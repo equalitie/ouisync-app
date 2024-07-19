@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 60;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXAggregateTarget section */
@@ -50,6 +50,7 @@
 		1ECD785E2C0F2806005D7636 /* Log.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1ECD785D2C0F2806005D7636 /* Log.swift */; };
 		1ECD785F2C0F2C53005D7636 /* Log.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1ECD785D2C0F2806005D7636 /* Log.swift */; };
 		1ECD78612C0F40A0005D7636 /* Debug.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1ECD78602C0F40A0005D7636 /* Debug.swift */; };
+		1EE0483C2C4A6CD900A653F2 /* OuisyncLib in Frameworks */ = {isa = PBXBuildFile; productRef = 1EE0483B2C4A6CD900A653F2 /* OuisyncLib */; };
 		331C80D8294CF71000263BE5 /* RunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331C80D7294CF71000263BE5 /* RunnerTests.swift */; };
 		335BBD1B22A9A15E00E9071D /* GeneratedPluginRegistrant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 335BBD1A22A9A15E00E9071D /* GeneratedPluginRegistrant.swift */; };
 		33CC10F12044A3C60003C045 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33CC10F02044A3C60003C045 /* AppDelegate.swift */; };
@@ -241,6 +242,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1EE0483C2C4A6CD900A653F2 /* OuisyncLib in Frameworks */,
 				1EBC4D652BB1B6850053E2F3 /* Common.framework in Frameworks */,
 				834BDDB917752395531F009D /* Pods_Runner.framework in Frameworks */,
 			);
@@ -508,6 +510,9 @@
 				1EBC4D642BB1B6850053E2F3 /* PBXTargetDependency */,
 			);
 			name = Runner;
+			packageProductDependencies = (
+				1EE0483B2C4A6CD900A653F2 /* OuisyncLib */,
+			);
 			productName = Runner;
 			productReference = 33CC10ED2044A3C60003C045 /* Ouisync.app */;
 			productType = "com.apple.product-type.application";
@@ -1638,6 +1643,10 @@
 
 /* Begin XCSwiftPackageProductDependency section */
 		1E11B5D82BC00EFA007248F2 /* OuisyncLib */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = OuisyncLib;
+		};
+		1EE0483B2C4A6CD900A653F2 /* OuisyncLib */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = OuisyncLib;
 		};

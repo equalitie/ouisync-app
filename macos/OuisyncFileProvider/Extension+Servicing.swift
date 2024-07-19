@@ -37,6 +37,7 @@ extension Extension {
         weak var weakExt: Extension?
         let listeners = NSHashTable<NSXPCListener>()
 
+
         init(_ ext: Extension) {
             self.weakExt = ext
         }

@@ -8,8 +8,127 @@
 import Foundation
 import FileProvider
 import Common
+import FlutterMacOS
+import OuisyncLib
+import MessagePack
 
+class FileProviderProxy2 {
+    let flutterMethodChannel: FlutterMethodChannel
 
+    init(_ flutterBinaryMessenger: FlutterBinaryMessenger) {
+        flutterMethodChannel = FlutterMethodChannel(name: "org.equalitie.ouisync/backend", binaryMessenger: flutterBinaryMessenger)
+        flutterMethodChannel.setMethodCallHandler(handleMessageFromFlutter)
+    }
+
+//    func invalidate() async throws {
+//        try await NSFileProviderManager.remove(ouisyncFileProviderDomain)
+//    }
+
+    static func log(_ message: String) {
+        NSLog(message)
+    }
+
+    private func handleMessageFromFlutter(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        let flutterData = call.arguments as! FlutterStandardTypedData
+        let data = Data(flutterData.data)
+        // TODO: Get rid of this conversion
+        let bytes = [UInt8](unsafeUninitializedCapacity: data.count) {
+            pointer, copied_count in
+            let length_written = data.copyBytes(to: pointer)
+            copied_count = length_written
+            assert(copied_count == data.count)
+        }
+        NSLog("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ \(call.method) \(bytes)");
+        switch call.method {
+        case "initialize":
+            let message = OutgoingMessage.deserialize(bytes)!
+            Task {
+                await initialize(message.messageId)
+            }
+        default:
+            fatalError("Received an unrecognized message from Flutter: \(call.method)(\(call.arguments))")
+        }
+        result(nil)
+    }
+
+    private func initialize(_ requestMessageId: MessageId) async {
+        let domain = ouisyncFileProviderDomain
+
+        do {
+            while true {
+                do {
+                    try await NSFileProviderManager.add(domain)
+                    Self.log("😀 NSFileProviderManager added domain successfully")
+                    break
+                } catch {
+                    Self.log("😡 Error starting file provider for domain \(domain): \(String(describing: error))")
+                    try await Task.sleep(for: .seconds(1))
+                }
+            }
+
+            let manager = NSFileProviderManager(for: domain)!
+
+            var service: NSFileProviderService? = nil
+
+            while true {
+                do {
+                    service = try await manager.service(named: ouisyncFileProviderServiceName, for: NSFileProviderItemIdentifier.rootContainer)
+                    break
+                } catch {
+                    Self.log("😡 Failed to acquire service from NSFileProviderManager: \(error)")
+                    try await Task.sleep(for: .seconds(1))
+                }
+            }
+
+            guard let service = service else {
+                Self.log("😡 Failed to acquire service from NSFileProviderManager")
+                return;
+            }
+
+            let connection = try await service.fileProviderConnection()
+            connection.remoteObjectInterface = NSXPCInterface(with: FromFlutterToFileProviderProtocol.self)
+
+            connection.interruptionHandler = {
+                Self.log("😡 Connection to File Provider XPC service has been interrupted")
+            }
+
+            connection.invalidationHandler = {
+                Self.log("😡 Connection to File Provider XPC service has been invalidated")
+            }
+
+            let fileProviderConnection = connection.remoteObjectProxy() as! FromFlutterToFileProviderProtocol;
+
+            func fromRustToServer(_ server: OuisyncFileProviderServerProtocol, _ fromRustRx: Rx) async {
+                for await message in fromRustRx {
+                    server.messageFromClientToServer(message)
+                }
+            }
+
+            class FromFileProviderToFlutter : FromFileProviderToFlutterProtocol {
+                let flutterMethodChannel: FlutterMethodChannel
+                init(_ flutterMethodChannel: FlutterMethodChannel) {
+                    self.flutterMethodChannel = flutterMethodChannel
+                }
+                func send(_ message: [UInt8]) {
+                    flutterMethodChannel.invokeMethod("response", arguments: message)
+                }
+            }
+
+            connection.exportedObject = FromFileProviderToFlutter(flutterMethodChannel)
+            connection.exportedInterface = NSXPCInterface(with: FromFileProviderToFlutterProtocol.self)
+
+            connection.resume();
+
+            // For some reason the communication wont start unless we send this first message
+            //server.messageFromClientToServer([])
+            NSLog("-------- sending back response")
+            flutterMethodChannel.invokeMethod("response", arguments: IncomingMessage(requestMessageId, IncomingPayload.response(Response(MessagePackValue.string("none")))).serialize())
+
+        } catch {
+            fatalError("Failed to initialize FileProviderProxy \(error)")
+        }
+    }
+}
 // Facilitate communication between the file provider extension and the rust code.
 class FileProviderProxy {
     init() {
@@ -23,7 +142,7 @@ class FileProviderProxy {
                     break
                 } catch {
                     Self.log("😡 Error starting file provider for domain \(domain): \(String(describing: error))")
-                    try await Task.sleep(nanoseconds: 1_000_000_000)
+                    try await Task.sleep(for: .seconds(1))
                 }
             }
 
@@ -52,7 +171,7 @@ class FileProviderProxy {
                     break
                 } catch {
                     Self.log("😡 Failed to acquire service from NSFileProviderManager: \(error)")
-                    try await Task.sleep(nanoseconds: 1_000_000_000)
+                    try await Task.sleep(for: .seconds(1))
                 }
             }
 
