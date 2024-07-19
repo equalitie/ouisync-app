@@ -10,17 +10,17 @@ import Foundation
 import FileProvider
 import OuisyncLib
 
-class OuisyncLibrarySender: OuisyncLibrarySenderProtocol {
-    let libraryClient: OuisyncFileProviderClientProtocol
-
-    init(_ libraryClient: OuisyncFileProviderClientProtocol) {
-        self.libraryClient = libraryClient
-    }
-
-    func sendDataToOuisyncLib(_ data: [UInt8]) {
-        libraryClient.messageFromServerToClient(data);
-    }
-}
+//class OuisyncLibrarySender: OuisyncLibrarySenderProtocol {
+//    let libraryClient: OuisyncFileProviderClientProtocol
+//
+//    init(_ libraryClient: OuisyncFileProviderClientProtocol) {
+//        self.libraryClient = libraryClient
+//    }
+//
+//    func sendDataToOuisyncLib(_ data: [UInt8]) {
+//        libraryClient.messageFromServerToClient(data);
+//    }
+//}
 
 extension Extension: NSFileProviderServicing {
     public func supportedServiceSources(for itemIdentifier: NSFileProviderItemIdentifier,
@@ -33,7 +33,7 @@ extension Extension: NSFileProviderServicing {
 }
 
 extension Extension {
-    class OuisyncServiceSource: NSObject, NSFileProviderServiceSource, NSXPCListenerDelegate, OuisyncFileProviderServerProtocol {
+    class OuisyncServiceSource: NSObject, NSFileProviderServiceSource, NSXPCListenerDelegate, FromAppToFileProviderProtocol {
         weak var weakExt: Extension?
         let listeners = NSHashTable<NSXPCListener>()
 
@@ -60,9 +60,9 @@ extension Extension {
         func listener(_ listener: NSXPCListener, shouldAcceptNewConnection connection: NSXPCConnection) -> Bool {
             NSLog(":::: Servicing START ::::")
 
-            connection.remoteObjectInterface = NSXPCInterface(with: OuisyncFileProviderClientProtocol.self)
+            connection.remoteObjectInterface = NSXPCInterface(with: FromFileProviderToAppProtocol.self)
             connection.exportedObject = self
-            connection.exportedInterface = NSXPCInterface(with: OuisyncFileProviderServerProtocol.self)
+            connection.exportedInterface = NSXPCInterface(with: FromAppToFileProviderProtocol.self)
 
             connection.interruptionHandler = {
                 NSLog("😡 Connection to Ouisync XPC service has been interrupted")
@@ -72,9 +72,9 @@ extension Extension {
                 NSLog("😡 Connection to Ouisync XPC service has been invalidated")
             }
 
-            let maybe_client = connection.remoteObjectProxy() as? OuisyncFileProviderClientProtocol;
+            let client = connection.remoteObjectProxy() as? FromFileProviderToAppProtocol;
 
-            guard let client = maybe_client else {
+            guard let client = client else {
                 NSLog("😡 Failed to convert XPC connection to OuisyncConnection")
                 return true
             }
@@ -95,8 +95,8 @@ extension Extension {
                 return false
             }
 
-            let ouisyncSession = OuisyncSession(OuisyncLibrarySender(client))
-            ext.assignSession(ouisyncSession)
+            //let ouisyncSession = OuisyncSession(OuisyncLibrarySender(client))
+            //ext.assignSession(ouisyncSession)
 
             startListeningToRepoChanges()
 
@@ -108,7 +108,8 @@ extension Extension {
 
         // Ouisync backend is running inside the app (not in this extension), so when we send a request to it
         // here is where we receive responses and pass it to `ouisyncSession`.
-        func messageFromClientToServer(_ message_data: [UInt8]) {
+        func fromAppToFileProvider(_ message_data: [UInt8]) {
+            NSLog("------------------------- extension received \(message_data)")
             if message_data.isEmpty {
                 return
             }

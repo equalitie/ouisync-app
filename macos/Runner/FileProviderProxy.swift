@@ -14,6 +14,7 @@ import MessagePack
 
 class FileProviderProxy2 {
     let flutterMethodChannel: FlutterMethodChannel
+    var fromAppToFileProvider: FromAppToFileProviderProtocol? = nil
 
     init(_ flutterBinaryMessenger: FlutterBinaryMessenger) {
         flutterMethodChannel = FlutterMethodChannel(name: "org.equalitie.ouisync/backend", binaryMessenger: flutterBinaryMessenger)
@@ -45,6 +46,9 @@ class FileProviderProxy2 {
             Task {
                 await initialize(message.messageId)
             }
+        case "invoke":
+            NSLog("Sending to extension")
+            fromAppToFileProvider!.fromAppToFileProvider(bytes)
         default:
             fatalError("Received an unrecognized message from Flutter: \(call.method)(\(call.arguments))")
         }
@@ -86,7 +90,7 @@ class FileProviderProxy2 {
             }
 
             let connection = try await service.fileProviderConnection()
-            connection.remoteObjectInterface = NSXPCInterface(with: FromFlutterToFileProviderProtocol.self)
+            connection.remoteObjectInterface = NSXPCInterface(with: FromAppToFileProviderProtocol.self)
 
             connection.interruptionHandler = {
                 Self.log("😡 Connection to File Provider XPC service has been interrupted")
@@ -96,26 +100,26 @@ class FileProviderProxy2 {
                 Self.log("😡 Connection to File Provider XPC service has been invalidated")
             }
 
-            let fileProviderConnection = connection.remoteObjectProxy() as! FromFlutterToFileProviderProtocol;
+            fromAppToFileProvider = connection.remoteObjectProxy() as! FromAppToFileProviderProtocol;
 
-            func fromRustToServer(_ server: OuisyncFileProviderServerProtocol, _ fromRustRx: Rx) async {
-                for await message in fromRustRx {
-                    server.messageFromClientToServer(message)
-                }
-            }
+//            func fromRustToServer(_ server: OuisyncFileProviderServerProtocol, _ fromRustRx: Rx) async {
+//                for await message in fromRustRx {
+//                    server.messageFromClientToServer(message)
+//                }
+//            }
 
-            class FromFileProviderToFlutter : FromFileProviderToFlutterProtocol {
+            class FromFileProviderToApp : FromFileProviderToAppProtocol {
                 let flutterMethodChannel: FlutterMethodChannel
                 init(_ flutterMethodChannel: FlutterMethodChannel) {
                     self.flutterMethodChannel = flutterMethodChannel
                 }
-                func send(_ message: [UInt8]) {
+                func fromFileProviderToApp(_ message: [UInt8]) {
                     flutterMethodChannel.invokeMethod("response", arguments: message)
                 }
             }
 
-            connection.exportedObject = FromFileProviderToFlutter(flutterMethodChannel)
-            connection.exportedInterface = NSXPCInterface(with: FromFileProviderToFlutterProtocol.self)
+            connection.exportedObject = FromFileProviderToApp(flutterMethodChannel)
+            connection.exportedInterface = NSXPCInterface(with: FromFileProviderToAppProtocol.self)
 
             connection.resume();
 
@@ -130,111 +134,111 @@ class FileProviderProxy2 {
     }
 }
 // Facilitate communication between the file provider extension and the rust code.
-class FileProviderProxy {
-    init() {
-        let domain = ouisyncFileProviderDomain
-
-        SuccessfulTask(name: "FileProviderProxy.init") {
-            while true {
-                do {
-                    try await NSFileProviderManager.add(domain)
-                    Self.log("😀 NSFileProviderManager added domain successfully")
-                    break
-                } catch {
-                    Self.log("😡 Error starting file provider for domain \(domain): \(String(describing: error))")
-                    try await Task.sleep(for: .seconds(1))
-                }
-            }
-
-            let ffi = FFI()
-
-            let (fromRustRx, fromRustTx) = makeStream();
-
-            // Compiler complains that `fromRustTx` is not a "class" when I try to get a raw pointer out of it.
-            let wrapFromRustTx = Wrap(fromRustTx)
-
-            let callback: FFICallback = { context, dataPointer, size in
-                let fromRustTx: Wrap<Tx> = FFI.fromUnretainedPtr(ptr: context!)
-                let data = Array(UnsafeBufferPointer(start: dataPointer, count: Int(exactly: size)!))
-                fromRustTx.inner.yield(data)
-            }
-
-            let session = try await ffi.waitForSession(FFI.toUnretainedPtr(obj: wrapFromRustTx), callback)
-
-            let manager = NSFileProviderManager(for: domain)!
-
-            var service: NSFileProviderService? = nil
-
-            while true {
-                do {
-                    service = try await manager.service(named: ouisyncFileProviderServiceName, for: NSFileProviderItemIdentifier.rootContainer)
-                    break
-                } catch {
-                    Self.log("😡 Failed to acquire service from NSFileProviderManager: \(error)")
-                    try await Task.sleep(for: .seconds(1))
-                }
-            }
-
-            guard let service = service else {
-                Self.log("😡 Failed to acquire service from NSFileProviderManager")
-                return;
-            }
-
-            let connection = try await service.fileProviderConnection()
-            connection.remoteObjectInterface = NSXPCInterface(with: OuisyncFileProviderServerProtocol.self)
-
-            connection.interruptionHandler = {
-                Self.log("😡 Connection to File Provider XPC service has been interrupted")
-                fromRustTx.finish();
-            }
-
-            connection.invalidationHandler = {
-                Self.log("😡 Connection to File Provider XPC service has been invalidated")
-                fromRustTx.finish();
-            }
-
-            let server = connection.remoteObjectProxy() as! OuisyncFileProviderServerProtocol;
-
-            func fromRustToServer(_ server: OuisyncFileProviderServerProtocol, _ fromRustRx: Rx) async {
-                for await message in fromRustRx {
-                    server.messageFromClientToServer(message)
-                }
-            }
-
-            class FromServerToRust : OuisyncFileProviderClientProtocol {
-                let ffi: FFI
-                let session: SessionHandle
-                init(_ ffi: FFI, _ session: SessionHandle) {
-                    self.ffi = ffi
-                    self.session = session
-                }
-                func messageFromServerToClient(_ message: [UInt8]) {
-                    ffi.channelSend(session, message)
-                }
-            }
-
-            connection.exportedObject = FromServerToRust(ffi, session)
-            connection.exportedInterface = NSXPCInterface(with: OuisyncFileProviderClientProtocol.self)
-
-            connection.resume();
-
-            // For some reason the communication wont start unless we send this first message
-            server.messageFromClientToServer([])
-
-            await fromRustToServer(server, fromRustRx);
-
-            await ffi.closeSession(session)
-        }
-    }
-
-    func invalidate() async throws {
-        try await NSFileProviderManager.remove(ouisyncFileProviderDomain)
-    }
-
-    static func log(_ message: String) {
-        NSLog(message)
-    }
-}
+//class FileProviderProxy {
+//    init() {
+//        let domain = ouisyncFileProviderDomain
+//
+//        SuccessfulTask(name: "FileProviderProxy.init") {
+//            while true {
+//                do {
+//                    try await NSFileProviderManager.add(domain)
+//                    Self.log("😀 NSFileProviderManager added domain successfully")
+//                    break
+//                } catch {
+//                    Self.log("😡 Error starting file provider for domain \(domain): \(String(describing: error))")
+//                    try await Task.sleep(for: .seconds(1))
+//                }
+//            }
+//
+//            let ffi = FFI()
+//
+//            let (fromRustRx, fromRustTx) = makeStream();
+//
+//            // Compiler complains that `fromRustTx` is not a "class" when I try to get a raw pointer out of it.
+//            let wrapFromRustTx = Wrap(fromRustTx)
+//
+//            let callback: FFICallback = { context, dataPointer, size in
+//                let fromRustTx: Wrap<Tx> = FFI.fromUnretainedPtr(ptr: context!)
+//                let data = Array(UnsafeBufferPointer(start: dataPointer, count: Int(exactly: size)!))
+//                fromRustTx.inner.yield(data)
+//            }
+//
+//            let session = try await ffi.waitForSession(FFI.toUnretainedPtr(obj: wrapFromRustTx), callback)
+//
+//            let manager = NSFileProviderManager(for: domain)!
+//
+//            var service: NSFileProviderService? = nil
+//
+//            while true {
+//                do {
+//                    service = try await manager.service(named: ouisyncFileProviderServiceName, for: NSFileProviderItemIdentifier.rootContainer)
+//                    break
+//                } catch {
+//                    Self.log("😡 Failed to acquire service from NSFileProviderManager: \(error)")
+//                    try await Task.sleep(for: .seconds(1))
+//                }
+//            }
+//
+//            guard let service = service else {
+//                Self.log("😡 Failed to acquire service from NSFileProviderManager")
+//                return;
+//            }
+//
+//            let connection = try await service.fileProviderConnection()
+//            connection.remoteObjectInterface = NSXPCInterface(with: OuisyncFileProviderServerProtocol.self)
+//
+//            connection.interruptionHandler = {
+//                Self.log("😡 Connection to File Provider XPC service has been interrupted")
+//                fromRustTx.finish();
+//            }
+//
+//            connection.invalidationHandler = {
+//                Self.log("😡 Connection to File Provider XPC service has been invalidated")
+//                fromRustTx.finish();
+//            }
+//
+//            let server = connection.remoteObjectProxy() as! OuisyncFileProviderServerProtocol;
+//
+//            func fromRustToServer(_ server: OuisyncFileProviderServerProtocol, _ fromRustRx: Rx) async {
+//                for await message in fromRustRx {
+//                    server.messageFromClientToServer(message)
+//                }
+//            }
+//
+//            class FromServerToRust : OuisyncFileProviderClientProtocol {
+//                let ffi: FFI
+//                let session: SessionHandle
+//                init(_ ffi: FFI, _ session: SessionHandle) {
+//                    self.ffi = ffi
+//                    self.session = session
+//                }
+//                func messageFromServerToClient(_ message: [UInt8]) {
+//                    ffi.channelSend(session, message)
+//                }
+//            }
+//
+//            connection.exportedObject = FromServerToRust(ffi, session)
+//            connection.exportedInterface = NSXPCInterface(with: OuisyncFileProviderClientProtocol.self)
+//
+//            connection.resume();
+//
+//            // For some reason the communication wont start unless we send this first message
+//            server.messageFromClientToServer([])
+//
+//            await fromRustToServer(server, fromRustRx);
+//
+//            await ffi.closeSession(session)
+//        }
+//    }
+//
+//    func invalidate() async throws {
+//        try await NSFileProviderManager.remove(ouisyncFileProviderDomain)
+//    }
+//
+//    static func log(_ message: String) {
+//        NSLog(message)
+//    }
+//}
 
 // ---------------------------------------------------------------------------------------
 

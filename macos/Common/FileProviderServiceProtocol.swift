@@ -13,18 +13,18 @@ public let ouisyncFileProviderServiceName = NSFileProviderServiceName("org.equal
 public let ouisyncFileProviderDomainId = NSFileProviderDomainIdentifier(rawValue: "ouisyncCommonDomain")
 public let ouisyncFileProviderDomain = NSFileProviderDomain(identifier: ouisyncFileProviderDomainId, displayName: "Ouisync")
 
-@objc public protocol OuisyncFileProviderClientProtocol {
-    func messageFromServerToClient(_ message: [UInt8])
+//@objc public protocol OuisyncFileProviderClientProtocol {
+//    func messageFromServerToClient(_ message: [UInt8])
+//}
+//
+//@objc public protocol OuisyncFileProviderServerProtocol {
+//    func messageFromClientToServer(_ message: [UInt8])
+//}
+
+@objc public protocol FromAppToFileProviderProtocol {
+    func fromAppToFileProvider(_ message: [UInt8])
 }
 
-@objc public protocol OuisyncFileProviderServerProtocol {
-    func messageFromClientToServer(_ message: [UInt8])
-}
-
-@objc public protocol FromFlutterToFileProviderProtocol {
-    func send(_ message: [UInt8]) -> [UInt8]
-}
-
-@objc public protocol FromFileProviderToFlutterProtocol {
-    func send(_ message: [UInt8])
+@objc public protocol FromFileProviderToAppProtocol {
+    func fromFileProviderToApp(_ message: [UInt8])
 }
