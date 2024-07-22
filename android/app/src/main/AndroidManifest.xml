@@ -35,14 +35,11 @@
       android:authorities="${applicationId}.pipe"
       android:exported="true"/>
     <!--
-      Regarding `launchMode="singleTask"`: when the user wants to "share"
-      files into Ouisync, we don't want to start a new task because then
-      all the repositories would be locked then they would need to
-      re-unlock them if they unlocked them previously.
+      NOTE: Forcing single Ouisync instance in its own task with launchMode="singleInstance". This is because Ouisync doesn't currently support multiple instances well. For example, modifying the repository list (adding/removing/renaming a repo) in one instance would not be reflected in the other instances, resulting in bad UX. Also the way Ouisync handles the back button is not currently compatible with launching it as part of other app's task. Even though these issues are potentially fixable, the single instance mode is still arguably more natural for Ouisync.
     -->
     <activity
       android:name=".MainActivity"
-      android:launchMode="singleTop"
+      android:launchMode="singleInstance"
       android:exported="true"
       android:theme="@style/LaunchTheme"
       android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
