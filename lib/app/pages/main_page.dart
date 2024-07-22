@@ -73,8 +73,9 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage>
     with TickerProviderStateMixin, AppLogger {
-  late final Cubits _cubits;
-  late final SortListCubit _sortListCubit;
+  late final StateMonitorIntCubit panicCounter;
+  late final SortListCubit sortListCubit;
+  late final UpgradeExistsCubit upgradeExists;
 
   final _bottomSheetInfo = ValueNotifier<BottomSheetInfo>(BottomSheetInfo(
     type: BottomSheetType.gone,
@@ -97,28 +98,23 @@ class _MainPageState extends State<MainPage>
   void initState() {
     super.initState();
 
-    final panicCounter = StateMonitorIntCubit(
+    panicCounter = StateMonitorIntCubit(
       widget.reposCubit.rootStateMonitor.child(
         oui.MonitorId.expectUnique("Session"),
       ),
       "panic_counter",
     );
 
-    final upgradeExists = UpgradeExistsCubit(
+    upgradeExists = UpgradeExistsCubit(
       widget.session.currentProtocolVersion,
       widget.settings,
     );
 
-    _cubits = Cubits(
-      panicCounter: panicCounter,
-      upgradeExists: upgradeExists,
-      mount: widget.mountCubit,
+    sortListCubit = SortListCubit.create(
+      sortBy: SortBy.name,
+      direction: SortDirection.asc,
+      listType: ListType.repos,
     );
-
-    _sortListCubit = SortListCubit.create(
-        sortBy: SortBy.name,
-        direction: SortDirection.asc,
-        listType: ListType.repos);
 
     widget.session.networkEvents.listen((event) async {
       switch (event) {
@@ -127,7 +123,7 @@ class _MainPageState extends State<MainPage>
         case NetworkEvent.protocolVersionMismatch:
           {
             final highest = await widget.session.highestSeenProtocolVersion;
-            await _cubits.upgradeExists.foundVersion(highest);
+            await upgradeExists.foundVersion(highest);
           }
           break;
       }
@@ -148,9 +144,9 @@ class _MainPageState extends State<MainPage>
     _fabFocus.dispose();
     _receivedMediaSubscription?.cancel();
 
-    unawaited(_sortListCubit.close());
-    unawaited(_cubits.upgradeExists.close());
-    unawaited(_cubits.panicCounter.close());
+    unawaited(upgradeExists.close());
+    unawaited(sortListCubit.close());
+    unawaited(panicCounter.close());
 
     super.dispose();
   }
@@ -539,9 +535,11 @@ class _MainPageState extends State<MainPage>
   _buildOuiSyncBar() => OuiSyncBar(
         reposCubit: widget.reposCubit,
         repoPicker: RepositoriesBar(
-          cubits: _cubits,
+          mount: widget.mountCubit,
+          panicCounter: panicCounter,
           powerControl: widget.powerControl,
           reposCubit: widget.reposCubit,
+          upgradeExists: upgradeExists,
         ),
         appSettingsButton: _buildAppSettingsIcon(),
         searchButton: _buildSearchIcon(),
@@ -549,10 +547,10 @@ class _MainPageState extends State<MainPage>
       );
 
   Widget _buildAppSettingsIcon() => NotificationBadge(
-        mount: _cubits.mount,
-        panicCounter: _cubits.panicCounter,
+        mount: widget.mountCubit,
+        panicCounter: panicCounter,
         powerControl: widget.powerControl,
-        upgradeExists: _cubits.upgradeExists,
+        upgradeExists: upgradeExists,
         moveDownwards: 5,
         moveRight: 3,
         child: Fields.actionIcon(
@@ -677,7 +675,7 @@ class _MainPageState extends State<MainPage>
             const Divider(height: 1),
             if (folder.content.isNotEmpty)
               SortContentsBar(
-                sortListCubit: _sortListCubit,
+                sortListCubit: sortListCubit,
                 reposCubit: widget.reposCubit,
               ),
             Expanded(child: child),
@@ -1218,9 +1216,11 @@ class _MainPageState extends State<MainPage>
         MaterialPageRoute(
           builder: (context) => SettingsPage(
             session: widget.session,
+            mount: widget.mountCubit,
+            panicCounter: panicCounter,
             powerControl: widget.powerControl,
             reposCubit: widget.reposCubit,
-            cubits: _cubits,
+            upgradeExists: upgradeExists,
             checkForDokan: checkForDokan,
           ),
         ),

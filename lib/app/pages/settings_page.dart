@@ -11,16 +11,20 @@ import '../widgets/widgets.dart';
 class SettingsPage extends StatefulWidget {
   const SettingsPage({
     required this.session,
-    required this.cubits,
+    required this.mount,
+    required this.panicCounter,
     required this.powerControl,
     required this.reposCubit,
+    required this.upgradeExists,
     required this.checkForDokan,
   });
 
   final Session session;
-  final Cubits cubits;
+  final MountCubit mount;
+  final StateMonitorIntCubit panicCounter;
   final PowerControl powerControl;
   final ReposCubit reposCubit;
+  final UpgradeExistsCubit upgradeExists;
   final void Function() checkForDokan;
 
   @override
@@ -49,7 +53,8 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
         body: AppSettingsContainer(
           widget.session,
-          widget.cubits,
+          mount: widget.mount,
+          panicCounter: widget.panicCounter,
           powerControl: widget.powerControl,
           reposCubit: widget.reposCubit,
           connectivityInfo: connectivityInfo,
@@ -57,6 +62,7 @@ class _SettingsPageState extends State<SettingsPage> {
           peerSet: peerSet,
           checkForDokan: widget.checkForDokan,
           launchAtStartup: launchAtStartup,
+          upgradeExists: widget.upgradeExists,
         ),
       );
 

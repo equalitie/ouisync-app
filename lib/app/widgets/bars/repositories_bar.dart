@@ -14,15 +14,19 @@ class RepositoriesBar extends StatelessWidget
     with AppLogger
     implements PreferredSizeWidget {
   const RepositoriesBar({
-    required this.cubits,
+    required this.mount,
+    required this.panicCounter,
     required this.powerControl,
     required this.reposCubit,
+    required this.upgradeExists,
     super.key,
   });
 
-  final Cubits cubits;
+  final MountCubit mount;
+  final StateMonitorIntCubit panicCounter;
   final PowerControl powerControl;
   final ReposCubit reposCubit;
+  final UpgradeExistsCubit upgradeExists;
 
   @override
   Widget build(BuildContext context) => reposCubit.builder((state) {
@@ -79,10 +83,10 @@ class RepositoriesBar extends StatelessWidget
 
   // TODO: Why does the badge appear to move quickly after entering this screen?
   Widget _buildBackButton() => NotificationBadge(
-        mount: cubits.mount,
-        panicCounter: cubits.panicCounter,
+        mount: mount,
+        panicCounter: panicCounter,
         powerControl: powerControl,
-        upgradeExists: cubits.upgradeExists,
+        upgradeExists: upgradeExists,
         moveDownwards: 5,
         moveRight: 6,
         child: Fields.actionIcon(
