@@ -17,6 +17,7 @@ class AppSettingsContainer extends StatefulHookWidget {
   AppSettingsContainer(
     Session session,
     Cubits cubits, {
+    required ReposCubit reposCubit,
     required ConnectivityInfo connectivityInfo,
     required NatDetection natDetection,
     required PeerSetCubit peerSet,
@@ -32,6 +33,7 @@ class AppSettingsContainer extends StatefulHookWidget {
           ),
           LogsSection(
             cubits,
+            reposCubit: reposCubit,
             connectivityInfo: connectivityInfo,
             natDetection: natDetection,
             checkForDokan: checkForDokan,
@@ -39,6 +41,7 @@ class AppSettingsContainer extends StatefulHookWidget {
           AboutSection(
             session,
             cubits,
+            reposCubit: reposCubit,
             connectivityInfo: connectivityInfo,
             peerSet: peerSet,
             natDetection: natDetection,

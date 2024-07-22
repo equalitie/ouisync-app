@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../utils/utils.dart';
 import 'mount.dart';
 import 'power_control.dart';
-import 'repos.dart';
 import 'state_monitor.dart';
 import 'upgrade_exists.dart';
 
@@ -26,14 +25,12 @@ export 'value.dart';
 export 'watch.dart';
 
 class Cubits {
-  final ReposCubit repositories;
   final PowerControl powerControl;
   final StateMonitorIntCubit panicCounter;
   final UpgradeExistsCubit upgradeExists;
   final MountCubit mount;
 
   Cubits({
-    required this.repositories,
     required this.powerControl,
     required this.panicCounter,
     required this.upgradeExists,

@@ -12,14 +12,17 @@ import '../repo_status.dart';
 class RepositoriesBar extends StatelessWidget
     with AppLogger
     implements PreferredSizeWidget {
-  const RepositoriesBar(this._cubits);
+  const RepositoriesBar({
+    required this.cubits,
+    required this.reposCubit,
+    super.key,
+  });
 
-  final Cubits _cubits;
+  final Cubits cubits;
+  final ReposCubit reposCubit;
 
   @override
-  Widget build(BuildContext context) => _cubits.repositories.builder((state) {
-        final reposCubit = _cubits.repositories;
-
+  Widget build(BuildContext context) => reposCubit.builder((state) {
         if (reposCubit.isLoading || reposCubit.showList) {
           return SizedBox.shrink();
         }
@@ -73,15 +76,14 @@ class RepositoriesBar extends StatelessWidget
 
   Widget _buildBackButton() {
     return multiBlocBuilder(
-        [_cubits.upgradeExists, _cubits.powerControl, _cubits.panicCounter],
-        () {
+        [cubits.upgradeExists, cubits.powerControl, cubits.panicCounter], () {
       final button = Fields.actionIcon(
         const Icon(Icons.arrow_back_rounded),
-        onPressed: () => _cubits.repositories.showRepoList(),
+        onPressed: () => reposCubit.showRepoList(),
         size: Dimensions.sizeIconSmall,
       );
 
-      Color? color = _cubits.mainNotificationBadgeColor();
+      Color? color = cubits.mainNotificationBadgeColor();
 
       if (color != null) {
         // TODO: Why does the badge appear to move quickly after entering this screen?

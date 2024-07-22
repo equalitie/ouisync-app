@@ -22,16 +22,18 @@ import 'settings_tile.dart';
 class LogsSection extends SettingsSection with AppLogger {
   final StateMonitor stateMonitor;
   final Cubits cubits;
+  final ReposCubit reposCubit;
   final ConnectivityInfo connectivityInfo;
   final NatDetection natDetection;
   final void Function() checkForDokan;
 
   LogsSection(
     this.cubits, {
+    required this.reposCubit,
     required this.connectivityInfo,
     required this.natDetection,
     required this.checkForDokan,
-  })  : stateMonitor = cubits.repositories.rootStateMonitor,
+  })  : stateMonitor = reposCubit.rootStateMonitor,
         super(
           key: GlobalKey(debugLabel: 'key_logs_section'),
           title: S.current.titleLogs,

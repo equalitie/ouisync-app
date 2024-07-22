@@ -9,14 +9,16 @@ import '../cubits/launch_at_startup.dart';
 import '../widgets/widgets.dart';
 
 class SettingsPage extends StatefulWidget {
-  const SettingsPage(
-    this.session,
-    this.cubits,
-    this.checkForDokan,
-  );
+  const SettingsPage({
+    required this.session,
+    required this.cubits,
+    required this.reposCubit,
+    required this.checkForDokan,
+  });
 
   final Session session;
   final Cubits cubits;
+  final ReposCubit reposCubit;
   final void Function() checkForDokan;
 
   @override
@@ -46,6 +48,7 @@ class _SettingsPageState extends State<SettingsPage> {
         body: AppSettingsContainer(
           widget.session,
           widget.cubits,
+          reposCubit: widget.reposCubit,
           connectivityInfo: connectivityInfo,
           natDetection: natDetection,
           peerSet: peerSet,

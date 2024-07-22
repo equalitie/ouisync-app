@@ -24,6 +24,7 @@ class AboutSection extends SettingsSection with AppLogger {
   AboutSection(
     this.session,
     this.cubits, {
+    required this.reposCubit,
     required this.connectivityInfo,
     required this.peerSet,
     required this.natDetection,
@@ -35,6 +36,7 @@ class AboutSection extends SettingsSection with AppLogger {
 
   final Session session;
   final Cubits cubits;
+  final ReposCubit reposCubit;
   final ConnectivityInfo connectivityInfo;
   final PeerSetCubit peerSet;
   final NatDetection natDetection;
@@ -103,7 +105,7 @@ class AboutSection extends SettingsSection with AppLogger {
         onTap: () => unawaited(launchUrl(Uri.parse(Constants.issueTrackerUrl))),
       ),
       AppVersionTile(
-        session: cubits.repositories.session,
+        session: reposCubit.session,
         upgradeExists: cubits.upgradeExists,
         leading: Icon(Icons.info_rounded),
         title: Text(S.current.labelAppVersion, style: bodyStyle),
@@ -175,7 +177,7 @@ class AboutSection extends SettingsSection with AppLogger {
         context,
         dumpAll(
           context,
-          rootMonitor: cubits.repositories.rootStateMonitor,
+          rootMonitor: reposCubit.rootStateMonitor,
           powerControl: cubits.powerControl,
           connectivityInfo: connectivityInfo,
           natDetection: natDetection,
@@ -212,7 +214,7 @@ class AboutSection extends SettingsSection with AppLogger {
   }
 
   Widget _getRuntimeIdForOS() => FutureBuilder(
-      future: cubits.repositories.session.thisRuntimeId,
+      future: reposCubit.session.thisRuntimeId,
       builder: (context, snapshot) {
         final runtimeId = snapshot.data ?? '';
         final runtimeIdWidget = Text(runtimeId,
