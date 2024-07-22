@@ -45,6 +45,7 @@ typedef PreviewFileCallback = Future<void> Function(
 
 class MainPage extends StatefulWidget {
   const MainPage({
+    required this.mountCubit,
     required this.nativeChannels,
     required this.packageInfo,
     required this.powerControl,
@@ -63,6 +64,7 @@ class MainPage extends StatefulWidget {
   final PowerControl powerControl;
   final Stream<List<SharedMediaFile>> receivedMedia;
   final ReposCubit reposCubit;
+  final MountCubit mountCubit;
 
   @override
   State<StatefulWidget> createState() => _MainPageState();
@@ -110,13 +112,8 @@ class _MainPageState extends State<MainPage>
       powerControl: widget.powerControl,
       panicCounter: panicCounter,
       upgradeExists: upgradeExists,
-      mount: MountCubit(widget.session),
+      mount: widget.mountCubit,
     );
-
-    final mountPoint = widget.settings.getMountPoint();
-    if (mountPoint != null) {
-      unawaited(_cubits.mount.mount(mountPoint));
-    }
 
     _sortListCubit = SortListCubit.create(
         sortBy: SortBy.name,
@@ -152,7 +149,6 @@ class _MainPageState extends State<MainPage>
     _receivedMediaSubscription?.cancel();
 
     unawaited(_sortListCubit.close());
-    unawaited(_cubits.mount.close());
     unawaited(_cubits.upgradeExists.close());
     unawaited(_cubits.panicCounter.close());
 
@@ -395,11 +391,7 @@ class _MainPageState extends State<MainPage>
     }
 
     if (installationResult) {
-      final mountPoint = widget.reposCubit.settings.getMountPoint();
-      if (mountPoint != null) {
-        unawaited(_cubits.mount.mount(mountPoint));
-      }
-
+      widget.mountCubit.init();
       return;
     }
 

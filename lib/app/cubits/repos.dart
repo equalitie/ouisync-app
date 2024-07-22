@@ -8,6 +8,7 @@ import 'package:ouisync/state_monitor.dart';
 
 import '../../generated/l10n.dart';
 import '../models/models.dart';
+import '../utils/mounter.dart';
 import '../utils/utils.dart';
 import 'cubits.dart';
 
@@ -29,12 +30,14 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
   final CacheServers cacheServers;
   final NavigationCubit navigation;
   final PasswordHasher passwordHasher;
+  final Mounter mounter;
 
   ReposCubit({
     required session,
     required nativeChannels,
     required settings,
     required this.cacheServers,
+    required this.mounter,
     EntryBottomSheetCubit? bottomSheet,
     NavigationCubit? navigation,
   })  : _session = session,
@@ -283,7 +286,6 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     }
 
     final cubit = await RepoCubit.create(
-      session: _session,
       nativeChannels: _nativeChannels,
       settings: _settings,
       navigation: navigation,
@@ -291,6 +293,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
       repo: repo,
       location: location,
       cacheServers: cacheServers,
+      mounter: mounter,
     );
 
     final entry = OpenRepoEntry(cubit);
@@ -470,7 +473,6 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
       );
 
       final cubit = await RepoCubit.create(
-        session: _session,
         nativeChannels: _nativeChannels,
         settings: _settings,
         navigation: navigation,
@@ -478,6 +480,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
         repo: repo,
         location: location,
         cacheServers: cacheServers,
+        mounter: mounter,
       );
 
       return OpenRepoEntry(cubit);
@@ -555,7 +558,6 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
       final databaseId = DatabaseId(await repo.hexDatabaseId());
 
       final cubit = await RepoCubit.create(
-        session: _session,
         nativeChannels: _nativeChannels,
         settings: _settings,
         navigation: navigation,
@@ -563,6 +565,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
         repo: repo,
         location: location,
         cacheServers: cacheServers,
+        mounter: mounter,
       );
 
       final authMode = switch (localSecretMode) {

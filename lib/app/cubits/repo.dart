@@ -13,6 +13,7 @@ import 'package:shelf/shelf_io.dart';
 import '../../generated/l10n.dart';
 import '../models/models.dart';
 import '../utils/master_key.dart';
+import '../utils/mounter.dart';
 import '../utils/repo_path.dart' as repo_path;
 import '../utils/utils.dart';
 import 'cubits.dart';
@@ -104,29 +105,28 @@ class RepoState extends Equatable {
 
 class RepoCubit extends Cubit<RepoState> with AppLogger {
   final _currentFolder = Folder();
-  final Session _session;
   final NativeChannels _nativeChannels;
   final NavigationCubit _navigation;
   final EntryBottomSheetCubit _bottomSheet;
   final Repository _repo;
   final Cipher _pathCipher;
   final CacheServers _cacheServers;
+  final Mounter _mounter;
 
   RepoCubit._(
-    this._session,
     this._nativeChannels,
     this._navigation,
     this._bottomSheet,
     this._repo,
     this._pathCipher,
     this._cacheServers,
+    this._mounter,
     super.state,
   ) {
     _currentFolder.repo = this;
   }
 
   static Future<RepoCubit> create({
-    required Session session,
     required NativeChannels nativeChannels,
     required Settings settings,
     required Repository repo,
@@ -134,6 +134,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     required NavigationCubit navigation,
     required EntryBottomSheetCubit bottomSheet,
     required CacheServers cacheServers,
+    required Mounter mounter,
   }) async {
     final authMode = await repo.getAuthMode();
 
@@ -163,13 +164,13 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     final pathCipher = await Cipher.newWithRandomKey();
 
     final cubit = RepoCubit._(
-      session,
       nativeChannels,
       navigation,
       bottomSheet,
       repo,
       pathCipher,
       cacheServers,
+      mounter,
       state,
     );
 
@@ -288,7 +289,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
   }
 
   Future<void> mount() async {
-    if (_session.mountPoint == null) {
+    if (_mounter.mountPoint == null) {
       // Mounting not supported.
       return;
     }
@@ -315,7 +316,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
       return null;
     }
 
-    final mountPoint = _session.mountPoint;
+    final mountPoint = _mounter.mountPoint;
     if (mountPoint == null) {
       return null;
     }

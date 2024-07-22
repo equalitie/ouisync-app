@@ -9,6 +9,7 @@ import 'package:ouisync_app/app/models/repo_entry.dart';
 import 'package:ouisync_app/app/models/repo_location.dart';
 import 'package:ouisync_app/app/utils/cache_servers.dart';
 import 'package:ouisync_app/app/utils/master_key.dart';
+import 'package:ouisync_app/app/utils/mounter.dart';
 import 'package:ouisync_app/app/utils/repo_path.dart' as repo_path;
 import 'package:ouisync_app/app/utils/settings/settings.dart';
 import 'package:ouisync_app/generated/l10n.dart';
@@ -47,6 +48,7 @@ void main() {
       navigation: NavigationCubit(),
       bottomSheet: EntryBottomSheetCubit(),
       cacheServers: CacheServers.disabled,
+      mounter: Mounter(session),
     );
 
     repoCreationCubit = RepoCreationCubit(reposCubit: reposCubit);
