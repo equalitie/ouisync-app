@@ -288,6 +288,11 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
   }
 
   Future<void> mount() async {
+    if (_session.mountPoint == null) {
+      // Mounting not supported.
+      return;
+    }
+
     try {
       await _repo.mount();
       emit(state.copyWith(mountState: const MountStateSuccess()));

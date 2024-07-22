@@ -65,19 +65,13 @@ class MainPage extends StatefulWidget {
   final ReposCubit reposCubit;
 
   @override
-  State<StatefulWidget> createState() => _MainPageState(
-        nativeChannels: nativeChannels,
-        powerControl: powerControl,
-        reposCubit: reposCubit,
-        session: session,
-        settings: settings,
-        windowManager: windowManager,
-      );
+  State<StatefulWidget> createState() => _MainPageState();
 }
 
 class _MainPageState extends State<MainPage>
     with TickerProviderStateMixin, AppLogger {
-  final Cubits _cubits;
+  late final Cubits _cubits;
+  late final SortListCubit _sortListCubit;
 
   final _bottomSheetInfo = ValueNotifier<BottomSheetInfo>(BottomSheetInfo(
     type: BottomSheetType.gone,
@@ -94,52 +88,42 @@ class _MainPageState extends State<MainPage>
 
   StreamSubscription? _receivedMediaSubscription;
 
-  _MainPageState._(this._cubits);
-
-  factory _MainPageState({
-    required NativeChannels nativeChannels,
-    required ReposCubit reposCubit,
-    required Session session,
-    required Settings settings,
-    required PlatformWindowManager windowManager,
-    required PowerControl powerControl,
-  }) {
-    final panicCounter = StateMonitorIntCubit(
-      reposCubit.rootStateMonitor.child(oui.MonitorId.expectUnique("Session")),
-      "panic_counter",
-    );
-
-    final mount = MountCubit(session);
-    final mountPoint = settings.getMountPoint();
-    if (mountPoint != null) {
-      unawaited(mount.mount(mountPoint));
-    }
-
-    final upgradeExists =
-        UpgradeExistsCubit(session.currentProtocolVersion, settings);
-
-    return _MainPageState._(Cubits(
-      repositories: reposCubit,
-      powerControl: powerControl,
-      panicCounter: panicCounter,
-      upgradeExists: upgradeExists,
-      windowManager: windowManager,
-      mount: mount,
-    ));
-  }
-
   RepoEntry? get _currentRepo => _cubits.repositories.currentRepo;
-
-  late final SortListCubit _sortListCubit;
 
   @override
   void initState() {
+    super.initState();
+
+    final panicCounter = StateMonitorIntCubit(
+      widget.reposCubit.rootStateMonitor.child(
+        oui.MonitorId.expectUnique("Session"),
+      ),
+      "panic_counter",
+    );
+
+    final upgradeExists = UpgradeExistsCubit(
+      widget.session.currentProtocolVersion,
+      widget.settings,
+    );
+
+    _cubits = Cubits(
+      repositories: widget.reposCubit,
+      powerControl: widget.powerControl,
+      panicCounter: panicCounter,
+      upgradeExists: upgradeExists,
+      windowManager: widget.windowManager,
+      mount: MountCubit(widget.session),
+    );
+
+    final mountPoint = widget.settings.getMountPoint();
+    if (mountPoint != null) {
+      unawaited(_cubits.mount.mount(mountPoint));
+    }
+
     _sortListCubit = SortListCubit.create(
         sortBy: SortBy.name,
         direction: SortDirection.asc,
         listType: ListType.repos);
-
-    super.initState();
 
     widget.session.networkEvents.listen((event) async {
       switch (event) {
@@ -168,6 +152,11 @@ class _MainPageState extends State<MainPage>
     _appSettingsIconFocus.dispose();
     _fabFocus.dispose();
     _receivedMediaSubscription?.cancel();
+
+    unawaited(_sortListCubit.close());
+    unawaited(_cubits.mount.close());
+    unawaited(_cubits.upgradeExists.close());
+    unawaited(_cubits.panicCounter.close());
 
     super.dispose();
   }

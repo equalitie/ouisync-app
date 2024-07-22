@@ -237,8 +237,6 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
       await repo.close();
     }
 
-    changed();
-
     await super.close();
   }
 

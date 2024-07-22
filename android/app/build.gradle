@@ -106,7 +106,7 @@ android {
             android.packagingOptions.doNotStrip "**.so"
         }
     }
-    namespace 'org.equalitie.ouisync_app'
+    // namespace 'org.equalitie.ouisync_app'
 }
 
 flutter {
