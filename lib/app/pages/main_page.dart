@@ -10,6 +10,7 @@ import 'package:ouisync_app/app/utils/share_token.dart';
 import 'package:ouisync/native_channels.dart';
 import 'package:ouisync/ouisync.dart';
 import 'package:ouisync/state_monitor.dart' as oui;
+import 'package:ouisync_app/app/widgets/notification_badge.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart' as system_path;
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
@@ -109,7 +110,6 @@ class _MainPageState extends State<MainPage>
     );
 
     _cubits = Cubits(
-      powerControl: widget.powerControl,
       panicCounter: panicCounter,
       upgradeExists: upgradeExists,
       mount: widget.mountCubit,
@@ -540,6 +540,7 @@ class _MainPageState extends State<MainPage>
         reposCubit: widget.reposCubit,
         repoPicker: RepositoriesBar(
           cubits: _cubits,
+          powerControl: widget.powerControl,
           reposCubit: widget.reposCubit,
         ),
         appSettingsButton: _buildAppSettingsIcon(),
@@ -547,26 +548,19 @@ class _MainPageState extends State<MainPage>
         repoSettingsButton: _buildRepoSettingsIcon(),
       );
 
-  Widget _buildAppSettingsIcon() {
-    final button = Fields.actionIcon(const Icon(Icons.settings_outlined),
-        onPressed: _showAppSettings, size: Dimensions.sizeIconSmall);
-
-    return multiBlocBuilder([
-      _cubits.upgradeExists,
-      _cubits.powerControl,
-      _cubits.panicCounter,
-      _cubits.mount,
-    ], () {
-      Color? color = _cubits.mainNotificationBadgeColor();
-
-      if (color != null) {
-        return Fields.addBadge(button,
-            color: color, moveDownwards: 5, moveRight: 3);
-      } else {
-        return button;
-      }
-    });
-  }
+  Widget _buildAppSettingsIcon() => NotificationBadge(
+        mount: _cubits.mount,
+        panicCounter: _cubits.panicCounter,
+        powerControl: widget.powerControl,
+        upgradeExists: _cubits.upgradeExists,
+        moveDownwards: 5,
+        moveRight: 3,
+        child: Fields.actionIcon(
+          const Icon(Icons.settings_outlined),
+          onPressed: _showAppSettings,
+          size: Dimensions.sizeIconSmall,
+        ),
+      );
 
   Widget _buildRepoSettingsIcon() =>
       Fields.actionIcon(const Icon(Icons.more_vert_rounded),
@@ -1224,6 +1218,7 @@ class _MainPageState extends State<MainPage>
         MaterialPageRoute(
           builder: (context) => SettingsPage(
             session: widget.session,
+            powerControl: widget.powerControl,
             reposCubit: widget.reposCubit,
             cubits: _cubits,
             checkForDokan: checkForDokan,

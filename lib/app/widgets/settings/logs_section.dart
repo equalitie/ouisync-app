@@ -22,6 +22,7 @@ import 'settings_tile.dart';
 class LogsSection extends SettingsSection with AppLogger {
   final StateMonitor stateMonitor;
   final Cubits cubits;
+  final PowerControl powerControl;
   final ReposCubit reposCubit;
   final ConnectivityInfo connectivityInfo;
   final NatDetection natDetection;
@@ -29,6 +30,7 @@ class LogsSection extends SettingsSection with AppLogger {
 
   LogsSection(
     this.cubits, {
+    required this.powerControl,
     required this.reposCubit,
     required this.connectivityInfo,
     required this.natDetection,
@@ -175,7 +177,7 @@ class LogsSection extends SettingsSection with AppLogger {
         context,
         connectivityInfo: connectivityInfo,
         natDetection: natDetection,
-        powerControl: cubits.powerControl,
+        powerControl: powerControl,
         rootMonitor: stateMonitor,
       );
 }

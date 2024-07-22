@@ -12,12 +12,14 @@ class SettingsPage extends StatefulWidget {
   const SettingsPage({
     required this.session,
     required this.cubits,
+    required this.powerControl,
     required this.reposCubit,
     required this.checkForDokan,
   });
 
   final Session session;
   final Cubits cubits;
+  final PowerControl powerControl;
   final ReposCubit reposCubit;
   final void Function() checkForDokan;
 
@@ -48,6 +50,7 @@ class _SettingsPageState extends State<SettingsPage> {
         body: AppSettingsContainer(
           widget.session,
           widget.cubits,
+          powerControl: widget.powerControl,
           reposCubit: widget.reposCubit,
           connectivityInfo: connectivityInfo,
           natDetection: natDetection,
@@ -60,7 +63,7 @@ class _SettingsPageState extends State<SettingsPage> {
   Future<void> _updateConnectivityInfo() async {
     await connectivityInfo.update();
 
-    await for (final _ in widget.cubits.powerControl.stream) {
+    await for (final _ in widget.powerControl.stream) {
       await connectivityInfo.update();
     }
   }

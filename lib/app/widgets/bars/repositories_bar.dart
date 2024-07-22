@@ -2,6 +2,7 @@ import 'package:extended_text/extended_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync/ouisync.dart';
+import 'package:ouisync_app/app/widgets/notification_badge.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
@@ -14,11 +15,13 @@ class RepositoriesBar extends StatelessWidget
     implements PreferredSizeWidget {
   const RepositoriesBar({
     required this.cubits,
+    required this.powerControl,
     required this.reposCubit,
     super.key,
   });
 
   final Cubits cubits;
+  final PowerControl powerControl;
   final ReposCubit reposCubit;
 
   @override
@@ -74,26 +77,20 @@ class RepositoriesBar extends StatelessWidget
         alignment: Alignment.centerRight,
       );
 
-  Widget _buildBackButton() {
-    return multiBlocBuilder(
-        [cubits.upgradeExists, cubits.powerControl, cubits.panicCounter], () {
-      final button = Fields.actionIcon(
-        const Icon(Icons.arrow_back_rounded),
-        onPressed: () => reposCubit.showRepoList(),
-        size: Dimensions.sizeIconSmall,
+  // TODO: Why does the badge appear to move quickly after entering this screen?
+  Widget _buildBackButton() => NotificationBadge(
+        mount: cubits.mount,
+        panicCounter: cubits.panicCounter,
+        powerControl: powerControl,
+        upgradeExists: cubits.upgradeExists,
+        moveDownwards: 5,
+        moveRight: 6,
+        child: Fields.actionIcon(
+          const Icon(Icons.arrow_back_rounded),
+          onPressed: () => reposCubit.showRepoList(),
+          size: Dimensions.sizeIconSmall,
+        ),
       );
-
-      Color? color = cubits.mainNotificationBadgeColor();
-
-      if (color != null) {
-        // TODO: Why does the badge appear to move quickly after entering this screen?
-        return Fields.addBadge(button,
-            color: color, moveDownwards: 5, moveRight: 6);
-      } else {
-        return button;
-      }
-    });
-  }
 
   @override
   Size get preferredSize {

@@ -24,6 +24,7 @@ class AboutSection extends SettingsSection with AppLogger {
   AboutSection(
     this.session,
     this.cubits, {
+    required this.powerControl,
     required this.reposCubit,
     required this.connectivityInfo,
     required this.peerSet,
@@ -36,6 +37,7 @@ class AboutSection extends SettingsSection with AppLogger {
 
   final Session session;
   final Cubits cubits;
+  final PowerControl powerControl;
   final ReposCubit reposCubit;
   final ConnectivityInfo connectivityInfo;
   final PeerSetCubit peerSet;
@@ -178,7 +180,7 @@ class AboutSection extends SettingsSection with AppLogger {
         dumpAll(
           context,
           rootMonitor: reposCubit.rootStateMonitor,
-          powerControl: cubits.powerControl,
+          powerControl: powerControl,
           connectivityInfo: connectivityInfo,
           natDetection: natDetection,
           compress: true,

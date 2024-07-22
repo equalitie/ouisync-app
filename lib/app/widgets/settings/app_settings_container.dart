@@ -17,6 +17,7 @@ class AppSettingsContainer extends StatefulHookWidget {
   AppSettingsContainer(
     Session session,
     Cubits cubits, {
+    required PowerControl powerControl,
     required ReposCubit reposCubit,
     required ConnectivityInfo connectivityInfo,
     required NatDetection natDetection,
@@ -26,13 +27,14 @@ class AppSettingsContainer extends StatefulHookWidget {
   }) : sections = [
           NetworkSection(
             session,
-            cubits,
             connectivityInfo: connectivityInfo,
             natDetection: natDetection,
             peerSet: peerSet,
+            powerControl: powerControl,
           ),
           LogsSection(
             cubits,
+            powerControl: powerControl,
             reposCubit: reposCubit,
             connectivityInfo: connectivityInfo,
             natDetection: natDetection,
@@ -41,6 +43,7 @@ class AppSettingsContainer extends StatefulHookWidget {
           AboutSection(
             session,
             cubits,
+            powerControl: powerControl,
             reposCubit: reposCubit,
             connectivityInfo: connectivityInfo,
             peerSet: peerSet,
