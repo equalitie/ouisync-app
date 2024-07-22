@@ -106,7 +106,7 @@ class _MainPageState extends State<MainPage>
     );
 
     upgradeExists = UpgradeExistsCubit(
-      widget.session.currentProtocolVersion,
+      widget.session,
       widget.settings,
     );
 
@@ -115,19 +115,6 @@ class _MainPageState extends State<MainPage>
       direction: SortDirection.asc,
       listType: ListType.repos,
     );
-
-    widget.session.networkEvents.listen((event) async {
-      switch (event) {
-        case NetworkEvent.peerSetChange:
-          break;
-        case NetworkEvent.protocolVersionMismatch:
-          {
-            final highest = await widget.session.highestSeenProtocolVersion;
-            await upgradeExists.foundVersion(highest);
-          }
-          break;
-      }
-    });
 
     _receivedMediaSubscription =
         widget.receivedMedia.listen(handleReceivedMedia);
