@@ -21,17 +21,23 @@ import 'settings_tile.dart';
 
 class LogsSection extends SettingsSection with AppLogger {
   final StateMonitor stateMonitor;
-  final Cubits cubits;
+  final MountCubit mount;
+  final StateMonitorIntCubit panicCounter;
+  final PowerControl powerControl;
+  final ReposCubit reposCubit;
   final ConnectivityInfo connectivityInfo;
   final NatDetection natDetection;
   final void Function() checkForDokan;
 
-  LogsSection(
-    this.cubits, {
+  LogsSection({
+    required this.mount,
+    required this.panicCounter,
+    required this.powerControl,
+    required this.reposCubit,
     required this.connectivityInfo,
     required this.natDetection,
     required this.checkForDokan,
-  })  : stateMonitor = cubits.repositories.rootStateMonitor,
+  })  : stateMonitor = reposCubit.rootStateMonitor,
         super(
           key: GlobalKey(debugLabel: 'key_logs_section'),
           title: S.current.titleLogs,
@@ -42,8 +48,6 @@ class LogsSection extends SettingsSection with AppLogger {
   @override
   List<Widget> buildTiles(BuildContext context) {
     bodyStyle = context.theme.appTextStyle.bodyMedium;
-
-    final mountCubit = cubits.mount;
 
     return [
       NavigationTile(
@@ -64,7 +68,7 @@ class LogsSection extends SettingsSection with AppLogger {
         onTap: () => _viewLogs(context),
       ),
       BlocBuilder<StateMonitorIntCubit, int?>(
-          bloc: cubits.panicCounter,
+          bloc: panicCounter,
           builder: (context, count) {
             if ((count ?? 0) == 0) {
               return SizedBox.shrink();
@@ -72,7 +76,7 @@ class LogsSection extends SettingsSection with AppLogger {
             return _errorTile(context, S.current.messageLibraryPanic);
           }),
       BlocBuilder<MountCubit, MountState>(
-          bloc: mountCubit,
+          bloc: mount,
           builder: (context, error) {
             if (error is! MountStateError) {
               return SizedBox.shrink();
@@ -110,10 +114,8 @@ class LogsSection extends SettingsSection with AppLogger {
   }
 
   @override
-  bool containsErrorNotification() {
-    return (cubits.panicCounter.state ?? 0) > 0 ||
-        cubits.mount.state is MountStateError;
-  }
+  bool containsErrorNotification() =>
+      (panicCounter.state ?? 0) > 0 || mount.state is MountStateError;
 
   Future<void> _saveLogs(
       BuildContext context, NatDetection natDetection) async {
@@ -173,7 +175,7 @@ class LogsSection extends SettingsSection with AppLogger {
         context,
         connectivityInfo: connectivityInfo,
         natDetection: natDetection,
-        powerControl: cubits.powerControl,
+        powerControl: powerControl,
         rootMonitor: stateMonitor,
       );
 }

@@ -12,8 +12,8 @@ import '../../utils/utils.dart';
 import '../widgets.dart';
 
 class MoveEntryDialog extends StatefulWidget {
-  const MoveEntryDialog(
-    this._cubits, {
+  const MoveEntryDialog({
+    required this.reposCubit,
     required this.originRepoCubit,
     required this.entryPath,
     required this.onUpdateBottomSheet,
@@ -21,7 +21,7 @@ class MoveEntryDialog extends StatefulWidget {
     required this.onCancel,
   });
 
-  final Cubits _cubits;
+  final ReposCubit reposCubit;
   final RepoCubit originRepoCubit;
   final String entryPath;
   final void Function(
@@ -40,7 +40,7 @@ class _MoveEntryDialogState extends State<MoveEntryDialog> {
   final bodyKey = GlobalKey();
   Size? widgetSize;
 
-  NavigationCubit get navigationCubit => widget._cubits.repositories.navigation;
+  NavigationCubit get navigationCubit => widget.reposCubit.navigation;
   RepoCubit get originRepoCubit => widget.originRepoCubit;
 
   String get entryPath => widget.entryPath;
@@ -74,7 +74,7 @@ class _MoveEntryDialogState extends State<MoveEntryDialog> {
     final parent = repo_path.dirname(widget.entryPath);
     final name = repo_path.basename(widget.entryPath);
 
-    return widget._cubits.repositories.builder(
+    return widget.reposCubit.builder(
       (cubit) => Container(
         key: bodyKey,
         padding: Dimensions.paddingBottomSheet,

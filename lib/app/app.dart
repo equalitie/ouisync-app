@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:loggy/loggy.dart';
+import 'package:ouisync_app/app/cubits/mount.dart';
 import 'package:ouisync_app/app/cubits/power_control.dart';
 import 'package:ouisync_app/app/widgets/media_receiver.dart';
 import 'package:ouisync/ouisync.dart' show Session;
@@ -14,6 +15,7 @@ import '../generated/l10n.dart';
 import 'cubits/repos.dart';
 import 'pages/pages.dart';
 import 'session.dart';
+import 'utils/mounter.dart';
 import 'utils/platform/platform.dart';
 import 'utils/utils.dart';
 
@@ -76,12 +78,8 @@ class OuisyncApp extends StatefulWidget {
 class _OuisyncAppState extends State<OuisyncApp> with AppLogger {
   final receivedMediaController = StreamController<List<SharedMediaFile>>();
   late final powerControl = PowerControl(widget.session, widget.settings);
-  late final reposCubit = ReposCubit(
-    session: widget.session,
-    nativeChannels: widget.nativeChannels,
-    settings: widget.settings,
-    cacheServers: CacheServers(Constants.cacheServers),
-  );
+  late final MountCubit mountCubit;
+  late final ReposCubit reposCubit;
 
   bool get _onboarded =>
       !widget.settings.getShowOnboarding() &&
@@ -90,14 +88,27 @@ class _OuisyncAppState extends State<OuisyncApp> with AppLogger {
   @override
   void initState() {
     super.initState();
+
+    final mounter = Mounter(widget.session);
+    mountCubit = MountCubit(mounter)..init();
+    reposCubit = ReposCubit(
+      session: widget.session,
+      nativeChannels: widget.nativeChannels,
+      settings: widget.settings,
+      cacheServers: CacheServers(Constants.cacheServers),
+      mounter: mounter,
+    );
+
     unawaited(_init());
   }
 
   @override
   void dispose() {
     unawaited(reposCubit.close());
+    unawaited(mountCubit.close());
     unawaited(powerControl.close());
     unawaited(receivedMediaController.close());
+
     super.dispose();
   }
 
@@ -106,14 +117,15 @@ class _OuisyncAppState extends State<OuisyncApp> with AppLogger {
         child: MediaReceiver(
           controller: receivedMediaController,
           child: MainPage(
+            mountCubit: mountCubit,
+            nativeChannels: widget.nativeChannels,
             packageInfo: widget.packageInfo,
             powerControl: powerControl,
+            receivedMedia: receivedMediaController.stream,
             reposCubit: reposCubit,
             session: widget.session,
-            nativeChannels: widget.nativeChannels,
             settings: widget.settings,
             windowManager: widget.windowManager,
-            receivedMedia: receivedMediaController.stream,
           ),
         ),
         visible: _onboarded,

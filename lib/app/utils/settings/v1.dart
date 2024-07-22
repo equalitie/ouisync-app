@@ -409,29 +409,11 @@ class Settings with AppLogger {
 
   //------------------------------------------------------------------
 
-  String? getMountPoint() => _defaultMountPoint();
-
   void debugPrint() {
     print("============== Settings ===============");
     for (final kv in _root.repos.entries) {
       print("=== ${kv.key}");
     }
     print("=======================================");
-  }
-}
-
-String? _defaultMountPoint() {
-  if (io.Platform.isLinux || io.Platform.isMacOS) {
-    final home = io.Platform.environment['HOME'];
-
-    if (home == null) {
-      return null;
-    }
-
-    return '$home/Ouisync';
-  } else if (io.Platform.isWindows) {
-    return 'O:';
-  } else {
-    return null;
   }
 }

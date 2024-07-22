@@ -9,14 +9,22 @@ import '../cubits/launch_at_startup.dart';
 import '../widgets/widgets.dart';
 
 class SettingsPage extends StatefulWidget {
-  const SettingsPage(
-    this.session,
-    this.cubits,
-    this.checkForDokan,
-  );
+  const SettingsPage({
+    required this.session,
+    required this.mount,
+    required this.panicCounter,
+    required this.powerControl,
+    required this.reposCubit,
+    required this.upgradeExists,
+    required this.checkForDokan,
+  });
 
   final Session session;
-  final Cubits cubits;
+  final MountCubit mount;
+  final StateMonitorIntCubit panicCounter;
+  final PowerControl powerControl;
+  final ReposCubit reposCubit;
+  final UpgradeExistsCubit upgradeExists;
   final void Function() checkForDokan;
 
   @override
@@ -45,19 +53,23 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
         body: AppSettingsContainer(
           widget.session,
-          widget.cubits,
+          mount: widget.mount,
+          panicCounter: widget.panicCounter,
+          powerControl: widget.powerControl,
+          reposCubit: widget.reposCubit,
           connectivityInfo: connectivityInfo,
           natDetection: natDetection,
           peerSet: peerSet,
           checkForDokan: widget.checkForDokan,
           launchAtStartup: launchAtStartup,
+          upgradeExists: widget.upgradeExists,
         ),
       );
 
   Future<void> _updateConnectivityInfo() async {
     await connectivityInfo.update();
 
-    await for (final _ in widget.cubits.powerControl.stream) {
+    await for (final _ in widget.powerControl.stream) {
       await connectivityInfo.update();
     }
   }

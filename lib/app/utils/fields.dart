@@ -16,11 +16,13 @@ import 'utils.dart';
 class Fields {
   Fields._();
 
-  static Widget addBadge(Widget child,
-      {bool show = true,
-      Color color = Colors.red,
-      double moveRight = 0,
-      double moveDownwards = 0}) {
+  static Widget addBadge(
+    Widget child, {
+    bool show = true,
+    Color color = Colors.red,
+    double moveRight = 0,
+    double moveDownwards = 0,
+  }) {
     return b.Badge(
         showBadge: show,
         ignorePointer: true,

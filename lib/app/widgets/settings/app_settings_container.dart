@@ -15,36 +15,50 @@ import 'settings_section.dart';
 
 class AppSettingsContainer extends StatefulHookWidget {
   AppSettingsContainer(
-    Session session,
-    Cubits cubits, {
-    required ConnectivityInfo connectivityInfo,
-    required NatDetection natDetection,
-    required PeerSetCubit peerSet,
+    Session session, {
     required void Function() checkForDokan,
+    required ConnectivityInfo connectivityInfo,
     required LaunchAtStartupCubit launchAtStartup,
+    required this.mount,
+    required NatDetection natDetection,
+    required this.panicCounter,
+    required PeerSetCubit peerSet,
+    required this.powerControl,
+    required ReposCubit reposCubit,
+    required this.upgradeExists,
   }) : sections = [
           NetworkSection(
             session,
-            cubits,
             connectivityInfo: connectivityInfo,
             natDetection: natDetection,
             peerSet: peerSet,
+            powerControl: powerControl,
           ),
           LogsSection(
-            cubits,
+            mount: mount,
+            panicCounter: panicCounter,
+            powerControl: powerControl,
+            reposCubit: reposCubit,
             connectivityInfo: connectivityInfo,
             natDetection: natDetection,
             checkForDokan: checkForDokan,
           ),
           AboutSection(
             session,
-            cubits,
+            powerControl: powerControl,
+            reposCubit: reposCubit,
             connectivityInfo: connectivityInfo,
             peerSet: peerSet,
             natDetection: natDetection,
             launchAtStartup: launchAtStartup,
+            upgradeExists: upgradeExists,
           ),
         ];
+
+  final MountCubit mount;
+  final StateMonitorIntCubit panicCounter;
+  final PowerControl powerControl;
+  final UpgradeExistsCubit upgradeExists;
 
   final List<SettingsSection> sections;
 
@@ -67,6 +81,10 @@ class _AppSettingsContainerState extends State<AppSettingsContainer>
               children: widget.sections
                   .mapIndexed(
                     (index, section) => SettingsSectionTitleDesktop(
+                      mount: widget.mount,
+                      powerControl: widget.powerControl,
+                      panicCounter: widget.panicCounter,
+                      upgradeExists: widget.upgradeExists,
                       section: section,
                       selected: selected.value == index,
                       onTap: () {
@@ -150,10 +168,19 @@ class _AppSettingsContainerState extends State<AppSettingsContainer>
 
 class SettingsSectionTitleDesktop extends StatelessWidget {
   const SettingsSectionTitleDesktop({
+    required this.mount,
+    required this.panicCounter,
+    required this.powerControl,
+    required this.upgradeExists,
     required this.section,
     required this.onTap,
     this.selected = false,
   });
+
+  final MountCubit mount;
+  final PowerControl powerControl;
+  final StateMonitorIntCubit panicCounter;
+  final UpgradeExistsCubit upgradeExists;
 
   final SettingsSection section;
   final bool selected;
@@ -161,13 +188,15 @@ class SettingsSectionTitleDesktop extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ListTile(
-        title: Row(children: [
-          // Need to put the badge in a row because wrapping the Text in Badge
-          // will make the text centered. Maybe there's a better solution
-          // though.
-          Text(section.title, style: _getStyle(context)),
-          _maybeBadge(section)
-        ]),
+        title: Row(
+          children: [
+            // Need to put the badge in a row because wrapping the Text in Badge
+            // will make the text centered. Maybe there's a better solution
+            // though.
+            Text(section.title, style: _getStyle(context)),
+            _maybeBadge(section),
+          ],
+        ),
         selected: selected,
         onTap: onTap,
       );

@@ -22,23 +22,27 @@ import 'settings_tile.dart';
 
 class AboutSection extends SettingsSection with AppLogger {
   AboutSection(
-    this.session,
-    this.cubits, {
+    this.session, {
+    required this.powerControl,
+    required this.reposCubit,
     required this.connectivityInfo,
     required this.peerSet,
     required this.natDetection,
     required this.launchAtStartup,
+    required this.upgradeExists,
   }) : super(
           key: GlobalKey(debugLabel: 'key_about_section'),
           title: S.current.titleAbout,
         );
 
   final Session session;
-  final Cubits cubits;
+  final PowerControl powerControl;
+  final ReposCubit reposCubit;
   final ConnectivityInfo connectivityInfo;
   final PeerSetCubit peerSet;
   final NatDetection natDetection;
   final LaunchAtStartupCubit launchAtStartup;
+  final UpgradeExistsCubit upgradeExists;
 
   TextStyle? bodyStyle;
 
@@ -103,8 +107,8 @@ class AboutSection extends SettingsSection with AppLogger {
         onTap: () => unawaited(launchUrl(Uri.parse(Constants.issueTrackerUrl))),
       ),
       AppVersionTile(
-        session: cubits.repositories.session,
-        upgradeExists: cubits.upgradeExists,
+        session: reposCubit.session,
+        upgradeExists: upgradeExists,
         leading: Icon(Icons.info_rounded),
         title: Text(S.current.labelAppVersion, style: bodyStyle),
       ),
@@ -128,17 +132,15 @@ class AboutSection extends SettingsSection with AppLogger {
     ];
   }
 
+  @override
+  bool containsErrorNotification() => upgradeExists.state;
+
   void _navigateToPeers(BuildContext context) => Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) => PeersPage(session, peerSet),
         ),
       );
-
-  @override
-  bool containsErrorNotification() {
-    return cubits.upgradeExists.state;
-  }
 
   Future<void> _openUrl(BuildContext context, String title, String url) async {
     final webView = PlatformWebView();
@@ -175,8 +177,8 @@ class AboutSection extends SettingsSection with AppLogger {
         context,
         dumpAll(
           context,
-          rootMonitor: cubits.repositories.rootStateMonitor,
-          powerControl: cubits.powerControl,
+          rootMonitor: reposCubit.rootStateMonitor,
+          powerControl: powerControl,
           connectivityInfo: connectivityInfo,
           natDetection: natDetection,
           compress: true,
@@ -212,7 +214,7 @@ class AboutSection extends SettingsSection with AppLogger {
   }
 
   Widget _getRuntimeIdForOS() => FutureBuilder(
-      future: cubits.repositories.session.thisRuntimeId,
+      future: reposCubit.session.thisRuntimeId,
       builder: (context, snapshot) {
         final runtimeId = snapshot.data ?? '';
         final runtimeIdWidget = Text(runtimeId,

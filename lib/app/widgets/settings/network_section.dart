@@ -16,21 +16,21 @@ import 'settings_tile.dart';
 
 class NetworkSection extends SettingsSection {
   NetworkSection(
-    this.session,
-    this.cubits, {
+    this.session, {
     required this.connectivityInfo,
     required this.natDetection,
     required this.peerSet,
+    required this.powerControl,
   }) : super(
           key: GlobalKey(debugLabel: 'key_network_section'),
           title: S.current.titleNetwork,
         );
 
   final Session session;
-  final Cubits cubits;
   final ConnectivityInfo connectivityInfo;
   final NatDetection natDetection;
   final PeerSetCubit peerSet;
+  final PowerControl powerControl;
 
   TextStyle? bodyStyle;
   TextStyle? subtitleStyle;
@@ -53,7 +53,7 @@ class NetworkSection extends SettingsSection {
 
   Widget _buildConnectivityTypeTile(BuildContext context) =>
       BlocBuilder<PowerControl, PowerControlState>(
-        bloc: cubits.powerControl,
+        bloc: powerControl,
         builder: (context, state) => SettingsTile(
           leading: Icon(Icons.wifi),
           title: Text(S.current.labelConnectionType, style: bodyStyle),
@@ -74,12 +74,12 @@ class NetworkSection extends SettingsSection {
 
   Widget _buildPortForwardingTile(BuildContext context) =>
       BlocSelector<PowerControl, PowerControlState, bool>(
-        bloc: cubits.powerControl,
+        bloc: powerControl,
         selector: (state) => state.portForwardingEnabled,
         builder: (context, value) => SwitchSettingsTile(
             value: value,
             onChanged: (value) {
-              unawaited(cubits.powerControl.setPortForwardingEnabled(value));
+              unawaited(powerControl.setPortForwardingEnabled(value));
             },
             title: InfoBuble(
                 child: Text(Strings.upNP, style: bodyStyle),
@@ -90,12 +90,12 @@ class NetworkSection extends SettingsSection {
 
   Widget _buildLocalDiscoveryTile(BuildContext context) =>
       BlocSelector<PowerControl, PowerControlState, bool>(
-        bloc: cubits.powerControl,
+        bloc: powerControl,
         selector: (state) => state.localDiscoveryEnabled,
         builder: (context, value) => SwitchSettingsTile(
           value: value,
           onChanged: (value) {
-            unawaited(cubits.powerControl.setLocalDiscoveryEnabled(value));
+            unawaited(powerControl.setLocalDiscoveryEnabled(value));
           },
           title: InfoBuble(
               child: Text(S.current.messageLocalDiscovery, style: bodyStyle),
@@ -109,12 +109,12 @@ class NetworkSection extends SettingsSection {
 
   Widget _buildSyncOnMobileSwitch(BuildContext context) =>
       BlocSelector<PowerControl, PowerControlState, bool>(
-        bloc: cubits.powerControl,
+        bloc: powerControl,
         selector: (state) => state.syncOnMobile,
         builder: (context, value) => SwitchSettingsTile(
           value: value,
           onChanged: (value) {
-            unawaited(cubits.powerControl.setSyncOnMobileEnabled(value));
+            unawaited(powerControl.setSyncOnMobileEnabled(value));
           },
           title: InfoBuble(
               child: Text(S.current.messageSyncMobileData, style: bodyStyle),

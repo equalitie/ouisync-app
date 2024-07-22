@@ -10,6 +10,7 @@ import 'package:ouisync_app/app/utils/share_token.dart';
 import 'package:ouisync/native_channels.dart';
 import 'package:ouisync/ouisync.dart';
 import 'package:ouisync/state_monitor.dart' as oui;
+import 'package:ouisync_app/app/widgets/notification_badge.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart' as system_path;
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
@@ -45,6 +46,7 @@ typedef PreviewFileCallback = Future<void> Function(
 
 class MainPage extends StatefulWidget {
   const MainPage({
+    required this.mountCubit,
     required this.nativeChannels,
     required this.packageInfo,
     required this.powerControl,
@@ -63,21 +65,17 @@ class MainPage extends StatefulWidget {
   final PowerControl powerControl;
   final Stream<List<SharedMediaFile>> receivedMedia;
   final ReposCubit reposCubit;
+  final MountCubit mountCubit;
 
   @override
-  State<StatefulWidget> createState() => _MainPageState(
-        nativeChannels: nativeChannels,
-        powerControl: powerControl,
-        reposCubit: reposCubit,
-        session: session,
-        settings: settings,
-        windowManager: windowManager,
-      );
+  State<StatefulWidget> createState() => _MainPageState();
 }
 
 class _MainPageState extends State<MainPage>
     with TickerProviderStateMixin, AppLogger {
-  final Cubits _cubits;
+  late final StateMonitorIntCubit panicCounter;
+  late final SortListCubit sortListCubit;
+  late final UpgradeExistsCubit upgradeExists;
 
   final _bottomSheetInfo = ValueNotifier<BottomSheetInfo>(BottomSheetInfo(
     type: BottomSheetType.gone,
@@ -94,65 +92,29 @@ class _MainPageState extends State<MainPage>
 
   StreamSubscription? _receivedMediaSubscription;
 
-  _MainPageState._(this._cubits);
-
-  factory _MainPageState({
-    required NativeChannels nativeChannels,
-    required ReposCubit reposCubit,
-    required Session session,
-    required Settings settings,
-    required PlatformWindowManager windowManager,
-    required PowerControl powerControl,
-  }) {
-    final panicCounter = StateMonitorIntCubit(
-      reposCubit.rootStateMonitor.child(oui.MonitorId.expectUnique("Session")),
-      "panic_counter",
-    );
-
-    final mount = MountCubit(session);
-    final mountPoint = settings.getMountPoint();
-    if (mountPoint != null) {
-      unawaited(mount.mount(mountPoint));
-    }
-
-    final upgradeExists =
-        UpgradeExistsCubit(session.currentProtocolVersion, settings);
-
-    return _MainPageState._(Cubits(
-      repositories: reposCubit,
-      powerControl: powerControl,
-      panicCounter: panicCounter,
-      upgradeExists: upgradeExists,
-      windowManager: windowManager,
-      mount: mount,
-    ));
-  }
-
-  RepoEntry? get _currentRepo => _cubits.repositories.currentRepo;
-
-  late final SortListCubit _sortListCubit;
+  RepoEntry? get _currentRepo => widget.reposCubit.currentRepo;
 
   @override
   void initState() {
-    _sortListCubit = SortListCubit.create(
-        sortBy: SortBy.name,
-        direction: SortDirection.asc,
-        listType: ListType.repos);
-
     super.initState();
 
-    widget.session.networkEvents.listen((event) async {
-      switch (event) {
-        case NetworkEvent.peerSetChange:
-          break;
-        case NetworkEvent.protocolVersionMismatch:
-          {
-            final highest = await widget.session.highestSeenProtocolVersion;
-            await _cubits.upgradeExists.foundVersion(highest);
-          }
-          break;
-      }
-    });
+    panicCounter = StateMonitorIntCubit(
+      widget.reposCubit.rootStateMonitor.child(
+        oui.MonitorId.expectUnique("Session"),
+      ),
+      "panic_counter",
+    );
+
+    upgradeExists = UpgradeExistsCubit(
+      widget.session,
+      widget.settings,
+    );
+
+    sortListCubit = SortListCubit.create(
+      sortBy: SortBy.name,
+      direction: SortDirection.asc,
+      listType: ListType.repos,
+    );
 
     _receivedMediaSubscription =
         widget.receivedMedia.listen(handleReceivedMedia);
@@ -168,6 +130,10 @@ class _MainPageState extends State<MainPage>
     _appSettingsIconFocus.dispose();
     _fabFocus.dispose();
     _receivedMediaSubscription?.cancel();
+
+    unawaited(upgradeExists.close());
+    unawaited(sortListCubit.close());
+    unawaited(panicCounter.close());
 
     super.dispose();
   }
@@ -408,11 +374,7 @@ class _MainPageState extends State<MainPage>
     }
 
     if (installationResult) {
-      final mountPoint = _cubits.repositories.settings.getMountPoint();
-      if (mountPoint != null) {
-        unawaited(_cubits.mount.mount(mountPoint));
-      }
-
+      widget.mountCubit.init();
       return;
     }
 
@@ -424,7 +386,7 @@ class _MainPageState extends State<MainPage>
   }
 
   Widget buildMainWidget() {
-    return _cubits.repositories.builder((repos) {
+    return widget.reposCubit.builder((repos) {
       final currentRepo = repos.currentRepo;
       final currentRepoCubit = currentRepo?.cubit;
 
@@ -526,7 +488,7 @@ class _MainPageState extends State<MainPage>
           ),
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.miniEndFloat,
-        floatingActionButton: _cubits.repositories
+        floatingActionButton: widget.reposCubit
             .builder((repos) => _buildFAB(context, repos.currentRepo)),
         bottomSheet: modalBottomSheet(),
       );
@@ -543,7 +505,7 @@ class _MainPageState extends State<MainPage>
         }
       }
 
-      _cubits.repositories.showRepoList();
+      widget.reposCubit.showRepoList();
       return;
     }
 
@@ -558,33 +520,32 @@ class _MainPageState extends State<MainPage>
   }
 
   _buildOuiSyncBar() => OuiSyncBar(
-        reposCubit: _cubits.repositories,
-        repoPicker: RepositoriesBar(_cubits),
+        reposCubit: widget.reposCubit,
+        repoPicker: RepositoriesBar(
+          mount: widget.mountCubit,
+          panicCounter: panicCounter,
+          powerControl: widget.powerControl,
+          reposCubit: widget.reposCubit,
+          upgradeExists: upgradeExists,
+        ),
         appSettingsButton: _buildAppSettingsIcon(),
         searchButton: _buildSearchIcon(),
         repoSettingsButton: _buildRepoSettingsIcon(),
       );
 
-  Widget _buildAppSettingsIcon() {
-    final button = Fields.actionIcon(const Icon(Icons.settings_outlined),
-        onPressed: _showAppSettings, size: Dimensions.sizeIconSmall);
-
-    return multiBlocBuilder([
-      _cubits.upgradeExists,
-      _cubits.powerControl,
-      _cubits.panicCounter,
-      _cubits.mount,
-    ], () {
-      Color? color = _cubits.mainNotificationBadgeColor();
-
-      if (color != null) {
-        return Fields.addBadge(button,
-            color: color, moveDownwards: 5, moveRight: 3);
-      } else {
-        return button;
-      }
-    });
-  }
+  Widget _buildAppSettingsIcon() => NotificationBadge(
+        mount: widget.mountCubit,
+        panicCounter: panicCounter,
+        powerControl: widget.powerControl,
+        upgradeExists: upgradeExists,
+        moveDownwards: 5,
+        moveRight: 3,
+        child: Fields.actionIcon(
+          const Icon(Icons.settings_outlined),
+          onPressed: _showAppSettings,
+          size: Dimensions.sizeIconSmall,
+        ),
+      );
 
   Widget _buildRepoSettingsIcon() =>
       Fields.actionIcon(const Icon(Icons.more_vert_rounded),
@@ -608,8 +569,8 @@ class _MainPageState extends State<MainPage>
   Widget _buildFAB(BuildContext context, RepoEntry? current) {
     final icon = const Icon(Icons.add_rounded);
 
-    if (_cubits.repositories.showList) {
-      if (_cubits.repositories.repos.isNotEmpty) {
+    if (widget.reposCubit.showList) {
+      if (widget.reposCubit.repos.isNotEmpty) {
         return FloatingActionButton(
           mini: true,
           focusNode: _fabFocus,
@@ -701,8 +662,8 @@ class _MainPageState extends State<MainPage>
             const Divider(height: 1),
             if (folder.content.isNotEmpty)
               SortContentsBar(
-                sortListCubit: _sortListCubit,
-                reposCubit: _cubits.repositories,
+                sortListCubit: sortListCubit,
+                reposCubit: widget.reposCubit,
               ),
             Expanded(child: child),
           ],
@@ -927,7 +888,7 @@ class _MainPageState extends State<MainPage>
 
   Widget modalBottomSheet() =>
       BlocBuilder<EntryBottomSheetCubit, EntryBottomSheetState>(
-        bloc: _cubits.repositories.bottomSheet,
+        bloc: widget.reposCubit.bottomSheet,
         builder: (context, state) {
           Widget? sheet;
 
@@ -958,7 +919,7 @@ class _MainPageState extends State<MainPage>
     required EntryType entryType,
   }) =>
       MoveEntryDialog(
-        _cubits,
+        reposCubit: widget.reposCubit,
         originRepoCubit: repoCubit,
         entryPath: entryPath,
         onUpdateBottomSheet: updateBottomSheetInfo,
@@ -967,7 +928,7 @@ class _MainPageState extends State<MainPage>
           entryPath,
           entryType,
         ),
-        onCancel: _cubits.repositories.bottomSheet.hide,
+        onCancel: widget.reposCubit.bottomSheet.hide,
       );
 
   Future<void> moveEntry(
@@ -1081,7 +1042,7 @@ class _MainPageState extends State<MainPage>
     for (final medium in media) {
       switch (medium.type) {
         case SharedMediaType.file
-            when (_cubits.repositories.showList ||
+            when (widget.reposCubit.showList ||
                     !PlatformValues.isDesktopDevice) &&
                 system_path.extension(medium.path) ==
                     ".${RepoLocation.defaultExtension}":
@@ -1099,7 +1060,7 @@ class _MainPageState extends State<MainPage>
     // Handle imported repos
     for (final path in repos) {
       final location = RepoLocation.fromDbPath(path);
-      await _cubits.repositories.importRepoFromLocation(location);
+      await widget.reposCubit.importRepoFromLocation(location);
     }
 
     // Handle share tokens
@@ -1116,8 +1077,8 @@ class _MainPageState extends State<MainPage>
       return;
     }
 
-    _cubits.repositories.bottomSheet.showSaveMedia(
-      reposCubit: _cubits.repositories,
+    widget.reposCubit.bottomSheet.showSaveMedia(
+      reposCubit: widget.reposCubit,
       paths: paths,
     );
   }
@@ -1134,7 +1095,7 @@ class _MainPageState extends State<MainPage>
           return DirectoryActions(
             parentContext: parentContext,
             repoCubit: repo.cubit,
-            bottomSheetCubit: _cubits.repositories.bottomSheet,
+            bottomSheetCubit: widget.reposCubit.bottomSheet,
           );
         },
       );
@@ -1147,7 +1108,7 @@ class _MainPageState extends State<MainPage>
         builder: (context) {
           return RepoListActions(
             context: context,
-            reposCubit: _cubits.repositories,
+            reposCubit: widget.reposCubit,
             onCreateRepoPressed: _createRepo,
             onImportRepoPressed: _importRepo,
           );
@@ -1176,8 +1137,8 @@ class _MainPageState extends State<MainPage>
   }
 
   Future<void> setCurrent(RepoLocation location) async {
-    final repo = _cubits.repositories.get(location);
-    await _cubits.repositories.setCurrent(repo);
+    final repo = widget.reposCubit.get(location);
+    await widget.reposCubit.setCurrent(repo);
   }
 
   Future<RepoLocation?> createRepoDialog(BuildContext parentContext) async =>
@@ -1185,7 +1146,7 @@ class _MainPageState extends State<MainPage>
         context,
         MaterialPageRoute(
           builder: (context) => RepoCreationPage(
-            reposCubit: _cubits.repositories,
+            reposCubit: widget.reposCubit,
           ),
         ),
       );
@@ -1198,7 +1159,7 @@ class _MainPageState extends State<MainPage>
 
     if (initialTokenValue != null) {
       final tokenResult =
-          await parseShareToken(_cubits.repositories, initialTokenValue);
+          await parseShareToken(widget.reposCubit, initialTokenValue);
       switch (tokenResult) {
         case ShareTokenValid():
           result = RepoImportFromToken(tokenResult.value);
@@ -1210,8 +1171,7 @@ class _MainPageState extends State<MainPage>
       result = await Navigator.push<RepoImportResult>(
         context,
         MaterialPageRoute(
-          builder: (context) =>
-              RepoImportPage(reposCubit: _cubits.repositories),
+          builder: (context) => RepoImportPage(reposCubit: widget.reposCubit),
         ),
       );
     }
@@ -1222,7 +1182,7 @@ class _MainPageState extends State<MainPage>
           context,
           MaterialPageRoute(
             builder: (context) => RepoCreationPage(
-              reposCubit: _cubits.repositories,
+              reposCubit: widget.reposCubit,
               token: token,
             ),
           ),
@@ -1242,9 +1202,13 @@ class _MainPageState extends State<MainPage>
         context,
         MaterialPageRoute(
           builder: (context) => SettingsPage(
-            widget.session,
-            _cubits,
-            checkForDokan,
+            session: widget.session,
+            mount: widget.mountCubit,
+            panicCounter: panicCounter,
+            powerControl: widget.powerControl,
+            reposCubit: widget.reposCubit,
+            upgradeExists: upgradeExists,
+            checkForDokan: checkForDokan,
           ),
         ),
       );
@@ -1262,7 +1226,7 @@ class _MainPageState extends State<MainPage>
             context: context,
             settings: widget.settings,
             repoCubit: repoCubit,
-            reposCubit: _cubits.repositories,
+            reposCubit: widget.reposCubit,
           );
         },
       );

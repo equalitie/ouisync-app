@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync/ouisync.dart' as oui;
+import 'package:ouisync/ouisync.dart';
 
 import '../utils/log.dart';
+import '../utils/mounter.dart';
 
 sealed class MountState {
   const MountState();
@@ -21,30 +22,36 @@ class MountStateSuccess extends MountState {
 }
 
 class MountStateError extends MountState {
-  final oui.ErrorCode code;
+  final ErrorCode code;
   final String message;
 
   const MountStateError(this.code, this.message);
 }
 
 class MountCubit extends Cubit<MountState> with AppLogger {
-  final oui.Session session;
+  final Mounter mounter;
 
-  MountCubit(this.session) : super(MountStateDisabled());
+  MountCubit(this.mounter) : super(MountStateDisabled());
 
-  Future<void> mount(String mountPoint) async {
+  void init() => unawaited(_init());
+
+  Future<void> _init() async {
     emit(MountStateMounting());
 
     try {
-      await session.mountAllRepositories(mountPoint);
+      await mounter.init();
       emit(MountStateSuccess());
-    } on oui.Error catch (error, st) {
-      loggy.error(
-        'Failed to mount repositories at $mountPoint:',
-        error.message,
-        st,
-      );
+    } on Error catch (error) {
       emit(MountStateError(error.code, error.message));
     }
+  }
+
+  @override
+  Future<void> close() async {
+    if (state is MountStateMounting) {
+      await stream.where((state) => state is! MountStateMounting).first;
+    }
+
+    await super.close();
   }
 }

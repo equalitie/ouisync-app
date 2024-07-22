@@ -6,11 +6,13 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:ouisync_app/app/cubits/mount.dart';
 import 'package:ouisync_app/app/cubits/power_control.dart';
 import 'package:ouisync_app/app/cubits/repos.dart';
 import 'package:ouisync_app/app/pages/main_page.dart';
 import 'package:ouisync_app/app/utils/cache_servers.dart';
 import 'package:ouisync_app/app/utils/master_key.dart';
+import 'package:ouisync_app/app/utils/mounter.dart';
 import 'package:ouisync_app/app/utils/platform/platform_window_manager.dart';
 import 'package:ouisync_app/app/utils/settings/settings.dart';
 import 'package:ouisync_app/generated/l10n.dart';
@@ -63,6 +65,7 @@ class TestDependencies {
     this.nativeChannels,
     this.powerControl,
     this.reposCubit,
+    this.mountCubit,
   );
 
   static Future<TestDependencies> create() async {
@@ -88,7 +91,10 @@ class TestDependencies {
       nativeChannels: nativeChannels,
       session: session,
       settings: settings,
+      mounter: Mounter(session),
     );
+
+    final mountCubit = MountCubit(reposCubit.mounter);
 
     return TestDependencies._(
       session,
@@ -96,10 +102,12 @@ class TestDependencies {
       nativeChannels,
       powerControl,
       reposCubit,
+      mountCubit,
     );
   }
 
   Future<void> dispose() async {
+    await mountCubit.close();
     await reposCubit.close();
     await powerControl.close();
     await session.close();
@@ -109,6 +117,7 @@ class TestDependencies {
     Stream<List<SharedMediaFile>>? receivedMedia,
   }) =>
       MainPage(
+        mountCubit: mountCubit,
         nativeChannels: nativeChannels,
         packageInfo: fakePackageInfo,
         powerControl: powerControl,
@@ -124,6 +133,7 @@ class TestDependencies {
   final NativeChannels nativeChannels;
   final PowerControl powerControl;
   final ReposCubit reposCubit;
+  final MountCubit mountCubit;
 }
 
 class _FakePathProviderPlatform extends PathProviderPlatform {
