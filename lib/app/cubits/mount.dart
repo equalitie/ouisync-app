@@ -47,4 +47,13 @@ class MountCubit extends Cubit<MountState> with AppLogger {
       emit(MountStateError(error.code, error.message));
     }
   }
+
+  @override
+  Future<void> close() async {
+    if (state is MountStateMounting) {
+      await stream.where((state) => state is! MountStateMounting).first;
+    }
+
+    await super.close();
+  }
 }

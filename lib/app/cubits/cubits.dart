@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../utils/platform/platform.dart';
 import '../utils/utils.dart';
 import 'mount.dart';
 import 'power_control.dart';
@@ -31,7 +30,6 @@ class Cubits {
   final PowerControl powerControl;
   final StateMonitorIntCubit panicCounter;
   final UpgradeExistsCubit upgradeExists;
-  final PlatformWindowManager windowManager;
   final MountCubit mount;
 
   Cubits({
@@ -39,7 +37,6 @@ class Cubits {
     required this.powerControl,
     required this.panicCounter,
     required this.upgradeExists,
-    required this.windowManager,
     required this.mount,
   });
 

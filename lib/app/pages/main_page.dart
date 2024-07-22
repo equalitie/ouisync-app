@@ -111,7 +111,6 @@ class _MainPageState extends State<MainPage>
       powerControl: widget.powerControl,
       panicCounter: panicCounter,
       upgradeExists: upgradeExists,
-      windowManager: widget.windowManager,
       mount: MountCubit(widget.session),
     );
 
