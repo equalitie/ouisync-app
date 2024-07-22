@@ -400,7 +400,7 @@
   "messageLogLevelAll":"All",
   "messageSaveLogFile":"Save log file",
   "messageErrorUnhandledState":"Error: unhandled state",
-  "messageUnlockRepoFailed":"The password did not unlock the repository",
+  "messageUnlockRepoFailed":"This repository is either blind or locked",
   "messageUnlockRepoOk":"Unlocked as a {access} replica",
   "messageUnlockUsingBiometrics":"Unlock using biometrics",
   "messagePassword":"Password",

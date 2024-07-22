@@ -744,7 +744,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageUnknownFileExtension":
             MessageLookupByLibrary.simpleMessage("Unknown file extension"),
         "messageUnlockRepoFailed": MessageLookupByLibrary.simpleMessage(
-            "The password did not unlock the repository"),
+            "This repository is either blind or locked"),
         "messageUnlockRepoOk": m24,
         "messageUnlockRepository": m25,
         "messageUnlockUsingBiometrics":

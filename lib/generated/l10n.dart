@@ -2490,10 +2490,10 @@ class S {
     );
   }
 
-  /// `The password did not unlock the repository`
+  /// `This repository is either blind or locked`
   String get messageUnlockRepoFailed {
     return Intl.message(
-      'The password did not unlock the repository',
+      'This repository is either blind or locked',
       name: 'messageUnlockRepoFailed',
       desc: '',
       args: [],
