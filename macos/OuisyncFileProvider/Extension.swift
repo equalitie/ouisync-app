@@ -9,7 +9,7 @@ import FileProvider
 import OuisyncLib
 import System
 import OSLog
-import class Common.Directories
+import Common
 
 class Extension: NSObject, NSFileProviderReplicatedExtension {
     static let WRITE_CHUNK_SIZE: UInt64 = 32768 // TODO: Decide on optimal value
@@ -44,6 +44,13 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
         // Path that is accessible by both the app and this extension.
         let commonDirectories = Common.Directories()
 
+        NSLog("-------------------------------------------------")
+        NSLog("Using directories:")
+        NSLog("configs:      \(commonDirectories.configsPath)")
+        NSLog("repositories: \(commonDirectories.repositoriesPath)")
+        NSLog("logs:         \(commonDirectories.logsPath)")
+        NSLog("-------------------------------------------------")
+
         ouisyncSession = try! OuisyncSession.create(commonDirectories.configsPath, commonDirectories.logsPath, ffi)
 
         // TODO: This doesn't work yet
@@ -53,6 +60,89 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
         self.domain = domain
         self.log = log.level(.trace)
         super.init()
+
+        startListeningToRepoChanges()
+    }
+
+    // Start watchin to changes in Ouisync: Everytime a repository is added or removed, and
+    // everytime a repository changes we ask the file provider to refresh it's content.
+    func startListeningToRepoChanges() {
+        let this = self
+
+        // TODO:
+        // 1. Need to ensure that the task finishes when the extension is `invalidate`d
+        // 2. Check that repos are removed from `repoWatchingTasks` when a repo is removed.
+        Task {
+            weak var weakExt = this
+
+            let repoListChanged: NotificationStream
+
+            if let session = weakExt?.ouisyncSession {
+                repoListChanged = try await session.subscribeToRepositoryListChange()
+            } else {
+                return
+            }
+
+            var repoWatchingTasks: [RepositoryHandle: Task<Void, Never>] = [:]
+
+            while true {
+                if let ext = weakExt {
+                    let currentRepos: [OuisyncRepository]
+
+                    do {
+                        currentRepos = try await ext.ouisyncSession.listRepositories()
+                    } catch let error as OuisyncError {
+                        switch error.code {
+                        case .ConnectionLost: return
+                        default: fatalError("😡 Unexpected Ouisync exception: \(error)")
+                        }
+                    } catch {
+                        fatalError("😡 Unexpected exception: \(error)")
+                    }
+
+                    let watchedRepoHandles = Set(repoWatchingTasks.keys)
+                    let currentRepoHandles = Set(currentRepos.map({ $0.handle }))
+
+                    let reposToAdd = currentRepoHandles.subtracting(watchedRepoHandles)
+                    let reposToRemove = watchedRepoHandles.subtracting(currentRepoHandles)
+
+                    for repo in reposToAdd {
+                        guard let ext = weakExt else {
+                            return
+                        }
+                        guard let stream = try? await ext.ouisyncSession.subscribeToRepositoryChange(repo) else {
+                            continue
+                        }
+                        repoWatchingTasks[repo] = Task {
+                            weak var weakExt = this
+                            while true {
+                                if await stream.next() == nil {
+                                    return
+                                }
+                                guard let ext = weakExt else {
+                                    return
+                                }
+                                await ext.signalRefresh()
+                            }
+                        }
+                    }
+
+                    for repo in reposToRemove {
+                        repoWatchingTasks.removeValue(forKey: repo)
+                    }
+
+                    await ext.signalRefresh()
+
+                } else {
+                    NSLog("❗Stopping the refresh of repo changes because the extension was destroyed")
+                    return
+                }
+
+                if await repoListChanged.next() == nil {
+                    break
+                }
+            }
+        }
     }
 
     func invalidate() {
@@ -435,6 +525,20 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
     // and write the content there. Then pass that URL to a completion handler.
     func makeTemporaryURL(_ purpose: String) -> URL {
         return temporaryDirectoryURL.appendingPathComponent("\(purpose)-\(UUID().uuidString)")
+    }
+
+    // This signals to the file provider to refresh
+    // https://developer.apple.com/documentation/fileprovider/replicated_file_provider_extension/synchronizing_files_using_file_provider_extensions#4099755
+    func signalRefresh() async {
+        let oldAnchor = currentAnchor
+        currentAnchor = NSFileProviderSyncAnchor.random()
+        NSLog("🚀 Refreshing FileProvider and updating anchor \(oldAnchor) -> \(currentAnchor)")
+
+        do {
+            try await manager.signalEnumerator(for: .workingSet)
+        } catch let error as NSError {
+            NSLog("❌ failed to signal working set for \(Common.ouisyncFileProviderDomain): \(error)")
+        }
     }
 }
  
