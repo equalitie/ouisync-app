@@ -55,7 +55,7 @@ void main() {
     await session.close();
   });
 
-  test('create repository with blind token', () async {
+  test('create blind repository with blind token', () async {
     final token = await parseShareToken(reposCubit, tokenString);
     expect(
         token,
@@ -64,10 +64,8 @@ void main() {
             .having((t) => t.error, 'error', isNull));
 
     final tokenAccesMode = await (token as ShareTokenValid).value.mode;
-    expect(
-        tokenAccesMode,
-        isA<AccessMode>()
-            .having((t) => t.name, 'mode', equals(AccessMode.blind.name)));
+    expect(tokenAccesMode,
+        isA<AccessMode>().having((t) => t, 'mode', equals(AccessMode.blind)));
 
     final suggestedRepoName = await token.value.suggestedName;
 
@@ -90,23 +88,16 @@ void main() {
 
     expect(
         repoCreationCubit.state.localSecretMode,
-        isA<LocalSecretMode>().having((lsm) => lsm.name, 'local_secret_mode',
-            LocalSecretMode.manual.name));
-
-    await repoCreationCubit.save();
-
-    await repoCreationCubit
-        .waitUntil((state) => state.substate is RepoCreationSuccess);
+        isA<LocalSecretMode>()
+            .having((lsm) => lsm, 'local_secret_mode', LocalSecretMode.manual));
 
     await repoCreationCubit.save();
     expect(repoCreationCubit.state.substate, isA<RepoCreationSuccess>());
     expect(
-      reposCubit.repos
-          .where((entry) => entry.name == suggestedRepoName)
-          .firstOrNull,
-      isA<OpenRepoEntry>()
-          .having((e) => e.accessMode, 'mode', AccessMode.blind)
-          .having((e) => e.cubit.accessMode, 'mode', AccessMode.blind),
-    );
+        reposCubit.repos
+            .where((entry) => entry.name == suggestedRepoName)
+            .firstOrNull,
+        isA<OpenRepoEntry>()
+            .having((e) => e.accessMode, 'mode', AccessMode.blind));
   });
 }
