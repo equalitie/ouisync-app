@@ -2,11 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync_app/app/cubits/repo_creation.dart';
-import 'package:ouisync_app/app/cubits/repo_security.dart';
 import 'package:ouisync/ouisync.dart';
 
 import '../../generated/l10n.dart';
+import '../cubits/repo_creation.dart';
+import '../cubits/repo_security.dart';
 import '../utils/constants.dart';
 import '../utils/dialogs.dart';
 import '../utils/dimensions.dart';
@@ -42,6 +42,14 @@ class RepoCreation extends StatelessWidget {
               listenWhen: (previous, current) =>
                   current.loading && !previous.loading,
               listener: _handleLoading,
+            ),
+            // Prefill suggested name on first load
+            BlocListener<RepoCreationCubit, RepoCreationState>(
+              bloc: creationCubit,
+              listenWhen: (previous, current) =>
+                  current.suggestedName.isNotEmpty &&
+                  previous.suggestedName.isEmpty,
+              listener: _handlePrefillSuggestedName,
             ),
             BlocListener<RepoSecurityCubit, RepoSecurityState>(
               bloc: securityCubit,
@@ -239,4 +247,10 @@ class RepoCreation extends StatelessWidget {
 
     creationCubit.setLocalSecret(localSecretInput);
   }
+
+  void _handlePrefillSuggestedName(
+    BuildContext context,
+    RepoCreationState state,
+  ) =>
+      creationCubit.acceptSuggestedName();
 }
