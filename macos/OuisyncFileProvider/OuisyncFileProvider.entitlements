@@ -10,5 +10,7 @@
 	<array>
 		<string>$(TeamIdentifierPrefix)org.equalitie.ouisync</string>
 	</array>
+	<key>com.apple.security.cs.disable-library-validation</key>
+	<true/>
 </dict>
 </plist>

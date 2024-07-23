@@ -84,16 +84,16 @@ extension Extension {
                 return false
             }
 
-            if ext.ouisyncSession != nil {
-                // TODO: What shoudld we do if there is another app trying to connect? Right now Ouisync
-                // runs inside the app, so that would mean we have two or more Ouisyncs running at the
-                // same time. The app is set up in Flutter to only allow one instance, but whether that
-                // actually works remains to be tested. If it happens that there are acually more than
-                // one Ouisync instance, we might need to move the backend to the extension, but that
-                // would require a lot of boilerplate to make it accessible from Dart.
-                NSLog("😡 Session already exists")
-                return false
-            }
+//            if ext.ouisyncSession != nil {
+//                // TODO: What shoudld we do if there is another app trying to connect? Right now Ouisync
+//                // runs inside the app, so that would mean we have two or more Ouisyncs running at the
+//                // same time. The app is set up in Flutter to only allow one instance, but whether that
+//                // actually works remains to be tested. If it happens that there are acually more than
+//                // one Ouisync instance, we might need to move the backend to the extension, but that
+//                // would require a lot of boilerplate to make it accessible from Dart.
+//                NSLog("😡 Session already exists")
+//                return false
+//            }
 
             //let ouisyncSession = OuisyncSession(OuisyncLibrarySender(client))
             //ext.assignSession(ouisyncSession)
@@ -108,21 +108,19 @@ extension Extension {
 
         // Ouisync backend is running inside the app (not in this extension), so when we send a request to it
         // here is where we receive responses and pass it to `ouisyncSession`.
-        func fromAppToFileProvider(_ message_data: [UInt8]) {
+        func fromAppToFileProvider(_ message_data: [UInt8]) async -> [UInt8] {
             NSLog("------------------------- extension received \(message_data)")
             if message_data.isEmpty {
-                return
+                fatalError("FP Extension received an empty message from the App")
             }
 
             guard let ext = self.weakExt else {
-                return
+                fatalError("FP Extension received a message but it has already been destroyed")
             }
 
-            guard let ouisyncSession = ext.ouisyncSession else {
-                return
-            }
-
-            ouisyncSession.onReceiveDataFromOuisyncLib(message_data)
+            let request = OutgoingMessage.deserialize(message_data)!
+            let response = await ext.ouisyncSession.invoke(request)
+            return response.serialize()
         }
 
         // Start watchin to changes in Ouisync: Everytime a repository is added or removed, and
@@ -146,7 +144,7 @@ extension Extension {
                         let currentRepos: [OuisyncRepository]
 
                         do {
-                            currentRepos = try await ext.ouisyncSession!.listRepositories()
+                            currentRepos = try await ext.ouisyncSession.listRepositories()
                         } catch let error as OuisyncError {
                             switch error.code {
                             case .ConnectionLost: return
@@ -166,7 +164,7 @@ extension Extension {
                             guard let ext = weakExt else {
                                 return
                             }
-                            guard let stream = try? await ext.ouisyncSession!.subscribeToRepositoryChange(repo) else {
+                            guard let stream = try? await ext.ouisyncSession.subscribeToRepositoryChange(repo) else {
                                 continue
                             }
                             repoWatchingTasks[repo] = Task {

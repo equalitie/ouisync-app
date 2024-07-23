@@ -20,15 +20,15 @@ Future<Session> createSession({
   final configPath = join(appDir.path, Constants.configDirName);
   final logPath = await LogUtils.path;
 
-  final session = Session.create(
-    configPath: configPath,
-    logPath: logPath,
-  );
-  final session2 = await Session.createChanneled("org.equalitie.ouisync/backend");
-  unawaited(() async {
-      final peers = await session2.peers;
-      print(">>>>>>>>>>>>>>>>>>>>> $peers");
-  }());
+  //final session = Session.create(
+  //  configPath: configPath,
+  //  logPath: logPath,
+  //);
+  final session = await Session.createChanneled("org.equalitie.ouisync/backend");
+  //unawaited(() async {
+  //    final peers = await session2.peers;
+  //    print(">>>>>>>>>>>>>>>>>>>>> $peers");
+  //}());
 
   try {
     windowManager?.onClose(session.close);

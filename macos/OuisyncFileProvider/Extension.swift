@@ -9,12 +9,13 @@ import FileProvider
 import OuisyncLib
 import System
 import OSLog
+import OuisyncLib
 
 class Extension: NSObject, NSFileProviderReplicatedExtension {
     static let WRITE_CHUNK_SIZE: UInt64 = 32768 // TODO: Decide on optimal value
     static let READ_CHUNK_SIZE: Int = 32768 // TODO: Decide on optimal value
 
-    var ouisyncSession: OuisyncSession?
+    let ouisyncSession: OuisyncSession
     var currentAnchor: NSFileProviderSyncAnchor = NSFileProviderSyncAnchor.random()
     let domain: NSFileProviderDomain
     let temporaryDirectoryURL: URL
@@ -38,6 +39,16 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
             fatalError("Failed to get temporary directory: \(error)")
         }
 
+        // Path that is accessible by both the app and this extension.
+        let appGroupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "5SR9R72Z83.org.equalitie.ouisync")!
+        let appGroupPath = appGroupURL.path(percentEncoded: false)
+        let configPath = appGroupPath + "config"
+        let logPath = appGroupPath + "log"
+
+        let ffi = OuisyncFFI();
+        ouisyncSession = try! OuisyncSession.create(configPath, logPath, ffi)
+
+        NSLog("WIIIIIIII")
         // TODO: This doesn't work yet
         //pastEnumerations = PastEnumerations()
         pastEnumerations = nil
@@ -47,12 +58,12 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
         super.init()
     }
 
-    func assignSession(_ ouisyncSession: OuisyncSession) {
-        self.ouisyncSession = ouisyncSession
-        Task {
-            try! await manager.signalErrorResolved(ExtError.backendIsUnreachable)
-        }
-    }
+//    func assignSession(_ ouisyncSession: OuisyncSession) {
+//        self.ouisyncSession = ouisyncSession
+//        Task {
+//            try! await manager.signalErrorResolved(ExtError.backendIsUnreachable)
+//        }
+//    }
 
     func invalidate() {
         // TODO: cleanup any resources
@@ -71,10 +82,10 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
             completionHandler(item, error)
         }
 
-        guard let session = ouisyncSession else {
-            handler(nil, ExtError.backendIsUnreachable)
-            return Progress()
-        }
+//        guard let session = ouisyncSession else {
+//            handler(nil, ExtError.backendIsUnreachable)
+//            return Progress()
+//        }
 
         Task {
             do {
@@ -83,7 +94,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
                 case .rootContainer: item = RootContainerItem(currentAnchor)
                 case .trashContainer: item = TrashContainerItem()
                 case .workingSet: item = WorkingSetItem(currentAnchor)
-                case .entry(let entry): item = try await entry.loadItem(session)
+                case .entry(let entry): item = try await entry.loadItem(ouisyncSession)
                 }
                 handler(item, nil)
             } catch let e as NSError where e.code == ExtError.noSuchItem.code {
@@ -108,10 +119,10 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
             completionHandler(url, item, error)
         }
 
-        guard let session = ouisyncSession else {
-            handler(nil, nil, ExtError.backendIsUnreachable)
-            return Progress()
-        }
+//        guard let session = ouisyncSession else {
+//            handler(nil, nil, ExtError.backendIsUnreachable)
+//            return Progress()
+//        }
 
         let progress = Progress()
 
@@ -127,7 +138,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
             do {
                 let identifier = ItemIdentifier(itemIdentifier)
 
-                guard let fileItem = try await identifier.asFile()?.loadItem(session) else {
+                guard let fileItem = try await identifier.asFile()?.loadItem(ouisyncSession) else {
                     handler(nil, nil, ExtError.featureNotSupported)
                     return
                 }
@@ -206,10 +217,10 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
             completionHandler(item, fields, fetch, error)
         }
 
-        guard let session = ouisyncSession else {
-            handler(itemTemplate, [], false, ExtError.backendIsUnreachable)
-            return Progress()
-        }
+//        guard let session = ouisyncSession else {
+//            handler(itemTemplate, [], false, ExtError.backendIsUnreachable)
+//            return Progress()
+//        }
 
         let dstName = itemTemplate.filename
         let parentId: DirectoryIdentifier
@@ -244,7 +255,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
         Task {
             do {
                 let repoName = parentId.repoName
-                let repo = try await parentId.loadRepo(session)
+                let repo = try await parentId.loadRepo(ouisyncSession)
                 let dstPath = parentId.path.appending(dstName)
 
                 switch type {
@@ -280,10 +291,10 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
             completionHandler(item, fields, fetch, error)
         }
 
-        guard let session = ouisyncSession else {
-            handler(nil, [], false, ExtError.backendIsUnreachable)
-            return Progress()
-        }
+//        guard let session = ouisyncSession else {
+//            handler(nil, [], false, ExtError.backendIsUnreachable)
+//            return Progress()
+//        }
 
         Task {
             do {
@@ -315,7 +326,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
                         fatalError("Cannot move an entry to a file parent")
                     }
 
-                    let repo = try await src.loadRepo(session)
+                    let repo = try await src.loadRepo(ouisyncSession)
                     let dstPath = dstParentPath.appending(item.filename)
 
                     try await repo.moveEntry(src.path(), dstPath)
@@ -345,7 +356,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
                         fatalError("Cannot change contents of a directory")
                     case .entry(.file(let fileId)):
                         repoName = fileId.repoName
-                        entry = try await fileId.loadEntry(session)
+                        entry = try await fileId.loadEntry(ouisyncSession)
                     }
 
                     let (written, version) = try await copyContentsAndClose(srcUrl, entry, false)
@@ -371,7 +382,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
                         entryId = EntryIdentifier(fileId)
                     }
 
-                    newItem = try await entryId.loadItem(session)
+                    newItem = try await entryId.loadItem(ouisyncSession)
                 }
 
                 handler(newItem, fields, false, nil)
@@ -396,10 +407,10 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
             completionHandler(error)
         }
 
-        guard let session = ouisyncSession else {
-            handler(ExtError.backendIsUnreachable)
-            return Progress()
-        }
+//        guard let session = ouisyncSession else {
+//            handler(ExtError.backendIsUnreachable)
+//            return Progress()
+//        }
 
         Task {
             do {
@@ -408,11 +419,11 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
                     throw ExtError.featureNotSupported
                 case .entry(.file(let file)):
                     let path = file.path
-                    let repo = try await file.loadRepo(session)
+                    let repo = try await file.loadRepo(ouisyncSession)
                     try await repo.deleteFile(path)
                 case .entry(.directory(let dir)):
                     let path = dir.path
-                    let repo = try await dir.loadRepo(session)
+                    let repo = try await dir.loadRepo(ouisyncSession)
                     try await repo.deleteDirectory(path, recursive: true)
                 }
 
@@ -432,13 +443,13 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
 
         let log = self.log.child("enumerator").level(.trace).trace("invoked(\(identifier))")
 
-        guard let session = self.ouisyncSession else {
-            let error = ExtError.backendIsUnreachable
-            log.error("\(error)")
-            throw error
-        }
+//        guard let session = self.ouisyncSession else {
+//            let error = ExtError.backendIsUnreachable
+//            log.error("\(error)")
+//            throw error
+//        }
 
-        return Enumerator(identifier, session, currentAnchor, log, pastEnumerations)
+        return Enumerator(identifier, ouisyncSession, currentAnchor, log, pastEnumerations)
     }
 
     // When the system requests to fetch a content from Ouisync, we create a temporary file at the URL location

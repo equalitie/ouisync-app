@@ -22,7 +22,7 @@ public let ouisyncFileProviderDomain = NSFileProviderDomain(identifier: ouisyncF
 //}
 
 @objc public protocol FromAppToFileProviderProtocol {
-    func fromAppToFileProvider(_ message: [UInt8])
+    func fromAppToFileProvider(_ message: [UInt8]) async -> [UInt8]
 }
 
 @objc public protocol FromFileProviderToAppProtocol {
