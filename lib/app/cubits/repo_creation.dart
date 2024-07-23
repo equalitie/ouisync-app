@@ -3,10 +3,11 @@ import 'dart:io' show File;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync_app/app/models/auth_mode.dart';
-import 'package:ouisync_app/app/models/local_secret.dart';
-import 'package:ouisync_app/app/models/repo_location.dart';
-import 'package:ouisync_app/app/utils/log.dart';
+import '../models/auth_mode.dart';
+import '../models/local_secret.dart';
+import '../models/repo_location.dart';
+import '../utils/extensions.dart';
+import '../utils/log.dart';
 import 'package:ouisync/ouisync.dart' show AccessMode, ShareToken;
 
 import '../../generated/l10n.dart';
@@ -165,7 +166,10 @@ class RepoCreationCubit extends Cubit<RepoCreationState> with AppLogger {
     });
   }
 
-  void acceptSuggestedName() => nameController.text = state.suggestedName;
+  void acceptSuggestedName() {
+    nameController.text = state.suggestedName;
+    nameController.selectAll();
+  }
 
   void setUseCacheServers(bool value) {
     emit(state.copyWith(useCacheServers: value));
