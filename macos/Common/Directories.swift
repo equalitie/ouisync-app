@@ -14,11 +14,10 @@ public class Directories {
     public let repositoriesPath: String
 
     public init() {
-        // Returns a path that is shared between the app and the file provider extension.
-        let appGroupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: applicationGroupIdentifier)!
-        rootPath = appGroupURL.path(percentEncoded: false)
-        configsPath = rootPath + "configs"
-        logsPath = rootPath + "logs"
+        let rootURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "5SR9R72Z83.org.equalitie.ouisync")!
+        rootPath = rootURL.path(percentEncoded: false)
+        configsPath = rootPath + "config"
+        logsPath = rootPath + "log"
         repositoriesPath = rootPath + "repositories"
     }
 }

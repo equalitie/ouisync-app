@@ -9,6 +9,7 @@ import FileProvider
 import OuisyncLib
 import System
 import OSLog
+import class Common.Directories
 
 class Extension: NSObject, NSFileProviderReplicatedExtension {
     static let WRITE_CHUNK_SIZE: UInt64 = 32768 // TODO: Decide on optimal value
@@ -38,16 +39,13 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
             fatalError("Failed to get temporary directory: \(error)")
         }
 
-        // Path that is accessible by both the app and this extension.
-        let appGroupURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "5SR9R72Z83.org.equalitie.ouisync")!
-        let appGroupPath = appGroupURL.path(percentEncoded: false)
-        let configPath = appGroupPath + "config"
-        let logPath = appGroupPath + "log"
-
         let ffi = OuisyncFFI();
-        ouisyncSession = try! OuisyncSession.create(configPath, logPath, ffi)
 
-        NSLog("WIIIIIIII")
+        // Path that is accessible by both the app and this extension.
+        let commonDirectories = Common.Directories()
+
+        ouisyncSession = try! OuisyncSession.create(commonDirectories.configsPath, commonDirectories.logsPath, ffi)
+
         // TODO: This doesn't work yet
         //pastEnumerations = PastEnumerations()
         pastEnumerations = nil
@@ -63,8 +61,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
     
     func item(for identifier: NSFileProviderItemIdentifier, request: NSFileProviderRequest, completionHandler: @escaping (NSFileProviderItem?, Error?) -> Void) -> Progress {
         let log = self.log.child("item").trace("invoked(\(identifier))")
-        // resolve the given identifier to a record in the model
-        
+
         let handler = { (item: NSFileProviderItem?, error: Error?) in
             if let error = error {
                 log.error("Error: \(error)")
@@ -105,11 +102,6 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
             }
             completionHandler(url, item, error)
         }
-
-//        guard let session = ouisyncSession else {
-//            handler(nil, nil, ExtError.backendIsUnreachable)
-//            return Progress()
-//        }
 
         let progress = Progress()
 

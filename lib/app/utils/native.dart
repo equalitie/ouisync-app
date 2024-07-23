@@ -23,4 +23,9 @@ class Native {
     final dynamic result = await _channel.invokeMethod('getDownloadPath');
     return result;
   }
+
+  /// In iOS or MacOS, it retrieves the default path where repositories shall be stored
+  static Future<String> getDefaultRepositoriesDirectory() async {
+    return await _channel.invokeMethod('getDefaultRepositoriesDirectory');
+  }
 }

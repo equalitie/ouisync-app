@@ -401,9 +401,21 @@ class Settings with AppLogger {
 
   //------------------------------------------------------------------
   Future<io.Directory> getDefaultRepositoriesDir() async {
-    final baseDir =
-        (io.Platform.isAndroid ? await getExternalStorageDirectory() : null) ??
-            await getApplicationSupportDirectory();
+    final io.Directory baseDir;
+
+    if (io.Platform.isAndroid) {
+      final extStorage = await getExternalStorageDirectory();
+      if (extStorage != null) {
+        baseDir = extStorage;
+      } else {
+        baseDir = await getApplicationSupportDirectory();
+      }
+    } else if (io.Platform.isIOS || io.Platform.isMacOS) {
+      baseDir = io.Directory(await Native.getDefaultRepositoriesDirectory());
+    } else {
+      baseDir = await getApplicationSupportDirectory();
+    }
+
     return io.Directory(join(baseDir.path, Constants.folderRepositoriesName));
   }
 
