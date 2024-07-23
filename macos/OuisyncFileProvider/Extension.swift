@@ -9,7 +9,6 @@ import FileProvider
 import OuisyncLib
 import System
 import OSLog
-import OuisyncLib
 
 class Extension: NSObject, NSFileProviderReplicatedExtension {
     static let WRITE_CHUNK_SIZE: UInt64 = 32768 // TODO: Decide on optimal value
@@ -58,13 +57,6 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
         super.init()
     }
 
-//    func assignSession(_ ouisyncSession: OuisyncSession) {
-//        self.ouisyncSession = ouisyncSession
-//        Task {
-//            try! await manager.signalErrorResolved(ExtError.backendIsUnreachable)
-//        }
-//    }
-
     func invalidate() {
         // TODO: cleanup any resources
     }
@@ -81,11 +73,6 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
             }
             completionHandler(item, error)
         }
-
-//        guard let session = ouisyncSession else {
-//            handler(nil, ExtError.backendIsUnreachable)
-//            return Progress()
-//        }
 
         Task {
             do {

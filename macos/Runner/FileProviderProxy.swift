@@ -35,16 +35,16 @@ class FileProviderProxy {
         }
         switch call.method {
         case "initialize":
-            let message = OutgoingMessage.deserialize(bytes)!
+            let message = OuisyncRequestMessage.deserialize(bytes)!
             Task {
                 await initialize(message.messageId)
             }
         case "invoke":
             NSLog("Sending to extension")
             Task {
-                NSLog("app -> extension \(OutgoingMessage.deserialize(bytes) as Optional)");
+                NSLog("app -> extension \(OuisyncRequestMessage.deserialize(bytes) as Optional)");
                 let response = await sendToExtension(bytes)
-                NSLog("extension -> app \(IncomingMessage.deserialize(bytes) as Optional)")
+                NSLog("extension -> app \(OuisyncResponseMessage.deserialize(bytes) as Optional)")
                 sendToFlutter(response)
             }
         default:
@@ -127,7 +127,7 @@ class FileProviderProxy {
             connectionToExtension = connection
             connection.resume();
 
-            sendToFlutter(IncomingMessage(requestMessageId, IncomingPayload.response(Response(MessagePackValue.string("none")))).serialize())
+            sendToFlutter(OuisyncResponseMessage(requestMessageId, OuisyncResponsePayload.response(Response(MessagePackValue.string("none")))).serialize())
 
         } catch {
             fatalError("Failed to initialize FileProviderProxy \(error)")

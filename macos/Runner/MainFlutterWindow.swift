@@ -2,7 +2,7 @@ import Cocoa
 import FlutterMacOS
 
 class MainFlutterWindow: NSWindow {
-    var fileProviderProxy: FileProviderProxy2? = nil
+    var fileProviderProxy: FileProviderProxy? = nil
 
     override func awakeFromNib() {
         let flutterViewController = FlutterViewController()
@@ -11,7 +11,7 @@ class MainFlutterWindow: NSWindow {
         self.setFrame(windowFrame, display: true)
 
         if fileProviderProxy == nil {
-            fileProviderProxy = FileProviderProxy2(flutterViewController.engine.binaryMessenger)
+            fileProviderProxy = FileProviderProxy(flutterViewController.engine.binaryMessenger)
         }
 
         RegisterGeneratedPlugins(registry: flutterViewController)

@@ -118,7 +118,7 @@ extension Extension {
                 fatalError("FP Extension received a message but it has already been destroyed")
             }
 
-            let request = OutgoingMessage.deserialize(message_data)!
+            let request = OuisyncRequestMessage.deserialize(message_data)!
             let response = await ext.ouisyncSession.invoke(request)
             return response.serialize()
         }
