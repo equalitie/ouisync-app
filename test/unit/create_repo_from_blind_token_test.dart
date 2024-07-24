@@ -55,7 +55,10 @@ void main() {
     await session.close();
   });
 
-  test('create blind repository with blind token', () async {
+  test(
+      'create blind repository with blind token uses LocalSecretMode.manual, '
+      'to select authentication mode AuthModeBlindOrManual for new repo',
+      () async {
     final token = await parseShareToken(reposCubit, tokenString);
     expect(
         token,
@@ -67,8 +70,6 @@ void main() {
     expect(tokenAccesMode,
         isA<AccessMode>().having((t) => t, 'mode', equals(AccessMode.blind)));
 
-    final suggestedRepoName = await token.value.suggestedName;
-
     expect(
       repoCreationCubit.state.substate,
       isA<RepoCreationPending>()
@@ -78,26 +79,38 @@ void main() {
           .having((s) => s.nameError, 'nameError', isNull),
     );
 
+    await repoCreationCubit.setToken(token.value);
+
+    final suggestedRepoName = await token.value.suggestedName;
     repoCreationCubit.nameController.text = suggestedRepoName;
 
     await repoCreationCubit
         .waitUntil((state) => state.substate is RepoCreationValid);
+
+    expect(repoCreationCubit.state.token, isNotNull);
     expect(repoCreationCubit.state.name, equals(suggestedRepoName));
 
-    await repoCreationCubit.setToken(token.value);
+    final localSecretMode = repoCreationCubit.state.localSecretMode;
+    print(localSecretMode);
 
     expect(
         repoCreationCubit.state.localSecretMode,
-        isA<LocalSecretMode>()
-            .having((lsm) => lsm, 'local_secret_mode', LocalSecretMode.manual));
+        isA<LocalSecretMode>().having(
+          (m) => m,
+          'localSecretMode',
+          LocalSecretMode.manual,
+        ));
 
     await repoCreationCubit.save();
+
     expect(repoCreationCubit.state.substate, isA<RepoCreationSuccess>());
     expect(
         reposCubit.repos
             .where((entry) => entry.name == suggestedRepoName)
-            .firstOrNull,
-        isA<OpenRepoEntry>()
-            .having((e) => e.accessMode, 'mode', AccessMode.blind));
+            .firstOrNull
+            ?.cubit
+            ?.state
+            .authMode,
+        isA<AuthModeBlindOrManual>());
   });
 }
