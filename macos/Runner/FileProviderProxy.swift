@@ -40,9 +40,8 @@ class FileProviderProxy {
                 await initialize(message.messageId)
             }
         case "invoke":
-            NSLog("Sending to extension")
             Task {
-                NSLog("app -> extension \(OuisyncRequestMessage.deserialize(bytes) as Optional)");
+                //NSLog("app -> extension \(OuisyncRequestMessage.deserialize(bytes) as Optional)");
                 sendToExtension(bytes)
             }
         default:
