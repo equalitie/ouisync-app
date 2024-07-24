@@ -10,6 +10,7 @@ import OuisyncLib
 import System
 import OSLog
 import Common
+import Network
 
 class Extension: NSObject, NSFileProviderReplicatedExtension {
     static let WRITE_CHUNK_SIZE: UInt64 = 32768 // TODO: Decide on optimal value
@@ -51,7 +52,16 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
         NSLog("logs:         \(commonDirectories.logsPath)")
         NSLog("-------------------------------------------------")
 
-        ouisyncSession = try! OuisyncSession.create(commonDirectories.configsPath, commonDirectories.logsPath, ffi)
+//        let params = NWParameters.udp
+//        params.allowFastOpen = true
+//        do {
+//            let listener = try NWListener(using: params, on: 0);
+//            NSLog("WIIIIIII \(listener)")
+//        } catch {
+//            NSLog("BAD \(error)")
+//        }
+//        fatalError("OK")
+        ouisyncSession = try! OuisyncSession(commonDirectories.configsPath, commonDirectories.logsPath, ffi)
 
         // TODO: This doesn't work yet
         //pastEnumerations = PastEnumerations()

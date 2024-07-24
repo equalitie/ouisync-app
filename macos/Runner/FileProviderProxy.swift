@@ -43,9 +43,7 @@ class FileProviderProxy {
             NSLog("Sending to extension")
             Task {
                 NSLog("app -> extension \(OuisyncRequestMessage.deserialize(bytes) as Optional)");
-                let response = await sendToExtension(bytes)
-                NSLog("extension -> app \(OuisyncResponseMessage.deserialize(bytes) as Optional)")
-                sendToFlutter(response)
+                sendToExtension(bytes)
             }
         default:
             fatalError("Received an unrecognized message from Flutter: \(call.method)(\(call.arguments as Optional))")
@@ -141,8 +139,8 @@ class FileProviderProxy {
         }
     }
 
-    fileprivate func sendToExtension(_ message: [UInt8]) async -> [UInt8] {
+    fileprivate func sendToExtension(_ message: [UInt8]) {
         let proto = connectionToExtension!.remoteObjectProxy() as! FromAppToFileProviderProtocol;
-        return await proto.fromAppToFileProvider(message)
+        proto.fromAppToFileProvider(message)
     }
 }
