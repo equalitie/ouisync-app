@@ -14,8 +14,7 @@ public let ouisyncFileProviderDomainId = NSFileProviderDomainIdentifier(rawValue
 public let ouisyncFileProviderDomain = NSFileProviderDomain(identifier: ouisyncFileProviderDomainId, displayName: "Ouisync")
 
 @objc public protocol FromAppToFileProviderProtocol {
-    // Used for sending requests from Flutter to the extension's backend. Since this
-    // can be async, we can also use it to send the response back.
+    // Used for sending requests from Flutter to the extension's backend.
     func fromAppToFileProvider(_ message: [UInt8])
 }
 

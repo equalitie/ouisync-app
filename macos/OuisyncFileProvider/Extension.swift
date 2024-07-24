@@ -52,15 +52,6 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
         NSLog("logs:         \(commonDirectories.logsPath)")
         NSLog("-------------------------------------------------")
 
-//        let params = NWParameters.udp
-//        params.allowFastOpen = true
-//        do {
-//            let listener = try NWListener(using: params, on: 0);
-//            NSLog("WIIIIIII \(listener)")
-//        } catch {
-//            NSLog("BAD \(error)")
-//        }
-//        fatalError("OK")
         ouisyncSession = try! OuisyncSession(commonDirectories.configsPath, commonDirectories.logsPath, ffi)
 
         // TODO: This doesn't work yet
@@ -296,11 +287,6 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
             completionHandler(item, fields, fetch, error)
         }
 
-//        guard let session = ouisyncSession else {
-//            handler(itemTemplate, [], false, ExtError.backendIsUnreachable)
-//            return Progress()
-//        }
-
         let dstName = itemTemplate.filename
         let parentId: DirectoryIdentifier
 
@@ -369,11 +355,6 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
             }
             completionHandler(item, fields, fetch, error)
         }
-
-//        guard let session = ouisyncSession else {
-//            handler(nil, [], false, ExtError.backendIsUnreachable)
-//            return Progress()
-//        }
 
         Task {
             do {
@@ -486,11 +467,6 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
             completionHandler(error)
         }
 
-//        guard let session = ouisyncSession else {
-//            handler(ExtError.backendIsUnreachable)
-//            return Progress()
-//        }
-
         Task {
             do {
                 switch ItemIdentifier(identifier) {
@@ -521,12 +497,6 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
         let identifier = ItemIdentifier(rawIdentifier)
 
         let log = self.log.child("enumerator").level(.trace).trace("invoked(\(identifier))")
-
-//        guard let session = self.ouisyncSession else {
-//            let error = ExtError.backendIsUnreachable
-//            log.error("\(error)")
-//            throw error
-//        }
 
         return Enumerator(identifier, ouisyncSession, currentAnchor, log, pastEnumerations)
     }
