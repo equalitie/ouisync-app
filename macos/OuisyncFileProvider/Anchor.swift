@@ -8,18 +8,34 @@
 import Foundation
 import FileProvider
 
-extension NSFileProviderSyncAnchor {
-    static func random() -> NSFileProviderSyncAnchor {
-        let value = UInt64.random(in: UInt64.min ... UInt64.max)
-        return NSFileProviderSyncAnchor(rawValue: String(value).data(using: .ascii)!)
-    }
-}
-
 extension NSFileProviderSyncAnchor: CustomDebugStringConvertible {
     public var debugDescription: String {
         guard let str = String(bytes: rawValue, encoding: .ascii) else {
-            return "InvalidAnchor"
+            return "InvalidAnchor(non-ascii)"
         }
-        return "Anchor(\(str))"
+        let strs = str.components(separatedBy: "-")
+        if strs.count != 2 {
+            return "InvalidAnchor(separator-wont-split-into-two)"
+        }
+        var runtimeId = strs[1]
+        if runtimeId.count > 8 {
+            runtimeId = "\(runtimeId.prefix(6)).."
+        }
+        return "\(strs[0])-\(runtimeId)"
+    }
+}
+
+class AnchorGenerator {
+    let runtimeId: UInt64
+    var nextAnchorId: UInt64 = 0
+
+    init () {
+        runtimeId = UInt64.random(in: UInt64.min ... UInt64.max)
+    }
+
+    func generate() -> NSFileProviderSyncAnchor {
+        let id = nextAnchorId
+        nextAnchorId += 1
+        return NSFileProviderSyncAnchor(rawValue: "\(id)-\(runtimeId)".data(using: .ascii)!)
     }
 }

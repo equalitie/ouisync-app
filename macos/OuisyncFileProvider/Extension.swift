@@ -17,7 +17,8 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
     static let READ_CHUNK_SIZE: Int = 32768 // TODO: Decide on optimal value
 
     let ouisyncSession: OuisyncSession
-    var currentAnchor: NSFileProviderSyncAnchor = NSFileProviderSyncAnchor.random()
+    let anchorGenerator: AnchorGenerator = AnchorGenerator()
+    var currentAnchor: NSFileProviderSyncAnchor
     let domain: NSFileProviderDomain
     let temporaryDirectoryURL: URL
     let log: Log
@@ -39,6 +40,8 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
         } catch {
             fatalError("Failed to get temporary directory: \(error)")
         }
+
+        currentAnchor = anchorGenerator.generate()
 
         let ffi = OuisyncFFI();
 
@@ -511,7 +514,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
     // https://developer.apple.com/documentation/fileprovider/replicated_file_provider_extension/synchronizing_files_using_file_provider_extensions#4099755
     func signalRefresh() async {
         let oldAnchor = currentAnchor
-        currentAnchor = NSFileProviderSyncAnchor.random()
+        currentAnchor = anchorGenerator.generate()
         NSLog("🚀 Refreshing FileProvider and updating anchor \(oldAnchor) -> \(currentAnchor)")
 
         do {
