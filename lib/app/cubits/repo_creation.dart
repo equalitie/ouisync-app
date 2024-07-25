@@ -219,11 +219,16 @@ class RepoCreationCubit extends Cubit<RepoCreationState> with AppLogger {
       return;
     }
 
+    final localSecretMode = switch (state.accessMode) {
+      AccessMode.read || AccessMode.write => state.localSecretMode,
+      AccessMode.blind => LocalSecretMode.manual,
+    };
+
     final repoEntry = await _loading(() => reposCubit.createRepository(
           location: substate.location,
           setLocalSecret: substate.setLocalSecret,
           token: state.token,
-          localSecretMode: state.localSecretMode,
+          localSecretMode: localSecretMode,
           useCacheServers: state.useCacheServers,
           setCurrent: true,
         ));
