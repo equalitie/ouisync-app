@@ -54,10 +54,6 @@ void main() {
 
     expect(repoCreationCubit.state.substate, isA<RepoCreationValid>());
     expect(repoCreationCubit.state.name, equals(suggestedRepoName));
-    expect(
-      repoCreationCubit.state.localSecretMode,
-      equals(LocalSecretMode.manual),
-    );
 
     await repoCreationCubit.save();
 
@@ -67,7 +63,12 @@ void main() {
           .where((entry) => entry.name == suggestedRepoName)
           .firstOrNull,
       isA<OpenRepoEntry>()
-          .having((e) => e.accessMode, 'accessMode', AccessMode.blind),
+          .having((e) => e.accessMode, 'accessMode', AccessMode.blind)
+          .having(
+            (e) => e.cubit.state.authMode,
+            'cubit.state.authMode',
+            isA<AuthModeBlindOrManual>(),
+          ),
     );
   });
 }
