@@ -51,8 +51,6 @@
 		1ECD785F2C0F2C53005D7636 /* Log.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1ECD785D2C0F2806005D7636 /* Log.swift */; };
 		1ECD78612C0F40A0005D7636 /* Debug.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1ECD78602C0F40A0005D7636 /* Debug.swift */; };
 		1EE0483C2C4A6CD900A653F2 /* OuisyncLib in Frameworks */ = {isa = PBXBuildFile; productRef = 1EE0483B2C4A6CD900A653F2 /* OuisyncLib */; };
-		1EE048492C4E9E9E00A653F2 /* libouisync_ffi.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1EE048482C4E9E9E00A653F2 /* libouisync_ffi.dylib */; };
-		1EE0484A2C4E9EA400A653F2 /* libouisync_ffi.dylib in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1EE048482C4E9E9E00A653F2 /* libouisync_ffi.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		1EE048512C4FB4BC00A653F2 /* Directories.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EE048502C4FB4BC00A653F2 /* Directories.swift */; };
 		331C80D8294CF71000263BE5 /* RunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331C80D7294CF71000263BE5 /* RunnerTests.swift */; };
 		335BBD1B22A9A15E00E9071D /* GeneratedPluginRegistrant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 335BBD1A22A9A15E00E9071D /* GeneratedPluginRegistrant.swift */; };
@@ -146,7 +144,6 @@
 			dstSubfolderSpec = 10;
 			files = (
 				1EBC4D722BB1B70D0053E2F3 /* Common.framework in Embed Frameworks */,
-				1EE0484A2C4E9EA400A653F2 /* libouisync_ffi.dylib in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -179,9 +176,6 @@
 		1ECD78552C0DAD46005D7636 /* SuccessfulTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuccessfulTask.swift; sourceTree = "<group>"; };
 		1ECD785D2C0F2806005D7636 /* Log.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Log.swift; sourceTree = "<group>"; };
 		1ECD78602C0F40A0005D7636 /* Debug.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Debug.swift; sourceTree = "<group>"; };
-		1EE0483D2C4E854E00A653F2 /* libouisync_ffi.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libouisync_ffi.dylib; path = ../ouisync/target/debug/libouisync_ffi.dylib; sourceTree = "<group>"; };
-		1EE048402C4E8F5500A653F2 /* libouisync_ffi.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libouisync_ffi.dylib; sourceTree = "<group>"; };
-		1EE048482C4E9E9E00A653F2 /* libouisync_ffi.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libouisync_ffi.dylib; path = OuisyncFileProvider/libouisync_ffi.dylib; sourceTree = "<group>"; };
 		1EE048502C4FB4BC00A653F2 /* Directories.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Directories.swift; sourceTree = "<group>"; };
 		25420BEC609102AA8183D515 /* Pods-RunnerTests.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.profile.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.profile.xcconfig"; sourceTree = "<group>"; };
 		30CDA840AD45D32461319ABD /* Pods-Runner.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"; sourceTree = "<group>"; };
@@ -230,7 +224,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1EE048492C4E9E9E00A653F2 /* libouisync_ffi.dylib in Frameworks */,
 				1E11B5D92BC00EFA007248F2 /* OuisyncLib in Frameworks */,
 				1ECD78572C0DBAE5005D7636 /* Common.framework in Frameworks */,
 				1EC102BE2BAC66050026BD42 /* UniformTypeIdentifiers.framework in Frameworks */,
@@ -398,9 +391,6 @@
 		D09E101972792C677877D348 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				1EE0483D2C4E854E00A653F2 /* libouisync_ffi.dylib */,
-				1EE048402C4E8F5500A653F2 /* libouisync_ffi.dylib */,
-				1EE048482C4E9E9E00A653F2 /* libouisync_ffi.dylib */,
 				1E640B172BA44F3500FF6B18 /* UniformTypeIdentifiers.framework */,
 				7A93B26F8F192724B261AEB0 /* Pods_Runner.framework */,
 				1E12D5CBA9317F3CD740717A /* Pods_RunnerTests.framework */,
