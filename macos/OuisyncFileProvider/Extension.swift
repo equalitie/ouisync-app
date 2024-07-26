@@ -71,6 +71,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
     // Start watchin to changes in Ouisync: Everytime a repository is added or removed, and
     // everytime a repository changes we ask the file provider to refresh it's content.
     func startListeningToRepoChanges() {
+        let log = self.log.child("RepoChange")
         let this = self
 
         // TODO:
@@ -117,6 +118,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
                         guard let stream = try? await ext.ouisyncSession.subscribeToRepositoryChange(repo) else {
                             continue
                         }
+                        log.info("Added repository \(repo)")
                         repoWatchingTasks[repo] = Task {
                             weak var weakExt = this
                             while true {
@@ -132,6 +134,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
                     }
 
                     for repo in reposToRemove {
+                        log.info("Removed repository \(repo)")
                         repoWatchingTasks.removeValue(forKey: repo)
                     }
 
