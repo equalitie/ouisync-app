@@ -198,6 +198,31 @@ void main() {
           findsOne,
         );
 
+        // The name field is autofilled with the suggested name.
+        expect(
+          find.descendant(
+            of: find.byKey(ValueKey('name')),
+            matching: find.text(name),
+          ),
+          findsOne,
+        );
+        await tester.pump();
+
+        // Remove the suggested name before testing the tap function
+        await tester.enterText(find.byKey(ValueKey('name')), "");
+        await tester.pumpAndSettle();
+
+        await repoCreationObserver.waitUntil((state) => !state.loading);
+
+        // The name field is empty.
+        expect(
+          find.descendant(
+            of: find.byKey(ValueKey('name')),
+            matching: find.text(""),
+          ),
+          findsOne,
+        );
+
         // The suggesten name is shown.
         final suggestedName =
             find.text('Suggested: $name\n(tap here to use this name)');
