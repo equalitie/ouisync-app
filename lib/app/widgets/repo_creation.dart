@@ -84,7 +84,10 @@ class RepoCreation extends StatelessWidget {
           ..._buildNameField(context, creationState),
           if (creationState.accessMode == AccessMode.write)
             _buildUseCacheServersSwitch(context, creationState),
-          RepoSecurity(securityCubit),
+          RepoSecurity(
+            securityCubit,
+            creationState.accessMode == AccessMode.blind,
+          ),
         ],
       );
 
