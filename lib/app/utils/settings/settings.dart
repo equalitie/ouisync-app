@@ -17,7 +17,9 @@ Future<Settings> loadAndMigrateSettings(Session session) async {
 
   final masterKey = await MasterKey.init();
 
-  final settings = await v1.Settings.init(masterKey);
+  final iosPath = (io.Platform.isIOS || io.Platform.isMacOS) ?  await getApplicationSupportDirectory() : null;
+
+  final settings = await v1.Settings.init(masterKey, iosPath: iosPath?.path);
   await settings.migrate(session);
 
   return settings;

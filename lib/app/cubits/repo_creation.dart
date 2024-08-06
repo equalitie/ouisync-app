@@ -1,17 +1,19 @@
 import 'dart:async';
-import 'dart:io' show File;
+import 'dart:io' show Directory, File, Platform;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ouisync/ouisync.dart' show AccessMode, ShareToken;
+import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
+
+import '../../generated/l10n.dart';
 import '../models/auth_mode.dart';
 import '../models/local_secret.dart';
+import '../models/repo_entry.dart';
 import '../models/repo_location.dart';
 import '../utils/extensions.dart';
 import '../utils/log.dart';
-import 'package:ouisync/ouisync.dart' show AccessMode, ShareToken;
-
-import '../../generated/l10n.dart';
-import '../models/repo_entry.dart';
 import '../utils/strings.dart';
 import 'repos.dart';
 
@@ -275,8 +277,13 @@ class RepoCreationCubit extends Cubit<RepoCreationState> with AppLogger {
     }
 
     await _loading(() async {
+      final dirPath = await reposCubit.settings.getDefaultRepositoriesDir();
+
+      final iosRootDirPath = await getApplicationSupportDirectory();
+      final iosDirPath = join(iosRootDirPath.path, dirPath.path);
+
       final location = RepoLocation.fromParts(
-        dir: await reposCubit.settings.getDefaultRepositoriesDir(),
+        dir: Directory(Platform.isIOS ? iosDirPath : dirPath.path),
         name: name,
       );
 

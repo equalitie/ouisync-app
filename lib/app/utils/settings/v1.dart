@@ -1,5 +1,5 @@
-import 'dart:io' as io;
 import 'dart:convert';
+import 'dart:io' as io;
 
 import 'package:equatable/equatable.dart';
 import 'package:ouisync/ouisync.dart';
@@ -8,9 +8,9 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../models/models.dart';
-import '../utils.dart';
 import '../files.dart';
 import '../master_key.dart';
+import '../utils.dart';
 import 'v0/v0.dart' as v0;
 
 class DatabaseId extends Equatable {
@@ -81,7 +81,7 @@ class SettingsRoot {
     return r;
   }
 
-  factory SettingsRoot.fromJson(String? s) {
+  factory SettingsRoot.fromJson(String? s, [String? iosPath]) {
     if (s == null) {
       return SettingsRoot._();
     }
@@ -96,7 +96,7 @@ class SettingsRoot {
 
     final repos = {
       for (var kv in data[_reposKey]!.entries)
-        DatabaseId(kv.key): RepoLocation.fromDbPath(kv.value)
+        DatabaseId(kv.key): RepoLocation.fromDbPath(io.Platform.isIOS ? getDarwinPath(iosPath!, kv.value) : kv.value)
     };
 
     String? defaultRepo = data[_defaultRepoKey];
@@ -106,11 +106,16 @@ class SettingsRoot {
       showOnboarding: data[_showOnboardingKey]!,
       enableSyncOnMobileInternet: data[_enableSyncOnMobileInternetKey]!,
       highestSeenProtocolNumber: data[_highestSeenProtocolNumberKey],
-      defaultRepo: defaultRepo?.let((path) => RepoLocation.fromDbPath(path)),
+      defaultRepo: defaultRepo?.let((path) { return RepoLocation.fromDbPath(io.Platform.isIOS ? getDarwinPath(iosPath!, path) : path); }),
       repos: repos,
       defaultRepositoriesDirVersion:
           data[_defaultRepositoriesDirVersionKey] ?? 0,
     );
+  }
+
+  static String getDarwinPath(String iosPath, String repoPath) {
+    final repoFileName = basename(repoPath);
+    return join(iosPath, 'repositories', repoFileName);
   }
 }
 
@@ -122,9 +127,11 @@ class Settings with AppLogger {
   final SettingsRoot _root;
   final SharedPreferences _prefs;
 
+  final String? _iosPath;
+
   //------------------------------------------------------------------
 
-  Settings._(this._root, this._prefs, this.masterKey);
+  Settings._(this._root, this._prefs, this._iosPath, this.masterKey);
 
   Future<void> _storeRoot() async {
     await _prefs.setString(settingsKey, json.encode(_root.toJson()));
@@ -132,13 +139,14 @@ class Settings with AppLogger {
 
   static Future<Settings> init(
     MasterKey masterKey,
+    {String? iosPath}
   ) async {
     final prefs = await SharedPreferences.getInstance();
 
     final json = prefs.getString(settingsKey);
-    final root = SettingsRoot.fromJson(json);
+    final root = SettingsRoot.fromJson(json, iosPath);
 
-    return Settings._(root, prefs, masterKey);
+    return Settings._(root, prefs, iosPath, masterKey);
   }
 
   Future<void> migrate(Session session) async {
@@ -404,7 +412,9 @@ class Settings with AppLogger {
     final baseDir =
         (io.Platform.isAndroid ? await getExternalStorageDirectory() : null) ??
             await getApplicationSupportDirectory();
-    return io.Directory(join(baseDir.path, Constants.folderRepositoriesName));
+    final dirRoot = io.Platform.isIOS ? '': baseDir.path;
+
+    return io.Directory(join(dirRoot, Constants.folderRepositoriesName));
   }
 
   //------------------------------------------------------------------
