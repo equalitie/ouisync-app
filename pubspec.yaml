@@ -43,7 +43,7 @@ dependencies:
   extended_text: ^13.0.2
   ffi: ^2.0.1
   file: ^7.0.0
-  file_picker: ^6.1.1
+  file_picker: ^8.0.7
   flutter:
     sdk: flutter
   flutter_bloc: ^8.0.1
