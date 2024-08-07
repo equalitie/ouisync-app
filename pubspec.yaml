@@ -30,20 +30,20 @@ dependencies:
   biometric_storage: ^5.0.1
   bloc_test: ^9.0.3
   build_context_provider: ^1.1.0
-  collection: ^1.16.0
+  collection: ^1.18.0
   connectivity_plus: ^5.0.1
   cross_file: ^0.3.3
   cryptography: ^2.7.0
   cryptography_flutter: ^2.3.2
   cupertino_icons: ^1.0.4
   desktop_drop: ^0.4.1
-  device_info_plus: ^9.0.3
+  device_info_plus: ^10.1.1
   dns_client: ^0.2.1
   equatable: ^2.0.3
-  extended_text: ^13.0.0
+  extended_text: ^13.0.2
   ffi: ^2.0.1
   file: ^7.0.0
-  file_picker: ^6.1.1
+  file_picker: ^8.0.7
   flutter:
     sdk: flutter
   flutter_bloc: ^8.0.1
@@ -69,7 +69,7 @@ dependencies:
   # introduction_screen: ^3.1.9
   introduction_screen:
     git: https://github.com/J-Pabon/introduction_screen
-  launch_at_startup: ^0.2.2
+  launch_at_startup: ^0.3.1
   local_auth: ^2.2.0
   loggy: ^2.0.1+1
   meta: ^1.10.0
@@ -77,20 +77,20 @@ dependencies:
   mobile_scanner: ^4.0.0
   move_to_background: ^1.0.2
   mutex: ^3.1.0
-  network_info_plus: ^5.0.3
+  network_info_plus: ^6.0.0
   ouisync:
     path: ouisync/bindings/dart
-  package_info_plus: ^5.0.1
+  package_info_plus: ^8.0.1
   path: ^1.8.2
   path_provider: ^2.1.2
   percent_indicator: ^4.2.2
   permission_handler: ^11.0.1
   qr_flutter: ^4.0.0
-  receive_sharing_intent: ^1.6.7
+  receive_sharing_intent: ^1.8.0
   result_type: ^0.2.0
   sentry_flutter: ^8.3.0
   settings_ui: ^2.0.2
-  share_plus: ^7.1.0
+  share_plus: ^10.0.0
   shared_preferences: ^2.0.13
   shelf: ^1.4.1
   stream_transform: ^2.1.0
@@ -108,7 +108,7 @@ dependencies:
 
 dev_dependencies:
   args: ^2.4.2
-  build_runner: ^2.4.6
+  build_runner: ^2.4.11
   date_format: ^2.0.7
   flutter_test:
     sdk: flutter
@@ -124,13 +124,13 @@ dev_dependencies:
   # the vscode plugin:
   # # dart run intl_utils:generate
   intl_utils: ^2.6.1
-  lints: ^3.0.0
+  lints: ^4.0.0
   msix: ^3.16.4
   path_provider_platform_interface: ^2.1.2
   properties: ^2.1.0
   pub_semver: ^2.1.4
   pubspec_parse: ^1.2.3
-  test: ^1.24.9
+  test: ^1.25.2
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
