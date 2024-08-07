@@ -90,6 +90,11 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
+          # Downgrade flutter from the current 3.24.0 version due to a compilation bug
+          # in the extended_text dependency.
+          # https://github.com/fluttercandies/extended_text/issues/166
+          # TODO: Remove the below line when the above bug is resolved.
+          flutter-version: 3.22.3
 
       - name: Run Flutter doctor
         run: flutter doctor -v
