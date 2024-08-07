@@ -124,7 +124,7 @@ dev_dependencies:
   # the vscode plugin:
   # # dart run intl_utils:generate
   intl_utils: ^2.6.1
-  lints: ^3.0.0
+  lints: ^4.0.0
   msix: ^3.16.4
   path_provider_platform_interface: ^2.1.2
   properties: ^2.1.0
