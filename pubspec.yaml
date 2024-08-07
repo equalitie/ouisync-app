@@ -90,7 +90,7 @@ dependencies:
   result_type: ^0.2.0
   sentry_flutter: ^8.3.0
   settings_ui: ^2.0.2
-  share_plus: ^7.1.0
+  share_plus: ^10.0.0
   shared_preferences: ^2.0.13
   shelf: ^1.4.1
   stream_transform: ^2.1.0
