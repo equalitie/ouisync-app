@@ -130,7 +130,7 @@ dev_dependencies:
   properties: ^2.1.0
   pub_semver: ^2.1.4
   pubspec_parse: ^1.2.3
-  test: ^1.24.9
+  test: ^1.25.2
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
