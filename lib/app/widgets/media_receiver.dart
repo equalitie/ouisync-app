@@ -28,11 +28,14 @@ class _MediaReceiverState extends State<MediaReceiver> {
     super.initState();
 
     if (Platform.isAndroid || Platform.isIOS) {
-      subscription =
-          ReceiveSharingIntent.getMediaStream().listen(onMediaReceived);
+      subscription = ReceiveSharingIntent.instance
+          .getMediaStream()
+          .listen(onMediaReceived);
 
       // For sharing media coming from outside the app while the app is closed
-      unawaited(ReceiveSharingIntent.getInitialMedia().then(onMediaReceived));
+      unawaited(ReceiveSharingIntent.instance
+          .getInitialMedia()
+          .then(onMediaReceived));
     }
   }
 

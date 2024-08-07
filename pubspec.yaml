@@ -31,7 +31,7 @@ dependencies:
   bloc_test: ^9.0.3
   build_context_provider: ^1.1.0
   collection: ^1.18.0
-  connectivity_plus: ^6.0.4
+  connectivity_plus: ^5.0.1
   cross_file: ^0.3.3
   cryptography: ^2.7.0
   cryptography_flutter: ^2.3.2
@@ -86,7 +86,7 @@ dependencies:
   percent_indicator: ^4.2.2
   permission_handler: ^11.0.1
   qr_flutter: ^4.0.0
-  receive_sharing_intent: ^1.6.7
+  receive_sharing_intent: ^1.8.0
   result_type: ^0.2.0
   sentry_flutter: ^8.3.0
   settings_ui: ^2.0.2
