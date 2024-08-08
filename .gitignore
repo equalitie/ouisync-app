@@ -61,6 +61,8 @@ android/key.properties
 
 # Whatever secrets needed to build a release for any of the supported platform.
 secrets/
+# For when secrets is a symbolic link to some other folder
+secrets
 
 # For Windows app publishing (MSIX)
 /installers/
