@@ -14,17 +14,12 @@ import '../utils.dart';
 
 void main() {
   late TestDependencies deps;
-  FilePicker? origFilePicker;
 
   setUp(() async {
     deps = await TestDependencies.create();
   });
 
   tearDown(() async {
-    if (origFilePicker != null) {
-      FilePicker.platform = origFilePicker!;
-    }
-
     await deps.dispose();
   });
 
@@ -60,7 +55,6 @@ void main() {
         await tester.pumpAndSettle();
 
         // Mock file picker
-        origFilePicker = FilePicker.platform;
         FilePicker.platform = _FakeFilePicker(location.path);
 
         final locateButton = find.text('LOCATE');
@@ -112,7 +106,6 @@ void main() {
         await tester.pumpAndSettle();
 
         // Mock file picker
-        origFilePicker = FilePicker.platform;
         FilePicker.platform = _FakeFilePicker(exportedLocation.path);
 
         final locateButton = find.text('LOCATE');
