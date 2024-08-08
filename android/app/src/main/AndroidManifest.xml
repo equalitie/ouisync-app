@@ -1,5 +1,12 @@
+<!--
+  The `package="${applicationId}"` should not really be needed, but there is
+  a bug in `flutter_tools` which causes compilation issues when running `flutter
+  run` for Android. Running `flutter build` compiles fine regardless.
+  See: https://stackoverflow.com/a/78630614/273348
+-->
 <manifest
   xmlns:android="http://schemas.android.com/apk/res/android"
+  package="${applicationId}"
   xmlns:tools="http://schemas.android.com/tools">
 
   <uses-permission android:name="android.permission.INTERNET"/> 
