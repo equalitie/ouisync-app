@@ -138,11 +138,15 @@ class RepoCreationCubit extends Cubit<RepoCreationState> with AppLogger {
   }
 
   final ReposCubit reposCubit;
+
   final nameController = TextEditingController();
+  final positiveButtonFocusNode = FocusNode();
 
   @override
   Future<void> close() async {
     nameController.dispose();
+    positiveButtonFocusNode.dispose();
+
     await super.close();
   }
 
@@ -168,7 +172,7 @@ class RepoCreationCubit extends Cubit<RepoCreationState> with AppLogger {
 
   void acceptSuggestedName() {
     nameController.text = state.suggestedName;
-    nameController.selectAll();
+    positiveButtonFocusNode.requestFocus();
   }
 
   void setUseCacheServers(bool value) {

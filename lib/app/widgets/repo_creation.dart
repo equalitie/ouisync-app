@@ -107,6 +107,8 @@ class RepoCreation extends StatelessWidget {
                     securityState.isValid
                 ? () => creationCubit.save()
                 : null,
+            autofocus: true,
+            focusNode: creationCubit.positiveButtonFocusNode,
           ),
         ),
       ];
@@ -169,7 +171,6 @@ class RepoCreation extends StatelessWidget {
           hintText: S.current.messageRepositoryName,
           errorText: state.nameError,
           autovalidateMode: AutovalidateMode.onUserInteraction,
-          autofocus: true,
           textInputAction: TextInputAction.next,
         ),
         Visibility(
