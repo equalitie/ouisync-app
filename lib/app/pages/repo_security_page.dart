@@ -6,8 +6,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../generated/l10n.dart';
 import '../cubits/repo.dart';
 import '../cubits/repo_security.dart';
-import '../utils/utils.dart';
+import '../models/access_mode.dart';
 import '../models/models.dart';
+import '../utils/utils.dart';
 import '../widgets/holder.dart';
 import '../widgets/widgets.dart';
 
@@ -44,9 +45,7 @@ class RepoSecurityPage extends StatelessWidget {
         content: PopScope(
           canPop: false,
           onPopInvoked: (didPop) => _onPopInvoked(context, didPop, cubit.state),
-          child: RepoSecurity(
-            cubit,
-          ),
+          child: RepoSecurity(cubit, repo.state.accessMode == AccessMode.blind),
         ),
         footer: BlocBuilder<RepoSecurityCubit, RepoSecurityState>(
           bloc: cubit,

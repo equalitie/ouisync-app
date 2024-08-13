@@ -83,7 +83,10 @@ class RepoCreation extends StatelessWidget {
             ..._buildTokenLabel(context, creationState),
           ..._buildNameField(context, creationState),
           _buildUseCacheServersSwitch(context, creationState),
-          RepoSecurity(securityCubit),
+          RepoSecurity(
+            securityCubit,
+            creationState.accessMode == AccessMode.blind,
+          ),
         ],
       );
 

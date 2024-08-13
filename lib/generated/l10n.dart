@@ -2600,6 +2600,16 @@ class S {
     );
   }
 
+  /// `The security options are not available for blind repositories`
+  String get messageSecurityOptionsNotAvailableBlind {
+    return Intl.message(
+      'The security options are not available for blind repositories',
+      name: 'messageSecurityOptionsNotAvailableBlind',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `There was an error authenticathing using biometrics. Please try again`
   String get messageErrorAuthenticatingBiometrics {
     return Intl.message(
