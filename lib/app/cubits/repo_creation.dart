@@ -27,7 +27,7 @@ class RepoCreationState {
   final bool useCacheServers;
 
   RepoCreationState({
-    this.accessMode = AccessMode.blind,
+    this.accessMode = AccessMode.write,
     this.loading = false,
     this.localSecretMode = initialLocalSecretMode,
     this.substate = const RepoCreationPending(),
