@@ -82,8 +82,7 @@ class RepoCreation extends StatelessWidget {
           if (creationState.token != null)
             ..._buildTokenLabel(context, creationState),
           ..._buildNameField(context, creationState),
-          if (creationState.accessMode == AccessMode.write)
-            _buildUseCacheServersSwitch(context, creationState),
+          _buildUseCacheServersSwitch(context, creationState),
           RepoSecurity(securityCubit),
         ],
       );
@@ -190,13 +189,15 @@ class RepoCreation extends StatelessWidget {
     BuildContext context,
     RepoCreationState state,
   ) =>
-      CustomAdaptiveSwitch(
-        key: ValueKey('use-cache-servers'),
-        value: state.useCacheServers,
-        title: S.current.messageUseCacheServers,
-        contentPadding: EdgeInsets.zero,
-        onChanged: (value) => creationCubit.setUseCacheServers(value),
-      );
+      state.accessMode == AccessMode.write
+          ? CustomAdaptiveSwitch(
+              key: ValueKey('use-cache-servers'),
+              value: state.useCacheServers,
+              title: S.current.messageUseCacheServers,
+              contentPadding: EdgeInsets.zero,
+              onChanged: (value) => creationCubit.setUseCacheServers(value),
+            )
+          : SizedBox.shrink();
 
   TextStyle _smallMessageStyle(BuildContext context) =>
       context.theme.appTextStyle.bodySmall.copyWith(color: Colors.black54);
