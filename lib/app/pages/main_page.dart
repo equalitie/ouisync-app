@@ -436,7 +436,7 @@ class _MainPageState extends State<MainPage>
             repositoryLocation: currentRepo.location,
             errorMessage: currentRepo.error,
             errorDescription: currentRepo.errorDescription,
-            onReloadRepository: null,
+            onBackToList: () => repos.setCurrent(null),
             reposCubit: repos);
       }
 
@@ -446,7 +446,7 @@ class _MainPageState extends State<MainPage>
         return ErrorState(
           errorMessage: currentRepo.error,
           errorDescription: currentRepo.errorDescription,
-          onReload: () => repos.setCurrent(null),
+          onBackToList: () => repos.setCurrent(null),
         );
       }
 
