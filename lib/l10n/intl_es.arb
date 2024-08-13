@@ -1021,5 +1021,7 @@
   "messageKeepBothFolders": "Mantener las dos carpetas",
   "@messageKeepBothFolders": {},
   "messageOnlyAvailableFiles": "Solo disponible para archivos",
-  "@messageOnlyAvailableFiles": {}
+  "@messageOnlyAvailableFiles": {},
+  "actionLocateRepo": "Localizar repositorio",
+  "@actionLocateRepo": {}
 }
