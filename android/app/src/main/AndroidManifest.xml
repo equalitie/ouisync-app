@@ -6,7 +6,7 @@
 -->
 <manifest
   xmlns:android="http://schemas.android.com/apk/res/android"
-  package="${applicationId}"
+  package="org.equalitie.ouisync_app"
   xmlns:tools="http://schemas.android.com/tools">
 
   <uses-permission android:name="android.permission.INTERNET"/> 
