@@ -3,15 +3,15 @@ import 'dart:io' show File;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../models/auth_mode.dart';
-import '../models/local_secret.dart';
-import '../models/repo_location.dart';
-import '../utils/extensions.dart';
-import '../utils/log.dart';
 import 'package:ouisync/ouisync.dart' show AccessMode, ShareToken;
 
 import '../../generated/l10n.dart';
+import '../models/auth_mode.dart';
+import '../models/local_secret.dart';
 import '../models/repo_entry.dart';
+import '../models/repo_location.dart';
+import '../utils/dialogs.dart';
+import '../utils/log.dart';
 import '../utils/strings.dart';
 import 'repos.dart';
 
@@ -27,7 +27,7 @@ class RepoCreationState {
   final bool useCacheServers;
 
   RepoCreationState({
-    this.accessMode = AccessMode.write,
+    this.accessMode = AccessMode.blind,
     this.loading = false,
     this.localSecretMode = initialLocalSecretMode,
     this.substate = const RepoCreationPending(),
@@ -138,11 +138,15 @@ class RepoCreationCubit extends Cubit<RepoCreationState> with AppLogger {
   }
 
   final ReposCubit reposCubit;
+
   final nameController = TextEditingController();
+  final positiveButtonFocusNode = FocusNode();
 
   @override
   Future<void> close() async {
     nameController.dispose();
+    positiveButtonFocusNode.dispose();
+
     await super.close();
   }
 
@@ -168,7 +172,7 @@ class RepoCreationCubit extends Cubit<RepoCreationState> with AppLogger {
 
   void acceptSuggestedName() {
     nameController.text = state.suggestedName;
-    nameController.selectAll();
+    positiveButtonFocusNode.requestFocus();
   }
 
   void setUseCacheServers(bool value) {
@@ -254,7 +258,7 @@ class RepoCreationCubit extends Cubit<RepoCreationState> with AppLogger {
   Future<R> _loading<R>(Future<R> Function() f) async {
     try {
       emit(state.copyWith(loading: true));
-      return await f();
+      return await Dialogs.executeFutureWithLoadingDialog(null, f.call());
     } finally {
       emit(state.copyWith(loading: false));
     }
