@@ -155,19 +155,22 @@ class RepoCreationCubit extends Cubit<RepoCreationState> with AppLogger {
       return;
     }
 
-    await _loading(() async {
-      final accessMode = await token.mode;
-      final suggestedName = await token.suggestedName;
-      final useCacheServers =
-          await reposCubit.cacheServers.isEnabledForShareToken(token);
+    await _loading(
+      () async {
+        final accessMode = await token.mode;
+        final suggestedName = await token.suggestedName;
+        final useCacheServers =
+            await reposCubit.cacheServers.isEnabledForShareToken(token);
 
-      emit(state.copyWith(
-        accessMode: accessMode,
-        suggestedName: suggestedName,
-        token: token,
-        useCacheServers: useCacheServers,
-      ));
-    });
+        emit(state.copyWith(
+          accessMode: accessMode,
+          suggestedName: suggestedName,
+          token: token,
+          useCacheServers: useCacheServers,
+        ));
+      },
+      showLoading: true,
+    );
   }
 
   void acceptSuggestedName() {
@@ -255,10 +258,15 @@ class RepoCreationCubit extends Cubit<RepoCreationState> with AppLogger {
     }
   }
 
-  Future<R> _loading<R>(Future<R> Function() f) async {
+  Future<R> _loading<R>(
+    Future<R> Function() f, {
+    bool showLoading = false,
+  }) async {
     try {
       emit(state.copyWith(loading: true));
-      return await Dialogs.executeFutureWithLoadingDialog(null, f.call());
+      return showLoading
+          ? await Dialogs.executeFutureWithLoadingDialog(null, f.call())
+          : await f();
     } finally {
       emit(state.copyWith(loading: false));
     }
