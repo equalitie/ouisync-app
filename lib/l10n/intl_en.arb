@@ -411,6 +411,7 @@
   "messageSecureUsingBiometrics":"Secure using biometrics",
   "messageRemoveBiometrics":"Remove biometrics",
   "messageRememberSavePasswordAlert":"Remember to securely save the password; if you forget it, there is no way to retrieve it.",
+  "messageSecurityOptionsNotAvailableBlind":"The security options are not available for blind repositories",
   "messageErrorAuthenticatingBiometrics":"There was an error authenticathing using biometrics. Please try again",
   "messageErrorChangingPassword":"There was a problem changing the password. Please try again",
   "messageSettingsRuntimeID":"Runtime ID",
