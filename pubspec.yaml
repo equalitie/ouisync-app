@@ -31,7 +31,7 @@ dependencies:
   bloc_test: ^9.0.3
   build_context_provider: ^1.1.0
   collection: ^1.18.0
-  connectivity_plus: ^5.0.1
+  connectivity_plus: ^6.0.5
   cross_file: ^0.3.3
   cryptography: ^2.7.0
   cryptography_flutter: ^2.3.2
@@ -87,7 +87,7 @@ dependencies:
   permission_handler: ^11.0.1
   qr_flutter: ^4.0.0
   receive_sharing_intent: ^1.8.0
-  result_type: ^0.2.0
+  result_type: ^1.0.0
   sentry_flutter: ^8.3.0
   settings_ui: ^2.0.2
   share_plus: ^10.0.0
@@ -103,7 +103,7 @@ dependencies:
   webview_flutter_android: ^3.16.4
   webview_flutter_wkwebview: ^3.13.1
   win32: ^5.0.7
-  window_manager: ^0.3.6
+  window_manager: ^0.4.0
   windows_single_instance: ^1.0.1
 
 dev_dependencies:
