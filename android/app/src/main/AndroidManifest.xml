@@ -1,12 +1,12 @@
 <!--
-  The `package="${applicationId}"` should not really be needed, but there is
+  The `package="org.equalitie.ouisync"` should not really be needed, but there is
   a bug in `flutter_tools` which causes compilation issues when running `flutter
   run` for Android. Running `flutter build` compiles fine regardless.
   See: https://stackoverflow.com/a/78630614/273348
 -->
 <manifest
   xmlns:android="http://schemas.android.com/apk/res/android"
-  package="org.equalitie.ouisync_app"
+  package="org.equalitie.ouisync"
   xmlns:tools="http://schemas.android.com/tools">
 
   <uses-permission android:name="android.permission.INTERNET"/> 
@@ -38,7 +38,7 @@
     android:roundIcon="@mipmap/ic_launcher_round">
     <provider
       tools:replace="android:authorities"
-      android:name="org.equalitie.ouisync.PipeProvider"
+      android:name="org.equalitie.ouisync.lib.PipeProvider"
       android:authorities="${applicationId}.pipe"
       android:exported="true"/>
     <!--

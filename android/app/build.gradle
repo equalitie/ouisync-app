@@ -62,7 +62,7 @@ android {
         disable 'InvalidPackage'
     }
 
-    def appId = "org.equalitie.ouisync_app"
+    def appId = "org.equalitie.ouisync"
 
     // Suffix to append to the application id, name and version. This allows installing multiple
     // versions of the app on the same device (e.g., production and development).

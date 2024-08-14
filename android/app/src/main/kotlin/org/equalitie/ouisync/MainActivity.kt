@@ -1,4 +1,4 @@
-package org.equalitie.ouisync_app
+package org.equalitie.ouisync
 
 import android.content.Context
 import android.content.Intent
@@ -11,7 +11,7 @@ import io.flutter.plugin.common.MethodChannel
 
 class MainActivity: FlutterFragmentActivity() {
   companion object {
-    private val CHANNEL = "org.equalitie.ouisync_app/native"
+    private val CHANNEL = "org.equalitie.ouisync/native"
   }
 
   override fun configureFlutterEngine(flutterEngine: FlutterEngine) {

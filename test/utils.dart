@@ -190,7 +190,7 @@ class FakeConnectivity implements Connectivity {
 /// Fake PackageInfo
 PackageInfo fakePackageInfo = PackageInfo(
   appName: 'ouisync.test',
-  packageName: 'org.equalitie.ouisync_app.test',
+  packageName: 'org.equalitie.ouisync.test',
   version: '1.0.0',
   buildNumber: '42',
   buildSignature: '',

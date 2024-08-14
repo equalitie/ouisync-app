@@ -194,7 +194,7 @@ class Settings with AppLogger {
       //
       // On Android this function will most likely return the user accessible
       // directory on phone's internal memory (i.e. not the SDCard). The user
-      // will see it as "<DEVICE>/Phone/Android/data/org.equalitie.ouisync_app/files"
+      // will see it as "<DEVICE>/Phone/Android/data/org.equalitie.ouisync/files"
       //
       // Everything in this folder is deleted when the app is un/re-installed.
       final dir = await path_provider.getExternalStorageDirectory();
