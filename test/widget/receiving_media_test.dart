@@ -276,7 +276,7 @@ void main() {
 
           // Wait for navigating to the repo creation page.
           await navigationObserver.waitForDepth(2);
-          await tester.pumpAndSettle();
+          await tester.pump();
 
           // We should now be on the repo creation page. Wait until it loads.
           await stateObserver
