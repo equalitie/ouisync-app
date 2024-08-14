@@ -8,7 +8,7 @@
     <application>
         <provider
         tools:replace="android:authorities"
-        android:name="org.equalitie.ouisync.PipeProvider"
+        android:name="org.equalitie.ouisync.lib.PipeProvider"
         android:authorities="${applicationId}.pipe"
         android:exported="true"/>
     </application>
