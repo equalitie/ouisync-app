@@ -181,13 +181,7 @@ void main() {
 
         await tester.enterText(find.byKey(ValueKey('token')), token);
         await repoImportObserver.waitUntil((state) => state is ShareTokenValid);
-        await tester.pump();
-
-        await tester.tap(find.text('IMPORT A REPOSITORY'));
         await tester.pumpAndSettle();
-        await repoCreationObserver
-            .waitUntil((state) => !state.loading && state.token != null);
-        await tester.pump();
 
         // The repo token is shown.
         expect(
@@ -197,6 +191,15 @@ void main() {
           ),
           findsOne,
         );
+
+        await tester.tap(find.widgetWithText(ElevatedButton, 'IMPORT A REPOSITORY'));
+        await tester.pump();
+
+        await repoCreationObserver
+            .waitUntil((state) => !state.loading && state.token != null);
+        await tester.pump();
+
+        expect(find.widgetWithText(TextFormField, token), findsOne);
 
         // The name field is autofilled with the suggested name.
         expect(
