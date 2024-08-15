@@ -74,7 +74,7 @@ dependencies:
   loggy: ^2.0.1+1
   meta: ^1.10.0
   mime: ^1.0.4
-  mobile_scanner: ^4.0.0
+  mobile_scanner: ^4.0.1
   move_to_background: ^1.0.2
   mutex: ^3.1.0
   network_info_plus: ^6.0.0
@@ -130,7 +130,7 @@ dev_dependencies:
   properties: ^2.1.0
   pub_semver: ^2.1.4
   pubspec_parse: ^1.2.3
-  test: ^1.25.2
+  test: ^1.25.7
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
