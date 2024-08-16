@@ -130,9 +130,7 @@ class RepoCreationFailure extends RepoCreationSubstate {
 
 class RepoCreationCubit extends Cubit<RepoCreationState> with AppLogger {
   RepoCreationCubit({required this.reposCubit}) : super(RepoCreationState()) {
-    nameController.addListener(
-      () => unawaited(_onNameChanged(nameController.text)),
-    );
+    nameController.addListener(_onNameChangedUnawaited);
 
     setLocalSecret(LocalSecretRandom());
   }
@@ -221,6 +219,13 @@ class RepoCreationCubit extends Cubit<RepoCreationState> with AppLogger {
   }
 
   Future<void> save() async {
+    // On some devices the `_onNameChangedUnawaited` listener is still called
+    // after this `save` function is called. When that happens and we already
+    // created the repository, it'll complain that the repository with the name
+    // in the `nameController` already exists, even though it's this cubit that
+    // created it. So we remove the listener to not pester the user.
+    nameController.removeListener(_onNameChangedUnawaited);
+
     final substate = state.substate;
     if (substate is! RepoCreationValid) {
       return;
@@ -272,7 +277,13 @@ class RepoCreationCubit extends Cubit<RepoCreationState> with AppLogger {
     }
   }
 
-  Future<void> _onNameChanged(String name) async {
+  void _onNameChangedUnawaited() {
+    unawaited(_onNameChanged());
+  }
+
+  Future<void> _onNameChanged() async {
+    final name = nameController.text;
+
     if (name.isEmpty) {
       if (state.location != null) {
         _setInvalidName(S.current.messageErrorFormValidatorNameDefault);
