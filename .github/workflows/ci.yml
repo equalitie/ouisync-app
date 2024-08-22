@@ -22,7 +22,7 @@ jobs:
               OUISYNC_LIB: ouisync/target/debug/libouisync_ffi.so
             target: aarch64-linux-android
             ndk:
-              version: 27.0.12077973
+              version: r27
               abi: arm64-v8a
             build-args: apk --target-platform android-arm64
 
