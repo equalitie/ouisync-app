@@ -1023,5 +1023,7 @@
   "messageOnlyAvailableFiles": "Solo disponible para archivos",
   "@messageOnlyAvailableFiles": {},
   "actionLocateRepo": "Localizar repositorio",
-  "@actionLocateRepo": {}
+  "@actionLocateRepo": {},
+  "messageSecurityOptionsNotAvailableBlind": "Las opciones de seguridad no están disponibles para repositorios vacíos",
+  "@messageSecurityOptionsNotAvailableBlind": {}
 }
