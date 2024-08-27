@@ -75,7 +75,9 @@ dependencies:
   meta: ^1.10.0
   mime: ^1.0.4
   mobile_scanner: ^4.0.1
-  move_to_background: ^1.0.2
+  # move_to_background: ^1.0.2
+  move_to_background:
+    git: 'https://github.com/J-Pabon/move_to_background'
   mutex: ^3.1.0
   network_info_plus: ^6.0.0
   ouisync:

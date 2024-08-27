@@ -959,10 +959,11 @@ packages:
   move_to_background:
     dependency: "direct main"
     description:
-      name: move_to_background
-      sha256: "00caad17a6ce149910777131503f43f8ed80025681f94684e3a6a87d979b914c"
-      url: "https://pub.dev"
-    source: hosted
+      path: "."
+      ref: HEAD
+      resolved-ref: "15d3b45f38870d273bb3d787a6068cd84a7e1c52"
+      url: "https://github.com/J-Pabon/move_to_background"
+    source: git
     version: "1.0.2"
   msgpack_dart:
     dependency: transitive
@@ -1660,10 +1661,10 @@ packages:
     dependency: transitive
     description:
       name: vm_service
-      sha256: f652077d0bdf60abe4c1f6377448e8655008eef28f128bc023f7b5e8dfeb48fc
+      sha256: "5c5f338a667b4c644744b661f309fb8080bb94b18a7e91ef1dbd343bed00ed6d"
       url: "https://pub.dev"
     source: hosted
-    version: "14.2.4"
+    version: "14.2.5"
   watcher:
     dependency: "direct main"
     description:
