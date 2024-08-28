@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:ouisync/ouisync.dart';
+import 'package:stream_transform/stream_transform.dart';
 
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
@@ -36,13 +37,29 @@ class _SettingsPageState extends State<SettingsPage> {
   late final PeerSetCubit peerSet = PeerSetCubit(widget.session);
   late final NatDetection natDetection = NatDetection(widget.session);
   final launchAtStartup = LaunchAtStartupCubit();
+  StreamSubscription? _powerControlSubscription;
 
   @override
   void initState() {
     super.initState();
+    _powerControlSubscription = widget.powerControl.stream
+        .map((_) => null)
+        // Update once immediately, before starting to receive the events.
+        .startWith(null)
+        .asyncMapSample((_) => connectivityInfo.update())
+        .listen(null);
+  }
 
-    peerSet.init();
-    unawaited(_updateConnectivityInfo());
+  @override
+  void dispose() {
+    unawaited(_powerControlSubscription?.cancel());
+
+    unawaited(connectivityInfo.close());
+    unawaited(peerSet.close());
+    unawaited(natDetection.close());
+    unawaited(launchAtStartup.close());
+
+    super.dispose();
   }
 
   @override
@@ -65,12 +82,4 @@ class _SettingsPageState extends State<SettingsPage> {
           upgradeExists: widget.upgradeExists,
         ),
       );
-
-  Future<void> _updateConnectivityInfo() async {
-    await connectivityInfo.update();
-
-    await for (final _ in widget.powerControl.stream) {
-      await connectivityInfo.update();
-    }
-  }
 }
