@@ -63,7 +63,8 @@ class RepositoriesBar extends StatelessWidget
               padding: EdgeInsets.only(right: 10.0),
               child: LiveThroughputDisplay(
                 _repoStatsStream(repo.cubit),
-                size: Theme.of(context).textTheme.titleMedium?.fontSize,
+                size: Theme.of(context).textTheme.labelSmall?.fontSize,
+                orientation: Orientation.portrait,
               ),
             )
           : SizedBox.shrink();

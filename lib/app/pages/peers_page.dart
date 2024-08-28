@@ -48,7 +48,8 @@ class _PeersPageState extends State<PeersPage> {
                 Spacer(),
                 LiveThroughputDisplay(
                   _networkStatsStream,
-                  size: Theme.of(context).textTheme.titleMedium?.fontSize,
+                  size: Theme.of(context).textTheme.labelSmall?.fontSize,
+                  orientation: Orientation.portrait,
                 ),
               ],
             ),
