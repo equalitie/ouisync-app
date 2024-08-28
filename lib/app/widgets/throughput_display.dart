@@ -49,7 +49,7 @@ class ThroughputDisplay extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             icon,
-            Text('${formatSize(value)}/s'),
+            Text(formatThroughput(value)),
           ],
         ),
       );
