@@ -4,24 +4,45 @@ import 'dart:collection';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:ouisync/ouisync.dart';
+import 'package:stream_transform/stream_transform.dart';
 
-class PeerSetCubit extends Cubit<PeerSet> {
+import '../utils/log.dart';
+
+class PeerSetCubit extends Cubit<PeerSet> with AppLogger {
   final Session _session;
-  StreamSubscription<List<PeerInfo>>? _subscription;
+  StreamSubscription<void>? _subscription;
 
   PeerSetCubit(Session session)
       : _session = session,
-        super(const PeerSet([]));
+        super(const PeerSet([])) {
+    unawaited(_init());
+  }
 
-  void init() {
-    if (_subscription != null) {
-      return;
+  Future<void> _init() async {
+    await setAutoRefresh(null);
+    await refresh();
+  }
+
+  Future<void> setAutoRefresh(Duration? period) async {
+    await _subscription?.cancel();
+
+    if (period != null) {
+      _subscription =
+          Stream.periodic(period).asyncMapSample((_) => refresh()).listen(null);
+      loggy.debug('peer set auto refresh enabled (period: $period)');
+    } else {
+      _subscription =
+          _session.networkEvents.asyncMapSample((_) => refresh()).listen(null);
+      loggy.debug('peer set auto refresh disabled');
     }
+  }
 
-    unawaited(_session.peers.then((peers) => emit(PeerSet(peers))));
+  Future<void> refresh() async {
+    final peers = await _session.peers;
 
-    _subscription =
-        _session.onPeersChange.listen((peers) => emit(PeerSet(peers)));
+    if (!isClosed) {
+      emit(PeerSet(peers));
+    }
   }
 
   @override

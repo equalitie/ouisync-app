@@ -1,22 +1,18 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync/ouisync.dart';
-import 'package:ouisync/state_monitor.dart';
 import 'package:stream_transform/stream_transform.dart';
 
 import '../cubits/mount.dart';
 import '../cubits/repo.dart';
-import '../cubits/state_monitor.dart';
 import '../utils/utils.dart';
 
 const _iconSize = 20.0;
 const _iconPadding = 2.0;
 final _color = Colors.black.withOpacity(0.25);
 
-/// Widget that displays repository status - it's sync progress and whether any sync activity is
-/// ongoing.
+/// Widget that displays repository error and sync progress.
 class RepoStatus extends StatelessWidget {
   RepoStatus(this.repoCubit, {super.key});
 
@@ -25,8 +21,7 @@ class RepoStatus extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Row(
         children: [
-          _Status(repoCubit),
-          _Activity(repoCubit),
+          _Error(repoCubit),
           _Progress(repoCubit),
         ],
       );
@@ -93,57 +88,8 @@ class _Progress extends StatelessWidget {
       );
 }
 
-class _Activity extends StatefulWidget {
-  _Activity(this.repoCubit);
-
-  final RepoCubit repoCubit;
-
-  @override
-  State<_Activity> createState() => _ActivityState();
-}
-
-class _ActivityState extends State<_Activity> with AppLogger {
-  late StateMonitorCubit? monitorCubit = widget.repoCubit.stateMonitor
-      ?.let((monitor) => StateMonitorCubit(monitor));
-
-  @override
-  void dispose() {
-    super.dispose();
-    unawaited(monitorCubit?.close());
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final monitorCubit = this.monitorCubit;
-
-    if (monitorCubit == null) {
-      return SizedBox.shrink();
-    }
-
-    return BlocBuilder<StateMonitorCubit, StateMonitorNode?>(
-      bloc: monitorCubit,
-      builder: _buildIndicator,
-    );
-  }
-
-  Widget _buildIndicator(BuildContext context, StateMonitorNode? node) {
-    final index = node?.parseDoubleValue('index requests inflight') ?? 0.0;
-    final block = node?.parseDoubleValue('block requests inflight') ?? 0.0;
-
-    if (index > 0.0 || block > 0.0) {
-      return Icon(
-        Icons.sync,
-        size: _iconSize + 2 * _iconPadding,
-        color: _color,
-      );
-    } else {
-      return SizedBox.square(dimension: 24.0);
-    }
-  }
-}
-
-class _Status extends StatelessWidget {
-  _Status(this.repoCubit);
+class _Error extends StatelessWidget {
+  _Error(this.repoCubit);
 
   final RepoCubit repoCubit;
 

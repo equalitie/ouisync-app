@@ -87,13 +87,13 @@ Future<bool> _isSynced(Repository repo) async {
 }
 
 Future<void> _waitForSyncInactivity(Session session) async {
-  var prev = await session.trafficStats;
+  var prev = await session.networkStats;
 
   while (true) {
     await Future.delayed(_syncInactivityPeriod);
-    final next = await session.trafficStats;
+    final next = await session.networkStats;
 
-    if (next.send == prev.send && next.recv == prev.recv) {
+    if (next.bytesTx == prev.bytesTx && next.bytesRx == prev.bytesRx) {
       return;
     } else {
       prev = next;

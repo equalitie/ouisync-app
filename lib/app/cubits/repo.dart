@@ -9,6 +9,7 @@ import 'package:ouisync/native_channels.dart';
 import 'package:ouisync/ouisync.dart';
 import 'package:ouisync/state_monitor.dart';
 import 'package:shelf/shelf_io.dart';
+import 'package:stream_transform/stream_transform.dart';
 
 import '../../generated/l10n.dart';
 import '../models/models.dart';
@@ -331,6 +332,8 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
   Future<EntryType?> type(String path) => _repo.type(path);
 
   Future<Progress> get syncProgress => _repo.syncProgress;
+
+  Future<NetworkStats> get networkStats => _repo.networkStats;
 
   // Get the state monitor of this particular repository. That is 'root >
   // Repositories > this repository ID'.
@@ -827,7 +830,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
   }
 
   StreamSubscription<void> autoRefresh() =>
-      _repo.events.listen((_) => refresh());
+      _repo.events.asyncMapSample((_) => refresh()).listen(null);
 
   Future<File?> _createFile(String newFilePath) async {
     File? newFile;
