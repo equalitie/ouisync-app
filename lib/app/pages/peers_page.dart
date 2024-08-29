@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync/ouisync.dart';
+import 'package:ouisync_app/app/widgets/throughput_display.dart';
+import 'package:stream_transform/stream_transform.dart';
 
 import '../../generated/l10n.dart';
 import '../cubits/peer_set.dart';
@@ -8,28 +10,63 @@ import '../utils/utils.dart';
 import '../widgets/long_text.dart';
 import 'user_provided_peers_page.dart';
 
-class PeersPage extends StatelessWidget {
+const double _contentSize = 12.0;
+
+class PeersPage extends StatefulWidget {
   final Session session;
   final PeerSetCubit cubit;
 
   PeersPage(this.session, this.cubit);
 
   @override
+  State<PeersPage> createState() => _PeersPageState();
+}
+
+class _PeersPageState extends State<PeersPage> {
+  Stream<NetworkStats> get _networkStatsStream =>
+      Stream.periodic(Duration(seconds: 1))
+          .asyncMapSample((_) => widget.session.networkStats);
+
+  @override
+  void initState() {
+    super.initState();
+    widget.cubit.setAutoRefresh(Duration(seconds: 1));
+  }
+
+  @override
+  void dispose() {
+    widget.cubit.setAutoRefresh(null);
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: Text(S.current.labelPeers), actions: [
-          IconButton(
-            icon: const Icon(Icons.manage_accounts),
-            tooltip: 'User provided peers',
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => UserProvidedPeersPage(session),
-              ),
+        appBar: AppBar(
+            title: Row(
+              children: [
+                Text(S.current.labelPeers),
+                Spacer(),
+                LiveThroughputDisplay(
+                  _networkStatsStream,
+                  size: Theme.of(context).textTheme.labelSmall?.fontSize,
+                  orientation: Orientation.portrait,
+                ),
+              ],
             ),
-          )
-        ]),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.manage_accounts),
+                tooltip: 'User provided peers',
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => UserProvidedPeersPage(widget.session),
+                  ),
+                ),
+              )
+            ]),
         body: BlocBuilder<PeerSetCubit, PeerSet>(
-          bloc: cubit,
+          bloc: widget.cubit,
           builder: (context, state) => ListView(
             padding: Dimensions.paddingContents,
             children: _buildItems(context, state),
@@ -115,7 +152,7 @@ class PeersPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   LongText(peer.addr),
-                  _buildBadges(context, peer),
+                  _buildDetails(context, peer),
                 ],
               ),
             ),
@@ -123,7 +160,7 @@ class PeersPage extends StatelessWidget {
         ),
       );
 
-  Widget _buildBadges(BuildContext context, PeerInfo peer) => Row(
+  Widget _buildDetails(BuildContext context, PeerInfo peer) => Row(
         children: [
           _buildBadge(
             context,
@@ -138,6 +175,8 @@ class PeersPage extends StatelessWidget {
           ),
           if (peer.state != PeerStateKind.active)
             _buildBadge(context, Text(_formatPeerState(peer.state))),
+          Spacer(),
+          ThroughputDisplay(peer.stats, size: _contentSize),
         ],
       );
 
@@ -156,7 +195,7 @@ class PeersPage extends StatelessWidget {
       child: _applyStyle(
         fgColor: fg,
         bgColor: bg,
-        contentSize: 10.0,
+        contentSize: _contentSize,
         child: child,
       ),
     );
