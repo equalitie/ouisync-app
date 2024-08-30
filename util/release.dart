@@ -27,7 +27,7 @@ Future<void> main(List<String> args) async {
 
   final git = await GitDir.fromExisting(p.current);
 
-  if (!await checkWorkingTreeIsClean(git)) {
+  if (!await checkWorkingTreeIsClean(git, options)) {
     return;
   }
 
@@ -146,6 +146,7 @@ class Options {
   final bool msix;
   final bool debGui;
   final bool debCli;
+  final bool promptIfGitDirty;
 
   final String? token;
   final RepositorySlug slug;
@@ -171,6 +172,7 @@ class Options {
     this.identityName,
     this.publisher,
     this.awaitUpload = false,
+    this.promptIfGitDirty = true,
   });
 
   static Future<Options> parse(List<String> args) async {
@@ -251,6 +253,10 @@ class Options {
       negatable: false,
       help: 'Print this usage information',
     );
+    parser.addFlag(
+      'no-prompt-if-git-dirty',
+      help: 'Do not prompt whether to continue building if git is not clean',
+    );
 
     final results = parser.parse(args);
 
@@ -313,6 +319,7 @@ class Options {
       identityName: results['identity-name'],
       publisher: results['publisher'],
       awaitUpload: results['await-upload'],
+      promptIfGitDirty: !results['no-prompt-if-git-dirty'],
     );
   }
 }
@@ -1091,8 +1098,12 @@ Future<void> copyDirectory(Directory src, Directory dst) async {
 }
 
 // Check if working tree is clean and if not confirm with the caller if we want to continue.
-Future<bool> checkWorkingTreeIsClean(GitDir git) async {
+Future<bool> checkWorkingTreeIsClean(GitDir git, Options options) async {
   if (!await git.isWorkingTreeClean()) {
+    if (options.promptIfGitDirty == false) {
+      // TODO: Write git diff in the directory where result binaries are made.
+      return true;
+    }
     while (true) {
       print("Git is dirty, continue anyway? [y/n/diff]");
       final input = stdin.readLineSync();
