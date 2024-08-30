@@ -76,6 +76,11 @@ dependencies:
   mime: ^1.0.6
   mobile_scanner: ^5.2.1
   # move_to_background: ^1.0.2
+  # - Upgrade Gradle to 8.5.2, minSdk=21, targetSdk and compileSdk to 34;
+  # - Fix deprecation warning
+  #
+  # This package contains one PR from August 2022, and one from February 2024 
+  # So it was best to just updagre de Android project in a forked repo
   move_to_background:
     git: 'https://github.com/J-Pabon/move_to_background'
   mutex: ^3.1.0
