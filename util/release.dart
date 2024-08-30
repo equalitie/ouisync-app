@@ -33,6 +33,10 @@ Future<void> main(List<String> args) async {
     return;
   }
 
+  if (version.isPreRelease) {
+    await addBadgeToIcons(version.preRelease.join('.'));
+  }
+
   // TODO: use `pubspec.name` here but first rename it from "ouisync_app" to "ouisync"
   final name = 'ouisync';
 
@@ -1157,4 +1161,54 @@ Future<String> readSentryDSN(String path) async {
     exit(1);
   }
   return sentryDSN;
+}
+
+class IconBadgeDesc {
+  String fileName;
+  String geometry;
+  String pointsize;
+
+  IconBadgeDesc(this.fileName, this.pointsize, this.geometry);
+}
+
+Future<void> addBadgeToIcons(String text) async {
+  String binaryName;
+
+  if (Platform.isWindows) {
+    binaryName = "magick";
+  } else {
+    binaryName = "convert";
+  }
+
+  final descriptions = [
+    IconBadgeDesc("ic_launcher.png", '40', "+16+16"),
+    IconBadgeDesc("ic_launcher_foreground.png", '40', "+100+120"),
+    IconBadgeDesc("ic_launcher_round.png", '40', "+16+16"),
+    IconBadgeDesc("ouisync_icon.png", '40', "+16+16"),
+    IconBadgeDesc("OuisyncFull.png", '40', "+300+16"),
+    IconBadgeDesc("Ouisync_v1_1560x1553.png", '200', "+64+124"),
+  ];
+
+  for (final desc in descriptions) {
+    // Use imagemagick's `convert` because the 'package:image/image.dart' lacks features
+    // (and some things like setting a font color doesn't seem to work).
+    // TODO: This overwrites the existing png files in git, which is annoying when done not
+    // on CI.
+    await run(binaryName, [
+      'assets/${desc.fileName}',
+      '-undercolor',
+      'red',
+      '-font',
+      // Picked randomly by what is on my and the CI machines.
+      'DejaVu-Sans',
+      '-gravity',
+      'SouthEast',
+      '-pointsize',
+      desc.pointsize,
+      '-annotate',
+      desc.geometry,
+      text,
+      'assets/${desc.fileName}',
+    ]);
+  }
 }
