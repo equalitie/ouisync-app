@@ -30,14 +30,16 @@ class _QRScannerState extends State<QRScanner> with AppLogger {
             IconButton(
               color: Theme.of(context).primaryColorDark,
               icon: ValueListenableBuilder(
-                valueListenable: cameraController.torchState,
-                builder: (context, state, child) {
-                  switch (state) {
-                    case TorchState.off:
-                      return const Icon(Icons.flash_off, color: Colors.grey);
-                    case TorchState.on:
-                      return Icon(Icons.flash_on, color: Colors.yellow[800]);
-                  }
+                valueListenable: cameraController,
+                builder: (context, state, child) => switch (state.torchState) {
+                  TorchState.off =>
+                    const Icon(Icons.flash_off_outlined, color: Colors.grey),
+                  TorchState.on =>
+                    Icon(Icons.flash_on_outlined, color: Colors.yellow[800]),
+                  TorchState.auto =>
+                    const Icon(Icons.flash_auto_outlined, color: Colors.grey),
+                  TorchState.unavailable =>
+                    const Icon(Icons.flash_off_outlined, color: Colors.white54),
                 },
               ),
               iconSize: Dimensions.sizeIconAverage,
@@ -46,14 +48,11 @@ class _QRScannerState extends State<QRScanner> with AppLogger {
             IconButton(
               color: Theme.of(context).primaryColorDark,
               icon: ValueListenableBuilder(
-                valueListenable: cameraController.cameraFacingState,
-                builder: (context, state, child) {
-                  switch (state) {
-                    case CameraFacing.front:
-                      return const Icon(Icons.camera_front);
-                    case CameraFacing.back:
-                      return const Icon(Icons.camera_rear);
-                  }
+                valueListenable: cameraController,
+                builder: (context, state, child) =>
+                    switch (state.cameraDirection) {
+                  CameraFacing.front => const Icon(Icons.camera_front),
+                  CameraFacing.back => const Icon(Icons.camera_rear),
                 },
               ),
               iconSize: Dimensions.sizeIconAverage,
@@ -71,8 +70,8 @@ class _QRScannerState extends State<QRScanner> with AppLogger {
         controller: cameraController,
         onDetect: (capture) async {
           String? code;
-          if (capture.raw.isNotEmpty) {
-            code = capture.raw[0]['rawValue'];
+          if ((capture.raw as List?)?.isNotEmpty ?? false) {
+            code = (capture.raw as List?)?[0]['rawValue'];
           }
 
           if (code == null) {

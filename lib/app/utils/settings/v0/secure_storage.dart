@@ -1,6 +1,6 @@
-import './flutter_secure.dart';
-import './biometric_secure.dart';
-import './v0.dart';
+import 'flutter_secure.dart';
+import 'biometric_secure.dart';
+import 'v0.dart';
 import '../../../utils/platform/platform.dart';
 import '../../../utils/utils.dart';
 
@@ -177,7 +177,7 @@ class SecureStorage with AppLogger {
 
 class Void {}
 
-class Error {
+class Error implements Exception {
   Error(this.exception, this.stackTrace);
   final Exception exception;
   final StackTrace stackTrace;
