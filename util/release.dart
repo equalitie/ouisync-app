@@ -27,13 +27,15 @@ Future<void> main(List<String> args) async {
 
   final git = await GitDir.fromExisting(p.current);
 
-  if (!await checkWorkingTreeIsClean(git, options)) {
+  Version version = determineVersion(pubspec, options);
+
+  if (!version.isPreRelease && !await checkWorkingTreeIsClean(git)) {
     return;
   }
 
   // TODO: use `pubspec.name` here but first rename it from "ouisync_app" to "ouisync"
   final name = 'ouisync';
-  final version = pubspec.version!;
+
   final commit = await getCommit();
 
   final buildDesc = BuildDesc(version, commit);
@@ -146,7 +148,6 @@ class Options {
   final bool msix;
   final bool debGui;
   final bool debCli;
-  final bool promptIfGitDirty;
 
   final String? token;
   final RepositorySlug slug;
@@ -156,6 +157,7 @@ class Options {
   final String? identityName;
   final String? publisher;
   final bool awaitUpload;
+  final String? preReleaseString;
 
   Options._({
     this.apk = false,
@@ -172,7 +174,7 @@ class Options {
     this.identityName,
     this.publisher,
     this.awaitUpload = false,
-    this.promptIfGitDirty = true,
+    this.preReleaseString = null,
   });
 
   static Future<Options> parse(List<String> args) async {
@@ -253,9 +255,10 @@ class Options {
       negatable: false,
       help: 'Print this usage information',
     );
-    parser.addFlag(
-      'no-prompt-if-git-dirty',
-      help: 'Do not prompt whether to continue building if git is not clean',
+    parser.addOption(
+      'pre-release-string',
+      help:
+          'Set pre-release version (the "foo" in "1.2.3-foo"). Useful e.g. for nightly builds',
     );
 
     final results = parser.parse(args);
@@ -319,7 +322,7 @@ class Options {
       identityName: results['identity-name'],
       publisher: results['publisher'],
       awaitUpload: results['await-upload'],
-      promptIfGitDirty: !results['no-prompt-if-git-dirty'],
+      preReleaseString: results['pre-release-string'],
     );
   }
 }
@@ -338,6 +341,8 @@ class BuildDesc {
 
   String get versionString => _formatVersion(StringBuffer()).toString();
   String get revisionString => _formatRevision(StringBuffer()).toString();
+  // The "foo" in "1.2.3+foo".
+  String get buildIdentifier => version.build[0].toString();
 
   @override
   String toString() {
@@ -700,7 +705,7 @@ Future<File> buildAab(BuildDesc buildDesc, sentryDSN) async {
     '--release',
     '--dart-define=SENTRY_DSN=$sentryDSN',
     '--build-number',
-    buildDesc.version.build[0].toString(),
+    buildDesc.buildIdentifier,
     '--build-name',
     buildDesc.toString(),
   ]);
@@ -1040,6 +1045,21 @@ Future<Directory> createOutputDir(BuildDesc buildDesc) async {
   return dir;
 }
 
+Version determineVersion(Pubspec pubspec, Options options) {
+  if (options.preReleaseString != null) {
+    final pubspecVersion = pubspec.version!;
+    if (pubspecVersion.isPreRelease) {
+      throw "Pre-release string (the \"foo\" in \"1.2.3-foo\") is already set in pubspec.yaml";
+    }
+    return Version(
+        pubspecVersion.major, pubspecVersion.minor, pubspecVersion.patch,
+        pre: options.preReleaseString,
+        build: pubspecVersion.build[0].toString());
+  } else {
+    return pubspec.version!;
+  }
+}
+
 Future<void> run(
   String command,
   List<String> args, [
@@ -1098,12 +1118,8 @@ Future<void> copyDirectory(Directory src, Directory dst) async {
 }
 
 // Check if working tree is clean and if not confirm with the caller if we want to continue.
-Future<bool> checkWorkingTreeIsClean(GitDir git, Options options) async {
+Future<bool> checkWorkingTreeIsClean(GitDir git) async {
   if (!await git.isWorkingTreeClean()) {
-    if (options.promptIfGitDirty == false) {
-      // TODO: Write git diff in the directory where result binaries are made.
-      return true;
-    }
     while (true) {
       print("Git is dirty, continue anyway? [y/n/diff]");
       final input = stdin.readLineSync();
