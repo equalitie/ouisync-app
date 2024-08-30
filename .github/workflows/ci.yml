@@ -20,12 +20,12 @@ jobs:
             os: ubuntu-latest
             env:
               OUISYNC_LIB: ouisync/target/debug/libouisync_ffi.so
-            target: aarch64-linux-android
+            target: aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
             ndk:
               version: r25c
               abi: arm64-v8a
-            build-args: apk --target-platform android-arm64
-            nightly-binary: build/app/outputs/flutter-apk/app-release.apk
+            build-args: --apk
+            artifact-files: ouisync*.apk
 
           - name: linux
             os: ubuntu-latest
@@ -33,8 +33,8 @@ jobs:
               OUISYNC_LIB: ouisync/target/debug/libouisync_ffi.so
             # TODO: enable analysis
             # analyze: true
-            build-args: linux
-            nightly-binary: build/linux/x64/release/bundle/ouisync-gui
+            build-args: --deb-gui --deb-cli
+            artifact-files: ouisync*.deb
 
           - name: windows
             os: windows-latest
@@ -42,8 +42,8 @@ jobs:
               # Install Dokan2.dll to where `flutter test` can find it
               DOKAN_DLL_OUTPUT_PATH: C:\Windows\System32
               OUISYNC_LIB: ouisync\target\debug\ouisync_ffi.dll
-            build-args: windows
-            nightly-binary: build/windows/x64/release/bundle/ouisync-gui.exe
+            build-args: --exe
+            artifact-files: ouisync*.exe
 
     env: ${{ matrix.env }}
 
@@ -133,12 +133,29 @@ jobs:
         run:
           flutter test
 
-      - name: Build Ouisync app
-        run: flutter --verbose build ${{ matrix.build-args }}
+      - name: Setup secrets for artifact build (different from the main releases)
+        run: |
+          mkdir -p secrets/android
+          echo $NIGHTLY_SENTRY_DSN > secrets/sentry_dsn
+          echo $NIGHTLY_KEYSTORE_JKS_HEX > secrets/android/upload-keystore.jks.hex
+          xxd -r -p secrets/android/upload-keystore.jks.hex secrets/android/upload-keystore.jks
+          echo "storePassword=$NIGHTLY_KEYSTORE_PASSWORD" > secrets/android/key.properties
+          echo "keyPassword=$NIGHTLY_KEYSTORE_PASSWORD" >> secrets/android/key.properties
+          echo "keyAlias=upload" >> secrets/android/key.properties
+          echo "storeFile=../../secrets/android/upload-keystore.jks" >> secrets/android/key.properties
+        shell: bash
+        env:
+          NIGHTLY_SENTRY_DSN : ${{ secrets.NIGHTLY_SENTRY_DSN }}
+          NIGHTLY_KEYSTORE_JKS_HEX : ${{ secrets.NIGHTLY_KEYSTORE_JKS_HEX }}
+          NIGHTLY_KEYSTORE_PASSWORD : ${{ secrets.NIGHTLY_KEYSTORE_PASSWORD }}
 
-      - name: Produce artifacts for nightly testing
+      - name: Build artifacts
+        run:
+          dart run util/release.dart --no-prompt-if-git-dirty ${{ matrix.build-args }}
+
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           # Name of the produced zip file
-          name: nightly-${{ matrix.name }}
-          path: ${{ matrix.nightly-binary }}
+          name: ${{ matrix.name }}
+          path: releases/release_*/${{ matrix.artifact-files }}
