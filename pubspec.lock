@@ -258,10 +258,10 @@ packages:
     dependency: transitive
     description:
       name: coverage
-      sha256: "7b594a150942e0d3be99cd45a1d0b5caff27ba5a27f292ed8e8d904ba3f167b5"
+      sha256: c1fb2dce3c0085f39dc72668e85f8e0210ec7de05345821ff58530567df345a5
       url: "https://pub.dev"
     source: hosted
-    version: "1.9.1"
+    version: "1.9.2"
   cross_file:
     dependency: "direct main"
     description:
