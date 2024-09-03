@@ -1,5 +1,6 @@
 import 'dart:io' as io;
 
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -159,11 +160,19 @@ class DirectoryActions extends StatelessWidget with AppLogger {
     RepoCubit repoCubit,
     FileType type,
   ) async {
-    final dstDir = repoCubit.state.currentFolder.path;
+    if (io.Platform.isAndroid) {
+      /// On Android 13 (Sdk API 33) or lower, the strorage
+      /// permission needs to be requested before using the file picker.
+      ///
+      /// This is not longer case, starting from version 14 (Sdk API 34)
+      final androidInfo = await DeviceInfoPlugin().androidInfo;
+      if (androidInfo.version.sdkInt <= 33) {
+        final status = await Permissions.requestPermission(
+            parentContext, Permission.storage);
 
-    final status =
-        await Permissions.requestPermission(parentContext, Permission.storage);
-    if (status != PermissionStatus.granted) return;
+        if (status != PermissionStatus.granted) return;
+      }
+    }
 
     final result = await FilePicker.platform.pickFiles(
       type: type,
@@ -180,7 +189,9 @@ class DirectoryActions extends StatelessWidget with AppLogger {
       Navigator.of(parentContext).pop();
 
       for (final srcFile in result.files) {
+        final dstDir = repoCubit.state.currentFolder.path;
         String fileName = srcFile.name;
+
         String dstPath = repo_path.join(dstDir, fileName);
 
         if (await repoCubit.exists(dstPath)) {
