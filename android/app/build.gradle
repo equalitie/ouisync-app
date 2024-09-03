@@ -106,6 +106,17 @@ android {
             android.packagingOptions.doNotStrip "**.so"
         }
     }
+
+    flavorDimensions "productionOrNightly"
+    productFlavors {
+        production {
+            dimension "productionOrNightly"
+        }
+        nightly {
+            dimension "productionOrNightly"
+            applicationIdSuffix ".nightly"
+        }
+    }
 }
 
 flutter {
