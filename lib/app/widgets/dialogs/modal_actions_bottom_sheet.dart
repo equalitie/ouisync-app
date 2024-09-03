@@ -138,21 +138,20 @@ class DirectoryActions extends StatelessWidget with AppLogger {
 
   void createFolderDialog(context, RepoCubit cubit) async {
     final parent = cubit.state.currentFolder.path;
-    await showDialog(
+    var newFolderPath = await showDialog<String?>(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) => ActionsDialog(
           title: S.current.titleCreateFolder,
           body: FolderCreation(cubit: cubit, parent: parent)),
-    ).then((newFolderPath) async {
-      if (newFolderPath.isNotEmpty) {
-        await cubit.createFolder(newFolderPath);
+    );
 
-        /// If a name for the new folder is provided, the new folder path is
-        /// returned; otherwise, empty string.
-        Navigator.of(parentContext).pop();
-      }
-    });
+    if (newFolderPath == null || newFolderPath.isEmpty) {
+      return;
+    }
+
+    await cubit.createFolder(newFolderPath);
+    Navigator.of(parentContext).pop();
   }
 
   Future<void> addFile(
@@ -164,7 +163,7 @@ class DirectoryActions extends StatelessWidget with AppLogger {
       /// On Android 13 (Sdk API 33) or lower, the strorage
       /// permission needs to be requested before using the file picker.
       ///
-      /// This is not longer case, starting from version 14 (Sdk API 34)
+      /// This is not longer the case, starting with version 14 (Sdk API 34)
       final androidInfo = await DeviceInfoPlugin().androidInfo;
       if (androidInfo.version.sdkInt <= 33) {
         final status = await Permissions.requestPermission(
