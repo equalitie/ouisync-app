@@ -1,7 +1,9 @@
 import 'dart:async';
+
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:ouisync/ouisync.dart' as oui;
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ouisync/ouisync.dart' as oui;
+
 import '../../generated/l10n.dart';
 import '../utils/utils.dart';
 
@@ -137,12 +139,12 @@ class PowerControl extends Cubit<PowerControlState> with AppLogger {
 
   Future<void> _listen() async {
     final result = await _connectivity.checkConnectivity();
-    await _onConnectivityChange(result);
+    await _onConnectivityChange(result.last);
 
     final stream = _connectivity.onConnectivityChanged;
 
     await for (var result in stream) {
-      await _onConnectivityChange(result);
+      await _onConnectivityChange(result.last);
     }
   }
 
@@ -195,7 +197,7 @@ class PowerControl extends Cubit<PowerControlState> with AppLogger {
   }
 
   Future<void> _refresh() async =>
-      _onConnectivityChange(await _connectivity.checkConnectivity());
+      _onConnectivityChange((await _connectivity.checkConnectivity()).last);
 
   Future<void> _setNetworkMode(NetworkMode mode, {force = false}) async {
     if (state.networkMode == null || mode != state.networkMode || force) {

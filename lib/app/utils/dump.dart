@@ -71,7 +71,7 @@ Future<File> dumpAll(
     final encoder = ZipFileEncoder();
     encoder.create(path);
     await encoder.addFile(file);
-    encoder.close();
+    await encoder.close();
 
     return File(path);
   } else {

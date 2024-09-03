@@ -24,6 +24,15 @@ String formatSizeProgress(
   return '$soFarValue/$totalValue $unit';
 }
 
+String formatThroughput(int bytesPerSecond, {int decimals = 1}) {
+  // Use KiB/s even for values less than 1 KiB/s, for readability
+  final scale = max(_sizeScale(bytesPerSecond), 1);
+  final value = _formatSizeValue(bytesPerSecond, scale, decimals: decimals);
+  final unit = _formatSizeUnit(scale);
+
+  return '$value $unit/s';
+}
+
 int _sizeScale(int bytes) => bytes > 0 ? (log(bytes) / log(1024)).floor() : 0;
 
 String _formatSizeValue(

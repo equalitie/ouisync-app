@@ -22,7 +22,7 @@ jobs:
               OUISYNC_LIB: ouisync/target/debug/libouisync_ffi.so
             target: aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
             ndk:
-              version: r25c
+              version: r27
               abi: arm64-v8a
             build-args: --apk
             artifact-files: ouisync*.apk
@@ -93,11 +93,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          # Downgrade flutter from the current 3.24.0 version due to a compilation bug
-          # in the extended_text dependency.
-          # https://github.com/fluttercandies/extended_text/issues/166
-          # TODO: Remove the below line when the above bug is resolved.
-          flutter-version: 3.22.3
+          flutter-version: 3.24.1
 
       - name: Run Flutter doctor
         run: flutter doctor -v

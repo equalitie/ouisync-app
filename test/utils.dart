@@ -180,11 +180,11 @@ class FakeWindowManager extends PlatformWindowManager {
 /// Fake Connectivity
 class FakeConnectivity implements Connectivity {
   @override
-  final Stream<ConnectivityResult> onConnectivityChanged = Stream.empty();
+  final Stream<List<ConnectivityResult>> onConnectivityChanged = Stream.empty();
 
   @override
-  Future<ConnectivityResult> checkConnectivity() =>
-      Future.value(ConnectivityResult.none);
+  Future<List<ConnectivityResult>> checkConnectivity() =>
+      Future.value([ConnectivityResult.none]);
 }
 
 /// Fake PackageInfo

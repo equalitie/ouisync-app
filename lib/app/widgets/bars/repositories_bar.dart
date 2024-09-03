@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync/ouisync.dart';
 import 'package:ouisync_app/app/widgets/notification_badge.dart';
+import 'package:ouisync_app/app/widgets/throughput_display.dart';
+import 'package:stream_transform/stream_transform.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
@@ -38,6 +40,7 @@ class RepositoriesBar extends StatelessWidget
           children: [
             _buildBackButton(),
             _buildName(reposCubit.currentRepo),
+            _buildStats(context, reposCubit.currentRepo),
             _buildStatus(reposCubit.currentRepo),
             _buildLockButton(reposCubit.currentRepo),
           ],
@@ -53,6 +56,18 @@ class RepositoriesBar extends StatelessWidget
           ),
         ),
       );
+
+  Widget _buildStats(BuildContext context, RepoEntry? repo) =>
+      repo is OpenRepoEntry
+          ? Padding(
+              padding: EdgeInsets.only(right: 10.0),
+              child: LiveThroughputDisplay(
+                _repoStatsStream(repo.cubit),
+                size: Theme.of(context).textTheme.labelSmall?.fontSize,
+                orientation: Orientation.portrait,
+              ),
+            )
+          : SizedBox.shrink();
 
   Widget _buildStatus(RepoEntry? repo) => repo is OpenRepoEntry
       ? Padding(
@@ -102,3 +117,7 @@ class RepositoriesBar extends StatelessWidget
     return const Size.fromHeight(Constants.repositoryBarHeight);
   }
 }
+
+Stream<NetworkStats> _repoStatsStream(RepoCubit repoCubit) =>
+    Stream.periodic(Duration(seconds: 1))
+        .asyncMapSample((_) => repoCubit.networkStats);

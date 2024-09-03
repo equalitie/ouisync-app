@@ -1,23 +1,24 @@
 import 'dart:async';
-import 'package:ouisync/ouisync.dart';
+
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ouisync/ouisync.dart';
 
 import '../utils/log.dart';
 
 class NatDetection extends Cubit<NatBehavior> with AppLogger {
   final Session session;
-  StreamSubscription<ConnectivityResult>? _subscription;
+  StreamSubscription<List<ConnectivityResult>>? _subscription;
 
   NatDetection(this.session) : super(NatBehavior.pending) {
     final connectivity = Connectivity();
 
     // TODO: throttle this to at most 1 per minute or so.
-    _subscription =
-        connectivity.onConnectivityChanged.listen((result) => _detect(result));
+    _subscription = connectivity.onConnectivityChanged
+        .listen((result) => _detect(result.last));
 
     unawaited(
-      connectivity.checkConnectivity().then((result) => _detect(result)),
+      connectivity.checkConnectivity().then((result) => _detect(result.last)),
     );
   }
 

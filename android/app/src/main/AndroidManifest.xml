@@ -1,108 +1,126 @@
-<!--
-  The `package="org.equalitie.ouisync"` should not really be needed, but there is
-  a bug in `flutter_tools` which causes compilation issues when running `flutter
-  run` for Android. Running `flutter build` compiles fine regardless.
-  See: https://stackoverflow.com/a/78630614/273348
--->
-<manifest
-  xmlns:android="http://schemas.android.com/apk/res/android"
-  package="org.equalitie.ouisync"
-  xmlns:tools="http://schemas.android.com/tools">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:tools="http://schemas.android.com/tools">
 
-  <uses-permission android:name="android.permission.INTERNET"/> 
-  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-  <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-  <uses-permission android:name="android.permission.CAMERA"/>
-
-  <!-- https://pub.dev/packages/android_alarm_manager_plus -->
-  <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
-  <uses-permission android:name="android.permission.WAKE_LOCK"/>
-
-  <!-- needed by flutter_email_sender -->
-  <queries>
-    <intent>
-      <action android:name="android.intent.action.SENDTO" />
-      <data android:scheme="mailto" />
-    </intent>
-  </queries>
-
-  <uses-sdk tools:overrideLibrary="design.codeux.biometric_storage" />
-
-  <application
-    android:label="@string/app_name"
-    android:networkSecurityConfig="@xml/network_security_config"
-    android:requestLegacyExternalStorage="true"
-    android:allowBackup="false"
-    android:fullBackupContent="false"
-    android:icon="@mipmap/ic_launcher"
-    android:roundIcon="@mipmap/ic_launcher_round">
-    <provider
-      tools:replace="android:authorities"
-      android:name="org.equalitie.ouisync.lib.PipeProvider"
-      android:authorities="${applicationId}.pipe"
-      android:exported="true"/>
-    <!--
-      NOTE: Forcing single Ouisync instance in its own task with launchMode="singleInstance". This is because Ouisync doesn't currently support multiple instances well. For example, modifying the repository list (adding/removing/renaming a repo) in one instance would not be reflected in the other instances, resulting in bad UX. Also the way Ouisync handles the back button is not currently compatible with launching it as part of other app's task. Even though these issues are potentially fixable, the single instance mode is still arguably more natural for Ouisync.
-    -->
-    <activity
-      android:name=".MainActivity"
-      android:launchMode="singleInstance"
-      android:exported="true"
-      android:theme="@style/LaunchTheme"
-      android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
-      android:hardwareAccelerated="true"
-      android:windowSoftInputMode="adjustResize">
-      <!--
-        Specifies an Android theme to apply to this Activity as soon as the Android process has
-        started. This theme is visible to the user while the Flutter UI initializes. After that,
-        this theme continues to determine the Window background behind the Flutter UI.
-      -->
-      <meta-data android:name="io.flutter.embedding.android.NormalTheme" android:resource="@style/NormalTheme"/>
-
-      <intent-filter>
-        <action android:name="android.intent.action.MAIN"/>
-        <category android:name="android.intent.category.LAUNCHER"/>
-      </intent-filter>
-      <!-- Receive share intent -->
-      <intent-filter>
-        <action android:name="android.intent.action.SEND"/>
-        <category android:name="android.intent.category.DEFAULT"/>
-        <data android:mimeType="*/*"/>
-      </intent-filter>
-      <intent-filter>
-        <action android:name="android.intent.action.SEND_MULTIPLE"/>
-        <category android:name="android.intent.category.DEFAULT"/>
-        <data android:mimeType="*/*"/>
-      </intent-filter>
-      <!-- Open share tokens -->
-      <!-- https://developer.android.com/training/app-links#android-app-links -->
-      <intent-filter android:autoVerify="true">
-        <action android:name="android.intent.action.VIEW"/>
-        <category android:name="android.intent.category.DEFAULT"/>
-        <category android:name="android.intent.category.BROWSABLE"/>
-        <data android:scheme="https" android:host="ouisync.net" android:pathPrefix="/r"/>
-      </intent-filter>
-    </activity>
+    <uses-permission android:name="android.permission.INTERNET"/> 
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.CAMERA"/>
 
     <!-- https://pub.dev/packages/android_alarm_manager_plus -->
-    <service
-        android:name="dev.fluttercommunity.plus.androidalarmmanager.AlarmService"
-        android:permission="android.permission.BIND_JOB_SERVICE"
-        android:exported="false"/>
-    <receiver
-        android:name="dev.fluttercommunity.plus.androidalarmmanager.AlarmBroadcastReceiver"
-        android:exported="false"/>
-    <receiver
-        android:name="dev.fluttercommunity.plus.androidalarmmanager.RebootBroadcastReceiver"
-        android:enabled="false"
-        android:exported="false">
-        <intent-filter>
-            <action android:name="android.intent.action.BOOT_COMPLETED" />
-        </intent-filter>
-    </receiver>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
 
-    <!-- Don't delete the meta-data below.
+    <!-- needed by flutter_email_sender -->
+    <queries>
+        <intent>
+        <action android:name="android.intent.action.SENDTO" />
+        <data android:scheme="mailto" />
+        </intent>
+    </queries>
+
+    <uses-sdk tools:overrideLibrary="design.codeux.biometric_storage" />
+
+    <application
+        android:label="@string/app_name"
+        android:name="${applicationName}"
+        android:allowBackup="false"
+        android:fullBackupContent="false"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round">
+
+        <provider
+            tools:replace="android:authorities"
+            android:name="org.equalitie.ouisync.lib.PipeProvider"
+            android:authorities="${applicationId}.pipe"
+            android:exported="true"/>
+        
+        <!--
+        NOTE: Forcing single Ouisync instance in its own task with launchMode="singleInstance". 
+        This is because Ouisync doesn't currently support multiple instances well. 
+        
+        For example, modifying the repository list (adding/removing/renaming a repo) in one 
+        instance would not be reflected in the other instances, resulting in bad UX. 
+        Also the way Ouisync handles the back button is not currently compatible with launching 
+        it as part of other app's task. 
+        
+        Even though these issues are potentially fixable, the single instance mode is still 
+        arguably more natural for Ouisync.
+        -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleInstance"
+            android:taskAffinity=""
+            android:theme="@style/LaunchTheme"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+            android:hardwareAccelerated="true"
+            android:windowSoftInputMode="adjustResize">
+            <!-- Specifies an Android theme to apply to this Activity as soon as
+                 the Android process has started. This theme is visible to the user
+                 while the Flutter UI initializes. After that, this theme continues
+                 to determine the Window background behind the Flutter UI. -->
+            <meta-data
+              android:name="io.flutter.embedding.android.NormalTheme"
+              android:resource="@style/NormalTheme"
+              />
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+
+            <!-- Receive share intent -->
+            <intent-filter>
+                <action android:name="android.intent.action.SEND"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="*/*"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND_MULTIPLE"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="*/*"/>
+            </intent-filter>
+            <!-- Open share tokens -->
+            <!-- https://developer.android.com/training/app-links#android-app-links -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="https" android:host="ouisync.net" android:pathPrefix="/r"/>
+            </intent-filter>
+        </activity>
+
+        <!-- https://pub.dev/packages/android_alarm_manager_plus -->
+        <service
+            android:name="dev.fluttercommunity.plus.androidalarmmanager.AlarmService"
+            android:permission="android.permission.BIND_JOB_SERVICE"
+            android:exported="false"/>
+        <receiver
+            android:name="dev.fluttercommunity.plus.androidalarmmanager.AlarmBroadcastReceiver"
+            android:exported="false"/>
+        <receiver
+            android:name="dev.fluttercommunity.plus.androidalarmmanager.RebootBroadcastReceiver"
+            android:enabled="false"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
-    <meta-data android:name="flutterEmbedding" android:value="2"/>
-  </application>
+        <meta-data
+            android:name="flutterEmbedding"
+            android:value="2" />
+    </application>
+    <!-- Required to query activities that can process text, see:
+         https://developer.android.com/training/package-visibility and
+         https://developer.android.com/reference/android/content/Intent#ACTION_PROCESS_TEXT.
+
+         In particular, this is used by the Flutter engine in io.flutter.plugin.text.ProcessTextPlugin. -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.PROCESS_TEXT"/>
+            <data android:mimeType="text/plain"/>
+        </intent>
+    </queries>
 </manifest>
