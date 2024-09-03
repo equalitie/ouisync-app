@@ -15,9 +15,11 @@ import 'package:path/path.dart' as p;
 import 'package:properties/properties.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
 import 'package:pub_semver/pub_semver.dart';
+import 'package:collection/collection.dart';
 
 const rootWorkDir = 'releases';
 const String windowsArtifactDir = 'build/windows/x64/runner/Release';
+const String defaultFlavor = "production";
 
 Future<void> main(List<String> args) async {
   final options = await Options.parse(args);
@@ -27,16 +29,23 @@ Future<void> main(List<String> args) async {
 
   final git = await GitDir.fromExisting(p.current);
 
-  if (!await checkWorkingTreeIsClean(git)) {
+  Version version = determineVersion(pubspec, options);
+
+  final commit = await getCommit();
+  final buildDesc = BuildDesc(version, commit);
+
+  if (buildDesc.flavor == defaultFlavor &&
+      !await checkWorkingTreeIsClean(git)) {
     return;
+  }
+
+  if (buildDesc.displayFlavor != null) {
+    await addBadgeToIcons(buildDesc.displayFlavor!);
   }
 
   // TODO: use `pubspec.name` here but first rename it from "ouisync_app" to "ouisync"
   final name = 'ouisync';
-  final version = pubspec.version!;
-  final commit = await getCommit();
 
-  final buildDesc = BuildDesc(version, commit);
   final outputDir = await createOutputDir(buildDesc);
 
   List<File> assets = [];
@@ -155,6 +164,7 @@ class Options {
   final String? identityName;
   final String? publisher;
   final bool awaitUpload;
+  final String flavor;
 
   Options._({
     this.apk = false,
@@ -171,6 +181,7 @@ class Options {
     this.identityName,
     this.publisher,
     this.awaitUpload = false,
+    this.flavor = defaultFlavor,
   });
 
   static Future<Options> parse(List<String> args) async {
@@ -251,6 +262,8 @@ class Options {
       negatable: false,
       help: 'Print this usage information',
     );
+    parser.addFlag('nightly',
+        help: 'Use the flavor for building nightly builds');
 
     final results = parser.parse(args);
 
@@ -313,6 +326,7 @@ class Options {
       identityName: results['identity-name'],
       publisher: results['publisher'],
       awaitUpload: results['await-upload'],
+      flavor: results['nightly'] ? "nightly" : defaultFlavor,
     );
   }
 }
@@ -331,6 +345,11 @@ class BuildDesc {
 
   String get versionString => _formatVersion(StringBuffer()).toString();
   String get revisionString => _formatRevision(StringBuffer()).toString();
+  // The "foo" in "1.2.3+foo".
+  String get buildIdentifier => version.build[0].toString();
+
+  String get flavor => version.preRelease.first!.toString();
+  String? get displayFlavor => flavor != defaultFlavor ? flavor : null;
 
   @override
   String toString() {
@@ -353,10 +372,10 @@ class BuildDesc {
       ..write('.')
       ..write(version.patch);
 
-    if (version.preRelease.isNotEmpty) {
+    if (displayFlavor != null) {
       buffer
         ..write('-')
-        ..write(version.preRelease.join('.'));
+        ..write(displayFlavor);
     }
 
     return buffer;
@@ -683,7 +702,10 @@ Future<File> buildDebCLI(
 //
 ////////////////////////////////////////////////////////////////////////////////
 Future<File> buildAab(BuildDesc buildDesc, sentryDSN) async {
-  final inputPath = 'build/app/outputs/bundle/release/app-release.aab';
+  String flavor = buildDesc.flavor;
+
+  final inputFileName = "app-$flavor-release.aab";
+  final inputPath = 'build/app/outputs/bundle/${flavor}Release/$inputFileName';
 
   print('Creating Android App Bundle ...');
 
@@ -693,7 +715,8 @@ Future<File> buildAab(BuildDesc buildDesc, sentryDSN) async {
     '--release',
     '--dart-define=SENTRY_DSN=$sentryDSN',
     '--build-number',
-    buildDesc.version.build[0].toString(),
+    buildDesc.buildIdentifier,
+    '--flavor=$flavor',
     '--build-name',
     buildDesc.toString(),
   ]);
@@ -1033,6 +1056,16 @@ Future<Directory> createOutputDir(BuildDesc buildDesc) async {
   return dir;
 }
 
+Version determineVersion(Pubspec pubspec, Options options) {
+  final pubspecVersion = pubspec.version!;
+  if (pubspecVersion.isPreRelease) {
+    throw "Pre-release string (the \"foo\" in \"1.2.3-foo\") is already set in pubspec.yaml";
+  }
+  return Version(
+      pubspecVersion.major, pubspecVersion.minor, pubspecVersion.patch,
+      pre: options.flavor, build: pubspecVersion.build[0].toString());
+}
+
 Future<void> run(
   String command,
   List<String> args, [
@@ -1130,4 +1163,54 @@ Future<String> readSentryDSN(String path) async {
     exit(1);
   }
   return sentryDSN;
+}
+
+class IconBadgeDesc {
+  String fileName;
+  String geometry;
+  String pointsize;
+
+  IconBadgeDesc(this.fileName, this.pointsize, this.geometry);
+}
+
+Future<void> addBadgeToIcons(String text) async {
+  String binaryName;
+
+  if (Platform.isWindows) {
+    binaryName = "magick";
+  } else {
+    binaryName = "convert";
+  }
+
+  final descriptions = [
+    IconBadgeDesc("ic_launcher.png", '40', "+16+16"),
+    IconBadgeDesc("ic_launcher_foreground.png", '40', "+100+120"),
+    IconBadgeDesc("ic_launcher_round.png", '40', "+16+16"),
+    IconBadgeDesc("ouisync_icon.png", '40', "+16+16"),
+    IconBadgeDesc("OuisyncFull.png", '40', "+300+16"),
+    IconBadgeDesc("Ouisync_v1_1560x1553.png", '200', "+64+124"),
+  ];
+
+  for (final desc in descriptions) {
+    // Use imagemagick's `convert` because the 'package:image/image.dart' lacks features
+    // (and some things like setting a font color doesn't seem to work).
+    // TODO: This overwrites the existing png files in git, which is annoying when done not
+    // on CI.
+    await run(binaryName, [
+      'assets/${desc.fileName}',
+      '-undercolor',
+      'red',
+      '-font',
+      // Picked randomly by what is on my and the CI machines.
+      'DejaVu-Sans',
+      '-gravity',
+      'SouthEast',
+      '-pointsize',
+      desc.pointsize,
+      '-annotate',
+      desc.geometry,
+      text,
+      'assets/${desc.fileName}',
+    ]);
+  }
 }
