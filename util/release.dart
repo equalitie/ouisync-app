@@ -745,6 +745,7 @@ Future<File> extractApk(File bundle) async {
   final storeFile = p.join('android/app', keyProperties.get('storeFile')!);
   final storePassword = keyProperties.get('storePassword')!;
   final keyPassword = keyProperties.get('keyPassword')!;
+  final keyAlias = keyProperties.get('keyAlias')!;
 
   final tempPath = p.setExtension(bundle.path, '.apks');
 
@@ -756,7 +757,7 @@ Future<File> extractApk(File bundle) async {
     '--mode=universal',
     '--ks=$storeFile',
     '--ks-pass=pass:$storePassword',
-    '--ks-key-alias=upload',
+    '--ks-key-alias=$keyAlias',
     '--key-pass=pass:$keyPassword',
     '--output=$tempPath',
   ]);
