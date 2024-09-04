@@ -403,7 +403,12 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
 
   Future<void> deleteRepository(RepoLocation location) async {
     final wasCurrent = currentRepo?.location == location;
-    final databaseId = _settings.findRepoByLocation(location)!;
+    final databaseId = _settings.findRepoByLocation(location);
+
+    if (databaseId == null) {
+      loggy.app('Failed finding repo by location', 'Returned null');
+      return;
+    }
 
     await _forget(location);
     await _settings.forgetRepo(databaseId);
