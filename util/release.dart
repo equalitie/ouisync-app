@@ -34,6 +34,10 @@ Future<void> main(List<String> args) async {
   final commit = await getCommit();
   final buildDesc = BuildDesc(version, commit);
 
+  if (sentryDSN == null && buildDesc.flavor == defaultFlavor) {
+    exit(1);
+  }
+
   if (buildDesc.flavor == defaultFlavor &&
       !await checkWorkingTreeIsClean(git)) {
     return;
@@ -411,7 +415,7 @@ class BuildDesc {
 //
 ////////////////////////////////////////////////////////////////////////////////
 Future<File> buildWindowsInstaller(
-    BuildDesc buildDesc, String sentryDSN) async {
+    BuildDesc buildDesc, String? sentryDSN) async {
   final buildName = buildDesc.toString();
 
   await run('flutter', [
@@ -419,7 +423,7 @@ Future<File> buildWindowsInstaller(
     'windows',
     '--verbose',
     '--release',
-    '--dart-define=SENTRY_DSN=$sentryDSN',
+    if (sentryDSN != null) '--dart-define=SENTRY_DSN=$sentryDSN',
     '--build-name',
     buildName,
   ]);
@@ -446,7 +450,7 @@ Future<File> buildWindowsInstaller(
 //
 ////////////////////////////////////////////////////////////////////////////////
 Future<File> buildWindowsMSIX(
-    String identityName, String publisher, String sentryDSN) async {
+    String identityName, String publisher, String? sentryDSN) async {
   if (await Directory(windowsArtifactDir).exists()) {
     // We had a problem when creating the msix when there was an executable from
     // previous non-msix builds, the executable was not regenerated and the
@@ -467,8 +471,12 @@ Future<File> buildWindowsMSIX(
 
   /// We first build the MSIX, before adding the additional assets to be
   /// packaged in the MSIX file
-  await run(
-      'dart', ['run', '--define=SENTRY_DSN=$sentryDSN', 'msix:build', ...args]);
+  await run('dart', [
+    'run',
+    if (sentryDSN != null) '--define=SENTRY_DSN=$sentryDSN',
+    'msix:build',
+    ...args
+  ]);
 
   /// Download the Dokan MSI to be bundle with the Ouisync MSIX, into the source
   /// directory (releases/bundled-assets-windows)
@@ -533,7 +541,7 @@ Future<File> buildDebGUI({
   required String name,
   required Directory outputDir,
   required BuildDesc buildDesc,
-  required String sentryDSN,
+  required String? sentryDSN,
   String description = '',
 }) async {
   // At some point we'll want to include the command line `ouisync`
@@ -550,7 +558,7 @@ Future<File> buildDebGUI({
   await run('flutter', [
     'build',
     'linux',
-    '--dart-define=SENTRY_DSN=$sentryDSN',
+    if (sentryDSN != null) '--dart-define=SENTRY_DSN=$sentryDSN',
     '--build-name',
     buildName,
   ]);
@@ -701,7 +709,7 @@ Future<File> buildDebCLI(
 // aab
 //
 ////////////////////////////////////////////////////////////////////////////////
-Future<File> buildAab(BuildDesc buildDesc, sentryDSN) async {
+Future<File> buildAab(BuildDesc buildDesc, String? sentryDSN) async {
   String flavor = buildDesc.flavor;
 
   final inputFileName = "app-$flavor-release.aab";
@@ -713,7 +721,7 @@ Future<File> buildAab(BuildDesc buildDesc, sentryDSN) async {
     'build',
     'appbundle',
     '--release',
-    '--dart-define=SENTRY_DSN=$sentryDSN',
+    if (sentryDSN != null) '--dart-define=SENTRY_DSN=$sentryDSN',
     '--build-number',
     buildDesc.buildIdentifier,
     '--flavor=$flavor',
@@ -1155,13 +1163,21 @@ Future<void> createIcon(File src, File dst, int resolution) async {
   await command.executeThread();
 }
 
-Future<String> readSentryDSN(String path) async {
-  final sentryDSN = (await File(path).readAsString()).trim();
+Future<String?> readSentryDSN(String path) async {
+  String sentryDSN;
+
+  try {
+    sentryDSN = (await File(path).readAsString()).trim();
+  } catch (e) {
+    print('Failed to open file containing Sentry DSN "$path"');
+    print(e);
+    return null;
+  }
   // Validate
   bool isValid = Uri.tryParse(sentryDSN)?.hasAbsolutePath ?? false;
   if (!isValid) {
     print("Invalid Sentry DSN in $path");
-    exit(1);
+    return null;
   }
   return sentryDSN;
 }
