@@ -84,14 +84,18 @@ android {
         }
     }
 
-    flavorDimensions "productionOrNightly"
+    flavorDimensions "releaseType"
     productFlavors {
         production {
-            dimension "productionOrNightly"
+            dimension "releaseType"
         }
         nightly {
-            dimension "productionOrNightly"
+            dimension "releaseType"
             applicationIdSuffix ".nightly"
+        }
+        unofficial {
+            dimension "releaseType"
+            applicationIdSuffix ".unofficial"
         }
     }
 }
