@@ -56,25 +56,33 @@ abstract class Dialogs {
             return _alertDialog(context, title, body, actions);
           });
 
-  static Future<bool?> simpleAlertDialog(
-      {required BuildContext context,
-      required String title,
-      required String message,
-      List<Widget>? actions}) {
-    actions ??= [
-      TextButton(
-        child: Text(S.current.actionCloseCapital),
-        onPressed: () => Navigator.of(context, rootNavigator: true).pop(false),
-      )
-    ];
-
-    return showDialog(
+  static Future<bool?> simpleAlertDialog({
+    required BuildContext context,
+    required String title,
+    required String message,
+    List<Widget>? actions,
+  }) =>
+      showDialog(
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
-          return _alertDialog(context, title, [Text(message)], actions!);
-        });
-  }
+          return _alertDialog(
+            context,
+            title,
+            [Text(message)],
+            actions ??
+                [
+                  TextButton(
+                    child: Text(S.current.actionCloseCapital),
+                    onPressed: () => Navigator.of(
+                      context,
+                      rootNavigator: true,
+                    ).pop(false),
+                  ),
+                ],
+          );
+        },
+      );
 
   static actionDialog(
           BuildContext context, String dialogTitle, Widget? actionBody) =>
