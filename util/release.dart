@@ -19,7 +19,57 @@ import 'package:collection/collection.dart';
 
 const rootWorkDir = 'releases';
 const String windowsArtifactDir = 'build/windows/x64/runner/Release';
-const String defaultFlavor = "production";
+
+enum Flavor {
+  production(true, true, true),
+  nightly(true, true, false),
+  unofficial(false, false, false);
+
+  const Flavor(
+      this.requiresSigning, this.requiresSentryDSN, this.doGitCleanCheck);
+
+  final bool requiresSigning;
+  final bool requiresSentryDSN;
+  final bool doGitCleanCheck;
+
+  static Flavor fromString(String name) {
+    switch (name) {
+      case "":
+      case "production":
+        return Flavor.production;
+      case "nightly":
+        return Flavor.nightly;
+      case "unofficial":
+        return Flavor.unofficial;
+      default:
+        print(
+            'Invalid flavor "$name", must be one of {production, nightly, unofficial}');
+        exit(1);
+    }
+  }
+
+  String toString() {
+    switch (this) {
+      case Flavor.production:
+        return "production";
+      case Flavor.nightly:
+        return "nightly";
+      case Flavor.unofficial:
+        return "unofficial";
+    }
+  }
+
+  String? get displayString {
+    switch (this) {
+      case Flavor.production:
+        return "";
+      case Flavor.nightly:
+        return "nightly";
+      case Flavor.unofficial:
+        return "unofficial";
+    }
+  }
+}
 
 Future<void> main(List<String> args) async {
   final options = await Options.parse(args);
@@ -34,17 +84,17 @@ Future<void> main(List<String> args) async {
   final commit = await getCommit();
   final buildDesc = BuildDesc(version, commit);
 
-  if (sentryDSN == null && buildDesc.flavor == defaultFlavor) {
+  if (sentryDSN == null && buildDesc.flavor.requiresSentryDSN) {
+    print("Sentry DSN is required for this flavor, but could not be found");
     exit(1);
   }
 
-  if (buildDesc.flavor == defaultFlavor &&
-      !await checkWorkingTreeIsClean(git)) {
+  if (buildDesc.flavor.doGitCleanCheck && !await checkWorkingTreeIsClean(git)) {
     return;
   }
 
-  if (buildDesc.displayFlavor != null) {
-    await addBadgeToIcons(buildDesc.displayFlavor!);
+  if (buildDesc.flavor.displayString != null) {
+    await addBadgeToIcons(buildDesc.flavor.displayString!);
   }
 
   // TODO: use `pubspec.name` here but first rename it from "ouisync_app" to "ouisync"
@@ -62,7 +112,7 @@ Future<void> main(List<String> args) async {
     }
 
     if (options.apk) {
-      final apk = await extractApk(aab);
+      final apk = await extractApk(aab, buildDesc.flavor);
       assets.add(await collateAsset(outputDir, name, buildDesc, apk));
     }
   }
@@ -168,7 +218,7 @@ class Options {
   final String? identityName;
   final String? publisher;
   final bool awaitUpload;
-  final String flavor;
+  final Flavor flavor;
 
   Options._({
     this.apk = false,
@@ -185,7 +235,7 @@ class Options {
     this.identityName,
     this.publisher,
     this.awaitUpload = false,
-    this.flavor = defaultFlavor,
+    this.flavor = Flavor.production,
   });
 
   static Future<Options> parse(List<String> args) async {
@@ -266,8 +316,9 @@ class Options {
       negatable: false,
       help: 'Print this usage information',
     );
-    parser.addFlag('nightly',
-        help: 'Use the flavor for building nightly builds');
+    parser.addOption('flavor',
+        help:
+            'Specify a build flavor, one of {production, nightly, unofficial}, nightly is the default');
 
     final results = parser.parse(args);
 
@@ -330,7 +381,7 @@ class Options {
       identityName: results['identity-name'],
       publisher: results['publisher'],
       awaitUpload: results['await-upload'],
-      flavor: results['nightly'] ? "nightly" : defaultFlavor,
+      flavor: Flavor.fromString(results['flavor']),
     );
   }
 }
@@ -352,8 +403,7 @@ class BuildDesc {
   // The "foo" in "1.2.3+foo".
   String get buildIdentifier => version.build[0].toString();
 
-  String get flavor => version.preRelease.first!.toString();
-  String? get displayFlavor => flavor != defaultFlavor ? flavor : null;
+  Flavor get flavor => Flavor.fromString(version.preRelease.first!.toString());
 
   @override
   String toString() {
@@ -376,10 +426,10 @@ class BuildDesc {
       ..write('.')
       ..write(version.patch);
 
-    if (displayFlavor != null) {
+    if (flavor.displayString != null) {
       buffer
         ..write('-')
-        ..write(displayFlavor);
+        ..write(flavor.displayString);
     }
 
     return buffer;
@@ -710,7 +760,7 @@ Future<File> buildDebCLI(
 //
 ////////////////////////////////////////////////////////////////////////////////
 Future<File> buildAab(BuildDesc buildDesc, String? sentryDSN) async {
-  String flavor = buildDesc.flavor;
+  String flavor = buildDesc.flavor.toString();
 
   final inputFileName = "app-$flavor-release.aab";
   final inputPath = 'build/app/outputs/bundle/${flavor}Release/$inputFileName';
@@ -737,7 +787,7 @@ Future<File> buildAab(BuildDesc buildDesc, String? sentryDSN) async {
 // apk
 //
 ////////////////////////////////////////////////////////////////////////////////
-Future<File> extractApk(File bundle) async {
+Future<File> extractApk(File bundle, Flavor flavor) async {
   final outputPath = p.setExtension(bundle.path, '.apk');
   final outputFile = File(outputPath);
 
@@ -749,11 +799,25 @@ Future<File> extractApk(File bundle) async {
 
   final bundletool = await prepareBundletool();
 
-  final keyProperties = Properties.fromFile('secrets/android/key.properties');
-  final storeFile = p.join('android/app', keyProperties.get('storeFile')!);
-  final storePassword = keyProperties.get('storePassword')!;
-  final keyPassword = keyProperties.get('keyPassword')!;
-  final keyAlias = keyProperties.get('keyAlias')!;
+  final keyPropertiesPath = 'secrets/android/key.properties';
+
+  String? storeFile;
+  String? storePassword;
+  String? keyPassword;
+  String? keyAlias;
+
+  if (await File(keyPropertiesPath).exists()) {
+    final keyProperties = Properties.fromFile(keyPropertiesPath);
+    storeFile = p.join('android/app', keyProperties.get('storeFile')!);
+    storePassword = keyProperties.get('storePassword')!;
+    keyPassword = keyProperties.get('keyPassword')!;
+    keyAlias = keyProperties.get('keyAlias')!;
+  } else {
+    if (flavor.requiresSigning) {
+      print('Key properties file "$keyPropertiesPath" not found');
+      exit(1);
+    }
+  }
 
   final tempPath = p.setExtension(bundle.path, '.apks');
 
@@ -763,10 +827,10 @@ Future<File> extractApk(File bundle) async {
     'build-apks',
     '--bundle=${bundle.path}',
     '--mode=universal',
-    '--ks=$storeFile',
-    '--ks-pass=pass:$storePassword',
-    '--ks-key-alias=$keyAlias',
-    '--key-pass=pass:$keyPassword',
+    if (storeFile != null) '--ks=$storeFile',
+    if (storePassword != null) '--ks-pass=pass:$storePassword',
+    if (keyAlias != null) '--ks-key-alias=$keyAlias',
+    if (keyPassword != null) '--key-pass=pass:$keyPassword',
     '--output=$tempPath',
   ]);
 
@@ -1072,7 +1136,8 @@ Version determineVersion(Pubspec pubspec, Options options) {
   }
   return Version(
       pubspecVersion.major, pubspecVersion.minor, pubspecVersion.patch,
-      pre: options.flavor, build: pubspecVersion.build[0].toString());
+      pre: options.flavor.toString(),
+      build: pubspecVersion.build[0].toString());
 }
 
 Future<void> run(
