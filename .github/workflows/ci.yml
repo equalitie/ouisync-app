@@ -129,16 +129,16 @@ jobs:
         run:
           flutter test
 
-      - name: Setup Sentry DSN for artifact build (different from the main releases)
+      - name: Setup Sentry DSN for artifact build (different from the production releases)
         run: |
           mkdir -p secrets/android
           echo $NIGHTLY_SENTRY_DSN > secrets/sentry_dsn
         shell: bash
         env:
           NIGHTLY_SENTRY_DSN : ${{ secrets.NIGHTLY_SENTRY_DSN }}
-        if: env.NIGHTLY_KEYSTORE_JKS_HEX != null
+        if: env.NIGHTLY_SENTRY_DSN != null
 
-      - name: Setup secrets for artifact signing (different from the main releases)
+      - name: Setup secrets for artifact signing (different from the production releases)
         run: |
           mkdir -p secrets/android
           echo $NIGHTLY_KEYSTORE_JKS_HEX > secrets/android/keystore.jks.hex
