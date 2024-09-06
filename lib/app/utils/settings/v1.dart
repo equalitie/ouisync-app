@@ -254,10 +254,10 @@ class Settings with AppLogger {
 
     if (password == null) {
       final errorMessage =
-          'failed to migrate auth mode for repository repo: password is null';
+          'Failed to migrate auth mode for repository repo: password is null';
 
-      loggy.error('$errorMessage: path');
-      await Sentry.captureMessage('$errorMessage $repoName');
+      loggy.error('$errorMessage - $path');
+      await Sentry.captureMessage(errorMessage);
 
       newAuthMode = AuthModeBlindOrManual();
       return newAuthMode;
