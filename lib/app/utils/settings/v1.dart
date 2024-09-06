@@ -1,16 +1,17 @@
-import 'dart:io' as io;
 import 'dart:convert';
+import 'dart:io' as io;
 
 import 'package:equatable/equatable.dart';
 import 'package:ouisync/ouisync.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../models/models.dart';
-import '../utils.dart';
 import '../files.dart';
 import '../master_key.dart';
+import '../utils.dart';
 import 'v0/v0.dart' as v0;
 
 class DatabaseId extends Equatable {
@@ -178,21 +179,17 @@ class Settings with AppLogger {
         case v0.AuthMode.version1:
         case v0.AuthMode.version2:
           oldPwdStorage = v0.SecureStorage(databaseId: databaseId);
-          final password = await oldPwdStorage.tryGetPassword(
-            authMode: v0.AuthMode.noLocalPassword,
-          );
-          authMode = AuthModePasswordStoredOnDevice(
-            await masterKey.encrypt(password!),
-            true,
+          authMode = await _getNewAuthMode(
+            oldPwdStorage,
+            repo.name,
+            repo.info.path,
           );
         case v0.AuthMode.noLocalPassword:
           oldPwdStorage = v0.SecureStorage(databaseId: databaseId);
-          final password = await oldPwdStorage.tryGetPassword(
-            authMode: v0.AuthMode.noLocalPassword,
-          );
-          authMode = AuthModePasswordStoredOnDevice(
-            await masterKey.encrypt(password!),
-            false,
+          authMode = await _getNewAuthMode(
+            oldPwdStorage,
+            repo.name,
+            repo.info.path,
           );
       }
 
@@ -243,6 +240,35 @@ class Settings with AppLogger {
 
       await _prefs.remove(key);
     }
+  }
+
+  Future<AuthMode> _getNewAuthMode(
+    v0.SecureStorage oldPwdStorage,
+    String repoName,
+    String path,
+  ) async {
+    AuthMode newAuthMode;
+    final password = await oldPwdStorage.tryGetPassword(
+      authMode: v0.AuthMode.noLocalPassword,
+    );
+
+    if (password == null) {
+      final errorMessage =
+          'Failed to migrate auth mode for repository repo: password is null';
+
+      loggy.error('$errorMessage - $path');
+      await Sentry.captureMessage(errorMessage);
+
+      newAuthMode = AuthModeBlindOrManual();
+      return newAuthMode;
+    }
+
+    newAuthMode = AuthModePasswordStoredOnDevice(
+      await masterKey.encrypt(password),
+      true,
+    );
+
+    return newAuthMode;
   }
 
   // Move all repos from the legacy location to the new location.
