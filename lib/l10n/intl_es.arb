@@ -1015,5 +1015,15 @@
   "titleDokanInstallationFound": "Instalación de Dokan encontrada",
   "@titleDokanInstallationFound": {},
   "messageUpdateLocalSecretOk": "Las propiedades de seguridad del repositorio han sido actualizadas.",
-  "@messageUpdateLocalSecretOk": {}
+  "@messageUpdateLocalSecretOk": {},
+  "messageReplaceExistingFolder": "Reemplazar carpeta existente",
+  "@messageReplaceExistingFolder": {},
+  "messageKeepBothFolders": "Mantener las dos carpetas",
+  "@messageKeepBothFolders": {},
+  "messageOnlyAvailableFiles": "Solo disponible para archivos",
+  "@messageOnlyAvailableFiles": {},
+  "actionLocateRepo": "Localizar repositorio",
+  "@actionLocateRepo": {},
+  "messageSecurityOptionsNotAvailableBlind": "Las opciones de seguridad no están disponibles para repositorios vacíos",
+  "@messageSecurityOptionsNotAvailableBlind": {}
 }
