@@ -2,11 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync_app/app/cubits/repo_creation.dart';
-import 'package:ouisync_app/app/cubits/repo_security.dart';
 import 'package:ouisync/ouisync.dart';
 
 import '../../generated/l10n.dart';
+import '../cubits/repo_creation.dart';
+import '../cubits/repo_security.dart';
 import '../utils/constants.dart';
 import '../utils/dialogs.dart';
 import '../utils/dimensions.dart';
@@ -43,6 +43,14 @@ class RepoCreation extends StatelessWidget {
                   current.loading && !previous.loading,
               listener: _handleLoading,
             ),
+            // Prefill suggested name on first load
+            BlocListener<RepoCreationCubit, RepoCreationState>(
+              bloc: creationCubit,
+              listenWhen: (previous, current) =>
+                  current.suggestedName.isNotEmpty &&
+                  previous.suggestedName.isEmpty,
+              listener: _handlePrefillSuggestedName,
+            ),
             BlocListener<RepoSecurityCubit, RepoSecurityState>(
               bloc: securityCubit,
               listener: _handleLocalSecretChanged,
@@ -74,9 +82,11 @@ class RepoCreation extends StatelessWidget {
           if (creationState.token != null)
             ..._buildTokenLabel(context, creationState),
           ..._buildNameField(context, creationState),
-          if (creationState.accessMode == AccessMode.write)
-            _buildUseCacheServersSwitch(context, creationState),
-          RepoSecurity(securityCubit),
+          _buildUseCacheServersSwitch(context, creationState),
+          RepoSecurity(
+            securityCubit,
+            creationState.accessMode == AccessMode.blind,
+          ),
         ],
       );
 
@@ -100,6 +110,8 @@ class RepoCreation extends StatelessWidget {
                     securityState.isValid
                 ? () => creationCubit.save()
                 : null,
+            autofocus: true,
+            focusNode: creationCubit.positiveButtonFocusNode,
           ),
         ),
       ];
@@ -162,7 +174,6 @@ class RepoCreation extends StatelessWidget {
           hintText: S.current.messageRepositoryName,
           errorText: state.nameError,
           autovalidateMode: AutovalidateMode.onUserInteraction,
-          autofocus: true,
           textInputAction: TextInputAction.next,
         ),
         Visibility(
@@ -182,13 +193,15 @@ class RepoCreation extends StatelessWidget {
     BuildContext context,
     RepoCreationState state,
   ) =>
-      CustomAdaptiveSwitch(
-        key: ValueKey('use-cache-servers'),
-        value: state.useCacheServers,
-        title: S.current.messageUseCacheServers,
-        contentPadding: EdgeInsets.zero,
-        onChanged: (value) => creationCubit.setUseCacheServers(value),
-      );
+      state.accessMode == AccessMode.write
+          ? CustomAdaptiveSwitch(
+              key: ValueKey('use-cache-servers'),
+              value: state.useCacheServers,
+              title: S.current.messageUseCacheServers,
+              contentPadding: EdgeInsets.zero,
+              onChanged: (value) => creationCubit.setUseCacheServers(value),
+            )
+          : SizedBox.shrink();
 
   TextStyle _smallMessageStyle(BuildContext context) =>
       context.theme.appTextStyle.bodySmall.copyWith(color: Colors.black54);
@@ -239,4 +252,10 @@ class RepoCreation extends StatelessWidget {
 
     creationCubit.setLocalSecret(localSecretInput);
   }
+
+  void _handlePrefillSuggestedName(
+    BuildContext context,
+    RepoCreationState state,
+  ) =>
+      creationCubit.acceptSuggestedName();
 }

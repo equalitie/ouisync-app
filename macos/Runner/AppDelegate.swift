@@ -5,7 +5,7 @@ import OSLog
 
 
 // https://developer.apple.com/documentation/uikit/uiapplicationdelegate
-@NSApplicationMain
+@main
 class AppDelegate: FlutterAppDelegate {
 //    var fileProviderProxy: FileProviderProxy?;
 

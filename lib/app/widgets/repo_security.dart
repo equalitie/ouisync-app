@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync_app/app/utils/utils.dart';
+import '../utils/utils.dart';
 
 import '../../generated/l10n.dart';
 import '../cubits/repo_security.dart';
@@ -10,27 +10,36 @@ import 'widgets.dart';
 
 class RepoSecurity extends StatelessWidget {
   const RepoSecurity(
-    this.cubit, {
+    this.cubit,
+    this.isBlind, {
     super.key,
   });
 
   final RepoSecurityCubit cubit;
+  // If a repository is blind, the security options are disabled, and a message
+  // is shown explaining this.
+  final bool isBlind;
 
   @override
-  Widget build(BuildContext context) =>
-      BlocBuilder<RepoSecurityCubit, RepoSecurityState>(
-        bloc: cubit,
-        builder: (context, state) => Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildPasswordFields(state),
-            _buildOriginSwitch(state),
-            _buildStoreSwitch(state),
-            _buildSecureWithBiometricsSwitch(state),
-            _buildManualPasswordWarning(context, state),
-          ],
-        ),
-      );
+  Widget build(BuildContext context) {
+    final warningStyle =
+        context.theme.appTextStyle.bodyMedium.copyWith(color: Colors.red);
+
+    return BlocBuilder<RepoSecurityCubit, RepoSecurityState>(
+      bloc: cubit,
+      builder: (context, state) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildPasswordFields(state),
+          _buildOriginSwitch(state),
+          _buildStoreSwitch(state),
+          _buildSecureWithBiometricsSwitch(state),
+          _buildDisabledOptionsMessage(isBlind, warningStyle),
+          _buildManualPasswordWarning(state, warningStyle),
+        ],
+      ),
+    );
+  }
 
   Widget _buildPasswordFields(RepoSecurityState state) =>
       switch (state.origin) {
@@ -45,8 +54,10 @@ class RepoSecurity extends StatelessWidget {
         key: ValueKey('use-local-password'),
         value: state.origin == SecretKeyOrigin.manual,
         title: S.current.messageUseLocalPassword,
-        onChanged: (value) => cubit
-            .setOrigin(value ? SecretKeyOrigin.manual : SecretKeyOrigin.random),
+        onChanged: isBlind
+            ? null
+            : (value) => cubit.setOrigin(
+                value ? SecretKeyOrigin.manual : SecretKeyOrigin.random),
       );
 
   Widget _buildStoreSwitch(RepoSecurityState state) => switch (state.origin) {
@@ -68,22 +79,44 @@ class RepoSecurity extends StatelessWidget {
           ? _buildSwitch(
               value: state.secureWithBiometrics,
               title: S.current.messageSecureUsingBiometrics,
-              onChanged: state.isSecureWithBiometricsEnabled
-                  ? cubit.setSecureWithBiometrics
-                  : null,
+              onChanged: isBlind
+                  ? null
+                  : state.isSecureWithBiometricsEnabled
+                      ? cubit.setSecureWithBiometrics
+                      : null,
             )
           : SizedBox.shrink();
 
+  Widget _buildDisabledOptionsMessage(
+    bool visible,
+    TextStyle warningStyle,
+  ) =>
+      _buildWarning(
+        visible,
+        S.current.messageSecurityOptionsNotAvailableBlind,
+        warningStyle,
+      );
+
   Widget _buildManualPasswordWarning(
-          BuildContext context, RepoSecurityState state) =>
+    RepoSecurityState state,
+    TextStyle warningStyle,
+  ) {
+    final visible = state.origin == SecretKeyOrigin.manual;
+    return _buildWarning(
+      visible,
+      S.current.messageRememberSavePasswordAlert,
+      warningStyle,
+    );
+  }
+
+  Widget _buildWarning(bool visible, String warning, TextStyle textStyle) =>
       Visibility(
-        visible: state.origin == SecretKeyOrigin.manual,
+        visible: visible,
         child: Padding(
           padding: EdgeInsets.symmetric(vertical: 24.0),
           child: Fields.autosizeText(
-            S.current.messageRememberSavePasswordAlert,
-            style: context.theme.appTextStyle.bodyMedium
-                .copyWith(color: Colors.red),
+            warning,
+            style: textStyle,
             maxLines: 10,
             softWrap: true,
             textOverflow: TextOverflow.ellipsis,

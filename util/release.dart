@@ -15,9 +15,61 @@ import 'package:path/path.dart' as p;
 import 'package:properties/properties.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
 import 'package:pub_semver/pub_semver.dart';
+import 'package:collection/collection.dart';
 
 const rootWorkDir = 'releases';
 const String windowsArtifactDir = 'build/windows/x64/runner/Release';
+
+enum Flavor {
+  production(true, true, true),
+  nightly(true, true, false),
+  unofficial(false, false, false);
+
+  const Flavor(
+      this.requiresSigning, this.requiresSentryDSN, this.doGitCleanCheck);
+
+  final bool requiresSigning;
+  final bool requiresSentryDSN;
+  final bool doGitCleanCheck;
+
+  static Flavor fromString(String name) {
+    switch (name) {
+      case "":
+      case "production":
+        return Flavor.production;
+      case "nightly":
+        return Flavor.nightly;
+      case "unofficial":
+        return Flavor.unofficial;
+      default:
+        print(
+            'Invalid flavor "$name", must be one of {production, nightly, unofficial}');
+        exit(1);
+    }
+  }
+
+  String toString() {
+    switch (this) {
+      case Flavor.production:
+        return "production";
+      case Flavor.nightly:
+        return "nightly";
+      case Flavor.unofficial:
+        return "unofficial";
+    }
+  }
+
+  String? get displayString {
+    switch (this) {
+      case Flavor.production:
+        return "";
+      case Flavor.nightly:
+        return "nightly";
+      case Flavor.unofficial:
+        return "unofficial";
+    }
+  }
+}
 
 Future<void> main(List<String> args) async {
   final options = await Options.parse(args);
@@ -27,16 +79,27 @@ Future<void> main(List<String> args) async {
 
   final git = await GitDir.fromExisting(p.current);
 
-  if (!await checkWorkingTreeIsClean(git)) {
+  Version version = determineVersion(pubspec, options);
+
+  final commit = await getCommit();
+  final buildDesc = BuildDesc(version, commit);
+
+  if (sentryDSN == null && buildDesc.flavor.requiresSentryDSN) {
+    print("Sentry DSN is required for this flavor, but could not be found");
+    exit(1);
+  }
+
+  if (buildDesc.flavor.doGitCleanCheck && !await checkWorkingTreeIsClean(git)) {
     return;
+  }
+
+  if (buildDesc.flavor.displayString != null) {
+    await addBadgeToIcons(buildDesc.flavor.displayString!);
   }
 
   // TODO: use `pubspec.name` here but first rename it from "ouisync_app" to "ouisync"
   final name = 'ouisync';
-  final version = pubspec.version!;
-  final commit = await getCommit();
 
-  final buildDesc = BuildDesc(version, commit);
   final outputDir = await createOutputDir(buildDesc);
 
   List<File> assets = [];
@@ -49,7 +112,7 @@ Future<void> main(List<String> args) async {
     }
 
     if (options.apk) {
-      final apk = await extractApk(aab);
+      final apk = await extractApk(aab, buildDesc.flavor);
       assets.add(await collateAsset(outputDir, name, buildDesc, apk));
     }
   }
@@ -155,6 +218,7 @@ class Options {
   final String? identityName;
   final String? publisher;
   final bool awaitUpload;
+  final Flavor flavor;
 
   Options._({
     this.apk = false,
@@ -171,6 +235,7 @@ class Options {
     this.identityName,
     this.publisher,
     this.awaitUpload = false,
+    this.flavor = Flavor.production,
   });
 
   static Future<Options> parse(List<String> args) async {
@@ -251,6 +316,9 @@ class Options {
       negatable: false,
       help: 'Print this usage information',
     );
+    parser.addOption('flavor',
+        help:
+            'Specify a build flavor, one of {production, nightly, unofficial}, nightly is the default');
 
     final results = parser.parse(args);
 
@@ -313,6 +381,7 @@ class Options {
       identityName: results['identity-name'],
       publisher: results['publisher'],
       awaitUpload: results['await-upload'],
+      flavor: Flavor.fromString(results['flavor']),
     );
   }
 }
@@ -331,6 +400,10 @@ class BuildDesc {
 
   String get versionString => _formatVersion(StringBuffer()).toString();
   String get revisionString => _formatRevision(StringBuffer()).toString();
+  // The "foo" in "1.2.3+foo".
+  String get buildIdentifier => version.build[0].toString();
+
+  Flavor get flavor => Flavor.fromString(version.preRelease.first!.toString());
 
   @override
   String toString() {
@@ -353,10 +426,10 @@ class BuildDesc {
       ..write('.')
       ..write(version.patch);
 
-    if (version.preRelease.isNotEmpty) {
+    if (flavor.displayString != null) {
       buffer
         ..write('-')
-        ..write(version.preRelease.join('.'));
+        ..write(flavor.displayString);
     }
 
     return buffer;
@@ -392,7 +465,7 @@ class BuildDesc {
 //
 ////////////////////////////////////////////////////////////////////////////////
 Future<File> buildWindowsInstaller(
-    BuildDesc buildDesc, String sentryDSN) async {
+    BuildDesc buildDesc, String? sentryDSN) async {
   final buildName = buildDesc.toString();
 
   await run('flutter', [
@@ -400,7 +473,7 @@ Future<File> buildWindowsInstaller(
     'windows',
     '--verbose',
     '--release',
-    '--dart-define=SENTRY_DSN=$sentryDSN',
+    if (sentryDSN != null) '--dart-define=SENTRY_DSN=$sentryDSN',
     '--build-name',
     buildName,
   ]);
@@ -427,7 +500,7 @@ Future<File> buildWindowsInstaller(
 //
 ////////////////////////////////////////////////////////////////////////////////
 Future<File> buildWindowsMSIX(
-    String identityName, String publisher, String sentryDSN) async {
+    String identityName, String publisher, String? sentryDSN) async {
   if (await Directory(windowsArtifactDir).exists()) {
     // We had a problem when creating the msix when there was an executable from
     // previous non-msix builds, the executable was not regenerated and the
@@ -448,8 +521,12 @@ Future<File> buildWindowsMSIX(
 
   /// We first build the MSIX, before adding the additional assets to be
   /// packaged in the MSIX file
-  await run(
-      'dart', ['run', '--define=SENTRY_DSN=$sentryDSN', 'msix:build', ...args]);
+  await run('dart', [
+    'run',
+    if (sentryDSN != null) '--define=SENTRY_DSN=$sentryDSN',
+    'msix:build',
+    ...args
+  ]);
 
   /// Download the Dokan MSI to be bundle with the Ouisync MSIX, into the source
   /// directory (releases/bundled-assets-windows)
@@ -514,7 +591,7 @@ Future<File> buildDebGUI({
   required String name,
   required Directory outputDir,
   required BuildDesc buildDesc,
-  required String sentryDSN,
+  required String? sentryDSN,
   String description = '',
 }) async {
   // At some point we'll want to include the command line `ouisync`
@@ -531,7 +608,7 @@ Future<File> buildDebGUI({
   await run('flutter', [
     'build',
     'linux',
-    '--dart-define=SENTRY_DSN=$sentryDSN',
+    if (sentryDSN != null) '--dart-define=SENTRY_DSN=$sentryDSN',
     '--build-name',
     buildName,
   ]);
@@ -682,8 +759,11 @@ Future<File> buildDebCLI(
 // aab
 //
 ////////////////////////////////////////////////////////////////////////////////
-Future<File> buildAab(BuildDesc buildDesc, sentryDSN) async {
-  final inputPath = 'build/app/outputs/bundle/release/app-release.aab';
+Future<File> buildAab(BuildDesc buildDesc, String? sentryDSN) async {
+  String flavor = buildDesc.flavor.toString();
+
+  final inputFileName = "app-$flavor-release.aab";
+  final inputPath = 'build/app/outputs/bundle/${flavor}Release/$inputFileName';
 
   print('Creating Android App Bundle ...');
 
@@ -691,9 +771,10 @@ Future<File> buildAab(BuildDesc buildDesc, sentryDSN) async {
     'build',
     'appbundle',
     '--release',
-    '--dart-define=SENTRY_DSN=$sentryDSN',
+    if (sentryDSN != null) '--dart-define=SENTRY_DSN=$sentryDSN',
     '--build-number',
-    buildDesc.version.build[0].toString(),
+    buildDesc.buildIdentifier,
+    '--flavor=$flavor',
     '--build-name',
     buildDesc.toString(),
   ]);
@@ -706,7 +787,7 @@ Future<File> buildAab(BuildDesc buildDesc, sentryDSN) async {
 // apk
 //
 ////////////////////////////////////////////////////////////////////////////////
-Future<File> extractApk(File bundle) async {
+Future<File> extractApk(File bundle, Flavor flavor) async {
   final outputPath = p.setExtension(bundle.path, '.apk');
   final outputFile = File(outputPath);
 
@@ -718,10 +799,25 @@ Future<File> extractApk(File bundle) async {
 
   final bundletool = await prepareBundletool();
 
-  final keyProperties = Properties.fromFile('secrets/android/key.properties');
-  final storeFile = p.join('android/app', keyProperties.get('storeFile')!);
-  final storePassword = keyProperties.get('storePassword')!;
-  final keyPassword = keyProperties.get('keyPassword')!;
+  final keyPropertiesPath = 'secrets/android/key.properties';
+
+  String? storeFile;
+  String? storePassword;
+  String? keyPassword;
+  String? keyAlias;
+
+  if (await File(keyPropertiesPath).exists()) {
+    final keyProperties = Properties.fromFile(keyPropertiesPath);
+    storeFile = p.join('android/app', keyProperties.get('storeFile')!);
+    storePassword = keyProperties.get('storePassword')!;
+    keyPassword = keyProperties.get('keyPassword')!;
+    keyAlias = keyProperties.get('keyAlias')!;
+  } else {
+    if (flavor.requiresSigning) {
+      print('Key properties file "$keyPropertiesPath" not found');
+      exit(1);
+    }
+  }
 
   final tempPath = p.setExtension(bundle.path, '.apks');
 
@@ -731,10 +827,10 @@ Future<File> extractApk(File bundle) async {
     'build-apks',
     '--bundle=${bundle.path}',
     '--mode=universal',
-    '--ks=$storeFile',
-    '--ks-pass=pass:$storePassword',
-    '--ks-key-alias=upload',
-    '--key-pass=pass:$keyPassword',
+    if (storeFile != null) '--ks=$storeFile',
+    if (storePassword != null) '--ks-pass=pass:$storePassword',
+    if (keyAlias != null) '--ks-key-alias=$keyAlias',
+    if (keyPassword != null) '--key-pass=pass:$keyPassword',
     '--output=$tempPath',
   ]);
 
@@ -1033,6 +1129,17 @@ Future<Directory> createOutputDir(BuildDesc buildDesc) async {
   return dir;
 }
 
+Version determineVersion(Pubspec pubspec, Options options) {
+  final pubspecVersion = pubspec.version!;
+  if (pubspecVersion.isPreRelease) {
+    throw "Pre-release string (the \"foo\" in \"1.2.3-foo\") is already set in pubspec.yaml";
+  }
+  return Version(
+      pubspecVersion.major, pubspecVersion.minor, pubspecVersion.patch,
+      pre: options.flavor.toString(),
+      build: pubspecVersion.build[0].toString());
+}
+
 Future<void> run(
   String command,
   List<String> args, [
@@ -1121,13 +1228,71 @@ Future<void> createIcon(File src, File dst, int resolution) async {
   await command.executeThread();
 }
 
-Future<String> readSentryDSN(String path) async {
-  final sentryDSN = (await File(path).readAsString()).trim();
+Future<String?> readSentryDSN(String path) async {
+  String sentryDSN;
+
+  try {
+    sentryDSN = (await File(path).readAsString()).trim();
+  } catch (e) {
+    print('Failed to open file containing Sentry DSN "$path"');
+    print(e);
+    return null;
+  }
   // Validate
   bool isValid = Uri.tryParse(sentryDSN)?.hasAbsolutePath ?? false;
   if (!isValid) {
     print("Invalid Sentry DSN in $path");
-    exit(1);
+    return null;
   }
   return sentryDSN;
+}
+
+class IconBadgeDesc {
+  String fileName;
+  String geometry;
+  String pointsize;
+
+  IconBadgeDesc(this.fileName, this.pointsize, this.geometry);
+}
+
+Future<void> addBadgeToIcons(String text) async {
+  String binaryName;
+
+  if (Platform.isWindows) {
+    binaryName = "magick";
+  } else {
+    binaryName = "convert";
+  }
+
+  final descriptions = [
+    IconBadgeDesc("ic_launcher.png", '40', "+16+16"),
+    IconBadgeDesc("ic_launcher_foreground.png", '40', "+100+120"),
+    IconBadgeDesc("ic_launcher_round.png", '40', "+16+16"),
+    IconBadgeDesc("ouisync_icon.png", '40', "+16+16"),
+    IconBadgeDesc("OuisyncFull.png", '40', "+300+16"),
+    IconBadgeDesc("Ouisync_v1_1560x1553.png", '200', "+64+124"),
+  ];
+
+  for (final desc in descriptions) {
+    // Use imagemagick's `convert` because the 'package:image/image.dart' lacks features
+    // (and some things like setting a font color doesn't seem to work).
+    // TODO: This overwrites the existing png files in git, which is annoying when done not
+    // on CI.
+    await run(binaryName, [
+      'assets/${desc.fileName}',
+      '-undercolor',
+      'red',
+      '-font',
+      // Picked randomly by what is on my and the CI machines.
+      'DejaVu-Sans',
+      '-gravity',
+      'SouthEast',
+      '-pointsize',
+      desc.pointsize,
+      '-annotate',
+      desc.geometry,
+      text,
+      'assets/${desc.fileName}',
+    ]);
+  }
 }

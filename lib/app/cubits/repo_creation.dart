@@ -3,14 +3,15 @@ import 'dart:io' show File;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync_app/app/models/auth_mode.dart';
-import 'package:ouisync_app/app/models/local_secret.dart';
-import 'package:ouisync_app/app/models/repo_location.dart';
-import 'package:ouisync_app/app/utils/log.dart';
 import 'package:ouisync/ouisync.dart' show AccessMode, ShareToken;
 
 import '../../generated/l10n.dart';
+import '../models/auth_mode.dart';
+import '../models/local_secret.dart';
 import '../models/repo_entry.dart';
+import '../models/repo_location.dart';
+import '../utils/dialogs.dart';
+import '../utils/log.dart';
 import '../utils/strings.dart';
 import 'repos.dart';
 
@@ -129,19 +130,21 @@ class RepoCreationFailure extends RepoCreationSubstate {
 
 class RepoCreationCubit extends Cubit<RepoCreationState> with AppLogger {
   RepoCreationCubit({required this.reposCubit}) : super(RepoCreationState()) {
-    nameController.addListener(
-      () => unawaited(_onNameChanged(nameController.text)),
-    );
+    nameController.addListener(_onNameChangedUnawaited);
 
     setLocalSecret(LocalSecretRandom());
   }
 
   final ReposCubit reposCubit;
+
   final nameController = TextEditingController();
+  final positiveButtonFocusNode = FocusNode();
 
   @override
   Future<void> close() async {
     nameController.dispose();
+    positiveButtonFocusNode.dispose();
+
     await super.close();
   }
 
@@ -150,22 +153,28 @@ class RepoCreationCubit extends Cubit<RepoCreationState> with AppLogger {
       return;
     }
 
-    await _loading(() async {
-      final accessMode = await token.mode;
-      final suggestedName = await token.suggestedName;
-      final useCacheServers =
-          await reposCubit.cacheServers.isEnabledForShareToken(token);
+    await _loading(
+      () async {
+        final accessMode = await token.mode;
+        final suggestedName = await token.suggestedName;
+        final useCacheServers =
+            await reposCubit.cacheServers.isEnabledForShareToken(token);
 
-      emit(state.copyWith(
-        accessMode: accessMode,
-        suggestedName: suggestedName,
-        token: token,
-        useCacheServers: useCacheServers,
-      ));
-    });
+        emit(state.copyWith(
+          accessMode: accessMode,
+          suggestedName: suggestedName,
+          token: token,
+          useCacheServers: useCacheServers,
+        ));
+      },
+      showLoading: true,
+    );
   }
 
-  void acceptSuggestedName() => nameController.text = state.suggestedName;
+  void acceptSuggestedName() {
+    nameController.text = state.suggestedName;
+    positiveButtonFocusNode.requestFocus();
+  }
 
   void setUseCacheServers(bool value) {
     emit(state.copyWith(useCacheServers: value));
@@ -210,16 +219,28 @@ class RepoCreationCubit extends Cubit<RepoCreationState> with AppLogger {
   }
 
   Future<void> save() async {
+    // On some devices the `_onNameChangedUnawaited` listener is still called
+    // after this `save` function is called. When that happens and we already
+    // created the repository, it'll complain that the repository with the name
+    // in the `nameController` already exists, even though it's this cubit that
+    // created it. So we remove the listener to not pester the user.
+    nameController.removeListener(_onNameChangedUnawaited);
+
     final substate = state.substate;
     if (substate is! RepoCreationValid) {
       return;
     }
 
+    final localSecretMode = switch (state.accessMode) {
+      AccessMode.read || AccessMode.write => state.localSecretMode,
+      AccessMode.blind => LocalSecretMode.manual,
+    };
+
     final repoEntry = await _loading(() => reposCubit.createRepository(
           location: substate.location,
           setLocalSecret: substate.setLocalSecret,
           token: state.token,
-          localSecretMode: state.localSecretMode,
+          localSecretMode: localSecretMode,
           useCacheServers: state.useCacheServers,
           setCurrent: true,
         ));
@@ -242,16 +263,29 @@ class RepoCreationCubit extends Cubit<RepoCreationState> with AppLogger {
     }
   }
 
-  Future<R> _loading<R>(Future<R> Function() f) async {
+  Future<R> _loading<R>(
+    Future<R> Function() f, {
+    bool showLoading = false,
+  }) async {
     try {
       emit(state.copyWith(loading: true));
-      return await f();
+      return showLoading
+          ? await Dialogs.executeFutureWithLoadingDialog(null, f.call())
+          : await f();
     } finally {
-      emit(state.copyWith(loading: false));
+      if (!isClosed) {
+        emit(state.copyWith(loading: false));
+      }
     }
   }
 
-  Future<void> _onNameChanged(String name) async {
+  void _onNameChangedUnawaited() {
+    unawaited(_onNameChanged());
+  }
+
+  Future<void> _onNameChanged() async {
+    final name = nameController.text;
+
     if (name.isEmpty) {
       if (state.location != null) {
         _setInvalidName(S.current.messageErrorFormValidatorNameDefault);

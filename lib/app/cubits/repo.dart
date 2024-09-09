@@ -9,10 +9,12 @@ import 'package:ouisync/native_channels.dart';
 import 'package:ouisync/ouisync.dart';
 import 'package:ouisync/state_monitor.dart';
 import 'package:shelf/shelf_io.dart';
+import 'package:stream_transform/stream_transform.dart';
 
 import '../../generated/l10n.dart';
 import '../models/models.dart';
 import '../utils/master_key.dart';
+import '../utils/mounter.dart';
 import '../utils/repo_path.dart' as repo_path;
 import '../utils/utils.dart';
 import 'cubits.dart';
@@ -104,29 +106,28 @@ class RepoState extends Equatable {
 
 class RepoCubit extends Cubit<RepoState> with AppLogger {
   final _currentFolder = Folder();
-  final Session _session;
   final NativeChannels _nativeChannels;
   final NavigationCubit _navigation;
   final EntryBottomSheetCubit _bottomSheet;
   final Repository _repo;
   final Cipher _pathCipher;
   final CacheServers _cacheServers;
+  final Mounter _mounter;
 
   RepoCubit._(
-    this._session,
     this._nativeChannels,
     this._navigation,
     this._bottomSheet,
     this._repo,
     this._pathCipher,
     this._cacheServers,
+    this._mounter,
     super.state,
   ) {
     _currentFolder.repo = this;
   }
 
   static Future<RepoCubit> create({
-    required Session session,
     required NativeChannels nativeChannels,
     required Settings settings,
     required Repository repo,
@@ -134,6 +135,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     required NavigationCubit navigation,
     required EntryBottomSheetCubit bottomSheet,
     required CacheServers cacheServers,
+    required Mounter mounter,
   }) async {
     final authMode = await repo.getAuthMode();
 
@@ -163,13 +165,13 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
     final pathCipher = await Cipher.newWithRandomKey();
 
     final cubit = RepoCubit._(
-      session,
       nativeChannels,
       navigation,
       bottomSheet,
       repo,
       pathCipher,
       cacheServers,
+      mounter,
       state,
     );
 
@@ -288,6 +290,11 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
   }
 
   Future<void> mount() async {
+    if (_mounter.mountPoint == null) {
+      // Mounting not supported.
+      return;
+    }
+
     try {
       await _repo.mount();
       emit(state.copyWith(mountState: const MountStateSuccess()));
@@ -310,7 +317,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
       return null;
     }
 
-    final mountPoint = _session.mountPoint;
+    final mountPoint = _mounter.mountPoint;
     if (mountPoint == null) {
       return null;
     }
@@ -325,6 +332,8 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
   Future<EntryType?> type(String path) => _repo.type(path);
 
   Future<Progress> get syncProgress => _repo.syncProgress;
+
+  Future<NetworkStats> get networkStats => _repo.networkStats;
 
   // Get the state monitor of this particular repository. That is 'root >
   // Repositories > this repository ID'.
@@ -821,7 +830,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
   }
 
   StreamSubscription<void> autoRefresh() =>
-      _repo.events.listen((_) => refresh());
+      _repo.events.asyncMapSample((_) => refresh()).listen(null);
 
   Future<File?> _createFile(String newFilePath) async {
     File? newFile;

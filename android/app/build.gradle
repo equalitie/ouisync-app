@@ -1,81 +1,58 @@
-def localProperties = new Properties()
-def localPropertiesFile = rootProject.file('local.properties')
-if (localPropertiesFile.exists()) {
-    localPropertiesFile.withReader('UTF-8') { reader ->
-        localProperties.load(reader)
-    }
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
+    id "dev.flutter.flutter-gradle-plugin"
 }
 
-def flutterRoot = localProperties.getProperty('flutter.sdk')
-if (flutterRoot == null) {
-    throw new FileNotFoundException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file.")
-}
-
-def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
-if (flutterVersionCode == null) {
-    flutterVersionCode = '1'
-}
-
-def flutterVersionName = localProperties.getProperty('flutter.versionName')
-if (flutterVersionName == null) {
-    flutterVersionName = '1.0'
-}
+def properties = new Properties()
+rootProject.file("local.properties").withInputStream { properties.load(it) }
 
 def keystoreProperties = new Properties()
 def keystorePropertiesFile = rootProject.file('../secrets/android/key.properties')
 if (keystorePropertiesFile.exists()) {
-    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+    keystorePropertiesFile.withInputStream { keystoreProperties.load(it) }
 }
 
-apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
-apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
-
 android {
-    lintOptions {
-        checkReleaseBuilds false
-    }
+    namespace = "org.equalitie.ouisync"
+    compileSdk = 34
+    ndkVersion = "27.0.12077973"
 
     // Fix for:
     //
     // Inconsistent JVM-target compatibility detected for tasks 'compileDebugJavaWithJavac'
     // (1.8) and 'compileDebugKotlin' (17).
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlin {
-        jvmToolchain(17)
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_17
     }
 
-    compileSdkVersion 34
-
-    // At time of writing, this is the LTS version
-    ndkVersion '26.3.11579264'
-
-    sourceSets {
-        main.java.srcDirs += 'src/main/kotlin'
-    }
-
-    lintOptions {
+    lint {
+        checkReleaseBuilds false
         disable 'InvalidPackage'
     }
 
-    def appId = "org.equalitie.ouisync_app"
-
     // Suffix to append to the application id, name and version. This allows installing multiple
     // versions of the app on the same device (e.g., production and development).
-    def appSuffix = System.getenv("APP_SUFFIX") ?: localProperties.getProperty("app.suffix")
+    def appSuffix = System.getenv("APP_SUFFIX") ?: properties.getProperty("app.suffix")
 
     defaultConfig {
-        applicationId appId
-        namespace appId
+        def appId = "org.equalitie.ouisync"
+
+        applicationId = appId
         resValue "string", "app_name", "Ouisync"
-        minSdkVersion 21
-        targetSdkVersion 34
-        versionCode flutterVersionCode.toInteger()
-        versionName flutterVersionName
+        // You can update the following values to match your application needs.
+        // For more information, see: https://flutter.dev/to/review-gradle-config.
+        minSdk = 21
+        targetSdk = 35
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
+        multiDexEnabled = true
 
         if (appSuffix != null) {
             applicationIdSuffix = ".$appSuffix"
@@ -106,15 +83,85 @@ android {
             android.packagingOptions.doNotStrip "**.so"
         }
     }
-    namespace 'org.equalitie.ouisync_app'
+
+    flavorDimensions "releaseType"
+    productFlavors {
+        production {
+            dimension "releaseType"
+        }
+        nightly {
+            dimension "releaseType"
+            applicationIdSuffix ".nightly"
+        }
+        unofficial {
+            dimension "releaseType"
+            applicationIdSuffix ".unofficial"
+        }
+    }
 }
 
 flutter {
-    source '../..'
+   source = "../.."
 }
 
-dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0'
+// Generate images in `android/src/main/res/mipmap-*/` based on those in `assets/
+task generateResourceImages() {
+    def images = [
+        "ic_launcher.png": [
+            "hdpi": "72x72",
+            "mdpi": "48x48",
+            "xhdpi": "96x96",
+            "xxhdpi": "144x144",
+            "xxxhdpi": "192x192",
+        ],
+        "ic_launcher_background.png": [
+            "hdpi": "162x162",
+            "mdpi": "108x108",
+            "xhdpi": "216x216",
+            "xxhdpi": "324x324",
+            "xxxhdpi": "432x432",
+        ],
+        "ic_launcher_foreground.png": [
+            "hdpi": "162x162",
+            "mdpi": "108x108",
+            "xhdpi": "216x216",
+            "xxhdpi": "324x324",
+            "xxxhdpi": "432x432",
+        ],
+        "ic_launcher_round.png": [
+            "hdpi": "72x72",
+            "mdpi": "48x48",
+            "xhdpi": "96x96",
+            "xxhdpi": "144x144",
+            "xxxhdpi": "192x192",
+        ],
+    ]
 
+    def imagemagick
+
+    def Os = org.apache.tools.ant.taskdefs.condition.Os
+
+    if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+        imagemagick = 'magick'
+    } else {
+        imagemagick = 'convert'
+    }
+
+    images.each { file, resolutions ->
+        resolutions.each { resName, dimensions ->
+            exec {
+                // TODO: With these `{in,out}put.file` lines I'd like gradle to not re-generate the output files
+                // if input files did not change, but changing the paths don't result in an error, so I'm not sure
+                // the lines do anything useful.
+                inputs.file "../../assets/$file"
+                outputs.file "src/main/res/mipmap-$resName/$file"
+                // PWD is `ouisync-app/android/app/`
+                commandLine imagemagick, "../../assets/$file", "-resize", dimensions, "src/main/res/mipmap-$resName/$file"
+            }
+        }
+    }
+}
+
+gradle.projectsEvaluated {
+    preBuild.dependsOn('generateResourceImages')
 }

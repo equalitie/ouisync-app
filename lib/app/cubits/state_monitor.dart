@@ -58,6 +58,7 @@ class StateMonitorIntCubit extends Cubit<int?> {
 
   Future<void> _load() async {
     final node = await _monitor.load();
+    if (isClosed) return;
     emit(node?.parseIntValue(_name));
   }
 

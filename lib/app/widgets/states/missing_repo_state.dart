@@ -13,7 +13,7 @@ class MissingRepositoryState extends HookWidget
     required this.repositoryLocation,
     required this.errorMessage,
     this.errorDescription,
-    required this.onReloadRepository,
+    required this.onBackToList,
     required this.reposCubit,
     super.key,
   });
@@ -23,7 +23,7 @@ class MissingRepositoryState extends HookWidget
   final String? errorDescription;
   final ReposCubit reposCubit;
 
-  final void Function()? onReloadRepository;
+  final void Function()? onBackToList;
 
   @override
   Widget build(BuildContext context) {
@@ -31,8 +31,6 @@ class MissingRepositoryState extends HookWidget
         Constants.statePlaceholderImageHeightFactor;
 
     final reloadButtonFocus = useFocusNode(debugLabel: 'reload_button_focus');
-    final deleteButtonFocus = useFocusNode(debugLabel: 'delete_button_focus');
-
     reloadButtonFocus.requestFocus();
 
     return Center(
@@ -61,26 +59,13 @@ class MissingRepositoryState extends HookWidget
                 child: Fields.inPageSecondaryMessage(errorDescription!,
                     tags: {Constants.inlineTextBold: InlineTextStyles.bold})),
           Dimensions.spacingVerticalDouble,
-          if (onReloadRepository != null)
-            Fields.inPageButton(
-                onPressed: () => onReloadRepository!(),
-                text: S.current.actionReloadRepo,
-                size: Dimensions.sizeInPageButtonLong,
-                alignment: Alignment.center,
-                focusNode: reloadButtonFocus,
-                autofocus: true),
-          if (onReloadRepository != null) Dimensions.spacingVertical,
           Fields.inPageButton(
-            onPressed: () => deleteRepository(
-              context,
-              reposCubit: reposCubit,
-              repoLocation: repositoryLocation,
-            ),
-            text: S.current.actionRemoveRepo,
-            size: Dimensions.sizeInPageButtonLong,
-            alignment: Alignment.center,
-            focusNode: deleteButtonFocus,
-          ),
+              onPressed: onBackToList,
+              text: S.current.actionBack,
+              size: Dimensions.sizeInPageButtonLong,
+              alignment: Alignment.center,
+              focusNode: reloadButtonFocus,
+              autofocus: true),
         ],
       ),
     ));

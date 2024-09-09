@@ -25,10 +25,17 @@ class CustomAdaptiveSwitch extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            Text(
-              title,
-              style: TextStyle(
-                  fontSize: context.theme.appTextStyle.titleMedium.fontSize),
+            Flexible(
+              child: Text(
+                title,
+                textAlign: TextAlign.end,
+                softWrap: true,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: context.theme.appTextStyle.titleMedium.fontSize,
+                ),
+              ),
             ),
             SizedBox(
               width: 12.0,

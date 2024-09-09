@@ -2,6 +2,9 @@ import 'package:extended_text/extended_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync/ouisync.dart';
+import 'package:ouisync_app/app/widgets/notification_badge.dart';
+import 'package:ouisync_app/app/widgets/throughput_display.dart';
+import 'package:stream_transform/stream_transform.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
@@ -12,14 +15,23 @@ import '../repo_status.dart';
 class RepositoriesBar extends StatelessWidget
     with AppLogger
     implements PreferredSizeWidget {
-  const RepositoriesBar(this._cubits);
+  const RepositoriesBar({
+    required this.mount,
+    required this.panicCounter,
+    required this.powerControl,
+    required this.reposCubit,
+    required this.upgradeExists,
+    super.key,
+  });
 
-  final Cubits _cubits;
+  final MountCubit mount;
+  final StateMonitorIntCubit panicCounter;
+  final PowerControl powerControl;
+  final ReposCubit reposCubit;
+  final UpgradeExistsCubit upgradeExists;
 
   @override
-  Widget build(BuildContext context) => _cubits.repositories.builder((state) {
-        final reposCubit = _cubits.repositories;
-
+  Widget build(BuildContext context) => reposCubit.builder((state) {
         if (reposCubit.isLoading || reposCubit.showList) {
           return SizedBox.shrink();
         }
@@ -28,6 +40,7 @@ class RepositoriesBar extends StatelessWidget
           children: [
             _buildBackButton(),
             _buildName(reposCubit.currentRepo),
+            _buildStats(context, reposCubit.currentRepo),
             _buildStatus(reposCubit.currentRepo),
             _buildLockButton(reposCubit.currentRepo),
           ],
@@ -43,6 +56,18 @@ class RepositoriesBar extends StatelessWidget
           ),
         ),
       );
+
+  Widget _buildStats(BuildContext context, RepoEntry? repo) =>
+      repo is OpenRepoEntry
+          ? Padding(
+              padding: EdgeInsets.only(right: 10.0),
+              child: LiveThroughputDisplay(
+                _repoStatsStream(repo.cubit),
+                size: Theme.of(context).textTheme.labelSmall?.fontSize,
+                orientation: Orientation.portrait,
+              ),
+            )
+          : SizedBox.shrink();
 
   Widget _buildStatus(RepoEntry? repo) => repo is OpenRepoEntry
       ? Padding(
@@ -71,27 +96,20 @@ class RepositoriesBar extends StatelessWidget
         alignment: Alignment.centerRight,
       );
 
-  Widget _buildBackButton() {
-    return multiBlocBuilder(
-        [_cubits.upgradeExists, _cubits.powerControl, _cubits.panicCounter],
-        () {
-      final button = Fields.actionIcon(
-        const Icon(Icons.arrow_back_rounded),
-        onPressed: () => _cubits.repositories.showRepoList(),
-        size: Dimensions.sizeIconSmall,
+  // TODO: Why does the badge appear to move quickly after entering this screen?
+  Widget _buildBackButton() => NotificationBadge(
+        mount: mount,
+        panicCounter: panicCounter,
+        powerControl: powerControl,
+        upgradeExists: upgradeExists,
+        moveDownwards: 5,
+        moveRight: 6,
+        child: Fields.actionIcon(
+          const Icon(Icons.arrow_back_rounded),
+          onPressed: () => reposCubit.showRepoList(),
+          size: Dimensions.sizeIconSmall,
+        ),
       );
-
-      Color? color = _cubits.mainNotificationBadgeColor();
-
-      if (color != null) {
-        // TODO: Why does the badge appear to move quickly after entering this screen?
-        return Fields.addBadge(button,
-            color: color, moveDownwards: 5, moveRight: 6);
-      } else {
-        return button;
-      }
-    });
-  }
 
   @override
   Size get preferredSize {
@@ -99,3 +117,7 @@ class RepositoriesBar extends StatelessWidget
     return const Size.fromHeight(Constants.repositoryBarHeight);
   }
 }
+
+Stream<NetworkStats> _repoStatsStream(RepoCubit repoCubit) =>
+    Stream.periodic(Duration(seconds: 1))
+        .asyncMapSample((_) => repoCubit.networkStats);

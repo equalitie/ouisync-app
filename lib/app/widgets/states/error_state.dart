@@ -8,14 +8,14 @@ class ErrorState extends HookWidget {
   const ErrorState({
     required this.errorMessage,
     this.errorDescription,
-    required this.onReload,
+    required this.onBackToList,
     super.key,
   });
 
   final String errorMessage;
   final String? errorDescription;
 
-  final void Function()? onReload;
+  final void Function()? onBackToList;
 
   @override
   Widget build(BuildContext context) {
@@ -57,14 +57,13 @@ class ErrorState extends HookWidget {
                       },
                     ),
                   ),
-                if (onReload != null) Dimensions.spacingVerticalDouble,
-                if (onReload != null)
-                  Fields.inPageButton(
-                    onPressed: onReload,
-                    text: S.current.actionReloadContents,
-                    focusNode: reloadButtonFocus,
-                    autofocus: true,
-                  )
+                Dimensions.spacingVerticalDouble,
+                Fields.inPageButton(
+                  onPressed: onBackToList,
+                  text: S.current.actionBack,
+                  focusNode: reloadButtonFocus,
+                  autofocus: true,
+                )
               ],
             )));
   }

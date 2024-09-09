@@ -5,7 +5,7 @@ import Common
 class MainFlutterWindow: NSWindow {
     var fileProviderProxy: FileProviderProxy? = nil
     var flutterMethodChannel: FlutterMethodChannel? = nil
-    let methodChannelName: String = "org.equalitie.ouisync_app/native"
+    let methodChannelName: String = "org.equalitie.ouisync/native"
 
     override func awakeFromNib() {
         let flutterViewController = FlutterViewController()

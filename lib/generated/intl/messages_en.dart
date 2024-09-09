@@ -689,6 +689,9 @@ class MessageLookup extends MessageLookupByLibrary {
             "Scan this with your other device or share it with your peers"),
         "messageSecureUsingBiometrics":
             MessageLookupByLibrary.simpleMessage("Secure using biometrics"),
+        "messageSecurityOptionsNotAvailableBlind":
+            MessageLookupByLibrary.simpleMessage(
+                "The security options are not available for blind repositories"),
         "messageSecurityPracticesP1": MessageLookupByLibrary.simpleMessage(
             "Data that the user uploads into the Ouisync repositories is end-to-end encrypted in transit as well as at rest. This includes metadata such as file names, sizes, folder structure etc. Within Ouisync, data is readable only by the person who uploaded the data and those persons with whom they shared their repositories"),
         "messageSecurityPracticesP2": MessageLookupByLibrary.simpleMessage(

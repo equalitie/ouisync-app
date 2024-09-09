@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:build_context_provider/build_context_provider.dart';
 import 'package:flutter/material.dart';
 
 import '../../generated/l10n.dart';
@@ -7,7 +10,7 @@ import 'utils.dart';
 
 abstract class Dialogs {
   static Future<T> executeFutureWithLoadingDialog<T>(
-    BuildContext context,
+    BuildContext? context,
     Future<T> future,
   ) async {
     _showLoadingDialog(context);
@@ -17,19 +20,27 @@ abstract class Dialogs {
     return result;
   }
 
-  static _showLoadingDialog(BuildContext context) {
-    return showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) => Center(
-        child: const CircularProgressIndicator.adaptive(
-          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-        ),
-      ),
-    );
-  }
+  static void _showLoadingDialog(BuildContext? context) => context != null
+      ? _loadingDialog(context)
+      : WidgetsBinding.instance
+          .addPostFrameCallback((_) => BuildContextProvider()(_loadingDialog));
 
-  static _hideLoadingDialog(context) =>
+  static Future<void> _loadingDialog(BuildContext context) => showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) => Center(
+          child: const CircularProgressIndicator.adaptive(
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+          ),
+        ),
+      );
+
+  static _hideLoadingDialog(BuildContext? context) => context != null
+      ? _popDialog(context)
+      : BuildContextProvider()
+          .call((globalContext) => _popDialog(globalContext));
+
+  static void _popDialog(BuildContext context) =>
       Navigator.of(context, rootNavigator: true).pop();
 
   static Future<bool?> alertDialogWithActions({
@@ -45,25 +56,33 @@ abstract class Dialogs {
             return _alertDialog(context, title, body, actions);
           });
 
-  static Future<bool?> simpleAlertDialog(
-      {required BuildContext context,
-      required String title,
-      required String message,
-      List<Widget>? actions}) {
-    actions ??= [
-      TextButton(
-        child: Text(S.current.actionCloseCapital),
-        onPressed: () => Navigator.of(context, rootNavigator: true).pop(false),
-      )
-    ];
-
-    return showDialog(
+  static Future<bool?> simpleAlertDialog({
+    required BuildContext context,
+    required String title,
+    required String message,
+    List<Widget>? actions,
+  }) =>
+      showDialog(
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
-          return _alertDialog(context, title, [Text(message)], actions!);
-        });
-  }
+          return _alertDialog(
+            context,
+            title,
+            [Text(message)],
+            actions ??
+                [
+                  TextButton(
+                    child: Text(S.current.actionCloseCapital),
+                    onPressed: () => Navigator.of(
+                      context,
+                      rootNavigator: true,
+                    ).pop(false),
+                  ),
+                ],
+          );
+        },
+      );
 
   static actionDialog(
           BuildContext context, String dialogTitle, Widget? actionBody) =>
