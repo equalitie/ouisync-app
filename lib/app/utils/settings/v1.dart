@@ -31,6 +31,8 @@ class SettingsRoot {
   static const int version = 1;
 
   static const _versionKey = 'version';
+  static const _selectedLanguageKey = 'selectedLanguage';
+  static const _appLanguageKey = 'appLanguage';
   static const _acceptedEqualitieValuesKey = 'acceptedEqualitieValues';
   static const _showOnboardingKey = 'showOnboarding';
   static const _enableSyncOnMobileInternetKey = 'enableSyncOnMobileInternet';
@@ -40,6 +42,10 @@ class SettingsRoot {
   static const _defaultRepositoriesDirVersionKey =
       'defaultRepositoriesDirVersion';
 
+  // Did the user selected the app default language?
+  bool selectedLanguage = false;
+  // The app default language
+  String appLanguage = '';
   // Did the user accept the eQ values?
   bool acceptedEqualitieValues = false;
   // Show onboarding (will flip to false once shown).
@@ -57,6 +63,8 @@ class SettingsRoot {
   SettingsRoot._();
 
   SettingsRoot({
+    required this.selectedLanguage,
+    required this.appLanguage,
     required this.acceptedEqualitieValues,
     required this.showOnboarding,
     required this.enableSyncOnMobileInternet,
@@ -69,6 +77,8 @@ class SettingsRoot {
   Map<String, dynamic> toJson() {
     final r = {
       _versionKey: version,
+      _selectedLanguageKey: selectedLanguage,
+      _appLanguageKey: appLanguage,
       _acceptedEqualitieValuesKey: acceptedEqualitieValues,
       _showOnboardingKey: showOnboarding,
       _enableSyncOnMobileInternetKey: enableSyncOnMobileInternet,
@@ -103,6 +113,8 @@ class SettingsRoot {
     String? defaultRepo = data[_defaultRepoKey];
 
     return SettingsRoot(
+      selectedLanguage: data[_selectedLanguageKey] ?? false,
+      appLanguage: data[_appLanguageKey] ?? '',
       acceptedEqualitieValues: data[_acceptedEqualitieValuesKey]!,
       showOnboarding: data[_showOnboardingKey]!,
       enableSyncOnMobileInternet: data[_enableSyncOnMobileInternetKey]!,
@@ -138,6 +150,9 @@ class Settings with AppLogger {
 
     final json = prefs.getString(settingsKey);
     final root = SettingsRoot.fromJson(json);
+
+    print('=============================PREFS================================');
+    print(json);
 
     return Settings._(root, prefs, masterKey);
   }
@@ -335,6 +350,24 @@ class Settings with AppLogger {
             'invalid defaultRepositoriesDirVersion: expected 0 or 1, was ${_root.defaultRepositoriesDirVersion}');
         return;
     }
+  }
+
+  //------------------------------------------------------------------
+
+  bool getSelectedAppLanguage() => _root.selectedLanguage;
+
+  Future<void> setSelectedAppLanguage(bool value) async {
+    _root.selectedLanguage = value;
+    await _storeRoot();
+  }
+
+  //------------------------------------------------------------------
+
+  String getAppLanguage() => _root.appLanguage;
+
+  Future<void> setAppLanguage(String value) async {
+    _root.appLanguage = value;
+    await _storeRoot();
   }
 
   //------------------------------------------------------------------
