@@ -466,7 +466,7 @@ class _MainPageState extends State<MainPage>
   @override
   Widget build(BuildContext context) => Scaffold(
         appBar: _buildOuiSyncBar(),
-        body: PopScope(
+        body: PopScope<Object?>(
           // Don't pop => don't exit
           //
           // We don't want to do the pop because that would destroy the current Isolate's execution
@@ -476,7 +476,7 @@ class _MainPageState extends State<MainPage>
           // user at that point tried to open the app again, this widget would try to reinitialize
           // all those variables without previously properly closing them.
           canPop: false,
-          onPopInvoked: _onBackPressed,
+          onPopInvokedWithResult: _onBackPressed,
           child: Stack(
             alignment: AlignmentDirectional.bottomEnd,
             children: <Widget>[
@@ -493,7 +493,7 @@ class _MainPageState extends State<MainPage>
         bottomSheet: modalBottomSheet(),
       );
 
-  Future<void> _onBackPressed(bool didPop) async {
+  Future<void> _onBackPressed(bool didPop, Object? result) async {
     final currentRepo = _currentRepo;
 
     if (currentRepo != null) {
