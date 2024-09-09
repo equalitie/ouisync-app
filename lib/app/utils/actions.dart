@@ -41,7 +41,6 @@ showSnackBar(
   String message, {
   SnackBarAction? action,
   bool showCloseIcon = true,
-  SnackBarBehavior behavior = SnackBarBehavior.floating,
 }) {
   BuildContextProvider().call((context) {
     final messenger = ScaffoldMessenger.of(context);
@@ -57,7 +56,7 @@ showSnackBar(
         content: _SnackBarWrap(message),
         action: action,
         showCloseIcon: showCloseIcon,
-        behavior: behavior,
+        behavior: SnackBarBehavior.fixed,
       ),
     );
   });
