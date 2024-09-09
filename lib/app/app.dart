@@ -82,6 +82,7 @@ class _OuisyncAppState extends State<OuisyncApp> with AppLogger {
   late final ReposCubit reposCubit;
 
   bool get _onboarded =>
+      widget.settings.getSelectedAppLanguage() &&
       !widget.settings.getShowOnboarding() &&
       widget.settings.getEqualitieValues();
 
@@ -135,11 +136,23 @@ class _OuisyncAppState extends State<OuisyncApp> with AppLogger {
     await widget.windowManager.setTitle(S.current.messageOuiSyncDesktopTitle);
     await widget.windowManager.initSystemTray();
 
+    // The first time the app runs we show the language selector.
+    // If the user doesn't pick one, we just use the default language, this
+    // is: the device language, and if not available in the app, English
+
     // We show the onboarding the first time the app starts.
     // Then, we show the page for accepting eQ values, until the user taps YES.
     // After this, just show the regular home page.
 
     if (!_onboarded) {
+      if (!widget.settings.getSelectedAppLanguage()) {
+        await Navigator.of(context).push(MaterialPageRoute(
+          builder: (_) => LanguagePickerPage(
+            settings: widget.settings,
+          ),
+        ));
+      }
+
       if (widget.settings.getShowOnboarding()) {
         await Navigator.of(context).push(MaterialPageRoute(
           builder: (_) => OnboardingPage(
