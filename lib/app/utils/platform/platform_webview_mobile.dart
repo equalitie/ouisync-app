@@ -23,20 +23,20 @@ class PlatformWebViewMobile implements PlatformWebView {
 
     final controller = WebViewController.fromPlatformCreationParams(params);
 
-    final initalizations = <Future>[];
+    final initializations = <Future>[];
 
-    initalizations
+    initializations
         .add(controller.setJavaScriptMode(JavaScriptMode.unrestricted));
-    initalizations.add(controller.setBackgroundColor(Colors.white));
-    initalizations.add(controller.loadRequest(Uri.parse(url)));
+    initializations.add(controller.setBackgroundColor(Colors.white));
+    initializations.add(controller.loadRequest(Uri.parse(url)));
 
     if (controller.platform is AndroidWebViewController) {
-      initalizations.add(AndroidWebViewController.enableDebugging(true));
-      initalizations.add((controller.platform as AndroidWebViewController)
+      initializations.add(AndroidWebViewController.enableDebugging(true));
+      initializations.add((controller.platform as AndroidWebViewController)
           .setMediaPlaybackRequiresUserGesture(false));
     }
 
-    await Future.wait(initalizations);
+    await Future.wait(initializations);
 
     return WebViewWidget(controller: controller);
   }

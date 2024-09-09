@@ -506,11 +506,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageView": MessageLookupByLibrary.simpleMessage("Voir"),
         "messageWiFi": MessageLookupByLibrary.simpleMessage("Wi-Fi"),
         "messageWriteReplicaExplanation": MessageLookupByLibrary.simpleMessage(
-            "Accès complet. Votre pair peut lire et écrire"),
+            "Accès complete. Votre pair peut lire et écrire"),
         "messageWritingFileCanceled": m26,
         "messageWritingFileError": m27,
-        "messsageFailedAddRepository": m28,
-        "messsageFailedCreateRepository": m29,
+        "messageFailedAddRepository": m28,
+        "messageFailedCreateRepository": m29,
         "popupMenuItemChangePassword":
             MessageLookupByLibrary.simpleMessage("Modifier le mot de passe"),
         "popupMenuItemCopyPassword":
