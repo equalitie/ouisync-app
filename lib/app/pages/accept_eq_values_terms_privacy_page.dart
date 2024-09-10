@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import '../../generated/l10n.dart';
+import '../utils/click_counter.dart';
 import '../utils/utils.dart';
 import '../widgets/widgets.dart';
 
@@ -20,19 +21,43 @@ class AcceptEqualitieValuesTermsPrivacyPage extends StatefulWidget {
 
 class _AcceptEqualitieValuesTermsPrivacyPageState
     extends State<AcceptEqualitieValuesTermsPrivacyPage> {
+  final exitClickCounter = ClickCounter(timeoutMs: 3000);
+
   @override
   Widget build(BuildContext context) => SafeArea(
         child: Scaffold(
-          body: ContentWithStickyFooterState(
-            content: _buildContent(context),
-            footer: Fields.dialogActions(
-              context,
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              buttons: _buildActions(context),
+          body: PopScope<Object?>(
+            canPop: false,
+            onPopInvokedWithResult: _onBackPressed,
+            child: ContentWithStickyFooterState(
+              content: _buildContent(context),
+              footer: Fields.dialogActions(
+                context,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                buttons: _buildActions(context),
+              ),
             ),
           ),
         ),
       );
+
+  Future<void> _onBackPressed(bool didPop, Object? result) async {
+    if (didPop) return;
+
+    int clickCount = exitClickCounter.registerClick();
+    if (clickCount <= 1) {
+      final snackBar = SnackBar(
+        content: Text(S.current.messageExitOuiSync),
+      );
+
+      // Find the ScaffoldMessenger in the widget tree
+      // and use it to show a SnackBar.
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    } else {
+      exitClickCounter.reset();
+      exit(0);
+    }
+  }
 
   Column _buildContent(BuildContext context) {
     return Column(
