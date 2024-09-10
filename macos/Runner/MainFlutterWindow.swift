@@ -1,6 +1,7 @@
 import Cocoa
 import FlutterMacOS
 import Common
+import FileProvider
 
 class MainFlutterWindow: NSWindow {
     var fileProviderProxy: FileProviderProxy? = nil
@@ -36,7 +37,10 @@ class MainFlutterWindow: NSWindow {
     // ------------------------------------------------------------------
     fileprivate func setupFlutterMethodChannel(_ binaryMessenger: FlutterBinaryMessenger) {
         let channel = FlutterMethodChannel(name: methodChannelName, binaryMessenger: binaryMessenger)
-        channel.setMethodCallHandler(handleFlutterMethodCall)
+        channel.setMethodCallHandler({ [weak self] (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
+            guard let self = self else { return }
+            handleFlutterMethodCall(call, result: result)
+        })
         flutterMethodChannel = channel
     }
 
@@ -45,6 +49,16 @@ class MainFlutterWindow: NSWindow {
         case "getDefaultRepositoriesDirectory":
             let commonDirs = Common.Directories()
             result(commonDirs.repositoriesPath)
+        case "getMountRootDirectory":
+            let manager = NSFileProviderManager(for: ouisyncFileProviderDomain)!
+            Task {
+                let userVisibleRootUrl = try! await manager.getUserVisibleURL(for: .rootContainer)
+                var path = userVisibleRootUrl.path(percentEncoded: false)
+                if path.last == "/" {
+                    path = String(path.dropLast())
+                }
+                result(path)
+            }
         default:
             result(FlutterMethodNotImplemented)
             fatalError("Unknown method '\(call.method)' passed to channel '\(methodChannelName)'")
