@@ -49,7 +49,10 @@ class _AcceptEqualitieValuesTermsPrivacyPageState
 
     if (widget.canNavigateToOnboarding) {
       await Navigator.of(context).push(MaterialPageRoute(
-          builder: (_) => OnboardingPage(settings: widget.settings)));
+          builder: (_) => OnboardingPage(
+                settings: widget.settings,
+                wasSeen: true,
+              )));
       return;
     }
 

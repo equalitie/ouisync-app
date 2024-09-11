@@ -7,12 +7,16 @@ import '../../generated/l10n.dart';
 import '../utils/click_counter.dart';
 import '../utils/utils.dart';
 
+const int totalPages = 3;
+
 class OnboardingPage extends StatefulWidget {
   const OnboardingPage({
     required this.settings,
+    this.wasSeen = false,
   });
 
   final Settings settings;
+  final bool wasSeen;
 
   @override
   State<OnboardingPage> createState() => _OnboardingPageState();
@@ -27,6 +31,14 @@ class _OnboardingPageState extends State<OnboardingPage> {
   final buttonStyle = TextStyle(fontWeight: FontWeight.w600);
 
   double _imageWidth = 0;
+
+  @override
+  void initState() {
+    if (widget.wasSeen) {
+      _currentPageIndex = totalPages - 1;
+    }
+    super.initState();
+  }
 
   @override
   void didChangeDependencies() {
@@ -51,6 +63,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
         children: [
           IntroductionScreen(
             key: introKey,
+            initialPage: _currentPageIndex,
             globalBackgroundColor: Colors.white,
             pages: [
               PageViewModel(
