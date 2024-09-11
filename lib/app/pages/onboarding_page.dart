@@ -107,12 +107,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
     int clickCount = exitClickCounter.registerClick();
     if (clickCount <= 1) {
-      final snackBar = SnackBar(
-        content: Text(S.current.messageExitOuiSync),
-      );
-
-      // Find the ScaffoldMessenger in the widget tree
-      // and use it to show a SnackBar.
+      final snackBar = SnackBar(content: Text(S.current.messageExitOuiSync));
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
     } else {
       exitClickCounter.reset();
