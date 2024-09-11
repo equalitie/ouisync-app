@@ -6,13 +6,16 @@ import '../../generated/l10n.dart';
 import '../utils/click_counter.dart';
 import '../utils/utils.dart';
 import '../widgets/widgets.dart';
+import 'pages.dart';
 
 class AcceptEqualitieValuesTermsPrivacyPage extends StatefulWidget {
   const AcceptEqualitieValuesTermsPrivacyPage({
     required this.settings,
+    required this.canNavigateToOnboarding,
   });
 
   final Settings settings;
+  final bool canNavigateToOnboarding;
 
   @override
   State<AcceptEqualitieValuesTermsPrivacyPage> createState() =>
@@ -44,14 +47,15 @@ class _AcceptEqualitieValuesTermsPrivacyPageState
   Future<void> _onBackPressed(bool didPop, Object? result) async {
     if (didPop) return;
 
+    if (widget.canNavigateToOnboarding) {
+      await Navigator.of(context).push(MaterialPageRoute(
+          builder: (_) => OnboardingPage(settings: widget.settings)));
+      return;
+    }
+
     int clickCount = exitClickCounter.registerClick();
     if (clickCount <= 1) {
-      final snackBar = SnackBar(
-        content: Text(S.current.messageExitOuiSync),
-      );
-
-      // Find the ScaffoldMessenger in the widget tree
-      // and use it to show a SnackBar.
+      final snackBar = SnackBar(content: Text(S.current.messageExitOuiSync));
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
     } else {
       exitClickCounter.reset();

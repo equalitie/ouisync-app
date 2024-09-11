@@ -140,20 +140,30 @@ class _OuisyncAppState extends State<OuisyncApp> with AppLogger {
     // After this, just show the regular home page.
 
     if (!_onboarded) {
+      final onboardingPages = <Widget>[];
+
       if (widget.settings.getShowOnboarding()) {
-        await Navigator.of(context).push(MaterialPageRoute(
-          builder: (_) => OnboardingPage(
-            settings: widget.settings,
-          ),
-        ));
+        onboardingPages.add(OnboardingPage(settings: widget.settings));
       }
 
       if (!widget.settings.getEqualitieValues()) {
-        await Navigator.of(context).push(MaterialPageRoute(
-          builder: (_) => AcceptEqualitieValuesTermsPrivacyPage(
+        // If this is the first time the onboarding page was displayed, even
+        // though the setting is already set to true by the time we get to the
+        // eQ values page, we can allow the user to navigate back to the
+        // onboarding using the back button in Android.
+        final canNavigateBack = widget.settings.getShowOnboarding();
+
+        onboardingPages.add(
+          AcceptEqualitieValuesTermsPrivacyPage(
             settings: widget.settings,
+            canNavigateToOnboarding: canNavigateBack,
           ),
-        ));
+        );
+      }
+
+      for (var page in onboardingPages) {
+        await Navigator.of(context)
+            .push(MaterialPageRoute(builder: (_) => page));
       }
 
       if (_onboarded) {
