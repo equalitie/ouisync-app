@@ -152,6 +152,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Importar un repositorio"),
         "actionInstallDokan":
             MessageLookupByLibrary.simpleMessage("Instalar Dokan"),
+        "actionLocateRepo":
+            MessageLookupByLibrary.simpleMessage("Localizar repositorio"),
         "actionLockCapital": MessageLookupByLibrary.simpleMessage("BLOQUEAR"),
         "actionMove": MessageLookupByLibrary.simpleMessage("Mover"),
         "actionNewFile": MessageLookupByLibrary.simpleMessage("Archivo"),
@@ -534,6 +536,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Declaración Internacional de Derechos Humanos"),
         "messageKeepBothFiles":
             MessageLookupByLibrary.simpleMessage("Guarde ambos archivos"),
+        "messageKeepBothFolders":
+            MessageLookupByLibrary.simpleMessage("Mantener las dos carpetas"),
         "messageLaunchAtStartup":
             MessageLookupByLibrary.simpleMessage("Iniciar al arrancar"),
         "messageLibraryPanic":
@@ -610,6 +614,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Los repositorios pueden ser compartidos en modo lectura/escritura, sólo lectura, o \"ciegamente\" (almacenas archivos para otras personas, pero no puedes accederlos)"),
         "messageOnboardingShare": MessageLookupByLibrary.simpleMessage(
             "Todos los archivos y carpetas agregados a Ouisync son cifrados de manera segura de forma predeterminada, tanto en reposo como en tránsito."),
+        "messageOnlyAvailableFiles": MessageLookupByLibrary.simpleMessage(
+            "Solo disponible para archivos"),
         "messageOpenFileError": m16,
         "messageOr": MessageLookupByLibrary.simpleMessage("O..."),
         "messageOuiSyncDesktopTitle":
@@ -662,6 +668,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Cambiar nombre de repositorio"),
         "messageReplaceExistingFile": MessageLookupByLibrary.simpleMessage(
             "Sustituir el archivo existente"),
+        "messageReplaceExistingFolder": MessageLookupByLibrary.simpleMessage(
+            "Reemplazar carpeta existente"),
         "messageRepoAuthFailed": MessageLookupByLibrary.simpleMessage(
             "Fallo en la autentificación del repositorio"),
         "messageRepoDeletionErrorDescription": m18,
@@ -703,6 +711,9 @@ class MessageLookup extends MessageLookupByLibrary {
             "Escanea este código con tu otro dispositivo or compartelo con tus pares"),
         "messageSecureUsingBiometrics":
             MessageLookupByLibrary.simpleMessage("Protección biométrica"),
+        "messageSecurityOptionsNotAvailableBlind":
+            MessageLookupByLibrary.simpleMessage(
+                "Las opciones de seguridad no están disponibles para repositorios vacíos"),
         "messageSecurityPracticesP1": MessageLookupByLibrary.simpleMessage(
             "Los datos que el usuario carga en los repositorios de Ouisync se cifran de extremo a extremo tanto en tránsito como en reposo. Esto incluye los metadatos como los nombres de los archivos, los tamaños, la estructura de las carpetas, etc. En Ouisync, sólo pueden leer los datos la persona que los ha cargado y las personas con las que comparte sus repositorios"),
         "messageSecurityPracticesP2": MessageLookupByLibrary.simpleMessage(

@@ -72,7 +72,7 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m24(access) => "Розблоковано як ${access} копія";
 
-  static String m25(name) => "Введіть пароль для розблокування";
+  static String m25(name) => "Введіть пароль для розблокування \"${name}\"";
 
   static String m26(name) => "${name} запис скасовано";
 
@@ -175,6 +175,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionUnlock": MessageLookupByLibrary.simpleMessage("Розблокувати"),
         "actionUpdate": MessageLookupByLibrary.simpleMessage("Оновити"),
         "actionYes": MessageLookupByLibrary.simpleMessage("Так"),
+        "buttonLocateRepository":
+            MessageLookupByLibrary.simpleMessage("Знайти"),
         "iconAccessMode": MessageLookupByLibrary.simpleMessage("Режим доступу"),
         "iconAddExistingRepository":
             MessageLookupByLibrary.simpleMessage("Імпортувати репозиторій"),
@@ -225,6 +227,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Прослуховування за протоколом QUIC/UDP IPv4"),
         "labelQuicListenerEndpointV6": MessageLookupByLibrary.simpleMessage(
             "Прослуховування за протоколом QUIC/UDP IPv6"),
+        "labelRememberPassword":
+            MessageLookupByLibrary.simpleMessage("Запам\'ятати пароль"),
         "labelRenameRepository":
             MessageLookupByLibrary.simpleMessage("Введіть нову назву: "),
         "labelRepositoryCurrentPassword":
@@ -265,6 +269,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageAck": MessageLookupByLibrary.simpleMessage("Ак!"),
         "messageActionNotAvailable": MessageLookupByLibrary.simpleMessage(
             "Не доступно для сховищ в режимі читання"),
+        "messageAddRepoDb": MessageLookupByLibrary.simpleMessage(
+            "Імпорт сховища з файлової системи"),
         "messageAddRepoLink": MessageLookupByLibrary.simpleMessage(
             "Імпортувати репозиторій за допомогою токен-посилання"),
         "messageAddRepoQR": MessageLookupByLibrary.simpleMessage(
@@ -492,6 +498,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Загальній декларації прав людини"),
         "messageKeepBothFiles":
             MessageLookupByLibrary.simpleMessage("Зберегти обидва файли"),
+        "messageKeepBothFolders":
+            MessageLookupByLibrary.simpleMessage("Зберігайте обидві папки"),
         "messageLaunchAtStartup":
             MessageLookupByLibrary.simpleMessage("Початок дії при запуску"),
         "messageLibraryPanic":
@@ -569,6 +577,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Сховища можуть бути доступними для читання і запису, лише для читання або невидимими (ви зберігаєте файли для інших, але не маєте до них доступу)"),
         "messageOnboardingShare": MessageLookupByLibrary.simpleMessage(
             "Усі файли та папки, додані до Ouisync, за замовчуванням надійно зашифровані, як під час передачі, так і в режимі очікування."),
+        "messageOnlyAvailableFiles":
+            MessageLookupByLibrary.simpleMessage("Доступно тільки для файлів"),
         "messageOpenFileError": m16,
         "messageOr": MessageLookupByLibrary.simpleMessage("Або"),
         "messageOuiSyncDesktopTitle":
@@ -618,6 +628,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Перейменувати репозиторій"),
         "messageReplaceExistingFile":
             MessageLookupByLibrary.simpleMessage("Замінити існуючий файл"),
+        "messageReplaceExistingFolder":
+            MessageLookupByLibrary.simpleMessage("Замінити наявну папку"),
         "messageRepoAuthFailed": MessageLookupByLibrary.simpleMessage(
             "Не вдалося виконати аутентифікацію сховища"),
         "messageRepoDeletionErrorDescription": m18,
@@ -721,6 +733,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageUpdateLocalPasswordConfirmation":
             MessageLookupByLibrary.simpleMessage(
                 "Оновити локальний пароль для цього сховища?"),
+        "messageUpdateLocalSecretFailed": MessageLookupByLibrary.simpleMessage(
+            "Не вдалося оновити дані про безпеку сховища."),
+        "messageUpdateLocalSecretOk": MessageLookupByLibrary.simpleMessage(
+            "Оновленo дані безпеки репозиторію."),
+        "messageUseLocalPassword": MessageLookupByLibrary.simpleMessage(
+            "Використовуйте локальний пароль"),
         "messageVPN": MessageLookupByLibrary.simpleMessage("ВПН"),
         "messageValidateLocalPassword": MessageLookupByLibrary.simpleMessage(
             "Підтвердити локальний пароль"),
@@ -746,6 +764,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "replacementNumber": m35,
         "replacementPath": m36,
         "replacementStatus": m37,
+        "repositoryIsAlreadyImported":
+            MessageLookupByLibrary.simpleMessage("Репозиторій вже імпортовано"),
         "statusSync": MessageLookupByLibrary.simpleMessage("СИНХРОНІЗОВАНО"),
         "statusUnspecified":
             MessageLookupByLibrary.simpleMessage("Не визначено"),
@@ -788,6 +808,12 @@ class MessageLookup extends MessageLookupByLibrary {
             "3.4 Видалення ваших даних з нашого \"постійно однорангового\" сервера"),
         "titleDigitalSecurity":
             MessageLookupByLibrary.simpleMessage("Цифрова безпека"),
+        "titleDokanInstallation":
+            MessageLookupByLibrary.simpleMessage("Інсталяція Dokan"),
+        "titleDokanInstallationFound":
+            MessageLookupByLibrary.simpleMessage("Інсталяція Dokan знайдена"),
+        "titleDokanMissing":
+            MessageLookupByLibrary.simpleMessage("Dokan не знайдений"),
         "titleDownloadLocation":
             MessageLookupByLibrary.simpleMessage("Розташування завантаження"),
         "titleDownloadToDevice":
@@ -878,6 +904,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Розблокувати репозиторій"),
         "titleUnsavedChanges":
             MessageLookupByLibrary.simpleMessage("Незбережені зміни"),
+        "titleUserProvidedPeers":
+            MessageLookupByLibrary.simpleMessage("Вузли, надані користувачем"),
         "titleWeAreEq":
             MessageLookupByLibrary.simpleMessage("Ми – це eQualit.ie"),
         "typeFile": MessageLookupByLibrary.simpleMessage("Файл"),

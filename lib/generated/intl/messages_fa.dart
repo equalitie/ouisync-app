@@ -23,6 +23,8 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m0(access) =>
       "مجوز موردنظر نمی تواند بیشتر از حالت دسترسی فعلی مخزن باشد: ${access}";
 
+  static String m1(path) => "فایل دانلود شد در ${path}";
+
   static String m2(name) => "${name} - دانلود لغو شد";
 
   static String m3(name) => "${name} - ناموفق در دانلود";
@@ -31,14 +33,17 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m5(path) => "پوشه فعلی موجود نیست، به بخش اصلی بروید: ${path}";
 
+  static String m6(error) => "خطا: ${error}";
+
   static String m7(dokanUrl) =>
-      "نصب دوکان (Dokan) پیدا نشد . لطفا آن را از این لینک نصب کنید. ${dokanUrl}";
+      "فایل نصب رابط کاربری Dokan پیدا نشد. ${dokanUrl}";
 
   static String m8(name) => "آماده‌سازی اولیه مخزن ${name} ناموفق بود";
 
   static String m9(path) => "${path} خالی نیست";
 
-  static String m10(reason) => "نصب نشد: ${reason}";
+  static String m10(reason) =>
+      "دسترسی به مخازن از طریق بخش جستجوگر فایل در دسترس نیست: ${reason}";
 
   static String m11(name) =>
       "${name} از قبل در این‌جا وجود دارد.\n\nچه‌کاری قصد دارید انجام دهید؟";
@@ -69,9 +74,11 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m22(name) =>
       "پیشنهاد: ${name}\n(برای استفاده از این نام این‌جا ضربه بزنید)";
 
+  static String m23(name) => "‌مرتب‌سازی بر اساس:${name}";
+
   static String m24(access) => "به‌عنوان کپی ${access} باز شد";
 
-  static String m25(name) => "رمز عبور را برای باز کردن قفل وارد کنید";
+  static String m25(name) => "رمز عبور را برای باز کردن قفل وارد کنید. ${name}";
 
   static String m26(name) => "${name} نوشتن لغو شد";
 
@@ -86,6 +93,8 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m31(changes) => "${changes}";
 
   static String m32(entry) => "${entry}";
+
+  static String m33(error) => "خطا ${error}";
 
   static String m34(name) => "${name}";
 
@@ -123,6 +132,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionDone": MessageLookupByLibrary.simpleMessage("انجام شد"),
         "actionEditRepositoryName":
             MessageLookupByLibrary.simpleMessage("ویرایش نام"),
+        "actionEject": MessageLookupByLibrary.simpleMessage("خروج"),
         "actionExit": MessageLookupByLibrary.simpleMessage("خروج"),
         "actionGoToSettings":
             MessageLookupByLibrary.simpleMessage("به بخش تنظیمات بروید"),
@@ -133,11 +143,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionImport": MessageLookupByLibrary.simpleMessage("وارد کردن"),
         "actionImportRepo":
             MessageLookupByLibrary.simpleMessage("وارد کردن مخزن"),
+        "actionInstallDokan":
+            MessageLookupByLibrary.simpleMessage("نصب رابط کاربری Dokan"),
         "actionLockCapital": MessageLookupByLibrary.simpleMessage("قفل کردن"),
         "actionMove":
             MessageLookupByLibrary.simpleMessage("حرکت دادن (انتقال)"),
         "actionNewFile": MessageLookupByLibrary.simpleMessage("فایل"),
         "actionNewFolder": MessageLookupByLibrary.simpleMessage("پوشه"),
+        "actionNewMediaFile": MessageLookupByLibrary.simpleMessage("رسانه"),
         "actionNewRepo": MessageLookupByLibrary.simpleMessage("ایجاد مخزن"),
         "actionNext": MessageLookupByLibrary.simpleMessage("بعدی"),
         "actionNo": MessageLookupByLibrary.simpleMessage("خیر"),
@@ -167,7 +180,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionUndo": MessageLookupByLibrary.simpleMessage("واگرد"),
         "actionUnlock": MessageLookupByLibrary.simpleMessage("بازکردن قفل"),
         "actionUpdate": MessageLookupByLibrary.simpleMessage("به‌روزرسانی"),
+        "actionUpdateDokan":
+            MessageLookupByLibrary.simpleMessage("به‌روزرسانی Dokan"),
         "actionYes": MessageLookupByLibrary.simpleMessage("بله"),
+        "buttonLocateRepository":
+            MessageLookupByLibrary.simpleMessage("مکان‌یابی"),
         "iconAccessMode": MessageLookupByLibrary.simpleMessage("حالت دسترسی"),
         "iconAddExistingRepository":
             MessageLookupByLibrary.simpleMessage("وارد کردن یک مخزن"),
@@ -212,6 +229,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("گوش‌دادن به QUIC/UDP IPv4"),
         "labelQuicListenerEndpointV6":
             MessageLookupByLibrary.simpleMessage("گوش‌دادن به QUIC/UDP IPv6"),
+        "labelRememberPassword":
+            MessageLookupByLibrary.simpleMessage("رمزعبور را به خاطر بسپار"),
         "labelRenameRepository":
             MessageLookupByLibrary.simpleMessage("نام جدید را وارد کنید: "),
         "labelRepositoryCurrentPassword":
@@ -253,6 +272,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "زمانی استفاده خواهد شد که مشکلی بروز کند. سورپرایز شدن یا واکنش منفی به چیزی که طبق انتظار عمل نمی‌کند.\nدر گفتگوی مرتبط با خطاها استفاده می‌شود."),
         "messageActionNotAvailable": MessageLookupByLibrary.simpleMessage(
             "این گزینه در مخازنی که فقط قابل هستند، موجود نیست"),
+        "messageAddRepoDb": MessageLookupByLibrary.simpleMessage(
+            "وارد کردن مخزن از فایل سیستم"),
         "messageAddRepoLink": MessageLookupByLibrary.simpleMessage(
             "یک مخزن را با استفاده از پیوند (لینک) توکن وارد کنید"),
         "messageAddRepoQR": MessageLookupByLibrary.simpleMessage(
@@ -262,11 +283,15 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageAddingFileToReadRepository":
             MessageLookupByLibrary.simpleMessage(
                 "این مخزن یک کپی فقط قابل خواندن است."),
+        "messageAuthenticate":
+            MessageLookupByLibrary.simpleMessage("احراز هویت"),
         "messageAutomaticUnlockRepositoryFailed":
             MessageLookupByLibrary.simpleMessage(
                 "ما نتوانستیم قفل مخزن را باز کنیم"),
         "messageAvailableOnMobile":
             MessageLookupByLibrary.simpleMessage("در تلفن همراه در دسترس است"),
+        "messageAwaitingResult":
+            MessageLookupByLibrary.simpleMessage("در انتظار نتیجه..."),
         "messageBackgroundAndroidPermissions": MessageLookupByLibrary.simpleMessage(
             "به زودی سیستم عامل از شما مجوز اجرای این اپلیکیشن را در پس‌زمینه درخواست می‌کند.\n\nاین (مجوز) برای ادامه همگام‌سازی لازم است در حالتی که اپلیکیشن در پیش‌زمینه اجرا نمی‌شود"),
         "messageBackgroundNotificationAndroid":
@@ -301,6 +326,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "آیا اطمینان دارید که می خواهید این فایل را حذف کنید؟"),
         "messageConfirmFolderDeletion": MessageLookupByLibrary.simpleMessage(
             "آیا اطمینان دارید که می‌خواهید این پوشه را حذف کنید؟"),
+        "messageConfirmIrreversibleChange": MessageLookupByLibrary.simpleMessage(
+            "این اقدام غیر قابل بازگشت خواهد بود، آیا تمایل دارید ادامه دهید؟"),
         "messageConfirmNotEmptyFolderDeletion":
             MessageLookupByLibrary.simpleMessage(
                 "این پوشه خالی نیست\n\nآیا هنوز می‌خواهید آن را حذف کنید؟ (با این کار تمام محتویات آن حذف می‌شود)"),
@@ -333,8 +360,19 @@ class MessageLookup extends MessageLookupByLibrary {
             "ساده‌ترین راه برای حذف داده‌های خود، حذف فایل‌ها یا مخازن از دستگاه خودتان است. هرگونه حذف فایل به همه همتایان شما اطلاع‌رسانی خواهد شد(منتشر خواهد شد) - به عنوان مثال، اگر به یک مخزن دسترسی نوشتنی دارید، می توانید فایل‌های موجود در آن را حذف کنید و همان فایل‌ها از مخازن همتایان شما و همچنین از همتای همیشه فعال ما Always-On-Peer حذف خواهند شد. \nاگر نیاز دارید که فقط مخازن را از سرور همتای همیشه فعال Always-On-Peer ما حذف کنید (اما همچنان آن‌ها را در مخزن خود در دستگاه خود نگه دارید)، لطفاً با آدرس زیر با ما تماس بگیرید."),
         "messageDistributedHashTables":
             MessageLookupByLibrary.simpleMessage("جداول هش توزیع‌شده"),
+        "messageDokan": MessageLookupByLibrary.simpleMessage(
+            "رابط نرم‌افزاری دکان (Dokan)"),
+        "messageDokanDifferentMayorP1":
+            MessageLookupByLibrary.simpleMessage("نصب شده"),
+        "messageDokanDifferentMayorP2": MessageLookupByLibrary.simpleMessage(
+            "قدیمی شده است. لطفا آن را به آخرین نسخه به‌روزرسانی کنید."),
+        "messageDokanInstallationFailed": MessageLookupByLibrary.simpleMessage(
+            "نصب رابط کاربری Dokan موفقیت‌آمیز نبود."),
+        "messageDokanOlderVersionP2": MessageLookupByLibrary.simpleMessage(
+            "قدیمی است.\n\nلطفاً نسخه موجود رابط کاربری Dokan را حذف کنید، سیستم را مجدد راه‌اندازی و وی‌سینک را دوباره اجرا کنید."),
         "messageDownloadFileCanceled":
             MessageLookupByLibrary.simpleMessage("دانلود فایل لغو شد"),
+        "messageDownloadFileLocation": m1,
         "messageDownloadingFileCanceled": m2,
         "messageDownloadingFileError": m3,
         "messageEmptyFolder":
@@ -397,6 +435,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "اشکالی پیش آمد. لطفا دوباره تلاش کنید."),
         "messageErrorDefaultShort":
             MessageLookupByLibrary.simpleMessage("ناموفق."),
+        "messageErrorDetail": m6,
         "messageErrorDokanNotInstalled": m7,
         "messageErrorEntryNotFound":
             MessageLookupByLibrary.simpleMessage("ورودی یافت نشد"),
@@ -475,10 +514,16 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("در حال راه‌اندازی…"),
         "messageInputPasswordToUnlock": MessageLookupByLibrary.simpleMessage(
             "روی دکمه باز کردن قفل ضربه بزنید و رمز عبور را برای دسترسی به محتوای این مخزن وارد کنید."),
+        "messageInstallDokanForOuisyncP1":
+            MessageLookupByLibrary.simpleMessage("موارد استفاده از وی‌سینک"),
+        "messageInstallDokanForOuisyncP2": MessageLookupByLibrary.simpleMessage(
+            "برای دسترسی به مخازن از طریق بخش جستجوگر فایل.\nلطفاً رابط نرم‌افزاری Dokan را برای بهبود تجربه وی‌سینک خود نصب کنید."),
         "messageInternationalBillHumanRights":
             MessageLookupByLibrary.simpleMessage("اعلامیه جهانی حقوق بشر"),
         "messageKeepBothFiles":
             MessageLookupByLibrary.simpleMessage("هر دو فایل را نگه دارید"),
+        "messageKeepBothFolders":
+            MessageLookupByLibrary.simpleMessage("هر دو پوشه را نگه دارید"),
         "messageLaunchAtStartup": MessageLookupByLibrary.simpleMessage(
             "راه‌اندازی هنگام شروع به کار"),
         "messageLibraryPanic":
@@ -554,6 +599,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "مخازن را می‌توان به صورت خواندنی-نوشتنی، فقط خواندنی یا «کور» (شما فایل‌ها را برای دیگران ذخیره می‌کنید، اما نمی‌توانید به آن‌ها دسترسی داشته باشید) به اشتراک گذاشت"),
         "messageOnboardingShare": MessageLookupByLibrary.simpleMessage(
             "همه فایل‌ها و پوشه‌های اضافه‌شده به Ouisync به‌طور پیش‌فرض هم در حالت انتقال و هم در حالت استراحت، به‌صورت امن رمزنگاری شده‌اند."),
+        "messageOnlyAvailableFiles": MessageLookupByLibrary.simpleMessage(
+            "فقط برای فایل‌ها در دسترس است"),
         "messageOpenFileError": m16,
         "messageOr": MessageLookupByLibrary.simpleMessage("یا"),
         "messageOuiSyncDesktopTitle":
@@ -565,10 +612,14 @@ class MessageLookup extends MessageLookupByLibrary {
             "رمز عبور در حافظه کوتاه‌مدت کپی شد"),
         "messagePasswordStrength":
             MessageLookupByLibrary.simpleMessage("میزان قدرتمندی رمز عبور"),
+        "messagePeerAdded":
+            MessageLookupByLibrary.simpleMessage("یک همتا افزوده شد"),
         "messagePeerExchange":
             MessageLookupByLibrary.simpleMessage("تبادل همتا"),
         "messagePeerExchangeWikipedia":
             MessageLookupByLibrary.simpleMessage("تبادل همتا در ویکی‌پدیا"),
+        "messagePeerRemoved":
+            MessageLookupByLibrary.simpleMessage("یک همتا حذف شد"),
         "messagePermissionRequired":
             MessageLookupByLibrary.simpleMessage("این مجوز لازم است"),
         "messagePreviewingFileFailed": m17,
@@ -602,6 +653,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("تغییر نام مخزن"),
         "messageReplaceExistingFile":
             MessageLookupByLibrary.simpleMessage("فایل موجود را جایگزین کنید"),
+        "messageReplaceExistingFolder":
+            MessageLookupByLibrary.simpleMessage("پوشه موجود را جایگزین کنید"),
         "messageRepoAuthFailed":
             MessageLookupByLibrary.simpleMessage("خطا در احراز هویت مخزن"),
         "messageRepoDeletionErrorDescription": m18,
@@ -629,6 +682,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageRepositorySuggestedName": m22,
         "messageRepositoryToken":
             MessageLookupByLibrary.simpleMessage("لینک را این‌جا قرار دهید"),
+        "messageResetLocalSecret":
+            MessageLookupByLibrary.simpleMessage("بازنشانی رمز محلی"),
         "messageRousseau": MessageLookupByLibrary.simpleMessage("ژان ژاک روسو"),
         "messageSaveLogFile": MessageLookupByLibrary.simpleMessage(
             "ذخیره‌سازی فایل مرتبط با ثبت رویدادها"),
@@ -658,6 +713,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "برای ایجاد پیوند مخزن ابتدا باید یک مجوز انتخاب کنید"),
         "messageShareWithWR":
             MessageLookupByLibrary.simpleMessage("کد QR را به‌ اشتراک بگذارید"),
+        "messageSortBy": m23,
         "messageStorage":
             MessageLookupByLibrary.simpleMessage("فضای ذخیره‌سازی"),
         "messageStoragePermission": MessageLookupByLibrary.simpleMessage(
@@ -705,6 +761,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageUpdateLocalPasswordConfirmation":
             MessageLookupByLibrary.simpleMessage(
                 "رمز عبور محلی این مخزن به‌روز شود؟"),
+        "messageUpdateLocalSecretFailed": MessageLookupByLibrary.simpleMessage(
+            "به‌روزرسانی شاخص‌های امنیتی مخزن انجام نشد."),
+        "messageUpdateLocalSecretOk": MessageLookupByLibrary.simpleMessage(
+            "شاخص‌های امنیتی مخزن به‌روزرسانی شده است."),
+        "messageUseCacheServers": MessageLookupByLibrary.simpleMessage(
+            "از سرورهای حافظه پنهان (کش) استفاده کنید"),
+        "messageUseLocalPassword": MessageLookupByLibrary.simpleMessage(
+            "از رمز عبور محلی استفاده کنید"),
         "messageVPN": MessageLookupByLibrary.simpleMessage("وی‌پی‌ان"),
         "messageValidateLocalPassword":
             MessageLookupByLibrary.simpleMessage("تایید رمز عبور محلی"),
@@ -726,10 +790,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "replacementAccess": m30,
         "replacementChanges": m31,
         "replacementEntry": m32,
+        "replacementError": m33,
         "replacementName": m34,
         "replacementNumber": m35,
         "replacementPath": m36,
         "replacementStatus": m37,
+        "repositoryIsAlreadyImported":
+            MessageLookupByLibrary.simpleMessage("مخزن قبلا وارد شده است"),
         "statusSync": MessageLookupByLibrary.simpleMessage("همگام‌سازی شد"),
         "statusUnspecified": MessageLookupByLibrary.simpleMessage("نامشخص"),
         "titleAbout": MessageLookupByLibrary.simpleMessage("درباره ما"),
@@ -768,6 +835,12 @@ class MessageLookup extends MessageLookupByLibrary {
             "۳.۴ حذف اطلاعات شما از سرور [Always-On-Peer] ما"),
         "titleDigitalSecurity":
             MessageLookupByLibrary.simpleMessage("امنیت دیجیتال"),
+        "titleDokanInstallation":
+            MessageLookupByLibrary.simpleMessage("نصب رابط نرم‌افزاری (Dokan)"),
+        "titleDokanInstallationFound": MessageLookupByLibrary.simpleMessage(
+            "نصب رابط نرم‌افزاری (Dokan) پیدا شد"),
+        "titleDokanMissing": MessageLookupByLibrary.simpleMessage(
+            "رابط نرم‌افزاری (Dokan) موجود نیست"),
         "titleDownloadLocation":
             MessageLookupByLibrary.simpleMessage("محل دانلود"),
         "titleDownloadToDevice":
@@ -858,6 +931,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("بازکردن قفل مخزن"),
         "titleUnsavedChanges":
             MessageLookupByLibrary.simpleMessage("تغییرات ذخیره‌ نشده"),
+        "titleUserProvidedPeers": MessageLookupByLibrary.simpleMessage(
+            "همتا‌های ارائه‌شده توسط کاربر"),
         "titleWeAreEq":
             MessageLookupByLibrary.simpleMessage("ما eQualit.ie هستیم"),
         "typeFile": MessageLookupByLibrary.simpleMessage("فایل"),
