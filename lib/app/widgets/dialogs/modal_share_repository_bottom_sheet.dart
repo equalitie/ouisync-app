@@ -76,8 +76,10 @@ class _ShareRepositoryState extends State<ShareRepository> with AppLogger {
                     currentAccessMode: widget.repository.state.accessMode,
                     availableAccessMode: widget.availableAccessModes,
                     onChanged: _onChanged,
-                    onDisabledMessage: (String message) =>
-                        showSnackBar(message),
+                    onDisabledMessage: (String message) => showSnackBar(
+                      message,
+                      context: context,
+                    ),
                   ),
                   Dimensions.spacingVerticalHalf,
                   _buildAccessModeDescription(_accessMode),
@@ -187,13 +189,20 @@ class _ShareRepositoryState extends State<ShareRepository> with AppLogger {
                     color: _getActionStateColor(_shareToken != null),
                     onPressed: () async {
                   if (_shareToken == null) {
-                    showSnackBar(S.current.messageShareActionDisabled);
+                    showSnackBar(
+                      S.current.messageShareActionDisabled,
+                      context: context,
+                    );
 
                     return;
                   }
 
                   await copyStringToClipboard(_shareToken!);
-                  showSnackBar(S.current.messageTokenCopiedToClipboard);
+
+                  showSnackBar(
+                    S.current.messageTokenCopiedToClipboard,
+                    context: context,
+                  );
                 }),
                 Fields.constrainedText(S.current.labelCopyLink,
                     flex: 0, style: labelStyle),
@@ -208,7 +217,10 @@ class _ShareRepositoryState extends State<ShareRepository> with AppLogger {
                   color: _getActionStateColor(_shareToken != null),
                   onPressed: () async {
                 if (_shareToken == null) {
-                  showSnackBar(S.current.messageShareActionDisabled);
+                  showSnackBar(
+                    S.current.messageShareActionDisabled,
+                    context: context,
+                  );
 
                   return;
                 }
@@ -238,7 +250,10 @@ class _ShareRepositoryState extends State<ShareRepository> with AppLogger {
                     color: _getActionStateColor(_shareToken != null),
                     onPressed: () async {
                   if (_shareToken == null) {
-                    showSnackBar(S.current.messageShareActionDisabled);
+                    showSnackBar(
+                      S.current.messageShareActionDisabled,
+                      context: context,
+                    );
 
                     return;
                   }

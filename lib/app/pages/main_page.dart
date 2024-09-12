@@ -512,7 +512,7 @@ class _MainPageState extends State<MainPage>
     int clickCount = exitClickCounter.registerClick();
 
     if (clickCount <= 1) {
-      showSnackBar(S.current.messageExitOuiSync);
+      showSnackBar(S.current.messageExitOuiSync, context: context);
     } else {
       exitClickCounter.reset();
       await MoveToBackground.moveTaskToBack();
