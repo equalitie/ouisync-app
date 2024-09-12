@@ -58,7 +58,10 @@ class _AcceptEqualitieValuesTermsPrivacyPageState
 
     int clickCount = exitClickCounter.registerClick();
     if (clickCount <= 1) {
-      final snackBar = SnackBar(content: Text(S.current.messageExitOuiSync));
+      final snackBar = SnackBar(
+        content: Text(S.current.messageExitOuiSync),
+        showCloseIcon: true,
+      );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
     } else {
       exitClickCounter.reset();
