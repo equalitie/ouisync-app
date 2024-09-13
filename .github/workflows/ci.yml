@@ -84,6 +84,7 @@ jobs:
         uses: nttld/setup-ndk@v1
         with:
             ndk-version: ${{ matrix.ndk.version }}
+            link-to-sdk: true
         if: matrix.ndk.version != ''
 
       - name: Set NDK ABI filter

@@ -39,28 +39,50 @@ class _SnackBarWrapState extends State<_SnackBarWrap> {
 
 showSnackBar(
   String message, {
+  BuildContext? context,
   SnackBarAction? action,
   bool showCloseIcon = true,
-  SnackBarBehavior behavior = SnackBarBehavior.floating,
+}) =>
+    context != null
+        ? _showSnackBar(
+            context,
+            message,
+            action: action,
+            showCloseIcon: showCloseIcon,
+          )
+        : WidgetsBinding.instance.addPostFrameCallback(
+            (_) => BuildContextProvider().call(
+              (context) => _showSnackBar(
+                context,
+                message,
+                action: action,
+                showCloseIcon: showCloseIcon,
+              ),
+            ),
+          );
+
+_showSnackBar(
+  BuildContext context,
+  String message, {
+  SnackBarAction? action,
+  bool showCloseIcon = true,
 }) {
-  BuildContextProvider().call((context) {
-    final messenger = ScaffoldMessenger.of(context);
+  final messenger = ScaffoldMessenger.of(context);
 
-    if (_snackbars.contains(message)) {
-      return;
-    }
+  if (_snackbars.contains(message)) {
+    return;
+  }
 
-    _snackbars.add(message);
+  _snackbars.add(message);
 
-    messenger.showSnackBar(
-      SnackBar(
-        content: _SnackBarWrap(message),
-        action: action,
-        showCloseIcon: showCloseIcon,
-        behavior: behavior,
-      ),
-    );
-  });
+  messenger.showSnackBar(
+    SnackBar(
+      content: _SnackBarWrap(message),
+      action: action,
+      showCloseIcon: showCloseIcon,
+      behavior: SnackBarBehavior.fixed,
+    ),
+  );
 }
 
 hideSnackBar(context) => SnackBarAction(
