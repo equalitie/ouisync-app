@@ -6,6 +6,7 @@ import 'package:launch_at_startup/launch_at_startup.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '../utils/constants.dart';
+import '../cubits/utils.dart';
 
 /// Cubit that controls whether the app should be launched at device startup. The state is a
 /// boolean indicating whether the launch at startup is enabled.
@@ -42,7 +43,7 @@ class LaunchAtStartupCubit extends Cubit<bool> {
   }
 
   Future<void> _update() async {
-    emit(await LaunchAtStartup.instance.isEnabled());
+    emitUnlessClosed(await LaunchAtStartup.instance.isEnabled());
   }
 }
 

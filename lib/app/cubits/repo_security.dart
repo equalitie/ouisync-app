@@ -10,6 +10,7 @@ import '../utils/master_key.dart';
 import '../utils/option.dart';
 import '../utils/password_hasher.dart';
 import 'repo.dart';
+import 'utils.dart';
 
 class RepoSecurityState {
   RepoSecurityState({
@@ -123,11 +124,9 @@ class RepoSecurityCubit extends Cubit<RepoSecurityState> with AppLogger {
 
   Future<void> _init() async {
     final canAuthenticate = await LocalAuth.canAuthenticate();
-    if (!isClosed) {
-      emit(state.copyWith(
-        isBiometricsAvailable: canAuthenticate,
-      ));
-    }
+    emitUnlessClosed(state.copyWith(
+      isBiometricsAvailable: canAuthenticate,
+    ));
   }
 
   void setOrigin(SecretKeyOrigin value) {
