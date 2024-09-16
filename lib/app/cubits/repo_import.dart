@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync_app/app/cubits/repos.dart';
 import 'package:ouisync_app/app/utils/share_token.dart';
+import 'utils.dart';
 
 class RepoImportCubit extends Cubit<ShareTokenResult?> {
   RepoImportCubit({required this.reposCubit}) : super(null) {
@@ -22,6 +23,6 @@ class RepoImportCubit extends Cubit<ShareTokenResult?> {
 
   Future<void> setToken(String input) async {
     final result = await parseShareToken(reposCubit, input);
-    emit(result);
+    emitUnlessClosed(result);
   }
 }

@@ -7,6 +7,7 @@ import 'package:ouisync/ouisync.dart';
 import 'package:stream_transform/stream_transform.dart';
 
 import '../utils/log.dart';
+import 'utils.dart';
 
 class PeerSetCubit extends Cubit<PeerSet> with AppLogger {
   final Session _session;
@@ -41,7 +42,7 @@ class PeerSetCubit extends Cubit<PeerSet> with AppLogger {
     final peers = await _session.peers;
 
     if (!isClosed) {
-      emit(PeerSet(peers));
+      emitUnlessClosed(PeerSet(peers));
     }
   }
 

@@ -14,6 +14,7 @@ import '../utils/dialogs.dart';
 import '../utils/log.dart';
 import '../utils/strings.dart';
 import 'repos.dart';
+import 'utils.dart';
 
 class RepoCreationState {
   static const initialLocalSecretMode = LocalSecretMode.randomStored;
@@ -338,7 +339,7 @@ class RepoCreationCubit extends Cubit<RepoCreationState> with AppLogger {
         RepoCreationPending(location: location),
     };
 
-    emit(state.copyWith(substate: substate));
+    emitUnlessClosed(state.copyWith(substate: substate));
   }
 
   void _setInvalidName(String error) {
@@ -352,7 +353,7 @@ class RepoCreationCubit extends Cubit<RepoCreationState> with AppLogger {
         RepoCreationPending(nameError: error),
     };
 
-    emit(state.copyWith(substate: substate));
+    emitUnlessClosed(state.copyWith(substate: substate));
   }
 
   //// DEBUG

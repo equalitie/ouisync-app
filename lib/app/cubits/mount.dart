@@ -4,6 +4,7 @@ import 'package:ouisync/ouisync.dart';
 
 import '../utils/log.dart';
 import '../utils/mounter.dart';
+import 'utils.dart';
 
 sealed class MountState {
   const MountState();
@@ -36,13 +37,13 @@ class MountCubit extends Cubit<MountState> with AppLogger {
   void init() => unawaited(_init());
 
   Future<void> _init() async {
-    emit(MountStateMounting());
+    emitUnlessClosed(MountStateMounting());
 
     try {
       await mounter.init();
-      emit(MountStateSuccess());
+      emitUnlessClosed(MountStateSuccess());
     } on Error catch (error) {
-      emit(MountStateError(error.code, error.message));
+      emitUnlessClosed(MountStateError(error.code, error.message));
     }
   }
 
