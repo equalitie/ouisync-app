@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync/ouisync.dart';
 
 import '../utils/log.dart';
+import 'utils.dart';
 
 class NatDetection extends Cubit<NatBehavior> with AppLogger {
   final Session session;
@@ -33,12 +34,12 @@ class NatDetection extends Cubit<NatBehavior> with AppLogger {
   void _detect(ConnectivityResult result) async {
     if (result == ConnectivityResult.none ||
         result == ConnectivityResult.bluetooth) {
-      emit(NatBehavior.offline);
+      emitUnlessClosed(NatBehavior.offline);
       return;
     }
 
-    emit(NatBehavior.pending);
-    emit(NatBehavior.parse(await session.natBehavior));
+    emitUnlessClosed(NatBehavior.pending);
+    emitUnlessClosed(NatBehavior.parse(await session.natBehavior));
   }
 }
 

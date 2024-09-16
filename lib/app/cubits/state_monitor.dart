@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:ouisync/state_monitor.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'utils.dart';
 
 class StateMonitorCubit extends Cubit<StateMonitorNode?> {
   final StateMonitor _monitor;
@@ -23,8 +24,7 @@ class StateMonitorCubit extends Cubit<StateMonitorNode?> {
 
   Future<void> _load() async {
     final node = await _monitor.load();
-    if (isClosed) return;
-    emit(node);
+    emitUnlessClosed(node);
   }
 
   @override
@@ -58,8 +58,7 @@ class StateMonitorIntCubit extends Cubit<int?> {
 
   Future<void> _load() async {
     final node = await _monitor.load();
-    if (isClosed) return;
-    emit(node?.parseIntValue(_name));
+    emitUnlessClosed(node?.parseIntValue(_name));
   }
 
   @override

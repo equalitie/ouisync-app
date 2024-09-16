@@ -18,6 +18,7 @@ import '../utils/mounter.dart';
 import '../utils/repo_path.dart' as repo_path;
 import '../utils/utils.dart';
 import 'cubits.dart';
+import 'utils.dart';
 
 class RepoState extends Equatable {
   final bool isLoading;
@@ -255,7 +256,7 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
 
   Future<void> _updateCacheServersState() async {
     final value = await _cacheServers.isEnabledForRepo(_repo);
-    emit(state.copyWith(isCacheServersEnabled: value));
+    emitUnlessClosed(state.copyWith(isCacheServersEnabled: value));
   }
 
   Future<Directory> openDirectory(String path) => Directory.open(_repo, path);
