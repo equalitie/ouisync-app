@@ -1,15 +1,68 @@
 import Cocoa
 import FlutterMacOS
+import Common
+import FileProvider
 
 class MainFlutterWindow: NSWindow {
-  override func awakeFromNib() {
-    let flutterViewController = FlutterViewController()
-    let windowFrame = self.frame
-    self.contentViewController = flutterViewController
-    self.setFrame(windowFrame, display: true)
+    var fileProviderProxy: FileProviderProxy? = nil
+    var flutterMethodChannel: FlutterMethodChannel? = nil
+    let methodChannelName: String = "org.equalitie.ouisync/native"
 
-    RegisterGeneratedPlugins(registry: flutterViewController)
+    override func awakeFromNib() {
+        let flutterViewController = FlutterViewController()
+        let windowFrame = self.frame
+        self.contentViewController = flutterViewController
+        self.setFrame(windowFrame, display: true)
 
-    super.awakeFromNib()
-  }
+        let flutterBinaryMessenger = flutterViewController.engine.binaryMessenger
+        setupFlutterToExtensionProxy(flutterBinaryMessenger)
+        setupFlutterMethodChannel(flutterBinaryMessenger)
+
+        RegisterGeneratedPlugins(registry: flutterViewController)
+
+        super.awakeFromNib()
+    }
+
+    // ------------------------------------------------------------------
+    // Setup proxy between flutter and the file provider extension
+    // ------------------------------------------------------------------
+    fileprivate func setupFlutterToExtensionProxy(_ binaryMessenger: FlutterBinaryMessenger) {
+        if fileProviderProxy == nil {
+            fileProviderProxy = FileProviderProxy(binaryMessenger)
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // Setup handing of message from flutter to this app instance
+    // ------------------------------------------------------------------
+    fileprivate func setupFlutterMethodChannel(_ binaryMessenger: FlutterBinaryMessenger) {
+        let channel = FlutterMethodChannel(name: methodChannelName, binaryMessenger: binaryMessenger)
+        channel.setMethodCallHandler({ [weak self] (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
+            guard let self = self else { return }
+            handleFlutterMethodCall(call, result: result)
+        })
+        flutterMethodChannel = channel
+    }
+
+    private func handleFlutterMethodCall(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        switch call.method {
+        case "getDefaultRepositoriesDirectory":
+            let commonDirs = Common.Directories()
+            result(commonDirs.repositoriesPath)
+        case "getMountRootDirectory":
+            let manager = NSFileProviderManager(for: ouisyncFileProviderDomain)!
+            Task {
+                let userVisibleRootUrl = try! await manager.getUserVisibleURL(for: .rootContainer)
+                var path = userVisibleRootUrl.path(percentEncoded: false)
+                if path.last == "/" {
+                    path = String(path.dropLast())
+                }
+                result(path)
+            }
+        default:
+            result(FlutterMethodNotImplemented)
+            fatalError("Unknown method '\(call.method)' passed to channel '\(methodChannelName)'")
+        }
+    }
 }
+

@@ -20,10 +20,19 @@ Future<Session> createSession({
   final configPath = join(appDir.path, Constants.configDirName);
   final logPath = await LogUtils.path;
 
-  final session = Session.create(
-    configPath: configPath,
-    logPath: logPath,
-  );
+  final Session session;
+
+  if (Platform.isMacOS) {
+    // On MacOS, later on iOS and possibly other platforms as well, the Ouisync
+    // Rust backend runs in the native code and we communicate with it using
+    // Flutter's `PlatformChannels`.
+    session = await Session.createChanneled("org.equalitie.ouisync/backend");
+  } else {
+    session = Session.create(
+      configPath: configPath,
+      logPath: logPath,
+    );
+  }
 
   try {
     windowManager?.onClose(session.close);

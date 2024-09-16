@@ -706,18 +706,30 @@ class _MainPageState extends State<MainPage>
       }
 
       bool previewOk = false;
+      var errorMessage = S.current.messagePreviewingFileFailed(entry.path);
       try {
-        if (!io.Platform.isWindows) {
-          final url = Uri.parse('file:$mountPoint${entry.path}');
-          previewOk = await launchUrl(url);
-        } else {
+        if (io.Platform.isWindows) {
           // Special non ASCII characters are encoded using Escape Encoding
           // https://datatracker.ietf.org/doc/html/rfc2396#section-2.4.1
           // which are not decoded back by the url_launcher plugin on Windows
           // before passing to the system for execution. Thus on Windows
           // we use the `launchUrlString` function instead of `launchUrl`.
           final path = '$mountPoint${entry.path}';
+          final can = await canLaunchUrlString(path);
           previewOk = await launchUrlString(path);
+        } else if (io.Platform.isMacOS) {
+          // TODO: There is some issue with permissions, launchUrl doesn't work
+          // and when I try to send this Uri to Swift to run
+          // `NSWorkspace.shared.open(url)` it just returns `false`. Tried also
+          // with running `url.startAccessingSecurityScopedResource()` but that
+          // also just returns `false`. I'll leave this to later or to someone
+          // who understands the macOS file permissions better.
+          showSnackBar("Not yet implemented");
+          return;
+        } else {
+          final url = Uri.parse('file:$mountPoint${entry.path}');
+          final can = await canLaunchUrl(url);
+          previewOk = await launchUrl(url);
         }
       } on PlatformException catch (e, st) {
         loggy.app(

@@ -531,7 +531,7 @@
   "messageBiometricUnlockRepositoryFailed":"Biometric unlocking failed",
   "messageEnterDifferentName":"Please enter a different name",
   "messageUnknownFileExtension":"Unknown file extension",
-  "messageNoAppsForThisAction":"Not apps can perform this action",
+  "messageNoAppsForThisAction":"No application can perform this action",
   "messageFilePreviewFailed":"We couldn’t start the file preview",
   "messagePreviewingFileFailed":"Previewing file {path} failed",
   "messageDownloadFileCanceled":"File download canceled",

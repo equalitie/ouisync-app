@@ -23,4 +23,15 @@ class Native {
     final dynamic result = await _channel.invokeMethod('getDownloadPath');
     return result;
   }
+
+  // On MacOS this returns the root of the directory where files and folders are stored.
+  // Should be something like ~/Library/CloudStorage/Ouisync-<Domain>`.
+  static Future<String> getMountRootDirectory() async {
+    return await _channel.invokeMethod('getMountRootDirectory');
+  }
+
+  /// In iOS or MacOS, it retrieves the default path where repositories shall be stored
+  static Future<String> getDefaultRepositoriesDirectory() async {
+    return await _channel.invokeMethod('getDefaultRepositoriesDirectory');
+  }
 }

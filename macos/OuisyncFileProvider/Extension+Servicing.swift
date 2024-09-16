@@ -10,18 +10,6 @@ import Foundation
 import FileProvider
 import OuisyncLib
 
-class OuisyncLibrarySender: OuisyncLibrarySenderProtocol {
-    let libraryClient: OuisyncFileProviderClientProtocol
-
-    init(_ libraryClient: OuisyncFileProviderClientProtocol) {
-        self.libraryClient = libraryClient
-    }
-
-    func sendDataToOuisyncLib(_ data: [UInt8]) {
-        libraryClient.messageFromServerToClient(data);
-    }
-}
-
 extension Extension: NSFileProviderServicing {
     public func supportedServiceSources(for itemIdentifier: NSFileProviderItemIdentifier,
                                         completionHandler: @escaping ([NSFileProviderServiceSource]?, Error?) -> Void) -> Progress {
@@ -32,10 +20,31 @@ extension Extension: NSFileProviderServicing {
     }
 }
 
+class AppToBackendProxy: FromAppToFileProviderProtocol {
+    let connectionToApp: NSXPCConnection
+    let sendToApp: FromFileProviderToAppProtocol
+    let ouisyncClient: OuisyncClient
+
+    init(_ connectionToApp: NSXPCConnection, _ sendToApp: FromFileProviderToAppProtocol, _ ouisyncClient: OuisyncClient) {
+        self.connectionToApp = connectionToApp
+        self.sendToApp = sendToApp
+        self.ouisyncClient = ouisyncClient
+        self.ouisyncClient.onReceiveFromBackend = { [weak self] message_data in
+            self?.sendToApp.fromFileProviderToApp(message_data)
+        }
+    }
+
+    func fromAppToFileProvider(_ message_data: [UInt8]) {
+        ouisyncClient.sendToBackend(message_data)
+    }
+}
+
 extension Extension {
-    class OuisyncServiceSource: NSObject, NSFileProviderServiceSource, NSXPCListenerDelegate, OuisyncFileProviderServerProtocol {
+    class OuisyncServiceSource: NSObject, NSFileProviderServiceSource, NSXPCListenerDelegate {
         weak var weakExt: Extension?
         let listeners = NSHashTable<NSXPCListener>()
+        var proxies: [UInt64: AppToBackendProxy] = [:]
+        var nextProxyId: UInt64 = 0
 
         init(_ ext: Extension) {
             self.weakExt = ext
@@ -59,23 +68,35 @@ extension Extension {
         func listener(_ listener: NSXPCListener, shouldAcceptNewConnection connection: NSXPCConnection) -> Bool {
             NSLog(":::: Servicing START ::::")
 
-            connection.remoteObjectInterface = NSXPCInterface(with: OuisyncFileProviderClientProtocol.self)
-            connection.exportedObject = self
-            connection.exportedInterface = NSXPCInterface(with: OuisyncFileProviderServerProtocol.self)
+            let proxyId = generateProxyId()
 
-            connection.interruptionHandler = {
+            connection.interruptionHandler = { [weak self] in
                 NSLog("😡 Connection to Ouisync XPC service has been interrupted")
+                if let s = self {
+                    synchronized(s) {
+                        s.proxies.removeValue(forKey: proxyId)
+                        return
+                    }
+                }
             }
 
-            connection.invalidationHandler = {
+            connection.invalidationHandler = { [weak self] in
                 NSLog("😡 Connection to Ouisync XPC service has been invalidated")
+                if let s = self {
+                    synchronized(s) {
+                        s.proxies.removeValue(forKey: proxyId)
+                        return
+                    }
+                }
             }
 
-            let maybe_client = connection.remoteObjectProxy() as? OuisyncFileProviderClientProtocol;
+            connection.remoteObjectInterface = NSXPCInterface(with: FromFileProviderToAppProtocol.self)
+            let sendToApp = connection.remoteObjectProxy() as? FromFileProviderToAppProtocol;
 
-            guard let client = maybe_client else {
+            // TODO: Send notifications to the app/flutter
+            guard let sendToApp = sendToApp else {
                 NSLog("😡 Failed to convert XPC connection to OuisyncConnection")
-                return true
+                return false
             }
 
             guard let ext = weakExt else {
@@ -83,140 +104,29 @@ extension Extension {
                 return false
             }
 
-            if ext.ouisyncSession != nil {
-                // TODO: What shoudld we do if there is another app trying to connect? Right now Ouisync
-                // runs inside the app, so that would mean we have two or more Ouisyncs running at the
-                // same time. The app is set up in Flutter to only allow one instance, but whether that
-                // actually works remains to be tested. If it happens that there are acually more than
-                // one Ouisync instance, we might need to move the backend to the extension, but that
-                // would require a lot of boilerplate to make it accessible from Dart.
-                NSLog("😡 Session already exists")
+            guard let ouisyncClient = try? ext.ouisyncSession.connectNewClient() else {
+                NSLog("😡 Failed to create new ouisync client when accepting new connection from the app")
                 return false
             }
 
-            let ouisyncSession = OuisyncSession(OuisyncLibrarySender(client))
-            ext.assignSession(ouisyncSession)
+            let proxy = AppToBackendProxy(connection, sendToApp, ouisyncClient)
 
-            startListeningToRepoChanges()
+            connection.exportedObject = proxy
+            connection.exportedInterface = NSXPCInterface(with: FromAppToFileProviderProtocol.self)
+
+            proxies[proxyId] = proxy
 
             connection.resume()
-
 
             return true
         }
 
-        // Ouisync backend is running inside the app (not in this extension), so when we send a request to it
-        // here is where we receive responses and pass it to `ouisyncSession`.
-        func messageFromClientToServer(_ message_data: [UInt8]) {
-            if message_data.isEmpty {
-                return
+        func generateProxyId() -> UInt64 {
+            synchronized(self) {
+                let proxyId = nextProxyId
+                nextProxyId += 1
+                return proxyId
             }
-
-            guard let ext = self.weakExt else {
-                return
-            }
-
-            guard let ouisyncSession = ext.ouisyncSession else {
-                return
-            }
-
-            ouisyncSession.onReceiveDataFromOuisyncLib(message_data)
-        }
-
-        // Start watchin to changes in Ouisync: Everytime a repository is added or removed, and
-        // everytime a repository changes we ask the file provider to refresh it's content.
-        func startListeningToRepoChanges() {
-            let weakExt = self.weakExt
-
-            Task {
-                let repoListChanged: NotificationStream
-
-                if let session = weakExt?.ouisyncSession {
-                    repoListChanged = try await session.subscribeToRepositoryListChange()
-                } else {
-                    return
-                }
-
-                var repoWatchingTasks: [RepositoryHandle: Task<Void, Never>] = [:]
-
-                while true {
-                    if let ext = weakExt {
-                        let currentRepos: [OuisyncRepository]
-
-                        do {
-                            currentRepos = try await ext.ouisyncSession!.listRepositories()
-                        } catch let error as OuisyncError {
-                            switch error.code {
-                            case .ConnectionLost: return
-                            default: fatalError("😡 Unexpected Ouisync exception: \(error)")
-                            }
-                        } catch {
-                            fatalError("😡 Unexpected exception: \(error)")
-                        }
-
-                        let watchedRepoHandles = Set(repoWatchingTasks.keys)
-                        let currentRepoHandles = Set(currentRepos.map({ $0.handle }))
-
-                        let reposToAdd = currentRepoHandles.subtracting(watchedRepoHandles)
-                        let reposToRemove = watchedRepoHandles.subtracting(currentRepoHandles)
-
-                        for repo in reposToAdd {
-                            guard let ext = weakExt else {
-                                return
-                            }
-                            guard let stream = try? await ext.ouisyncSession!.subscribeToRepositoryChange(repo) else {
-                                continue
-                            }
-                            repoWatchingTasks[repo] = Task {
-                                while true {
-                                    if await stream.next() == nil {
-                                        return
-                                    }
-                                    guard let ext = weakExt else {
-                                        return
-                                    }
-                                    await refreshFileProvider(ext)
-                                }
-                            }
-                        }
-
-                        for repo in reposToRemove {
-                            repoWatchingTasks.removeValue(forKey: repo)
-                        }
-
-                        await refreshFileProvider(ext)
-
-                    } else {
-                        NSLog("❗Stopping the refresh of repo changes because the extension was destroyed")
-                        return
-                    }
-
-                    if await repoListChanged.next() == nil {
-                        break
-                    }
-                }
-            }
-        }
-    }
-
-
-    // This signals to the file provider to refresh
-    // https://developer.apple.com/documentation/fileprovider/replicated_file_provider_extension/synchronizing_files_using_file_provider_extensions#4099755
-    static func refreshFileProvider(_ ext: Extension) async {
-        let oldAnchor = ext.currentAnchor
-        ext.currentAnchor = NSFileProviderSyncAnchor.random()
-        NSLog("🚀 Refreshing FileProvider and updating anchor \(oldAnchor) -> \(ext.currentAnchor)")
-
-        let domain = ouisyncFileProviderDomain
-
-        guard let manager = NSFileProviderManager(for: domain) else {
-            NSLog("❌ failed to create NSFileProviderManager for \(domain)")
-            return
-        }
-        do {
-            try await manager.signalEnumerator(for: .workingSet)
-        } catch let error as NSError {
-            NSLog("❌ failed to signal working set for \(domain): \(error)")
         }
     }
 }

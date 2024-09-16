@@ -33,6 +33,7 @@ class Enumerator: NSObject, NSFileProviderEnumerator {
 
     func enumerateItems(for observer: NSFileProviderEnumerationObserver, startingAt page: NSFileProviderPage) {
         let log = log.child("enumerateItems").trace("invoke(...) \(itemId)")
+
         /* TODO:
          - inspect the page to determine whether this is an initial or a follow-up request
          
@@ -47,7 +48,8 @@ class Enumerator: NSObject, NSFileProviderEnumerator {
          */
         Task {
             do {
-                let items = try await enumerateBackend()
+                let items = try await enumerateImpl(itemId)
+                log.trace("  ↳ \(items.map{ $0.providerItem() })")
                 if !items.isEmpty {
                     observer.didEnumerate(items.map{ $0.providerItem() })
                 }
@@ -75,6 +77,9 @@ class Enumerator: NSObject, NSFileProviderEnumerator {
         
         let finishEnumeratingWithError = { (error: NSError, line: Int) in
             if self.pastEnumerations == nil {
+                // This is a valid error to tell the system that anchor has expired, the system
+                // still prints out an error in the log so no need to clutter the log with our
+                // message as well.
                 if error.code != ExtError.syncAnchorExpired.code {
                     log.trace("\(error) L\(line)")
                 }
@@ -103,7 +108,7 @@ class Enumerator: NSObject, NSFileProviderEnumerator {
 
             Task {
                 do {
-                    let currentItems = try await enumerateBackend()
+                    let currentItems = try await enumerateImpl(itemId)
 
                     let removedIds = Set(previousItems.keys).subtracting(Set(currentItems.map { $0.id() }))
                     let changed: [EntryItem] = currentItems.makeIterator().filter { (current: EntryItem) in
@@ -139,51 +144,74 @@ class Enumerator: NSObject, NSFileProviderEnumerator {
         }
     }
 
-    private func enumerateBackend() async throws -> [EntryItem] {
+    private func enumerateImpl(_ itemId: ItemIdentifier, recursive: Bool = false) async throws -> [EntryItem] {
+        var retItems: [EntryItem]
+
         switch itemId {
         case .workingSet:
-            // TODO
-            return []
+            retItems = try await enumerateImpl(.rootContainer, recursive: true)
         case .rootContainer:
-            do {
-                let reposByName = try await listRepositories()
-                let items = try await reposToItems(reposByName)
-                return items.map { .directory($0) }
-            } catch {
-                fatalError("Unhandled exception \(error)")
-            }
+            retItems = try await enumerateRootImpl()
         case .entry(.directory(let identifier)):
-            do {
-                let dir = try await identifier.loadItem(session)
-                let entries = try await dir.directory.listEntries()
-                var items: [EntryItem] = []
-                for entry in entries {
-                    switch entry {
-                    case .directory(let dirEntry):
-                        let dirItem = try await DirectoryItem.load(dirEntry, dir.repoName)
-                        items.append(.directory(dirItem))
-                    case .file(let fileEntry):
-                        let identifier = FileIdentifier(fileEntry.path, dir.repoName)
-                        items.append(.file(try await identifier.loadItem(session)))
-                    }
-                }
-                return items
-            } catch {
-                fatalError("Unhandled exception for \(identifier): \(error)")
-            }
+            retItems = try await enumerateDirImpl(identifier)
         case .trashContainer:
-            return []
+            retItems = []
         default: fatalError("Invalid item in `enumerateItems`: \(itemId)")
+        }
+
+        if recursive {
+            let copy = retItems
+            for item in copy {
+                if case let .directory(dirItem) = item {
+                    retItems += try await enumerateImpl(dirItem.directoryIdentifier().item())
+                }
+            }
+        }
+
+        return retItems
+    }
+
+    private func enumerateRootImpl() async throws -> [EntryItem] {
+        do {
+            let reposByName = try await listRepositories()
+            var items: [DirectoryItem] = []
+            for (repoName, repo) in reposByName {
+                do {
+                    let dirItem = try await DirectoryItem.load(repo, repoName)
+                    items.append(dirItem)
+                } catch let error as OuisyncError where error.code == .PermissionDenied {
+                    log.error("Failed to load repo \(repoName), might be it has not yet been unlocked")
+                    continue
+                }
+            }
+            return items.map { .directory($0) }
+        } catch {
+            fatalError("Unhandled exception \(error)")
         }
     }
 
-    func reposToItems(_ repos: Dictionary<RepoName, OuisyncRepository>) async throws -> [DirectoryItem] {
-        var items: [DirectoryItem] = []
-        for (repoName, repo) in repos {
-            let dirItem = try await DirectoryItem.load(repo, repoName)
-            items.append(dirItem)
+    private func enumerateDirImpl(_ dirItemId: DirectoryIdentifier) async throws -> [EntryItem] {
+        do {
+            let dir = try await dirItemId.loadItem(session)
+            let entries = try await dir.directory.listEntries()
+            var items: [EntryItem] = []
+            for entry in entries {
+                switch entry {
+                case .directory(let dirEntry):
+                    let dirItem = try await DirectoryItem.load(dirEntry, dir.repoName)
+                    items.append(.directory(dirItem))
+                case .file(let fileEntry):
+                    let identifier = FileIdentifier(fileEntry.path, dir.repoName)
+                    items.append(.file(try await identifier.loadItem(session)))
+                }
+            }
+            return items
+        } catch let error as OuisyncError where error.code == .PermissionDenied {
+            log.error("Can't open directory dirItemId: \(error)")
+            return [];
+        } catch {
+            fatalError("Unhandled exception for \(dirItemId): \(error)")
         }
-        return items
     }
 
     func reposToIdentifiers(_ repos: Dictionary<RepoName, OuisyncRepository>) -> Set<DirectoryIdentifier> {

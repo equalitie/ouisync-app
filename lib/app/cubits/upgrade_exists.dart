@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync/ouisync.dart';
 
 import '../utils/utils.dart';
+import 'utils.dart';
 
 class UpgradeExistsCubit extends Cubit<bool> with AppLogger {
   final Session _session;
@@ -35,9 +36,7 @@ class UpgradeExistsCubit extends Cubit<bool> with AppLogger {
 
     await _settings.setHighestSeenProtocolNumber(found);
 
-    if (isClosed) return;
-
-    emit(true);
+    emitUnlessClosed(true);
   }
 
   Future<void> _init() async {

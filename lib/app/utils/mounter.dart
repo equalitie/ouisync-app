@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:ouisync/ouisync.dart';
 
 import 'log.dart';
+import 'native.dart';
 
 /// Utility to mount repositories to the file system on platforms where mounting is supported.
 class Mounter with AppLogger {
@@ -12,6 +13,11 @@ class Mounter with AppLogger {
   String? _mountPoint;
 
   Future<void> init() async {
+    if (Platform.isMacOS) {
+      _mountPoint = await Native.getMountRootDirectory();
+      return;
+    }
+
     final mountPoint = _defaultMountPoint;
     if (mountPoint == null) {
       return;

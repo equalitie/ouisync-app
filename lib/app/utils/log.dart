@@ -100,7 +100,11 @@ class AppLogPrinter extends LoggyPrinter {
       message.write('\n${record.stackTrace}');
     }
 
-    o.logPrint(level, record.loggerName, message.toString());
+    if (Platform.isMacOS || Platform.isIOS) {
+      print("$level ${record.loggerName} $message");
+    } else {
+      o.logPrint(level, record.loggerName, message.toString());
+    }
   }
 }
 

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync/ouisync.dart';
+import 'utils.dart';
 
 class UserProvidedPeersCubit extends Cubit<List<String>> {
   final Session _session;
@@ -22,5 +23,5 @@ class UserProvidedPeersCubit extends Cubit<List<String>> {
     await _refresh();
   }
 
-  Future<void> _refresh() => _session.userProvidedPeers.then(emit);
+  Future<void> _refresh() => _session.userProvidedPeers.then(emitUnlessClosed);
 }

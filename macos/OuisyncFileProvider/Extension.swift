@@ -9,13 +9,16 @@ import FileProvider
 import OuisyncLib
 import System
 import OSLog
+import Common
+import Network
 
 class Extension: NSObject, NSFileProviderReplicatedExtension {
     static let WRITE_CHUNK_SIZE: UInt64 = 32768 // TODO: Decide on optimal value
     static let READ_CHUNK_SIZE: Int = 32768 // TODO: Decide on optimal value
 
-    var ouisyncSession: OuisyncSession?
-    var currentAnchor: NSFileProviderSyncAnchor = NSFileProviderSyncAnchor.random()
+    let ouisyncSession: OuisyncSession
+    let anchorGenerator: AnchorGenerator = AnchorGenerator()
+    var currentAnchor: NSFileProviderSyncAnchor
     let domain: NSFileProviderDomain
     let temporaryDirectoryURL: URL
     let log: Log
@@ -38,6 +41,22 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
             fatalError("Failed to get temporary directory: \(error)")
         }
 
+        currentAnchor = anchorGenerator.generate()
+
+        let ffi = OuisyncFFI();
+
+        // Path that is accessible by both the app and this extension.
+        let commonDirectories = Common.Directories()
+
+        NSLog("-------------------------------------------------")
+        NSLog("Using directories:")
+        NSLog("configs:      \(commonDirectories.configsPath)")
+        NSLog("repositories: \(commonDirectories.repositoriesPath)")
+        NSLog("logs:         \(commonDirectories.logsPath)")
+        NSLog("-------------------------------------------------")
+
+        ouisyncSession = try! OuisyncSession(commonDirectories.configsPath, commonDirectories.logsPath, ffi)
+
         // TODO: This doesn't work yet
         //pastEnumerations = PastEnumerations()
         pastEnumerations = nil
@@ -45,12 +64,91 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
         self.domain = domain
         self.log = log.level(.trace)
         super.init()
+
+        startListeningToRepoChanges()
     }
 
-    func assignSession(_ ouisyncSession: OuisyncSession) {
-        self.ouisyncSession = ouisyncSession
+    // Start watchin to changes in Ouisync: Everytime a repository is added or removed, and
+    // everytime a repository changes we ask the file provider to refresh it's content.
+    func startListeningToRepoChanges() {
+        let log = self.log.child("RepoChange")
+        let this = self
+
+        // TODO:
+        // 1. Need to ensure that the task finishes when the extension is `invalidate`d
+        // 2. Check that repos are removed from `repoWatchingTasks` when a repo is removed.
         Task {
-            try! await manager.signalErrorResolved(ExtError.backendIsUnreachable)
+            weak var weakExt = this
+
+            let repoListChanged: NotificationStream
+
+            if let session = weakExt?.ouisyncSession {
+                repoListChanged = try await session.subscribeToRepositoryListChange()
+            } else {
+                return
+            }
+
+            var repoWatchingTasks: [RepositoryHandle: Task<Void, Never>] = [:]
+
+            while true {
+                if let ext = weakExt {
+                    let currentRepos: [OuisyncRepository]
+
+                    do {
+                        currentRepos = try await ext.ouisyncSession.listRepositories()
+                    } catch let error as OuisyncError {
+                        switch error.code {
+                        case .ConnectionLost: return
+                        default: fatalError("😡 Unexpected Ouisync exception: \(error)")
+                        }
+                    } catch {
+                        fatalError("😡 Unexpected exception: \(error)")
+                    }
+
+                    let watchedRepoHandles = Set(repoWatchingTasks.keys)
+                    let currentRepoHandles = Set(currentRepos.map({ $0.handle }))
+
+                    let reposToAdd = currentRepoHandles.subtracting(watchedRepoHandles)
+                    let reposToRemove = watchedRepoHandles.subtracting(currentRepoHandles)
+
+                    for repo in reposToAdd {
+                        guard let ext = weakExt else {
+                            return
+                        }
+                        guard let stream = try? await ext.ouisyncSession.subscribeToRepositoryChange(repo) else {
+                            continue
+                        }
+                        log.info("Added repository \(repo)")
+                        repoWatchingTasks[repo] = Task {
+                            weak var weakExt = this
+                            while true {
+                                if await stream.next() == nil {
+                                    return
+                                }
+                                guard let ext = weakExt else {
+                                    return
+                                }
+                                await ext.signalRefresh()
+                            }
+                        }
+                    }
+
+                    for repo in reposToRemove {
+                        log.info("Removed repository \(repo)")
+                        repoWatchingTasks.removeValue(forKey: repo)
+                    }
+
+                    await ext.signalRefresh()
+
+                } else {
+                    NSLog("❗Stopping the refresh of repo changes because the extension was destroyed")
+                    return
+                }
+
+                if await repoListChanged.next() == nil {
+                    break
+                }
+            }
         }
     }
 
@@ -60,8 +158,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
     
     func item(for identifier: NSFileProviderItemIdentifier, request: NSFileProviderRequest, completionHandler: @escaping (NSFileProviderItem?, Error?) -> Void) -> Progress {
         let log = self.log.child("item").trace("invoked(\(identifier))")
-        // resolve the given identifier to a record in the model
-        
+
         let handler = { (item: NSFileProviderItem?, error: Error?) in
             if let error = error {
                 log.error("Error: \(error)")
@@ -71,11 +168,6 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
             completionHandler(item, error)
         }
 
-        guard let session = ouisyncSession else {
-            handler(nil, ExtError.backendIsUnreachable)
-            return Progress()
-        }
-
         Task {
             do {
                 let item: NSFileProviderItem
@@ -83,7 +175,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
                 case .rootContainer: item = RootContainerItem(currentAnchor)
                 case .trashContainer: item = TrashContainerItem()
                 case .workingSet: item = WorkingSetItem(currentAnchor)
-                case .entry(let entry): item = try await entry.loadItem(session)
+                case .entry(let entry): item = try await entry.loadItem(ouisyncSession)
                 }
                 handler(item, nil)
             } catch let e as NSError where e.code == ExtError.noSuchItem.code {
@@ -108,11 +200,6 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
             completionHandler(url, item, error)
         }
 
-        guard let session = ouisyncSession else {
-            handler(nil, nil, ExtError.backendIsUnreachable)
-            return Progress()
-        }
-
         let progress = Progress()
 
         Task {
@@ -127,7 +214,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
             do {
                 let identifier = ItemIdentifier(itemIdentifier)
 
-                guard let fileItem = try await identifier.asFile()?.loadItem(session) else {
+                guard let fileItem = try await identifier.asFile()?.loadItem(ouisyncSession) else {
                     handler(nil, nil, ExtError.featureNotSupported)
                     return
                 }
@@ -206,11 +293,6 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
             completionHandler(item, fields, fetch, error)
         }
 
-        guard let session = ouisyncSession else {
-            handler(itemTemplate, [], false, ExtError.backendIsUnreachable)
-            return Progress()
-        }
-
         let dstName = itemTemplate.filename
         let parentId: DirectoryIdentifier
 
@@ -244,7 +326,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
         Task {
             do {
                 let repoName = parentId.repoName
-                let repo = try await parentId.loadRepo(session)
+                let repo = try await parentId.loadRepo(ouisyncSession)
                 let dstPath = parentId.path.appending(dstName)
 
                 switch type {
@@ -280,11 +362,6 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
             completionHandler(item, fields, fetch, error)
         }
 
-        guard let session = ouisyncSession else {
-            handler(nil, [], false, ExtError.backendIsUnreachable)
-            return Progress()
-        }
-
         Task {
             do {
                 let id = ItemIdentifier(item.itemIdentifier)
@@ -315,7 +392,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
                         fatalError("Cannot move an entry to a file parent")
                     }
 
-                    let repo = try await src.loadRepo(session)
+                    let repo = try await src.loadRepo(ouisyncSession)
                     let dstPath = dstParentPath.appending(item.filename)
 
                     try await repo.moveEntry(src.path(), dstPath)
@@ -345,7 +422,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
                         fatalError("Cannot change contents of a directory")
                     case .entry(.file(let fileId)):
                         repoName = fileId.repoName
-                        entry = try await fileId.loadEntry(session)
+                        entry = try await fileId.loadEntry(ouisyncSession)
                     }
 
                     let (written, version) = try await copyContentsAndClose(srcUrl, entry, false)
@@ -371,7 +448,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
                         entryId = EntryIdentifier(fileId)
                     }
 
-                    newItem = try await entryId.loadItem(session)
+                    newItem = try await entryId.loadItem(ouisyncSession)
                 }
 
                 handler(newItem, fields, false, nil)
@@ -396,11 +473,6 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
             completionHandler(error)
         }
 
-        guard let session = ouisyncSession else {
-            handler(ExtError.backendIsUnreachable)
-            return Progress()
-        }
-
         Task {
             do {
                 switch ItemIdentifier(identifier) {
@@ -408,11 +480,11 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
                     throw ExtError.featureNotSupported
                 case .entry(.file(let file)):
                     let path = file.path
-                    let repo = try await file.loadRepo(session)
+                    let repo = try await file.loadRepo(ouisyncSession)
                     try await repo.deleteFile(path)
                 case .entry(.directory(let dir)):
                     let path = dir.path
-                    let repo = try await dir.loadRepo(session)
+                    let repo = try await dir.loadRepo(ouisyncSession)
                     try await repo.deleteDirectory(path, recursive: true)
                 }
 
@@ -432,19 +504,27 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
 
         let log = self.log.child("enumerator").level(.trace).trace("invoked(\(identifier))")
 
-        guard let session = self.ouisyncSession else {
-            let error = ExtError.backendIsUnreachable
-            log.error("\(error)")
-            throw error
-        }
-
-        return Enumerator(identifier, session, currentAnchor, log, pastEnumerations)
+        return Enumerator(identifier, ouisyncSession, currentAnchor, log, pastEnumerations)
     }
 
     // When the system requests to fetch a content from Ouisync, we create a temporary file at the URL location
     // and write the content there. Then pass that URL to a completion handler.
     func makeTemporaryURL(_ purpose: String) -> URL {
         return temporaryDirectoryURL.appendingPathComponent("\(purpose)-\(UUID().uuidString)")
+    }
+
+    // This signals to the file provider to refresh
+    // https://developer.apple.com/documentation/fileprovider/replicated_file_provider_extension/synchronizing_files_using_file_provider_extensions#4099755
+    func signalRefresh() async {
+        let oldAnchor = currentAnchor
+        currentAnchor = anchorGenerator.generate()
+        NSLog("🚀 Refreshing FileProvider and updating anchor \(oldAnchor) -> \(currentAnchor)")
+
+        do {
+            try await manager.signalEnumerator(for: .workingSet)
+        } catch let error as NSError {
+            NSLog("❌ failed to signal working set for \(Common.ouisyncFileProviderDomain): \(error)")
+        }
     }
 }
  

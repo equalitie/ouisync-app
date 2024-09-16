@@ -6,6 +6,7 @@ import 'package:ouisync/ouisync.dart' as oui;
 
 import '../../generated/l10n.dart';
 import '../utils/utils.dart';
+import 'utils.dart';
 
 const _unspecifiedV4 = "0.0.0.0:0";
 const _unspecifiedV6 = "[::]:0";
@@ -97,7 +98,7 @@ class PowerControl extends Cubit<PowerControlState> with AppLogger {
     final portForwardingEnabled = await _session.isPortForwardingEnabled;
     final localDiscoveryEnabled = await _session.isLocalDiscoveryEnabled;
 
-    emit(state.copyWith(
+    emitUnlessClosed(state.copyWith(
       portForwardingEnabled: portForwardingEnabled,
       localDiscoveryEnabled: localDiscoveryEnabled,
     ));
@@ -111,7 +112,7 @@ class PowerControl extends Cubit<PowerControlState> with AppLogger {
       return;
     }
 
-    emit(state.copyWith(syncOnMobile: value));
+    emitUnlessClosed(state.copyWith(syncOnMobile: value));
 
     await _settings.setSyncOnMobileEnabled(value);
     await _refresh();
