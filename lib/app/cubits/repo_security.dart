@@ -20,6 +20,7 @@ class RepoSecurityState {
     bool? store,
     bool? secureWithBiometrics,
     this.localPassword = const None(),
+    this.updatedLocalPassword = const None(),
     this.isBiometricsAvailable = false,
   })  : origin = origin ?? oldLocalSecretMode.origin,
         store = store ?? _initialStore(oldLocalSecretMode),
@@ -32,6 +33,11 @@ class RepoSecurityState {
   final bool store;
   final bool secureWithBiometrics;
   final Option<LocalPassword> localPassword;
+  // This is set to the above `localPassword` once the user clicks the "UPDATE"
+  // button.  It is used to check whether the `localPassword` has changed
+  // between the user clicking the "UPDATE" button and leaving the security
+  // page.
+  final Option<LocalPassword> updatedLocalPassword;
   final bool isBiometricsAvailable;
 
   RepoSecurityState copyWith({
@@ -41,6 +47,7 @@ class RepoSecurityState {
     bool? store,
     bool? secureWithBiometrics,
     Option<LocalPassword>? localPassword,
+    Option<LocalPassword>? updatedLocalPassword,
     bool? isBiometricsAvailable,
   }) =>
       RepoSecurityState(
@@ -50,6 +57,7 @@ class RepoSecurityState {
         store: store ?? this.store,
         secureWithBiometrics: secureWithBiometrics ?? this.secureWithBiometrics,
         localPassword: localPassword ?? this.localPassword,
+        updatedLocalPassword: updatedLocalPassword ?? this.updatedLocalPassword,
         isBiometricsAvailable:
             isBiometricsAvailable ?? this.isBiometricsAvailable,
       );
@@ -71,12 +79,13 @@ class RepoSecurityState {
 
   bool get isValid => newLocalSecretInput != null;
 
-  bool get hasPendingChanges =>
-      origin != oldLocalSecretMode.origin ||
-      store != oldLocalSecretMode.store.isStored ||
-      secureWithBiometrics !=
-          oldLocalSecretMode.store.isSecuredWithBiometrics ||
-      localPassword is Some;
+  bool get hasPendingChanges {
+    return origin != oldLocalSecretMode.origin ||
+        store != oldLocalSecretMode.store.isStored ||
+        secureWithBiometrics !=
+            oldLocalSecretMode.store.isSecuredWithBiometrics ||
+        localPassword != updatedLocalPassword;
+  }
 
   LocalSecretInput? get newLocalSecretInput =>
       switch ((localPassword, origin, store, secureWithBiometrics)) {
@@ -170,7 +179,17 @@ class RepoSecurityCubit extends Cubit<RepoSecurityState> with AppLogger {
     // Save the new auth mode
     try {
       await repoCubit.setAuthMode(newAuthMode);
-      emit(state.copyWith(oldLocalSecretMode: newAuthMode.localSecretMode));
+
+      Option<LocalPassword> newLocalPassword =
+          newLocalSecretInput is LocalSecretManual
+              ? Some(newLocalSecretInput.password)
+              : None<LocalPassword>();
+
+      emit(state.copyWith(
+        oldLocalSecretMode: newAuthMode.localSecretMode,
+        updatedLocalPassword: newLocalPassword,
+      ));
+
       loggy.debug('Repo auth mode updated: $newAuthMode');
     } catch (e, st) {
       loggy.error(
@@ -216,8 +235,8 @@ class RepoSecurityCubit extends Cubit<RepoSecurityState> with AppLogger {
   //}
 }
 
-// We want store to be explicitly opt-in so the switch must be initially off even if the
-// initial origin is random which is implicitly stored.
+// We want `store` to be explicitly opt-in so the switch must be initially off even if the
+// initial `origin` is random which is implicitly stored.
 bool _initialStore(LocalSecretMode localSecretMode) =>
     switch (localSecretMode) {
       LocalSecretMode.manualStored ||
