@@ -160,12 +160,12 @@ class DirectoryActions extends StatelessWidget with AppLogger {
     FileType type,
   ) async {
     if (io.Platform.isAndroid) {
-      /// On Android 13 (Sdk API 33) or lower, the strorage
+      /// On Android 12 (Sdk API 32) or lower, the strorage
       /// permission needs to be requested before using the file picker.
       ///
-      /// This is not longer the case, starting with version 14 (Sdk API 34)
+      /// This is not longer the case, starting with version 13 (Sdk API 33)
       final androidInfo = await DeviceInfoPlugin().androidInfo;
-      if (androidInfo.version.sdkInt <= 33) {
+      if (androidInfo.version.sdkInt <= 32) {
         final status = await Permissions.requestPermission(
             parentContext, Permission.storage);
 

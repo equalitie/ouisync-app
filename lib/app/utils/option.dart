@@ -5,6 +5,21 @@ sealed class Option<T> {
   const Option();
 
   T? get value;
+
+  @override
+  bool operator ==(Object other) {
+    if (other is! Option<T>) return false;
+    switch ((this, other)) {
+      case (Some(value: var lv), Some(value: var rv)):
+        return lv == rv;
+      case (None, None):
+        return true;
+      case (_, _):
+        return false;
+    }
+  }
+
+  String toString();
 }
 
 class Some<T> extends Option<T> {
@@ -12,6 +27,9 @@ class Some<T> extends Option<T> {
 
   @override
   final T value;
+
+  @override
+  String toString() => "Some($value)";
 }
 
 class None<T> extends Option<T> {
@@ -19,4 +37,7 @@ class None<T> extends Option<T> {
 
   @override
   T? get value => null;
+
+  @override
+  String toString() => "None";
 }

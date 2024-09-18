@@ -62,7 +62,7 @@ class RepoSecurity extends StatelessWidget {
 
   Widget _buildStoreSwitch(RepoSecurityState state) => switch (state.origin) {
         SecretKeyOrigin.manual => _buildSwitch(
-            value: state.store,
+            value: state.secretWillBeStored,
             title: S.current.labelRememberPassword,
             onChanged: cubit.setStore,
           ),

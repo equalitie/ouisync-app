@@ -163,7 +163,7 @@ class _Refresher {
   }
 
   int _nameComparator(FileSystemEntry a, FileSystemEntry b) {
-    final nameResult = a.name.compareTo(b.name);
+    final nameResult = a.name.toLowerCase().compareTo(b.name.toLowerCase());
     if (nameResult != 0) {
       if (a is FileEntry && b is DirectoryEntry) return 1;
       if (a is DirectoryEntry && b is FileEntry) return -1;
@@ -184,12 +184,15 @@ class _Refresher {
           _sizeNameComparator((sa ?? 0).compareTo(sb ?? 0), a, b),
         (FileEntry(), DirectoryEntry()) => 1,
         (DirectoryEntry(), FileEntry()) => -1,
-        (DirectoryEntry(), DirectoryEntry()) => a.name.compareTo(b.name),
+        (DirectoryEntry(), DirectoryEntry()) =>
+          a.name.toLowerCase().compareTo(b.name.toLowerCase()),
       };
 
   int _sizeNameComparator(
           int sizeResult, FileSystemEntry a, FileSystemEntry b) =>
-      sizeResult == 0 ? a.name.compareTo(b.name) : sizeResult;
+      sizeResult == 0
+          ? a.name.toLowerCase().compareTo(b.name.toLowerCase())
+          : sizeResult;
 
   int Function(FileSystemEntry, FileSystemEntry)? _sortByType(
       SortDirection direction) {
@@ -201,7 +204,7 @@ class _Refresher {
   int _typeComparator(FileSystemEntry a, FileSystemEntry b) => switch ((a, b)) {
         (FileEntry(), FileEntry()) ||
         (DirectoryEntry(), DirectoryEntry()) =>
-          a.name.compareTo(b.name),
+          a.name.toLowerCase().compareTo(b.name.toLowerCase()),
         (DirectoryEntry(), FileEntry()) => -1,
         (FileEntry(), DirectoryEntry()) => 1,
       };
