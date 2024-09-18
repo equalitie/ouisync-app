@@ -10,8 +10,8 @@ import 'widgets.dart';
 
 class RepoSecurity extends StatelessWidget {
   const RepoSecurity(
-    this.cubit,
-    this.isBlind, {
+    this.cubit, {
+    required this.isBlind,
     super.key,
   });
 
