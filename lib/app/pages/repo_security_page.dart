@@ -45,7 +45,8 @@ class RepoSecurityPage extends StatelessWidget {
         content: PopScope(
           canPop: false,
           onPopInvoked: (didPop) => _onPopInvoked(context, didPop, cubit.state),
-          child: RepoSecurity(cubit, repo.state.accessMode == AccessMode.blind),
+          // We know the `currentLocalSecret` so the repository is not blind.
+          child: RepoSecurity(cubit, isBlind: false),
         ),
         footer: BlocBuilder<RepoSecurityCubit, RepoSecurityState>(
           bloc: cubit,

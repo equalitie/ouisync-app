@@ -85,7 +85,7 @@ class RepoCreation extends StatelessWidget {
           _buildUseCacheServersSwitch(context, creationState),
           RepoSecurity(
             securityCubit,
-            creationState.accessMode == AccessMode.blind,
+            isBlind: creationState.accessMode == AccessMode.blind,
           ),
         ],
       );
