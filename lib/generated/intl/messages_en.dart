@@ -753,7 +753,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageUnlockUsingBiometrics":
             MessageLookupByLibrary.simpleMessage("Unlock using biometrics"),
         "messageUnsavedChanges": MessageLookupByLibrary.simpleMessage(
-            "You have unsaved changes.\n\nDo you want to discard them?"),
+            "You have unsaved changes.\n\nWould you like to discard them?"),
         "messageUpdateLocalPasswordConfirmation":
             MessageLookupByLibrary.simpleMessage(
                 "Update this repository localpassword?"),

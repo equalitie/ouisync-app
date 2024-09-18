@@ -81,7 +81,7 @@ class RepoSecurityPage extends StatelessWidget {
             child: Text(S.current.actionCancel),
             onPressed: () => Navigator.of(context).pop(false)),
         TextButton(
-            child: Text(S.current.actionAccept),
+            child: Text(S.current.actionDiscard),
             onPressed: () => Navigator.of(context).pop(true))
       ],
     ).then((pop) {

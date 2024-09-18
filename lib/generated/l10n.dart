@@ -2750,10 +2750,10 @@ class S {
     );
   }
 
-  /// `You have unsaved changes.\n\nDo you want to discard them?`
+  /// `You have unsaved changes.\n\nWould you like to discard them?`
   String get messageUnsavedChanges {
     return Intl.message(
-      'You have unsaved changes.\n\nDo you want to discard them?',
+      'You have unsaved changes.\n\nWould you like to discard them?',
       name: 'messageUnsavedChanges',
       desc: '',
       args: [],
