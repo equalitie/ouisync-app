@@ -528,7 +528,7 @@
   "@messageRemoveBiometrics": {},
   "messageErrorChangingPassword": "Ha habido un problema al cambiar la contraseña. Por favor, inténtelo de nuevo",
   "@messageErrorChangingPassword": {},
-  "messageUnsavedChanges": "Tienes cambios sin guardar.\n\n¿Desea descartarlos?",
+  "messageUnsavedChanges": "Tienes cambios sin guardar.\n\n¿Te gustaría descartarlos?",
   "@messageUnsavedChanges": {},
   "messageNewPassword": "Nueva contraseña",
   "@messageNewPassword": {},
