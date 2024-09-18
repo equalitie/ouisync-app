@@ -84,7 +84,7 @@ class RepoSecurityState {
         store != oldLocalSecretMode.store.isStored ||
         secureWithBiometrics !=
             oldLocalSecretMode.store.isSecuredWithBiometrics ||
-        localPassword != updatedLocalPassword;
+        (localPassword is Some && localPassword != updatedLocalPassword);
   }
 
   LocalSecretInput? get newLocalSecretInput =>
