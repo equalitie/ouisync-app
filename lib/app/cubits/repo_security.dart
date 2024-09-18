@@ -17,39 +17,51 @@ class RepoSecurityState {
     required this.oldLocalSecretMode,
     required this.oldLocalSecret,
     SecretKeyOrigin? origin,
-    bool? store,
+    // Reflects the user's preference on storing a password for
+    // `LocalSecretMode`s where storing is not implicit.
+    this.userPrefersToStoreSecret = const None(),
     bool? secureWithBiometrics,
     this.localPassword = const None(),
+    this.updatedLocalPassword = const None(),
     this.isBiometricsAvailable = false,
   })  : origin = origin ?? oldLocalSecretMode.origin,
-        store = store ?? _initialStore(oldLocalSecretMode),
         secureWithBiometrics = secureWithBiometrics ??
             oldLocalSecretMode.store.isSecuredWithBiometrics;
 
   final LocalSecretMode oldLocalSecretMode;
   final LocalSecret oldLocalSecret;
   final SecretKeyOrigin origin;
-  final bool store;
+  final Option<bool> userPrefersToStoreSecret;
   final bool secureWithBiometrics;
   final Option<LocalPassword> localPassword;
+  // This is set to the above `localPassword` once the user clicks the "UPDATE"
+  // button.  It is used to check whether the `localPassword` has changed
+  // between the user clicking the "UPDATE" button and leaving the security
+  // page.
+  final Option<LocalPassword> updatedLocalPassword;
   final bool isBiometricsAvailable;
+  final bool _defaultStoreIfOriginIsManual = false;
 
   RepoSecurityState copyWith({
     LocalSecretMode? oldLocalSecretMode,
     LocalSecret? oldLocalSecret,
     SecretKeyOrigin? origin,
-    bool? store,
+    bool? userPrefersToStoreSecret,
     bool? secureWithBiometrics,
     Option<LocalPassword>? localPassword,
+    Option<LocalPassword>? updatedLocalPassword,
     bool? isBiometricsAvailable,
   }) =>
       RepoSecurityState(
         oldLocalSecretMode: oldLocalSecretMode ?? this.oldLocalSecretMode,
         oldLocalSecret: oldLocalSecret ?? this.oldLocalSecret,
         origin: origin ?? this.origin,
-        store: store ?? this.store,
+        userPrefersToStoreSecret: userPrefersToStoreSecret != null
+            ? Some(userPrefersToStoreSecret)
+            : this.userPrefersToStoreSecret,
         secureWithBiometrics: secureWithBiometrics ?? this.secureWithBiometrics,
         localPassword: localPassword ?? this.localPassword,
+        updatedLocalPassword: updatedLocalPassword ?? this.updatedLocalPassword,
         isBiometricsAvailable:
             isBiometricsAvailable ?? this.isBiometricsAvailable,
       );
@@ -67,40 +79,61 @@ class RepoSecurityState {
       };
 
   bool get isSecureWithBiometricsEnabled =>
-      isBiometricsAvailable && (origin == SecretKeyOrigin.random || store);
+      isBiometricsAvailable && secretWillBeStored;
 
   bool get isValid => newLocalSecretInput != null;
 
-  bool get hasPendingChanges =>
-      origin != oldLocalSecretMode.origin ||
-      store != oldLocalSecretMode.store.isStored ||
-      secureWithBiometrics !=
-          oldLocalSecretMode.store.isSecuredWithBiometrics ||
-      localPassword is Some;
-
-  LocalSecretInput? get newLocalSecretInput =>
-      switch ((localPassword, origin, store, secureWithBiometrics)) {
-        (Some(value: final password), SecretKeyOrigin.manual, false, _) =>
-          LocalSecretManual(
-            password: password,
-            store: SecretKeyStore.notStored,
-          ),
-        (Some(value: final password), SecretKeyOrigin.manual, true, false) =>
-          LocalSecretManual(
-            password: password,
-            store: SecretKeyStore.stored,
-          ),
-        (Some(value: final password), SecretKeyOrigin.manual, true, true) =>
-          LocalSecretManual(
-            password: password,
-            store: SecretKeyStore.securedWithBiometrics,
-          ),
-        (None(), SecretKeyOrigin.manual, _, _) => null,
-        (_, SecretKeyOrigin.random, _, false) =>
-          LocalSecretRandom(secureWithBiometrics: false),
-        (_, SecretKeyOrigin.random, _, true) =>
-          LocalSecretRandom(secureWithBiometrics: true),
+  bool get secretWillBeStored =>
+      origin == SecretKeyOrigin.random ||
+      switch (userPrefersToStoreSecret) {
+        Some(value: final store) => store,
+        None() => _defaultStoreIfOriginIsManual
       };
+
+  bool get hasPendingChanges {
+    final originChanged = origin != oldLocalSecretMode.origin;
+
+    final localPasswordChanged =
+        localPassword is Some && localPassword != updatedLocalPassword;
+
+    final storeChanged =
+        secretWillBeStored != oldLocalSecretMode.store.isStored;
+
+    final biometricsChanged = secureWithBiometrics !=
+        oldLocalSecretMode.store.isSecuredWithBiometrics;
+
+    return originChanged ||
+        storeChanged ||
+        biometricsChanged ||
+        localPasswordChanged;
+  }
+
+  LocalSecretInput? get newLocalSecretInput {
+    final willStore = secretWillBeStored;
+
+    return switch ((localPassword, origin, willStore, secureWithBiometrics)) {
+      (Some(value: final password), SecretKeyOrigin.manual, false, _) =>
+        LocalSecretManual(
+          password: password,
+          store: SecretKeyStore.notStored,
+        ),
+      (Some(value: final password), SecretKeyOrigin.manual, true, false) =>
+        LocalSecretManual(
+          password: password,
+          store: SecretKeyStore.stored,
+        ),
+      (Some(value: final password), SecretKeyOrigin.manual, true, true) =>
+        LocalSecretManual(
+          password: password,
+          store: SecretKeyStore.securedWithBiometrics,
+        ),
+      (None(), SecretKeyOrigin.manual, _, _) => null,
+      (_, SecretKeyOrigin.random, _, false) =>
+        LocalSecretRandom(secureWithBiometrics: false),
+      (_, SecretKeyOrigin.random, _, true) =>
+        LocalSecretRandom(secureWithBiometrics: true),
+    };
+  }
 
   LocalPassword? get newLocalPassword => switch ((localPassword, origin)) {
         (Some(value: final value), SecretKeyOrigin.manual) => value,
@@ -108,7 +141,8 @@ class RepoSecurityState {
       };
 
   @override
-  String toString() => '$runtimeType(origin: $origin, store: $store, ...)';
+  String toString() =>
+      '$runtimeType(origin: $origin, userPrefersToStoreSecret: $userPrefersToStoreSecret, ...)';
 }
 
 class RepoSecurityCubit extends Cubit<RepoSecurityState> with AppLogger {
@@ -134,7 +168,7 @@ class RepoSecurityCubit extends Cubit<RepoSecurityState> with AppLogger {
   }
 
   void setStore(bool value) {
-    emit(state.copyWith(store: value));
+    emit(state.copyWith(userPrefersToStoreSecret: value));
   }
 
   void setSecureWithBiometrics(bool value) {
@@ -170,7 +204,17 @@ class RepoSecurityCubit extends Cubit<RepoSecurityState> with AppLogger {
     // Save the new auth mode
     try {
       await repoCubit.setAuthMode(newAuthMode);
-      emit(state.copyWith(oldLocalSecretMode: newAuthMode.localSecretMode));
+
+      Option<LocalPassword> newLocalPassword =
+          newLocalSecretInput is LocalSecretManual
+              ? Some(newLocalSecretInput.password)
+              : None<LocalPassword>();
+
+      emit(state.copyWith(
+        oldLocalSecretMode: newAuthMode.localSecretMode,
+        updatedLocalPassword: newLocalPassword,
+      ));
+
       loggy.debug('Repo auth mode updated: $newAuthMode');
     } catch (e, st) {
       loggy.error(
@@ -216,8 +260,8 @@ class RepoSecurityCubit extends Cubit<RepoSecurityState> with AppLogger {
   //}
 }
 
-// We want store to be explicitly opt-in so the switch must be initially off even if the
-// initial origin is random which is implicitly stored.
+// We want `store` to be explicitly opt-in so the switch must be initially off even if the
+// initial `origin` is random which is implicitly stored.
 bool _initialStore(LocalSecretMode localSecretMode) =>
     switch (localSecretMode) {
       LocalSecretMode.manualStored ||
