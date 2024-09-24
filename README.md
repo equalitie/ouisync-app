@@ -39,6 +39,8 @@ flutter pub get
 flutter <build|run> -d <windows|android|linux>
 ```
 
+If you choose `android` above, also use the `--flavor <production|nightly|unoficial>` argument.
+
 ## Running tests
 
 On Linux:
