@@ -3800,10 +3800,10 @@ class S {
     );
   }
 
-  /// `Not apps can perform this action`
+  /// `No application can perform this action`
   String get messageNoAppsForThisAction {
     return Intl.message(
-      'Not apps can perform this action',
+      'No application can perform this action',
       name: 'messageNoAppsForThisAction',
       desc: '',
       args: [],

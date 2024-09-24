@@ -577,7 +577,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageNewVersionIsAvailable":
             MessageLookupByLibrary.simpleMessage("A new version is available."),
         "messageNoAppsForThisAction": MessageLookupByLibrary.simpleMessage(
-            "Not apps can perform this action"),
+            "No application can perform this action"),
         "messageNoRepo": MessageLookupByLibrary.simpleMessage(
             "Before adding files, you need to create a repository"),
         "messageNoRepoIsSelected":
