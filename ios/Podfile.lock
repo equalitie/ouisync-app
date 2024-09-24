@@ -273,7 +273,7 @@ SPEC CHECKSUMS:
   move_to_background: 39a5b79b26d577b0372cbe8a8c55e7aa9fcd3a2d
   nanopb: 438bc412db1928dac798aa6fd75726007be04262
   network_info_plus: 9d930145451916919786087c4173226363616071
-  ouisync: 677a78225fe9a7196d5ad8bc3c07018801379f6d
+  ouisync: 2620ea99b935c285b7383dd4dbd64d37b0445cef
   package_info_plus: 58f0028419748fad15bf008b270aaa8e54380b1c
   path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
   permission_handler_apple: 9878588469a2b0d0fc1e048d9f43605f92e6cec2
