@@ -132,7 +132,7 @@ SPEC CHECKSUMS:
   local_auth_darwin: 66e40372f1c29f383a314c738c7446e2f7fdadc3
   mobile_scanner: 0a05256215b047af27b9495db3b77640055e8824
   network_info_plus: aeb9c4ed699cae128bc94b9d0f04f2389a414cbb
-  ouisync: bcb314d64b00dcf4c705444330f53ad8dd39878e
+  ouisync: 2620ea99b935c285b7383dd4dbd64d37b0445cef
   package_info_plus: fa739dd842b393193c5ca93c26798dff6e3d0e0c
   path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
   screen_retriever: 59634572a57080243dd1bf715e55b6c54f241a38
