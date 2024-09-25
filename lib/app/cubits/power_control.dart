@@ -74,6 +74,10 @@ class PowerControlState {
         return S.current.messageNetworkIsUnavailable;
     }
   }
+
+  @override
+  String toString() =>
+      "PowerControlState($connectivityType, $networkMode, syncOnMobile:$syncOnMobile, ...)";
 }
 
 class PowerControl extends Cubit<PowerControlState> with AppLogger {
@@ -112,10 +116,8 @@ class PowerControl extends Cubit<PowerControlState> with AppLogger {
       return;
     }
 
-    emitUnlessClosed(state.copyWith(syncOnMobile: value));
-
     await _settings.setSyncOnMobileEnabled(value);
-    await _refresh();
+    await _refresh(syncOnMobile: value);
   }
 
   Future<void> setPortForwardingEnabled(bool value) async {
@@ -149,8 +151,12 @@ class PowerControl extends Cubit<PowerControlState> with AppLogger {
     }
   }
 
-  Future<void> _onConnectivityChange(ConnectivityResult result) async {
-    if (result == state.connectivityType) {
+  Future<void> _onConnectivityChange(ConnectivityResult result,
+      {bool? syncOnMobile = null}) async {
+    syncOnMobile ??= state.syncOnMobile;
+
+    if (result == state.connectivityType &&
+        syncOnMobile == state.syncOnMobile) {
       // The Cubit/Bloc machinery knows not to rebuild widgets if the state
       // doesn't change, but in this function we also call
       // `_session.bindNetwork` which we don't necessarily want to do if the
@@ -164,7 +170,7 @@ class PowerControl extends Cubit<PowerControlState> with AppLogger {
 
     loggy.app('Connectivity event: ${result.name}');
 
-    emit(state.copyWith(connectivityType: result));
+    emit(state.copyWith(connectivityType: result, syncOnMobile: syncOnMobile));
 
     var newMode = NetworkMode.disabled;
 
@@ -197,8 +203,9 @@ class PowerControl extends Cubit<PowerControlState> with AppLogger {
     await _setNetworkMode(newMode);
   }
 
-  Future<void> _refresh() async =>
-      _onConnectivityChange((await _connectivity.checkConnectivity()).last);
+  Future<void> _refresh({bool? syncOnMobile = null}) async =>
+      _onConnectivityChange((await _connectivity.checkConnectivity()).last,
+          syncOnMobile: syncOnMobile);
 
   Future<void> _setNetworkMode(NetworkMode mode, {force = false}) async {
     if (state.networkMode == null || mode != state.networkMode || force) {

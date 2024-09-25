@@ -5,22 +5,33 @@ import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'v1.dart' as v1;
+import 'v2.dart' as v2;
 import '../files.dart';
 import '../log.dart';
 import '../master_key.dart';
 
-typedef DatabaseId = v1.DatabaseId;
-typedef Settings = v1.Settings;
+typedef DatabaseId = v2.DatabaseId;
+typedef Settings = v2.Settings;
 
 Future<Settings> loadAndMigrateSettings(Session session) async {
   await _migratePaths();
 
   final masterKey = await MasterKey.init();
 
-  final settings = await v1.Settings.init(masterKey);
-  await settings.migrate(session);
-
-  return settings;
+  try {
+    final settingsV2 = await v2.Settings.init(masterKey);
+    return settingsV2;
+  } on v2.InvalidSettingsVersion catch (e) {
+    if (e.statedVersion < 2) {
+      final settingsV1 = await v1.Settings.init(masterKey);
+      await settingsV1.migrate(session);
+      return await v2.Settings.initWithV1(settingsV1);
+    } else {
+      throw "Settings have been created with a newer Ouisync version and thus can't be migrated";
+    }
+  } catch (e) {
+    rethrow;
+  }
 }
 
 Future<void> _migratePaths() async {
