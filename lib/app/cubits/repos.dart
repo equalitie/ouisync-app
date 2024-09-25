@@ -287,7 +287,6 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
 
     final cubit = await RepoCubit.create(
       nativeChannels: _nativeChannels,
-      settings: _settings,
       navigation: navigation,
       bottomSheet: bottomSheet,
       repo: repo,
@@ -479,7 +478,6 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
 
       final cubit = await RepoCubit.create(
         nativeChannels: _nativeChannels,
-        settings: _settings,
         navigation: navigation,
         bottomSheet: bottomSheet,
         repo: repo,
@@ -564,7 +562,6 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
 
       final cubit = await RepoCubit.create(
         nativeChannels: _nativeChannels,
-        settings: _settings,
         navigation: navigation,
         bottomSheet: bottomSheet,
         repo: repo,

@@ -130,7 +130,6 @@ class RepoCubit extends Cubit<RepoState> with AppLogger {
 
   static Future<RepoCubit> create({
     required NativeChannels nativeChannels,
-    required Settings settings,
     required Repository repo,
     required RepoLocation location,
     required NavigationCubit navigation,
