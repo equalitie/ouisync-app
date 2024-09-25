@@ -75,7 +75,7 @@ class NetworkSection extends SettingsSection {
   Widget _buildPortForwardingTile(BuildContext context) =>
       BlocSelector<PowerControl, PowerControlState, bool>(
         bloc: powerControl,
-        selector: (state) => state.portForwardingEnabled,
+        selector: (state) => state.userWantsPortForwardingEnabled,
         builder: (context, value) => SwitchSettingsTile(
             value: value,
             onChanged: (value) {
@@ -91,7 +91,7 @@ class NetworkSection extends SettingsSection {
   Widget _buildLocalDiscoveryTile(BuildContext context) =>
       BlocSelector<PowerControl, PowerControlState, bool>(
         bloc: powerControl,
-        selector: (state) => state.localDiscoveryEnabled,
+        selector: (state) => state.userWantsLocalDiscoveryEnabled,
         builder: (context, value) => SwitchSettingsTile(
           value: value,
           onChanged: (value) {
@@ -110,7 +110,7 @@ class NetworkSection extends SettingsSection {
   Widget _buildSyncOnMobileSwitch(BuildContext context) =>
       BlocSelector<PowerControl, PowerControlState, bool>(
         bloc: powerControl,
-        selector: (state) => state.syncOnMobile,
+        selector: (state) => state.userWantsSyncOnMobile,
         builder: (context, value) => SwitchSettingsTile(
           value: value,
           onChanged: (value) {
