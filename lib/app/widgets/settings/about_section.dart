@@ -23,6 +23,7 @@ import 'settings_tile.dart';
 class AboutSection extends SettingsSection with AppLogger {
   AboutSection(
     this.session, {
+    required this.changeLocaleCubit,
     required this.powerControl,
     required this.reposCubit,
     required this.connectivityInfo,
@@ -36,6 +37,7 @@ class AboutSection extends SettingsSection with AppLogger {
         );
 
   final Session session;
+  final ChangeLocaleCubit changeLocaleCubit;
   final PowerControl powerControl;
   final ReposCubit reposCubit;
   final ConnectivityInfo connectivityInfo;
@@ -64,6 +66,15 @@ class AboutSection extends SettingsSection with AppLogger {
             leading: Icon(Icons.rocket_launch_sharp),
           ),
         ),
+      NavigationTile(
+          title: Text('App language', style: bodyStyle),
+          leading: Icon(Icons.language_rounded),
+          value: Text('Select the app language from the available locales',
+              style: context.theme.appTextStyle.bodySmall),
+          onTap: () async => await _navigateToLanguagePicker(
+                context,
+                reposCubit.settings,
+              )),
       NavigationTile(
           title: Text(S.current.titleFAQShort, style: bodyStyle),
           leading: Icon(Icons.question_answer_rounded),
@@ -134,6 +145,20 @@ class AboutSection extends SettingsSection with AppLogger {
 
   @override
   bool containsErrorNotification() => upgradeExists.state;
+
+  Future<void> _navigateToLanguagePicker(
+    BuildContext context,
+    Settings settings,
+  ) async {
+    final locale = await Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => LanguagePicker()),
+    );
+
+    if (locale == null) return;
+
+    await settings.setLanguageLocale(locale.languageCode);
+    await changeLocaleCubit.changeLocale(locale);
+  }
 
   void _navigateToPeers(BuildContext context) => Navigator.push(
         context,

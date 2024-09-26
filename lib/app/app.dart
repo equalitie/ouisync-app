@@ -1,23 +1,23 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:loggy/loggy.dart';
-import 'package:ouisync_app/app/cubits/mount.dart';
-import 'package:ouisync_app/app/cubits/power_control.dart';
-import 'package:ouisync_app/app/widgets/media_receiver.dart';
-import 'package:ouisync/ouisync.dart' show Session;
 import 'package:ouisync/native_channels.dart';
+import 'package:ouisync/ouisync.dart' show Session;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 import '../generated/l10n.dart';
-import 'cubits/repos.dart';
+import 'cubits/cubits.dart'
+    show ChangeLocaleCubit, MountCubit, PowerControl, ReposCubit;
 import 'pages/pages.dart';
 import 'session.dart';
 import 'utils/mounter.dart';
 import 'utils/platform/platform.dart';
 import 'utils/utils.dart';
+import 'widgets/media_receiver.dart';
 
 Future<Widget> initOuiSyncApp(List<String> args) async {
   final packageInfo = await PackageInfo.fromPlatform();
@@ -37,21 +37,36 @@ Future<Widget> initOuiSyncApp(List<String> args) async {
   // and let whoever needs seetings to await for it.
   final settings = await loadAndMigrateSettings(session);
 
-  return MaterialApp(
-    debugShowCheckedModeBanner: false,
-    theme: _setupAppThemeData(),
-    localizationsDelegates: const [
-      S.delegate,
-      GlobalMaterialLocalizations.delegate,
-      GlobalWidgetsLocalizations.delegate,
-      GlobalCupertinoLocalizations.delegate,
-    ],
-    supportedLocales: S.delegate.supportedLocales,
-    home: OuisyncApp(
-      session: session,
-      windowManager: windowManager,
-      settings: settings,
-      packageInfo: packageInfo,
+  final languageCode = settings.getLanguageLocal();
+  final locale =
+      languageCode.isEmpty ? const Locale('en') : Locale(languageCode);
+  final changeLocaleCubit = ChangeLocaleCubit(
+    settings: settings,
+    defaultLocale: locale,
+  );
+
+  return BlocProvider<ChangeLocaleCubit>(
+    create: (context) => changeLocaleCubit,
+    child: BlocBuilder<ChangeLocaleCubit, Locale>(
+      builder: (context, localeState) => MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: _setupAppThemeData(),
+        locale: localeState,
+        localizationsDelegates: const [
+          S.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: S.delegate.supportedLocales,
+        home: OuisyncApp(
+          session: session,
+          windowManager: windowManager,
+          settings: settings,
+          packageInfo: packageInfo,
+          changeLocaleCubit: changeLocaleCubit,
+        ),
+      ),
     ),
   );
 }
@@ -62,6 +77,7 @@ class OuisyncApp extends StatefulWidget {
     required this.session,
     required this.settings,
     required this.packageInfo,
+    required this.changeLocaleCubit,
     super.key,
   }) : nativeChannels = NativeChannels(session);
 
@@ -70,6 +86,7 @@ class OuisyncApp extends StatefulWidget {
   final NativeChannels nativeChannels;
   final Settings settings;
   final PackageInfo packageInfo;
+  final ChangeLocaleCubit changeLocaleCubit;
 
   @override
   State<OuisyncApp> createState() => _OuisyncAppState();
@@ -82,6 +99,7 @@ class _OuisyncAppState extends State<OuisyncApp> with AppLogger {
   late final ReposCubit reposCubit;
 
   bool get _onboarded =>
+      widget.settings.getLanguageLocal().isNotEmpty &&
       !widget.settings.getShowOnboarding() &&
       widget.settings.getEqualitieValues();
 
@@ -117,6 +135,7 @@ class _OuisyncAppState extends State<OuisyncApp> with AppLogger {
         child: MediaReceiver(
           controller: receivedMediaController,
           child: MainPage(
+            changeLocaleCubit: widget.changeLocaleCubit,
             mountCubit: mountCubit,
             nativeChannels: widget.nativeChannels,
             packageInfo: widget.packageInfo,
@@ -142,6 +161,10 @@ class _OuisyncAppState extends State<OuisyncApp> with AppLogger {
     if (!_onboarded) {
       final onboardingPages = <Widget>[];
 
+      if (widget.settings.getLanguageLocal().isEmpty) {
+        onboardingPages.add(LanguagePicker());
+      }
+
       if (widget.settings.getShowOnboarding()) {
         onboardingPages.add(OnboardingPage(settings: widget.settings));
       }
@@ -163,7 +186,14 @@ class _OuisyncAppState extends State<OuisyncApp> with AppLogger {
 
       for (var page in onboardingPages) {
         await Navigator.of(context)
-            .push(MaterialPageRoute(builder: (_) => page));
+            .push(MaterialPageRoute(builder: (_) => page))
+            .then((result) async {
+          if (result == null) return;
+
+          if (result is Locale) {
+            await widget.changeLocaleCubit.changeLocale(result);
+          }
+        });
       }
 
       if (_onboarded) {

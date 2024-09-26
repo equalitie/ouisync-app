@@ -1,16 +1,13 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:ouisync_app/app/widgets/widgets.dart';
 
 import '../../generated/l10n.dart';
 import '../utils/click_counter.dart';
-import '../utils/utils.dart';
+import '../widgets/widgets.dart';
 
 class LanguagePicker extends StatefulWidget {
-  const LanguagePicker({required this.settings, super.key});
-
-  final Settings settings;
+  const LanguagePicker();
 
   @override
   State<LanguagePicker> createState() => _LanguagePickerState();
@@ -79,11 +76,7 @@ class _LanguagePickerState extends State<LanguagePicker> {
                 subtitle: Text(locale),
                 onTap: () async {
                   final selectedLocale = S.delegate.supportedLocales[index];
-                  await S.delegate.load(selectedLocale);
                   Navigator.of(context).pop(selectedLocale);
-                  // await widget.settings
-                  //     .setLanguageLocale(selectedLocale.languageCode);
-                  // setState(() => selected = index);
                 },
               );
             },

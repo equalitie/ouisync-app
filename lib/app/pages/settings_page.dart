@@ -12,6 +12,7 @@ import '../widgets/widgets.dart';
 class SettingsPage extends StatefulWidget {
   const SettingsPage({
     required this.session,
+    required this.changeLocaleCubit,
     required this.mount,
     required this.panicCounter,
     required this.powerControl,
@@ -21,6 +22,7 @@ class SettingsPage extends StatefulWidget {
   });
 
   final Session session;
+  final ChangeLocaleCubit changeLocaleCubit;
   final MountCubit mount;
   final StateMonitorIntCubit panicCounter;
   final PowerControl powerControl;
@@ -70,6 +72,7 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
         body: AppSettingsContainer(
           widget.session,
+          changeLocaleCubit: widget.changeLocaleCubit,
           mount: widget.mount,
           panicCounter: widget.panicCounter,
           powerControl: widget.powerControl,
