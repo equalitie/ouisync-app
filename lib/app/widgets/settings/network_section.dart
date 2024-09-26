@@ -34,11 +34,14 @@ class NetworkSection extends SettingsSection {
 
   TextStyle? bodyStyle;
   TextStyle? subtitleStyle;
+  TextStyle? subtitleWarningStyle;
 
   @override
   List<Widget> buildTiles(BuildContext context) {
     bodyStyle = context.theme.appTextStyle.bodyMedium;
     subtitleStyle = context.theme.appTextStyle.bodySmall;
+    subtitleWarningStyle =
+        subtitleStyle!.copyWith(color: Constants.warningColor);
 
     return [
       _buildConnectivityTypeTile(context),
@@ -62,11 +65,12 @@ class NetworkSection extends SettingsSection {
             children: [
               Text(_connectivityTypeName(state.connectivityType),
                   style: subtitleStyle),
-              if (state.networkDisabledReason != null)
-                Text('(${state.networkDisabledReason!})', style: subtitleStyle),
+              if (state.internetConnectivityDisabledReason != null)
+                Text('${state.internetConnectivityDisabledReason!}',
+                    style: subtitleWarningStyle),
             ],
           ),
-          trailing: (state.isNetworkEnabled ?? true)
+          trailing: (state.isInternetConnectivityEnabled ?? true)
               ? null
               : Icon(Icons.warning, color: Constants.warningColor),
         ),
@@ -89,11 +93,10 @@ class NetworkSection extends SettingsSection {
       );
 
   Widget _buildLocalDiscoveryTile(BuildContext context) =>
-      BlocSelector<PowerControl, PowerControlState, bool>(
+      BlocBuilder<PowerControl, PowerControlState>(
         bloc: powerControl,
-        selector: (state) => state.userWantsLocalDiscoveryEnabled,
-        builder: (context, value) => SwitchSettingsTile(
-          value: value,
+        builder: (context, state) => SwitchSettingsTile(
+          value: state.userWantsLocalDiscoveryEnabled,
           onChanged: (value) {
             unawaited(powerControl.setLocalDiscoveryEnabled(value));
           },
@@ -103,6 +106,12 @@ class NetworkSection extends SettingsSection {
               description: [
                 TextSpan(text: S.current.messageInfoLocalDiscovery)
               ]),
+          subtitle: () {
+            final text = powerControl.state.localDiscoveryDisabledReason;
+            return text != null
+                ? Text(text, style: subtitleWarningStyle)
+                : null;
+          }(),
           leading: Icon(Icons.broadcast_on_personal),
         ),
       );
@@ -110,7 +119,7 @@ class NetworkSection extends SettingsSection {
   Widget _buildSyncOnMobileSwitch(BuildContext context) =>
       BlocSelector<PowerControl, PowerControlState, bool>(
         bloc: powerControl,
-        selector: (state) => state.userWantsSyncOnMobile,
+        selector: (state) => state.userWantsSyncOnMobileEnabled,
         builder: (context, value) => SwitchSettingsTile(
           value: value,
           onChanged: (value) {

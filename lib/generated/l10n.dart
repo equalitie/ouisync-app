@@ -1260,10 +1260,10 @@ class S {
     );
   }
 
-  /// `Syncing is disabled while using mobile internet`
+  /// `Syncing is disabled while using mobile data`
   String get messageSyncingIsDisabledOnMobileInternet {
     return Intl.message(
-      'Syncing is disabled while using mobile internet',
+      'Syncing is disabled while using mobile data',
       name: 'messageSyncingIsDisabledOnMobileInternet',
       desc: '',
       args: [],
@@ -3665,6 +3665,16 @@ class S {
     return Intl.message(
       'Is a set of networking protocols that will allow your Ouisync apps to discover and communicate with each other.\n\nFor best connectivity we recommend this setting to be ON',
       name: 'messageInfoUPnP',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Not available on mobile networks`
+  String get messageLocalDiscoveryNotAvailableOnMobileNetwork {
+    return Intl.message(
+      'Not available on mobile networks',
+      name: 'messageLocalDiscoveryNotAvailableOnMobileNetwork',
       desc: '',
       args: [],
     );

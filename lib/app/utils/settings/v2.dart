@@ -26,6 +26,7 @@ class SettingsRoot {
   static const _acceptedEqualitieValuesKey = 'acceptedEqualitieValues';
   static const _showOnboardingKey = 'showOnboarding';
   static const _enableSyncOnMobileInternetKey = 'enableSyncOnMobileInternet';
+  static const _enableLocalDiscoveryKey = 'enableLocalDiscovery';
   static const _highestSeenProtocolNumberKey = 'highestSeenProtocolNumber';
   static const _defaultRepoKey = 'defaultRepo';
   static const _reposKey = 'repos';
@@ -37,6 +38,7 @@ class SettingsRoot {
   // Show onboarding (will flip to false once shown).
   bool showOnboarding = true;
   bool enableSyncOnMobileInternet = false;
+  bool enableLocalDiscovery = true;
   int? highestSeenProtocolNumber;
   // NOTE: In order to preserve plausible deniability, once the current repo is
   // locked in _AuthModeBlindOrManual, this value must be set to `null`.
@@ -52,6 +54,7 @@ class SettingsRoot {
     required this.acceptedEqualitieValues,
     required this.showOnboarding,
     required this.enableSyncOnMobileInternet,
+    required this.enableLocalDiscovery,
     required this.highestSeenProtocolNumber,
     required this.defaultRepo,
     required this.repos,
@@ -64,6 +67,7 @@ class SettingsRoot {
       _acceptedEqualitieValuesKey: acceptedEqualitieValues,
       _showOnboardingKey: showOnboarding,
       _enableSyncOnMobileInternetKey: enableSyncOnMobileInternet,
+      _enableLocalDiscoveryKey: enableLocalDiscovery,
       _highestSeenProtocolNumberKey: highestSeenProtocolNumber,
       _defaultRepoKey: defaultRepo?.path,
       _reposKey: <String, Object?>{
@@ -98,6 +102,7 @@ class SettingsRoot {
       acceptedEqualitieValues: data[_acceptedEqualitieValuesKey]!,
       showOnboarding: data[_showOnboardingKey]!,
       enableSyncOnMobileInternet: data[_enableSyncOnMobileInternetKey]!,
+      enableLocalDiscovery: data[_enableLocalDiscoveryKey]!,
       highestSeenProtocolNumber: data[_highestSeenProtocolNumberKey],
       defaultRepo: defaultRepo?.let((path) => RepoLocation.fromDbPath(path)),
       repos: repos,
@@ -147,8 +152,11 @@ class Settings with AppLogger {
     final root = SettingsRoot(
       acceptedEqualitieValues: v1.acceptedEqualitieValues,
       showOnboarding: v1.showOnboarding,
-      // This is what changed from V1 to V2, by default it's now `false`.
+      // This is one thing that changed from V1 to V2, by default it's now
+      // `false`.
       enableSyncOnMobileInternet: false,
+      // This is another thing that changed, the V1 did not have it.
+      enableLocalDiscovery: true,
       highestSeenProtocolNumber: v1.highestSeenProtocolNumber,
       defaultRepo: v1.defaultRepo,
       repos: v1.repos,
@@ -186,6 +194,15 @@ class Settings with AppLogger {
 
   Future<void> setSyncOnMobileEnabled(bool enable) async {
     _root.enableSyncOnMobileInternet = enable;
+    await _storeRoot();
+  }
+
+  //------------------------------------------------------------------
+
+  bool getLocalDiscoveryEnabled() => _root.enableLocalDiscovery;
+
+  Future<void> setLocalDiscoveryEnabled(bool enable) async {
+    _root.enableLocalDiscovery = enable;
     await _storeRoot();
   }
 

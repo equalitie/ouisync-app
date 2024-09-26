@@ -530,6 +530,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Loading…"),
         "messageLocalDiscovery":
             MessageLookupByLibrary.simpleMessage("Local Discovery"),
+        "messageLocalDiscoveryNotAvailableOnMobileNetwork":
+            MessageLookupByLibrary.simpleMessage(
+                "Not available on mobile networks"),
         "messageLockOpenRepos": m13,
         "messageLockedRepository": MessageLookupByLibrary.simpleMessage(
             "This <bold>repository</bold> is locked."),
@@ -719,7 +722,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Sync while using mobile data"),
         "messageSyncingIsDisabledOnMobileInternet":
             MessageLookupByLibrary.simpleMessage(
-                "Syncing is disabled while using mobile internet"),
+                "Syncing is disabled while using mobile data"),
         "messageTapForTermsPrivacy": MessageLookupByLibrary.simpleMessage(
             "Tap here to read our Terms of Use and Privacy Notice"),
         "messageTapForValues":
