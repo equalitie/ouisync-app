@@ -1,13 +1,17 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:locale_names/locale_names.dart';
 
 import '../../generated/l10n.dart';
 import '../utils/click_counter.dart';
+import '../utils/utils.dart';
 import '../widgets/widgets.dart';
 
 class LanguagePicker extends StatefulWidget {
-  const LanguagePicker();
+  const LanguagePicker({required this.canPop});
+
+  final bool canPop;
 
   @override
   State<LanguagePicker> createState() => _LanguagePickerState();
@@ -21,12 +25,19 @@ class _LanguagePickerState extends State<LanguagePicker> {
   @override
   Widget build(BuildContext context) => SafeArea(
         child: Scaffold(
+          appBar: AppBar(
+            title: Text('App language'),
+            automaticallyImplyLeading: widget.canPop,
+          ),
           body: PopScope<Object?>(
             canPop: false,
             onPopInvokedWithResult: _onBackPressed,
-            child: ContentWithStickyFooterState(
-              content: _buildContent(context),
-              footer: SizedBox.shrink(),
+            child: Padding(
+              padding: Dimensions.paddingActionBox,
+              child: ContentWithStickyFooterState(
+                content: _buildContent(context),
+                footer: SizedBox.shrink(),
+              ),
             ),
           ),
         ),
@@ -34,6 +45,8 @@ class _LanguagePickerState extends State<LanguagePicker> {
 
   Future<void> _onBackPressed(bool didPop, Object? result) async {
     if (didPop) return;
+
+    if (widget.canPop) {};
 
     int clickCount = exitClickCounter.registerClick();
     if (clickCount <= 1) {
@@ -58,7 +71,6 @@ class _LanguagePickerState extends State<LanguagePicker> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(S.current.actionAccept),
         Flexible(
           fit: FlexFit.loose,
           child: ListView.builder(
@@ -66,14 +78,21 @@ class _LanguagePickerState extends State<LanguagePicker> {
             primary: false,
             itemCount: locales.length,
             itemBuilder: (context, index) {
-              final locale = locales[index].languageCode;
-              final countryCode = locales[index].countryCode ?? '';
+              final languageCode = locales[index].languageCode;
+              final countryCode = locales[index].countryCode;
+              final localeName = Locale.fromSubtags(
+                languageCode: languageCode,
+                countryCode: countryCode,
+              );
 
-              final selectionColor = index == selected ? Colors.blue : null;
+              final selectionColor = index == selected
+                  ? Theme.of(context).colorScheme.primaryContainer
+                  : null;
               return ListTile(
                 tileColor: selectionColor,
-                title: Text(countryCode),
-                subtitle: Text(locale),
+                title: Text(localeName.nativeDisplayLanguageScript),
+                subtitle: Text(localeName.defaultDisplayLanguage),
+                trailing: Text(localeName.countryCode ?? ''),
                 onTap: () async {
                   final selectedLocale = S.delegate.supportedLocales[index];
                   Navigator.of(context).pop(selectedLocale);

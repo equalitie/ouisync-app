@@ -151,7 +151,7 @@ class AboutSection extends SettingsSection with AppLogger {
     Settings settings,
   ) async {
     final locale = await Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => LanguagePicker()),
+      MaterialPageRoute(builder: (_) => LanguagePicker(canPop: true)),
     );
 
     if (locale == null) return;
