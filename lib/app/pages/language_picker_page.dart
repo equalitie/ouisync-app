@@ -30,7 +30,7 @@ class _LanguagePickerState extends State<LanguagePicker> {
             automaticallyImplyLeading: widget.canPop,
           ),
           body: PopScope<Object?>(
-            canPop: false,
+            canPop: widget.canPop,
             onPopInvokedWithResult: _onBackPressed,
             child: Padding(
               padding: Dimensions.paddingActionBox,
@@ -45,8 +45,6 @@ class _LanguagePickerState extends State<LanguagePicker> {
 
   Future<void> _onBackPressed(bool didPop, Object? result) async {
     if (didPop) return;
-
-    if (widget.canPop) {};
 
     int clickCount = exitClickCounter.registerClick();
     if (clickCount <= 1) {
