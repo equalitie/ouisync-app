@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:collection/collection.dart';
+import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:locale_names/locale_names.dart';
 
@@ -9,18 +11,23 @@ import '../utils/utils.dart';
 import '../widgets/widgets.dart';
 
 class LanguagePicker extends StatefulWidget {
-  const LanguagePicker({required this.canPop});
+  const LanguagePicker({required this.languageCodeCurrent, required this.canPop});
 
+  final String? languageCodeCurrent;
   final bool canPop;
 
   @override
   State<LanguagePicker> createState() => _LanguagePickerState();
 }
 
-class _LanguagePickerState extends State<LanguagePicker> {
+class _LanguagePickerState extends State<LanguagePicker> with AppLogger {
   final exitClickCounter = ClickCounter(timeoutMs: 3000);
 
-  int selected = -1;
+  // English (languageCode=en) is the default locale when the device language is not supported.
+  Locale deviceLocale = Locale('en');
+  Locale deviceLocaleForDisplay = Locale('en');
+
+  String selectedLanguageCode = 'en';
 
   @override
   Widget build(BuildContext context) => SafeArea(
@@ -62,9 +69,12 @@ class _LanguagePickerState extends State<LanguagePicker> {
   Column _buildContent(BuildContext context) {
     final locales = S.delegate.supportedLocales;
 
-    if (selected < 0) {
-      setState(() => selected = locales.indexOf(Locale('en'), 0));
-    }
+    _setDeviceLocale(locales);
+    final localeItems = _getLocaleItems(locales);
+
+    setState(() =>
+      selectedLanguageCode = localeItems.singleWhereOrNull((li) => li.isCurrent)?.locale.languageCode ?? 'en'
+    );
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -74,27 +84,47 @@ class _LanguagePickerState extends State<LanguagePicker> {
           child: ListView.builder(
             shrinkWrap: true,
             primary: false,
-            itemCount: locales.length,
+            itemCount: localeItems.length,
             itemBuilder: (context, index) {
-              final languageCode = locales[index].languageCode;
-              final countryCode = locales[index].countryCode;
+              final item = localeItems[index];
+
+              final languageCode = item.locale.languageCode;
+              final countryCode = item.locale.countryCode;
               final localeName = Locale.fromSubtags(
                 languageCode: languageCode,
                 countryCode: countryCode,
               );
 
-              final selectionColor = index == selected
+              final selectionColor = !item.isSupported ? Colors.grey.shade200 :
+               item.isCurrent
                   ? Theme.of(context).colorScheme.primaryContainer
                   : null;
+
+              final title = StringBuffer(localeName.nativeDisplayLanguageScript);
+              if (item.isDefault) title.write(' (default)');
+              if (!item.isSupported) title.write(' (not available)');
+              
+              final subtitle = StringBuffer(localeName.defaultDisplayLanguage);
+              if (item.isDevice) subtitle.write(' (device\'s language)');
+
               return ListTile(
                 tileColor: selectionColor,
-                title: Text(localeName.nativeDisplayLanguageScript),
-                subtitle: Text(localeName.defaultDisplayLanguage),
+                title: Text(title.toString()),
+                subtitle: Text(subtitle.toString()),
                 trailing: Text(localeName.countryCode ?? ''),
-                onTap: () async {
-                  final selectedLocale = S.delegate.supportedLocales[index];
+                onTap: item.isSupported ? () async {
+                  Locale? selectedLocale = S.delegate.supportedLocales.singleWhereOrNull((sl) => sl.languageCode == item.locale.languageCode);
+                  assert(selectedLocale != null, 'selectedLocale is Null. The locale: ${item.locale.languageCode}');
+
+                  if (selectedLocale == null) {
+                    final errorMessage = 'Something went wrong selecting this language. Using the default language instead: English (en)';
+                    showSnackBar(errorMessage, context: context, showCloseIcon: true);
+
+                    selectedLocale = Locale('en');
+                  }
+
                   Navigator.of(context).pop(selectedLocale);
-                },
+                } : null,
               );
             },
           ),
@@ -102,4 +132,68 @@ class _LanguagePickerState extends State<LanguagePicker> {
       ],
     );
   }
+
+  void _setDeviceLocale(List<Locale> locales) {
+    final deviceLocaleName = Platform.localeName;
+    final underscoreIndex = deviceLocaleName.indexOf('_');
+    final baseLanguageCode = underscoreIndex >= 0 ? deviceLocaleName.substring(0, underscoreIndex) : deviceLocaleName;
+    final countryCode = underscoreIndex >= 0 ? deviceLocaleName.substring(underscoreIndex).replaceAll('_', '').trim() : null;
+    
+    setState(() {
+      deviceLocale = Locale(baseLanguageCode);
+      deviceLocaleForDisplay = Locale(baseLanguageCode, countryCode);
+    }); 
+  }
+
+  List<LocaleItem> _getLocaleItems(List<Locale> locales) {
+    final localeItems = <LocaleItem>[];
+    int localeIndex = 0;
+
+    if (!locales.contains(deviceLocale)) {
+      localeItems.add(LocaleItem(index: localeIndex, locale: deviceLocale, isDevice: true, isDefault: false, isSupported: false, isCurrent: false,));
+      localeIndex++;
+    }
+
+    localeItems.addAll(S.delegate.supportedLocales.map((l) { 
+      final isDevice = l.languageCode == deviceLocale.languageCode;
+      final isDefault = l.languageCode == 'en';
+      final isCurrent = _getIsCurrent(l);
+      final item = LocaleItem(index: localeIndex, locale: l, isDevice: isDevice, isDefault: isDefault, isSupported: true, isCurrent: isCurrent,);
+
+      localeIndex++;
+      return item;
+    }));
+
+    return localeItems.sortedBy((li) => li.locale.defaultDisplayLanguage);
+  }
+
+  bool _getIsCurrent(Locale locale) {
+    if (widget.languageCodeCurrent == null) {
+      return false;
+    }
+
+    return locale.languageCode == widget.languageCodeCurrent;
+  }
+}
+
+class LocaleItem extends Equatable {
+  LocaleItem({required this.index,
+    required this.locale,
+    required this.isDevice,
+    required this.isDefault,
+    required this.isSupported,
+    required this.isCurrent,
+  });
+
+  final int index;
+  final Locale locale;
+
+  final bool isDevice;
+  final bool isDefault;
+  final bool isSupported;
+  final bool isCurrent;
+
+  @override
+  List<Object?> get props => [index, locale, isCurrent];
+
 }

@@ -162,7 +162,7 @@ class _OuisyncAppState extends State<OuisyncApp> with AppLogger {
       final onboardingPages = <Widget>[];
 
       if (widget.settings.getLanguageLocal().isEmpty) {
-        onboardingPages.add(LanguagePicker(canPop: false));
+        onboardingPages.add(LanguagePicker(languageCodeCurrent: null, canPop: false));
       }
 
       if (widget.settings.getShowOnboarding()) {
