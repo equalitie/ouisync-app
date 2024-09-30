@@ -206,7 +206,7 @@ class PowerControl extends Cubit<PowerControlState>
     while (true) {
       switch (await _localInterfaceWatch.onChange()) {
         case watch.Value(value: final iface):
-          _updateNetworkMode(
+          await _updateNetworkMode(
               state.copyWithNetworkModeUpdate(localInterface: iface));
           break;
         case watch.Closed():
@@ -375,7 +375,7 @@ class NetworkModeFull extends NetworkMode {
 /// *Mobile* data saving mode - only local connections on the hotspot provided
 /// by this device (if any) are enabled.
 class NetworkModeSaving extends NetworkMode {
-  String? hotspotAddr;
+  final String? hotspotAddr;
 
   NetworkModeSaving({required this.hotspotAddr});
 
