@@ -1,15 +1,11 @@
 import 'dart:convert';
 import 'dart:io' as io;
 
-import 'package:equatable/equatable.dart';
-import 'package:ouisync/ouisync.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../models/models.dart';
-import '../files.dart';
 import '../master_key.dart';
 import '../utils.dart';
 import 'atomic_shared_prefs_settings_key.dart';
