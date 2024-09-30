@@ -4,6 +4,7 @@ import 'dart:io' as io;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
+import 'package:locale_names/locale_names.dart';
 import 'package:ouisync/ouisync.dart';
 import 'package:path/path.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -52,6 +53,15 @@ class AboutSection extends SettingsSection with AppLogger {
   List<Widget> buildTiles(BuildContext context) {
     bodyStyle = context.theme.appTextStyle.bodyMedium;
 
+    final appLanguage = reposCubit.settings.getLanguageLocal();
+    final localeName = Locale.fromSubtags(languageCode: appLanguage);
+
+    final deviceLocaleName = io.Platform.localeName;
+    final underscoreIndex = deviceLocaleName.indexOf('_');
+    final baseLanguageCode = underscoreIndex >= 0 ? deviceLocaleName.substring(0, underscoreIndex) : deviceLocaleName;
+    final currentLanguage = StringBuffer(localeName.defaultDisplayLanguage);
+    if (appLanguage == baseLanguageCode) currentLanguage.write(' (device\'s language)');
+
     return [
       if (PlatformValues.isDesktopDevice)
         BlocBuilder<LaunchAtStartupCubit, bool>(
@@ -69,7 +79,7 @@ class AboutSection extends SettingsSection with AppLogger {
       NavigationTile(
           title: Text('App language', style: bodyStyle),
           leading: Icon(Icons.language_rounded),
-          value: Text('Select the app language from the available locales',
+          value: Text(currentLanguage.toString(),
               style: context.theme.appTextStyle.bodySmall),
           onTap: () async => await _navigateToLanguagePicker(
                 context,
