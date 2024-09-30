@@ -46,7 +46,6 @@ Future<String?> findHotspotIp() async {
 typedef LocalInterfaceAddr = String;
 
 class LocalInterfaceWatch {
-  final _isClosed = false;
   final _watchTx = watch.Sender<LocalInterfaceAddr?>(null);
   late watch.Receiver<LocalInterfaceAddr?> _watchRx;
 
