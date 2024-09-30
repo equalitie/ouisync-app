@@ -12,7 +12,7 @@ sealed class Option<T> {
     switch ((this, other)) {
       case (Some(value: var lv), Some(value: var rv)):
         return lv == rv;
-      case (None, None):
+      case (None(), None()):
         return true;
       case (_, _):
         return false;

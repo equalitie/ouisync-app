@@ -9,7 +9,7 @@ import 'package:stream_transform/stream_transform.dart';
 import '../utils/log.dart';
 import 'utils.dart';
 
-class PeerSetCubit extends Cubit<PeerSet> with AppLogger {
+class PeerSetCubit extends Cubit<PeerSet> with CubitActions, AppLogger {
   final Session _session;
   StreamSubscription<void>? _subscription;
 

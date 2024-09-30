@@ -183,7 +183,7 @@
   "@messageLibraryPanic": {},
   "messageMissingBackgroundServicePermission": "Ouisync does not have permission to run in the background, opening another application may stop ongoing synchronization",
   "@messageMissingBackgroundServicePermission": {},
-  "messageSyncingIsDisabledOnMobileInternet": "Syncing is disabled while using mobile internet",
+  "messageSyncingIsDisabledOnMobileInternet": "Syncing over internet is disabled while using mobile data",
   "@messageSyncingIsDisabledOnMobileInternet": {},
   "messageNetworkIsUnavailable": "Network is unavailable",
   "@messageNetworkIsUnavailable": {},
