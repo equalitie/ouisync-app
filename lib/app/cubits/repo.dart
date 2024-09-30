@@ -105,7 +105,7 @@ class RepoState extends Equatable {
   bool get canWrite => accessMode == AccessMode.write;
 }
 
-class RepoCubit extends Cubit<RepoState> with AppLogger {
+class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   final _currentFolder = Folder();
   final NativeChannels _nativeChannels;
   final NavigationCubit _navigation;

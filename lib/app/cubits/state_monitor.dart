@@ -4,7 +4,7 @@ import 'package:ouisync/state_monitor.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'utils.dart';
 
-class StateMonitorCubit extends Cubit<StateMonitorNode?> {
+class StateMonitorCubit extends Cubit<StateMonitorNode?> with CubitActions {
   final StateMonitor _monitor;
   final Subscription _subscription;
 
@@ -37,7 +37,7 @@ class StateMonitorCubit extends Cubit<StateMonitorNode?> {
       StateMonitorCubit(_monitor.child(id));
 }
 
-class StateMonitorIntCubit extends Cubit<int?> {
+class StateMonitorIntCubit extends Cubit<int?> with CubitActions {
   final StateMonitor _monitor;
   final String _name;
   final Subscription _subscription;

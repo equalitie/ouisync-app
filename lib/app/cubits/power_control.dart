@@ -104,7 +104,8 @@ class PowerControlState {
       "PowerControlState($connectivityType, $networkMode, userWantsSyncOnMobileEnabled:$userWantsSyncOnMobileEnabled, ...)";
 }
 
-class PowerControl extends Cubit<PowerControlState> with AppLogger {
+class PowerControl extends Cubit<PowerControlState>
+    with CubitActions, AppLogger {
   final oui.Session _session;
   final Settings _settings;
   final Connectivity _connectivity;
