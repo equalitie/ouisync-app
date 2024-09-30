@@ -59,6 +59,17 @@ class ConnectivityInfoState extends Equatable {
         externalAddressV4,
         externalAddressV6,
       ];
+
+  @override
+  String toString() =>
+      "ConnectivityInfoState(" +
+      "tcpListenerV4: $tcpListenerV4, " +
+      "tcpListenerV6: $tcpListenerV6, " +
+      "quicListenerV4: $quicListenerV4, " +
+      "localAddressV4: $localAddressV4, " +
+      "localAddressV6: $localAddressV6, " +
+      "externalAddressV4: $externalAddressV4, " +
+      "externalAddressV6: $externalAddressV6)";
 }
 
 class ConnectivityInfo extends Cubit<ConnectivityInfoState> with AppLogger {

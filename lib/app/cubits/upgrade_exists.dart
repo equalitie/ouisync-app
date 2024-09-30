@@ -6,7 +6,7 @@ import 'package:ouisync/ouisync.dart';
 import '../utils/utils.dart';
 import 'utils.dart';
 
-class UpgradeExistsCubit extends Cubit<bool> with AppLogger {
+class UpgradeExistsCubit extends Cubit<bool> with CubitActions, AppLogger {
   final Session _session;
   final Settings _settings;
   StreamSubscription? _subscription;

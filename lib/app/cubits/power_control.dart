@@ -3,10 +3,12 @@ import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync/ouisync.dart' as oui;
+import 'package:equatable/equatable.dart';
 
 import '../../generated/l10n.dart';
 import '../utils/utils.dart';
 import 'utils.dart';
+import '../utils/watch.dart' as watch;
 
 const _unspecifiedV4 = "0.0.0.0:0";
 const _unspecifiedV6 = "[::]:0";
@@ -17,74 +19,98 @@ class PowerControlState {
   // That information is needed by the warning widgets shown to the user (if
   // it's null then there is no warning). If we instead set this value to
   // `disabled` by default, then the warning would show up if only breafly
-  // until `_onConnectivityChange` is invoked for the first time.
+  // until `_init` finishes.
   final NetworkMode? networkMode;
-  final bool syncOnMobile;
-  final bool portForwardingEnabled;
-  final bool localDiscoveryEnabled;
+  // These signify what the user wants based on what preferences they set in the app.
+  // They do not signify what the actual state is.
+  final bool userWantsSyncOnMobileEnabled;
+  final bool userWantsPortForwardingEnabled;
+  final bool userWantsLocalDiscoveryEnabled;
+
+  final bool? isLocalDiscoveryEnabled;
+  final LocalInterfaceAddr? localInterface;
 
   PowerControlState({
     this.connectivityType = ConnectivityResult.none,
     this.networkMode,
-    this.syncOnMobile = false,
-    this.portForwardingEnabled = false,
-    this.localDiscoveryEnabled = false,
+    this.userWantsSyncOnMobileEnabled = false,
+    this.userWantsPortForwardingEnabled = false,
+    this.userWantsLocalDiscoveryEnabled = false,
+    this.isLocalDiscoveryEnabled,
+    this.localInterface = null,
   });
 
   PowerControlState copyWith({
     ConnectivityResult? connectivityType,
     NetworkMode? networkMode,
-    bool? syncOnMobile,
-    bool? portForwardingEnabled,
-    bool? localDiscoveryEnabled,
+    bool? userWantsSyncOnMobileEnabled,
+    bool? userWantsPortForwardingEnabled,
+    bool? userWantsLocalDiscoveryEnabled,
+    bool? isLocalDiscoveryEnabled,
+    LocalInterfaceAddr? localInterface,
   }) =>
       PowerControlState(
         connectivityType: connectivityType ?? this.connectivityType,
         networkMode: networkMode ?? this.networkMode,
-        syncOnMobile: syncOnMobile ?? this.syncOnMobile,
-        portForwardingEnabled:
-            portForwardingEnabled ?? this.portForwardingEnabled,
-        localDiscoveryEnabled:
-            localDiscoveryEnabled ?? this.localDiscoveryEnabled,
+        userWantsSyncOnMobileEnabled:
+            userWantsSyncOnMobileEnabled ?? this.userWantsSyncOnMobileEnabled,
+        userWantsPortForwardingEnabled: userWantsPortForwardingEnabled ??
+            this.userWantsPortForwardingEnabled,
+        userWantsLocalDiscoveryEnabled: userWantsLocalDiscoveryEnabled ??
+            this.userWantsLocalDiscoveryEnabled,
+        isLocalDiscoveryEnabled:
+            isLocalDiscoveryEnabled ?? this.isLocalDiscoveryEnabled,
+        localInterface: localInterface ?? this.localInterface,
       );
 
   // Null means the answer is not yet known (the init function hasn't finished
   // or was not called yet).
-  bool? get isNetworkEnabled {
-    final mode = networkMode;
-    if (mode == null) return null;
-    switch (mode) {
-      case NetworkMode.full:
-        return true;
-      case NetworkMode.saving:
-      case NetworkMode.disabled:
-        return false;
-    }
+  bool? get isInternetConnectivityEnabled {
+    return networkMode?.allowsInternetConnections;
   }
 
-  String? get networkDisabledReason {
-    final mode = networkMode;
-    if (mode == null) return null;
-    switch (mode) {
-      case NetworkMode.full:
-        return null;
-      case NetworkMode.saving:
-        return S.current.messageSyncingIsDisabledOnMobileInternet;
-      case NetworkMode.disabled:
-        return S.current.messageNetworkIsUnavailable;
-    }
+  String? get internetConnectivityDisabledReason {
+    return networkMode?.disallowsInternetConnectivityReason;
+  }
+
+  String? get localDiscoveryDisabledReason {
+    return networkMode?.disallowsLocalConnectivityReason;
+  }
+
+  PowerControlState copyWithNetworkModeUpdate({
+    ConnectivityResult? connectivityType,
+    LocalInterfaceAddr? localInterface,
+    bool? userWantsSyncOnMobileEnabled,
+    bool? userWantsLocalDiscoveryEnabled,
+  }) {
+    final newState = this.copyWith(
+      connectivityType: connectivityType,
+      localInterface: localInterface,
+      userWantsSyncOnMobileEnabled: userWantsSyncOnMobileEnabled,
+      userWantsLocalDiscoveryEnabled: userWantsLocalDiscoveryEnabled,
+    );
+
+    final newNetworkMode = PowerControl._determineNetworkMode(
+        connectivityType: newState.connectivityType,
+        userWantsSyncOnMobileEnabled: newState.userWantsSyncOnMobileEnabled,
+        userWantsLocalDiscoveryEnabled: newState.userWantsLocalDiscoveryEnabled,
+        localInterface: newState.localInterface);
+
+    return newState.copyWith(networkMode: newNetworkMode);
   }
 
   @override
   String toString() =>
-      "PowerControlState($connectivityType, $networkMode, syncOnMobile:$syncOnMobile, ...)";
+      "PowerControlState($connectivityType, $networkMode, userWantsSyncOnMobileEnabled:$userWantsSyncOnMobileEnabled, ...)";
 }
 
-class PowerControl extends Cubit<PowerControlState> with AppLogger {
+class PowerControl extends Cubit<PowerControlState>
+    with CubitActions, AppLogger {
   final oui.Session _session;
   final Settings _settings;
   final Connectivity _connectivity;
   _Transition _networkModeTransition = _Transition.none;
+  final LocalInterfaceWatch _localInterfaceWatch = LocalInterfaceWatch();
 
   PowerControl(
     this._session,
@@ -95,52 +121,77 @@ class PowerControl extends Cubit<PowerControlState> with AppLogger {
     unawaited(_init());
   }
 
+  @override
+  Future<void> close() {
+    _localInterfaceWatch.close();
+    return super.close();
+  }
+
   Future<void> _init() async {
-    final syncOnMobile = _settings.getSyncOnMobileEnabled();
-    await setSyncOnMobileEnabled(syncOnMobile);
+    final userWantsSyncOnMobileEnabled = _settings.getSyncOnMobileEnabled();
+    final userWantsLocalDiscoveryEnabled = _settings.getLocalDiscoveryEnabled();
 
-    final portForwardingEnabled = await _session.isPortForwardingEnabled;
-    final localDiscoveryEnabled = await _session.isLocalDiscoveryEnabled;
+    // TODO: We should be getting `userWantsPortForwardingEnabled` from `_settings`.
+    final userWantsPortForwardingEnabled =
+        await _session.isPortForwardingEnabled;
+    final isLocalDiscoveryEnabled = await _session.isLocalDiscoveryEnabled;
 
-    emitUnlessClosed(state.copyWith(
-      portForwardingEnabled: portForwardingEnabled,
-      localDiscoveryEnabled: localDiscoveryEnabled,
-    ));
+    final connectivityType = (await _connectivity.checkConnectivity()).last;
 
-    await _refresh();
-    await _listen();
+    final newState = state
+        .copyWith(
+          userWantsPortForwardingEnabled: userWantsPortForwardingEnabled,
+          isLocalDiscoveryEnabled: isLocalDiscoveryEnabled,
+        )
+        .copyWithNetworkModeUpdate(
+          connectivityType: connectivityType,
+          userWantsSyncOnMobileEnabled: userWantsSyncOnMobileEnabled,
+          userWantsLocalDiscoveryEnabled: userWantsLocalDiscoveryEnabled,
+        );
+
+    await _updateNetworkMode(newState);
+
+    unawaited(_listenToConnectivityChanges());
+    unawaited(_listenToLocalNetworkInterfaceChanges());
   }
 
   Future<void> setSyncOnMobileEnabled(bool value) async {
-    if (state.syncOnMobile == value) {
+    if (state.userWantsSyncOnMobileEnabled == value) {
       return;
     }
 
     await _settings.setSyncOnMobileEnabled(value);
-    await _refresh(syncOnMobile: value);
+    final newState =
+        state.copyWithNetworkModeUpdate(userWantsSyncOnMobileEnabled: value);
+    await _updateNetworkMode(newState);
   }
 
   Future<void> setPortForwardingEnabled(bool value) async {
-    if (state.portForwardingEnabled == value) {
+    if (state.userWantsPortForwardingEnabled == value) {
       return;
     }
 
-    emit(state.copyWith(portForwardingEnabled: value));
+    emit(state.copyWith(userWantsPortForwardingEnabled: value));
 
     await _session.setPortForwardingEnabled(value);
   }
 
   Future<void> setLocalDiscoveryEnabled(bool value) async {
-    if (state.localDiscoveryEnabled == value) {
-      return;
+    bool changed = state.userWantsLocalDiscoveryEnabled != value;
+
+    if (changed) {
+      await _settings.setLocalDiscoveryEnabled(value);
+      await _session.setLocalDiscoveryEnabled(value);
     }
 
-    emit(state.copyWith(localDiscoveryEnabled: value));
+    final isLocalDiscoveryEnabled = await _session.isLocalDiscoveryEnabled;
 
-    await _session.setLocalDiscoveryEnabled(value);
+    emitUnlessClosed(state.copyWith(
+        userWantsLocalDiscoveryEnabled: value,
+        isLocalDiscoveryEnabled: isLocalDiscoveryEnabled));
   }
 
-  Future<void> _listen() async {
+  Future<void> _listenToConnectivityChanges() async {
     final result = await _connectivity.checkConnectivity();
     await _onConnectivityChange(result.last);
 
@@ -151,12 +202,32 @@ class PowerControl extends Cubit<PowerControlState> with AppLogger {
     }
   }
 
-  Future<void> _onConnectivityChange(ConnectivityResult result,
-      {bool? syncOnMobile = null}) async {
-    syncOnMobile ??= state.syncOnMobile;
+  Future<void> _listenToLocalNetworkInterfaceChanges() async {
+    while (true) {
+      switch (await _localInterfaceWatch.onChange()) {
+        case watch.Value(value: final iface):
+          await _updateNetworkMode(
+              state.copyWithNetworkModeUpdate(localInterface: iface));
+          break;
+        case watch.Closed():
+          return;
+      }
+    }
+  }
 
-    if (result == state.connectivityType &&
-        syncOnMobile == state.syncOnMobile) {
+  Future<void> _onConnectivityChange(ConnectivityResult result) async {
+    await _updateNetworkMode(
+        state.copyWithNetworkModeUpdate(connectivityType: result));
+  }
+
+  Future<void> _updateNetworkMode(PowerControlState newState) async {
+    final oldState = state.copyWith();
+
+    if (!emitUnlessClosed(newState)) {
+      return;
+    }
+
+    if (oldState.networkMode == newState.networkMode) {
       // The Cubit/Bloc machinery knows not to rebuild widgets if the state
       // doesn't change, but in this function we also call
       // `_session.bindNetwork` which we don't necessarily want to do if the
@@ -164,30 +235,42 @@ class PowerControl extends Cubit<PowerControlState> with AppLogger {
       // `_session.bindNetwork` should be idempotent if local endpoints don't
       // change).
       loggy.app(
-          'Connectivity event: ${result.name} (ignored, same as previous)');
+          'Network mode event: ${oldState.networkMode} -> ${newState.networkMode} (ignored, same as previous)');
       return;
     }
 
-    loggy.app('Connectivity event: ${result.name}');
+    loggy.app(
+        'NetworkMode event: ${oldState.networkMode} -> ${newState.networkMode}');
 
-    emit(state.copyWith(connectivityType: result, syncOnMobile: syncOnMobile));
+    await _setNetworkMode(newState.networkMode);
+  }
 
-    var newMode = NetworkMode.disabled;
+  static NetworkMode _determineNetworkMode(
+      {required ConnectivityResult connectivityType,
+      required bool userWantsSyncOnMobileEnabled,
+      required bool userWantsLocalDiscoveryEnabled,
+      required LocalInterfaceAddr? localInterface}) {
+    NetworkMode newMode = NetworkModeDisabled();
 
-    switch (result) {
+    switch (connectivityType) {
       case ConnectivityResult.bluetooth:
-        newMode = NetworkMode.disabled;
+        newMode = NetworkModeDisabled();
         break;
       case ConnectivityResult.wifi:
       case ConnectivityResult.ethernet:
       case ConnectivityResult.vpn:
-        newMode = NetworkMode.full;
+        newMode = NetworkModeFull();
         break;
       case ConnectivityResult.mobile:
-        if (state.syncOnMobile) {
-          newMode = NetworkMode.full;
+        if (userWantsSyncOnMobileEnabled) {
+          newMode = NetworkModeFull();
         } else {
-          newMode = NetworkMode.saving;
+          final hotspotIp = localInterface;
+          final hotspotAddr =
+              hotspotIp != null && userWantsLocalDiscoveryEnabled
+                  ? "$hotspotIp:0"
+                  : null;
+          newMode = NetworkModeSaving(hotspotAddr: hotspotAddr);
         }
         break;
       case ConnectivityResult.none:
@@ -195,25 +278,21 @@ class PowerControl extends Cubit<PowerControlState> with AppLogger {
         // mobile internet is not enabled we get here as well. Ideally we would have
         // also the information about whether tethering is enabled and only in such case
         // we'd keep the connection going.
-        newMode = NetworkMode.full;
+        newMode = NetworkModeFull();
         break;
       case ConnectivityResult.other:
     }
-
-    await _setNetworkMode(newMode);
+    return newMode;
   }
 
-  Future<void> _refresh({bool? syncOnMobile = null}) async =>
-      _onConnectivityChange((await _connectivity.checkConnectivity()).last,
-          syncOnMobile: syncOnMobile);
-
-  Future<void> _setNetworkMode(NetworkMode mode, {force = false}) async {
-    if (state.networkMode == null || mode != state.networkMode || force) {
-      loggy.app('Network mode: $mode');
-      emit(state.copyWith(networkMode: mode));
-    } else {
+  Future<void> _setNetworkMode(NetworkMode? mode, {force = false}) async {
+    // For when we have not yet received connectivity type. See comment on
+    // `networkMode` member of `PowerControlState`.
+    if (mode == null) {
       return;
     }
+
+    loggy.app('Setting network mode: $mode');
 
     switch (_networkModeTransition) {
       case _Transition.none:
@@ -230,16 +309,15 @@ class PowerControl extends Cubit<PowerControlState> with AppLogger {
     String? quicV6;
 
     switch (mode) {
-      case NetworkMode.full:
+      case NetworkModeFull():
         quicV4 = _unspecifiedV4;
         quicV6 = _unspecifiedV6;
         break;
-      case NetworkMode.saving:
-        final ip = await findHotspotIp();
-        quicV4 = ip != null ? "$ip:0" : null;
+      case NetworkModeSaving(hotspotAddr: final hotspotAddr):
+        quicV4 = hotspotAddr;
         quicV6 = null;
         break;
-      case NetworkMode.disabled:
+      case NetworkModeDisabled():
         quicV4 = null;
         quicV6 = null;
         break;
@@ -248,7 +326,10 @@ class PowerControl extends Cubit<PowerControlState> with AppLogger {
     try {
       await _session.bindNetwork(quicV4: quicV4, quicV6: quicV6);
     } catch (e) {
-      emit(state.copyWith(networkMode: NetworkMode.disabled));
+      if (!emitUnlessClosed(
+          state.copyWith(networkMode: NetworkModeDisabled()))) {
+        return;
+      }
       rethrow;
     } finally {
       transition = _networkModeTransition;
@@ -256,24 +337,94 @@ class PowerControl extends Cubit<PowerControlState> with AppLogger {
     }
 
     if (transition == _Transition.queued) {
-      // We set state.networkMode above, so it can't be null.
-      await _setNetworkMode(state.networkMode!, force: true);
+      await _setNetworkMode(state.networkMode, force: true);
     } else {
-      emit(state.copyWith());
+      emitUnlessClosed(state.copyWith());
     }
   }
 }
 
-enum NetworkMode {
-  /// Unrestricted network - any connection is enabled
-  full,
+sealed class NetworkMode extends Equatable {
+  bool get allowsInternetConnections;
+  bool get allowsLocalConnections;
 
-  /// Mobile data saving mode - only local connections on the hotspot provided by this device
-  /// (if any) are enabled.
-  saving,
+  String? get disallowsInternetConnectivityReason;
+  String? get disallowsLocalConnectivityReason;
 
-  /// Network is disabled
-  disabled,
+  @override
+  List<Object> get props => [];
+}
+
+/// Unrestricted network - any internet connection is enabled
+class NetworkModeFull extends NetworkMode {
+  NetworkModeFull();
+
+  @override
+  bool get allowsInternetConnections => true;
+
+  @override
+  bool get allowsLocalConnections => true;
+
+  @override
+  String? get disallowsInternetConnectivityReason => null;
+
+  @override
+  String? get disallowsLocalConnectivityReason => null;
+
+  @override
+  List<Object> get props => [];
+
+  @override
+  String toString() => "NetworkModeFull()";
+}
+
+/// *Mobile* data saving mode - only local connections on the hotspot provided
+/// by this device (if any) are enabled.
+class NetworkModeSaving extends NetworkMode {
+  final String? hotspotAddr;
+
+  NetworkModeSaving({required this.hotspotAddr});
+
+  @override
+  bool get allowsInternetConnections => false;
+
+  @override
+  bool get allowsLocalConnections => hotspotAddr != null;
+
+  @override
+  String? get disallowsInternetConnectivityReason =>
+      S.current.messageSyncingIsDisabledOnMobileInternet;
+
+  @override
+  String? get disallowsLocalConnectivityReason => null;
+
+  @override
+  List<Object> get props {
+    final addr = hotspotAddr;
+    return addr != null ? [addr] : [];
+  }
+
+  @override
+  String toString() => "NetworkModeSaving(hotspotAddr: $hotspotAddr)";
+}
+
+/// Network is disabled
+class NetworkModeDisabled extends NetworkMode {
+  @override
+  bool get allowsInternetConnections => false;
+
+  @override
+  bool get allowsLocalConnections => false;
+
+  @override
+  String get disallowsInternetConnectivityReason =>
+      S.current.messageNetworkIsUnavailable;
+
+  @override
+  get disallowsLocalConnectivityReason => S.current.messageNetworkIsUnavailable;
+
+  @override
+  String toString() => "NetworkModeDisabled()";
 }
 
 enum _Transition {

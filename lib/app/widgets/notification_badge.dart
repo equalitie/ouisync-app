@@ -50,7 +50,8 @@ class NotificationBadge extends StatelessWidget {
                   color = Constants.errorColor;
                 } else if (mountState is MountStateError) {
                   color = Constants.errorColor;
-                } else if (!(powerControlState.isNetworkEnabled ?? true)) {
+                } else if (!(powerControlState.isInternetConnectivityEnabled ??
+                    true)) {
                   color = Constants.warningColor;
                 }
 

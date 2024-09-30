@@ -145,7 +145,8 @@ class RepoSecurityState {
       '$runtimeType(origin: $origin, userPrefersToStoreSecret: $userPrefersToStoreSecret, ...)';
 }
 
-class RepoSecurityCubit extends Cubit<RepoSecurityState> with AppLogger {
+class RepoSecurityCubit extends Cubit<RepoSecurityState>
+    with CubitActions, AppLogger {
   RepoSecurityCubit({
     required LocalSecretMode oldLocalSecretMode,
     LocalSecret? oldLocalSecret,
