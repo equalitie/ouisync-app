@@ -222,7 +222,10 @@ class PowerControl extends Cubit<PowerControlState>
 
   Future<void> _updateNetworkMode(PowerControlState newState) async {
     final oldState = state.copyWith();
-    emit(newState);
+
+    if (!emitUnlessClosed(newState)) {
+      return;
+    }
 
     if (oldState.networkMode == newState.networkMode) {
       // The Cubit/Bloc machinery knows not to rebuild widgets if the state
@@ -323,7 +326,10 @@ class PowerControl extends Cubit<PowerControlState>
     try {
       await _session.bindNetwork(quicV4: quicV4, quicV6: quicV6);
     } catch (e) {
-      emit(state.copyWith(networkMode: NetworkModeDisabled()));
+      if (!emitUnlessClosed(
+          state.copyWith(networkMode: NetworkModeDisabled()))) {
+        return;
+      }
       rethrow;
     } finally {
       transition = _networkModeTransition;
@@ -333,7 +339,7 @@ class PowerControl extends Cubit<PowerControlState>
     if (transition == _Transition.queued) {
       await _setNetworkMode(state.networkMode, force: true);
     } else {
-      emit(state.copyWith());
+      emitUnlessClosed(state.copyWith());
     }
   }
 }
