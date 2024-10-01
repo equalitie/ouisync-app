@@ -13,25 +13,10 @@ import 'repo.dart';
 import 'utils.dart';
 
 class RepoSecurityState {
-  RepoSecurityState({
-    required this.oldLocalSecretMode,
-    required this.oldLocalSecret,
-    SecretKeyOrigin? origin,
-    // Reflects the user's preference on storing a password for
-    // `LocalSecretMode`s where storing is not implicit.
-    this.userPrefersToStoreSecret = const None(),
-    bool? secureWithBiometrics,
-    this.localPassword = const None(),
-    this.updatedLocalPassword = const None(),
-    this.isBiometricsAvailable = false,
-  })  : origin = origin ?? oldLocalSecretMode.origin,
-        secureWithBiometrics = secureWithBiometrics ??
-            oldLocalSecretMode.store.isSecuredWithBiometrics;
-
   final LocalSecretMode oldLocalSecretMode;
   final LocalSecret oldLocalSecret;
   final SecretKeyOrigin origin;
-  final Option<bool> userPrefersToStoreSecret;
+  final Option<bool> userWantsToStoreSecret;
   final bool secureWithBiometrics;
   final Option<LocalPassword> localPassword;
   // This is set to the above `localPassword` once the user clicks the "UPDATE"
@@ -42,11 +27,26 @@ class RepoSecurityState {
   final bool isBiometricsAvailable;
   final bool _defaultStoreIfOriginIsManual = false;
 
+  RepoSecurityState({
+    required this.oldLocalSecretMode,
+    required this.oldLocalSecret,
+    SecretKeyOrigin? origin,
+    // Reflects the user's preference on storing a password for
+    // `LocalSecretMode`s where storing is not implicit.
+    this.userWantsToStoreSecret = const None(),
+    bool? secureWithBiometrics,
+    this.localPassword = const None(),
+    this.updatedLocalPassword = const None(),
+    this.isBiometricsAvailable = false,
+  })  : origin = origin ?? oldLocalSecretMode.origin,
+        secureWithBiometrics = secureWithBiometrics ??
+            oldLocalSecretMode.store.isSecuredWithBiometrics;
+
   RepoSecurityState copyWith({
     LocalSecretMode? oldLocalSecretMode,
     LocalSecret? oldLocalSecret,
     SecretKeyOrigin? origin,
-    bool? userPrefersToStoreSecret,
+    bool? userWantsToStoreSecret,
     bool? secureWithBiometrics,
     Option<LocalPassword>? localPassword,
     Option<LocalPassword>? updatedLocalPassword,
@@ -56,9 +56,9 @@ class RepoSecurityState {
         oldLocalSecretMode: oldLocalSecretMode ?? this.oldLocalSecretMode,
         oldLocalSecret: oldLocalSecret ?? this.oldLocalSecret,
         origin: origin ?? this.origin,
-        userPrefersToStoreSecret: userPrefersToStoreSecret != null
-            ? Some(userPrefersToStoreSecret)
-            : this.userPrefersToStoreSecret,
+        userWantsToStoreSecret: userWantsToStoreSecret != null
+            ? Some(userWantsToStoreSecret)
+            : this.userWantsToStoreSecret,
         secureWithBiometrics: secureWithBiometrics ?? this.secureWithBiometrics,
         localPassword: localPassword ?? this.localPassword,
         updatedLocalPassword: updatedLocalPassword ?? this.updatedLocalPassword,
@@ -85,7 +85,7 @@ class RepoSecurityState {
 
   bool get secretWillBeStored =>
       origin == SecretKeyOrigin.random ||
-      switch (userPrefersToStoreSecret) {
+      switch (userWantsToStoreSecret) {
         Some(value: final store) => store,
         None() => _defaultStoreIfOriginIsManual
       };
@@ -142,7 +142,7 @@ class RepoSecurityState {
 
   @override
   String toString() =>
-      '$runtimeType(origin: $origin, userPrefersToStoreSecret: $userPrefersToStoreSecret, ...)';
+      '$runtimeType(origin: $origin, userWantsToStoreSecret: $userWantsToStoreSecret, ...)';
 }
 
 class RepoSecurityCubit extends Cubit<RepoSecurityState>
@@ -151,9 +151,15 @@ class RepoSecurityCubit extends Cubit<RepoSecurityState>
     required LocalSecretMode oldLocalSecretMode,
     LocalSecret? oldLocalSecret,
   }) : super(RepoSecurityState(
-          oldLocalSecretMode: oldLocalSecretMode,
-          oldLocalSecret: oldLocalSecret ?? LocalSecretKey.random(),
-        )) {
+            oldLocalSecretMode: oldLocalSecretMode,
+            oldLocalSecret: oldLocalSecret ?? LocalSecretKey.random(),
+            userWantsToStoreSecret: switch (oldLocalSecretMode) {
+              LocalSecretMode.manual => Some(false),
+              LocalSecretMode.manualStored => Some(true),
+              LocalSecretMode.manualSecuredWithBiometrics => Some(true),
+              LocalSecretMode.randomStored => None(),
+              LocalSecretMode.randomSecuredWithBiometrics => None(),
+            })) {
     unawaited(_init());
   }
 
@@ -169,7 +175,7 @@ class RepoSecurityCubit extends Cubit<RepoSecurityState>
   }
 
   void setStore(bool value) {
-    emit(state.copyWith(userPrefersToStoreSecret: value));
+    emit(state.copyWith(userWantsToStoreSecret: value));
   }
 
   void setSecureWithBiometrics(bool value) {
