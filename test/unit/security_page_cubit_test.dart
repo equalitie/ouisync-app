@@ -28,6 +28,7 @@ void main() {
 
     cubit.setOrigin(SecretKeyOrigin.manual);
 
-    expect(cubit.state.secretWillBeStored, false);
+    expect(cubit.state.secretWillBeStored,
+        RepoSecurityCubit.defaultStoreSecretOnDeviceEnabled);
   });
 }

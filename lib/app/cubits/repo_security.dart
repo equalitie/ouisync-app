@@ -25,7 +25,6 @@ class RepoSecurityState {
   // page.
   final Option<LocalPassword> updatedLocalPassword;
   final bool isBiometricsAvailable;
-  final bool _defaultStoreIfOriginIsManual = false;
 
   RepoSecurityState({
     required this.oldLocalSecretMode,
@@ -87,7 +86,7 @@ class RepoSecurityState {
       origin == SecretKeyOrigin.random ||
       switch (userWantsToStoreSecret) {
         Some(value: final store) => store,
-        None() => _defaultStoreIfOriginIsManual
+        None() => RepoSecurityCubit.defaultStoreSecretOnDeviceEnabled
       };
 
   bool get hasPendingChanges {
@@ -147,6 +146,11 @@ class RepoSecurityState {
 
 class RepoSecurityCubit extends Cubit<RepoSecurityState>
     with CubitActions, AppLogger {
+  // The default for whether the secret is going to be stored on the device
+  // when the user wants to secure their repo using a password but hasn't yet
+  // interacted with the `labelRememberPassword` toggle.
+  static final bool defaultStoreSecretOnDeviceEnabled = false;
+
   RepoSecurityCubit({
     required LocalSecretMode oldLocalSecretMode,
     LocalSecret? oldLocalSecret,
