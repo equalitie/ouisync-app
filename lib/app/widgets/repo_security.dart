@@ -101,7 +101,7 @@ class RepoSecurity extends StatelessWidget {
     RepoSecurityState state,
     TextStyle warningStyle,
   ) {
-    final visible = state.origin == SecretKeyOrigin.manual;
+    final visible = !state.secretWillBeStored;
     return _buildWarning(
       visible,
       S.current.messageRememberSavePasswordAlert,
