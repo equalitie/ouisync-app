@@ -219,7 +219,7 @@ class RepoCreation extends StatelessWidget {
       case RepoCreationFailure(location: final location, error: final error):
         await Dialogs.simpleAlertDialog(
           context: context,
-          title: S.current.messsageFailedCreateRepository(location.path),
+          title: S.current.messageFailedCreateRepository(location.path),
           message: error,
         );
     }

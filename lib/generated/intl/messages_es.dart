@@ -800,8 +800,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Acceso total. Tu par puede leer y modificar"),
         "messageWritingFileCanceled": m26,
         "messageWritingFileError": m27,
-        "messsageFailedAddRepository": m28,
-        "messsageFailedCreateRepository": m29,
+        "messageFailedAddRepository": m28,
+        "messageFailedCreateRepository": m29,
         "popupMenuItemChangePassword":
             MessageLookupByLibrary.simpleMessage("Cambiar la contraseña"),
         "popupMenuItemCopyPassword":

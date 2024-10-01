@@ -24,7 +24,7 @@ enum EntryItem: Hashable, Equatable, CustomDebugStringConvertible {
 
     func id() -> EntryIdentifier {
         switch self {
-        case .file(let file): return file.fileIdentifer().entry()
+        case .file(let file): return file.fileIdentifier().entry()
         case .directory(let dir): return dir.directoryIdentifier().entry()
         }
     }
@@ -54,7 +54,7 @@ class FileItem: NSObject, NSFileProviderItem {
         try await file.exists()
     }
 
-    func fileIdentifer() -> FileIdentifier {
+    func fileIdentifier() -> FileIdentifier {
         FileIdentifier(file.path, repoName)
     }
 

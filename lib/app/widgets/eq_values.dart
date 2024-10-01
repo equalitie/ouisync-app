@@ -68,7 +68,7 @@ class EqValues extends StatelessWidget {
                 fontSize: subtitleFontSize),
             TextSpan(text: '${S.current.messageEqValuesP10}\n\n'),
             Fields.boldTextSpan(
-                '· ${S.current.titleFreedomExpresionAccessInfo}\n\n',
+                '· ${S.current.titleFreedomExpressionAccessInfo}\n\n',
                 fontSize: subtitleFontSize),
             TextSpan(text: '${S.current.messageEqValuesP11}.\n\n'),
             Fields.boldTextSpan('· ${S.current.titleJustLegalSociety}\n\n',

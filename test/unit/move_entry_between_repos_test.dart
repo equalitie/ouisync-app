@@ -175,7 +175,7 @@ void main() {
       expect(folder1Contents, dirEntryComparator(expectedFile1));
     }
 
-    // Move folder woth one file to other repo
+    // Move folder worth one file to other repo
     {
       final result = await originRepoCubit.moveEntryToRepo(
         destinationRepoCubit: otherRepoCubit,
