@@ -11,7 +11,7 @@ import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 import '../generated/l10n.dart';
 import 'cubits/cubits.dart'
-    show ChangeLocaleCubit, MountCubit, PowerControl, ReposCubit;
+    show LocaleCubit, MountCubit, PowerControl, ReposCubit;
 import 'pages/pages.dart';
 import 'session.dart';
 import 'utils/mounter.dart';
@@ -37,18 +37,17 @@ Future<Widget> initOuiSyncApp(List<String> args) async {
 
   final languageCode = settings.getLanguageLocale();
 
-  final locale = languageCode == null
-      ? ChangeLocaleCubit.systemLocale
-      : Locale(languageCode);
+  final locale =
+      languageCode == null ? LocaleCubit.systemLocale : Locale(languageCode);
 
-  final changeLocaleCubit = ChangeLocaleCubit(
+  final localeCubit = LocaleCubit(
     settings: settings,
     defaultLocale: locale,
   );
 
-  return BlocProvider<ChangeLocaleCubit>(
-    create: (context) => changeLocaleCubit,
-    child: BlocBuilder<ChangeLocaleCubit, Locale>(
+  return BlocProvider<LocaleCubit>(
+    create: (context) => localeCubit,
+    child: BlocBuilder<LocaleCubit, Locale>(
       builder: (context, localeState) => MaterialApp(
         debugShowCheckedModeBanner: false,
         theme: _setupAppThemeData(),
@@ -65,7 +64,7 @@ Future<Widget> initOuiSyncApp(List<String> args) async {
           windowManager: windowManager,
           settings: settings,
           packageInfo: packageInfo,
-          changeLocaleCubit: changeLocaleCubit,
+          localeCubit: localeCubit,
         ),
       ),
     ),
@@ -78,7 +77,7 @@ class OuisyncApp extends StatefulWidget {
     required this.session,
     required this.settings,
     required this.packageInfo,
-    required this.changeLocaleCubit,
+    required this.localeCubit,
     super.key,
   }) : nativeChannels = NativeChannels(session);
 
@@ -87,7 +86,7 @@ class OuisyncApp extends StatefulWidget {
   final NativeChannels nativeChannels;
   final Settings settings;
   final PackageInfo packageInfo;
-  final ChangeLocaleCubit changeLocaleCubit;
+  final LocaleCubit localeCubit;
 
   @override
   State<OuisyncApp> createState() => _OuisyncAppState();
@@ -136,7 +135,7 @@ class _OuisyncAppState extends State<OuisyncApp> with AppLogger {
         child: MediaReceiver(
           controller: receivedMediaController,
           child: MainPage(
-            changeLocaleCubit: widget.changeLocaleCubit,
+            localeCubit: widget.localeCubit,
             mountCubit: mountCubit,
             nativeChannels: widget.nativeChannels,
             packageInfo: widget.packageInfo,
@@ -193,7 +192,7 @@ class _OuisyncAppState extends State<OuisyncApp> with AppLogger {
           if (result == null) return;
 
           if (result is Locale) {
-            await widget.changeLocaleCubit.changeLocale(result);
+            await widget.localeCubit.changeLocale(result);
           }
         });
       }

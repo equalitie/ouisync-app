@@ -1,4 +1,4 @@
-export 'change_locale.dart';
+export 'locale.dart';
 export 'connectivity_info.dart';
 export 'entry_bottom_sheet.dart';
 export 'file_progress.dart';

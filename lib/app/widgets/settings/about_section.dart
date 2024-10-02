@@ -24,7 +24,7 @@ import 'settings_tile.dart';
 class AboutSection extends SettingsSection with AppLogger {
   AboutSection(
     this.session, {
-    required this.changeLocaleCubit,
+    required this.localeCubit,
     required this.powerControl,
     required this.reposCubit,
     required this.connectivityInfo,
@@ -38,7 +38,7 @@ class AboutSection extends SettingsSection with AppLogger {
         );
 
   final Session session;
-  final ChangeLocaleCubit changeLocaleCubit;
+  final LocaleCubit localeCubit;
   final PowerControl powerControl;
   final ReposCubit reposCubit;
   final ConnectivityInfo connectivityInfo;
@@ -53,9 +53,9 @@ class AboutSection extends SettingsSection with AppLogger {
   List<Widget> buildTiles(BuildContext context) {
     bodyStyle = context.theme.appTextStyle.bodyMedium;
 
-    final currentLocale = changeLocaleCubit.currentLocale;
+    final currentLocale = localeCubit.currentLocale;
     final currentLanguage = StringBuffer(currentLocale.defaultDisplayLanguage);
-    if (currentLocale == ChangeLocaleCubit.systemLocale)
+    if (currentLocale == LocaleCubit.systemLocale)
       currentLanguage.write(' (device\'s language)');
 
     return [
@@ -166,7 +166,7 @@ class AboutSection extends SettingsSection with AppLogger {
     if (locale == null) return;
 
     await settings.setLanguageLocale(locale.languageCode);
-    await changeLocaleCubit.changeLocale(locale);
+    await localeCubit.changeLocale(locale);
   }
 
   void _navigateToPeers(BuildContext context) => Navigator.push(

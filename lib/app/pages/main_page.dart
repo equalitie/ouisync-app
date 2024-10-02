@@ -46,7 +46,7 @@ typedef PreviewFileCallback = Future<void> Function(
 
 class MainPage extends StatefulWidget {
   const MainPage({
-    required this.changeLocaleCubit,
+    required this.localeCubit,
     required this.mountCubit,
     required this.nativeChannels,
     required this.packageInfo,
@@ -67,7 +67,7 @@ class MainPage extends StatefulWidget {
   final Stream<List<SharedMediaFile>> receivedMedia;
   final ReposCubit reposCubit;
   final MountCubit mountCubit;
-  final ChangeLocaleCubit changeLocaleCubit;
+  final LocaleCubit localeCubit;
 
   @override
   State<StatefulWidget> createState() => _MainPageState();
@@ -1205,7 +1205,7 @@ class _MainPageState extends State<MainPage>
         MaterialPageRoute(
           builder: (context) => SettingsPage(
             session: widget.session,
-            changeLocaleCubit: widget.changeLocaleCubit,
+            localeCubit: widget.localeCubit,
             mount: widget.mountCubit,
             panicCounter: panicCounter,
             powerControl: widget.powerControl,

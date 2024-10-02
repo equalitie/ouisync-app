@@ -7,10 +7,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../utils/settings/settings.dart';
 import 'utils.dart';
 
-class ChangeLocaleCubit extends Cubit<Locale> with CubitActions {
+class LocaleCubit extends Cubit<Locale> with CubitActions {
   final Settings _settings;
 
-  ChangeLocaleCubit({required defaultLocale, required Settings settings})
+  LocaleCubit({required defaultLocale, required Settings settings})
       : _settings = settings,
         super(defaultLocale);
 
