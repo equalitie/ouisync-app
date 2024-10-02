@@ -46,10 +46,12 @@ class SwitchSettingsTile extends StatelessWidget {
     required this.onChanged,
     required this.title,
     required this.leading,
+    this.subtitle = null,
   });
 
   final bool value;
   final Widget title;
+  final Widget? subtitle;
   final Widget leading;
   final ValueChanged<bool>? onChanged;
 
@@ -63,12 +65,14 @@ class SwitchSettingsTile extends StatelessWidget {
         title: title,
         leading: leading,
         onToggle: onChanged,
+        description: subtitle,
       );
 
   Widget _buildDesktop(BuildContext context) => SwitchListTile.adaptive(
         value: value,
         onChanged: onChanged,
         title: title,
+        subtitle: subtitle,
         secondary: leading,
       );
 }

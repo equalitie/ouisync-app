@@ -118,7 +118,8 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     // repositories.
     final setDefault = switch (entry?.cubit?.state.authMode) {
       AuthModeKeyStoredOnDevice() || AuthModePasswordStoredOnDevice() => true,
-      AuthModeBlindOrManual() || null => false,
+      AuthModeBlindOrManual() => false,
+      null => true,
     };
 
     if (setDefault) {
@@ -134,8 +135,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
   }
 
   void showRepoList() {
-    _currentRepo = null;
-    changed();
+    setCurrent(null);
   }
 
   Future<void> _load(RepoLocation location) async {
@@ -287,7 +287,6 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
 
     final cubit = await RepoCubit.create(
       nativeChannels: _nativeChannels,
-      settings: _settings,
       navigation: navigation,
       bottomSheet: bottomSheet,
       repo: repo,
@@ -479,7 +478,6 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
 
       final cubit = await RepoCubit.create(
         nativeChannels: _nativeChannels,
-        settings: _settings,
         navigation: navigation,
         bottomSheet: bottomSheet,
         repo: repo,
@@ -564,7 +562,6 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
 
       final cubit = await RepoCubit.create(
         nativeChannels: _nativeChannels,
-        settings: _settings,
         navigation: navigation,
         bottomSheet: bottomSheet,
         repo: repo,

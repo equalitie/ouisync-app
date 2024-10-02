@@ -12,6 +12,7 @@ import '../../models/models.dart';
 import '../files.dart';
 import '../master_key.dart';
 import '../utils.dart';
+import 'atomic_shared_prefs_settings_key.dart';
 import 'v0/v0.dart' as v0;
 
 class DatabaseId extends Equatable {
@@ -99,7 +100,7 @@ class SettingsRoot {
     int inputVersion = data[_versionKey];
 
     if (inputVersion != version) {
-      throw "Invalid settings version ($inputVersion)";
+      throw InvalidSettingsVersion(inputVersion);
     }
 
     final repos = {
@@ -124,8 +125,6 @@ class SettingsRoot {
 }
 
 class Settings with AppLogger {
-  static const String settingsKey = "settings";
-
   final MasterKey masterKey;
 
   final SettingsRoot _root;
@@ -136,7 +135,8 @@ class Settings with AppLogger {
   Settings._(this._root, this._prefs, this.masterKey);
 
   Future<void> _storeRoot() async {
-    await _prefs.setString(settingsKey, json.encode(_root.toJson()));
+    await _prefs.setString(
+        atomicSharedPrefsSettingsKey, json.encode(_root.toJson()));
   }
 
   static Future<Settings> init(
@@ -144,7 +144,7 @@ class Settings with AppLogger {
   ) async {
     final prefs = await SharedPreferences.getInstance();
 
-    final json = prefs.getString(settingsKey);
+    final json = prefs.getString(atomicSharedPrefsSettingsKey);
     final root = SettingsRoot.fromJson(json);
 
     return Settings._(root, prefs, masterKey);
@@ -156,8 +156,10 @@ class Settings with AppLogger {
   }
 
   Future<void> _migrateValues(Session session) async {
-    // Check if already fully migrated.
-    if (_prefs.containsKey(settingsKey) && _prefs.getKeys().length == 1) {
+    // Check if already fully migrated. The `atomicSharedPrefsSettingsKey` was introduced in V1
+    // where it's the only key.
+    if (_prefs.containsKey(atomicSharedPrefsSettingsKey) &&
+        _prefs.getKeys().length == 1) {
       return;
     }
 
@@ -242,7 +244,8 @@ class Settings with AppLogger {
     // to do this **after** we've stored the root and version number of this
     // settings.
     for (final key in _prefs.getKeys()) {
-      if (key == settingsKey || key == v0.Settings.knownRepositoriesKey) {
+      if (key == atomicSharedPrefsSettingsKey ||
+          key == v0.Settings.knownRepositoriesKey) {
         continue;
       }
 
@@ -459,4 +462,49 @@ class Settings with AppLogger {
     }
     print("=======================================");
   }
+
+  //------------------------------------------------------------------
+
+  // Only for use in migrations!
+  MigrationContext getMigrationContext() => MigrationContext(
+        masterKey: masterKey,
+        acceptedEqualitieValues: _root.acceptedEqualitieValues,
+        showOnboarding: _root.showOnboarding,
+        highestSeenProtocolNumber: _root.highestSeenProtocolNumber,
+        defaultRepo: _root.defaultRepo?.clone(),
+        repos: Map.from(_root.repos),
+        defaultRepositoriesDirVersion: _root.defaultRepositoriesDirVersion,
+        sharedPreferences: _prefs,
+      );
+}
+
+class InvalidSettingsVersion {
+  int statedVersion;
+  InvalidSettingsVersion(this.statedVersion);
+  @override
+  String toString() => "Invalid settings version ($statedVersion)";
+}
+
+class MigrationContext {
+  final MasterKey masterKey;
+  final bool acceptedEqualitieValues;
+  final bool showOnboarding;
+  // Intentionally not including this one as it's not used in V2.
+  //final bool enableSyncOnMobileInternet;
+  final int? highestSeenProtocolNumber;
+  final RepoLocation? defaultRepo;
+  final Map<DatabaseId, RepoLocation> repos;
+  final int defaultRepositoriesDirVersion;
+  final SharedPreferences sharedPreferences;
+
+  MigrationContext({
+    required this.masterKey,
+    required this.acceptedEqualitieValues,
+    required this.showOnboarding,
+    required this.highestSeenProtocolNumber,
+    required this.defaultRepo,
+    required this.repos,
+    required this.defaultRepositoriesDirVersion,
+    required this.sharedPreferences,
+  });
 }

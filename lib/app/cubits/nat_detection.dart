@@ -7,7 +7,7 @@ import 'package:ouisync/ouisync.dart';
 import '../utils/log.dart';
 import 'utils.dart';
 
-class NatDetection extends Cubit<NatBehavior> with AppLogger {
+class NatDetection extends Cubit<NatBehavior> with CubitActions, AppLogger {
   final Session session;
   StreamSubscription<List<ConnectivityResult>>? _subscription;
 

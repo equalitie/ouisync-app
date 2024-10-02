@@ -29,7 +29,7 @@ class MountStateError extends MountState {
   const MountStateError(this.code, this.message);
 }
 
-class MountCubit extends Cubit<MountState> with AppLogger {
+class MountCubit extends Cubit<MountState> with CubitActions, AppLogger {
   final Mounter mounter;
 
   MountCubit(this.mounter) : super(MountStateDisabled());

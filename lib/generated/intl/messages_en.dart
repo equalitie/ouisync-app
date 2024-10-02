@@ -625,7 +625,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageReadReplicaExplanation": MessageLookupByLibrary.simpleMessage(
             "Cannot be modified, just access the contents"),
         "messageRememberSavePasswordAlert": MessageLookupByLibrary.simpleMessage(
-            "Remember to securely save the password; if you forget it, there is no way to retrieve it."),
+            "Remember to securely store the password. There is no way to retrieve it if lost or forgotten."),
         "messageRemoveBiometricValidation":
             MessageLookupByLibrary.simpleMessage("Remove biometric validation"),
         "messageRemoveBiometrics":
@@ -719,7 +719,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Sync while using mobile data"),
         "messageSyncingIsDisabledOnMobileInternet":
             MessageLookupByLibrary.simpleMessage(
-                "Syncing is disabled while using mobile internet"),
+                "Syncing over internet is disabled while using mobile data"),
         "messageTapForTermsPrivacy": MessageLookupByLibrary.simpleMessage(
             "Tap here to read our Terms of Use and Privacy Notice"),
         "messageTapForValues":

@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync/ouisync.dart';
 import 'utils.dart';
 
-class UserProvidedPeersCubit extends Cubit<List<String>> {
+class UserProvidedPeersCubit extends Cubit<List<String>> with CubitActions {
   final Session _session;
 
   UserProvidedPeersCubit(Session session)
