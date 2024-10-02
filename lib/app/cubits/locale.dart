@@ -10,16 +10,26 @@ import 'utils.dart';
 class LocaleCubit extends Cubit<Locale> with CubitActions {
   final Settings _settings;
 
-  LocaleCubit({required defaultLocale, required Settings settings})
+  LocaleCubit(Settings settings)
       : _settings = settings,
-        super(defaultLocale);
+        super(_localeFromSettings(settings));
 
   Locale get currentLocale => state;
 
   static Locale get systemLocale => PlatformDispatcher.instance.locale;
 
   Future<void> changeLocale(Locale locale) async {
-    await _settings.setLanguageLocale(locale.languageCode);
+    // `systemLocale` is represented as `null` in Settings.
+    final l = locale == LocaleCubit.systemLocale ? null : locale;
+    await _settings.setLanguageLocale(l?.languageCode);
     emitUnlessClosed(locale);
   }
+}
+
+Locale _localeFromSettings(Settings settings) {
+  final languageCode = settings.getLanguageLocale();
+  if (languageCode != null) {
+    return Locale(languageCode);
+  }
+  return LocaleCubit.systemLocale;
 }

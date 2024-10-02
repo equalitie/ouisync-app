@@ -35,15 +35,7 @@ Future<Widget> initOuiSyncApp(List<String> args) async {
 
   final settings = await loadAndMigrateSettings(session);
 
-  final languageCode = settings.getLanguageLocale();
-
-  final locale =
-      languageCode == null ? LocaleCubit.systemLocale : Locale(languageCode);
-
-  final localeCubit = LocaleCubit(
-    settings: settings,
-    defaultLocale: locale,
-  );
+  final localeCubit = LocaleCubit(settings);
 
   return BlocProvider<LocaleCubit>(
     create: (context) => localeCubit,
