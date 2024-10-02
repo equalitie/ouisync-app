@@ -6,7 +6,7 @@ import 'package:ouisync_app/app/cubits/repos.dart';
 import 'package:ouisync_app/app/utils/share_token.dart';
 import 'utils.dart';
 
-class RepoImportCubit extends Cubit<ShareTokenResult?> {
+class RepoImportCubit extends Cubit<ShareTokenResult?> with CubitActions {
   RepoImportCubit({required this.reposCubit}) : super(null) {
     tokenController
         .addListener(() => unawaited(setToken(tokenController.text)));

@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:ouisync_app/app/models/auth_mode.dart';
 import 'package:ouisync_app/app/utils/utils.dart';
 import 'package:ouisync_app/app/utils/settings/v0/v0.dart' as v0;
+import 'package:ouisync_app/app/utils/settings/v1.dart' as v1;
 import 'package:ouisync_app/app/models/repo_location.dart';
 import 'package:ouisync_app/app/utils/master_key.dart';
 import 'package:ouisync/ouisync.dart' show Repository, Session, SessionKind;
@@ -12,7 +13,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 // Run with `flutter test test/settings_test.dart`.
 void main() {
-  test('settings migration', () async {
+  test('settings migration v0 to v1', () async {
     SharedPreferences.setMockInitialValues({});
     FlutterSecureStorage.setMockInitialValues({});
 
@@ -69,6 +70,70 @@ void main() {
 
     expect(
       s1.repos,
+      unorderedEquals([
+        RepoLocation.fromDbPath(fooPath),
+        RepoLocation.fromDbPath(barPath),
+      ]),
+    );
+  });
+
+  test('settings migration v1 to v2', () async {
+    SharedPreferences.setMockInitialValues({});
+    FlutterSecureStorage.setMockInitialValues({});
+
+    final prefs = await SharedPreferences.getInstance();
+    expect(prefs.getKeys().isEmpty, true);
+
+    final baseDir = await getApplicationSupportDirectory();
+
+    final fooPath = join(baseDir.path, 'foo.db');
+    final barPath = join(baseDir.path, 'bar.db');
+
+    final masterKey = MasterKey.random();
+    final s1 = await v1.Settings.init(masterKey);
+
+    final repoLocation = RepoLocation.fromDbPath(fooPath);
+
+    await s1.setEqualitieValues(true);
+    await s1.setShowOnboarding(false);
+    await s1.setSyncOnMobileEnabled(true);
+    await s1.setHighestSeenProtocolNumber(1);
+    await s1.setRepoLocation(DatabaseId('123'), repoLocation);
+    await s1.setDefaultRepo(repoLocation);
+
+    final session = Session.create(
+      configPath: join(baseDir.path, 'config'),
+      kind: SessionKind.unique,
+    );
+
+    await Repository.create(
+      session,
+      store: fooPath,
+      readSecret: null,
+      writeSecret: null,
+    );
+
+    final s2 = await loadAndMigrateSettings(session);
+
+    expect(s2.getSyncOnMobileEnabled(), false);
+
+    await prefs.reload();
+
+    // In version 1 we only expect the "settings" value to be present.
+    expect(prefs.getKeys().length, 1);
+    expect(s2.repos, unorderedEquals([RepoLocation.fromDbPath(fooPath)]));
+
+    // The auth mode should have been transfered to the repo metadata
+    final repo = await Repository.open(session, store: fooPath);
+    expect(await repo.getAuthMode(), isA<AuthModeBlindOrManual>());
+
+    await s2.setRepoLocation(
+      DatabaseId("234"),
+      RepoLocation.fromDbPath(barPath),
+    );
+
+    expect(
+      s2.repos,
       unorderedEquals([
         RepoLocation.fromDbPath(fooPath),
         RepoLocation.fromDbPath(barPath),

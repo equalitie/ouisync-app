@@ -8,7 +8,6 @@ import 'package:ouisync_app/app/models/repo_location.dart';
 import 'package:ouisync_app/app/utils/cache_servers.dart';
 import 'package:ouisync_app/app/utils/master_key.dart';
 import 'package:ouisync_app/app/utils/mounter.dart';
-import 'package:ouisync_app/app/utils/settings/settings.dart';
 import 'package:ouisync/native_channels.dart';
 import 'package:ouisync/ouisync.dart';
 import 'package:path/path.dart' as p;
@@ -26,7 +25,6 @@ void main() {
   late RepoCubit otherRepoCubit;
 
   late NativeChannels nativeChannels;
-  late Settings settings;
   late NavigationCubit navigationCubit;
   late EntryBottomSheetCubit bottomSheetCubit;
 
@@ -59,7 +57,6 @@ void main() {
     FlutterSecureStorage.setMockInitialValues({});
     SharedPreferences.setMockInitialValues({});
     final key = MasterKey.random();
-    settings = await Settings.init(key);
     navigationCubit = NavigationCubit();
     bottomSheetCubit = EntryBottomSheetCubit();
 
@@ -67,7 +64,6 @@ void main() {
 
     originRepoCubit = await RepoCubit.create(
       nativeChannels: nativeChannels,
-      settings: settings,
       repo: originRepo,
       location: locationOrigin,
       navigation: navigationCubit,
@@ -78,7 +74,6 @@ void main() {
 
     otherRepoCubit = await RepoCubit.create(
       nativeChannels: nativeChannels,
-      settings: settings,
       repo: otherRepo,
       location: locationOther,
       navigation: navigationCubit,

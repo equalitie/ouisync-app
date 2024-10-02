@@ -1260,10 +1260,10 @@ class S {
     );
   }
 
-  /// `Syncing is disabled while using mobile internet`
+  /// `Syncing over internet is disabled while using mobile data`
   String get messageSyncingIsDisabledOnMobileInternet {
     return Intl.message(
-      'Syncing is disabled while using mobile internet',
+      'Syncing over internet is disabled while using mobile data',
       name: 'messageSyncingIsDisabledOnMobileInternet',
       desc: '',
       args: [],
@@ -2590,10 +2590,10 @@ class S {
     );
   }
 
-  /// `Remember to securely save the password; if you forget it, there is no way to retrieve it.`
+  /// `Remember to securely store the password. There is no way to retrieve it if lost or forgotten.`
   String get messageRememberSavePasswordAlert {
     return Intl.message(
-      'Remember to securely save the password; if you forget it, there is no way to retrieve it.',
+      'Remember to securely store the password. There is no way to retrieve it if lost or forgotten.',
       name: 'messageRememberSavePasswordAlert',
       desc: '',
       args: [],

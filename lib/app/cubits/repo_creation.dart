@@ -129,7 +129,8 @@ class RepoCreationFailure extends RepoCreationSubstate {
   final String error;
 }
 
-class RepoCreationCubit extends Cubit<RepoCreationState> with AppLogger {
+class RepoCreationCubit extends Cubit<RepoCreationState>
+    with CubitActions, AppLogger {
   RepoCreationCubit({required this.reposCubit}) : super(RepoCreationState()) {
     nameController.addListener(_onNameChangedUnawaited);
 
