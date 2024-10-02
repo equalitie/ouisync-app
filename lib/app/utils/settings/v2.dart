@@ -28,6 +28,9 @@ class SettingsRoot {
   static const _reposKey = 'repos';
   static const _defaultRepositoriesDirVersionKey =
       'defaultRepositoriesDirVersion';
+  // On the first run, we ask the user to pick a language for the app, from the
+  // list of supported languages. English (en) is the default locale.
+  static const _languageLocaleKey = 'languageLocale';
 
   // Did the user accept the eQ values?
   bool acceptedEqualitieValues = false;
@@ -44,6 +47,8 @@ class SettingsRoot {
   // Whenever we change the default repos path, increment this value and implement a migration.
   int defaultRepositoriesDirVersion = 1;
 
+  String languageLocale = '';
+
   SettingsRoot._();
 
   SettingsRoot({
@@ -55,6 +60,7 @@ class SettingsRoot {
     required this.defaultRepo,
     required this.repos,
     required this.defaultRepositoriesDirVersion,
+    required this.languageLocale,
   });
 
   Map<String, dynamic> toJson() {
@@ -70,6 +76,7 @@ class SettingsRoot {
         for (var kv in repos.entries) kv.key.toString(): kv.value.path
       },
       _defaultRepositoriesDirVersionKey: defaultRepositoriesDirVersion,
+      _languageLocaleKey: languageLocale,
     };
     return r;
   }
@@ -104,6 +111,7 @@ class SettingsRoot {
       repos: repos,
       defaultRepositoriesDirVersion:
           data[_defaultRepositoriesDirVersionKey] ?? 0,
+      languageLocale: data[_languageLocaleKey] ?? 'en',
     );
   }
 }
@@ -157,6 +165,7 @@ class Settings with AppLogger {
       defaultRepo: v1.defaultRepo,
       repos: v1.repos,
       defaultRepositoriesDirVersion: v1.defaultRepositoriesDirVersion,
+      languageLocale: 'en',
     );
 
     final settingsV2 = Settings._(root, v1.sharedPreferences, v1.masterKey);
@@ -269,6 +278,15 @@ class Settings with AppLogger {
         (io.Platform.isAndroid ? await getExternalStorageDirectory() : null) ??
             await getApplicationSupportDirectory();
     return io.Directory(join(baseDir.path, Constants.folderRepositoriesName));
+  }
+
+  //------------------------------------------------------------------
+
+  String getLanguageLocal() => _root.languageLocale;
+
+  Future<void> setLanguageLocale(String value) async {
+    _root.languageLocale = value;
+    await _storeRoot();
   }
 
   //------------------------------------------------------------------
