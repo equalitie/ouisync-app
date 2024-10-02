@@ -53,14 +53,10 @@ class AboutSection extends SettingsSection with AppLogger {
   List<Widget> buildTiles(BuildContext context) {
     bodyStyle = context.theme.appTextStyle.bodyMedium;
 
-    final appLanguage = reposCubit.settings.getLanguageLocal();
-    final localeName = Locale.fromSubtags(languageCode: appLanguage);
-
-    final deviceLocaleName = io.Platform.localeName;
-    final underscoreIndex = deviceLocaleName.indexOf('_');
-    final baseLanguageCode = underscoreIndex >= 0 ? deviceLocaleName.substring(0, underscoreIndex) : deviceLocaleName;
-    final currentLanguage = StringBuffer(localeName.defaultDisplayLanguage);
-    if (appLanguage == baseLanguageCode) currentLanguage.write(' (device\'s language)');
+    final currentLocale = changeLocaleCubit.currentLocale;
+    final currentLanguage = StringBuffer(currentLocale.defaultDisplayLanguage);
+    if (currentLocale == ChangeLocaleCubit.systemLocale)
+      currentLanguage.write(' (device\'s language)');
 
     return [
       if (PlatformValues.isDesktopDevice)
@@ -160,9 +156,11 @@ class AboutSection extends SettingsSection with AppLogger {
     BuildContext context,
     Settings settings,
   ) async {
-    final currentLanguage = settings.getLanguageLocal();
+    final currentLanguage = settings.getLanguageLocale();
     final locale = await Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => LanguagePicker(languageCodeCurrent: currentLanguage,canPop: true)),
+      MaterialPageRoute(
+          builder: (_) => LanguagePicker(
+              languageCodeCurrent: currentLanguage, canPop: true)),
     );
 
     if (locale == null) return;

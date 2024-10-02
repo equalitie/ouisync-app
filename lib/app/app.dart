@@ -33,13 +33,14 @@ Future<Widget> initOuiSyncApp(List<String> args) async {
     logger: Loggy<AppLogger>('foreground'),
   );
 
-  // TODO: Maybe we don't need to await for this, instead just get the future
-  // and let whoever needs seetings to await for it.
   final settings = await loadAndMigrateSettings(session);
 
-  final languageCode = settings.getLanguageLocal();
-  final locale =
-      languageCode.isEmpty ? const Locale('en') : Locale(languageCode);
+  final languageCode = settings.getLanguageLocale();
+
+  final locale = languageCode == null
+      ? ChangeLocaleCubit.systemLocale
+      : Locale(languageCode);
+
   final changeLocaleCubit = ChangeLocaleCubit(
     settings: settings,
     defaultLocale: locale,
@@ -99,7 +100,7 @@ class _OuisyncAppState extends State<OuisyncApp> with AppLogger {
   late final ReposCubit reposCubit;
 
   bool get _onboarded =>
-      widget.settings.getLanguageLocal().isNotEmpty &&
+      widget.settings.getLanguageLocale() != null &&
       !widget.settings.getShowOnboarding() &&
       widget.settings.getEqualitieValues();
 
@@ -161,8 +162,9 @@ class _OuisyncAppState extends State<OuisyncApp> with AppLogger {
     if (!_onboarded) {
       final onboardingPages = <Widget>[];
 
-      if (widget.settings.getLanguageLocal().isEmpty) {
-        onboardingPages.add(LanguagePicker(languageCodeCurrent: null, canPop: false));
+      if (widget.settings.getLanguageLocale() == null) {
+        onboardingPages
+            .add(LanguagePicker(languageCodeCurrent: null, canPop: false));
       }
 
       if (widget.settings.getShowOnboarding()) {

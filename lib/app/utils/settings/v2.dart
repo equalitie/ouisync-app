@@ -47,7 +47,8 @@ class SettingsRoot {
   // Whenever we change the default repos path, increment this value and implement a migration.
   int defaultRepositoriesDirVersion = 1;
 
-  String languageLocale = '';
+  // If `null`, the system's default should be used.
+  String? languageLocale;
 
   SettingsRoot._();
 
@@ -111,7 +112,7 @@ class SettingsRoot {
       repos: repos,
       defaultRepositoriesDirVersion:
           data[_defaultRepositoriesDirVersionKey] ?? 0,
-      languageLocale: data[_languageLocaleKey] ?? 'en',
+      languageLocale: data[_languageLocaleKey],
     );
   }
 }
@@ -165,7 +166,7 @@ class Settings with AppLogger {
       defaultRepo: v1.defaultRepo,
       repos: v1.repos,
       defaultRepositoriesDirVersion: v1.defaultRepositoriesDirVersion,
-      languageLocale: 'en',
+      languageLocale: null,
     );
 
     final settingsV2 = Settings._(root, v1.sharedPreferences, v1.masterKey);
@@ -282,9 +283,9 @@ class Settings with AppLogger {
 
   //------------------------------------------------------------------
 
-  String getLanguageLocal() => _root.languageLocale;
+  String? getLanguageLocale() => _root.languageLocale;
 
-  Future<void> setLanguageLocale(String value) async {
+  Future<void> setLanguageLocale(String? value) async {
     _root.languageLocale = value;
     await _storeRoot();
   }
