@@ -73,7 +73,7 @@ class AboutSection extends SettingsSection with AppLogger {
           ),
         ),
       NavigationTile(
-          title: Text('App language', style: bodyStyle),
+          title: Text(S.current.titleApplicationLanguage, style: bodyStyle),
           leading: Icon(Icons.language_rounded),
           value: Text(currentLanguage.toString(),
               style: context.theme.appTextStyle.bodySmall),

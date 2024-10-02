@@ -692,6 +692,9 @@
   "actionInstallDokan":"Install Dokan",
   "actionUpdateDokan":"Update Dokan",
   "actionLocateRepo":"Locate repository",
+  "titleApplicationLanguage": "App language",
+  "languageOfTheDevice": "device's language",
+  "languageIsNotAvailable": "not available",
   "messageFailedToMount": "Accessing repositories via File Explorer is not available: {reason}",
   "@messageFailedToMount": {
     "placeholders": {

@@ -256,6 +256,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Type password: "),
         "labelUseExternalStorage":
             MessageLookupByLibrary.simpleMessage("Use external storage"),
+        "languageIsNotAvailable":
+            MessageLookupByLibrary.simpleMessage("not available"),
+        "languageOfTheDevice":
+            MessageLookupByLibrary.simpleMessage("device\'s language"),
         "menuItemAbout": MessageLookupByLibrary.simpleMessage("About"),
         "menuItemLogs": MessageLookupByLibrary.simpleMessage("Logs"),
         "menuItemNetwork": MessageLookupByLibrary.simpleMessage("Network"),
@@ -804,6 +808,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "titleAddRepository":
             MessageLookupByLibrary.simpleMessage("Import a repository"),
         "titleAppTitle": MessageLookupByLibrary.simpleMessage("Ouisync"),
+        "titleApplicationLanguage":
+            MessageLookupByLibrary.simpleMessage("App language"),
         "titleBackgroundAndroidPermissionsTitle":
             MessageLookupByLibrary.simpleMessage("Permissions needed"),
         "titleChangePassword":

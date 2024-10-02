@@ -28,8 +28,6 @@ class SettingsRoot {
   static const _reposKey = 'repos';
   static const _defaultRepositoriesDirVersionKey =
       'defaultRepositoriesDirVersion';
-  // On the first run, we ask the user to pick a language for the app, from the
-  // list of supported languages. English (en) is the default locale.
   static const _languageLocaleKey = 'languageLocale';
 
   // Did the user accept the eQ values?

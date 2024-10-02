@@ -4870,6 +4870,36 @@ class S {
     );
   }
 
+  /// `App language`
+  String get titleApplicationLanguage {
+    return Intl.message(
+      'App language',
+      name: 'titleApplicationLanguage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `device's language`
+  String get languageOfTheDevice {
+    return Intl.message(
+      'device\'s language',
+      name: 'languageOfTheDevice',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `not available`
+  String get languageIsNotAvailable {
+    return Intl.message(
+      'not available',
+      name: 'languageIsNotAvailable',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Accessing repositories via File Explorer is not available: {reason}`
   String messageFailedToMount(Object reason) {
     return Intl.message(
