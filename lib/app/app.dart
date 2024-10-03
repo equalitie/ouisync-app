@@ -11,7 +11,7 @@ import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 import '../generated/l10n.dart';
 import 'cubits/cubits.dart'
-    show LocaleCubit, MountCubit, PowerControl, ReposCubit;
+    show LocaleCubit, LocaleState, MountCubit, PowerControl, ReposCubit;
 import 'pages/pages.dart';
 import 'session.dart';
 import 'utils/mounter.dart';
@@ -39,11 +39,11 @@ Future<Widget> initOuiSyncApp(List<String> args) async {
 
   return BlocProvider<LocaleCubit>(
     create: (context) => localeCubit,
-    child: BlocBuilder<LocaleCubit, Locale>(
+    child: BlocBuilder<LocaleCubit, LocaleState>(
       builder: (context, localeState) => MaterialApp(
         debugShowCheckedModeBanner: false,
         theme: _setupAppThemeData(),
-        locale: localeState,
+        locale: localeState.currentLocale,
         localizationsDelegates: const [
           S.delegate,
           GlobalMaterialLocalizations.delegate,
@@ -153,10 +153,8 @@ class _OuisyncAppState extends State<OuisyncApp> with AppLogger {
     if (!_onboarded) {
       final onboardingPages = <Widget>[];
 
-      if (widget.settings.getLanguageLocale() == null) {
-        onboardingPages
-            .add(LanguagePicker(languageCodeCurrent: null, canPop: false));
-      }
+      onboardingPages
+          .add(LanguagePicker(localeCubit: widget.localeCubit, canPop: false));
 
       if (widget.settings.getShowOnboarding()) {
         onboardingPages.add(OnboardingPage(settings: widget.settings));

@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/models.dart';
 import '../master_key.dart';
 import '../utils.dart';
+import '../option.dart';
 import '../locale.dart';
 import 'atomic_shared_prefs_settings_key.dart';
 import 'v1.dart' as v1;
@@ -77,7 +78,7 @@ class SettingsRoot {
         for (var kv in repos.entries) kv.key.toString(): kv.value.path
       },
       _defaultRepositoriesDirVersionKey: defaultRepositoriesDirVersion,
-      _languageLocaleKey: _andThen(languageLocale, serializeLocale),
+      _languageLocaleKey: Option.andThen(languageLocale, serializeLocale),
     };
     return r;
   }
@@ -309,11 +310,4 @@ class InvalidSettingsVersion {
   InvalidSettingsVersion(this.statedVersion);
   @override
   String toString() => "Invalid settings version ($statedVersion)";
-}
-
-To? _andThen<From, To>(From? a, To? Function(From) convert) {
-  if (a == null) {
-    return null;
-  }
-  return convert(a);
 }

@@ -55,8 +55,9 @@ class AboutSection extends SettingsSection with AppLogger {
 
     final currentLocale = localeCubit.currentLocale;
     final currentLanguage = StringBuffer(currentLocale.defaultDisplayLanguage);
-    if (currentLocale == LocaleCubit.systemLocale)
-      currentLanguage.write(' (device\'s language)');
+
+    if (currentLocale == localeCubit.deviceLocale)
+      currentLanguage.write(' (${S.current.languageOfTheDevice})');
 
     return [
       if (PlatformValues.isDesktopDevice)
@@ -156,11 +157,10 @@ class AboutSection extends SettingsSection with AppLogger {
     BuildContext context,
     Settings settings,
   ) async {
-    final currentLanguage = settings.getLanguageLocale();
     final locale = await Navigator.of(context).push(
       MaterialPageRoute(
-          builder: (_) => LanguagePicker(
-              languageCodeCurrent: currentLanguage, canPop: true)),
+          builder: (_) =>
+              LanguagePicker(localeCubit: localeCubit, canPop: true)),
     );
 
     if (locale == null) return;
