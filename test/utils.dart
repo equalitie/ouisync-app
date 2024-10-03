@@ -6,7 +6,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:ouisync_app/app/cubits/change_locale.dart';
+import 'package:ouisync_app/app/cubits/locale.dart';
 import 'package:ouisync_app/app/cubits/mount.dart';
 import 'package:ouisync_app/app/cubits/power_control.dart';
 import 'package:ouisync_app/app/cubits/repos.dart';
@@ -67,7 +67,7 @@ class TestDependencies {
     this.powerControl,
     this.reposCubit,
     this.mountCubit,
-    this.changeLocaleCubit,
+    this.localeCubit,
   );
 
   static Future<TestDependencies> create() async {
@@ -97,7 +97,7 @@ class TestDependencies {
     );
 
     final mountCubit = MountCubit(reposCubit.mounter);
-    final changeLocaleCubit = ChangeLocaleCubit(defaultLocale: Locale('en'), settings: settings);
+    final localeCubit = LocaleCubit(settings);
 
     return TestDependencies._(
       session,
@@ -106,12 +106,12 @@ class TestDependencies {
       powerControl,
       reposCubit,
       mountCubit,
-      changeLocaleCubit,
+      localeCubit,
     );
   }
 
   Future<void> dispose() async {
-    await changeLocaleCubit.close();
+    await localeCubit.close();
     await mountCubit.close();
     await reposCubit.close();
     await powerControl.close();
@@ -122,7 +122,7 @@ class TestDependencies {
     Stream<List<SharedMediaFile>>? receivedMedia,
   }) =>
       MainPage(
-        changeLocaleCubit: changeLocaleCubit,
+        localeCubit: localeCubit,
         mountCubit: mountCubit,
         nativeChannels: nativeChannels,
         packageInfo: fakePackageInfo,
@@ -140,7 +140,7 @@ class TestDependencies {
   final PowerControl powerControl;
   final ReposCubit reposCubit;
   final MountCubit mountCubit;
-  final ChangeLocaleCubit changeLocaleCubit;
+  final LocaleCubit localeCubit;
 }
 
 class _FakePathProviderPlatform extends PathProviderPlatform {
