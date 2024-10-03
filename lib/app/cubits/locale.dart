@@ -14,29 +14,41 @@ class LocaleState {
   // Both of these (if non null) must be in S.delegate.supportedLocales.
   final Locale currentLocale;
   final Option<Locale> deviceLocale;
+  // This is true when `currentLocale == deviceLocale` or when `deviceLocale`
+  // has changed through `_onSystemLocaleChanged` and but the new value was not
+  // in `S.delegate.supportedLocales`.
+  final bool currentIsDefault;
 
-  LocaleState({required this.currentLocale, required this.deviceLocale});
+  LocaleState(
+      {required this.currentLocale,
+      required this.deviceLocale,
+      required this.currentIsDefault});
 
-  LocaleState copyWith({Locale? currentLocale, Option<Locale>? deviceLocale}) =>
+  LocaleState copyWith(
+          {Locale? currentLocale,
+          Option<Locale>? deviceLocale,
+          bool? currentIsDefault}) =>
       LocaleState(
         currentLocale: currentLocale ?? this.currentLocale,
         deviceLocale: deviceLocale ?? this.deviceLocale,
+        currentIsDefault: currentIsDefault ?? this.currentIsDefault,
       );
 }
 
-class LocaleCubit extends Cubit<LocaleState> with CubitActions {
+class LocaleCubit extends Cubit<LocaleState> with CubitActions<LocaleState> {
+  static final _defaultLocale = Locale('en');
   final Settings _settings;
 
   factory LocaleCubit(Settings settings) {
-    final defaultLocale = Locale('en');
-    assert(S.delegate.supportedLocales.contains(defaultLocale));
+    assert(S.delegate.supportedLocales.contains(LocaleCubit._defaultLocale));
 
     final deviceLocale = _closestSupported(PlatformDispatcher.instance.locale);
 
     final settingsLocale =
         Option.andThen(settings.getLanguageLocale(), _closestSupported);
 
-    final currentLocale = settingsLocale ?? deviceLocale ?? defaultLocale;
+    final currentLocale =
+        settingsLocale ?? deviceLocale ?? LocaleCubit._defaultLocale;
 
     return LocaleCubit._(settings, currentLocale, Option.from(deviceLocale));
   }
@@ -45,16 +57,46 @@ class LocaleCubit extends Cubit<LocaleState> with CubitActions {
       Settings settings, Locale currentLocale, Option<Locale> deviceLocale)
       : _settings = settings,
         super(LocaleState(
-            currentLocale: currentLocale, deviceLocale: deviceLocale));
+            currentLocale: currentLocale,
+            deviceLocale: deviceLocale,
+            currentIsDefault: currentLocale == deviceLocale.value)) {
+    // TODO: If someone/something creates another `LocaleCubit`, will that replace
+    // the `this._onLocaleChanged` causing `this` to no longer receive the events?
+    PlatformDispatcher.instance.onLocaleChanged =
+        () => _onSystemLocaleChanged();
+  }
 
   Locale get currentLocale => state.currentLocale;
   Locale? get deviceLocale => state.deviceLocale.value;
 
   Future<void> changeLocale(Locale locale) async {
+    final newIsDefault = locale == state.deviceLocale;
+
     // `deviceLocale` is represented as `null` in Settings.
-    final l = locale == state.deviceLocale ? null : locale;
-    await _settings.setLanguageLocale(l);
-    emitUnlessClosed(state.copyWith(currentLocale: locale));
+    await _settings.setLanguageLocale(newIsDefault ? null : locale);
+
+    emitUnlessClosed(state.copyWith(
+      currentLocale: locale,
+      currentIsDefault: newIsDefault,
+    ));
+  }
+
+  void _onSystemLocaleChanged() {
+    final oldDeviceLocale = deviceLocale;
+    final newDeviceLocale =
+        _closestSupported(PlatformDispatcher.instance.locale);
+
+    if (state.currentIsDefault) {
+      final newCurrent = Option.andThen(newDeviceLocale, _closestSupported) ??
+          LocaleCubit._defaultLocale;
+
+      emitUnlessClosed(state.copyWith(
+          currentLocale: newCurrent,
+          deviceLocale: Option.from(newDeviceLocale)));
+    } else {
+      emitUnlessClosed(
+          state.copyWith(deviceLocale: Option.from(newDeviceLocale)));
+    }
   }
 }
 
