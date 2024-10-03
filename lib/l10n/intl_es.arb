@@ -1024,6 +1024,7 @@
   "@messageOnlyAvailableFiles": {},
   "actionLocateRepo": "Localizar repositorio",
   "@actionLocateRepo": {},
+  "titleApplicationLanguage": "Idioma de la aplicación",
   "messageSecurityOptionsNotAvailableBlind": "Las opciones de seguridad no están disponibles para repositorios vacíos",
   "@messageSecurityOptionsNotAvailableBlind": {}
 }
