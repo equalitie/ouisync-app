@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io' as io;
+import 'dart:ui' show Locale;
 
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -8,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/models.dart';
 import '../master_key.dart';
 import '../utils.dart';
+import '../locale.dart';
 import 'atomic_shared_prefs_settings_key.dart';
 import 'v1.dart' as v1;
 
@@ -46,7 +48,7 @@ class SettingsRoot {
   int defaultRepositoriesDirVersion = 1;
 
   // If `null`, the system's default should be used.
-  String? languageLocale;
+  Locale? languageLocale;
 
   SettingsRoot._();
 
@@ -75,7 +77,7 @@ class SettingsRoot {
         for (var kv in repos.entries) kv.key.toString(): kv.value.path
       },
       _defaultRepositoriesDirVersionKey: defaultRepositoriesDirVersion,
-      _languageLocaleKey: languageLocale,
+      _languageLocaleKey: _andThen(languageLocale, serializeLocale),
     };
     return r;
   }
@@ -110,7 +112,9 @@ class SettingsRoot {
       repos: repos,
       defaultRepositoriesDirVersion:
           data[_defaultRepositoriesDirVersionKey] ?? 0,
-      languageLocale: data[_languageLocaleKey],
+      languageLocale: (String? localeStr) {
+        return localeStr != null ? deserializeLocale(localeStr) : null;
+      }(data[_languageLocaleKey]),
     );
   }
 }
@@ -281,9 +285,10 @@ class Settings with AppLogger {
 
   //------------------------------------------------------------------
 
-  String? getLanguageLocale() => _root.languageLocale;
+  Locale? getLanguageLocale() => _root.languageLocale;
 
-  Future<void> setLanguageLocale(String? value) async {
+  // `null` means to erase the existing value.
+  Future<void> setLanguageLocale(Locale? value) async {
     _root.languageLocale = value;
     await _storeRoot();
   }
@@ -304,4 +309,11 @@ class InvalidSettingsVersion {
   InvalidSettingsVersion(this.statedVersion);
   @override
   String toString() => "Invalid settings version ($statedVersion)";
+}
+
+To? _andThen<From, To>(From? a, To? Function(From) convert) {
+  if (a == null) {
+    return null;
+  }
+  return convert(a);
 }
