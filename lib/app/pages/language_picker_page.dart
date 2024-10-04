@@ -13,39 +13,39 @@ import '../cubits/locale.dart';
 import '../widgets/widgets.dart';
 
 class LanguagePicker extends StatelessWidget {
-  LanguagePicker({required this.localeCubit, required this.canPop})
+  LanguagePicker(
+      {required this.localeCubit, required this.canPop, this.onSelect})
       : exitClickCounter = ClickCounter(timeoutMs: 3000);
 
   final LocaleCubit localeCubit;
   final bool canPop;
   final ClickCounter exitClickCounter;
+  final void Function()? onSelect;
 
   Locale? get deviceLocale => localeCubit.deviceLocale;
   Locale get currentLocale => localeCubit.currentLocale;
 
   @override
-  Widget build(BuildContext context) => BlocBuilder<LocaleCubit, LocaleState>(
-      bloc: localeCubit,
-      builder: (context, localeState) => SafeArea(
-            child: Scaffold(
-              appBar: AppBar(
-                title: Text(S.current.titleApplicationLanguage),
-                automaticallyImplyLeading: canPop,
-              ),
-              body: PopScope<Object?>(
-                canPop: canPop,
-                onPopInvokedWithResult: (bool didPop, Object? result) =>
-                    _onBackPressed(context, didPop, result),
-                child: Padding(
-                  padding: Dimensions.paddingActionBox,
-                  child: ContentWithStickyFooterState(
-                    content: _buildContent(context),
-                    footer: SizedBox.shrink(),
-                  ),
-                ),
+  Widget build(BuildContext context) => SafeArea(
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text(S.current.titleApplicationLanguage),
+            automaticallyImplyLeading: canPop,
+          ),
+          body: PopScope<Object?>(
+            canPop: canPop,
+            onPopInvokedWithResult: (bool didPop, Object? result) =>
+                _onBackPressed(context, didPop, result),
+            child: Padding(
+              padding: Dimensions.paddingActionBox,
+              child: ContentWithStickyFooterState(
+                content: _buildContent(context),
+                footer: SizedBox.shrink(),
               ),
             ),
-          ));
+          ),
+        ),
+      );
 
   Future<void> _onBackPressed(
       BuildContext context, bool didPop, Object? result) async {
@@ -95,7 +95,8 @@ class LanguagePicker extends StatelessWidget {
                   subtitle: Text(subtitle.toString()),
                   trailing: Text(item.locale.countryCode ?? ''),
                   onTap: () async {
-                    Navigator.of(context).pop(item.locale);
+                    localeCubit.changeLocale(item.locale);
+                    if (onSelect != null) onSelect!();
                   });
             },
           ),

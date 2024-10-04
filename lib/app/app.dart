@@ -40,25 +40,27 @@ Future<Widget> initOuiSyncApp(List<String> args) async {
   return BlocProvider<LocaleCubit>(
     create: (context) => localeCubit,
     child: BlocBuilder<LocaleCubit, LocaleState>(
-      builder: (context, localeState) => MaterialApp(
-        debugShowCheckedModeBanner: false,
-        theme: _setupAppThemeData(),
-        locale: localeState.currentLocale,
-        localizationsDelegates: const [
-          S.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        supportedLocales: S.delegate.supportedLocales,
-        home: OuisyncApp(
-          session: session,
-          windowManager: windowManager,
-          settings: settings,
-          packageInfo: packageInfo,
-          localeCubit: localeCubit,
-        ),
-      ),
+      builder: (context, localeState) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          theme: _setupAppThemeData(),
+          locale: localeState.currentLocale,
+          localizationsDelegates: const [
+            S.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: S.delegate.supportedLocales,
+          home: OuisyncApp(
+            session: session,
+            windowManager: windowManager,
+            settings: settings,
+            packageInfo: packageInfo,
+            localeCubit: localeCubit,
+          ),
+        );
+      },
     ),
   );
 }
@@ -90,10 +92,6 @@ class _OuisyncAppState extends State<OuisyncApp> with AppLogger {
   late final MountCubit mountCubit;
   late final ReposCubit reposCubit;
 
-  bool get _onboarded =>
-      !widget.settings.getShowOnboarding() &&
-      widget.settings.getEqualitieValues();
-
   @override
   void initState() {
     super.initState();
@@ -122,79 +120,26 @@ class _OuisyncAppState extends State<OuisyncApp> with AppLogger {
   }
 
   @override
-  Widget build(BuildContext context) => Visibility(
-        child: MediaReceiver(
-          controller: receivedMediaController,
-          child: MainPage(
-            localeCubit: widget.localeCubit,
-            mountCubit: mountCubit,
-            nativeChannels: widget.nativeChannels,
-            packageInfo: widget.packageInfo,
-            powerControl: powerControl,
-            receivedMedia: receivedMediaController.stream,
-            reposCubit: reposCubit,
-            session: widget.session,
-            settings: widget.settings,
-            windowManager: widget.windowManager,
-          ),
-        ),
-        visible: _onboarded,
+  Widget build(BuildContext context) => MediaReceiver(
+        controller: receivedMediaController,
+        child: OnboardingPage(widget.localeCubit, widget.settings,
+            mainPage: MainPage(
+              localeCubit: widget.localeCubit,
+              mountCubit: mountCubit,
+              nativeChannels: widget.nativeChannels,
+              packageInfo: widget.packageInfo,
+              powerControl: powerControl,
+              receivedMedia: receivedMediaController.stream,
+              reposCubit: reposCubit,
+              session: widget.session,
+              settings: widget.settings,
+              windowManager: widget.windowManager,
+            )),
       );
 
   Future<void> _init() async {
     await widget.windowManager.setTitle(S.current.messageOuiSyncDesktopTitle);
     await widget.windowManager.initSystemTray();
-
-    // We show the onboarding the first time the app starts.
-    // Then, we show the page for accepting eQ values, until the user taps YES.
-    // After this, just show the regular home page.
-
-    if (!_onboarded) {
-      final onboardingPages = <Widget>[];
-
-      // NOTE: It's probably good that we're always showing the language
-      // selection here (i.e. not checking for `settings.getLocale() != null`)
-      // in case the user accidentally selected the wrong language previously
-      // and wants to re-read the onboarding screens in a different language.
-      onboardingPages
-          .add(LanguagePicker(localeCubit: widget.localeCubit, canPop: false));
-
-      if (widget.settings.getShowOnboarding()) {
-        onboardingPages.add(OnboardingPage(settings: widget.settings));
-      }
-
-      if (!widget.settings.getEqualitieValues()) {
-        // If this is the first time the onboarding page was displayed, even
-        // though the setting is already set to true by the time we get to the
-        // eQ values page, we can allow the user to navigate back to the
-        // onboarding using the back button in Android.
-        final canNavigateBack = widget.settings.getShowOnboarding();
-
-        onboardingPages.add(
-          AcceptEqualitieValuesTermsPrivacyPage(
-            settings: widget.settings,
-            canNavigateToOnboarding: canNavigateBack,
-          ),
-        );
-      }
-
-      for (var page in onboardingPages) {
-        await Navigator.of(context)
-            .push(MaterialPageRoute(builder: (_) => page))
-            .then((result) async {
-          if (result == null) return;
-
-          if (result is Locale) {
-            await widget.localeCubit.changeLocale(result);
-          }
-        });
-      }
-
-      if (_onboarded) {
-        // Force rebuild to show the main page.
-        setState(() {});
-      }
-    }
   }
 }
 

@@ -14,8 +14,8 @@ class LocaleState {
   // Both of these (if non null) must be in S.delegate.supportedLocales.
   final Locale currentLocale;
   final Option<Locale> deviceLocale;
-  // This is true when `currentLocale == deviceLocale` or when `deviceLocale`
-  // has changed through `_onSystemLocaleChanged` and but the new value was not
+  // This is true when `currentLocale == deviceLocale` *or* when `deviceLocale`
+  // has changed through `_onSystemLocaleChanged` while the new value was not
   // in `S.delegate.supportedLocales`.
   final bool currentIsDefault;
 
