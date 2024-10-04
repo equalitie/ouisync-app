@@ -91,7 +91,6 @@ class _OuisyncAppState extends State<OuisyncApp> with AppLogger {
   late final ReposCubit reposCubit;
 
   bool get _onboarded =>
-      widget.settings.getLocale() != null &&
       !widget.settings.getShowOnboarding() &&
       widget.settings.getEqualitieValues();
 
@@ -153,6 +152,10 @@ class _OuisyncAppState extends State<OuisyncApp> with AppLogger {
     if (!_onboarded) {
       final onboardingPages = <Widget>[];
 
+      // NOTE: It's probably good that we're always showing the language
+      // selection here (i.e. not checking for `settings.getLocale() != null`)
+      // in case the user accidentally selected the wrong language previously
+      // and wants to re-read the onboarding screens in a different language.
       onboardingPages
           .add(LanguagePicker(localeCubit: widget.localeCubit, canPop: false));
 
