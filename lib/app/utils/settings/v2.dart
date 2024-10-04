@@ -31,7 +31,7 @@ class SettingsRoot {
   static const _reposKey = 'repos';
   static const _defaultRepositoriesDirVersionKey =
       'defaultRepositoriesDirVersion';
-  static const _languageLocaleKey = 'languageLocale';
+  static const _languageLocaleKey = 'locale';
 
   // Did the user accept the eQ values?
   bool acceptedEqualitieValues = false;
@@ -48,8 +48,8 @@ class SettingsRoot {
   // Whenever we change the default repos path, increment this value and implement a migration.
   int defaultRepositoriesDirVersion = 1;
 
-  // If `null`, the system's default should be used.
-  Locale? languageLocale;
+  // `null` means the user hasn't yet made a choice.
+  SettingsLocale? locale;
 
   SettingsRoot._();
 
@@ -62,7 +62,7 @@ class SettingsRoot {
     required this.defaultRepo,
     required this.repos,
     required this.defaultRepositoriesDirVersion,
-    required this.languageLocale,
+    required this.locale,
   });
 
   Map<String, dynamic> toJson() {
@@ -78,7 +78,8 @@ class SettingsRoot {
         for (var kv in repos.entries) kv.key.toString(): kv.value.path
       },
       _defaultRepositoriesDirVersionKey: defaultRepositoriesDirVersion,
-      _languageLocaleKey: Option.andThen(languageLocale, serializeLocale),
+      _languageLocaleKey:
+          Option.andThen(locale, (locale) => locale.serialize()),
     };
     return r;
   }
@@ -113,9 +114,8 @@ class SettingsRoot {
       repos: repos,
       defaultRepositoriesDirVersion:
           data[_defaultRepositoriesDirVersionKey] ?? 0,
-      languageLocale: (String? localeStr) {
-        return localeStr != null ? deserializeLocale(localeStr) : null;
-      }(data[_languageLocaleKey]),
+      locale:
+          Option.andThen(data[_languageLocaleKey], SettingsLocale.deserialize),
     );
   }
 }
@@ -169,7 +169,7 @@ class Settings with AppLogger {
       defaultRepo: v1.defaultRepo,
       repos: v1.repos,
       defaultRepositoriesDirVersion: v1.defaultRepositoriesDirVersion,
-      languageLocale: null,
+      locale: null,
     );
 
     final settingsV2 = Settings._(root, v1.sharedPreferences, v1.masterKey);
@@ -286,11 +286,13 @@ class Settings with AppLogger {
 
   //------------------------------------------------------------------
 
-  Locale? getLanguageLocale() => _root.languageLocale;
+  SettingsLocale? getLocale() => _root.locale;
 
-  // `null` means to erase the existing value.
-  Future<void> setLanguageLocale(Locale? value) async {
-    _root.languageLocale = value;
+  // `null` means the user wants to use the default system locale.
+  Future<void> setLocale(Locale? locale) async {
+    _root.locale =
+        locale != null ? SettingsUserLocale(locale) : SettingsDefaultLocale();
+
     await _storeRoot();
   }
 
@@ -310,4 +312,51 @@ class InvalidSettingsVersion {
   InvalidSettingsVersion(this.statedVersion);
   @override
   String toString() => "Invalid settings version ($statedVersion)";
+}
+
+sealed class SettingsLocale {
+  static SettingsLocale? deserialize(Object obj) {
+    if (obj is String && obj == "default") {
+      return SettingsDefaultLocale();
+    } else if (obj is Map<String, String>) {
+      final languageCode = obj['languageCode'];
+      final countryCode = obj['countryCode'];
+      final scriptCode = obj['scriptCode'];
+      if (languageCode == null || languageCode.isEmpty) {
+        return null;
+      }
+      return SettingsUserLocale(Locale.fromSubtags(
+        languageCode: languageCode,
+        countryCode: countryCode,
+        scriptCode: scriptCode,
+      ));
+    }
+    return null;
+  }
+
+  Object serialize();
+}
+
+class SettingsDefaultLocale implements SettingsLocale {
+  SettingsDefaultLocale();
+
+  @override
+  Object serialize() => "default";
+}
+
+class SettingsUserLocale extends Locale implements SettingsLocale {
+  SettingsUserLocale(Locale locale)
+      : super.fromSubtags(
+            languageCode: locale.languageCode,
+            countryCode: locale.countryCode,
+            scriptCode: locale.scriptCode);
+
+  @override
+  Object serialize() {
+    return <String, String>{
+      "languageCode": languageCode,
+      if (countryCode != null) "countryCode": countryCode!,
+      if (scriptCode != null) "scriptCode": scriptCode!,
+    };
+  }
 }

@@ -165,7 +165,6 @@ class AboutSection extends SettingsSection with AppLogger {
 
     if (locale == null) return;
 
-    await settings.setLanguageLocale(locale.languageCode);
     await localeCubit.changeLocale(locale);
   }
 

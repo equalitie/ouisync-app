@@ -91,7 +91,7 @@ class _OuisyncAppState extends State<OuisyncApp> with AppLogger {
   late final ReposCubit reposCubit;
 
   bool get _onboarded =>
-      widget.settings.getLanguageLocale() != null &&
+      widget.settings.getLocale() != null &&
       !widget.settings.getShowOnboarding() &&
       widget.settings.getEqualitieValues();
 

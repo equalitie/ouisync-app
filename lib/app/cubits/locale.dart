@@ -44,8 +44,11 @@ class LocaleCubit extends Cubit<LocaleState> with CubitActions<LocaleState> {
 
     final deviceLocale = _closestSupported(PlatformDispatcher.instance.locale);
 
-    final settingsLocale =
-        Option.andThen(settings.getLanguageLocale(), _closestSupported);
+    final settingsLocale = switch (settings.getLocale()) {
+      null => null,
+      SettingsDefaultLocale() => deviceLocale,
+      final SettingsUserLocale locale => _closestSupported(locale),
+    };
 
     final currentLocale =
         settingsLocale ?? deviceLocale ?? LocaleCubit._defaultLocale;
@@ -70,10 +73,9 @@ class LocaleCubit extends Cubit<LocaleState> with CubitActions<LocaleState> {
   Locale? get deviceLocale => state.deviceLocale.value;
 
   Future<void> changeLocale(Locale locale) async {
-    final newIsDefault = locale == state.deviceLocale;
+    final newIsDefault = locale == state.deviceLocale.value;
 
-    // `deviceLocale` is represented as `null` in Settings.
-    await _settings.setLanguageLocale(newIsDefault ? null : locale);
+    await _settings.setLocale(newIsDefault ? null : locale);
 
     emitUnlessClosed(state.copyWith(
       currentLocale: locale,
