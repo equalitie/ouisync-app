@@ -46,7 +46,7 @@ class SwitchSettingsTile extends StatelessWidget {
     required this.onChanged,
     required this.title,
     required this.leading,
-    this.subtitle = null,
+    this.subtitle,
   });
 
   final bool value;

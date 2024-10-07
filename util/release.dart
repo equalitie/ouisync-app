@@ -15,7 +15,6 @@ import 'package:path/path.dart' as p;
 import 'package:properties/properties.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
 import 'package:pub_semver/pub_semver.dart';
-import 'package:collection/collection.dart';
 
 const rootWorkDir = 'releases';
 const String windowsArtifactDir = 'build/windows/x64/runner/Release';
@@ -48,6 +47,7 @@ enum Flavor {
     }
   }
 
+  @override
   String toString() {
     switch (this) {
       case Flavor.production:
@@ -403,7 +403,7 @@ class BuildDesc {
   // The "foo" in "1.2.3+foo".
   String get buildIdentifier => version.build[0].toString();
 
-  Flavor get flavor => Flavor.fromString(version.preRelease.first!.toString());
+  Flavor get flavor => Flavor.fromString(version.preRelease.first.toString());
 
   @override
   String toString() {

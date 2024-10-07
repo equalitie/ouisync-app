@@ -37,7 +37,7 @@ class RepoLocation implements Comparable<RepoLocation> {
   RepoLocation move(io.Directory newDir) =>
       RepoLocation._(newDir.path, _name, _ext);
 
-  RepoLocation clone() => RepoLocation._(this._dir, this._name, this._ext);
+  RepoLocation clone() => RepoLocation._(_dir, _name, _ext);
 
   @override
   bool operator ==(Object other) =>

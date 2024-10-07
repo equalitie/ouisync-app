@@ -19,6 +19,7 @@ class AppSettingsContainer extends StatefulHookWidget {
     required void Function() checkForDokan,
     required ConnectivityInfo connectivityInfo,
     required LaunchAtStartupCubit launchAtStartup,
+    required this.localeCubit,
     required this.mount,
     required NatDetection natDetection,
     required this.panicCounter,
@@ -45,6 +46,7 @@ class AppSettingsContainer extends StatefulHookWidget {
           ),
           AboutSection(
             session,
+            localeCubit: localeCubit,
             powerControl: powerControl,
             reposCubit: reposCubit,
             connectivityInfo: connectivityInfo,
@@ -55,6 +57,7 @@ class AppSettingsContainer extends StatefulHookWidget {
           ),
         ];
 
+  final LocaleCubit localeCubit;
   final MountCubit mount;
   final StateMonitorIntCubit panicCounter;
   final PowerControl powerControl;

@@ -271,19 +271,6 @@ class RepoSecurityCubit extends Cubit<RepoSecurityState>
   //}
 }
 
-// We want `store` to be explicitly opt-in so the switch must be initially off even if the
-// initial `origin` is random which is implicitly stored.
-bool _initialStore(LocalSecretMode localSecretMode) =>
-    switch (localSecretMode) {
-      LocalSecretMode.manualStored ||
-      LocalSecretMode.manualSecuredWithBiometrics =>
-        true,
-      LocalSecretMode.manual ||
-      LocalSecretMode.randomStored ||
-      LocalSecretMode.randomSecuredWithBiometrics =>
-        false
-    };
-
 Future<(LocalSecretKeyAndSalt?, AuthMode)> _computeLocalSecretAndAuthMode(
   RepoCubit repoCubit,
   LocalSecretInput localSecretInput,
