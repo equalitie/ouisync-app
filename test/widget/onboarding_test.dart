@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/material.dart';
 import 'package:ouisync_app/app/app.dart';
 import 'package:ouisync_app/app/cubits/locale.dart';
 import 'package:ouisync_app/app/pages/main_page.dart';
@@ -50,16 +51,16 @@ void main() {
     await tester.pumpAndSettle();
 
     // Go to the second onboarding page
-    await tester.tap(find.text('NEXT'));
+    await tester.tap(find.byIcon(Icons.arrow_forward));
     await tester
         .pumpAndSettle(); // TODO: Do we need to call this after every interaction?
 
     // Go to the third onboarding page
-    await tester.tap(find.text('NEXT'));
+    await tester.tap(find.byIcon(Icons.arrow_forward));
     await tester.pumpAndSettle();
 
     // Go to the accept terms & conditions page
-    await tester.tap(find.text('DONE'));
+    await tester.tap(find.byIcon(Icons.arrow_forward));
     await tester.pumpAndSettle();
 
     expect(
