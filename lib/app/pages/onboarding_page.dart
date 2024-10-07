@@ -41,6 +41,11 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
   double _imageWidth = 0;
 
+  // Ideally, we would get this value from `intro.currentState.getPagesLength() - 1`,
+  // but the introduction page screen's state gets deleted when the introduction
+  // screen is done.
+  int _lastIntroPageIndex() => 2;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -78,7 +83,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
           onBack: () {
             setState(() {
               _pageIndex -= 1;
-              _introPageIndex = (intro?.getPagesLength() ?? 1) - 1;
+              _introPageIndex = _lastIntroPageIndex();
             });
           });
     } else {
@@ -152,7 +157,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
     setState(() {
       if (_introPageIndex > 0) {
         _introPageIndex -= 1;
-        intro?.previous();
+        introKey.currentState?.previous();
       } else {
         _pageIndex -= 1;
       }
@@ -163,6 +168,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
     await widget.settings.setShowOnboarding(false);
     setState(() {
       _pageIndex += 1;
+      _introPageIndex = _lastIntroPageIndex();
     });
   }
 
@@ -178,4 +184,13 @@ class _OnboardingPageState extends State<OnboardingPage> {
         foregroundColor: Theme.of(context).colorScheme.surfaceTint,
         onPressed: null,
       );
+
+  // For debugging
+  //@override
+  //String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) =>
+  //    "OnboardingPageState("
+  //    "_pageIndex:$_pageIndex, "
+  //    "_introPageIndex:$_introPageIndex, "
+  //    "onboardingShown:$onboardingShown, "
+  //    "acceptedTerms:$acceptedTerms)";
 }
