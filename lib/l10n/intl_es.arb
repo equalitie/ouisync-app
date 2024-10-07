@@ -1025,6 +1025,13 @@
   "actionLocateRepo": "Localizar repositorio",
   "@actionLocateRepo": {},
   "titleApplicationLanguage": "Idioma de la aplicación",
+  "@titleApplicationLanguage": {},
   "messageSecurityOptionsNotAvailableBlind": "Las opciones de seguridad no están disponibles para repositorios vacíos",
-  "@messageSecurityOptionsNotAvailableBlind": {}
+  "@messageSecurityOptionsNotAvailableBlind": {},
+  "languageOfTheDevice": "idioma del dispositivo",
+  "@languageOfTheDevice": {},
+  "languageIsNotAvailable": "no disponible",
+  "@languageIsNotAvailable": {},
+  "messageSettingsVersionNewerThanCurrent": "Los ajustes de este dispositivo se crearón con una versión más reciente de Ouisync y no se pueden migrar.",
+  "@messageSettingsVersionNewerThanCurrent": {}
 }
