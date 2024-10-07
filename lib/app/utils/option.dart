@@ -4,7 +4,14 @@
 sealed class Option<T> {
   const Option();
 
+  factory Option.from(T? value) => value != null ? Some<T>(value) : None<T>();
+
   T? get value;
+
+  static To? andThen<From, To>(From? from, To? Function(From) convert) {
+    if (from == null) return null;
+    return convert(from);
+  }
 
   @override
   bool operator ==(Object other) {
@@ -19,6 +26,10 @@ sealed class Option<T> {
     }
   }
 
+  @override
+  int get hashCode => value.hashCode;
+
+  @override
   String toString();
 }
 

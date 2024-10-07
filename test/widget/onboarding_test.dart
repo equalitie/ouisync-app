@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ouisync_app/app/app.dart';
+import 'package:ouisync_app/app/cubits/locale.dart';
 import 'package:ouisync_app/app/pages/main_page.dart';
 import 'package:ouisync_app/app/utils/master_key.dart';
 import 'package:ouisync_app/app/utils/settings/settings.dart';
@@ -12,6 +13,7 @@ import '../utils.dart';
 void main() {
   late Session session;
   late Settings settings;
+  late LocaleCubit localeCubit;
 
   setUp(() async {
     final configPath = join(
@@ -25,19 +27,26 @@ void main() {
     );
 
     settings = await Settings.init(MasterKey.random());
+    localeCubit = LocaleCubit(settings);
   });
 
   tearDown(() async {
+    await localeCubit.close();
     await session.close();
   });
 
   testWidgets('onboarding', (tester) async {
     await tester.pumpWidget(testApp(OuisyncApp(
+      localeCubit: localeCubit,
       packageInfo: fakePackageInfo,
       session: session,
       settings: settings,
       windowManager: FakeWindowManager(),
     )));
+    await tester.pumpAndSettle();
+
+    final englishItem = find.text('English').first;
+    await tester.tap(englishItem);
     await tester.pumpAndSettle();
 
     // Go to the second onboarding page

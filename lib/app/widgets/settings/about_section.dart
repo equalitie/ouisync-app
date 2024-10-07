@@ -4,6 +4,7 @@ import 'dart:io' as io;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
+import 'package:locale_names/locale_names.dart';
 import 'package:ouisync/ouisync.dart';
 import 'package:path/path.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -23,6 +24,7 @@ import 'settings_tile.dart';
 class AboutSection extends SettingsSection with AppLogger {
   AboutSection(
     this.session, {
+    required this.localeCubit,
     required this.powerControl,
     required this.reposCubit,
     required this.connectivityInfo,
@@ -36,6 +38,7 @@ class AboutSection extends SettingsSection with AppLogger {
         );
 
   final Session session;
+  final LocaleCubit localeCubit;
   final PowerControl powerControl;
   final ReposCubit reposCubit;
   final ConnectivityInfo connectivityInfo;
@@ -49,6 +52,13 @@ class AboutSection extends SettingsSection with AppLogger {
   @override
   List<Widget> buildTiles(BuildContext context) {
     bodyStyle = context.theme.appTextStyle.bodyMedium;
+
+    final currentLocale = localeCubit.currentLocale;
+    final currentLanguage = StringBuffer(currentLocale.defaultDisplayLanguage);
+
+    if (currentLocale == localeCubit.deviceLocale) {
+      currentLanguage.write(' (${S.current.languageOfTheDevice})');
+    }
 
     return [
       if (PlatformValues.isDesktopDevice)
@@ -64,6 +74,15 @@ class AboutSection extends SettingsSection with AppLogger {
             leading: Icon(Icons.rocket_launch_sharp),
           ),
         ),
+      NavigationTile(
+          title: Text(S.current.titleApplicationLanguage, style: bodyStyle),
+          leading: Icon(Icons.language_rounded),
+          value: Text(currentLanguage.toString(),
+              style: context.theme.appTextStyle.bodySmall),
+          onTap: () async => await _navigateToLanguagePicker(
+                context,
+                reposCubit.settings,
+              )),
       NavigationTile(
           title: Text(S.current.titleFAQShort, style: bodyStyle),
           leading: Icon(Icons.question_answer_rounded),
@@ -134,6 +153,15 @@ class AboutSection extends SettingsSection with AppLogger {
 
   @override
   bool containsErrorNotification() => upgradeExists.state;
+
+  Future<void> _navigateToLanguagePicker(
+    BuildContext context,
+    Settings settings,
+  ) async {
+    await Navigator.of(context).push(MaterialPageRoute(
+        builder: (_) =>
+            LanguagePicker(localeCubit: localeCubit, canPop: true)));
+  }
 
   void _navigateToPeers(BuildContext context) => Navigator.push(
         context,

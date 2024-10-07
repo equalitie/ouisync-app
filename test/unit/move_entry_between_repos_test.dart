@@ -6,7 +6,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:ouisync_app/app/cubits/cubits.dart';
 import 'package:ouisync_app/app/models/repo_location.dart';
 import 'package:ouisync_app/app/utils/cache_servers.dart';
-import 'package:ouisync_app/app/utils/master_key.dart';
 import 'package:ouisync_app/app/utils/mounter.dart';
 import 'package:ouisync/native_channels.dart';
 import 'package:ouisync/ouisync.dart';
@@ -56,7 +55,6 @@ void main() {
 
     FlutterSecureStorage.setMockInitialValues({});
     SharedPreferences.setMockInitialValues({});
-    final key = MasterKey.random();
     navigationCubit = NavigationCubit();
     bottomSheetCubit = EntryBottomSheetCubit();
 

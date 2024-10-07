@@ -12,6 +12,10 @@ import '../master_key.dart';
 
 typedef DatabaseId = v2.DatabaseId;
 typedef Settings = v2.Settings;
+typedef SettingsLocale = v2.SettingsLocale;
+typedef SettingsUserLocale = v2.SettingsUserLocale;
+typedef SettingsDefaultLocale = v2.SettingsDefaultLocale;
+typedef InvalidSettingsVersion = v2.InvalidSettingsVersion;
 
 Future<Settings> loadAndMigrateSettings(Session session) async {
   await _migratePaths();

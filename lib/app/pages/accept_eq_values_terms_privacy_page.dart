@@ -1,21 +1,19 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 
 import '../../generated/l10n.dart';
-import '../utils/click_counter.dart';
 import '../utils/utils.dart';
 import '../widgets/widgets.dart';
-import 'pages.dart';
 
 class AcceptEqualitieValuesTermsPrivacyPage extends StatefulWidget {
   const AcceptEqualitieValuesTermsPrivacyPage({
     required this.settings,
-    required this.canNavigateToOnboarding,
+    required this.onAccept,
+    required this.onBack,
   });
 
   final Settings settings;
-  final bool canNavigateToOnboarding;
+  final void Function() onAccept;
+  final void Function() onBack;
 
   @override
   State<AcceptEqualitieValuesTermsPrivacyPage> createState() =>
@@ -24,8 +22,6 @@ class AcceptEqualitieValuesTermsPrivacyPage extends StatefulWidget {
 
 class _AcceptEqualitieValuesTermsPrivacyPageState
     extends State<AcceptEqualitieValuesTermsPrivacyPage> {
-  final exitClickCounter = ClickCounter(timeoutMs: 3000);
-
   @override
   Widget build(BuildContext context) => SafeArea(
         child: Scaffold(
@@ -46,27 +42,7 @@ class _AcceptEqualitieValuesTermsPrivacyPageState
 
   Future<void> _onBackPressed(bool didPop, Object? result) async {
     if (didPop) return;
-
-    if (widget.canNavigateToOnboarding) {
-      await Navigator.of(context).push(MaterialPageRoute(
-          builder: (_) => OnboardingPage(
-                settings: widget.settings,
-                wasSeen: true,
-              )));
-      return;
-    }
-
-    int clickCount = exitClickCounter.registerClick();
-    if (clickCount <= 1) {
-      final snackBar = SnackBar(
-        content: Text(S.current.messageExitOuiSync),
-        showCloseIcon: true,
-      );
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
-    } else {
-      exitClickCounter.reset();
-      exit(0);
-    }
+    widget.onBack();
   }
 
   Column _buildContent(BuildContext context) {
@@ -104,16 +80,18 @@ class _AcceptEqualitieValuesTermsPrivacyPageState
         TextSpan(text: ' ${S.current.messageEqualitieValues}')
       ]));
 
-  List<Widget> _buildActions(BuildContext context) => [
-        OutlinedButton(
-            onPressed: () => exit(0),
-            child: Text(S.current.actionIDontAgree.toUpperCase())),
-        ElevatedButton(
-            onPressed: () async {
-              await widget.settings.setEqualitieValues(true);
-              Navigator.of(context).pop(null);
-            },
-            autofocus: true,
-            child: Text(S.current.actionIAgree.toUpperCase()))
-      ];
+  List<Widget> _buildActions(BuildContext context) {
+    final onBack = widget.onBack;
+    return [
+      OutlinedButton(
+          onPressed: onBack, child: Text(S.current.actionBack.toUpperCase())),
+      ElevatedButton(
+          onPressed: () async {
+            await widget.settings.setEqualitieValues(true);
+            widget.onAccept();
+          },
+          autofocus: true,
+          child: Text(S.current.actionIAgree.toUpperCase()))
+    ];
+  }
 }

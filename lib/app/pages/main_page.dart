@@ -6,11 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:move_to_background/move_to_background.dart';
-import 'package:ouisync_app/app/utils/share_token.dart';
 import 'package:ouisync/native_channels.dart';
 import 'package:ouisync/ouisync.dart';
 import 'package:ouisync/state_monitor.dart' as oui;
-import 'package:ouisync_app/app/widgets/notification_badge.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart' as system_path;
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
@@ -22,7 +20,9 @@ import '../cubits/cubits.dart';
 import '../models/models.dart';
 import '../utils/click_counter.dart';
 import '../utils/platform/platform.dart';
+import '../utils/share_token.dart';
 import '../utils/utils.dart';
+import '../widgets/notification_badge.dart';
 import '../widgets/widgets.dart';
 import 'pages.dart';
 
@@ -46,6 +46,7 @@ typedef PreviewFileCallback = Future<void> Function(
 
 class MainPage extends StatefulWidget {
   const MainPage({
+    required this.localeCubit,
     required this.mountCubit,
     required this.nativeChannels,
     required this.packageInfo,
@@ -66,6 +67,7 @@ class MainPage extends StatefulWidget {
   final Stream<List<SharedMediaFile>> receivedMedia;
   final ReposCubit reposCubit;
   final MountCubit mountCubit;
+  final LocaleCubit localeCubit;
 
   @override
   State<StatefulWidget> createState() => _MainPageState();
@@ -1203,6 +1205,7 @@ class _MainPageState extends State<MainPage>
         MaterialPageRoute(
           builder: (context) => SettingsPage(
             session: widget.session,
+            localeCubit: widget.localeCubit,
             mount: widget.mountCubit,
             panicCounter: panicCounter,
             powerControl: widget.powerControl,

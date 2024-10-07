@@ -37,7 +37,7 @@ class PowerControlState {
     this.userWantsPortForwardingEnabled = false,
     this.userWantsLocalDiscoveryEnabled = false,
     this.isLocalDiscoveryEnabled,
-    this.localInterface = null,
+    this.localInterface,
   });
 
   PowerControlState copyWith({
@@ -83,7 +83,7 @@ class PowerControlState {
     bool? userWantsSyncOnMobileEnabled,
     bool? userWantsLocalDiscoveryEnabled,
   }) {
-    final newState = this.copyWith(
+    final newState = copyWith(
       connectivityType: connectivityType,
       localInterface: localInterface,
       userWantsSyncOnMobileEnabled: userWantsSyncOnMobileEnabled,
