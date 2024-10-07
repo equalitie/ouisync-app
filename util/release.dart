@@ -47,6 +47,7 @@ enum Flavor {
     }
   }
 
+  @override
   String toString() {
     switch (this) {
       case Flavor.production:

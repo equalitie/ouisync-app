@@ -10,7 +10,6 @@ import '../../models/models.dart';
 import '../master_key.dart';
 import '../utils.dart';
 import '../option.dart';
-import '../locale.dart';
 import 'atomic_shared_prefs_settings_key.dart';
 import 'v1.dart' as v1;
 
@@ -145,7 +144,7 @@ class Settings with AppLogger {
     // The `atomicSharedPrefsSettingsKey` was introduced in V1 where it's the
     // only key. The other condition is to ensure this is not a freshly
     // generated `SharedPreferences` instance.
-    if (json == null && prefs.getKeys().length != 0) {
+    if (json == null && prefs.getKeys().isNotEmpty) {
       throw InvalidSettingsVersion(0);
     }
 

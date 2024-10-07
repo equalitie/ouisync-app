@@ -3,7 +3,6 @@ import 'dart:ui' show PlatformDispatcher;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:collection/collection.dart';
 
 import '../../generated/l10n.dart' show S;
 import '../utils/settings/settings.dart';
@@ -84,7 +83,6 @@ class LocaleCubit extends Cubit<LocaleState> with CubitActions<LocaleState> {
   }
 
   void _onSystemLocaleChanged() {
-    final oldDeviceLocale = deviceLocale;
     final newDeviceLocale =
         _closestSupported(PlatformDispatcher.instance.locale);
 
@@ -156,9 +154,11 @@ Locale? _closestWithin(Locale desired, List<Locale> within) {
 // Return  0 if it's a tie.
 // https://api.flutter.dev/flutter/dart-core/Comparator.html
 int _comparator(String? target, String? left, String? right) {
-  final nullOrEmpty = (String? s) => s == null ? true : s.isEmpty;
-
-  return switch ((nullOrEmpty(target), nullOrEmpty(left), nullOrEmpty(right))) {
+  return switch ((
+    _nullOrEmpty(target),
+    _nullOrEmpty(left),
+    _nullOrEmpty(right)
+  )) {
     (true, true, true) => 0,
     (true, true, false) => -1,
     (true, false, true) => 1,
@@ -169,3 +169,5 @@ int _comparator(String? target, String? left, String? right) {
     (false, false, false) => target == left ? -1 : (target == right ? 1 : 0),
   };
 }
+
+bool _nullOrEmpty(String? s) => s == null ? true : s.isEmpty;

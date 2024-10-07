@@ -32,7 +32,7 @@ import 'dart:async';
 // });
 
 class Sender<T> {
-  _SharedState<T> _state;
+  final _SharedState<T> _state;
 
   Sender(T initialValue) : _state = _SharedState(initialValue);
 
@@ -66,8 +66,8 @@ class Sender<T> {
 }
 
 class Receiver<T> {
-  _SharedState<T> _state;
-  BigInt? _lastSeenVersion = null;
+  final _SharedState<T> _state;
+  BigInt? _lastSeenVersion;
 
   Receiver._(this._state);
 

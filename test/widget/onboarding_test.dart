@@ -1,7 +1,6 @@
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ouisync_app/app/app.dart';
-import 'package:ouisync_app/app/cubits/change_locale.dart';
+import 'package:ouisync_app/app/cubits/locale.dart';
 import 'package:ouisync_app/app/pages/main_page.dart';
 import 'package:ouisync_app/app/utils/master_key.dart';
 import 'package:ouisync_app/app/utils/settings/settings.dart';
@@ -14,7 +13,7 @@ import '../utils.dart';
 void main() {
   late Session session;
   late Settings settings;
-  late ChangeLocaleCubit changeLocaleCubit;
+  late LocaleCubit localeCubit;
 
   setUp(() async {
     final configPath = join(
@@ -28,17 +27,17 @@ void main() {
     );
 
     settings = await Settings.init(MasterKey.random());
-    changeLocaleCubit = ChangeLocaleCubit(defaultLocale: Locale('en'), settings: settings);
+    localeCubit = LocaleCubit(settings);
   });
 
   tearDown(() async {
-    await changeLocaleCubit.close();
+    await localeCubit.close();
     await session.close();
   });
 
   testWidgets('onboarding', (tester) async {
     await tester.pumpWidget(testApp(OuisyncApp(
-      changeLocaleCubit: changeLocaleCubit,
+      localeCubit: localeCubit,
       packageInfo: fakePackageInfo,
       session: session,
       settings: settings,

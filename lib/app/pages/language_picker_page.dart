@@ -1,10 +1,7 @@
 import 'dart:io';
 
-import 'package:collection/collection.dart';
-import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:locale_names/locale_names.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../generated/l10n.dart';
 import '../utils/click_counter.dart';
@@ -86,8 +83,9 @@ class LanguagePicker extends StatelessWidget {
               final title = StringBuffer(item.locale.nativeDisplayLanguage);
 
               final subtitle = StringBuffer(item.locale.defaultDisplayLanguage);
-              if (item.isDevice)
+              if (item.isDevice) {
                 subtitle.write(' (${S.current.languageOfTheDevice})');
+              }
 
               return ListTile(
                   tileColor: selectionColor,
@@ -95,7 +93,7 @@ class LanguagePicker extends StatelessWidget {
                   subtitle: Text(subtitle.toString()),
                   trailing: Text(item.locale.countryCode ?? ''),
                   onTap: () async {
-                    localeCubit.changeLocale(item.locale);
+                    await localeCubit.changeLocale(item.locale);
                     if (onSelect != null) onSelect!();
                   });
             },

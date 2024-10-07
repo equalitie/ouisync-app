@@ -26,6 +26,10 @@ sealed class Option<T> {
     }
   }
 
+  @override
+  int get hashCode => value.hashCode;
+
+  @override
   String toString();
 }
 

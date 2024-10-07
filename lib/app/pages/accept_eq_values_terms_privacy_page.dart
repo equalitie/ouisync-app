@@ -1,12 +1,8 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 
 import '../../generated/l10n.dart';
-import '../utils/click_counter.dart';
 import '../utils/utils.dart';
 import '../widgets/widgets.dart';
-import 'pages.dart';
 
 class AcceptEqualitieValuesTermsPrivacyPage extends StatefulWidget {
   const AcceptEqualitieValuesTermsPrivacyPage({
@@ -87,9 +83,8 @@ class _AcceptEqualitieValuesTermsPrivacyPageState
   List<Widget> _buildActions(BuildContext context) {
     final onBack = widget.onBack;
     return [
-      if (onBack != null)
-        OutlinedButton(
-            onPressed: onBack, child: Text(S.current.actionBack.toUpperCase())),
+      OutlinedButton(
+          onPressed: onBack, child: Text(S.current.actionBack.toUpperCase())),
       ElevatedButton(
           onPressed: () async {
             await widget.settings.setEqualitieValues(true);

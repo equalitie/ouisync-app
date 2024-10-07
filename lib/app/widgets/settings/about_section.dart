@@ -56,8 +56,9 @@ class AboutSection extends SettingsSection with AppLogger {
     final currentLocale = localeCubit.currentLocale;
     final currentLanguage = StringBuffer(currentLocale.defaultDisplayLanguage);
 
-    if (currentLocale == localeCubit.deviceLocale)
+    if (currentLocale == localeCubit.deviceLocale) {
       currentLanguage.write(' (${S.current.languageOfTheDevice})');
+    }
 
     return [
       if (PlatformValues.isDesktopDevice)
