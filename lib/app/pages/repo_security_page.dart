@@ -43,7 +43,8 @@ class RepoSecurityPage extends StatelessWidget {
       ContentWithStickyFooterState(
         content: PopScope(
           canPop: false,
-          onPopInvoked: (didPop) => _onPopInvoked(context, didPop, cubit.state),
+          onPopInvokedWithResult: (didPop, _) =>
+              _onPopInvoked(context, didPop, cubit.state),
           // We know the `currentLocalSecret` so the repository is not blind.
           child: RepoSecurity(cubit, isBlind: false),
         ),

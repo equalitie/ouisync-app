@@ -1,44 +1,50 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:introduction_screen/introduction_screen.dart';
 
+import 'language_picker_page.dart';
+import 'accept_eq_values_terms_privacy_page.dart';
 import '../../generated/l10n.dart';
 import '../utils/click_counter.dart';
+import '../cubits/locale.dart';
 import '../utils/utils.dart';
 
-const int totalPages = 3;
-
 class OnboardingPage extends StatefulWidget {
-  const OnboardingPage({
-    required this.settings,
-    this.wasSeen = false,
+  OnboardingPage(
+    this._localeCubit,
+    this.settings, {
+    required this.mainPage,
   });
 
+  final LocaleCubit _localeCubit;
   final Settings settings;
-  final bool wasSeen;
+  final Widget mainPage;
+  final exitClickCounter = ClickCounter(timeoutMs: 3000);
 
   @override
-  State<OnboardingPage> createState() => _OnboardingPageState();
+  State<OnboardingPage> createState() => _OnboardingPageState(
+        onboardingShown: !settings.getShowOnboarding(),
+        acceptedTerms: settings.getEqualitieValues(),
+      );
 }
 
 class _OnboardingPageState extends State<OnboardingPage> {
+  _OnboardingPageState(
+      {required this.onboardingShown, required this.acceptedTerms});
+
   final introKey = GlobalKey<IntroductionScreenState>();
+  IntroductionScreenState? get intro => introKey.currentState;
 
-  int _currentPageIndex = 0;
-  final exitClickCounter = ClickCounter(timeoutMs: 3000);
-
-  final buttonStyle = TextStyle(fontWeight: FontWeight.w600);
+  int _pageIndex = 0;
+  int _introPageIndex = 0;
+  bool onboardingShown;
+  bool acceptedTerms;
 
   double _imageWidth = 0;
 
-  @override
-  void initState() {
-    if (widget.wasSeen) {
-      _currentPageIndex = totalPages - 1;
-    }
-    super.initState();
-  }
+  // Ideally, we would get this value from `intro.currentState.getPagesLength() - 1`,
+  // but the introduction page screen's state gets deleted when the introduction
+  // screen is done.
+  int _lastIntroPageIndex() => 2;
 
   @override
   void didChangeDependencies() {
@@ -49,6 +55,43 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (onboardingShown && acceptedTerms) {
+      return widget.mainPage;
+    }
+
+    if (_pageIndex == 0) {
+      return LanguagePicker(
+          localeCubit: widget._localeCubit,
+          canPop: false,
+          onSelect: () {
+            setState(() {
+              _pageIndex += 1;
+            });
+          });
+    }
+    if (_pageIndex == 1) {
+      return _buildIntroduction(context);
+    } else if (_pageIndex == 2) {
+      return AcceptEqualitieValuesTermsPrivacyPage(
+          settings: widget.settings,
+          onAccept: () {
+            setState(() {
+              acceptedTerms = true;
+              _pageIndex += 1;
+            });
+          },
+          onBack: () {
+            setState(() {
+              _pageIndex -= 1;
+              _introPageIndex = _lastIntroPageIndex();
+            });
+          });
+    } else {
+      return widget.mainPage;
+    }
+  }
+
+  Widget _buildIntroduction(BuildContext context) {
     final pageDecoration = PageDecoration(
         titleTextStyle: context.theme.appTextStyle.titleLarge,
         bodyAlignment: Alignment.center,
@@ -58,12 +101,12 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
     return PopScope<Object?>(
       canPop: false,
-      onPopInvokedWithResult: _onBackPressed,
+      onPopInvokedWithResult: (bool didPop, Object? result) => _onBackPressed(),
       child: Stack(
         children: [
           IntroductionScreen(
             key: introKey,
-            initialPage: _currentPageIndex,
+            initialPage: _introPageIndex,
             globalBackgroundColor: Colors.white,
             pages: [
               PageViewModel(
@@ -85,16 +128,16 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 decoration: pageDecoration,
               ),
             ],
-            onChange: (index) => setState(() => _currentPageIndex = index),
-            onDone: () async => await _onIntroEnd(context),
-            onSkip: () async => await _onIntroEnd(context),
+            onChange: (index) => setState(() => _introPageIndex = index),
+            onDone: () async => await _onIntroEnd(),
+            onSkip: () async => await _onIntroEnd(),
             skipOrBackFlex: 0,
             nextFlex: 0,
             showBackButton: true,
             rtl: Directionality.of(context) == TextDirection.rtl,
-            back: _buildButton(S.current.actionBack),
-            next: _buildButton(S.current.actionNext),
-            done: _buildButton(S.current.actionDone),
+            back: const Icon(Icons.arrow_back),
+            next: const Icon(Icons.arrow_forward),
+            done: const Icon(Icons.arrow_forward),
             curve: Curves.fastLinearToSlowEaseIn,
             dotsDecorator: DotsDecorator(
               size: Size(10.0, 10.0),
@@ -110,30 +153,23 @@ class _OnboardingPageState extends State<OnboardingPage> {
     );
   }
 
-  Future<void> _onBackPressed(bool didPop, Object? result) async {
-    if (didPop) return;
-
-    if (_currentPageIndex > 0) {
-      introKey.currentState?.previous();
-      return;
-    }
-
-    int clickCount = exitClickCounter.registerClick();
-    if (clickCount <= 1) {
-      final snackBar = SnackBar(
-        content: Text(S.current.messageExitOuiSync),
-        showCloseIcon: true,
-      );
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
-    } else {
-      exitClickCounter.reset();
-      exit(0);
-    }
+  Future<void> _onBackPressed() async {
+    setState(() {
+      if (_introPageIndex > 0) {
+        _introPageIndex -= 1;
+        introKey.currentState?.previous();
+      } else {
+        _pageIndex -= 1;
+      }
+    });
   }
 
-  Future<void> _onIntroEnd(context) async {
+  Future<void> _onIntroEnd() async {
     await widget.settings.setShowOnboarding(false);
-    Navigator.of(context).pop(null);
+    setState(() {
+      _pageIndex += 1;
+      _introPageIndex = _lastIntroPageIndex();
+    });
   }
 
   Widget _buildImage(String assetName) => Image.asset(
@@ -148,4 +184,13 @@ class _OnboardingPageState extends State<OnboardingPage> {
         foregroundColor: Theme.of(context).colorScheme.surfaceTint,
         onPressed: null,
       );
+
+  // For debugging
+  //@override
+  //String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) =>
+  //    "OnboardingPageState("
+  //    "_pageIndex:$_pageIndex, "
+  //    "_introPageIndex:$_introPageIndex, "
+  //    "onboardingShown:$onboardingShown, "
+  //    "acceptedTerms:$acceptedTerms)";
 }

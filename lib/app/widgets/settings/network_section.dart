@@ -66,7 +66,7 @@ class NetworkSection extends SettingsSection {
               Text(_connectivityTypeName(state.connectivityType),
                   style: subtitleStyle),
               if (state.internetConnectivityDisabledReason != null)
-                Text('${state.internetConnectivityDisabledReason!}',
+                Text(state.internetConnectivityDisabledReason!,
                     style: subtitleWarningStyle),
             ],
           ),

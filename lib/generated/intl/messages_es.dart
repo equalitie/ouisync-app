@@ -827,6 +827,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "titleAddRepository":
             MessageLookupByLibrary.simpleMessage("Importar un repositorio"),
         "titleAppTitle": MessageLookupByLibrary.simpleMessage("Ouisync"),
+        "titleApplicationLanguage":
+            MessageLookupByLibrary.simpleMessage("Idioma de la aplicación"),
         "titleBackgroundAndroidPermissionsTitle":
             MessageLookupByLibrary.simpleMessage("Permisos requeridos"),
         "titleChangePassword":

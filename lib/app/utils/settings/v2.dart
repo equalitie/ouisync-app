@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io' as io;
+import 'dart:ui' show Locale;
 
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -8,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/models.dart';
 import '../master_key.dart';
 import '../utils.dart';
+import '../option.dart';
 import 'atomic_shared_prefs_settings_key.dart';
 import 'v1.dart' as v1;
 
@@ -16,8 +18,6 @@ typedef DatabaseId = v1.DatabaseId;
 //--------------------------------------------------------------------
 
 class SettingsRoot {
-  static const int version = 2;
-
   static const _versionKey = 'version';
   static const _acceptedEqualitieValuesKey = 'acceptedEqualitieValues';
   static const _showOnboardingKey = 'showOnboarding';
@@ -28,6 +28,7 @@ class SettingsRoot {
   static const _reposKey = 'repos';
   static const _defaultRepositoriesDirVersionKey =
       'defaultRepositoriesDirVersion';
+  static const _languageLocaleKey = 'locale';
 
   // Did the user accept the eQ values?
   bool acceptedEqualitieValues = false;
@@ -44,6 +45,9 @@ class SettingsRoot {
   // Whenever we change the default repos path, increment this value and implement a migration.
   int defaultRepositoriesDirVersion = 1;
 
+  // `null` means the user hasn't yet made a choice.
+  SettingsLocale? locale;
+
   SettingsRoot._();
 
   SettingsRoot({
@@ -55,11 +59,12 @@ class SettingsRoot {
     required this.defaultRepo,
     required this.repos,
     required this.defaultRepositoriesDirVersion,
+    required this.locale,
   });
 
   Map<String, dynamic> toJson() {
     final r = {
-      _versionKey: version,
+      _versionKey: Settings.version,
       _acceptedEqualitieValuesKey: acceptedEqualitieValues,
       _showOnboardingKey: showOnboarding,
       _enableSyncOnMobileInternetKey: enableSyncOnMobileInternet,
@@ -70,6 +75,8 @@ class SettingsRoot {
         for (var kv in repos.entries) kv.key.toString(): kv.value.path
       },
       _defaultRepositoriesDirVersionKey: defaultRepositoriesDirVersion,
+      _languageLocaleKey:
+          Option.andThen(locale, (locale) => locale.serialize()),
     };
     return r;
   }
@@ -83,7 +90,7 @@ class SettingsRoot {
 
     int inputVersion = data[_versionKey];
 
-    if (inputVersion != version) {
+    if (inputVersion != Settings.version) {
       throw InvalidSettingsVersion(inputVersion);
     }
 
@@ -104,11 +111,15 @@ class SettingsRoot {
       repos: repos,
       defaultRepositoriesDirVersion:
           data[_defaultRepositoriesDirVersionKey] ?? 0,
+      locale:
+          Option.andThen(data[_languageLocaleKey], SettingsLocale.deserialize),
     );
   }
 }
 
 class Settings with AppLogger {
+  static const int version = 2;
+
   final MasterKey masterKey;
 
   final SettingsRoot _root;
@@ -133,7 +144,7 @@ class Settings with AppLogger {
     // The `atomicSharedPrefsSettingsKey` was introduced in V1 where it's the
     // only key. The other condition is to ensure this is not a freshly
     // generated `SharedPreferences` instance.
-    if (json == null && prefs.getKeys().length != 0) {
+    if (json == null && prefs.getKeys().isNotEmpty) {
       throw InvalidSettingsVersion(0);
     }
 
@@ -157,6 +168,7 @@ class Settings with AppLogger {
       defaultRepo: v1.defaultRepo,
       repos: v1.repos,
       defaultRepositoriesDirVersion: v1.defaultRepositoriesDirVersion,
+      locale: null,
     );
 
     final settingsV2 = Settings._(root, v1.sharedPreferences, v1.masterKey);
@@ -273,6 +285,18 @@ class Settings with AppLogger {
 
   //------------------------------------------------------------------
 
+  SettingsLocale? getLocale() => _root.locale;
+
+  // `null` means the user wants to use the default system locale.
+  Future<void> setLocale(Locale? locale) async {
+    _root.locale =
+        locale != null ? SettingsUserLocale(locale) : SettingsDefaultLocale();
+
+    await _storeRoot();
+  }
+
+  //------------------------------------------------------------------
+
   void debugPrint() {
     print("============== Settings ===============");
     for (final kv in _root.repos.entries) {
@@ -287,4 +311,51 @@ class InvalidSettingsVersion {
   InvalidSettingsVersion(this.statedVersion);
   @override
   String toString() => "Invalid settings version ($statedVersion)";
+}
+
+sealed class SettingsLocale {
+  static SettingsLocale? deserialize(Object obj) {
+    if (obj is String && obj == "default") {
+      return SettingsDefaultLocale();
+    } else if (obj is Map<String, String>) {
+      final languageCode = obj['languageCode'];
+      final countryCode = obj['countryCode'];
+      final scriptCode = obj['scriptCode'];
+      if (languageCode == null || languageCode.isEmpty) {
+        return null;
+      }
+      return SettingsUserLocale(Locale.fromSubtags(
+        languageCode: languageCode,
+        countryCode: countryCode,
+        scriptCode: scriptCode,
+      ));
+    }
+    return null;
+  }
+
+  Object serialize();
+}
+
+class SettingsDefaultLocale implements SettingsLocale {
+  SettingsDefaultLocale();
+
+  @override
+  Object serialize() => "default";
+}
+
+class SettingsUserLocale extends Locale implements SettingsLocale {
+  SettingsUserLocale(Locale locale)
+      : super.fromSubtags(
+            languageCode: locale.languageCode,
+            countryCode: locale.countryCode,
+            scriptCode: locale.scriptCode);
+
+  @override
+  Object serialize() {
+    return <String, String>{
+      "languageCode": languageCode,
+      if (countryCode != null) "countryCode": countryCode!,
+      if (scriptCode != null) "scriptCode": scriptCode!,
+    };
+  }
 }
