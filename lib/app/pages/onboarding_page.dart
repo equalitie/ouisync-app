@@ -130,9 +130,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
             nextFlex: 0,
             showBackButton: true,
             rtl: Directionality.of(context) == TextDirection.rtl,
-            back: _buildButton(S.current.actionBack),
-            next: _buildButton(S.current.actionNext),
-            done: _buildButton(S.current.actionDone),
+            back: const Icon(Icons.arrow_back),
+            next: const Icon(Icons.arrow_forward),
+            done: const Icon(Icons.arrow_forward),
             curve: Curves.fastLinearToSlowEaseIn,
             dotsDecorator: DotsDecorator(
               size: Size(10.0, 10.0),
