@@ -706,5 +706,6 @@
     "placeholders": {
         "dokanUrl": {}
     }
-  }
+  },
+  "messageSettingsVersionNewerThanCurrent": "The settings found on this device were created with a newer version of Ouisync and can't be migrated."
 }

@@ -710,6 +710,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Select the location"),
         "messageSettingsRuntimeID":
             MessageLookupByLibrary.simpleMessage("Runtime ID"),
+        "messageSettingsVersionNewerThanCurrent":
+            MessageLookupByLibrary.simpleMessage(
+                "The settings found on this device were created with a newer version of Ouisync and can\'t be migrated."),
         "messageShareActionDisabled": MessageLookupByLibrary.simpleMessage(
             "You need to select one permission to create a repository link first"),
         "messageShareWithWR":

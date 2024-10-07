@@ -18,8 +18,6 @@ typedef DatabaseId = v1.DatabaseId;
 //--------------------------------------------------------------------
 
 class SettingsRoot {
-  static const int version = 2;
-
   static const _versionKey = 'version';
   static const _acceptedEqualitieValuesKey = 'acceptedEqualitieValues';
   static const _showOnboardingKey = 'showOnboarding';
@@ -66,7 +64,7 @@ class SettingsRoot {
 
   Map<String, dynamic> toJson() {
     final r = {
-      _versionKey: version,
+      _versionKey: Settings.version,
       _acceptedEqualitieValuesKey: acceptedEqualitieValues,
       _showOnboardingKey: showOnboarding,
       _enableSyncOnMobileInternetKey: enableSyncOnMobileInternet,
@@ -92,7 +90,7 @@ class SettingsRoot {
 
     int inputVersion = data[_versionKey];
 
-    if (inputVersion != version) {
+    if (inputVersion != Settings.version) {
       throw InvalidSettingsVersion(inputVersion);
     }
 
@@ -120,6 +118,8 @@ class SettingsRoot {
 }
 
 class Settings with AppLogger {
+  static const int version = 2;
+
   final MasterKey masterKey;
 
   final SettingsRoot _root;

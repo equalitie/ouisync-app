@@ -4919,6 +4919,16 @@ class S {
       args: [dokanUrl],
     );
   }
+
+  /// `The settings found on this device were created with a newer version of Ouisync and can't be migrated.`
+  String get messageSettingsVersionNewerThanCurrent {
+    return Intl.message(
+      'The settings found on this device were created with a newer version of Ouisync and can\'t be migrated.',
+      name: 'messageSettingsVersionNewerThanCurrent',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

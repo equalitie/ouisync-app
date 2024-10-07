@@ -33,36 +33,41 @@ Future<Widget> initOuiSyncApp(List<String> args) async {
     logger: Loggy<AppLogger>('foreground'),
   );
 
-  final settings = await loadAndMigrateSettings(session);
+  Settings settings;
 
-  final localeCubit = LocaleCubit(settings);
+  try {
+    settings = await loadAndMigrateSettings(session);
 
-  return BlocProvider<LocaleCubit>(
-    create: (context) => localeCubit,
-    child: BlocBuilder<LocaleCubit, LocaleState>(
-      builder: (context, localeState) {
-        return MaterialApp(
-          debugShowCheckedModeBanner: false,
-          theme: _setupAppThemeData(),
-          locale: localeState.currentLocale,
-          localizationsDelegates: const [
-            S.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          supportedLocales: S.delegate.supportedLocales,
-          home: OuisyncApp(
-            session: session,
-            windowManager: windowManager,
-            settings: settings,
-            packageInfo: packageInfo,
-            localeCubit: localeCubit,
-          ),
-        );
-      },
-    ),
-  );
+    final localeCubit = LocaleCubit(settings);
+
+    return BlocProvider<LocaleCubit>(
+      create: (context) => localeCubit,
+      child: BlocBuilder<LocaleCubit, LocaleState>(
+        builder: (context, localeState) {
+          return _createInMaterialApp(
+            OuisyncApp(
+              session: session,
+              windowManager: windowManager,
+              settings: settings,
+              packageInfo: packageInfo,
+              localeCubit: localeCubit,
+            ),
+            currentLocale: localeCubit.currentLocale,
+          );
+        },
+      ),
+    );
+  } on InvalidSettingsVersion catch (e) {
+    if (e.statedVersion > Settings.version) {
+      return _createInMaterialApp(ErrorSettingsHigherVersion());
+    } else {
+      assert(
+          false,
+          "This should not happen because previous settings versions "
+          "should have been migrated to the current one.");
+      rethrow;
+    }
+  }
 }
 
 class OuisyncApp extends StatefulWidget {
@@ -164,3 +169,31 @@ ThemeData _setupAppThemeData() => ThemeData().copyWith(
               labelMedium: AppTypography.labelMedium,
               labelSmall: AppTypography.labelSmall)
         ]);
+
+MaterialApp _createInMaterialApp(Widget topWidget,
+        {Locale? currentLocale = null}) =>
+    MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: _setupAppThemeData(),
+      locale: currentLocale,
+      localizationsDelegates: const [
+        S.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: S.delegate.supportedLocales,
+      home: topWidget,
+    );
+
+class ErrorSettingsHigherVersion extends StatelessWidget {
+  const ErrorSettingsHigherVersion({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        body: Center(
+            child: Text(S.current.messageSettingsVersionNewerThanCurrent,
+                textAlign: TextAlign.center)));
+  }
+}
