@@ -340,6 +340,7 @@ class Fields {
         style: style,
         overflowWidget: TextOverflowWidget(
           position: ellipsisPosition,
+          align: TextOverflowAlign.center,
           child: Text('...'),
         ),
       );
