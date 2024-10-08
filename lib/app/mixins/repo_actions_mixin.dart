@@ -157,7 +157,7 @@ mixin RepositoryActionsMixin on LoggyType {
       context: context,
       title: S.current.actionLocateRepo,
       body: [
-        Fields.ellipsedText(
+        Text(
           dbFile,
           style: context.theme.appTextStyle.bodyMedium
               .copyWith(fontWeight: FontWeight.w400),

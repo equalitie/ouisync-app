@@ -1,4 +1,3 @@
-import 'package:extended_text/extended_text.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
 
@@ -201,10 +200,12 @@ class _MediaDescription extends StatelessWidget {
               ),
               Expanded(
                 child: Container(
-                  padding: EdgeInsetsDirectional.symmetric(horizontal: 8.0),
-                  child: Fields.ellipsedText(
+                  padding: EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Text(
                     name,
-                    ellipsisPosition: TextOverflowPosition.middle,
+                    maxLines: 1,
+                    softWrap: true,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ),
@@ -214,10 +215,12 @@ class _MediaDescription extends StatelessWidget {
             children: [
               Expanded(
                 child: Container(
-                  padding: EdgeInsetsDirectional.symmetric(horizontal: 8.0),
-                  child: Fields.ellipsedText(
+                  padding: EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Text(
                     parent,
-                    ellipsisPosition: TextOverflowPosition.middle,
+                    maxLines: 1,
+                    softWrap: true,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ),

@@ -40,7 +40,6 @@ dependencies:
   device_info_plus: ^10.1.1
   dns_client: ^0.2.1
   equatable: ^2.0.3
-  extended_text: ^14.0.1
   ffi: ^2.0.1
   file: ^7.0.0
   file_picker: ^8.1.2
