@@ -93,8 +93,8 @@ Future<void> main(List<String> args) async {
     return;
   }
 
-  if (buildDesc.flavor.displayString != null) {
-    await addBadgeToIcons(buildDesc.flavor.displayString!);
+  if (buildDesc.flavor != Flavor.production) {
+    await addBadgeToIcons(buildDesc.flavor.displayString ?? "");
   }
 
   // TODO: use `pubspec.name` here but first rename it from "ouisync_app" to "ouisync"
