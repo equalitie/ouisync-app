@@ -1,4 +1,3 @@
-import 'package:extended_text/extended_text.dart';
 import 'package:flutter/material.dart';
 
 import '../../cubits/repo.dart';
@@ -29,10 +28,12 @@ class RepoDescription extends StatelessWidget with AppLogger {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Fields.ellipsedText(
+          Text(
             state.location.name,
             style: nameTextStyle,
-            ellipsisPosition: TextOverflowPosition.middle,
+            maxLines: 1,
+            softWrap: true,
+            overflow: TextOverflow.ellipsis,
           ),
           Fields.autosizeText(
             state.accessMode.name,

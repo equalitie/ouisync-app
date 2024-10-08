@@ -1,8 +1,6 @@
-import 'package:extended_text/extended_text.dart';
 import 'package:flutter/material.dart';
 
 import '../../cubits/cubits.dart';
-import '../../utils/fields.dart';
 import '../../utils/repo_path.dart' as repo_path;
 import '../../utils/strings.dart';
 
@@ -43,9 +41,11 @@ class FolderNavigationBar extends StatelessWidget {
         Expanded(
           child: Padding(
             padding: EdgeInsets.only(left: 12.0, right: 12.0),
-            child: Fields.ellipsedText(
+            child: Text(
               current,
-              ellipsisPosition: TextOverflowPosition.middle,
+              maxLines: 1,
+              softWrap: true,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ),
