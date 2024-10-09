@@ -17,7 +17,8 @@ class _ScrollableTextWidgetState extends State<ScrollableTextWidget> {
   bool showEndEllipsis = false;
   bool maintainEndEllipsisSpace = false;
 
-  final ellipsisWidget = const Text('...');
+  final leadingEllipsisWidget = const Text('... ');
+  final trailingEllipsisWidget = const Text(' ...');
 
   @override
   void initState() {
@@ -47,26 +48,42 @@ class _ScrollableTextWidgetState extends State<ScrollableTextWidget> {
   }
 
   @override
-  Widget build(BuildContext context) => Row(
+  Widget build(BuildContext context) => Stack(
         children: [
+          Row(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  controller: _scrollController,
+                  scrollDirection: Axis.horizontal,
+                  clipBehavior: Clip.antiAliasWithSaveLayer,
+                  child: widget.child,
+                ),
+              ),
+              Visibility(
+                visible: showEndEllipsis,
+                child: Container(
+                  color: Colors.white,
+                  child: trailingEllipsisWidget,
+                ),
+              ),
+            ],
+          ),
           Visibility(
             visible: showStartEllipsis,
-            child: ellipsisWidget,
-          ),
-          Expanded(
-            child: SingleChildScrollView(
-              controller: _scrollController,
-              scrollDirection: Axis.horizontal,
-              clipBehavior: Clip.antiAliasWithSaveLayer,
-              child: widget.child,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  color: Colors.white,
+                  child: leadingEllipsisWidget,
+                ),
+                Container(
+                  color: Color.fromRGBO(255, 255, 255, 0.6),
+                  child: Text(' '),
+                ),
+              ],
             ),
-          ),
-          Visibility(
-            visible: showEndEllipsis,
-            maintainSize: maintainEndEllipsisSpace,
-            maintainAnimation: maintainEndEllipsisSpace,
-            maintainState: maintainEndEllipsisSpace,
-            child: ellipsisWidget,
           ),
         ],
       );
