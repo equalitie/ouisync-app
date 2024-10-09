@@ -74,12 +74,7 @@ class DirectoryListItem extends StatelessWidget {
             Expanded(
               child: Container(
                 padding: Dimensions.paddingItem,
-                child: Text(
-                  entry.name,
-                  maxLines: 1,
-                  softWrap: true,
-                  overflow: TextOverflow.ellipsis,
-                ),
+                child: ScrollableTextWidget(child: Text(entry.name)),
               ),
             ),
             _VerticalDotsButton(verticalDotsAction),
