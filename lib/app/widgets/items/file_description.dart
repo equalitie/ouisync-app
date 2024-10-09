@@ -6,8 +6,8 @@ import '../../cubits/cubits.dart';
 import '../../models/models.dart';
 import '../../utils/utils.dart';
 
-class FileDescription extends StatelessWidget with AppLogger {
-  const FileDescription(
+class FileDescription extends StatefulWidget with AppLogger {
+  FileDescription(
     this.repoCubit,
     this.entry,
     this.uploadJob,
@@ -18,14 +18,80 @@ class FileDescription extends StatelessWidget with AppLogger {
   final Job? uploadJob;
 
   @override
+  State<FileDescription> createState() => _FileDescriptionState();
+}
+
+class _FileDescriptionState extends State<FileDescription> {
+  final _scrollController = ScrollController();
+
+  bool showStartEllipsis = false;
+
+  bool showEndEllipsis = false;
+  bool maintainEndEllipsisSpace = false;
+
+  final ellipsisWidget = const Text('...');
+
+  @override
+  void initState() {
+    executeOnNextFrame(() {
+      final extentTotal = _scrollController.position.extentTotal;
+      final viewPort = _scrollController.position.extentInside;
+
+      final willScroll = extentTotal > viewPort;
+
+      maintainEndEllipsisSpace = willScroll;
+      setState(() => showEndEllipsis = willScroll);
+    });
+
+    _scrollController.addListener(
+      () => setState(() {
+        if (_scrollController.positions.isEmpty) return;
+
+        final offset = _scrollController.offset;
+        final maxScroll = _scrollController.position.maxScrollExtent;
+
+        showStartEllipsis = offset > 1;
+        showEndEllipsis = (maxScroll - offset) > 0;
+      }),
+    );
+
+    super.initState();
+  }
+
+  void executeOnNextFrame(void Function() f) =>
+      WidgetsBinding.instance.addPostFrameCallback((_) => f.call());
+
+  @override
   Widget build(BuildContext context) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            entry.name,
-            maxLines: 1,
-            softWrap: true,
-            overflow: TextOverflow.ellipsis,
+          Row(
+            children: [
+              Visibility(
+                visible: showStartEllipsis,
+                child: ellipsisWidget,
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  controller: _scrollController,
+                  scrollDirection: Axis.horizontal,
+                  clipBehavior: Clip.antiAliasWithSaveLayer,
+                  child: Text(
+                    widget.entry.name,
+                    maxLines: 1,
+                    softWrap: true,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
+              Visibility(
+                visible: showEndEllipsis,
+                maintainSize: maintainEndEllipsisSpace,
+                maintainAnimation: maintainEndEllipsisSpace,
+                maintainState: maintainEndEllipsisSpace,
+                child: ellipsisWidget,
+              ),
+            ],
           ),
           Dimensions.spacingVerticalHalf,
           _buildDetails(context),
@@ -33,7 +99,7 @@ class FileDescription extends StatelessWidget with AppLogger {
       );
 
   Widget _buildDetails(BuildContext context) {
-    final uploadJob = this.uploadJob;
+    final uploadJob = widget.uploadJob;
 
     if (uploadJob != null) {
       return _buildUploadDetails(context, uploadJob);
@@ -43,9 +109,9 @@ class FileDescription extends StatelessWidget with AppLogger {
   }
 
   Widget _buildSyncDetails(BuildContext context) => BlocProvider(
-        create: (context) => FileProgress(repoCubit, entry.path),
+        create: (context) => FileProgress(widget.repoCubit, widget.entry.path),
         child: BlocBuilder<FileProgress, int?>(builder: (cubit, soFar) {
-          final total = entry.size;
+          final total = widget.entry.size;
 
           if (total == null) {
             return _buildSizeWidget(context, null, true);
