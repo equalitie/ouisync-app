@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync/ouisync.dart';
+import 'package:ouisync_app/app/widgets/widgets.dart';
 import '../notification_badge.dart';
 import '../throughput_display.dart';
 import 'package:stream_transform/stream_transform.dart';
@@ -49,11 +50,8 @@ class RepositoriesBar extends StatelessWidget
   Widget _buildName(RepoEntry? repo) => Expanded(
         child: Container(
           padding: Dimensions.paddingItem,
-          child: Text(
-            repo?.name ?? S.current.messageNoRepos,
-            maxLines: 1,
-            softWrap: true,
-            overflow: TextOverflow.ellipsis,
+          child: ScrollableTextWidget(
+            child: Text(repo?.name ?? S.current.messageNoRepos),
           ),
         ),
       );
