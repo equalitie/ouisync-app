@@ -59,7 +59,7 @@ enum Flavor {
     }
   }
 
-  String? get displayString {
+  String get displayString {
     switch (this) {
       case Flavor.production:
         return "";
@@ -94,7 +94,7 @@ Future<void> main(List<String> args) async {
   }
 
   if (buildDesc.flavor != Flavor.production) {
-    await addBadgeToIcons(buildDesc.flavor.displayString ?? "");
+    await addBadgeToIcons(buildDesc.flavor.displayString);
   }
 
   // TODO: use `pubspec.name` here but first rename it from "ouisync_app" to "ouisync"
@@ -426,7 +426,7 @@ class BuildDesc {
       ..write('.')
       ..write(version.patch);
 
-    if (flavor.displayString != null) {
+    if (flavor.displayString.isNotEmpty) {
       buffer
         ..write('-')
         ..write(flavor.displayString);
