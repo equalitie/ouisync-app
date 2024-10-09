@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../cubits/repo.dart';
 import '../../utils/utils.dart';
+import '../widgets.dart';
 
 class RepoDescription extends StatelessWidget with AppLogger {
   RepoDescription(
@@ -28,12 +29,11 @@ class RepoDescription extends StatelessWidget with AppLogger {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            state.location.name,
-            style: nameTextStyle,
-            maxLines: 1,
-            softWrap: true,
-            overflow: TextOverflow.ellipsis,
+          ScrollableTextWidget(
+            child: Text(
+              state.location.name,
+              style: nameTextStyle,
+            ),
           ),
           Fields.autosizeText(
             state.accessMode.name,
