@@ -39,6 +39,7 @@ Future<Widget> initOuiSyncApp(List<String> args) async {
     settings = await loadAndMigrateSettings(session);
 
     final localeCubit = LocaleCubit(settings);
+    final nativeChannels = NativeChannels(session);
 
     return BlocProvider<LocaleCubit>(
       create: (context) => localeCubit,
@@ -51,6 +52,7 @@ Future<Widget> initOuiSyncApp(List<String> args) async {
               settings: settings,
               packageInfo: packageInfo,
               localeCubit: localeCubit,
+              nativeChannels: nativeChannels,
             ),
             currentLocale: localeCubit.currentLocale,
           );
@@ -77,8 +79,9 @@ class OuisyncApp extends StatefulWidget {
     required this.settings,
     required this.packageInfo,
     required this.localeCubit,
+    required this.nativeChannels,
     super.key,
-  }) : nativeChannels = NativeChannels(session);
+  });
 
   final PlatformWindowManager windowManager;
   final Session session;
