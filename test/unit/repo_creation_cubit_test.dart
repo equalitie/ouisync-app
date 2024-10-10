@@ -101,8 +101,11 @@ void main() {
     );
 
     repoCreationCubit.nameController.text = name;
-    await repoCreationCubit.waitUntil((state) => state.loading);
-    await repoCreationCubit.waitUntil((state) => !state.loading);
+
+    await repoCreationCubit.waitUntil((state) {
+      final substate = state.substate;
+      return substate is RepoCreationPending && substate.nameError != null;
+    });
 
     expect(
       repoCreationCubit.state.substate,

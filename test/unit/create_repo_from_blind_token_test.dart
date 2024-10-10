@@ -50,7 +50,8 @@ void main() {
     await repoCreationCubit.setToken(token.value);
 
     repoCreationCubit.nameController.text = suggestedRepoName;
-    await repoCreationCubit.waitUntil((state) => !state.loading);
+    await repoCreationCubit
+        .waitUntil((state) => state.substate is RepoCreationValid);
 
     expect(repoCreationCubit.state.substate, isA<RepoCreationValid>());
     expect(repoCreationCubit.state.name, equals(suggestedRepoName));

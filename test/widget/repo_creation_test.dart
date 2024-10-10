@@ -39,8 +39,8 @@ void main() {
         // Filling in the repo name triggers an async operation and so we must explicitly wait until
         // it completes.
         await tester.enterText(find.byKey(ValueKey('name')), 'my repo');
-        await repoCreationObserver.waitUntil(
-            (state) => !state.loading && state.substate is RepoCreationValid);
+        await repoCreationObserver
+            .waitUntil((state) => state.substate is RepoCreationValid);
         await tester.pump();
 
         await tester.tap(find.descendant(
@@ -84,7 +84,6 @@ void main() {
         await tester.pumpAndSettle();
 
         await tester.enterText(find.byKey(ValueKey('name')), name);
-        await repoCreationObserver.waitUntil((state) => !state.loading);
         await tester.pumpAndSettle();
 
         await tester.tap(find.byKey(ValueKey('use-local-password')));
@@ -143,14 +142,13 @@ void main() {
         await tester.pumpAndSettle();
 
         await tester.enterText(find.byKey(ValueKey('name')), name);
-        await repoCreationObserver.waitUntil((state) =>
-            !state.loading &&
-            switch (state.substate) {
-              RepoCreationPending(nameError: final nameError)
-                  when nameError != null && nameError.isNotEmpty =>
-                true,
-              _ => false,
-            });
+        await repoCreationObserver
+            .waitUntil((state) => switch (state.substate) {
+                  RepoCreationPending(nameError: final nameError)
+                      when nameError != null && nameError.isNotEmpty =>
+                    true,
+                  _ => false,
+                });
 
         await tester.pump();
 
@@ -192,11 +190,11 @@ void main() {
           findsOne,
         );
 
-        await tester.tap(find.widgetWithText(ElevatedButton, 'IMPORT A REPOSITORY'));
+        await tester
+            .tap(find.widgetWithText(ElevatedButton, 'IMPORT A REPOSITORY'));
         await tester.pump();
 
-        await repoCreationObserver
-            .waitUntil((state) => !state.loading && state.token != null);
+        await repoCreationObserver.waitUntil((state) => state.token != null);
         await tester.pump();
 
         expect(find.widgetWithText(TextFormField, token), findsOne);
@@ -215,8 +213,6 @@ void main() {
         await tester.enterText(find.byKey(ValueKey('name')), "");
         await tester.pumpAndSettle();
 
-        await repoCreationObserver.waitUntil((state) => !state.loading);
-
         // The name field is empty.
         expect(
           find.descendant(
@@ -233,8 +229,7 @@ void main() {
 
         // Tap on the suggested name and wait until it gets applied.
         await tester.tap(suggestedName);
-        await repoCreationObserver
-            .waitUntil((state) => !state.loading && state.name == name);
+        await repoCreationObserver.waitUntil((state) => state.name == name);
 
         await tester.pumpAndSettle();
 
