@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:ouisync/native_channels.dart';
 import 'package:ouisync_app/app/app.dart';
 import 'package:ouisync_app/app/cubits/locale.dart';
 import 'package:ouisync_app/app/pages/main_page.dart';
@@ -43,6 +44,7 @@ void main() {
       session: session,
       settings: settings,
       windowManager: FakeWindowManager(),
+      nativeChannels: NativeChannels(session),
     )));
     await tester.pumpAndSettle();
 
