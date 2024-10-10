@@ -301,13 +301,12 @@ class RepoCreationCubit extends Cubit<RepoCreationState>
       return;
     }
 
-    await _loading(() async {
-      final location = RepoLocation.fromParts(
-        dir: await reposCubit.settings.getDefaultRepositoriesDir(),
-        name: name,
-      );
+    final reposDir = await reposCubit.settings.getDefaultRepositoriesDir();
 
-      final exists = await File(location.path).exists();
+    await _loading(() async {
+      final location = RepoLocation.fromParts(dir: reposDir, name: name);
+      final exists = File(location.path).existsSync();
+
       if (exists) {
         _setInvalidName(S.current.messageErrorRepositoryNameExist);
         return;
