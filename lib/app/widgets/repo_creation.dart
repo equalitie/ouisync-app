@@ -36,13 +36,6 @@ class RepoCreation extends StatelessWidget {
                   current.substate != previous.substate,
               listener: _handleSubstateChange,
             ),
-            // Show loading indicator
-            BlocListener<RepoCreationCubit, RepoCreationState>(
-              bloc: creationCubit,
-              listenWhen: (previous, current) =>
-                  current.loading && !previous.loading,
-              listener: _handleLoading,
-            ),
             // Prefill suggested name on first load
             BlocListener<RepoCreationCubit, RepoCreationState>(
               bloc: creationCubit,
@@ -223,22 +216,6 @@ class RepoCreation extends StatelessWidget {
           message: error,
         );
     }
-  }
-
-  Future<void> _handleLoading(
-    BuildContext context,
-    RepoCreationState state,
-  ) async {
-    Future<void> done() async {
-      // Make sure to check the initial state as well, to avoid race conditions.
-      if (!creationCubit.state.loading) {
-        return;
-      }
-
-      await creationCubit.stream.where((state) => !state.loading).first;
-    }
-
-    await Dialogs.executeFutureWithLoadingDialog(context, done());
   }
 
   void _handleLocalSecretChanged(

@@ -9,15 +9,26 @@ import '../widgets/widgets.dart';
 import 'utils.dart';
 
 abstract class Dialogs {
+  static int _loadingInvocations = 0;
+
   static Future<T> executeFutureWithLoadingDialog<T>(
     BuildContext? context,
     Future<T> future,
   ) async {
-    _showLoadingDialog(context);
-    var result = await future;
-    _hideLoadingDialog(context);
+    if (_loadingInvocations == 0) {
+      _showLoadingDialog(context);
+    }
 
-    return result;
+    _loadingInvocations += 1;
+
+    try {
+      return await future;
+    } finally {
+      _loadingInvocations -= 1;
+      if (_loadingInvocations == 0) {
+        _hideLoadingDialog(context);
+      }
+    }
   }
 
   static void _showLoadingDialog(BuildContext? context) => context != null

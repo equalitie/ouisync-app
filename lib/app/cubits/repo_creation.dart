@@ -21,7 +21,6 @@ class RepoCreationState {
 
   final AccessMode accessMode;
   final LocalSecretMode localSecretMode;
-  final bool loading;
   final RepoCreationSubstate substate;
   final String suggestedName;
   final ShareToken? token;
@@ -29,7 +28,6 @@ class RepoCreationState {
 
   RepoCreationState({
     this.accessMode = AccessMode.write,
-    this.loading = false,
     this.localSecretMode = initialLocalSecretMode,
     this.substate = const RepoCreationPending(),
     this.suggestedName = '',
@@ -41,7 +39,6 @@ class RepoCreationState {
     AccessMode? accessMode,
     bool? isBiometricsAvailable,
     LocalSecretMode? localSecretMode,
-    bool? loading,
     RepoCreationSubstate? substate,
     String? suggestedName,
     ShareToken? token,
@@ -50,7 +47,6 @@ class RepoCreationState {
       RepoCreationState(
         accessMode: accessMode ?? this.accessMode,
         localSecretMode: localSecretMode ?? this.localSecretMode,
-        loading: loading ?? this.loading,
         substate: substate ?? this.substate,
         suggestedName: suggestedName ?? this.suggestedName,
         token: token ?? this.token,
@@ -74,7 +70,7 @@ class RepoCreationState {
 
   @override
   String toString() =>
-      '$runtimeType(loading: $loading, substate: $substate, suggestedName: $suggestedName, useCacheServers: $useCacheServers, ..)';
+      '$runtimeType(substate: $substate, suggestedName: $suggestedName, useCacheServers: $useCacheServers, ..)';
 }
 
 sealed class RepoCreationSubstate {
@@ -155,7 +151,8 @@ class RepoCreationCubit extends Cubit<RepoCreationState>
       return;
     }
 
-    await _loading(
+    await Dialogs.executeFutureWithLoadingDialog(
+      null,
       () async {
         final accessMode = await token.mode;
         final suggestedName = await token.suggestedName;
@@ -168,8 +165,7 @@ class RepoCreationCubit extends Cubit<RepoCreationState>
           token: token,
           useCacheServers: useCacheServers,
         ));
-      },
-      showLoading: true,
+      }(),
     );
   }
 
@@ -238,14 +234,14 @@ class RepoCreationCubit extends Cubit<RepoCreationState>
       AccessMode.blind => LocalSecretMode.manual,
     };
 
-    final repoEntry = await _loading(() => reposCubit.createRepository(
-          location: substate.location,
-          setLocalSecret: substate.setLocalSecret,
-          token: state.token,
-          localSecretMode: localSecretMode,
-          useCacheServers: state.useCacheServers,
-          setCurrent: true,
-        ));
+    final repoEntry = await reposCubit.createRepository(
+      location: substate.location,
+      setLocalSecret: substate.setLocalSecret,
+      token: state.token,
+      localSecretMode: localSecretMode,
+      useCacheServers: state.useCacheServers,
+      setCurrent: true,
+    );
 
     switch (repoEntry) {
       case OpenRepoEntry():
@@ -262,20 +258,6 @@ class RepoCreationCubit extends Cubit<RepoCreationState>
       case LoadingRepoEntry():
       case MissingRepoEntry():
         throw 'unreachable code';
-    }
-  }
-
-  Future<R> _loading<R>(
-    Future<R> Function() f, {
-    bool showLoading = false,
-  }) async {
-    try {
-      emit(state.copyWith(loading: true));
-      return showLoading
-          ? await Dialogs.executeFutureWithLoadingDialog(null, f.call())
-          : await f();
-    } finally {
-      emitUnlessClosed(state.copyWith(loading: false));
     }
   }
 
@@ -299,19 +281,19 @@ class RepoCreationCubit extends Cubit<RepoCreationState>
       return;
     }
 
-    final reposDir = await reposCubit.settings.getDefaultRepositoriesDir();
+    final location = RepoLocation.fromParts(
+      dir: await reposCubit.settings.getDefaultRepositoriesDir(),
+      name: name,
+    );
 
-    await _loading(() async {
-      final location = RepoLocation.fromParts(dir: reposDir, name: name);
-      final exists = File(location.path).existsSync();
+    final exists = await File(location.path).exists();
 
-      if (exists) {
-        _setInvalidName(S.current.messageErrorRepositoryNameExist);
-        return;
-      }
+    if (exists) {
+      _setInvalidName(S.current.messageErrorRepositoryNameExist);
+      return;
+    }
 
-      _setValidName(location);
-    });
+    _setValidName(location);
   }
 
   void _setValidName(RepoLocation location) {
