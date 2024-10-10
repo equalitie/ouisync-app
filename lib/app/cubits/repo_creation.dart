@@ -275,9 +275,7 @@ class RepoCreationCubit extends Cubit<RepoCreationState>
           ? await Dialogs.executeFutureWithLoadingDialog(null, f.call())
           : await f();
     } finally {
-      if (!isClosed) {
-        emit(state.copyWith(loading: false));
-      }
+      emitUnlessClosed(state.copyWith(loading: false));
     }
   }
 
