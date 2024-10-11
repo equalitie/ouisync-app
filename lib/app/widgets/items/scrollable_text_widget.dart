@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 
 class ScrollableTextWidget extends StatefulWidget {
-  const ScrollableTextWidget({required this.child, super.key});
+  const ScrollableTextWidget({
+    required this.child,
+    this.parentColor = Colors.white,
+    super.key,
+  });
 
   final Widget child;
+  final Color parentColor;
 
   @override
   State<ScrollableTextWidget> createState() => _ScrollableTextWidgetState();
@@ -17,8 +22,11 @@ class _ScrollableTextWidgetState extends State<ScrollableTextWidget> {
   bool showEndEllipsis = false;
   bool maintainEndEllipsisSpace = false;
 
-  final leadingEllipsisWidget = const Text('... ');
-  final trailingEllipsisWidget = const Text(' ...');
+  final leadingFadeWidget = const Text('   ');
+  final trailingEllipsisWidget = const Text(
+    '...',
+    style: TextStyle(backgroundColor: Colors.transparent),
+  );
 
   @override
   void initState() {
@@ -62,10 +70,10 @@ class _ScrollableTextWidgetState extends State<ScrollableTextWidget> {
               ),
               Visibility(
                 visible: showEndEllipsis,
-                child: Container(
-                  color: Colors.white,
-                  child: trailingEllipsisWidget,
-                ),
+                child: trailingEllipsisWidget,
+                maintainState: maintainEndEllipsisSpace,
+                maintainSize: maintainEndEllipsisSpace,
+                maintainAnimation: maintainEndEllipsisSpace,
               ),
             ],
           ),
@@ -75,12 +83,17 @@ class _ScrollableTextWidgetState extends State<ScrollableTextWidget> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  color: Colors.white,
-                  child: leadingEllipsisWidget,
-                ),
-                Container(
-                  color: Color.fromRGBO(255, 255, 255, 0.6),
-                  child: Text(' '),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.bottomLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        widget.parentColor,
+                        widget.parentColor.withOpacity(0.1)
+                      ],
+                    ),
+                  ),
+                  child: leadingFadeWidget,
                 ),
               ],
             ),

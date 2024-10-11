@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync/ouisync.dart';
-import 'package:ouisync_app/app/widgets/widgets.dart';
-import '../notification_badge.dart';
-import '../throughput_display.dart';
 import 'package:stream_transform/stream_transform.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../models/models.dart';
 import '../../utils/utils.dart';
+import '../notification_badge.dart';
 import '../repo_status.dart';
+import '../throughput_display.dart';
+import '../widgets.dart';
 
 class RepositoriesBar extends StatelessWidget
     with AppLogger
@@ -39,7 +39,7 @@ class RepositoriesBar extends StatelessWidget
         return Row(
           children: [
             _buildBackButton(),
-            _buildName(reposCubit.currentRepo),
+            _buildName(context, reposCubit.currentRepo),
             _buildStats(context, reposCubit.currentRepo),
             _buildStatus(reposCubit.currentRepo),
             _buildLockButton(reposCubit.currentRepo),
@@ -47,14 +47,20 @@ class RepositoriesBar extends StatelessWidget
         );
       });
 
-  Widget _buildName(RepoEntry? repo) => Expanded(
-        child: Container(
-          padding: Dimensions.paddingItem,
-          child: ScrollableTextWidget(
-            child: Text(repo?.name ?? S.current.messageNoRepos),
-          ),
+  Widget _buildName(BuildContext context, RepoEntry? repo) {
+    final parentColor =
+        context.theme.primaryTextTheme.titleMedium?.color ?? Colors.transparent;
+
+    return Expanded(
+      child: Container(
+        padding: Dimensions.paddingItem,
+        child: ScrollableTextWidget(
+          child: Text(repo?.name ?? S.current.messageNoRepos),
+          parentColor: parentColor,
         ),
-      );
+      ),
+    );
+  }
 
   Widget _buildStats(BuildContext context, RepoEntry? repo) =>
       repo is OpenRepoEntry
