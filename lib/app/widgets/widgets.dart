@@ -35,6 +35,7 @@ export 'items/file_description.dart';
 export 'items/list_item.dart';
 export 'items/repo_description.dart';
 export 'items/missing_repo_description.dart';
+export 'items/scrollable_text_widget.dart';
 
 export 'selectors/access_mode_selector.dart';
 

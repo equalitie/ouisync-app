@@ -1,4 +1,3 @@
-import 'package:extended_text/extended_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -6,9 +5,10 @@ import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../models/models.dart';
 import '../../utils/utils.dart';
+import 'scrollable_text_widget.dart';
 
 class FileDescription extends StatelessWidget with AppLogger {
-  const FileDescription(
+  FileDescription(
     this.repoCubit,
     this.entry,
     this.uploadJob,
@@ -22,10 +22,7 @@ class FileDescription extends StatelessWidget with AppLogger {
   Widget build(BuildContext context) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Fields.ellipsedText(
-            entry.name,
-            ellipsisPosition: TextOverflowPosition.middle,
-          ),
+          ScrollableTextWidget(child: Text(entry.name)),
           Dimensions.spacingVerticalHalf,
           _buildDetails(context),
         ],

@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:extended_text/extended_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -90,10 +89,12 @@ class _MoveEntryDialogState extends State<MoveEntryDialog> {
                 icon: Icons.drive_file_move_outlined,
                 text: name,
               ),
-              Fields.ellipsedText(
+              Text(
                 S.current.messageMoveEntryOrigin(parent),
-                ellipsisPosition: TextOverflowPosition.middle,
                 style: bodyStyle,
+                maxLines: 1,
+                softWrap: true,
+                overflow: TextOverflow.ellipsis,
               ),
               _selectActions(context, cubit.showList),
             ],
