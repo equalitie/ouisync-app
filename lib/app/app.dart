@@ -40,6 +40,7 @@ Future<Widget> initOuiSyncApp(List<String> args) async {
 
     final localeCubit = LocaleCubit(settings);
     final nativeChannels = NativeChannels(session);
+    final appRouteObserver = NavigatorObserver(); //RouteObserver<Route>();
 
     return BlocProvider<LocaleCubit>(
       create: (context) => localeCubit,
@@ -94,7 +95,8 @@ class OuisyncApp extends StatefulWidget {
   State<OuisyncApp> createState() => _OuisyncAppState();
 }
 
-class _OuisyncAppState extends State<OuisyncApp> with AppLogger {
+class _OuisyncAppState extends State<OuisyncApp>
+    with AppLogger /*, RouteAware*/ {
   final receivedMediaController = StreamController<List<SharedMediaFile>>();
   late final powerControl = PowerControl(widget.session, widget.settings);
   late final MountCubit mountCubit;
@@ -118,11 +120,18 @@ class _OuisyncAppState extends State<OuisyncApp> with AppLogger {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    //widget.appRouteObserver.subscribe(this, ModalRoute.of(context)!);
+  }
+
+  @override
   void dispose() {
     unawaited(reposCubit.close());
     unawaited(mountCubit.close());
     unawaited(powerControl.close());
     unawaited(receivedMediaController.close());
+    //widget.appRouteObserver.unsubscribe(this);
 
     super.dispose();
   }
@@ -187,6 +196,7 @@ MaterialApp _createInMaterialApp(Widget topWidget,
       ],
       supportedLocales: S.delegate.supportedLocales,
       home: topWidget,
+      navigatorObservers: [_AppNavigatorObserver()],
     );
 
 class ErrorSettingsHigherVersion extends StatelessWidget {
@@ -199,4 +209,50 @@ class ErrorSettingsHigherVersion extends StatelessWidget {
             child: Text(S.current.messageSettingsVersionNewerThanCurrent,
                 textAlign: TextAlign.center)));
   }
+}
+
+class _AppNavigatorObserver extends NavigatorObserver {
+  int _size = 0;
+
+  @override
+  void didPush(Route route, Route? previousRoute) {
+    final old = _size;
+    _size += 1;
+    print(
+        "========== DID PUSH === $old -> $_size ${_RouteInfo(route)} ${_RouteInfo(previousRoute)}");
+    print(StackTrace.current);
+  }
+
+  @override
+  void didReplace({Route? newRoute, Route? oldRoute}) {
+    print(
+        "========== DID REPLACE === ${_RouteInfo(newRoute)} ${_RouteInfo(oldRoute)}");
+    print(StackTrace.current);
+  }
+
+  @override
+  void didRemove(Route route, Route? previousRoute) {
+    final old = _size;
+    _size -= 1;
+    print(
+        "========== DID REMOVE === $old -> $_size ${_RouteInfo(route)} ${_RouteInfo(previousRoute)}");
+    print(StackTrace.current);
+  }
+
+  @override
+  void didPop(Route route, Route? previousRoute) {
+    final old = _size;
+    _size -= 1;
+    print(
+        "========== DID POP === $old -> $_size ${_RouteInfo(route)} ${_RouteInfo(previousRoute)}");
+    print(StackTrace.current);
+  }
+}
+
+class _RouteInfo {
+  final Route? route;
+  _RouteInfo(this.route);
+  @override
+  String toString() =>
+      route == null ? "null" : "(${route?.hashCode},${route?.settings.name})";
 }
