@@ -46,8 +46,24 @@ class _RepositoryQRPageState extends State<RepositoryQRPage> {
 
     return Container(
         decoration: BoxDecoration(
-            border: Border.all(
-                width: Dimensions.borderQRCodeImage, color: Colors.white),
+            border: BorderDirectional(
+              start: BorderSide(
+                width: Dimensions.borderQRCodeImage,
+                color: Colors.white,
+              ),
+              top: BorderSide(
+                width: Dimensions.borderQRCodeImage,
+                color: Colors.white,
+              ),
+              end: BorderSide(
+                width: Dimensions.borderQRCodeImage,
+                color: Colors.white,
+              ),
+              bottom: BorderSide(
+                width: Dimensions.borderQRCodeImage,
+                color: Colors.white,
+              ),
+            ),
             borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
             color: Colors.white),
         child: qrCodeImage);
