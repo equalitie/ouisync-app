@@ -144,7 +144,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
               color: Theme.of(context).colorScheme.surfaceDim,
               activeSize: Size(22.0, 10.0),
               activeShape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(25.0)),
+                borderRadius: BorderRadiusDirectional.all(
+                  Radius.circular(25.0),
+                ),
               ),
             ),
           ),

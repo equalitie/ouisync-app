@@ -126,7 +126,9 @@ class Fields {
             height: height,
             decoration: BoxDecoration(
               color: Theme.of(context).dividerColor,
-              borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
+              borderRadius: BorderRadiusDirectional.all(
+                Radius.circular(borderRadius),
+              ),
             ),
           ),
         ),

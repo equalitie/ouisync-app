@@ -194,7 +194,7 @@ class _PeersPageState extends State<PeersPage> {
     return Container(
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(4.0),
+        borderRadius: BorderRadiusDirectional.circular(4.0),
       ),
       padding: EdgeInsetsDirectional.symmetric(vertical: 2.0, horizontal: 4.0),
       margin: EdgeInsetsDirectional.symmetric(horizontal: 1.0),

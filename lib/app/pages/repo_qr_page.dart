@@ -64,7 +64,9 @@ class _RepositoryQRPageState extends State<RepositoryQRPage> {
                 color: Colors.white,
               ),
             ),
-            borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+            borderRadius: BorderRadiusDirectional.circular(
+              Dimensions.radiusSmall,
+            ),
             color: Colors.white),
         child: qrCodeImage);
   }

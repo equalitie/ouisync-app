@@ -46,11 +46,13 @@ class _RepositorySecurityDesktopState extends State<RepositorySecurityDesktop> {
       Row(mainAxisSize: MainAxisSize.min, children: [
         Container(
             width: PlatformValues.getFormFactorMaxWidth(context) * 0.5,
-            padding: EdgeInsetsDirectional.all(10.0), //Dimensions.paddingGreyBox,
+            padding:
+                EdgeInsetsDirectional.all(10.0), //Dimensions.paddingGreyBox,
             margin: EdgeInsetsDirectional.symmetric(vertical: 5.0),
             decoration: const BoxDecoration(
-                borderRadius:
-                    BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
+                borderRadius: BorderRadiusDirectional.all(
+                  Radius.circular(Dimensions.radiusSmall),
+                ),
                 color: Constants.inputBackgroundColor),
             child: Row(children: [
               Expanded(

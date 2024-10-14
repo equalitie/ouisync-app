@@ -165,8 +165,9 @@ class RepoImportPage extends StatelessWidget {
           Dimensions.spacingVerticalDouble,
           Container(
             decoration: const BoxDecoration(
-              borderRadius:
-                  BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
+              borderRadius: BorderRadiusDirectional.all(
+                Radius.circular(Dimensions.radiusSmall),
+              ),
               color: Constants.inputBackgroundColor,
             ),
             child: Fields.formTextField(

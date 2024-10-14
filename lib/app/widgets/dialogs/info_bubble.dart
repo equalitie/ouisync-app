@@ -218,7 +218,7 @@ class _InfoBubbleDialogState extends State<_InfoBubbleDialog> {
                     width: widget.bubbleWidth,
                     decoration: BoxDecoration(
                         color: widget.bgColor,
-                        borderRadius: BorderRadius.circular(8)),
+                        borderRadius: BorderRadiusDirectional.circular(8)),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,

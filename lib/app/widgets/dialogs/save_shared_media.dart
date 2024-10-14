@@ -99,7 +99,7 @@ class _SaveSharedMediaState extends State<SaveSharedMedia> {
       constraints: BoxConstraints.loose(Size.fromHeight(mediaListMaxHeight)),
       height: mediaListMaxHeight,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.all(Radius.circular(6.0)),
+        borderRadius: BorderRadiusDirectional.all(Radius.circular(6.0)),
         color: Color.fromARGB(150, 255, 255, 255),
       ),
       child: ListView.separated(
