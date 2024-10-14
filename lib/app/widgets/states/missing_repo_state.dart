@@ -41,13 +41,13 @@ class MissingRepositoryState extends HookWidget
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Align(
-              alignment: Alignment.center,
+              alignment: AlignmentDirectional.center,
               child: Fields.placeholderWidget(
                   assetName: Constants.assetEmptyFolder,
                   assetHeight: emptyFolderImageHeight)),
           Dimensions.spacingVerticalDouble,
           Align(
-            alignment: Alignment.center,
+            alignment: AlignmentDirectional.center,
             child: Fields.inPageMainMessage(errorMessage,
                 style: context.theme.appTextStyle.bodyLarge
                     .copyWith(color: Constants.dangerColor)),
@@ -55,7 +55,7 @@ class MissingRepositoryState extends HookWidget
           if (errorDescription != null) Dimensions.spacingVertical,
           if (errorDescription != null)
             Align(
-                alignment: Alignment.center,
+                alignment: AlignmentDirectional.center,
                 child: Fields.inPageSecondaryMessage(errorDescription!,
                     tags: {Constants.inlineTextBold: InlineTextStyles.bold})),
           Dimensions.spacingVerticalDouble,
@@ -63,7 +63,7 @@ class MissingRepositoryState extends HookWidget
               onPressed: onBackToList,
               text: S.current.actionBack,
               size: Dimensions.sizeInPageButtonLong,
-              alignment: Alignment.center,
+              alignment: AlignmentDirectional.center,
               focusNode: reloadButtonFocus,
               autofocus: true),
         ],

@@ -21,7 +21,7 @@ class ContentWithStickyFooterState extends StatelessWidget {
                 children: [
                   Container(
                     padding: EdgeInsetsDirectional.symmetric(horizontal: 18.0),
-                    alignment: Alignment.topCenter,
+                    alignment: AlignmentDirectional.topCenter,
                     child: content,
                   ),
                   Container(

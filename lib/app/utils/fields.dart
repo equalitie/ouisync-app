@@ -85,7 +85,7 @@ class Fields {
     required void Function()? onPressed,
     Icon? leadingIcon,
     required String text,
-    Alignment alignment = Alignment.center,
+    AlignmentDirectional alignment = AlignmentDirectional.center,
     Size size = Dimensions.sizeInPageButtonRegular,
     bool autofocus = false,
     FocusNode? focusNode,
@@ -534,7 +534,7 @@ class Fields {
       double? assetScale,
       double? assetWidth,
       double? assetHeight,
-      AlignmentGeometry assetAlignment = Alignment.center}) {
+      AlignmentGeometry assetAlignment = AlignmentDirectional.center}) {
     return Column(
       children: [
         Image.asset(

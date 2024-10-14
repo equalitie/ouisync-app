@@ -38,13 +38,13 @@ class LockedRepositoryState extends HookWidget
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Align(
-            alignment: Alignment.center,
+            alignment: AlignmentDirectional.center,
             child: Fields.placeholderWidget(
                 assetName: Constants.assetLockedRepository,
                 assetHeight: lockedRepoImageHeight)),
         Dimensions.spacingVerticalDouble,
         Align(
-            alignment: Alignment.center,
+            alignment: AlignmentDirectional.center,
             child: Fields.inPageMainMessage(S.current.messageLockedRepository,
                 style: context.theme.appTextStyle.bodyLarge,
                 tags: {
@@ -55,7 +55,7 @@ class LockedRepositoryState extends HookWidget
                 })),
         Dimensions.spacingVertical,
         Align(
-            alignment: Alignment.center,
+            alignment: AlignmentDirectional.center,
             child: Fields.inPageSecondaryMessage(
                 S.current.messageInputPasswordToUnlock,
                 tags: {

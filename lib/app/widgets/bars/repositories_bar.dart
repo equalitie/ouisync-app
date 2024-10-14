@@ -93,7 +93,7 @@ class RepositoriesBar extends StatelessWidget
             Fields.accessModeIcon(repoCubit?.accessMode ?? AccessMode.blind)),
         iconSize: Dimensions.sizeIconSmall,
         onPressed: () => repoCubit?.lock(),
-        alignment: Alignment.centerRight,
+        alignment: AlignmentDirectional.centerEnd,
       );
 
   // TODO: Why does the badge appear to move quickly after entering this screen?

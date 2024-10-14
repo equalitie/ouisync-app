@@ -27,7 +27,7 @@ class _SortContentsBarState extends State<SortContentsBar> {
           builder: (context, state) => widget.reposCubit.showList
               ? SizedBox.shrink()
               : Container(
-                  alignment: Alignment.centerLeft,
+                  alignment: AlignmentDirectional.centerStart,
                   padding: Dimensions.paddingActionBox,
                   child: Row(
                     children: [

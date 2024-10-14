@@ -96,7 +96,7 @@ class Dimensions {
 
   static const double defaultListBottomPadding = 2.0;
 
-  static const AlignmentGeometry alignmentIconButton = Alignment.center;
+  static const AlignmentGeometry alignmentIconButton = AlignmentDirectional.center;
 
   static const Widget spacingVerticalHalf = SizedBox(height: 5.0);
   static const Widget spacingVertical = SizedBox(height: 10.0);
