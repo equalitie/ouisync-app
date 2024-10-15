@@ -150,7 +150,6 @@ class DirectoryActions extends StatelessWidget with AppLogger {
       return;
     }
 
-    await cubit.createFolder(newFolderPath);
     Navigator.of(parentContext).pop();
   }
 

@@ -54,6 +54,7 @@ class FolderCreation extends HookWidget {
                           final newFolderPath =
                               repo_path.join(parent, newFolderName!);
                           Navigator.of(context).pop(newFolderPath);
+                          await _saveAndPop(context, parent, newFolderName!);
                         }
                       },
                       validator: validateNoEmptyMaybeRegExpr(
@@ -131,17 +132,26 @@ class FolderCreation extends HookWidget {
             buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton),
         PositiveButton(
             text: S.current.actionCreate,
-            onPressed: () => onSaved(context, parent, nameController.text),
+            onPressed: () =>
+                _onCreateButtonPress(context, parent, nameController.text),
             buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
             focusNode: positiveButtonFocus)
       ];
 
-  void onSaved(
+  void _onCreateButtonPress(
       BuildContext context, String parent, String newFolderName) async {
     final submitted = await submitField(parent, newFolderName);
     if (submitted) {
-      final newFolderPath = repo_path.join(parent, newFolderName);
-      Navigator.of(context).pop(newFolderPath);
+      await _saveAndPop(context, parent, newFolderName);
     }
+  }
+
+  Future<void> _saveAndPop(
+      BuildContext context, String parent, String newFolderName) async {
+    final newFolderPath = repo_path.join(parent, newFolderName);
+    await Dialogs.executeWithLoadingDialog(context, () async {
+      await cubit.createFolder(newFolderPath);
+    });
+    Navigator.of(context).pop(newFolderPath);
   }
 }
