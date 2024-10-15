@@ -279,7 +279,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "menuItemNetwork": MessageLookupByLibrary.simpleMessage("ကွန်ရက်"),
         "menuItemRepository":
             MessageLookupByLibrary.simpleMessage("သိုလှောင်ခန်း"),
-        "mesageNoMediaPresent":
+        "messageNoMediaPresent":
             MessageLookupByLibrary.simpleMessage("တင်ဆက်နေသော မီဒီယာ မရှိပါ။"),
         "messageAccessModeDisabled": m0,
         "messageAccessingSecureStorage": MessageLookupByLibrary.simpleMessage(
@@ -567,7 +567,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageLogDataP3": MessageLookupByLibrary.simpleMessage(
             "ဤဒေတာကို မည်သည့်ပြင်ပအဖွဲ့အစည်းနှင့်မျှ မျှဝေခြင်းမပြုပါ"),
         "messageLogLevelAll": MessageLookupByLibrary.simpleMessage("အားလုံး"),
-        "messageLogLevelErroWarnInfoDebug":
+        "messageLogLevelErrorWarnInfoDebug":
             MessageLookupByLibrary.simpleMessage(
                 "မှားယွင်းမှု၊ သတိပေးမှု၊ အချက်အလက်နှင့် အမှားအယွင်းများ"),
         "messageLogLevelError":
@@ -794,8 +794,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "အပြည့်အဝ ခွင့်ပြုသည်။ သင်တို့အချင်းချင်း ရေးသားဖတ်ရှုနိုင်ပါသည်"),
         "messageWritingFileCanceled": m26,
         "messageWritingFileError": m27,
-        "messsageFailedAddRepository": m28,
-        "messsageFailedCreateRepository": m29,
+        "messageFailedAddRepository": m28,
+        "messageFailedCreateRepository": m29,
         "popupMenuItemChangePassword":
             MessageLookupByLibrary.simpleMessage("စကားဝှက်ကို ပြောင်းလဲပါ"),
         "popupMenuItemCopyPassword":
@@ -872,7 +872,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("ပေါင်းထည့်မည်"),
         "titleFolderDetails": MessageLookupByLibrary.simpleMessage(
             "ဖိုဒါ၏ အသေးစိတ်အချက်အလက်များ"),
-        "titleFreedomExpresionAccessInfo": MessageLookupByLibrary.simpleMessage(
+        "titleFreedomExpressionAccessInfo": MessageLookupByLibrary.simpleMessage(
             "လွတ်လပ်စွာ ထုတ်ဖော်ပြောဆိုခွင့်နှင့် သတင်းအချက်အလက်ရယူခွင့်"),
         "titleIssueTracker":
             MessageLookupByLibrary.simpleMessage("ပြဿနာခြေရာခံသူ"),

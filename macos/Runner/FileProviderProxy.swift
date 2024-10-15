@@ -163,7 +163,7 @@ class FFI {
 
     // Blocks until Dart creates a session, then returns it.
     func waitForSession(_ context: UnsafeRawPointer, _ callback: FFICallback) async throws -> SessionHandle {
-        // TODO: Might be worth change the ffi function to call a callback when the session becomes created instead of bussy sleeping.
+        // TODO: Might be worth change the ffi function to call a callback when the session becomes created instead of busy sleeping.
         var elapsed: UInt64 = 0;
         while true {
             let result = ffiSessionGrab(context, callback)

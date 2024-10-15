@@ -1,6 +1,6 @@
 # Creating a release
 
-## Prerequisities
+## Prerequisite
 
 Create `android/key.properties` with the following content:
 
@@ -30,7 +30,7 @@ Bump the app version in `pubspec.yaml`. The version has the following format:
 
     MAJOR.MINOR.PATH{-PRE}+BUILD
 
-Where `MAJOR`, `MINOR` and `PATCH` are the coresponding semver components, `PRE` is an optional
+Where `MAJOR`, `MINOR` and `PATCH` are the corresponding semver components, `PRE` is an optional
 pre-release tag (e.g. `alpha`, `beta`, `rc1`, `rc2`, ...) and `BUILD` is the build number. The build
 number must be incremented for every release. The other components are just for user information
 and can be set to anything but ideally we should follow established practices (i.e., semver).
@@ -44,7 +44,7 @@ Notes:
 
 - Omitting the github token still creates the release packages but doesn't upload them to github.
 
-## MSIX Addtional assets
+## MSIX Additional assets
 
 For bundling additional assets with the Ouisync MSIX, place the required files inside ./additional_assets 
 
