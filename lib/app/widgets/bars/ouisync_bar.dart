@@ -59,14 +59,17 @@ class OuiSyncBar extends StatelessWidget implements PreferredSizeWidget {
 
         actionsList.add(settingsButton);
 
-        return AppBar(
-          automaticallyImplyLeading: true,
-          leading: leadingWidget,
-          leadingWidth: 120.0,
-          title: titleWidget,
-          // Make the `repoList` have no spacing on the horizontal axis.
-          titleSpacing: 0.0,
-          actions: actionsList,
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: AppBar(
+            automaticallyImplyLeading: true,
+            leading: leadingWidget,
+            leadingWidth: 120.0,
+            title: titleWidget,
+            // Make the `repoList` have no spacing on the horizontal axis.
+            titleSpacing: 0.0,
+            actions: actionsList,
+          ),
         );
       });
 
