@@ -8,6 +8,7 @@ import 'package:ouisync/native_channels.dart';
 import 'package:ouisync/ouisync.dart' show Session;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 import '../generated/l10n.dart';
 import 'cubits/cubits.dart'
@@ -23,6 +24,8 @@ Future<Widget> initOuiSyncApp(List<String> args) async {
   final packageInfo = await PackageInfo.fromPlatform();
   print(packageInfo);
 
+  final foregroundLogger = Loggy<AppLogger>('foreground');
+
   final windowManager = await PlatformWindowManager.create(
     args,
     packageInfo.appName,
@@ -30,7 +33,7 @@ Future<Widget> initOuiSyncApp(List<String> args) async {
   final session = await createSession(
     packageInfo: packageInfo,
     windowManager: windowManager,
-    logger: Loggy<AppLogger>('foreground'),
+    logger: foregroundLogger,
   );
 
   Settings settings;
@@ -40,7 +43,7 @@ Future<Widget> initOuiSyncApp(List<String> args) async {
 
     final localeCubit = LocaleCubit(settings);
     final nativeChannels = NativeChannels(session);
-    final appRouteObserver = NavigatorObserver(); //RouteObserver<Route>();
+    final appRouteObserver = NavigatorObserver();
 
     return BlocProvider<LocaleCubit>(
       create: (context) => localeCubit,
@@ -56,6 +59,7 @@ Future<Widget> initOuiSyncApp(List<String> args) async {
               nativeChannels: nativeChannels,
             ),
             currentLocale: localeCubit.currentLocale,
+            navigatorObservers: [_AppNavigatorObserver(foregroundLogger)],
           );
         },
       ),
@@ -183,7 +187,8 @@ ThemeData _setupAppThemeData() => ThemeData().copyWith(
         ]);
 
 MaterialApp _createInMaterialApp(Widget topWidget,
-        {Locale? currentLocale = null}) =>
+        {Locale? currentLocale = null,
+        List<NavigatorObserver> navigatorObservers = const []}) =>
     MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: _setupAppThemeData(),
@@ -196,7 +201,7 @@ MaterialApp _createInMaterialApp(Widget topWidget,
       ],
       supportedLocales: S.delegate.supportedLocales,
       home: topWidget,
-      navigatorObservers: [_AppNavigatorObserver()],
+      navigatorObservers: navigatorObservers,
     );
 
 class ErrorSettingsHigherVersion extends StatelessWidget {
@@ -211,48 +216,68 @@ class ErrorSettingsHigherVersion extends StatelessWidget {
   }
 }
 
+// Due to race conditions the app sometimes `pop`s more from the stack than have been pushed
+// resulting in black screens. This class should help us find those race conditions.
 class _AppNavigatorObserver extends NavigatorObserver {
-  int _size = 0;
+  final int _maxHistoryLength = 16;
+  List<_RouteHistoryEntry> _stackHistory = [];
+  Loggy<AppLogger> _logger;
+
+  _AppNavigatorObserver(this._logger);
 
   @override
   void didPush(Route route, Route? previousRoute) {
-    final old = _size;
-    _size += 1;
-    print(
-        "========== DID PUSH === $old -> $_size ${_RouteInfo(route)} ${_RouteInfo(previousRoute)}");
-    print(StackTrace.current);
+    _pushHistory(
+        "push next:${route.hashCode} onTopOf:${previousRoute?.hashCode}",
+        StackTrace.current);
   }
 
   @override
   void didReplace({Route? newRoute, Route? oldRoute}) {
-    print(
-        "========== DID REPLACE === ${_RouteInfo(newRoute)} ${_RouteInfo(oldRoute)}");
-    print(StackTrace.current);
+    _pushHistory("replace new:${newRoute?.hashCode} old:${oldRoute?.hashCode}",
+        StackTrace.current);
   }
 
   @override
   void didRemove(Route route, Route? previousRoute) {
-    final old = _size;
-    _size -= 1;
-    print(
-        "========== DID REMOVE === $old -> $_size ${_RouteInfo(route)} ${_RouteInfo(previousRoute)}");
-    print(StackTrace.current);
+    _pushHistory(
+        "remove route:${route.hashCode} previous:${previousRoute?.hashCode}",
+        StackTrace.current);
   }
 
   @override
-  void didPop(Route route, Route? previousRoute) {
-    final old = _size;
-    _size -= 1;
-    print(
-        "========== DID POP === $old -> $_size ${_RouteInfo(route)} ${_RouteInfo(previousRoute)}");
-    print(StackTrace.current);
+  void didPop(Route beingPopped, Route? nextCurrent) {
+    _pushHistory(
+        "pop beingPopped:${beingPopped.hashCode} nextCurrent:${nextCurrent?.hashCode}",
+        StackTrace.current);
+
+    if (nextCurrent == null) {
+      // The user will now see the black screen.
+      _reportProblem("Popped last route");
+    }
+  }
+
+  void _pushHistory(String action, StackTrace stackTrace) {
+    _stackHistory.add(_RouteHistoryEntry(action, stackTrace.toString()));
+    if (_stackHistory.length > _maxHistoryLength) {
+      _stackHistory.removeAt(0);
+    }
+  }
+
+  void _reportProblem(String reason) {
+    final buffer =
+        StringBuffer("::::::::AppNavigationObserver error: $reason\n");
+    for (final e in _stackHistory) {
+      buffer.write(":::: ${e.action}\n");
+      buffer.write(e.stackTrace);
+    }
+    _logger.error(buffer);
+    unawaited(Sentry.captureMessage(buffer.toString()));
   }
 }
 
-class _RouteInfo {
-  final Route? route;
-  _RouteInfo(this.route);
-  @override
-  String toString() =>
-      route == null ? "null" : "(${route?.hashCode},${route?.settings.name})";
+class _RouteHistoryEntry {
+  String action;
+  String stackTrace;
+  _RouteHistoryEntry(this.action, this.stackTrace);
 }
