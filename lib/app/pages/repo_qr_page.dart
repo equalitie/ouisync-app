@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../generated/l10n.dart';
-import '../utils/utils.dart';
+import '../utils/utils.dart'
+    show AppThemeExtension, Dimensions, Fields, ThemeGetter;
+import '../widgets/widgets.dart' show DirectionalAppBar;
 
 class RepositoryQRPage extends StatefulWidget {
   const RepositoryQRPage({required this.shareLink, super.key});
@@ -18,12 +20,13 @@ class RepositoryQRPage extends StatefulWidget {
 class _RepositoryQRPageState extends State<RepositoryQRPage> {
   @override
   Widget build(BuildContext context) => Scaffold(
-      appBar: AppBar(
-          leading: Fields.actionIcon(
-              const Icon(Icons.close, color: Colors.white),
-              onPressed: () => Navigator.of(context).pop()),
-          elevation: 0.0,
-          backgroundColor: Colors.transparent),
+      appBar: DirectionalAppBar(
+        leading: Fields.actionIcon(
+          const Icon(Icons.close, color: Colors.white),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        backgroundColor: Colors.transparent,
+      ),
       backgroundColor: Theme.of(context).primaryColorDark,
       body: Center(
           child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [

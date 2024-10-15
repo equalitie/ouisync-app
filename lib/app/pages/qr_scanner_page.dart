@@ -3,7 +3,8 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:ouisync/ouisync.dart' as plugin;
 
 import '../../generated/l10n.dart';
-import '../utils/utils.dart';
+import '../utils/utils.dart' show AppLogger, Dimensions;
+import '../widgets/widgets.dart' show DirectionalAppBar;
 
 class QRScanner extends StatefulWidget {
   final plugin.Session session;
@@ -21,9 +22,8 @@ class _QRScannerState extends State<QRScanner> with AppLogger {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
+        appBar: DirectionalAppBar(
           title: Text(S.current.titleScanRepoQR),
-          elevation: 0.0,
           backgroundColor: Colors.transparent,
           foregroundColor: Colors.black87,
           actions: [

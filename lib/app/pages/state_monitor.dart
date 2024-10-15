@@ -5,8 +5,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync/ouisync.dart' as oui;
 import 'package:ouisync/state_monitor.dart';
 
-import '../cubits/cubits.dart';
 import '../../generated/l10n.dart';
+import '../cubits/cubits.dart' show StateMonitorCubit;
+import '../widgets/widgets.dart' show DirectionalAppBar;
 
 class StateMonitorPage extends StatefulWidget {
   final oui.Session session;
@@ -36,7 +37,7 @@ class _StateMonitorState extends State<StateMonitorPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: Text(S.current.titleStateMonitor)),
+        appBar: DirectionalAppBar(title: Text(S.current.titleStateMonitor)),
         body: Theme(
           data: ThemeData(
             cardTheme: CardTheme(margin: EdgeInsetsDirectional.all(1.0)),

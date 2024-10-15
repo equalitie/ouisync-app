@@ -1,19 +1,26 @@
 import 'dart:async';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync_app/app/cubits/repo_import.dart';
 import 'package:ouisync/ouisync.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:file_picker/file_picker.dart';
 
 import '../../generated/l10n.dart';
-import '../cubits/cubits.dart';
-import '../utils/platform/platform.dart';
-import '../utils/share_token.dart';
-import '../utils/utils.dart';
+import '../cubits/cubits.dart' show RepoImportCubit, ReposCubit;
 import '../models/models.dart';
-import '../widgets/holder.dart';
+import '../utils/platform/platform.dart' show PlatformValues;
+import '../utils/share_token.dart';
+import '../utils/utils.dart'
+    show
+        AppThemeExtension,
+        Constants,
+        Dimensions,
+        Fields,
+        Permissions,
+        showSnackBar,
+        ThemeGetter;
+import '../widgets/widgets.dart' show BlocHolder, DirectionalAppBar;
 import 'pages.dart';
 
 class RepoImportPage extends StatelessWidget {
@@ -23,12 +30,12 @@ class RepoImportPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(
-            title: Text(S.current.titleAddRepoToken),
-            elevation: 0.0,
-            backgroundColor: Colors.transparent,
-            foregroundColor: Colors.black87,
-            titleTextStyle: context.theme.appTextStyle.titleMedium),
+        appBar: DirectionalAppBar(
+          title: Text(S.current.titleAddRepoToken),
+          backgroundColor: Colors.transparent,
+          foregroundColor: Colors.black87,
+          titleTextStyle: context.theme.appTextStyle.titleMedium,
+        ),
         body: Center(
           child: SingleChildScrollView(
             padding: Dimensions.paddingAll20,

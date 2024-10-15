@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync/ouisync.dart';
-import 'package:ouisync_app/app/widgets/throughput_display.dart';
 import 'package:stream_transform/stream_transform.dart';
 
 import '../../generated/l10n.dart';
-import '../cubits/peer_set.dart';
-import '../utils/utils.dart';
-import '../widgets/long_text.dart';
-import 'user_provided_peers_page.dart';
+import '../cubits/cubits.dart' show PeerSet, PeerSetCubit;
+import '../utils/utils.dart' show AppThemeExtension, Dimensions, ThemeGetter;
+import '../widgets/widgets.dart'
+    show DirectionalAppBar, LongText, LiveThroughputDisplay, ThroughputDisplay;
+import 'pages.dart' show UserProvidedPeersPage;
 
 const double _contentSize = 12.0;
 
@@ -41,30 +41,31 @@ class _PeersPageState extends State<PeersPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(
-            title: Row(
-              children: [
-                Text(S.current.labelPeers),
-                Spacer(),
-                LiveThroughputDisplay(
-                  _networkStatsStream,
-                  size: Theme.of(context).textTheme.labelSmall?.fontSize,
-                  orientation: Orientation.portrait,
+        appBar: DirectionalAppBar(
+          title: Row(
+            children: [
+              Text(S.current.labelPeers),
+              Spacer(),
+              LiveThroughputDisplay(
+                _networkStatsStream,
+                size: Theme.of(context).textTheme.labelSmall?.fontSize,
+                orientation: Orientation.portrait,
+              ),
+            ],
+          ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.manage_accounts),
+              tooltip: 'User provided peers',
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => UserProvidedPeersPage(widget.session),
                 ),
-              ],
-            ),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.manage_accounts),
-                tooltip: 'User provided peers',
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => UserProvidedPeersPage(widget.session),
-                  ),
-                ),
-              )
-            ]),
+              ),
+            )
+          ],
+        ),
         body: BlocBuilder<PeerSetCubit, PeerSet>(
           bloc: widget.cubit,
           builder: (context, state) => ListView(

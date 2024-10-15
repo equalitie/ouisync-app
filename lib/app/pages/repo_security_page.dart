@@ -4,12 +4,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../generated/l10n.dart';
-import '../cubits/repo.dart';
-import '../cubits/repo_security.dart';
-import '../models/models.dart';
-import '../utils/utils.dart';
-import '../widgets/holder.dart';
-import '../widgets/widgets.dart';
+import '../cubits/cubits.dart'
+    show RepoCubit, RepoSecurityCubit, RepoSecurityState;
+import '../models/models.dart' show LocalSecret;
+import '../utils/utils.dart'
+    show
+        AppThemeExtension,
+        Dialogs,
+        Fields,
+        PasswordHasher,
+        Settings,
+        showSnackBar,
+        ThemeGetter;
+import '../widgets/widgets.dart'
+    show
+        BlocHolder,
+        ContentWithStickyFooterState,
+        DirectionalAppBar,
+        RepoSecurity;
 
 class RepoSecurityPage extends StatelessWidget {
   const RepoSecurityPage({
@@ -26,7 +38,7 @@ class RepoSecurityPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: Text(S.current.titleSecurity), elevation: 0.0),
+        appBar: DirectionalAppBar(title: Text(S.current.titleSecurity)),
         body: BlocHolder(
           create: () => RepoSecurityCubit(
             oldLocalSecretMode: repo.state.authMode.localSecretMode,
