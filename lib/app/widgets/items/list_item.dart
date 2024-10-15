@@ -192,13 +192,17 @@ class _ListItemContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Material(
-        child: InkWell(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: InkWell(
             onTap: () => mainAction.call(),
             splashColor: Colors.blue,
             child: Container(
               padding: Dimensions.paddingListItem,
               child: child,
-            )),
+            ),
+          ),
+        ),
         color: Colors.white,
       );
 }
