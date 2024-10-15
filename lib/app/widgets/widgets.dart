@@ -1,5 +1,6 @@
 export 'animated/file_icon_animated.dart';
 
+export 'bars/directional_app_bar.dart';
 export 'bars/folder_navigation_bar.dart';
 export 'bars/ouisync_bar.dart';
 export 'bars/repositories_bar.dart';
@@ -56,5 +57,10 @@ export 'switches/custom_adaptive_switch.dart';
 
 export 'eq_terms_privacy.dart';
 export 'eq_values.dart';
+export 'holder.dart';
 export 'log_view.dart';
+export 'long_text.dart';
+export 'repo_creation.dart';
 export 'repo_security.dart';
+export 'repo_status.dart';
+export 'throughput_display.dart';
