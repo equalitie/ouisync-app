@@ -4,29 +4,49 @@ class ScrollableTextWidget extends StatefulWidget {
   const ScrollableTextWidget({
     required this.child,
     this.parentColor = Colors.white,
+    this.fontSize,
     super.key,
   });
 
   final Widget child;
   final Color parentColor;
+  final double? fontSize;
 
   @override
-  State<ScrollableTextWidget> createState() => _ScrollableTextWidgetState();
+  State<ScrollableTextWidget> createState() => _ScrollableTextWidgetState(
+        parentColor,
+        fontSize,
+      );
 }
 
 class _ScrollableTextWidgetState extends State<ScrollableTextWidget> {
+  _ScrollableTextWidgetState(
+    Color parentColor,
+    double? fontSize,
+  )   : _parentColor = parentColor,
+        _leadingFadeWidget = Text(
+          '   ',
+          style: TextStyle(fontSize: fontSize),
+        ),
+        _trailingEllipsisWidget = Text(
+          '...',
+          style: TextStyle(
+            backgroundColor: Colors.transparent,
+            fontSize: fontSize,
+          ),
+        );
+
+  final Color _parentColor;
+
+  final Text _leadingFadeWidget;
+  final Text _trailingEllipsisWidget;
+
   final _scrollController = ScrollController();
 
-  bool showStartEllipsis = false;
+  bool _showStartEllipsis = false;
 
-  bool showEndEllipsis = false;
-  bool maintainEndEllipsisSpace = false;
-
-  final leadingFadeWidget = const Text('   ');
-  final trailingEllipsisWidget = const Text(
-    '...',
-    style: TextStyle(backgroundColor: Colors.transparent),
-  );
+  bool _showEndEllipsis = false;
+  bool _maintainEndEllipsisSpace = false;
 
   @override
   void initState() {
@@ -36,8 +56,8 @@ class _ScrollableTextWidgetState extends State<ScrollableTextWidget> {
 
       final willScroll = extentTotal > viewPort;
 
-      maintainEndEllipsisSpace = willScroll;
-      setState(() => showEndEllipsis = willScroll);
+      _maintainEndEllipsisSpace = willScroll;
+      setState(() => _showEndEllipsis = willScroll);
     });
 
     _scrollController.addListener(
@@ -47,8 +67,8 @@ class _ScrollableTextWidgetState extends State<ScrollableTextWidget> {
         final offset = _scrollController.offset;
         final maxScroll = _scrollController.position.maxScrollExtent;
 
-        showStartEllipsis = offset > 1;
-        showEndEllipsis = (maxScroll - offset) > 0;
+        _showStartEllipsis = offset > 1;
+        _showEndEllipsis = (maxScroll - offset) > 0;
       }),
     );
 
@@ -69,16 +89,16 @@ class _ScrollableTextWidgetState extends State<ScrollableTextWidget> {
                 ),
               ),
               Visibility(
-                visible: showEndEllipsis,
-                child: trailingEllipsisWidget,
-                maintainState: maintainEndEllipsisSpace,
-                maintainSize: maintainEndEllipsisSpace,
-                maintainAnimation: maintainEndEllipsisSpace,
+                visible: _showEndEllipsis,
+                child: _trailingEllipsisWidget,
+                maintainState: _maintainEndEllipsisSpace,
+                maintainSize: _maintainEndEllipsisSpace,
+                maintainAnimation: _maintainEndEllipsisSpace,
               ),
             ],
           ),
           Visibility(
-            visible: showStartEllipsis,
+            visible: _showStartEllipsis,
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -88,12 +108,12 @@ class _ScrollableTextWidgetState extends State<ScrollableTextWidget> {
                       begin: Alignment.bottomLeft,
                       end: Alignment.bottomRight,
                       colors: [
-                        widget.parentColor,
-                        widget.parentColor.withOpacity(0.1)
+                        _parentColor,
+                        _parentColor.withOpacity(0.1),
                       ],
                     ),
                   ),
-                  child: leadingFadeWidget,
+                  child: _leadingFadeWidget,
                 ),
               ],
             ),
