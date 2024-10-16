@@ -266,7 +266,7 @@ class RepoCreationCubit extends Cubit<RepoCreationState>
   }
 
   Future<void> _onNameChanged() async {
-    final name = nameController.text;
+    final name = nameController.text.trim();
 
     if (name.isEmpty) {
       if (state.location != null) {
