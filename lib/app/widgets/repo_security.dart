@@ -1,24 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../utils/utils.dart';
 
 import '../../generated/l10n.dart';
-import '../cubits/repo_security.dart';
-import '../models/auth_mode.dart';
-import '../utils/platform/platform_values.dart';
-import 'widgets.dart';
+import '../cubits/cubits.dart' show RepoSecurityCubit, RepoSecurityState;
+import '../models/models.dart' show SecretKeyOrigin;
+import '../utils/platform/platform_values.dart' show PlatformValues;
+import '../utils/utils.dart'
+    show AppThemeExtension, Dimensions, Fields, ThemeGetter;
+import 'widgets.dart'
+    show CustomAdaptiveSwitch, PasswordValidation, ScrollableTextWidget;
 
 class RepoSecurity extends StatelessWidget {
   const RepoSecurity(
     this.cubit, {
     required this.isBlind,
+    this.repoName,
     super.key,
   });
 
   final RepoSecurityCubit cubit;
+
   // If a repository is blind, the security options are disabled, and a message
   // is shown explaining this.
   final bool isBlind;
+  final String? repoName;
 
   @override
   Widget build(BuildContext context) {
@@ -30,6 +35,7 @@ class RepoSecurity extends StatelessWidget {
       builder: (context, state) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          _buildRepoName(context, repoName),
           _buildPasswordFields(state),
           _buildOriginSwitch(state),
           _buildStoreSwitch(state),
@@ -37,6 +43,27 @@ class RepoSecurity extends StatelessWidget {
           _buildDisabledOptionsMessage(isBlind, warningStyle),
           _buildManualPasswordWarning(state, warningStyle),
         ],
+      ),
+    );
+  }
+
+  Widget _buildRepoName(BuildContext context, String? repoName) {
+    if (repoName == null) return const SizedBox.shrink();
+
+    final titleFontSize = context.theme.textTheme.titleLarge?.fontSize;
+    final textStyle = context.theme.textTheme.bodyMedium?.copyWith(
+        fontSize: titleFontSize,
+        fontWeight: FontWeight.w400,
+        textBaseline: TextBaseline.ideographic);
+
+    return Container(
+      padding: Dimensions.paddingVertical10,
+      child: ScrollableTextWidget(
+        child: Text(
+          '\'$repoName\'',
+          style: textStyle,
+        ),
+        fontSize: titleFontSize,
       ),
     );
   }

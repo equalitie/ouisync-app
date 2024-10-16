@@ -4,12 +4,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../generated/l10n.dart';
-import '../cubits/repo.dart';
-import '../cubits/repo_security.dart';
-import '../models/models.dart';
-import '../utils/utils.dart';
-import '../widgets/holder.dart';
-import '../widgets/widgets.dart';
+import '../cubits/cubits.dart'
+    show RepoCubit, RepoSecurityCubit, RepoSecurityState;
+import '../models/models.dart' show LocalSecret;
+import '../utils/utils.dart'
+    show
+        AppThemeExtension,
+        Dialogs,
+        Fields,
+        PasswordHasher,
+        Settings,
+        showSnackBar,
+        ThemeGetter;
+import '../widgets/widgets.dart'
+    show BlocHolder, ContentWithStickyFooterState, RepoSecurity;
 
 class RepoSecurityPage extends StatelessWidget {
   const RepoSecurityPage({
@@ -32,13 +40,18 @@ class RepoSecurityPage extends StatelessWidget {
             oldLocalSecretMode: repo.state.authMode.localSecretMode,
             oldLocalSecret: currentLocalSecret,
           ),
-          builder: _buildContent,
+          builder: (context, repoSecurityCubit) => _buildContent(
+            context,
+            repoSecurityCubit,
+            repo.name,
+          ),
         ),
       );
 
   ContentWithStickyFooterState _buildContent(
     BuildContext context,
     RepoSecurityCubit cubit,
+    String repoName,
   ) =>
       ContentWithStickyFooterState(
         content: PopScope(
@@ -46,7 +59,7 @@ class RepoSecurityPage extends StatelessWidget {
           onPopInvokedWithResult: (didPop, _) =>
               _onPopInvoked(context, didPop, cubit.state),
           // We know the `currentLocalSecret` so the repository is not blind.
-          child: RepoSecurity(cubit, isBlind: false),
+          child: RepoSecurity(cubit, isBlind: false, repoName: repoName),
         ),
         footer: BlocBuilder<RepoSecurityCubit, RepoSecurityState>(
           bloc: cubit,

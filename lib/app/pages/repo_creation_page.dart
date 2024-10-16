@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:ouisync_app/app/widgets/holder.dart';
-import 'package:ouisync_app/app/widgets/repo_creation.dart';
 import 'package:ouisync/ouisync.dart';
 
 import '../../generated/l10n.dart';
-import '../cubits/cubits.dart';
-import '../cubits/repo_creation.dart';
+import '../cubits/cubits.dart' show ReposCubit, RepoCreationCubit;
+import '../widgets/widgets.dart' show BlocHolder, RepoCreation;
 
 class RepoCreationPage extends StatelessWidget {
   RepoCreationPage({
