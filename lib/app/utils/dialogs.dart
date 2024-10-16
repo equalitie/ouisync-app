@@ -9,6 +9,11 @@ import '../widgets/widgets.dart';
 import 'utils.dart';
 
 abstract class Dialogs {
+  static Future<T> executeWithLoadingDialog<T>(
+      BuildContext context, Future<T> func()) {
+    return executeFutureWithLoadingDialog(context, func());
+  }
+
   static Future<T> executeFutureWithLoadingDialog<T>(
     BuildContext? context,
     Future<T> future,
@@ -26,14 +31,16 @@ abstract class Dialogs {
           .addPostFrameCallback((_) => BuildContextProvider()(_loadingDialog));
 
   static Future<void> _loadingDialog(BuildContext context) => showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) => Center(
-          child: const CircularProgressIndicator.adaptive(
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-          ),
-        ),
-      );
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) => PopScope(
+            canPop: false,
+            child: Center(
+              child: const CircularProgressIndicator.adaptive(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              ),
+            ),
+          ));
 
   static _hideLoadingDialog(BuildContext? context) => context != null
       ? _popDialog(context)
