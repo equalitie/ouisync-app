@@ -51,7 +51,8 @@ class PlatformWindowManagerDesktop
     // On Windows, the system tray title is shown only when howering over the
     // icon, but on Linux it is always visible next to it. That's in my
     // experience is unlike how other apps behave. So turning it off on Linux.
-    final systemTrayTitle = Platform.isLinux ? null : S.current.titleAppTitle;
+    // edit: same goes for macOS; the title has its uses, but not in this case.
+    final systemTrayTitle = Platform.isWindows ? S.current.titleAppTitle : null;
 
     await _systemTray.initSystemTray(
       title: systemTrayTitle,
@@ -61,7 +62,7 @@ class PlatformWindowManagerDesktop
 
     final menu = stray.Menu();
     await menu.buildFrom([
-      if (Platform.isLinux)
+      if (Platform.isLinux || Platform.isMacOS)
         stray.MenuItemLabel(
           label: '${S.current.actionHide} / ${S.current.actionShow}',
           onClicked: (_) => _toggleVisible(),
@@ -169,7 +170,7 @@ class PlatformWindowManagerDesktop
         await windowManager.close();
         break;
       case _State.closed:
-        break;
+        await windowManager.destroy();
     }
   }
 

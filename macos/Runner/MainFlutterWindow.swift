@@ -26,6 +26,11 @@ class MainFlutterWindow: NSWindow {
         super.awakeFromNib()
     }
 
+    override public func order(_ place: NSWindow.OrderingMode, relativeTo otherWin: Int) {
+        super.order(place, relativeTo: otherWin)
+        hiddenWindowAtLaunch()
+    }
+
     // ------------------------------------------------------------------
     // Autostart requires some custom platform integration as per:
     // https://pub.dev/packages/launch_at_startup#macos-support
