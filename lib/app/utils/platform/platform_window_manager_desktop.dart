@@ -141,11 +141,7 @@ class PlatformWindowManagerDesktop
         minimumSize: minSize);
 
     await windowManager.waitUntilReadyToShow(windowOptions);
-
-    if (_showWindow) {
-      await windowManager.show();
-      await windowManager.focus();
-    }
+    await _toggleVisible(_showWindow);
   }
 
   @override
@@ -157,7 +153,7 @@ class PlatformWindowManagerDesktop
     // then actually closes the window and exits the app.
     switch (_state) {
       case _State.open:
-        await windowManager.hide();
+        await _toggleVisible(false);
         break;
       case _State.closing:
         final onClose = _onClose;
@@ -201,11 +197,14 @@ class PlatformWindowManagerDesktop
   }
 }
 
-Future<void> _toggleVisible() async {
-  if (await windowManager.isVisible()) {
-    await windowManager.hide();
-  } else {
+Future<void> _toggleVisible([bool? visible]) async {
+  visible ??= !await windowManager.isVisible();
+  await windowManager.setSkipTaskbar(!visible);
+  if (visible) {
     await windowManager.show();
+    await windowManager.focus();
+  } else {
+    await windowManager.hide();
   }
 }
 
