@@ -19,14 +19,17 @@ class SortByButton extends StatelessWidget {
       borderRadius: BorderRadiusDirectional.all(Radius.circular(6.0)),
       child: Center(
         child: InkWell(
-          child: Container(
-            padding: EdgeInsetsDirectional.all(6.0),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primaryContainer,
-              shape: BoxShape.rectangle,
-              borderRadius: BorderRadiusDirectional.all(Radius.circular(6.0)),
+          child: Directionality(
+            textDirection: TextDirection.rtl,
+            child: Container(
+              padding: EdgeInsetsDirectional.all(6.0),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primaryContainer,
+                shape: BoxShape.rectangle,
+                borderRadius: BorderRadiusDirectional.all(Radius.circular(6.0)),
+              ),
+              child: Text(S.current.messageSortBy(sortBy.name)),
             ),
-            child: Text(S.current.messageSortBy(sortBy.name)),
           ),
           onTap: () async => sort(),
         ),
