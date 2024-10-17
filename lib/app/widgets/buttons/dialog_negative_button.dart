@@ -25,7 +25,7 @@ class NegativeButton extends StatelessWidget {
       children: [
         Expanded(
           child: Align(
-            alignment: Alignment.bottomRight,
+            alignment: AlignmentDirectional.bottomEnd,
             child: AspectRatio(
               aspectRatio: buttonsAspectRatio,
               child: Container(

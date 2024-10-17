@@ -66,7 +66,7 @@ class _Progress extends StatelessWidget {
   Widget _buildIndicator(double fraction) => Container(
         width: _iconSize,
         height: _iconSize,
-        padding: EdgeInsets.all(_iconPadding),
+        padding: EdgeInsetsDirectional.all(_iconPadding),
         child: CircularProgressIndicator(
           value: fraction,
           color: _color,
@@ -79,7 +79,7 @@ class _Progress extends StatelessWidget {
           color: Colors.lightGreen,
           shape: CircleBorder(),
         ),
-        padding: EdgeInsets.all(_iconPadding),
+        padding: EdgeInsetsDirectional.all(_iconPadding),
         child: Icon(
           Icons.done,
           color: Colors.white,

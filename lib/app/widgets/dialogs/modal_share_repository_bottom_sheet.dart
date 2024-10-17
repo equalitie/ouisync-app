@@ -59,7 +59,7 @@ class _ShareRepositoryState extends State<ShareRepository> with AppLogger {
     });
 
     return Container(
-        alignment: Alignment.bottomCenter,
+        alignment: AlignmentDirectional.bottomCenter,
         padding: Dimensions.paddingBottomSheet,
         child: SingleChildScrollView(
             controller: scrollController,
@@ -142,10 +142,8 @@ class _ShareRepositoryState extends State<ShareRepository> with AppLogger {
   Widget _buildShareBox() => Container(
         padding: Dimensions.paddingItemBoxLoose,
         decoration: const BoxDecoration(
-          borderRadius: BorderRadius.all(
-            Radius.circular(
-              Dimensions.radiusSmall,
-            ),
+          borderRadius: BorderRadiusDirectional.all(
+            Radius.circular(Dimensions.radiusSmall),
           ),
           color: Constants.inputBackgroundColor,
         ),

@@ -65,7 +65,7 @@ class _AcceptEqualitieValuesTermsPrivacyPageState
         Image.asset(Constants.ouisyncLogoFull,
             width: MediaQuery.of(context).size.width * 0.6),
         Padding(
-            padding: EdgeInsets.only(bottom: 10.0),
+            padding: EdgeInsetsDirectional.only(bottom: 10.0),
             child: Text(S.current.messageBy,
                 style: context.theme.appTextStyle.bodyMicro
                     .copyWith(color: Colors.black54))),

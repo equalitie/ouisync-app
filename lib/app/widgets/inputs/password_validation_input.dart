@@ -31,7 +31,7 @@ class _PasswordValidationState<PasswordResult> extends State<PasswordValidation>
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.only(top: 24.0),
+      padding: EdgeInsetsDirectional.only(top: 24.0),
       child: Column(
         children: [
           Row(
@@ -144,7 +144,7 @@ class _PasswordValidationState<PasswordResult> extends State<PasswordValidation>
             icon: _obscurePassword
                 ? const Icon(Constants.iconVisibilityOff)
                 : const Icon(Constants.iconVisibilityOn),
-            padding: EdgeInsets.zero,
+            padding: EdgeInsetsDirectional.zero,
             visualDensity: VisualDensity.compact,
             color: Colors.black),
         IconButton(
@@ -153,7 +153,7 @@ class _PasswordValidationState<PasswordResult> extends State<PasswordValidation>
               showSnackBar(S.current.messagePasswordCopiedClipboard);
             },
             icon: const Icon(Icons.copy_rounded),
-            padding: EdgeInsets.zero,
+            padding: EdgeInsetsDirectional.zero,
             visualDensity: VisualDensity.compact,
             color: Colors.black)
       ]);
@@ -165,7 +165,7 @@ class _PasswordValidationState<PasswordResult> extends State<PasswordValidation>
             icon: _obscureRetypePassword
                 ? const Icon(Constants.iconVisibilityOff)
                 : const Icon(Constants.iconVisibilityOn),
-            padding: EdgeInsets.zero,
+            padding: EdgeInsetsDirectional.zero,
             visualDensity: VisualDensity.compact,
             color: Colors.black),
         IconButton(
@@ -175,7 +175,7 @@ class _PasswordValidationState<PasswordResult> extends State<PasswordValidation>
               showSnackBar(S.current.messagePasswordCopiedClipboard);
             },
             icon: const Icon(Icons.copy_rounded),
-            padding: EdgeInsets.zero,
+            padding: EdgeInsetsDirectional.zero,
             visualDensity: VisualDensity.compact,
             color: Colors.black)
       ]);

@@ -27,13 +27,13 @@ class NoContentsState extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Align(
-                alignment: Alignment.center,
+                alignment: AlignmentDirectional.center,
                 child: Fields.placeholderWidget(
                     assetName: Constants.assetEmptyFolder,
                     assetHeight: emptyFolderImageHeight)),
             Dimensions.spacingVerticalDouble,
             Align(
-              alignment: Alignment.center,
+              alignment: AlignmentDirectional.center,
               child: Fields.inPageMainMessage(
                   path.isEmpty
                       ? S.current.messageEmptyRepo
@@ -42,7 +42,7 @@ class NoContentsState extends StatelessWidget {
             ),
             Dimensions.spacingVertical,
             Align(
-              alignment: Alignment.center,
+              alignment: AlignmentDirectional.center,
               child: Fields.inPageSecondaryMessage(
                 repository.state.accessMode == oui.AccessMode.write
                     ? S.current.messageCreateAddNewItem

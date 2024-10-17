@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync/ouisync.dart';
-import 'package:ouisync_app/app/widgets/throughput_display.dart';
 import 'package:stream_transform/stream_transform.dart';
 
 import '../../generated/l10n.dart';
-import '../cubits/peer_set.dart';
-import '../utils/utils.dart';
-import '../widgets/long_text.dart';
-import 'user_provided_peers_page.dart';
+import '../cubits/cubits.dart' show PeerSet, PeerSetCubit;
+import '../utils/utils.dart' show AppThemeExtension, Dimensions, ThemeGetter;
+import '../widgets/widgets.dart'
+    show DirectionalAppBar, LongText, LiveThroughputDisplay, ThroughputDisplay;
+import 'pages.dart' show UserProvidedPeersPage;
 
 const double _contentSize = 12.0;
 
@@ -41,30 +41,31 @@ class _PeersPageState extends State<PeersPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(
-            title: Row(
-              children: [
-                Text(S.current.labelPeers),
-                Spacer(),
-                LiveThroughputDisplay(
-                  _networkStatsStream,
-                  size: Theme.of(context).textTheme.labelSmall?.fontSize,
-                  orientation: Orientation.portrait,
+        appBar: DirectionalAppBar(
+          title: Row(
+            children: [
+              Text(S.current.labelPeers),
+              Spacer(),
+              LiveThroughputDisplay(
+                _networkStatsStream,
+                size: Theme.of(context).textTheme.labelSmall?.fontSize,
+                orientation: Orientation.portrait,
+              ),
+            ],
+          ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.manage_accounts),
+              tooltip: 'User provided peers',
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => UserProvidedPeersPage(widget.session),
                 ),
-              ],
-            ),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.manage_accounts),
-                tooltip: 'User provided peers',
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => UserProvidedPeersPage(widget.session),
-                  ),
-                ),
-              )
-            ]),
+              ),
+            )
+          ],
+        ),
         body: BlocBuilder<PeerSetCubit, PeerSet>(
           bloc: widget.cubit,
           builder: (context, state) => ListView(
@@ -105,15 +106,21 @@ class _PeersPageState extends State<PeersPage> {
   }
 
   Widget _buildHeader(BuildContext context, String title) => Container(
-        padding: EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0),
+        padding: EdgeInsetsDirectional.symmetric(
+          horizontal: 4.0,
+          vertical: 8.0,
+        ),
         child: Text(title, style: context.theme.appTextStyle.titleLarge),
       );
 
   Widget _buildPeerHeader(BuildContext context, int index, String runtimeId) =>
       Container(
-        padding: EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
+        padding: EdgeInsetsDirectional.symmetric(
+          horizontal: 4.0,
+          vertical: 4.0,
+        ),
         decoration: BoxDecoration(
-          border: Border(
+          border: BorderDirectional(
             top: BorderSide(
               color: context.theme.dividerColor.withOpacity(0.5),
             ),
@@ -142,7 +149,7 @@ class _PeersPageState extends State<PeersPage> {
       );
 
   Widget _buildPeer(BuildContext context, PeerInfo peer) => Container(
-        padding: EdgeInsets.all(4.0),
+        padding: EdgeInsetsDirectional.all(4.0),
         child: Row(
           children: [
             Spacer(flex: 1),
@@ -188,10 +195,10 @@ class _PeersPageState extends State<PeersPage> {
     return Container(
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(4.0),
+        borderRadius: BorderRadiusDirectional.circular(4.0),
       ),
-      padding: EdgeInsets.symmetric(vertical: 2.0, horizontal: 4.0),
-      margin: EdgeInsets.symmetric(horizontal: 1.0),
+      padding: EdgeInsetsDirectional.symmetric(vertical: 2.0, horizontal: 4.0),
+      margin: EdgeInsetsDirectional.symmetric(horizontal: 1.0),
       child: _applyStyle(
         fgColor: fg,
         bgColor: bg,

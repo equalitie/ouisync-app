@@ -19,8 +19,9 @@ class RepositorySelector extends StatelessWidget with AppLogger {
             : null,
         padding: Dimensions.paddingActionBox,
         decoration: const BoxDecoration(
-            borderRadius:
-                BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
+            borderRadius: BorderRadiusDirectional.all(
+              Radius.circular(Dimensions.radiusSmall),
+            ),
             color: Constants.inputBackgroundColor),
         child: DropdownButton<RepoEntry?>(
           isExpanded: true,

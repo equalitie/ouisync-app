@@ -18,15 +18,15 @@ class SortDirectionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       elevation: 3.0,
-      borderRadius: BorderRadius.all(Radius.circular(6.0)),
+      borderRadius: BorderRadiusDirectional.all(Radius.circular(6.0)),
       child: Center(
         child: InkWell(
           child: Container(
-            padding: EdgeInsets.all(6.0),
+            padding: EdgeInsetsDirectional.all(6.0),
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.primaryContainer,
               shape: BoxShape.rectangle,
-              borderRadius: BorderRadius.all(Radius.circular(6.0)),
+              borderRadius: BorderRadiusDirectional.all(Radius.circular(6.0)),
             ),
             child: _getDirectionArrow(direction),
           ),
