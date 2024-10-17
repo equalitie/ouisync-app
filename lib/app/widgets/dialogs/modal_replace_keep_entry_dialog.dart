@@ -48,7 +48,7 @@ class ReplaceKeepEntry extends StatelessWidget {
                   },
                   child: RadioListTile<FileAction>(
                     dense: true,
-                    contentPadding: EdgeInsets.zero,
+                    contentPadding: EdgeInsetsDirectional.zero,
                     title: Text(replaceMessage, style: bodyStyle),
                     value: FileAction.replace,
                     groupValue: value,
@@ -58,7 +58,7 @@ class ReplaceKeepEntry extends StatelessWidget {
                 ),
                 RadioListTile<FileAction>(
                   dense: true,
-                  contentPadding: EdgeInsets.zero,
+                  contentPadding: EdgeInsetsDirectional.zero,
                   title: Text(keepMessage, style: bodyStyle),
                   value: FileAction.keep,
                   groupValue: value,

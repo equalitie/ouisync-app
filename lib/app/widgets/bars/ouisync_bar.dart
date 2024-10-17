@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../cubits/cubits.dart';
 import '../../utils/constants.dart';
-import 'folder_navigation_bar.dart';
+import '../widgets.dart' show DirectionalAppBar, FolderNavigationBar;
 
 enum AppBarWidgetType { title, action }
 
@@ -28,7 +28,7 @@ class OuiSyncBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) => reposCubit.builder((state) {
         final leadingWidget = state.showList
             ? Padding(
-                padding: const EdgeInsets.only(left: 8.0),
+                padding: const EdgeInsetsDirectional.only(start: 8.0),
                 child: ouisyncLogo,
               )
             : null;
@@ -59,14 +59,14 @@ class OuiSyncBar extends StatelessWidget implements PreferredSizeWidget {
 
         actionsList.add(settingsButton);
 
-        return AppBar(
-          automaticallyImplyLeading: true,
+        return DirectionalAppBar(
           leading: leadingWidget,
-          leadingWidth: 120.0,
           title: titleWidget,
+          automaticallyImplyLeading: true,
+          actions: actionsList,
           // Make the `repoList` have no spacing on the horizontal axis.
           titleSpacing: 0.0,
-          actions: actionsList,
+          leadingWidth: 120.0,
         );
       });
 

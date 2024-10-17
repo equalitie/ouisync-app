@@ -60,7 +60,7 @@ class RepositoriesBar extends StatelessWidget
   Widget _buildStats(BuildContext context, RepoEntry? repo) =>
       repo is OpenRepoEntry
           ? Padding(
-              padding: EdgeInsets.only(right: 10.0),
+              padding: EdgeInsetsDirectional.only(end: 10.0),
               child: LiveThroughputDisplay(
                 _repoStatsStream(repo.cubit),
                 size: Theme.of(context).textTheme.labelSmall?.fontSize,
@@ -71,7 +71,7 @@ class RepositoriesBar extends StatelessWidget
 
   Widget _buildStatus(RepoEntry? repo) => repo is OpenRepoEntry
       ? Padding(
-          padding: EdgeInsets.only(right: 10.0),
+          padding: EdgeInsetsDirectional.only(end: 10.0),
           child: RepoStatus(repo.cubit),
         )
       : SizedBox.shrink();
@@ -93,7 +93,7 @@ class RepositoriesBar extends StatelessWidget
             Fields.accessModeIcon(repoCubit?.accessMode ?? AccessMode.blind)),
         iconSize: Dimensions.sizeIconSmall,
         onPressed: () => repoCubit?.lock(),
-        alignment: Alignment.centerRight,
+        alignment: AlignmentDirectional.centerEnd,
       );
 
   // TODO: Why does the badge appear to move quickly after entering this screen?

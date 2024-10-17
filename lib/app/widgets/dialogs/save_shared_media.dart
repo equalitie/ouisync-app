@@ -99,7 +99,7 @@ class _SaveSharedMediaState extends State<SaveSharedMedia> {
       constraints: BoxConstraints.loose(Size.fromHeight(mediaListMaxHeight)),
       height: mediaListMaxHeight,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.all(Radius.circular(6.0)),
+        borderRadius: BorderRadiusDirectional.all(Radius.circular(6.0)),
         color: Color.fromARGB(150, 255, 255, 255),
       ),
       child: ListView.separated(
@@ -123,7 +123,7 @@ class _SaveSharedMediaState extends State<SaveSharedMedia> {
         totalFiles == 1 ? S.current.messageFile : S.current.messageFiles;
 
     return Padding(
-      padding: EdgeInsets.all(4.0),
+      padding: EdgeInsetsDirectional.all(4.0),
       child: Text(
         '$totalFiles $pluralizedMessage',
         textAlign: TextAlign.right,
@@ -135,7 +135,7 @@ class _SaveSharedMediaState extends State<SaveSharedMedia> {
         (reposCubit) => Fields.dialogActions(
           context,
           buttons: _actions(reposCubit),
-          padding: const EdgeInsets.only(top: 20.0),
+          padding: const EdgeInsetsDirectional.only(top: 20.0),
           mainAxisAlignment: MainAxisAlignment.end,
         ),
       );
@@ -201,7 +201,7 @@ class _MediaDescription extends StatelessWidget {
               ),
               Expanded(
                 child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8.0),
+                  padding: EdgeInsetsDirectional.symmetric(horizontal: 8.0),
                   child: Fields.ellipsedText(
                     name,
                     ellipsisPosition: TextOverflowPosition.middle,
@@ -214,7 +214,7 @@ class _MediaDescription extends StatelessWidget {
             children: [
               Expanded(
                 child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8.0),
+                  padding: EdgeInsetsDirectional.symmetric(horizontal: 8.0),
                   child: Fields.ellipsedText(
                     parent,
                     ellipsisPosition: TextOverflowPosition.middle,

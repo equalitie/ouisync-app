@@ -6,7 +6,6 @@ import 'package:stream_transform/stream_transform.dart';
 
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
-import '../cubits/launch_at_startup.dart';
 import '../widgets/widgets.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -66,10 +65,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(
-          title: Text(S.current.titleSettings),
-          elevation: 0.0,
-        ),
+        appBar: DirectionalAppBar(title: Text(S.current.titleSettings)),
         body: AppSettingsContainer(
           widget.session,
           localeCubit: widget.localeCubit,

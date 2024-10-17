@@ -124,8 +124,9 @@ class RepoCreation extends StatelessWidget {
         Container(
           padding: Dimensions.paddingShareLinkBox,
           decoration: const BoxDecoration(
-            borderRadius:
-                BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
+            borderRadius: BorderRadiusDirectional.all(
+              Radius.circular(Dimensions.radiusSmall),
+            ),
             color: Constants.inputBackgroundColor,
           ),
           child: Column(
@@ -198,7 +199,7 @@ class RepoCreation extends StatelessWidget {
               key: ValueKey('use-cache-servers'),
               value: state.useCacheServers,
               title: S.current.messageUseCacheServers,
-              contentPadding: EdgeInsets.zero,
+              contentPadding: EdgeInsetsDirectional.zero,
               onChanged: (value) => creationCubit.setUseCacheServers(value),
             )
           : SizedBox.shrink();

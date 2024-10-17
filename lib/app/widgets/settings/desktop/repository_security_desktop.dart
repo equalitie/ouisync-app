@@ -36,7 +36,7 @@ class _RepositorySecurityDesktopState extends State<RepositorySecurityDesktop> {
   }
 
   Widget _authenticationPlaceholder(BuildContext context) => Padding(
-      padding: EdgeInsets.symmetric(vertical: 20.0),
+      padding: EdgeInsetsDirectional.symmetric(vertical: 20.0),
       child: TextButton.icon(
           onPressed: () async => await _unlockSecurity(context),
           icon: const Icon(Icons.lock_outline_rounded),
@@ -46,11 +46,13 @@ class _RepositorySecurityDesktopState extends State<RepositorySecurityDesktop> {
       Row(mainAxisSize: MainAxisSize.min, children: [
         Container(
             width: PlatformValues.getFormFactorMaxWidth(context) * 0.5,
-            padding: EdgeInsets.all(10.0), //Dimensions.paddingGreyBox,
-            margin: EdgeInsets.symmetric(vertical: 5.0),
+            padding:
+                EdgeInsetsDirectional.all(10.0), //Dimensions.paddingGreyBox,
+            margin: EdgeInsetsDirectional.symmetric(vertical: 5.0),
             decoration: const BoxDecoration(
-                borderRadius:
-                    BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
+                borderRadius: BorderRadiusDirectional.all(
+                  Radius.circular(Dimensions.radiusSmall),
+                ),
                 color: Constants.inputBackgroundColor),
             child: Row(children: [
               Expanded(
@@ -62,7 +64,7 @@ class _RepositorySecurityDesktopState extends State<RepositorySecurityDesktop> {
                       icon: _previewPassword
                           ? const Icon(Constants.iconVisibilityOff)
                           : const Icon(Constants.iconVisibilityOn),
-                      padding: EdgeInsets.zero,
+                      padding: EdgeInsetsDirectional.zero,
                       color: Theme.of(context).primaryColor,
                       onPressed: _isPasswordAvailable(_password)
                           ? () => setState(

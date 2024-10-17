@@ -18,7 +18,7 @@ class EqTermsAndPrivacy extends StatelessWidget {
     return Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
-            childrenPadding: EdgeInsets.symmetric(vertical: 20.0),
+            childrenPadding: EdgeInsetsDirectional.symmetric(vertical: 20.0),
             title: Text(S.current.messageTapForTermsPrivacy,
                 textAlign: TextAlign.end, style: headerTextStyle),
             children: [_temsAndPrivacyTextBlock(context)]));

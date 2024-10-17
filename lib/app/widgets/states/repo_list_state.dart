@@ -53,7 +53,7 @@ class RepoListState extends StatelessWidget
       ValueListenableBuilder(
         valueListenable: bottomSheetInfo,
         builder: (context, btInfo, child) => ListView.separated(
-          padding: EdgeInsets.only(
+          padding: EdgeInsetsDirectional.only(
             bottom: btInfo.neededPadding <= 0.0
                 ? Dimensions.defaultListBottomPadding
                 : btInfo.neededPadding,

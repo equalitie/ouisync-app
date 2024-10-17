@@ -14,7 +14,7 @@ class EntryActionItem extends StatefulWidget {
     this.enabledValidation,
     this.disabledMessage,
     this.disabledMessageDuration = 0,
-    this.contentPadding = EdgeInsets.zero,
+    this.contentPadding = EdgeInsetsDirectional.zero,
     this.dense = true,
     this.visualDensity = VisualDensity.compact,
     this.minLeadingWidth = 20.0,
@@ -37,7 +37,7 @@ class EntryActionItem extends StatefulWidget {
   final bool? dense;
   final VisualDensity? visualDensity;
   final double minLeadingWidth;
-  final EdgeInsets contentPadding;
+  final EdgeInsetsDirectional contentPadding;
   final TextAlign textAlign;
   final TextOverflow textOverflow;
   final TextStyle? titleTextStyle;
@@ -140,7 +140,7 @@ class _EntryActionItemState extends State<EntryActionItem> {
             child: GestureDetector(
                 onTap: _hideDisabledMessage,
                 child: Padding(
-                    padding: const EdgeInsets.only(right: 20.0, bottom: 4.0),
+                    padding: const EdgeInsetsDirectional.only(end: 20.0, bottom: 4.0),
                     child: Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [

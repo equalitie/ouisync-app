@@ -34,69 +34,79 @@ class Dimensions {
   static const BoxConstraints sizeConstrainsBottomDialogAction =
       BoxConstraints(minWidth: 98, minHeight: 46.0);
 
-  static const EdgeInsets paddingContents =
-      EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0);
-  static const EdgeInsets paddingDialog =
-      EdgeInsets.fromLTRB(15.0, 20.0, 15.0, 10.0);
-  static const EdgeInsets paddingBottomSheet =
-      EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0);
-  static const EdgeInsets paddingBottomSheetActions =
-      EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 20.0);
-  static const EdgeInsets paddingIconButton = EdgeInsets.all(2.0);
-  static const EdgeInsets paddingActionButton =
-      EdgeInsets.symmetric(vertical: 10.0, horizontal: 4.0);
-  static const EdgeInsets paddingBox = EdgeInsets.only(top: 10.0, bottom: 10.0);
-  static const EdgeInsets paddingRepositoryBar =
-      EdgeInsets.symmetric(vertical: 0.0, horizontal: 5.0);
-  static const EdgeInsets paddingRepositoryPicker =
-      EdgeInsets.symmetric(vertical: 0.0, horizontal: 2.0);
-  static const EdgeInsets paddingInPageMain =
-      EdgeInsets.symmetric(horizontal: 5.0, vertical: 0.0);
-  static const EdgeInsets paddingInPageSecondary =
-      EdgeInsets.symmetric(horizontal: 10.0, vertical: 0.0);
-  static const EdgeInsets paddingBottomSheetTitle =
-      EdgeInsets.only(bottom: 20.0);
-  static const EdgeInsets paddingFormTextField = EdgeInsets.only(bottom: 10.0);
-  static const EdgeInsets paddingActionsSection = EdgeInsets.only(top: 20.0);
-  static const EdgeInsets paddingActionBox = EdgeInsets.all(5.0);
-  static const EdgeInsets paddingActionBoxTop =
-      EdgeInsets.only(top: 10.0, bottom: 5.0);
-  static const EdgeInsets paddingActionBoxRight =
-      EdgeInsets.only(right: 5.0, bottom: 10.0);
-  static const EdgeInsets paddingListItem =
-      EdgeInsets.fromLTRB(8.0, 10.0, 2.0, 10.0);
-  static const EdgeInsets paddingItem = EdgeInsets.only(left: 10.0);
-  static const EdgeInsets paddingItemBox =
-      EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0);
-  static const EdgeInsets paddingItemBoxLoose =
-      EdgeInsets.symmetric(vertical: 20.0, horizontal: 10.0);
-  static const EdgeInsets paddingGreyBox =
-      EdgeInsets.symmetric(vertical: 5.0, horizontal: 5.0);
-  static const EdgeInsets paddingLinearProgressIndicator =
-      EdgeInsets.symmetric(horizontal: 10.0, vertical: 2.0);
-  static const EdgeInsets paddingAll20 = EdgeInsets.all(20.0);
-  static const EdgeInsets paddingVertical10 =
-      EdgeInsets.symmetric(vertical: 10.0);
-  static const EdgeInsets paddingVertical20 =
-      EdgeInsets.symmetric(vertical: 20.0);
-  static const EdgeInsets paddingVertical40 =
-      EdgeInsets.symmetric(vertical: 40.0);
-  static const EdgeInsets paddingTop40 = EdgeInsets.only(top: 40.0);
-  static const EdgeInsets paddingShareLinkBox =
-      EdgeInsets.symmetric(vertical: 15.0, horizontal: 10.0);
-  static const EdgeInsets paddingPageButton =
-      EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0);
-  static const EdgeInsets paddingPageButtonIcon =
-      EdgeInsets.symmetric(horizontal: 20.0, vertical: 15.0);
+  static const EdgeInsetsDirectional paddingContents =
+      EdgeInsetsDirectional.symmetric(vertical: 5.0, horizontal: 10.0);
+  static const EdgeInsetsDirectional paddingDialog =
+      EdgeInsetsDirectional.fromSTEB(15.0, 20.0, 15.0, 10.0);
+  static const EdgeInsetsDirectional paddingBottomSheet =
+      EdgeInsetsDirectional.symmetric(vertical: 10.0, horizontal: 20.0);
+  static const EdgeInsetsDirectional paddingBottomSheetActions =
+      EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 20.0);
+  static const EdgeInsetsDirectional paddingIconButton =
+      EdgeInsetsDirectional.all(2.0);
+  static const EdgeInsetsDirectional paddingActionButton =
+      EdgeInsetsDirectional.symmetric(vertical: 10.0, horizontal: 4.0);
+  static const EdgeInsetsDirectional paddingBox =
+      EdgeInsetsDirectional.only(top: 10.0, bottom: 10.0);
+  static const EdgeInsetsDirectional paddingRepositoryBar =
+      EdgeInsetsDirectional.symmetric(vertical: 0.0, horizontal: 5.0);
+  static const EdgeInsetsDirectional paddingRepositoryPicker =
+      EdgeInsetsDirectional.symmetric(vertical: 0.0, horizontal: 2.0);
+  static const EdgeInsetsDirectional paddingInPageMain =
+      EdgeInsetsDirectional.symmetric(horizontal: 5.0, vertical: 0.0);
+  static const EdgeInsetsDirectional paddingInPageSecondary =
+      EdgeInsetsDirectional.symmetric(horizontal: 10.0, vertical: 0.0);
+  static const EdgeInsetsDirectional paddingBottomSheetTitle =
+      EdgeInsetsDirectional.only(bottom: 20.0);
+  static const EdgeInsetsDirectional paddingFormTextField =
+      EdgeInsetsDirectional.only(bottom: 10.0);
+  static const EdgeInsetsDirectional paddingActionsSection =
+      EdgeInsetsDirectional.only(top: 20.0);
+  static const EdgeInsetsDirectional paddingActionBox =
+      EdgeInsetsDirectional.all(5.0);
+  static const EdgeInsetsDirectional paddingActionBoxTop =
+      EdgeInsetsDirectional.only(top: 10.0, bottom: 5.0);
+  static const EdgeInsetsDirectional paddingActionBoxRight =
+      EdgeInsetsDirectional.only(end: 5.0, bottom: 10.0);
+  static const EdgeInsetsDirectional paddingListItem =
+      EdgeInsetsDirectional.fromSTEB(8.0, 10.0, 2.0, 10.0);
+  static const EdgeInsetsDirectional paddingItem =
+      EdgeInsetsDirectional.only(start: 10.0);
+  static const EdgeInsetsDirectional paddingItemBox =
+      EdgeInsetsDirectional.symmetric(horizontal: 10.0, vertical: 5.0);
+  static const EdgeInsetsDirectional paddingItemBoxLoose =
+      EdgeInsetsDirectional.symmetric(vertical: 20.0, horizontal: 10.0);
+  static const EdgeInsetsDirectional paddingGreyBox =
+      EdgeInsetsDirectional.symmetric(vertical: 5.0, horizontal: 5.0);
+  static const EdgeInsetsDirectional paddingLinearProgressIndicator =
+      EdgeInsetsDirectional.symmetric(horizontal: 10.0, vertical: 2.0);
+  static const EdgeInsetsDirectional paddingAll20 =
+      EdgeInsetsDirectional.all(20.0);
+  static const EdgeInsetsDirectional paddingVertical10 =
+      EdgeInsetsDirectional.symmetric(vertical: 10.0);
+  static const EdgeInsetsDirectional paddingVertical20 =
+      EdgeInsetsDirectional.symmetric(vertical: 20.0);
+  static const EdgeInsetsDirectional paddingVertical40 =
+      EdgeInsetsDirectional.symmetric(vertical: 40.0);
+  static const EdgeInsetsDirectional paddingTop40 =
+      EdgeInsetsDirectional.only(top: 40.0);
+  static const EdgeInsetsDirectional paddingShareLinkBox =
+      EdgeInsetsDirectional.symmetric(vertical: 15.0, horizontal: 10.0);
+  static const EdgeInsetsDirectional paddingPageButton =
+      EdgeInsetsDirectional.symmetric(horizontal: 20.0, vertical: 20.0);
+  static const EdgeInsetsDirectional paddingPageButtonIcon =
+      EdgeInsetsDirectional.symmetric(horizontal: 20.0, vertical: 15.0);
 
-  static const EdgeInsets marginQRCodeImage = EdgeInsets.all(20.0);
+  static const EdgeInsetsDirectional marginQRCodeImage =
+      EdgeInsetsDirectional.all(20.0);
 
   static const double actionsDialogPadding = 20.0;
   static const double actionsDialogAvatarRadius = 10.0;
 
   static const double defaultListBottomPadding = 2.0;
 
-  static const AlignmentGeometry alignmentIconButton = Alignment.center;
+  static const AlignmentGeometry alignmentIconButton =
+      AlignmentDirectional.center;
 
   static const Widget spacingVerticalHalf = SizedBox(height: 5.0);
   static const Widget spacingVertical = SizedBox(height: 10.0);
@@ -118,13 +128,13 @@ class Dimensions {
 
   static const TextStyle textStyleDialogNegativeButton = TextStyle(
       color: Color.fromARGB(255, 97, 97, 97), fontWeight: FontWeight.w500);
-  static const EdgeInsets marginDialogNegativeButton =
-      EdgeInsets.only(right: 10.0);
+  static const EdgeInsetsDirectional marginDialogNegativeButton =
+      EdgeInsetsDirectional.only(end: 10.0);
 
-  static const BorderRadius borderRadiusDialogPositiveButton =
-      BorderRadius.all(Radius.circular(5.0));
-  static const EdgeInsets marginDialogPositiveButton =
-      EdgeInsets.only(left: 10.0);
+  static const BorderRadiusDirectional borderRadiusDialogPositiveButton =
+      BorderRadiusDirectional.all(Radius.circular(5.0));
+  static const EdgeInsetsDirectional marginDialogPositiveButton =
+      EdgeInsetsDirectional.only(start: 10.0);
 
   static const RoundedRectangleBorder borderBottomSheetTop =
       RoundedRectangleBorder(borderRadius: boderRadiusBottomSheetTop);
@@ -132,11 +142,13 @@ class Dimensions {
   static const RoundedRectangleBorder borderBottomSheetAlternate =
       RoundedRectangleBorder(borderRadius: boderRadiusBottomSheetTop);
 
-  static const BorderRadius boderRadiusBottomSheetTop = BorderRadius.only(
-      topLeft: Radius.circular(Dimensions.radiusAverage),
-      topRight: Radius.circular(Dimensions.radiusAverage),
-      bottomLeft: Radius.zero,
-      bottomRight: Radius.zero);
+  static const BorderRadiusDirectional boderRadiusBottomSheetTop =
+      BorderRadiusDirectional.only(
+    topStart: Radius.circular(Dimensions.radiusAverage),
+    topEnd: Radius.circular(Dimensions.radiusAverage),
+    bottomStart: Radius.zero,
+    bottomEnd: Radius.zero,
+  );
 
   static const BoxDecoration decorationBottomSheetAlternative = BoxDecoration(
       borderRadius: Dimensions.boderRadiusBottomSheetTop,

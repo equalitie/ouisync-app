@@ -31,7 +31,7 @@ class NoRepositoriesState extends HookWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Align(
-            alignment: Alignment.center,
+            alignment: AlignmentDirectional.center,
             child: Fields.placeholderWidget(
               assetName: Constants.assetPathNothingHereYet,
               assetHeight: nothingHereYetImageHeight,
@@ -39,7 +39,7 @@ class NoRepositoriesState extends HookWidget {
           ),
           Dimensions.spacingVerticalDouble,
           Align(
-            alignment: Alignment.center,
+            alignment: AlignmentDirectional.center,
             child: Fields.inPageMainMessage(
               S.current.messageNoRepos,
               style: context.theme.appTextStyle.bodyLarge,
@@ -47,7 +47,7 @@ class NoRepositoriesState extends HookWidget {
           ),
           Dimensions.spacingVertical,
           Align(
-            alignment: Alignment.center,
+            alignment: AlignmentDirectional.center,
             child: Fields.inPageSecondaryMessage(
               S.current.messageCreateNewRepo,
               tags: {Constants.inlineTextBold: InlineTextStyles.bold},

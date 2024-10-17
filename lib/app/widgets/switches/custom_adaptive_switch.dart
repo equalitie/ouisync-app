@@ -13,7 +13,7 @@ class CustomAdaptiveSwitch extends StatelessWidget {
 
   final bool value;
   final String title;
-  final EdgeInsets contentPadding;
+  final EdgeInsetsDirectional contentPadding;
   final void Function(bool)? onChanged;
 
   @override
@@ -25,12 +25,12 @@ class CustomAdaptiveSwitch extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            Flexible(
+            Expanded(
               child: Text(
                 title,
-                textAlign: TextAlign.end,
+                textAlign: TextAlign.start,
                 softWrap: true,
-                maxLines: 3,
+                maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: context.theme.appTextStyle.titleMedium.fontSize,

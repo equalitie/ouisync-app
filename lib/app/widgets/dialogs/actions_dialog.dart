@@ -30,7 +30,9 @@ class _ActionsDialogState extends State<ActionsDialog> {
             decoration: BoxDecoration(
                 shape: BoxShape.rectangle,
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                borderRadius: BorderRadiusDirectional.circular(
+                  Dimensions.radiusSmall,
+                ),
                 boxShadow: const [
                   BoxShadow(
                       color: Colors.black,
