@@ -39,7 +39,7 @@ class _StateMonitorState extends State<StateMonitorPage> {
         appBar: AppBar(title: Text(S.current.titleStateMonitor)),
         body: Theme(
           data: ThemeData(
-            cardTheme: CardTheme(margin: EdgeInsets.all(1.0)),
+            cardTheme: CardTheme(margin: EdgeInsetsDirectional.all(1.0)),
             listTileTheme: ListTileThemeData(
               dense: true,
             ),
@@ -71,7 +71,7 @@ class _NodeWidget extends StatelessWidget {
 
             // child node - use regular `Column` because we are already inside `ListView`.
             return Padding(
-                padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
+                padding: const EdgeInsetsDirectional.fromSTEB(20, 0, 0, 0),
                 child: Column(children: buildValuesAndChildren(node)));
           });
 

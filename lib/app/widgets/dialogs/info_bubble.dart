@@ -198,7 +198,7 @@ class _InfoBubbleDialogState extends State<_InfoBubbleDialog> {
               children: [
                 // if (!showBubbleAboveWidget)
                 //   Padding(
-                //     padding: EdgeInsets.only(left: bubbleTipLeftPadding),
+                //     padding: EdgeInsetsDirectional.only(left: bubbleTipLeftPadding),
                 //     child: CustomPaint(
                 //       painter: TrianglePainter(
                 //         strokeColor: widget.bgColor,
@@ -214,7 +214,7 @@ class _InfoBubbleDialogState extends State<_InfoBubbleDialog> {
                 Material(
                   color: Colors.transparent,
                   child: Container(
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsetsDirectional.all(12),
                     width: widget.bubbleWidth,
                     decoration: BoxDecoration(
                         color: widget.bgColor,
@@ -239,7 +239,7 @@ class _InfoBubbleDialogState extends State<_InfoBubbleDialog> {
                 ),
                 // if (showBubbleAboveWidget)
                 //   Padding(
-                //     padding: EdgeInsets.only(left: bubbleTipLeftPadding),
+                //     padding: EdgeInsetsDirectional.only(left: bubbleTipLeftPadding),
                 //     child: RotatedBox(
                 //       quarterTurns: 2,
                 //       child: CustomPaint(

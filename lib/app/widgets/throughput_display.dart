@@ -57,7 +57,7 @@ class ThroughputDisplay extends StatelessWidget {
     Icon icon,
   ) =>
       Padding(
-        padding: EdgeInsets.symmetric(horizontal: 4.0),
+        padding: EdgeInsetsDirectional.symmetric(horizontal: 4.0),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [

@@ -198,7 +198,7 @@ class RepoCreation extends StatelessWidget {
               key: ValueKey('use-cache-servers'),
               value: state.useCacheServers,
               title: S.current.messageUseCacheServers,
-              contentPadding: EdgeInsets.zero,
+              contentPadding: EdgeInsetsDirectional.zero,
               onChanged: (value) => creationCubit.setUseCacheServers(value),
             )
           : SizedBox.shrink();

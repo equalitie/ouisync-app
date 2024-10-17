@@ -115,7 +115,7 @@ class RepoListItem extends StatelessWidget {
                   size: Dimensions.sizeIconAverage,
                 ),
                 color: Constants.folderIconColor,
-                padding: EdgeInsets.all(0.0),
+                padding: EdgeInsetsDirectional.all(0.0),
                 onPressed: () => repoCubit.lock(),
               ),
               Expanded(

@@ -13,7 +13,7 @@ class CustomAdaptiveSwitch extends StatelessWidget {
 
   final bool value;
   final String title;
-  final EdgeInsets contentPadding;
+  final EdgeInsetsDirectional contentPadding;
   final void Function(bool)? onChanged;
 
   @override

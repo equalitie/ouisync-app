@@ -45,7 +45,7 @@ class _UserProvidedPeersState extends State<UserProvidedPeersPage> {
       peers.map((peer) => _buildPeer(context, peer)).toList();
 
   Widget _buildPeer(BuildContext context, String peer) => Padding(
-        padding: EdgeInsets.all(4.0),
+        padding: EdgeInsetsDirectional.all(4.0),
         child: Row(children: [
           Expanded(child: LongText(peer)),
           IconButton(

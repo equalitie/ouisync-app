@@ -20,7 +20,7 @@ class SortByButton extends StatelessWidget {
       child: Center(
         child: InkWell(
           child: Container(
-            padding: EdgeInsets.all(6.0),
+            padding: EdgeInsetsDirectional.all(6.0),
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.primaryContainer,
               shape: BoxShape.rectangle,

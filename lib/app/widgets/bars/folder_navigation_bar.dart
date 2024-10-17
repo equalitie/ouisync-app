@@ -16,7 +16,7 @@ class FolderNavigationBar extends StatelessWidget {
     final path = _repo.state.currentFolder.path;
 
     return Container(
-      padding: const EdgeInsets.only(left: 12.0),
+      padding: const EdgeInsetsDirectional.only(start: 12.0),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -42,7 +42,7 @@ class FolderNavigationBar extends StatelessWidget {
         SizedBox(width: path == separator ? 5.0 : 0.0),
         Expanded(
           child: Padding(
-            padding: EdgeInsets.only(left: 12.0, right: 12.0),
+            padding: EdgeInsetsDirectional.only(start: 12.0, end: 12.0),
             child: Fields.ellipsedText(
               current,
               ellipsisPosition: TextOverflowPosition.middle,

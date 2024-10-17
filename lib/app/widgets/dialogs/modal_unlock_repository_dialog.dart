@@ -82,7 +82,7 @@ class _UnlockRepositoryState extends State<UnlockRepository> with AppLogger {
         onChanged: (value) => setState(() {
           store = value;
         }),
-        contentPadding: EdgeInsets.zero,
+        contentPadding: EdgeInsetsDirectional.zero,
       );
 
   Widget buildBiometricsSwitch() => Visibility(
@@ -95,7 +95,7 @@ class _UnlockRepositoryState extends State<UnlockRepository> with AppLogger {
                     secureWithBiometrics = value;
                   })
               : null,
-          contentPadding: EdgeInsets.zero,
+          contentPadding: EdgeInsetsDirectional.zero,
         ),
       );
 

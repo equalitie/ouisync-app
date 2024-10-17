@@ -28,7 +28,7 @@ class OuiSyncBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) => reposCubit.builder((state) {
         final leadingWidget = state.showList
             ? Padding(
-                padding: const EdgeInsets.only(left: 8.0),
+                padding: const EdgeInsetsDirectional.only(start: 8.0),
                 child: ouisyncLogo,
               )
             : null;

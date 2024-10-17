@@ -105,13 +105,13 @@ class _PeersPageState extends State<PeersPage> {
   }
 
   Widget _buildHeader(BuildContext context, String title) => Container(
-        padding: EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0),
+        padding: EdgeInsetsDirectional.symmetric(horizontal: 4.0, vertical: 8.0),
         child: Text(title, style: context.theme.appTextStyle.titleLarge),
       );
 
   Widget _buildPeerHeader(BuildContext context, int index, String runtimeId) =>
       Container(
-        padding: EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
+        padding: EdgeInsetsDirectional.symmetric(horizontal: 4.0, vertical: 4.0),
         decoration: BoxDecoration(
           border: Border(
             top: BorderSide(
@@ -142,7 +142,7 @@ class _PeersPageState extends State<PeersPage> {
       );
 
   Widget _buildPeer(BuildContext context, PeerInfo peer) => Container(
-        padding: EdgeInsets.all(4.0),
+        padding: EdgeInsetsDirectional.all(4.0),
         child: Row(
           children: [
             Spacer(flex: 1),
@@ -190,8 +190,8 @@ class _PeersPageState extends State<PeersPage> {
         color: bg,
         borderRadius: BorderRadius.circular(4.0),
       ),
-      padding: EdgeInsets.symmetric(vertical: 2.0, horizontal: 4.0),
-      margin: EdgeInsets.symmetric(horizontal: 1.0),
+      padding: EdgeInsetsDirectional.symmetric(vertical: 2.0, horizontal: 4.0),
+      margin: EdgeInsetsDirectional.symmetric(horizontal: 1.0),
       child: _applyStyle(
         fgColor: fg,
         bgColor: bg,

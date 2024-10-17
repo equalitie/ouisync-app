@@ -113,7 +113,7 @@ class RepoSecurity extends StatelessWidget {
       Visibility(
         visible: visible,
         child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 24.0),
+          padding: EdgeInsetsDirectional.symmetric(vertical: 24.0),
           child: Fields.autosizeText(
             warning,
             style: textStyle,
@@ -134,7 +134,7 @@ class RepoSecurity extends StatelessWidget {
         key: key,
         value: value,
         title: title,
-        contentPadding: EdgeInsets.zero,
+        contentPadding: EdgeInsetsDirectional.zero,
         onChanged: onChanged,
       );
 }
