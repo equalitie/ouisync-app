@@ -20,7 +20,7 @@ class AppDelegate: FlutterAppDelegate {
 //    }
 //
     override func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
-        return true
+        return false
     }
 
 //    override func applicationWillTerminate(_ notification: Notification) {
