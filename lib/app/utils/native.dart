@@ -1,4 +1,6 @@
+import 'dart:io' as io;
 import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
 
 /// MethodChannel handler for calling functions
 /// implemented natively, and viceversa.
@@ -30,8 +32,26 @@ class Native {
     return await _channel.invokeMethod('getMountRootDirectory');
   }
 
-  /// In iOS or MacOS, it retrieves the default path where repositories shall be stored
-  static Future<String> getDefaultRepositoriesDirectory() async {
-    return await _channel.invokeMethod('getDefaultRepositoriesDirectory');
+  /// Path to a directory where the application may place application support
+  /// files. If this directory does not exist, it is created automatically.
+  ///
+  /// Similar to getApplicationSupportDirectory() but allows customization.
+  /// The `removable` parameter controls whether removable locations such as SD
+  /// cards may be returned.
+  static Future<io.Directory> getBaseDir({bool removable=false}) async {
+    if (io.Platform.isAndroid) {
+      // on Android we support SD cards where permitted (e.g. for repositories)
+      final extStorage = removable ? await getExternalStorageDirectory() : null;
+      return extStorage ?? getApplicationSupportDirectory();
+    } else if (io.Platform.isIOS || io.Platform.isMacOS) {
+      // on Darwin, we can't use the default implementation because the UI and
+      // backend run in different address spaces and file sandboxes, so we defer
+      // this decision to the host to allow for maximum customizability
+      // TODO: delegate this decision to the host on all platforms instead?
+      return io.Directory(await _channel.invokeMethod('getSharedDir'));
+    } else {
+      // default to the path provider plugin; this usually means the homedir
+      return getApplicationSupportDirectory();
+    }
   }
 }

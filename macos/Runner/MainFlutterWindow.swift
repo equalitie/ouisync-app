@@ -75,9 +75,8 @@ class MainFlutterWindow: NSWindow {
 
     private func handleFlutterMethodCall(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         switch call.method {
-        case "getDefaultRepositoriesDirectory":
-            let commonDirs = Common.Directories()
-            result(commonDirs.repositoriesPath)
+        case "getSharedDir":
+            result(Directories.rootPath)
         case "getMountRootDirectory":
             let manager = NSFileProviderManager(for: ouisyncFileProviderDomain)!
             Task {

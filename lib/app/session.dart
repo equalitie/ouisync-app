@@ -5,10 +5,10 @@ import 'package:loggy/loggy.dart';
 import 'package:ouisync/ouisync.dart' show Session;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart';
-import 'package:path_provider/path_provider.dart';
 
 import 'utils/constants.dart';
 import 'utils/log.dart';
+import 'utils/native.dart';
 import 'utils/platform/platform_window_manager.dart';
 
 Future<Session> createSession({
@@ -16,7 +16,7 @@ Future<Session> createSession({
   required Loggy logger,
   PlatformWindowManager? windowManager,
 }) async {
-  final appDir = await getApplicationSupportDirectory();
+  final appDir = await Native.getBaseDir();
   final configPath = join(appDir.path, Constants.configDirName);
   final logPath = await LogUtils.path;
 
