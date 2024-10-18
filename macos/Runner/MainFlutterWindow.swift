@@ -2,6 +2,8 @@ import Cocoa
 import FlutterMacOS
 import Common
 import FileProvider
+import LaunchAtLogin
+
 
 class MainFlutterWindow: NSWindow {
     var fileProviderProxy: FileProviderProxy? = nil
@@ -17,10 +19,37 @@ class MainFlutterWindow: NSWindow {
         let flutterBinaryMessenger = flutterViewController.engine.binaryMessenger
         setupFlutterToExtensionProxy(flutterBinaryMessenger)
         setupFlutterMethodChannel(flutterBinaryMessenger)
+        setupFlutterAutostartChannel(flutterBinaryMessenger)
 
         RegisterGeneratedPlugins(registry: flutterViewController)
 
         super.awakeFromNib()
+    }
+
+    override public func order(_ place: NSWindow.OrderingMode, relativeTo otherWin: Int) {
+        super.order(place, relativeTo: otherWin)
+        hiddenWindowAtLaunch()
+    }
+
+    // ------------------------------------------------------------------
+    // Autostart requires some custom platform integration as per:
+    // https://pub.dev/packages/launch_at_startup#macos-support
+    // ------------------------------------------------------------------
+    fileprivate func setupFlutterAutostartChannel(_ binaryMessenger: FlutterBinaryMessenger) {
+        FlutterMethodChannel(name: "launch_at_startup",
+                             binaryMessenger: binaryMessenger)
+        .setMethodCallHandler { call, result in
+            switch call.method {
+            case "launchAtStartupSetEnabled":
+                if let arguments = call.arguments as? [String: Any],
+                   let value = arguments["setEnabledValue"] as? Bool {
+                    LaunchAtLogin.isEnabled = value
+                }
+                fallthrough
+            case "launchAtStartupIsEnabled": result(LaunchAtLogin.isEnabled)
+            default: result(FlutterMethodNotImplemented)
+            }
+        }
     }
 
     // ------------------------------------------------------------------
@@ -46,9 +75,8 @@ class MainFlutterWindow: NSWindow {
 
     private func handleFlutterMethodCall(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         switch call.method {
-        case "getDefaultRepositoriesDirectory":
-            let commonDirs = Common.Directories()
-            result(commonDirs.repositoriesPath)
+        case "getSharedDir":
+            result(Directories.rootPath)
         case "getMountRootDirectory":
             let manager = NSFileProviderManager(for: ouisyncFileProviderDomain)!
             Task {

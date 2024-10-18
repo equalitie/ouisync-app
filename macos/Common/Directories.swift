@@ -8,16 +8,9 @@
 import Foundation
 
 public class Directories {
-    public let rootPath: String
-    public let configsPath: String
-    public let logsPath: String
-    public let repositoriesPath: String
-
-    public init() {
-        let rootURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "5SR9R72Z83.org.equalitie.ouisync")!
-        rootPath = rootURL.path(percentEncoded: false)
-        configsPath = rootPath + "config"
-        logsPath = rootPath + "log"
-        repositoriesPath = rootPath + "repositories"
-    }
+    private static let rootURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "5SR9R72Z83.org.equalitie.ouisync")!
+    public static let rootPath = rootURL.path(percentEncoded: false)
+    public static let configsPath = rootPath + "config"
+    public static let logsPath = rootPath + "logs/ouisync.log"
+    public static let repositoriesPath = rootPath + "repositories"
 }

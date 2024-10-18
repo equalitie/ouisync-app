@@ -31,7 +31,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
         // then launch the application extension process, call
         // `FileProviderExtension.init(domain:)` to instantiate the extension
         // for that domain, and call methods on the instance.
-        
+
         let log = Log("Extension")
         self.manager = NSFileProviderManager(for: domain)!
 
@@ -46,16 +46,15 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
         let ffi = OuisyncFFI();
 
         // Path that is accessible by both the app and this extension.
-        let commonDirectories = Common.Directories()
 
         NSLog("-------------------------------------------------")
         NSLog("Using directories:")
-        NSLog("configs:      \(commonDirectories.configsPath)")
-        NSLog("repositories: \(commonDirectories.repositoriesPath)")
-        NSLog("logs:         \(commonDirectories.logsPath)")
+        NSLog("configs:      \(Directories.configsPath)")
+        NSLog("repositories: \(Directories.repositoriesPath)")
+        NSLog("logs:         \(Directories.logsPath)")
         NSLog("-------------------------------------------------")
 
-        ouisyncSession = try! OuisyncSession(commonDirectories.configsPath, commonDirectories.logsPath, ffi)
+        ouisyncSession = try! OuisyncSession(Directories.configsPath, Directories.logsPath, ffi)
 
         // TODO: This doesn't work yet
         //pastEnumerations = PastEnumerations()
