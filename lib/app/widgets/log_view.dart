@@ -79,6 +79,7 @@ class _LogViewState extends State<LogView> {
         backgroundColor: widget.theme.resolveColor(style.background),
         fontWeight: style.fontWeight,
         fontStyle: style.fontStyle,
+        fontFamilyFallback: ["Monaco", "Consolas", "Droid Sans Mono", "Courier New", "Courier"]
       );
 
   void _onMessage(LogMessage message) {
