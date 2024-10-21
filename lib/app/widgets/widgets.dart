@@ -11,6 +11,11 @@ export 'buttons/dialog_positive_button.dart';
 export 'buttons/dialog_danger_button.dart';
 
 export 'dialogs/actions_dialog.dart';
+export 'dialogs/add_peer_dialog.dart';
+export 'dialogs/dokan_different_mayor_found.dart';
+export 'dialogs/dokan_not_found.dart';
+export 'dialogs/dokan_older_mayor_found.dart';
+export 'dialogs/dokan_validation.dart';
 export 'dialogs/info_bubble.dart';
 export 'dialogs/modal_actions_bottom_sheet.dart';
 export 'dialogs/modal_file_detail_bottom_sheet.dart';

@@ -18,9 +18,7 @@ import 'package:url_launcher/url_launcher_string.dart';
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
 import '../models/models.dart';
-import '../utils/click_counter.dart';
 import '../utils/platform/platform.dart';
-import '../utils/share_token.dart';
 import '../utils/utils.dart';
 import '../widgets/notification_badge.dart';
 import '../widgets/widgets.dart';
@@ -148,243 +146,46 @@ class _MainPageState extends State<MainPage>
   }
 
   void checkForDokan() {
-    final dokanCheck = DokanCheck(
-      requiredMayor: Constants.dokanMayorRequired,
-      minimumRequiredVersion: Constants.dokanMinimunVersion,
+    installationOk() => widget.mountCubit.init();
+    Future<bool?> installationFailed() => Dialogs.simpleAlertDialog(
+          context: context,
+          title: S.current.titleDokanInstallation,
+          message: S.current.messageDokanInstallationFailed,
+        );
+
+    final dokanValidation = DokanValidation(
+      context,
+      installationOk: installationOk,
+      installationFailed: installationFailed,
     );
 
-    final dokanCheckResult = dokanCheck.checkDokanInstallation();
-    final result = dokanCheckResult.result;
+    final dokanCheckResult = dokanValidation.checkDokanInstallation;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      switch (dokanCheckResult.result) {
+        case DokanResult.notFound:
+          unawaited(dokanValidation.tryInstallDokan());
+          break;
 
-    if (result == null) return;
+        case DokanResult.differentMayor:
+          unawaited(dokanValidation.tryInstallNewerDokanMayor());
+          break;
 
-    switch (result) {
-      case DokanResult.sameVersion:
-      case DokanResult.newerVersionMayor:
-        {
-          // No install required
-          loggy.app('The Dokan version installed is supported: ${result.name}');
-        }
-      case DokanResult.notFound:
-        {
-          //Install Dokan using the bundled MSI
-          WidgetsBinding.instance.addPostFrameCallback(
-            (_) {
-              unawaited(
-                showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (BuildContext context) => AlertDialog(
-                    title: Flex(
-                      direction: Axis.horizontal,
-                      children: [
-                        Fields.constrainedText(
-                          S.current.titleDokanMissing,
-                          style: context.theme.appTextStyle.titleMedium,
-                          maxLines: 2,
-                        )
-                      ],
-                    ),
-                    content: SingleChildScrollView(
-                      child: ListBody(
-                        children: [
-                          RichText(
-                            text: TextSpan(
-                              style: context.theme.appTextStyle.bodyMedium,
-                              children: [
-                                TextSpan(
-                                    text:
-                                        '${S.current.messageInstallDokanForOuisyncP1} '),
-                                Fields.linkTextSpan(
-                                  context,
-                                  S.current.messageDokan,
-                                  _launchDokanGitHub,
-                                ),
-                                TextSpan(
-                                    text:
-                                        ' ${S.current.messageInstallDokanForOuisyncP2}')
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    actions: [
-                      TextButton(
-                        child: Text(S.current.actionSkip.toUpperCase()),
-                        onPressed: () => Navigator.of(context).pop(false),
-                      ),
-                      TextButton(
-                        child: Text(S.current.actionInstallDokan.toUpperCase()),
-                        onPressed: () => Navigator.of(context).pop(true),
-                      )
-                    ],
-                  ),
-                ).then(
-                  (installDokan) async {
-                    if (installDokan ?? false) {
-                      unawaited(_installBundledDokan(
-                          dokanCheck.runDokanMsiInstallation));
-                    }
-                  },
-                ),
-              );
-            },
-          );
-        }
-      case DokanResult.differentMayor:
-        {
-          WidgetsBinding.instance.addPostFrameCallback(
-            (_) {
-              unawaited(
-                showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (BuildContext context) => AlertDialog(
-                    title: Flex(
-                      direction: Axis.horizontal,
-                      children: [
-                        Fields.constrainedText(
-                          S.current.titleDokanInstallationFound,
-                          style: context.theme.appTextStyle.titleMedium,
-                          maxLines: 2,
-                        )
-                      ],
-                    ),
-                    content: SingleChildScrollView(
-                      child: ListBody(
-                        children: [
-                          RichText(
-                            text: TextSpan(
-                              style: context.theme.appTextStyle.bodyMedium,
-                              children: [
-                                TextSpan(
-                                    text:
-                                        '${S.current.messageDokanDifferentMayorP1} '),
-                                Fields.linkTextSpan(
-                                  context,
-                                  S.current.messageDokan,
-                                  _launchDokanGitHub,
-                                ),
-                                TextSpan(
-                                    text:
-                                        ' ${S.current.messageDokanDifferentMayorP2}')
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    actions: [
-                      TextButton(
-                        child: Text(S.current.actionSkip.toUpperCase()),
-                        onPressed: () => Navigator.of(context).pop(false),
-                      ),
-                      TextButton(
-                        child: Text(S.current.actionInstallDokan.toUpperCase()),
-                        onPressed: () => Navigator.of(context).pop(true),
-                      )
-                    ],
-                  ),
-                ).then(
-                  (installDokan) async {
-                    if (installDokan ?? false) {
-                      unawaited(_installBundledDokan(
-                          dokanCheck.runDokanMsiInstallation));
-                    }
-                  },
-                ),
-              );
-            },
-          );
-        }
-      case DokanResult.olderVersionMayor:
-        {
-          WidgetsBinding.instance.addPostFrameCallback(
-            (_) => unawaited(
-              showDialog(
-                context: context,
-                barrierDismissible: false,
-                builder: (BuildContext context) => AlertDialog(
-                  title: Flex(
-                    direction: Axis.horizontal,
-                    children: [
-                      Fields.constrainedText(
-                        S.current.titleDokanInstallationFound,
-                        style: context.theme.appTextStyle.titleMedium,
-                        maxLines: 2,
-                      )
-                    ],
-                  ),
-                  content: SingleChildScrollView(
-                    child: ListBody(
-                      children: [
-                        RichText(
-                          text: TextSpan(
-                            style: context.theme.appTextStyle.bodyMedium,
-                            children: [
-                              TextSpan(
-                                  text:
-                                      '${S.current.messageDokanDifferentMayorP1} '),
-                              Fields.linkTextSpan(
-                                context,
-                                S.current.messageDokan,
-                                _launchDokanGitHub,
-                              ),
-                              TextSpan(
-                                  text:
-                                      ' ${S.current.messageDokanOlderVersionP2}')
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  actions: [
-                    TextButton(
-                      child: Text(S.current.actionCloseCapital),
-                      onPressed: () =>
-                          Navigator.of(context, rootNavigator: true).pop(false),
-                    )
-                  ],
-                ),
-              ).then(
-                (installDokan) async {
-                  if (installDokan ?? false) {
-                    unawaited(_installBundledDokan(
-                        dokanCheck.runDokanMsiInstallation));
-                  }
-                },
-              ),
-            ),
-          );
-        }
-    }
-  }
+        case DokanResult.olderVersionMayor:
+          unawaited(dokanValidation.tryInstallDifferentDokanMayor());
+          break;
 
-  void _launchDokanGitHub(BuildContext context) async {
-    final title = Text('Dokan');
-    await Fields.openUrl(context, title, Constants.dokanUrl);
-  }
+        case DokanResult.sameVersion:
+        case DokanResult.newerVersionMayor:
+          loggy.app('The Dokan version installed is supported: '
+              '${dokanCheckResult.result!.name}');
+          break;
 
-  Future<void> _installBundledDokan(
-      Future<bool?> Function() runDokanMsiInstallation) async {
-    final installationResult = await runDokanMsiInstallation();
-
-    if (installationResult == null) {
-      return;
-    }
-
-    if (installationResult) {
-      widget.mountCubit.init();
-      return;
-    }
-
-    await Dialogs.simpleAlertDialog(
-      context: context,
-      title: S.current.titleDokanInstallation,
-      message: S.current.messageDokanInstallationFailed,
-    );
+        case null:
+          loggy.app('Check Dokan installation status failed: '
+              '${dokanCheckResult.error}');
+          break;
+      }
+    });
   }
 
   Widget buildMainWidget() {

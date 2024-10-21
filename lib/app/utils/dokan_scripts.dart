@@ -7,8 +7,8 @@ import 'log.dart';
 
 const String msiAdditionalAssetsFolder = 'data\\bundled-assets';
 
-class DokanCheck with AppLogger {
-  const DokanCheck({
+class DokanScripts with AppLogger {
+  const DokanScripts({
     required this.requiredMayor,
     required this.minimumRequiredVersion,
   });
