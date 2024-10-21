@@ -4,18 +4,18 @@ import 'dart:io';
 import 'package:loggy/loggy.dart';
 import 'package:ouisync/ouisync.dart' as o;
 import 'package:path/path.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:watcher/watcher.dart';
 
 import 'ansi_parser.dart';
 import 'constants.dart';
+import 'native.dart';
 
 class LogUtils {
   LogUtils._();
 
   /// Path to the log file
   static Future<String> get path async {
-    final appDir = await getApplicationSupportDirectory();
+    final appDir = await Native.getBaseDir();
     return join(appDir.path, "logs", Constants.logFileName);
   }
 

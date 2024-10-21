@@ -3,7 +3,6 @@ import 'dart:io' as io;
 import 'dart:ui' show Locale;
 
 import 'package:path/path.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../models/models.dart';
@@ -277,9 +276,7 @@ class Settings with AppLogger {
 
   //------------------------------------------------------------------
   Future<io.Directory> getDefaultRepositoriesDir() async {
-    final baseDir =
-        (io.Platform.isAndroid ? await getExternalStorageDirectory() : null) ??
-            await getApplicationSupportDirectory();
+    final baseDir = await Native.getBaseDir(removable: true);
     return io.Directory(join(baseDir.path, Constants.folderRepositoriesName));
   }
 

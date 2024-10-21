@@ -51,7 +51,8 @@ class PlatformWindowManagerDesktop
     // On Windows, the system tray title is shown only when howering over the
     // icon, but on Linux it is always visible next to it. That's in my
     // experience is unlike how other apps behave. So turning it off on Linux.
-    final systemTrayTitle = Platform.isLinux ? null : S.current.titleAppTitle;
+    // edit: same goes for macOS; the title has its uses, but not in this case.
+    final systemTrayTitle = Platform.isWindows ? S.current.titleAppTitle : null;
 
     await _systemTray.initSystemTray(
       title: systemTrayTitle,
@@ -61,7 +62,7 @@ class PlatformWindowManagerDesktop
 
     final menu = stray.Menu();
     await menu.buildFrom([
-      if (Platform.isLinux)
+      if (Platform.isLinux || Platform.isMacOS)
         stray.MenuItemLabel(
           label: '${S.current.actionHide} / ${S.current.actionShow}',
           onClicked: (_) => _toggleVisible(),
@@ -140,11 +141,7 @@ class PlatformWindowManagerDesktop
         minimumSize: minSize);
 
     await windowManager.waitUntilReadyToShow(windowOptions);
-
-    if (_showWindow) {
-      await windowManager.show();
-      await windowManager.focus();
-    }
+    await _toggleVisible(_showWindow);
   }
 
   @override
@@ -156,7 +153,7 @@ class PlatformWindowManagerDesktop
     // then actually closes the window and exits the app.
     switch (_state) {
       case _State.open:
-        await windowManager.hide();
+        await _toggleVisible(false);
         break;
       case _State.closing:
         final onClose = _onClose;
@@ -169,7 +166,7 @@ class PlatformWindowManagerDesktop
         await windowManager.close();
         break;
       case _State.closed:
-        break;
+        await windowManager.destroy();
     }
   }
 
@@ -200,11 +197,14 @@ class PlatformWindowManagerDesktop
   }
 }
 
-Future<void> _toggleVisible() async {
-  if (await windowManager.isVisible()) {
-    await windowManager.hide();
-  } else {
+Future<void> _toggleVisible([bool? visible]) async {
+  visible ??= !await windowManager.isVisible();
+  await windowManager.setSkipTaskbar(!visible);
+  if (visible) {
     await windowManager.show();
+    await windowManager.focus();
+  } else {
+    await windowManager.hide();
   }
 }
 
