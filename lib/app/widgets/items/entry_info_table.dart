@@ -1,4 +1,3 @@
-import 'package:extended_text/extended_text.dart';
 import 'package:flutter/material.dart';
 
 import '../../../generated/l10n.dart';
@@ -56,15 +55,17 @@ class EntryInfoTable extends StatelessWidget {
               ),
               child: Text(label)),
           Container(
-              padding: EdgeInsetsDirectional.only(
-                top: verticalPadding,
-                bottom: verticalPadding,
-              ),
-              child: Fields.ellipsedText(
-                info,
-                maxLines: 4,
-                ellipsisPosition: TextOverflowPosition.middle,
-              )),
+            padding: EdgeInsets.only(
+              top: verticalPadding,
+              bottom: verticalPadding,
+            ),
+            child: Text(
+              info,
+              maxLines: 4,
+              softWrap: true,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
         ],
       );
 }

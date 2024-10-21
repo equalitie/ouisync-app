@@ -1,4 +1,3 @@
-import 'package:extended_text/extended_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -22,9 +21,11 @@ class FileDescription extends StatelessWidget with AppLogger {
   Widget build(BuildContext context) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Fields.ellipsedText(
+          Text(
             entry.name,
-            ellipsisPosition: TextOverflowPosition.middle,
+            maxLines: 1,
+            softWrap: true,
+            overflow: TextOverflow.ellipsis,
           ),
           Dimensions.spacingVerticalHalf,
           _buildDetails(context),

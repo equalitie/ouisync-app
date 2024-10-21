@@ -1,4 +1,3 @@
-import 'package:extended_text/extended_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -75,9 +74,11 @@ class DirectoryListItem extends StatelessWidget {
             Expanded(
               child: Container(
                 padding: Dimensions.paddingItem,
-                child: Fields.ellipsedText(
+                child: Text(
                   entry.name,
-                  ellipsisPosition: TextOverflowPosition.middle,
+                  maxLines: 1,
+                  softWrap: true,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ),

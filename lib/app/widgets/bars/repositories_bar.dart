@@ -1,9 +1,8 @@
-import 'package:extended_text/extended_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync/ouisync.dart';
-import 'package:ouisync_app/app/widgets/notification_badge.dart';
-import 'package:ouisync_app/app/widgets/throughput_display.dart';
+import '../notification_badge.dart';
+import '../throughput_display.dart';
 import 'package:stream_transform/stream_transform.dart';
 
 import '../../../generated/l10n.dart';
@@ -50,9 +49,11 @@ class RepositoriesBar extends StatelessWidget
   Widget _buildName(RepoEntry? repo) => Expanded(
         child: Container(
           padding: Dimensions.paddingItem,
-          child: Fields.ellipsedText(
+          child: Text(
             repo?.name ?? S.current.messageNoRepos,
-            ellipsisPosition: TextOverflowPosition.middle,
+            maxLines: 1,
+            softWrap: true,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
       );
