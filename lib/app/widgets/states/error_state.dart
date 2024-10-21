@@ -30,7 +30,7 @@ class ErrorState extends HookWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Align(
-                  alignment: Alignment.center,
+                  alignment: AlignmentDirectional.center,
                   child: Fields.inPageMainMessage(
                     errorMessage,
                     style: context.theme.appTextStyle.bodyLarge
@@ -46,7 +46,7 @@ class ErrorState extends HookWidget {
                 if (errorDescription != null) const SizedBox(height: 10.0),
                 if (errorDescription != null)
                   Align(
-                    alignment: Alignment.center,
+                    alignment: AlignmentDirectional.center,
                     child: Fields.inPageSecondaryMessage(
                       errorDescription!,
                       tags: {

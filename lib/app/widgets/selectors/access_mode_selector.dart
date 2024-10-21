@@ -37,8 +37,9 @@ class _AccessModeSelectorState extends State<AccessModeSelector>
     return Container(
       padding: Dimensions.paddingActionBoxTop,
       decoration: const BoxDecoration(
-          borderRadius:
-              BorderRadius.all(Radius.circular(Dimensions.radiusSmall)),
+          borderRadius: BorderRadiusDirectional.all(
+            Radius.circular(Dimensions.radiusSmall),
+          ),
           color: Constants.inputBackgroundColor),
       child: _buildModeSelector(),
     );

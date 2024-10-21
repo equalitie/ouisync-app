@@ -168,7 +168,7 @@ class _SwitchItem extends StatelessWidget {
           size: Dimensions.sizeIconMicro,
           color: Colors.black87,
         ),
-        contentPadding: EdgeInsets.zero,
+        contentPadding: EdgeInsetsDirectional.zero,
         dense: true,
         visualDensity: VisualDensity(horizontal: -4.0),
         value: value,

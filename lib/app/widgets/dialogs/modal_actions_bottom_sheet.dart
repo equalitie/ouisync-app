@@ -43,16 +43,19 @@ class DirectoryActions extends StatelessWidget with AppLogger {
             S.current.titleFolderActions,
             style: sheetTitleStyle,
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _buildAction(
-                name: S.current.actionNewFolder,
-                icon: Icons.create_new_folder_outlined,
-                action: () => createFolderDialog(context, repoCubit),
-              ),
-              _buildNewFileAction(parentContext),
-            ],
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _buildAction(
+                  name: S.current.actionNewFolder,
+                  icon: Icons.create_new_folder_outlined,
+                  action: () => createFolderDialog(context, repoCubit),
+                ),
+                _buildNewFileAction(parentContext),
+              ],
+            ),
           ),
         ],
       ),
@@ -150,7 +153,6 @@ class DirectoryActions extends StatelessWidget with AppLogger {
       return;
     }
 
-    await cubit.createFolder(newFolderPath);
     Navigator.of(parentContext).pop();
   }
 

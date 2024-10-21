@@ -112,7 +112,7 @@ class _MoveEntryDialogState extends State<MoveEntryDialog> {
           return Fields.dialogActions(
             context,
             buttons: _actions(context, isRepoList, aspectRatio),
-            padding: const EdgeInsets.only(top: 20.0),
+            padding: const EdgeInsetsDirectional.only(top: 20.0),
             mainAxisAlignment: MainAxisAlignment.end,
           );
         },

@@ -267,33 +267,37 @@ class _MainPageState extends State<MainPage>
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-        appBar: _buildOuiSyncBar(),
-        body: PopScope<Object?>(
-          // Don't pop => don't exit
-          //
-          // We don't want to do the pop because that would destroy the current Isolate's execution
-          // context and we would lose track of open OuiSync objects (i.e. repositories, files,
-          // directories, network handles,...). This is bad because even though the current execution
-          // context is deleted, the OuiSync Rust global variables and threads stay alive. If the
-          // user at that point tried to open the app again, this widget would try to reinitialize
-          // all those variables without previously properly closing them.
-          canPop: false,
-          onPopInvokedWithResult: _onBackPressed,
-          child: Stack(
-            alignment: AlignmentDirectional.bottomEnd,
-            children: <Widget>[
-              Column(
-                children: [Expanded(child: buildMainWidget())],
-              ),
-              const ListenerThatRunsFunctionsWithBuildContext(),
-            ],
+  Widget build(BuildContext context) => Directionality(
+        textDirection: TextDirection.ltr,
+        child: Scaffold(
+          appBar: _buildOuiSyncBar(),
+          body: PopScope<Object?>(
+            // Don't pop => don't exit
+            //
+            // We don't want to do the pop because that would destroy the current Isolate's execution
+            // context and we would lose track of open OuiSync objects (i.e. repositories, files,
+            // directories, network handles,...). This is bad because even though the current execution
+            // context is deleted, the OuiSync Rust global variables and threads stay alive. If the
+            // user at that point tried to open the app again, this widget would try to reinitialize
+            // all those variables without previously properly closing them.
+            canPop: false,
+            onPopInvokedWithResult: _onBackPressed,
+            child: Stack(
+              alignment: AlignmentDirectional.bottomEnd,
+              children: <Widget>[
+                Column(
+                  children: [Expanded(child: buildMainWidget())],
+                ),
+                const ListenerThatRunsFunctionsWithBuildContext(),
+              ],
+            ),
           ),
+          floatingActionButtonLocation:
+              FloatingActionButtonLocation.miniEndFloat,
+          floatingActionButton: widget.reposCubit
+              .builder((repos) => _buildFAB(context, repos.currentRepo)),
+          bottomSheet: modalBottomSheet(),
         ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.miniEndFloat,
-        floatingActionButton: widget.reposCubit
-            .builder((repos) => _buildFAB(context, repos.currentRepo)),
-        bottomSheet: modalBottomSheet(),
       );
 
   Future<void> _onBackPressed(bool didPop, Object? result) async {
@@ -452,7 +456,7 @@ class _MainPageState extends State<MainPage>
     return ValueListenableBuilder(
       valueListenable: _bottomSheetInfo,
       builder: (_, btInfo, __) => Container(
-        padding: EdgeInsets.only(
+        padding: EdgeInsetsDirectional.only(
           bottom: btInfo.neededPadding <= 0.0
               ? Dimensions.defaultListBottomPadding
               : btInfo.neededPadding,

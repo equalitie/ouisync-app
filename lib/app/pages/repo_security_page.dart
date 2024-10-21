@@ -17,7 +17,11 @@ import '../utils/utils.dart'
         showSnackBar,
         ThemeGetter;
 import '../widgets/widgets.dart'
-    show BlocHolder, ContentWithStickyFooterState, RepoSecurity;
+    show
+        BlocHolder,
+        ContentWithStickyFooterState,
+        DirectionalAppBar,
+        RepoSecurity;
 
 class RepoSecurityPage extends StatelessWidget {
   const RepoSecurityPage({
@@ -34,24 +38,19 @@ class RepoSecurityPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: Text(S.current.titleSecurity), elevation: 0.0),
+        appBar: DirectionalAppBar(title: Text(S.current.titleSecurity)),
         body: BlocHolder(
           create: () => RepoSecurityCubit(
             oldLocalSecretMode: repo.state.authMode.localSecretMode,
             oldLocalSecret: currentLocalSecret,
           ),
-          builder: (context, repoSecurityCubit) => _buildContent(
-            context,
-            repoSecurityCubit,
-            repo.name,
-          ),
+          builder: _buildContent,
         ),
       );
 
   ContentWithStickyFooterState _buildContent(
     BuildContext context,
     RepoSecurityCubit cubit,
-    String repoName,
   ) =>
       ContentWithStickyFooterState(
         content: PopScope(
@@ -59,7 +58,7 @@ class RepoSecurityPage extends StatelessWidget {
           onPopInvokedWithResult: (didPop, _) =>
               _onPopInvoked(context, didPop, cubit.state),
           // We know the `currentLocalSecret` so the repository is not blind.
-          child: RepoSecurity(cubit, isBlind: false, repoName: repoName),
+          child: RepoSecurity(cubit, isBlind: false),
         ),
         footer: BlocBuilder<RepoSecurityCubit, RepoSecurityState>(
           bloc: cubit,

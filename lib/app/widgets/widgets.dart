@@ -1,5 +1,6 @@
 export 'animated/file_icon_animated.dart';
 
+export 'bars/directional_app_bar.dart';
 export 'bars/folder_navigation_bar.dart';
 export 'bars/ouisync_bar.dart';
 export 'bars/repositories_bar.dart';

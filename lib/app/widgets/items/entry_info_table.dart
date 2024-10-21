@@ -48,8 +48,8 @@ class EntryInfoTable extends StatelessWidget {
   TableRow _getInfoItem(String label, String info) => TableRow(
         children: [
           Padding(
-              padding: EdgeInsets.only(
-                right: spacing,
+              padding: EdgeInsetsDirectional.only(
+                end: spacing,
                 top: verticalPadding,
                 bottom: verticalPadding,
               ),

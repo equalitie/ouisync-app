@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:locale_names/locale_names.dart';
 
 import '../../generated/l10n.dart';
-import '../utils/click_counter.dart';
-import '../utils/utils.dart';
-import '../cubits/locale.dart';
-import '../widgets/widgets.dart';
+import '../cubits/cubits.dart' show LocaleCubit;
+import '../utils/utils.dart' show ClickCounter, Dimensions;
+import '../widgets/widgets.dart'
+    show ContentWithStickyFooterState, DirectionalAppBar;
 
 class LanguagePicker extends StatelessWidget {
   LanguagePicker(
@@ -25,7 +25,7 @@ class LanguagePicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) => SafeArea(
         child: Scaffold(
-          appBar: AppBar(
+          appBar: DirectionalAppBar(
             title: Text(S.current.titleApplicationLanguage),
             automaticallyImplyLeading: canPop,
           ),
