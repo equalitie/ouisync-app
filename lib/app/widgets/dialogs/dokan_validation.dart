@@ -33,8 +33,9 @@ class DokanValidation {
 
   Future<void> tryInstallDokan() async {
     final title = S.current.titleDokanMissing;
-    final body =
-        DokanNotFound(linkLaunchDokanGitHub: _buildLinkToDokanGitHub(_context));
+    final body = DokanNotFound(
+      linkLaunchDokanGitHub: _buildLinkToDokanWebsite(_context),
+    );
 
     return _runInstallation(title, body);
   }
@@ -42,7 +43,8 @@ class DokanValidation {
   Future<void> tryInstallNewerDokanMayor() async {
     final title = S.current.titleDokanInstallationFound;
     final body = DokanDifferentMayorFound(
-        linkLaunchDokanGitHub: _buildLinkToDokanGitHub(_context));
+      linkLaunchDokanGitHub: _buildLinkToDokanWebsite(_context),
+    );
 
     return _runInstallation(title, body);
   }
@@ -50,18 +52,20 @@ class DokanValidation {
   Future<void> tryInstallDifferentDokanMayor() async {
     final title = S.current.titleDokanInstallationFound;
     final body = DokanOlderMayorFound(
-        linkLaunchDokanGitHub: _buildLinkToDokanGitHub(_context));
+      linkLaunchDokanGitHub: _buildLinkToDokanWebsite(_context),
+    );
 
     return _runInstallation(title, body);
   }
 
-  TextSpan _buildLinkToDokanGitHub(BuildContext context) => Fields.linkTextSpan(
+  TextSpan _buildLinkToDokanWebsite(BuildContext context) =>
+      Fields.linkTextSpan(
         _context,
         S.current.messageDokan,
-        _launchDokanGitHub,
+        _launchDokanWebsite,
       );
 
-  void _launchDokanGitHub(BuildContext context) async {
+  void _launchDokanWebsite(BuildContext context) async {
     final title = Text('Dokan');
     await Fields.openUrl(context, title, Constants.dokanUrl);
   }
@@ -78,8 +82,10 @@ class DokanValidation {
           if (install == null) return;
 
           if (install) {
-            final result = await _dokanScripts.runDokanMsiInstallation();
-            result == true
+            final installationResult =
+                await _dokanScripts.runDokanMsiInstallation();
+
+            installationResult == true
                 ? _installationOk.call()
                 : await _installationFailed.call();
           }
