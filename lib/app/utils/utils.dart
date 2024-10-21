@@ -8,7 +8,7 @@ export 'cipher.dart';
 export 'constants.dart';
 export 'dialogs.dart';
 export 'dimensions.dart';
-export 'dokan_check.dart';
+export 'dokan_scripts.dart';
 export 'dump.dart';
 export 'entry_ops.dart';
 export 'extensions.dart';
