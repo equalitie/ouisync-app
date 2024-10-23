@@ -11,12 +11,6 @@ plugins {
 def properties = new Properties()
 rootProject.file("local.properties").withInputStream { properties.load(it) }
 
-def keystoreProperties = new Properties()
-def keystorePropertiesFile = rootProject.file('../secrets/android/key.properties')
-if (keystorePropertiesFile.exists()) {
-    keystorePropertiesFile.withInputStream { keystoreProperties.load(it) }
-}
-
 android {
     namespace = "org.equalitie.ouisync"
     compileSdk = 34
@@ -65,25 +59,19 @@ android {
     }
 
     signingConfigs {
-        release {
-            keyAlias keystoreProperties['keyAlias']
-            keyPassword keystoreProperties['keyPassword']
-            storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
-            storePassword keystoreProperties['storePassword']
+        production {
+            def cfg = loadKeystorePropertiesFile("production")
+            keyAlias cfg?.keyAlias
+            keyPassword cfg?.keyPassword
+            storeFile cfg?.storeFile
+            storePassword cfg?.storePassword
         }
-    }
-
-    buildTypes {
-        release {
-            if (keystorePropertiesFile.exists()) {
-                signingConfig signingConfigs.release
-            } else {
-                signingConfig signingConfigs.debug
-            }
-        }
-
-        debug {
-            android.packagingOptions.doNotStrip "**.so"
+        nightly {
+            def cfg = loadKeystorePropertiesFile("nightly")
+            keyAlias cfg?.keyAlias
+            keyPassword cfg?.keyPassword
+            storeFile cfg?.storeFile
+            storePassword cfg?.storePassword
         }
     }
 
@@ -91,14 +79,18 @@ android {
     productFlavors {
         production {
             dimension "releaseType"
+            signingConfig signingConfigs.production
+            applicationIdSuffix applicationIdSuffix
         }
         nightly {
             dimension "releaseType"
-            applicationIdSuffix ".nightly"
+            applicationIdSuffix appendUnlessNull(".nightly", applicationIdSuffix)
+            signingConfig signingConfigs.nightly
         }
         unofficial {
             dimension "releaseType"
-            applicationIdSuffix ".unofficial"
+            applicationIdSuffix appendUnlessNull(".unofficial", applicationIdSuffix)
+            signingConfig signingConfigs.debug
         }
     }
 
@@ -108,6 +100,14 @@ android {
     // it's not.
     checkFlavorParameter(getCurrentFlavor(), productFlavors)
 
+    buildTypes {
+        release {
+        }
+
+        debug {
+            android.packagingOptions.doNotStrip "**.so"
+        }
+    }
 }
 
 flutter {
@@ -176,6 +176,32 @@ gradle.projectsEvaluated {
     preBuild.dependsOn('generateResourceImages')
 }
 
+class SigningConfig {
+    String keyAlias
+    String keyPassword
+    File storeFile
+    String storePassword
+}
+
+def loadKeystorePropertiesFile(String flavor) {
+    def keystoreProperties = new Properties()
+    def keystoreFilePath = "../secrets/${flavor}/android/key.properties"
+    def keystorePropertiesFile = rootProject.file(keystoreFilePath)
+    if (!keystorePropertiesFile.exists()) {
+        return null
+    }
+    keystorePropertiesFile.withInputStream { keystoreProperties.load(it) }
+
+    def config = new SigningConfig(
+        keyAlias: keystoreProperties['keyAlias'],
+        keyPassword: keystoreProperties['keyPassword'],
+        storeFile: file(keystoreProperties['storeFile']),
+        storePassword: keystoreProperties['storePassword']
+    )
+
+    return config
+}
+
 // Check if the user provided the `--flavor=` argument.
 def checkFlavorParameter(String currentFlavor, availableFlavors) {
     def availableFlavorNames = availableFlavors.collect { it.name }
@@ -204,4 +230,11 @@ def getCurrentFlavor() {
     } else {
         return null
     }
+}
+
+def appendUnlessNull(String s1, String s2) {
+    if (s2 == null) {
+        return s1
+    }
+    return s1 + s2
 }
