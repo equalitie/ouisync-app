@@ -1,3 +1,6 @@
+import java.util.regex.Matcher
+import java.util.regex.Pattern
+
 plugins {
     id "com.android.application"
     id "kotlin-android"
@@ -98,6 +101,13 @@ android {
             applicationIdSuffix ".unofficial"
         }
     }
+
+    // Flutter building will exit with an incomprehensive error if the flavor
+    // is not specified. So in this function we do our own check if the
+    // --flavor parameter was used and tell the user that it needs to be set if
+    // it's not.
+    checkFlavorParameter(getCurrentFlavor(), productFlavors)
+
 }
 
 flutter {
@@ -164,4 +174,34 @@ task generateResourceImages() {
 
 gradle.projectsEvaluated {
     preBuild.dependsOn('generateResourceImages')
+}
+
+// Check if the user provided the `--flavor=` argument.
+def checkFlavorParameter(String currentFlavor, availableFlavors) {
+    def availableFlavorNames = availableFlavors.collect { it.name }
+
+    if (currentFlavor == null) {
+        if (availableFlavors.empty) {
+            return
+        }
+        throw new GradleException("Missing '--flavor=${availableFlavorNames}' argument.")
+    }
+
+    if (!availableFlavorNames.contains(currentFlavor)) {
+        throw new GradleException("Unrecognized flavor '${currentFlavor}'. Use one from ${availableFlavorNames}.")
+    }
+}
+
+// Return the current flavor or null.
+def getCurrentFlavor() {
+    String taskRequests = gradle.startParameter.taskRequests.toString()
+
+    Pattern pattern = Pattern.compile("(assemble|bundle)(\\w+)(Release|Debug)")
+    Matcher matcher = pattern.matcher(taskRequests)
+
+    if (matcher.find()) {
+        return matcher.group(2).toLowerCase()
+    } else {
+        return null
+    }
 }
