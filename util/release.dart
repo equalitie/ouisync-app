@@ -799,7 +799,8 @@ Future<File> extractApk(File bundle, Flavor flavor) async {
 
   final bundletool = await prepareBundletool();
 
-  final keyPropertiesPath = 'secrets/android/key.properties';
+  final keyPropertiesPath =
+      'secrets/${flavor.toString()}/android/key.properties';
 
   String? storeFile;
   String? storePassword;
