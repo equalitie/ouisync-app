@@ -31,7 +31,7 @@ flutter run
 
 ### Removing the file provider extension
 
-Sometimes the extention misbehaves and/or xcode won't start the newly compiled binary.
+Sometimes the extension misbehaves and/or xcode won't start the newly compiled binary.
 If that happens it is sometimes useful to remove the extension from the system:
 
 ```bash

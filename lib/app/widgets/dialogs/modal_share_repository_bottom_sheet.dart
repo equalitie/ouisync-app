@@ -45,7 +45,7 @@ class _ShareRepositoryState extends State<ShareRepository> with AppLogger {
     labelStyle = context.theme.appTextStyle.bodyMicro
         .copyWith(color: Constants.inputLabelForeColor);
 
-    // On certain resolutions (higer) the constrain set on this dialog when called
+    // On certain resolutions (higher) the constrain set on this dialog when called
     // causes the content to scroll, giving the appearance of a smaller padding
     // at the bottom of the content.
     //

@@ -34,7 +34,7 @@ ADD https://github.com/Kitware/CMake/releases/download/v3.26.3/cmake-3.26.3.tar.
 # Extract into /home/TEMP/cmake-3.26.3
 RUN tar -zxvf cmake-3.26.3.tar.gz
     
-# Boostrap CMake
+# Bootstrap CMake
 RUN cd cmake-3.26.3 && \
     ./bootstrap
 
