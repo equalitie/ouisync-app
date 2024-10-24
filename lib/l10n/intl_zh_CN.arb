@@ -1,3 +1,5 @@
 {
-    "@@locale": "zh-CN"
+  "@@locale": "zh-CN",
+  "titleAbout": "关于",
+  "@titleAbout": {}
 }
