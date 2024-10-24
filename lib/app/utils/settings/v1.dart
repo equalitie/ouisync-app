@@ -459,7 +459,7 @@ class Settings with AppLogger {
       );
 }
 
-class InvalidSettingsVersion {
+class InvalidSettingsVersion implements Exception {
   int statedVersion;
   InvalidSettingsVersion(this.statedVersion);
   @override
