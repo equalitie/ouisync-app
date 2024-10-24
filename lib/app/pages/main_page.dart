@@ -18,9 +18,7 @@ import 'package:url_launcher/url_launcher_string.dart';
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
 import '../models/models.dart';
-import '../utils/click_counter.dart';
 import '../utils/platform/platform.dart';
-import '../utils/share_token.dart';
 import '../utils/utils.dart';
 import '../widgets/notification_badge.dart';
 import '../widgets/widgets.dart';
@@ -387,7 +385,7 @@ class _MainPageState extends State<MainPage>
     );
   }
 
-  Widget buildMainWidget() {
+  Widget buildMainWidget(TextDirection directionality) {
     return widget.reposCubit.builder((repos) {
       final currentRepo = repos.currentRepo;
       final currentRepoCubit = currentRepo?.cubit;
@@ -430,11 +428,12 @@ class _MainPageState extends State<MainPage>
         final navigationPath = currentRepo.cubit.state.currentFolder.path;
         currentRepo.cubit.navigateTo(navigationPath);
 
-        return _repositoryContentBuilder(currentRepo);
+        return _repositoryContentBuilder(currentRepo, directionality);
       }
 
       if (currentRepo is MissingRepoEntry) {
         return MissingRepositoryState(
+            directionality: directionality,
             repositoryLocation: currentRepo.location,
             errorMessage: currentRepo.error,
             errorDescription: currentRepo.errorDescription,
@@ -446,6 +445,7 @@ class _MainPageState extends State<MainPage>
         // This is a general purpose error state.
         // errorDescription is required, but nullable.
         return ErrorState(
+          directionality: directionality,
           errorMessage: currentRepo.error,
           errorDescription: currentRepo.errorDescription,
           onBackToList: () => repos.setCurrent(null),
@@ -456,6 +456,7 @@ class _MainPageState extends State<MainPage>
         return repos.repos.isNotEmpty
             ? SizedBox.shrink()
             : NoRepositoriesState(
+                directionality: directionality,
                 onCreateRepoPressed: _createRepo,
                 onImportRepoPressed: _importRepo,
               );
@@ -485,7 +486,11 @@ class _MainPageState extends State<MainPage>
               alignment: AlignmentDirectional.bottomEnd,
               children: <Widget>[
                 Column(
-                  children: [Expanded(child: buildMainWidget())],
+                  children: [
+                    Expanded(
+                      child: buildMainWidget(Directionality.of(context)),
+                    )
+                  ],
                 ),
                 const ListenerThatRunsFunctionsWithBuildContext(),
               ],
@@ -604,17 +609,21 @@ class _MainPageState extends State<MainPage>
     return Container();
   }
 
-  Widget _repositoryContentBuilder(OpenRepoEntry repo) =>
+  Widget _repositoryContentBuilder(
+    OpenRepoEntry repo,
+    TextDirection directionality,
+  ) =>
       BlocBuilder<RepoCubit, RepoState>(
         bloc: repo.cubit,
-        builder: (context, state) => _selectLayoutWidget(),
+        builder: (context, state) => _selectLayoutWidget(directionality),
       );
 
-  Widget _selectLayoutWidget() {
+  Widget _selectLayoutWidget(TextDirection directionality) {
     final current = _currentRepo;
 
     if (current == null || current is LoadingRepoEntry) {
       return NoRepositoriesState(
+        directionality: directionality,
         onCreateRepoPressed: _createRepo,
         onImportRepoPressed: _importRepo,
       );
@@ -624,6 +633,7 @@ class _MainPageState extends State<MainPage>
       if (!current.cubit.state.canRead) {
         return LockedRepositoryState(
           parentContext: context,
+          directionality: directionality,
           repoCubit: current.cubit,
           masterKey: widget.settings.masterKey,
           passwordHasher: PasswordHasher(widget.session),
@@ -631,13 +641,18 @@ class _MainPageState extends State<MainPage>
       }
 
       _appSettingsIconFocus.unfocus();
-      return _contentBrowser(current.cubit);
+      return _contentBrowser(current.cubit, directionality);
     }
 
-    return Center(child: Text(S.current.messageErrorUnhandledState));
+    return Center(
+      child: Text(
+        S.current.messageErrorUnhandledState,
+        textDirection: directionality,
+      ),
+    );
   }
 
-  Widget _contentBrowser(RepoCubit repo) {
+  Widget _contentBrowser(RepoCubit repo, TextDirection directionality) {
     Widget child;
     final folder = repo.state.currentFolder;
 
@@ -646,7 +661,11 @@ class _MainPageState extends State<MainPage>
         child = const Center(child: CircularProgressIndicator());
       } else {
         _fabFocus.requestFocus();
-        child = NoContentsState(repository: repo, path: folder.path);
+        child = NoContentsState(
+          directionality: directionality,
+          repository: repo,
+          path: folder.path,
+        );
       }
     } else {
       child = _contentsList(repo);

@@ -6,10 +6,12 @@ import '../../utils/utils.dart';
 
 class NoRepositoriesState extends HookWidget {
   const NoRepositoriesState({
+    required this.directionality,
     required this.onCreateRepoPressed,
     required this.onImportRepoPressed,
   });
 
+  final TextDirection directionality;
   final Future<void> Function() onCreateRepoPressed;
   final Future<void> Function() onImportRepoPressed;
 
@@ -23,54 +25,58 @@ class NoRepositoriesState extends HookWidget {
     final importRepoButtonFocus =
         useFocusNode(debugLabel: 'import_repo_button_focus');
 
-    return Center(
+    return Directionality(
+      textDirection: directionality,
+      child: Center(
         child: SingleChildScrollView(
-      reverse: false,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Align(
-            alignment: AlignmentDirectional.center,
-            child: Fields.placeholderWidget(
-              assetName: Constants.assetPathNothingHereYet,
-              assetHeight: nothingHereYetImageHeight,
-            ),
+          reverse: false,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Align(
+                alignment: AlignmentDirectional.center,
+                child: Fields.placeholderWidget(
+                  assetName: Constants.assetPathNothingHereYet,
+                  assetHeight: nothingHereYetImageHeight,
+                ),
+              ),
+              Dimensions.spacingVerticalDouble,
+              Align(
+                alignment: AlignmentDirectional.center,
+                child: Fields.inPageMainMessage(
+                  S.current.messageNoRepos,
+                  style: context.theme.appTextStyle.bodyLarge,
+                ),
+              ),
+              Dimensions.spacingVertical,
+              Align(
+                alignment: AlignmentDirectional.center,
+                child: Fields.inPageSecondaryMessage(
+                  S.current.messageCreateNewRepo,
+                  tags: {Constants.inlineTextBold: InlineTextStyles.bold},
+                ),
+              ),
+              Dimensions.spacingVerticalDouble,
+              Dimensions.spacingVerticalDouble,
+              Fields.inPageButton(
+                onPressed: onCreateRepoPressed,
+                text: S.current.actionCreateRepository,
+                size: Dimensions.sizeInPageButtonRegular,
+                focusNode: newRepoButtonFocus,
+                autofocus: true,
+              ),
+              Dimensions.spacingVertical,
+              Fields.inPageButton(
+                onPressed: onImportRepoPressed,
+                text: S.current.actionAddRepositoryWithToken,
+                size: Dimensions.sizeInPageButtonRegular,
+                focusNode: importRepoButtonFocus,
+              ),
+            ],
           ),
-          Dimensions.spacingVerticalDouble,
-          Align(
-            alignment: AlignmentDirectional.center,
-            child: Fields.inPageMainMessage(
-              S.current.messageNoRepos,
-              style: context.theme.appTextStyle.bodyLarge,
-            ),
-          ),
-          Dimensions.spacingVertical,
-          Align(
-            alignment: AlignmentDirectional.center,
-            child: Fields.inPageSecondaryMessage(
-              S.current.messageCreateNewRepo,
-              tags: {Constants.inlineTextBold: InlineTextStyles.bold},
-            ),
-          ),
-          Dimensions.spacingVerticalDouble,
-          Dimensions.spacingVerticalDouble,
-          Fields.inPageButton(
-            onPressed: onCreateRepoPressed,
-            text: S.current.actionCreateRepository,
-            size: Dimensions.sizeInPageButtonRegular,
-            focusNode: newRepoButtonFocus,
-            autofocus: true,
-          ),
-          Dimensions.spacingVertical,
-          Fields.inPageButton(
-            onPressed: onImportRepoPressed,
-            text: S.current.actionAddRepositoryWithToken,
-            size: Dimensions.sizeInPageButtonRegular,
-            focusNode: importRepoButtonFocus,
-          ),
-        ],
+        ),
       ),
-    ));
+    );
   }
 }
