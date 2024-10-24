@@ -75,7 +75,6 @@ Future<void> main(List<String> args) async {
   final options = await Options.parse(args);
 
   final pubspec = Pubspec.parse(await File("pubspec.yaml").readAsString());
-  final sentryDSN = await readSentryDSN('secrets/sentry_dsn');
 
   final git = await GitDir.fromExisting(p.current);
 
@@ -84,6 +83,8 @@ Future<void> main(List<String> args) async {
   final commit = await getCommit();
   final buildDesc = BuildDesc(version, commit);
 
+  final sentryDSN =
+      await readSentryDSN('secrets/${buildDesc.flavor}/sentry_dsn');
   if (sentryDSN == null && buildDesc.flavor.requiresSentryDSN) {
     print("Sentry DSN is required for this flavor, but could not be found");
     exit(1);

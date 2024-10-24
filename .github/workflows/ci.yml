@@ -132,8 +132,8 @@ jobs:
 
       - name: Setup Sentry DSN for artifact build (different from the production releases)
         run: |
-          mkdir -p secrets/android
-          echo $NIGHTLY_SENTRY_DSN > secrets/sentry_dsn
+          mkdir -p secrets/nightly
+          echo $NIGHTLY_SENTRY_DSN > secrets/nightly/sentry_dsn
         shell: bash
         env:
           NIGHTLY_SENTRY_DSN : ${{ secrets.NIGHTLY_SENTRY_DSN }}
