@@ -75,21 +75,19 @@ class MainFlutterWindow: NSWindow {
 
     private func handleFlutterMethodCall(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         switch call.method {
-        case "getSharedDir":
-            result(Directories.rootPath)
-        case "getMountRootDirectory":
+        case "getSharedDir": result(Directories.rootPath)
+        case "getMountRootDirectory": Task {
             let manager = NSFileProviderManager(for: ouisyncFileProviderDomain)!
-            Task {
-                let userVisibleRootUrl = try! await manager.getUserVisibleURL(for: .rootContainer)
-                var path = userVisibleRootUrl.path(percentEncoded: false)
-                if path.last == "/" {
-                    path = String(path.dropLast())
-                }
-                result(path)
+            let userVisibleRootUrl = try! await manager.getUserVisibleURL(for: .rootContainer)
+            var path = userVisibleRootUrl.path(percentEncoded: false)
+            if path.last == "/" {
+                path = String(path.dropLast())
             }
-        default:
-            result(FlutterMethodNotImplemented)
-            fatalError("Unknown method '\(call.method)' passed to channel '\(methodChannelName)'")
+            result(path)
+        }
+        default: result(FlutterError(code: "OS06",
+                                     message: "Method \"\(call.method)\" not exported by host",
+                                     details: nil))
         }
     }
 }
