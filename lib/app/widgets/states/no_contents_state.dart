@@ -7,10 +7,12 @@ import '../../utils/utils.dart';
 
 class NoContentsState extends StatelessWidget {
   const NoContentsState({
+    required this.directionality,
     required this.repository,
     required this.path,
   });
 
+  final TextDirection directionality;
   final RepoCubit repository;
   final String path;
 
@@ -19,44 +21,47 @@ class NoContentsState extends StatelessWidget {
     final emptyFolderImageHeight = MediaQuery.of(context).size.height *
         Constants.statePlaceholderImageHeightFactor;
 
-    return Center(
-      child: SingleChildScrollView(
-        reverse: false,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Align(
+    return Directionality(
+      textDirection: directionality,
+      child: Center(
+        child: SingleChildScrollView(
+          reverse: false,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Align(
+                  alignment: AlignmentDirectional.center,
+                  child: Fields.placeholderWidget(
+                      assetName: Constants.assetEmptyFolder,
+                      assetHeight: emptyFolderImageHeight)),
+              Dimensions.spacingVerticalDouble,
+              Align(
                 alignment: AlignmentDirectional.center,
-                child: Fields.placeholderWidget(
-                    assetName: Constants.assetEmptyFolder,
-                    assetHeight: emptyFolderImageHeight)),
-            Dimensions.spacingVerticalDouble,
-            Align(
-              alignment: AlignmentDirectional.center,
-              child: Fields.inPageMainMessage(
-                  path.isEmpty
-                      ? S.current.messageEmptyRepo
-                      : S.current.messageEmptyFolder,
-                  style: context.theme.appTextStyle.bodyLarge),
-            ),
-            Dimensions.spacingVertical,
-            Align(
-              alignment: AlignmentDirectional.center,
-              child: Fields.inPageSecondaryMessage(
-                repository.state.accessMode == oui.AccessMode.write
-                    ? S.current.messageCreateAddNewItem
-                    : S.current.messageReadOnlyContents,
-                tags: {
-                  Constants.inlineTextBold: InlineTextStyles.bold,
-                  Constants.inlineTextIcon: InlineTextStyles.icon(
-                      Icons.add_circle,
-                      size: Dimensions.sizeIconBig,
-                      color: Theme.of(context).primaryColor)
-                },
+                child: Fields.inPageMainMessage(
+                    path.isEmpty
+                        ? S.current.messageEmptyRepo
+                        : S.current.messageEmptyFolder,
+                    style: context.theme.appTextStyle.bodyLarge),
               ),
-            ),
-          ],
+              Dimensions.spacingVertical,
+              Align(
+                alignment: AlignmentDirectional.center,
+                child: Fields.inPageSecondaryMessage(
+                  repository.state.accessMode == oui.AccessMode.write
+                      ? S.current.messageCreateAddNewItem
+                      : S.current.messageReadOnlyContents,
+                  tags: {
+                    Constants.inlineTextBold: InlineTextStyles.bold,
+                    Constants.inlineTextIcon: InlineTextStyles.icon(
+                        Icons.add_circle,
+                        size: Dimensions.sizeIconBig,
+                        color: Theme.of(context).primaryColor)
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
