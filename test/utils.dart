@@ -4,6 +4,7 @@ import 'dart:ui';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ouisync_app/app/cubits/locale.dart';
@@ -30,17 +31,33 @@ import 'package:shared_preferences/shared_preferences.dart';
 ///
 /// This can be applied automatically using `flutter_test_config.dart`.
 Future<void> testEnv(FutureOr<void> Function() callback) async {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  
   late Directory tempDir;
   late BlocObserver origBlocObserver;
 
   setUp(() async {
     origBlocObserver = Bloc.observer;
 
-    final dir = await Directory.systemTemp.createTemp();
-    PathProviderPlatform.instance = _FakePathProviderPlatform(dir);
-    SharedPreferences.setMockInitialValues({});
+    tempDir = await Directory.systemTemp.createTemp();
+    final platform = Directory(join(tempDir.path, 'platform')).create();
+    PathProviderPlatform.instance = _FakePathProviderPlatform(await platform);
 
-    tempDir = dir;
+    final shared = Directory(join(tempDir.path, 'shared')).create();
+    final mount =  Directory(join(tempDir.path, 'mount')).create();
+    final native = TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+    native.setMockMethodCallHandler(MethodChannel('org.equalitie.ouisync/native'), (call) async {
+      switch (call.method) {
+        case 'getSharedDir': return (await shared).path;
+        case 'getMountRootDirectory': return (await mount).path;
+        default: throw PlatformException(code: 'OS06',
+                                         message: 'Method "${call.method}" not exported by host');
+      }
+    });
+
+    // TODO: add mock for 'org.equalitie.ouisync/backend' once the tests are updated to use channels
+
+    SharedPreferences.setMockInitialValues({});
   });
 
   tearDown(() async {
