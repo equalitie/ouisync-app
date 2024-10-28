@@ -218,7 +218,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     final isDhtEnabled = await _repo.isDhtEnabled;
     final isPexEnabled = await _repo.isPexEnabled;
 
-    emit(state.copyWith(
+    emitUnlessClosed(state.copyWith(
       isDhtEnabled: isDhtEnabled,
       isPexEnabled: isPexEnabled,
     ));
@@ -231,7 +231,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
 
     await _repo.setDhtEnabled(value);
 
-    emit(state.copyWith(isDhtEnabled: value));
+    emitUnlessClosed(state.copyWith(isDhtEnabled: value));
   }
 
   Future<void> setPexEnabled(bool value) async {
@@ -241,12 +241,12 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
 
     await _repo.setPexEnabled(value);
 
-    emit(state.copyWith(isPexEnabled: value));
+    emitUnlessClosed(state.copyWith(isPexEnabled: value));
   }
 
   Future<void> setCacheServersEnabled(bool value) async {
     // Update the state to the desired value for immediate feedback...
-    emit(state.copyWith(isCacheServersEnabled: value));
+    emitUnlessClosed(state.copyWith(isCacheServersEnabled: value));
     await _cacheServers.setEnabled(_repo, value);
     // ...then fetch the actual value and update the state again. This is needed because some of
     // the cache server requests might fail.
@@ -286,7 +286,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   Future<void> setCredentials(Uint8List credentials) async {
     await _repo.setCredentials(credentials);
     final accessMode = await _repo.accessMode;
-    emit(state.copyWith(accessMode: accessMode));
+    emitUnlessClosed(state.copyWith(accessMode: accessMode));
   }
 
   Future<void> mount() async {
@@ -297,9 +297,9 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
 
     try {
       await _repo.mount();
-      emit(state.copyWith(mountState: const MountStateSuccess()));
+      emitUnlessClosed(state.copyWith(mountState: const MountStateSuccess()));
     } on Error catch (error) {
-      emit(state.copyWith(
+      emitUnlessClosed(state.copyWith(
         mountState: MountStateError(error.code, error.message),
       ));
     }
@@ -308,7 +308,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   Future<void> unmount() async {
     try {
       await _repo.unmount();
-      emit(state.copyWith(mountState: const MountStateDisabled()));
+      emitUnlessClosed(state.copyWith(mountState: const MountStateDisabled()));
     } catch (_) {}
   }
 
@@ -340,16 +340,16 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   StateMonitor? get stateMonitor => _repo.stateMonitor;
 
   Future<void> navigateTo(String destination) async {
-    emit(state.copyWith(isLoading: true));
+    emitUnlessClosed(state.copyWith(isLoading: true));
 
     _currentFolder.goTo(destination);
     await refresh();
 
-    emit(state.copyWith(isLoading: false));
+    emitUnlessClosed(state.copyWith(isLoading: false));
   }
 
   Future<bool> createFolder(String folderPath) async {
-    emit(state.copyWith(isLoading: true));
+    emitUnlessClosed(state.copyWith(isLoading: true));
 
     try {
       await Directory.create(_repo, folderPath);
@@ -364,7 +364,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   }
 
   Future<bool> deleteFolder(String path, bool recursive) async {
-    emit(state.copyWith(isLoading: true));
+    emitUnlessClosed(state.copyWith(isLoading: true));
 
     try {
       await Directory.remove(_repo, path, recursive: recursive);
@@ -398,7 +398,8 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     loggy.debug('Saving file $filePath');
 
     final job = Job(0, length);
-    emit(state.copyWith(uploads: state.uploads.withAdded(filePath, job)));
+    emitUnlessClosed(
+        state.copyWith(uploads: state.uploads.withAdded(filePath, job)));
 
     await refresh();
 
@@ -423,7 +424,8 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
       await file.close();
       await refresh();
 
-      emit(state.copyWith(uploads: state.uploads.withRemoved(filePath)));
+      emitUnlessClosed(
+          state.copyWith(uploads: state.uploads.withRemoved(filePath)));
     }
 
     if (job.state.cancel) {
@@ -500,16 +502,16 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   }
 
   Future<void> setAuthMode(AuthMode authMode) async {
-    emit(state.copyWith(isLoading: true));
+    emitUnlessClosed(state.copyWith(isLoading: true));
     await _repo.setAuthMode(authMode);
-    emit(state.copyWith(authMode: authMode, isLoading: false));
+    emitUnlessClosed(state.copyWith(authMode: authMode, isLoading: false));
   }
 
   Future<bool> setLocalSecret({
     required LocalSecret oldSecret,
     required SetLocalSecret newSecret,
   }) async {
-    emit(state.copyWith(isLoading: true));
+    emitUnlessClosed(state.copyWith(isLoading: true));
 
     // Grab the current credentials so we can restore the access mode when we are done.
     final credentials = await _repo.credentials;
@@ -546,7 +548,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
       return false;
     } finally {
       await _repo.setCredentials(credentials);
-      emit(state.copyWith(isLoading: false));
+      emitUnlessClosed(state.copyWith(isLoading: false));
     }
   }
 
@@ -580,7 +582,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   Future<void> unlock(LocalSecret? secret) async {
     await _repo.setAccessMode(AccessMode.write, secret: secret);
     final accessMode = await _repo.accessMode;
-    emit(state.copyWith(accessMode: accessMode));
+    emitUnlessClosed(state.copyWith(accessMode: accessMode));
 
     if (state.accessMode != AccessMode.blind) {
       await refresh();
@@ -591,7 +593,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   Future<void> lock() async {
     await _repo.setAccessMode(AccessMode.blind);
     final accessMode = await _repo.accessMode;
-    emit(state.copyWith(accessMode: accessMode));
+    emitUnlessClosed(state.copyWith(accessMode: accessMode));
   }
 
   Future<int?> _getFileSize(String path) async {
@@ -657,7 +659,8 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     int offset = 0;
 
     final job = Job(0, length);
-    emit(state.copyWith(downloads: state.downloads.withAdded(sourcePath, job)));
+    emitUnlessClosed(
+        state.copyWith(downloads: state.downloads.withAdded(sourcePath, job)));
 
     try {
       while (job.state.cancel == false) {
@@ -685,7 +688,8 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
       showSnackBar(S.current.messageDownloadingFileError(sourcePath));
     } finally {
       showSnackBar(S.current.messageDownloadFileLocation(parentPath));
-      emit(state.copyWith(downloads: state.downloads.withRemoved(sourcePath)));
+      emitUnlessClosed(
+          state.copyWith(downloads: state.downloads.withRemoved(sourcePath)));
 
       await Future.wait(
           [sink.flush().then((_) => sink.close()), ouisyncFile.close()]);
@@ -696,7 +700,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     required String source,
     required String destination,
   }) async {
-    emit(state.copyWith(isLoading: true));
+    emitUnlessClosed(state.copyWith(isLoading: true));
 
     try {
       await _repo.move(source, destination);
@@ -715,7 +719,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     required String source,
     required String destination,
   }) async {
-    emit(state.copyWith(isLoading: true));
+    emitUnlessClosed(state.copyWith(isLoading: true));
     try {
       final result = type == EntryType.file
           ? await _moveFileToRepo(
@@ -784,7 +788,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   }
 
   Future<bool> deleteFile(String filePath) async {
-    emit(state.copyWith(isLoading: true));
+    emitUnlessClosed(state.copyWith(isLoading: true));
 
     try {
       await File.remove(_repo, filePath);
@@ -823,7 +827,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
       showSnackBar(e.toString());
     }
 
-    emit(state.copyWith(
+    emitUnlessClosed(state.copyWith(
       currentFolder: _currentFolder.state,
       isLoading: false,
     ));
