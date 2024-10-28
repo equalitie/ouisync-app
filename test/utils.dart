@@ -26,6 +26,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:stack_trace/stack_trace.dart';
 
 /// Setup the test environment and run `callback` inside it.
 ///
@@ -33,6 +34,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 Future<void> testEnv(FutureOr<void> Function() callback) async {
   TestWidgetsFlutterBinding.ensureInitialized();
   
+  if (Platform.environment.containsKey("DEMANGLE_STACK")) {
+    // https://api.flutter.dev/flutter/foundation/FlutterError/demangleStackTrace.html
+    FlutterError.demangleStackTrace = (StackTrace stack) {
+      if (stack is Trace) { return stack.vmTrace; }
+      if (stack is Chain) { return stack.toTrace().vmTrace; }
+      return stack;
+    };
+  }
+
   late Directory tempDir;
   late BlocObserver origBlocObserver;
 
