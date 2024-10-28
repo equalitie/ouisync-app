@@ -41,9 +41,7 @@ enum Flavor {
       case "unofficial":
         return Flavor.unofficial;
       default:
-        print(
-            'Invalid flavor "$name", must be one of {production, nightly, unofficial}');
-        exit(1);
+        throw ('Invalid flavor "$name", must be one of {production, nightly, unofficial}');
     }
   }
 
@@ -85,8 +83,7 @@ Future<void> main(List<String> args) async {
   final buildDesc = BuildDesc(version, commit);
 
   if (sentryDSN == null && buildDesc.flavor.requiresSentryDSN) {
-    print("Sentry DSN is required for this flavor, but could not be found");
-    exit(1);
+    throw ("Sentry DSN is required for this flavor, but could not be found");
   }
 
   if (buildDesc.flavor.doGitCleanCheck && !await checkWorkingTreeIsClean(git)) {
@@ -707,8 +704,8 @@ Future<File> buildDebCLI(
     String description = ''}) async {
   final buildName = buildDesc.toString();
 
-  await run(
-      'cargo', ['build', '--release', '--package', 'ouisync-cli'], './ouisync');
+  await run('cargo', ['build', '--release', '--package', 'ouisync-cli'],
+      workingDirectory: './ouisync');
 
   final arch = 'amd64';
   final packageName = '$name-cli_${buildDesc}_$arch';
@@ -760,24 +757,44 @@ Future<File> buildDebCLI(
 //
 ////////////////////////////////////////////////////////////////////////////////
 Future<File> buildAab(BuildDesc buildDesc, String? sentryDSN) async {
-  String flavor = buildDesc.flavor.toString();
+  Flavor flavor = buildDesc.flavor;
 
-  final inputFileName = "app-$flavor-release.aab";
-  final inputPath = 'build/app/outputs/bundle/${flavor}Release/$inputFileName';
+  final secrets = switch (flavor.requiresSigning) {
+    true => await prepareAndroidSecrets(flavor),
+    false => null,
+  };
 
-  print('Creating Android App Bundle ...');
+  try {
+    final env = Map<String, String>();
 
-  await run('flutter', [
-    'build',
-    'appbundle',
-    '--release',
-    if (sentryDSN != null) '--dart-define=SENTRY_DSN=$sentryDSN',
-    '--build-number',
-    buildDesc.buildIdentifier,
-    '--flavor=$flavor',
-    '--build-name',
-    buildDesc.toString(),
-  ]);
+    if (secrets != null) {
+      env['KEYSTORE_PROPERTIES'] = secrets.keystorePropertiesPath;
+    }
+
+    final inputFileName = "app-$flavor-release.aab";
+    final inputPath =
+        'build/app/outputs/bundle/${flavor}Release/$inputFileName';
+
+    print('Creating Android App Bundle ...');
+
+    await run(
+      'flutter',
+      [
+        'build',
+        'appbundle',
+        '--release',
+        if (sentryDSN != null) '--dart-define=SENTRY_DSN=$sentryDSN',
+        '--build-number',
+        buildDesc.buildIdentifier,
+        '--flavor=$flavor',
+        '--build-name',
+        buildDesc.toString(),
+      ],
+      environment: env,
+    );
+  } finally {
+    await secrets?.destroy();
+  }
 
   return File(inputPath);
 }
@@ -799,41 +816,42 @@ Future<File> extractApk(File bundle, Flavor flavor) async {
 
   final bundletool = await prepareBundletool();
 
-  final keyPropertiesPath =
-      'secrets/${flavor.toString()}/android/key.properties';
-
-  String? storeFile;
-  String? storePassword;
-  String? keyPassword;
-  String? keyAlias;
-
-  if (await File(keyPropertiesPath).exists()) {
-    final keyProperties = Properties.fromFile(keyPropertiesPath);
-    storeFile = p.join('android/app', keyProperties.get('storeFile')!);
-    storePassword = keyProperties.get('storePassword')!;
-    keyPassword = keyProperties.get('keyPassword')!;
-    keyAlias = keyProperties.get('keyAlias')!;
-  } else {
-    if (flavor.requiresSigning) {
-      print('Key properties file "$keyPropertiesPath" not found');
-      exit(1);
-    }
-  }
+  final secrets = switch (flavor.requiresSigning) {
+    true => await prepareAndroidSecrets(flavor),
+    false => null,
+  };
 
   final tempPath = p.setExtension(bundle.path, '.apks');
 
-  await run('java', [
-    '-jar',
-    bundletool,
-    'build-apks',
-    '--bundle=${bundle.path}',
-    '--mode=universal',
-    if (storeFile != null) '--ks=$storeFile',
-    if (storePassword != null) '--ks-pass=pass:$storePassword',
-    if (keyAlias != null) '--ks-key-alias=$keyAlias',
-    if (keyPassword != null) '--key-pass=pass:$keyPassword',
-    '--output=$tempPath',
-  ]);
+  try {
+    String? storeFile;
+    String? storePassword;
+    String? keyPassword;
+    String? keyAlias;
+
+    if (secrets != null) {
+      final keyProperties = Properties.fromFile(secrets.keystorePropertiesPath);
+      storeFile = p.join('android/app', keyProperties.get('storeFile')!);
+      storePassword = keyProperties.get('storePassword')!;
+      keyPassword = keyProperties.get('keyPassword')!;
+      keyAlias = keyProperties.get('keyAlias')!;
+    }
+
+    await run('java', [
+      '-jar',
+      bundletool,
+      'build-apks',
+      '--bundle=${bundle.path}',
+      '--mode=universal',
+      if (storeFile != null) '--ks=$storeFile',
+      if (storePassword != null) '--ks-pass=pass:$storePassword',
+      if (keyAlias != null) '--ks-key-alias=$keyAlias',
+      if (keyPassword != null) '--key-pass=pass:$keyPassword',
+      '--output=$tempPath',
+    ]);
+  } finally {
+    secrets.destroy();
+  }
 
   try {
     final inputStream = InputFileStream(tempPath);
@@ -1061,7 +1079,7 @@ Future<String> buildReleaseNotes(
 Future<String> getCommit([String? workingDirectory]) => runCapture(
       'git',
       ['rev-parse', '--short', 'HEAD'],
-      workingDirectory,
+      workingDirectory: workingDirectory,
     );
 
 Future<String?> getSubmoduleCommit(String superCommit, String submodule) async {
@@ -1092,7 +1110,7 @@ Future<String> getLog(
         '$first...$last',
         '--pretty=format:- https://github.com/${slug.owner}/${slug.name}/commit/%h %s'
       ],
-      workingDirectory,
+      workingDirectory: workingDirectory,
     );
 
 String changelogUrl(RepositorySlug slug, String first, String last) {
@@ -1143,15 +1161,17 @@ Version determineVersion(Pubspec pubspec, Options options) {
 
 Future<void> run(
   String command,
-  List<String> args, [
+  List<String> args, {
   String? workingDirectory,
-]) async {
+  Map<String, String>? environment,
+}) async {
   final process = await Process.start(
     command,
     args,
     workingDirectory: workingDirectory,
     // This helps on Windows with finding `command` in $PATH environment variable.
     runInShell: true,
+    environment: environment,
   );
 
   unawaited(process.stdout.transform(utf8.decoder).forEach(stdout.write));
@@ -1166,9 +1186,9 @@ Future<void> run(
 
 Future<String> runCapture(
   String command,
-  List<String> args, [
+  List<String> args, {
   String? workingDirectory,
-]) async {
+}) async {
   final result = await Process.run(
     command,
     args,
@@ -1296,4 +1316,48 @@ Future<void> addBadgeToIcons(String text) async {
       'assets/${desc.fileName}',
     ]);
   }
+}
+
+class AndroidSecrets {
+  String keystorePropertiesPath;
+  Future<void> Function() onDestroy;
+
+  AndroidSecrets(this.keystorePropertiesPath, this.onDestroy);
+  Future<void> destroy() async {
+    onDestroy.call();
+  }
+}
+
+Future<AndroidSecrets> prepareAndroidSecrets(Flavor flavor) async {
+  final dir = await (await Directory(
+              "${Directory.systemTemp.path}/ouisync-android-secrets")
+          .create())
+      .createTemp();
+
+  final deleteSecrets = () => dir.delete(recursive: true);
+
+  try {
+    final base = 'cenoers/ouisync/app/$flavor/android';
+
+    final storePassword = await runCapture('pass', ['$base/storePassword']);
+    final keyAlias = await runCapture('pass', ['$base/keyAlias']);
+    final keyPassword = await runCapture('pass', ['$base/keyPassword']);
+
+    final keystoreJks = File(dir.path + "/keystore.jks");
+    final keystoreJksContent =
+        await Process.run('pass', ['$base/keystore.jks'], stdoutEncoding: null);
+
+    await keystoreJks.writeAsBytes(keystoreJksContent.stdout);
+
+    final keystoreProperties = File(dir.path + "/key.properties");
+    await keystoreProperties.writeAsString("storePassword=$storePassword\n" +
+        "keyAlias=$keyAlias\n" +
+        "keyPassword=$keyPassword\n" +
+        "storeFile=${keystoreJks.path}\n");
+  } catch (e) {
+    await deleteSecrets();
+    rethrow;
+  }
+
+  return AndroidSecrets(keystoreProperties.path, deleteSecrets);
 }
