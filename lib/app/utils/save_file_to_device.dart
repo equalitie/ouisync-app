@@ -2,6 +2,7 @@ import 'dart:io' as io;
 
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/widgets.dart' show BuildContext;
 import 'package:path/path.dart' as p;
 import 'package:permission_handler/permission_handler.dart';
 
@@ -17,8 +18,11 @@ class SaveFileToDevice with AppLogger {
   final FileEntry entry;
   final RepoCubit repoCubit;
 
-  Future<void> save(String defaultPath) async {
-    await _maybeRequestPermission();
+  Future<void> save(BuildContext context, String defaultPath) async {
+    final storagePermissionOk = await _maybeRequestPermission(context);
+    if (storagePermissionOk != null && storagePermissionOk == false) {
+      return;
+    }
 
     String fileName = entry.name;
 
@@ -66,9 +70,7 @@ class SaveFileToDevice with AppLogger {
     );
   }
 
-  Future<void> _maybeRequestPermission() async {
-    if (!io.Platform.isAndroid) return;
-
+  Future<bool?> _maybeRequestPermission(BuildContext context) async {
     final deviceInfo = DeviceInfoPlugin();
     final androidInfo = await deviceInfo.androidInfo;
 
@@ -76,19 +78,20 @@ class SaveFileToDevice with AppLogger {
     if (androidSDK <= Constants.android12SDK) {
       loggy.app('Android SDK is $androidSDK; requesting STORAGE permission');
 
-      final storagePermission = await Permission.storage.status;
-      if (!storagePermission.isGranted) {
-        final status = await Permission.storage.request();
+      final storagePermission =
+          await Permissions.requestPermission(context, Permission.storage);
+      if (storagePermission != PermissionStatus.granted) {
+        loggy.app('Error: STORAGE permission denied by the user '
+            '(SDK $androidSDK)');
 
-        assert(status.isGranted, 'Status denied');
-        loggy.app(
-            'Error: STORAGE permission denied by the user (SDK $androidSDK)');
-
-        return;
+        return false;
       }
 
       loggy.app('STORAGE permission granted by the user (SDK $androidSDK)');
+      return true;
     }
+
+    return null;
   }
 
   Future<String?> _desktopPath(String parentPath, String fileName) async {

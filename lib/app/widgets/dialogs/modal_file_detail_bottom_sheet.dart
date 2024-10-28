@@ -55,8 +55,6 @@ class _FileDetailState extends State<FileDetail> {
                 title: S.current.iconDownload,
                 dense: true,
                 onTap: () async {
-                  Navigator.of(context, rootNavigator: false).pop();
-
                   String? defaultDirectoryPath;
                   if (io.Platform.isAndroid) {
                     defaultDirectoryPath =
@@ -74,7 +72,9 @@ class _FileDetailState extends State<FileDetail> {
                   await SaveFileToDevice(
                     entry: widget.entry,
                     repoCubit: widget.repoCubit,
-                  ).save(defaultDirectoryPath);
+                  ).save(context, defaultDirectoryPath);
+
+                  await Navigator.of(context, rootNavigator: false).maybePop();
                 },
                 enabledValidation: () => widget.isActionAvailableValidator(
                   widget.repoCubit.state.accessMode,
