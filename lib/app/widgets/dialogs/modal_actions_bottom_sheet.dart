@@ -153,7 +153,7 @@ class DirectoryActions extends StatelessWidget with AppLogger {
       return;
     }
 
-    Navigator.of(parentContext).pop();
+    await Navigator.of(parentContext).maybePop();
   }
 
   Future<void> addFile(
