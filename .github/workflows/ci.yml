@@ -132,7 +132,7 @@ jobs:
 
       - name: Setup Sentry DSN for artifact build (different from the production releases)
         run: |
-          mkdir -p secrets/android
+          mkdir -p secrets/
           echo $NIGHTLY_SENTRY_DSN > secrets/sentry_dsn
         shell: bash
         env:
@@ -162,8 +162,14 @@ jobs:
 
       - name: Build artifacts
         run: |
-          flavor=$([ -f secrets/android/key.properties ] && echo 'nightly' || echo 'unofficial' )
-          dart run util/release.dart --flavor=$flavor ${{ matrix.build-args }}
+          key_properties_path=secrets/android/key.properties
+          sentry_dsn_path=secrets/sentry_dsn
+
+          flavor=$([ -f $key_properties_path ] && echo 'nightly' || echo 'unofficial' )
+          keystore=$([ "$flavor" = 'nightly' ] && echo "--android-key-properties=$key_properties_path" || true)
+          sentry=$([ -f $sentry_dsn_path ] && echo "--sentry=$sentry_dsn_path" || true)
+
+          dart run util/release.dart --flavor=$flavor $keystore $sentry ${{ matrix.build-args }}
         shell: bash
 
       - name: Upload artifacts
