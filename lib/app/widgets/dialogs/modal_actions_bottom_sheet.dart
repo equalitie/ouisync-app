@@ -1,17 +1,19 @@
 import 'dart:io' as io;
 
-import 'package:device_info_plus/device_info_plus.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync/ouisync.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 import '../../../generated/l10n.dart';
-import '../../cubits/cubits.dart';
-import '../../utils/repo_path.dart' as repo_path;
-import '../../utils/utils.dart';
-import '../widgets.dart';
+import '../../cubits/cubits.dart'
+    show
+        EntryBottomSheetCubit,
+        EntryBottomSheetState,
+        HideSheetState,
+        RepoCubit;
+import '../../utils/utils.dart'
+    show AppLogger, Dialogs, Dimensions, Fields, FileIO;
+import '../widgets.dart' show ActionsDialog, FolderCreation;
 
 class DirectoryActions extends StatelessWidget with AppLogger {
   const DirectoryActions({
@@ -160,103 +162,7 @@ class DirectoryActions extends StatelessWidget with AppLogger {
     parentContext,
     RepoCubit repoCubit,
     FileType type,
-  ) async {
-    if (io.Platform.isAndroid) {
-      /// On Android 12 (Sdk API 32) or lower, the strorage
-      /// permission needs to be requested before using the file picker.
-      ///
-      /// This is not longer the case, starting with version 13 (Sdk API 33)
-      final androidInfo = await DeviceInfoPlugin().androidInfo;
-      if (androidInfo.version.sdkInt <= 32) {
-        final status = await Permissions.requestPermission(
-            parentContext, Permission.storage);
-
-        if (status != PermissionStatus.granted) return;
-      }
-    }
-
-    final result = await FilePicker.platform.pickFiles(
-      type: type,
-      withReadStream: true,
-      allowMultiple: true,
-    );
-
-    if (result != null) {
-      loggy.debug(() {
-        final fileNames = result.files.map((file) => file.name).toList();
-        return 'Adding files $fileNames';
-      });
-
-      Navigator.of(parentContext).pop();
-
-      for (final srcFile in result.files) {
-        final dstDir = repoCubit.state.currentFolder.path;
-        String fileName = srcFile.name;
-
-        String dstPath = repo_path.join(dstDir, fileName);
-
-        if (await repoCubit.exists(dstPath)) {
-          await showDialog<FileAction>(
-            context: parentContext,
-            builder: (BuildContext context) => AlertDialog(
-              title: Flex(
-                direction: Axis.horizontal,
-                children: [
-                  Fields.constrainedText(
-                    S.current.titleAddFile,
-                    style: context.theme.appTextStyle.titleMedium,
-                    maxLines: 2,
-                  )
-                ],
-              ),
-              content: ReplaceKeepEntry(name: fileName, type: EntryType.file),
-            ),
-          ).then(
-            (fileAction) async {
-              if (fileAction == null) {
-                return;
-              }
-
-              if (fileAction == FileAction.replace) {
-                await repoCubit.replaceFile(
-                  filePath: dstPath,
-                  length: srcFile.size,
-                  fileByteStream: srcFile.readStream!,
-                );
-              }
-
-              if (fileAction == FileAction.keep) {
-                final newPath = await _renameFile(dstPath, 0);
-                await repoCubit.saveFile(
-                  filePath: newPath,
-                  length: srcFile.size,
-                  fileByteStream: srcFile.readStream!,
-                );
-              }
-            },
-          );
-        } else {
-          await repoCubit.saveFile(
-            filePath: dstPath,
-            length: srcFile.size,
-            fileByteStream: srcFile.readStream!,
-          );
-        }
-      }
-    }
-  }
-
-  Future<String> _renameFile(String dstPath, int versions) async {
-    final parent = repo_path.dirname(dstPath);
-    final name = repo_path.basenameWithoutExtension(dstPath);
-    final extension = repo_path.extension(dstPath);
-
-    final newFileName = '$name (${versions += 1})$extension';
-    final newPath = repo_path.join(parent, newFileName);
-
-    if (await repoCubit.exists(newPath)) {
-      return await _renameFile(dstPath, versions);
-    }
-    return newPath;
-  }
+  ) async =>
+      FileIO(context: parentContext, repoCubit: repoCubit)
+          .addFileFromDevice(type: type);
 }
