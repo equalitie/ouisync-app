@@ -8,12 +8,27 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
 import '../../../generated/l10n.dart';
-import '../../cubits/cubits.dart';
-import '../../models/models.dart';
-import '../../pages/pages.dart';
-import '../../utils/repo_path.dart' as repo_path;
-import '../../utils/utils.dart';
-import '../widgets.dart';
+import '../../cubits/cubits.dart' show BottomSheetType, RepoCubit;
+import '../../models/models.dart' show FileEntry;
+import '../../pages/pages.dart' show PreviewFileCallback;
+import '../../utils/utils.dart'
+    show
+        AppThemeExtension,
+        Constants,
+        Dialogs,
+        Dimensions,
+        FileIO,
+        Fields,
+        formatSize,
+        Native,
+        ThemeGetter;
+import '../widgets.dart'
+    show
+        ActionsDialog,
+        EntryAction,
+        EntryActionItem,
+        EntryInfoTable,
+        RenameEntry;
 
 class FileDetail extends StatefulWidget {
   const FileDetail({
@@ -70,10 +85,13 @@ class _FileDetailState extends State<FileDetail> {
 
                   if (defaultDirectoryPath == null) return;
 
-                  await SaveFileToDevice(
-                    entry: widget.entry,
+                  await FileIO(
+                    context: context,
                     repoCubit: widget.repoCubit,
-                  ).save(context, defaultDirectoryPath);
+                  ).saveFileToDevice(
+                    entry: widget.entry,
+                    defaultPath: defaultDirectoryPath,
+                  );
 
                   await Navigator.of(context, rootNavigator: false).maybePop();
                 },
