@@ -24,7 +24,7 @@ export 'move_entry.dart';
 export 'password_hasher.dart';
 export 'native.dart';
 export 'permissions.dart';
-export 'save_file_to_device.dart';
+export 'file_io.dart';
 export 'save_media.dart';
 export 'share_token.dart';
 export 'settings/settings.dart';

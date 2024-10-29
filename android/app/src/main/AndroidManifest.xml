@@ -25,6 +25,7 @@ xmlns:tools="http://schemas.android.com/tools">
         android:name="${applicationName}"
         android:allowBackup="false"
         android:fullBackupContent="false"
+        android:requestLegacyExternalStorage="true"
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round">
 
