@@ -53,13 +53,29 @@ class FileProviderProxy: FromFileProviderToAppProtocol {
     private func invoke(_ call: FlutterMethodCall) async throws -> Any? {
         switch call.method {
         case "initialize":
-            do {
-                return try await initialize()
-            } catch {
-                throw FlutterError(code: "OS02",
-                                   message: "Unable to connect to FileProvider",
-                                   details: String(describing: error))
-            }
+            try await NSFileProviderManager.add(ouisyncFileProviderDomain)
+            manager = NSFileProviderManager(for: ouisyncFileProviderDomain)
+            if manager == nil { throw FlutterError(code: "OS02",
+                                                   message: "Unable to obtain File Provider manager",
+                                                   details: nil) }
+            // the following two concurrency warnings can be ignored because they're just transferring
+            // ownership of instances created in a different actor; it's better to see them than
+            // declaring unchecked Sendable conformance because they should be isolated otherwise
+            service = try await manager.service(named: ouisyncFileProviderServiceName,
+                                                for: NSFileProviderItemIdentifier.rootContainer)
+            if service == nil { throw FlutterError(code: "OS02",
+                                                   message: "Unable to obtain File Provider service",
+                                                   details: nil) }
+
+            connection = try await service.fileProviderConnection()
+            connection.remoteObjectInterface = NSXPCInterface(with: FromAppToFileProviderProtocol.self)
+
+            connection.interruptionHandler = { [weak self] in self?.reset("interrupted") }
+            connection.invalidationHandler = { [weak self] in self?.reset("invalidated") }
+
+            connection.exportedObject = self
+            connection.exportedInterface = NSXPCInterface(with: FromFileProviderToAppProtocol.self)
+            connection.resume()
         case "invoke":
             guard let bytes = (call.arguments as? FlutterStandardTypedData)?.data.bytes
             else { throw FlutterError(code: "OS03",
@@ -75,11 +91,11 @@ class FileProviderProxy: FromFileProviderToAppProtocol {
                                       details: nil) }
 
             proto.fromAppToFileProvider(bytes)
-            return nil
         default: throw FlutterError(code: "OS06",
                                     message: "Method \"\(call.method)\" not exported by host",
                                     details: nil)
         }
+        return nil
     }
 
     nonisolated private func reset(_ reason: String) {
@@ -87,31 +103,5 @@ class FileProviderProxy: FromFileProviderToAppProtocol {
             self.connection = nil
             self.channel.invokeMethod("reset", arguments: reason)
         }
-    }
-
-    private func initialize() async throws {
-        try await NSFileProviderManager.add(ouisyncFileProviderDomain)
-        manager = NSFileProviderManager(for: ouisyncFileProviderDomain)
-        if manager == nil { throw FlutterError(code: "OS07",
-                                               message: "Unable to obtain File Provider manager",
-                                               details: nil) }
-        // the following two concurrency warnings can be ignored because they're just transferring
-        // ownership of instances created in a different actor; it's better to see them than
-        // declaring unchecked Sendable conformance because they should be isolated otherwise
-        service = try await manager.service(named: ouisyncFileProviderServiceName,
-                                            for: NSFileProviderItemIdentifier.rootContainer)
-        if service == nil { throw FlutterError(code: "OS08",
-                                               message: "Unable to obtain File Provider service",
-                                               details: nil) }
-
-        connection = try await service.fileProviderConnection()
-        connection.remoteObjectInterface = NSXPCInterface(with: FromAppToFileProviderProtocol.self)
-
-        connection.interruptionHandler = { [weak self] in self?.reset("interrupted") }
-        connection.invalidationHandler = { [weak self] in self?.reset("invalidated") }
-
-        connection.exportedObject = self
-        connection.exportedInterface = NSXPCInterface(with: FromFileProviderToAppProtocol.self)
-        connection.resume()
     }
 }
