@@ -51,11 +51,13 @@ class _AppContainerWrappedState {
   final Session session;
   final NativeChannels nativeChannels;
   final Settings settings;
+  final String sessionId;
 
   _AppContainerWrappedState({
     required this.session,
     required this.nativeChannels,
     required this.settings,
+    required this.sessionId,
   });
 }
 class _AppContainerState extends State<AppContainer> {
@@ -79,6 +81,9 @@ class _AppContainerState extends State<AppContainer> {
           packageInfo: widget.packageInfo,
           localeCubit: context.read(),
           nativeChannels: state.nativeChannels,
+          // we use a custom key tied to the session to force the child
+          // component to drop state whenever the session disconnects
+          key: Key(state.sessionId)
         ), currentLocale: localeState.currentLocale)
       )
     ),
@@ -90,7 +95,6 @@ class _AppContainerState extends State<AppContainer> {
   };
 
   Future<void> _restart() async {
-    setState(() => state = null);
     try {
       final session = await createSession(
         packageInfo: widget.packageInfo,
@@ -98,10 +102,12 @@ class _AppContainerState extends State<AppContainer> {
         onConnectionReset: () => unawaited(_restart())
       );
       final settings = await loadAndMigrateSettings(session);
+      final sessionId = await session.thisRuntimeId;
       setState(() => state = Success(_AppContainerWrappedState(
         session: session,
         nativeChannels: NativeChannels(session),
-        settings: settings
+        settings: settings,
+        sessionId: sessionId,
       )));
     } on Exception catch(error) {
       setState(() => state = Failure(error));
