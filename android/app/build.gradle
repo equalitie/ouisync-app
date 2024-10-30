@@ -1,3 +1,6 @@
+import java.util.regex.Matcher
+import java.util.regex.Pattern
+
 plugins {
     id "com.android.application"
     id "kotlin-android"
@@ -7,12 +10,6 @@ plugins {
 
 def properties = new Properties()
 rootProject.file("local.properties").withInputStream { properties.load(it) }
-
-def keystoreProperties = new Properties()
-def keystorePropertiesFile = rootProject.file('../secrets/android/key.properties')
-if (keystorePropertiesFile.exists()) {
-    keystorePropertiesFile.withInputStream { keystoreProperties.load(it) }
-}
 
 android {
     namespace = "org.equalitie.ouisync"
@@ -62,25 +59,19 @@ android {
     }
 
     signingConfigs {
-        release {
-            keyAlias keystoreProperties['keyAlias']
-            keyPassword keystoreProperties['keyPassword']
-            storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
-            storePassword keystoreProperties['storePassword']
+        production {
+            def cfg = loadKeystorePropertiesFile("production")
+            keyAlias cfg?.keyAlias
+            keyPassword cfg?.keyPassword
+            storeFile cfg?.storeFile
+            storePassword cfg?.storePassword
         }
-    }
-
-    buildTypes {
-        release {
-            if (keystorePropertiesFile.exists()) {
-                signingConfig signingConfigs.release
-            } else {
-                signingConfig signingConfigs.debug
-            }
-        }
-
-        debug {
-            android.packagingOptions.doNotStrip "**.so"
+        nightly {
+            def cfg = loadKeystorePropertiesFile("nightly")
+            keyAlias cfg?.keyAlias
+            keyPassword cfg?.keyPassword
+            storeFile cfg?.storeFile
+            storePassword cfg?.storePassword
         }
     }
 
@@ -88,14 +79,33 @@ android {
     productFlavors {
         production {
             dimension "releaseType"
+            signingConfig signingConfigs.production
+            applicationIdSuffix applicationIdSuffix
         }
         nightly {
             dimension "releaseType"
-            applicationIdSuffix ".nightly"
+            applicationIdSuffix appendUnlessNull(".nightly", applicationIdSuffix)
+            signingConfig signingConfigs.nightly
         }
         unofficial {
             dimension "releaseType"
-            applicationIdSuffix ".unofficial"
+            applicationIdSuffix appendUnlessNull(".unofficial", applicationIdSuffix)
+            signingConfig signingConfigs.debug
+        }
+    }
+
+    // Flutter building will exit with an incomprehensive error if the flavor
+    // is not specified. So in this function we do our own check if the
+    // --flavor parameter was used and tell the user that it needs to be set if
+    // it's not.
+    checkFlavorParameter(getCurrentFlavor(), productFlavors)
+
+    buildTypes {
+        release {
+        }
+
+        debug {
+            android.packagingOptions.doNotStrip "**.so"
         }
     }
 }
@@ -164,4 +174,67 @@ task generateResourceImages() {
 
 gradle.projectsEvaluated {
     preBuild.dependsOn('generateResourceImages')
+}
+
+class SigningConfig {
+    String keyAlias
+    String keyPassword
+    File storeFile
+    String storePassword
+}
+
+def loadKeystorePropertiesFile(String flavor) {
+    def keystoreProperties = new Properties()
+    def keystoreFilePath = "../secrets/${flavor}/android/key.properties"
+    def keystorePropertiesFile = rootProject.file(keystoreFilePath)
+    if (!keystorePropertiesFile.exists()) {
+        return null
+    }
+    keystorePropertiesFile.withInputStream { keystoreProperties.load(it) }
+
+    def config = new SigningConfig(
+        keyAlias: keystoreProperties['keyAlias'],
+        keyPassword: keystoreProperties['keyPassword'],
+        storeFile: file(keystoreProperties['storeFile']),
+        storePassword: keystoreProperties['storePassword']
+    )
+
+    return config
+}
+
+// Check if the user provided the `--flavor=` argument.
+def checkFlavorParameter(String currentFlavor, availableFlavors) {
+    def availableFlavorNames = availableFlavors.collect { it.name }
+
+    if (currentFlavor == null) {
+        if (availableFlavors.empty) {
+            return
+        }
+        throw new GradleException("Missing '--flavor=${availableFlavorNames}' argument.")
+    }
+
+    if (!availableFlavorNames.contains(currentFlavor)) {
+        throw new GradleException("Unrecognized flavor '${currentFlavor}'. Use one from ${availableFlavorNames}.")
+    }
+}
+
+// Return the current flavor or null.
+def getCurrentFlavor() {
+    String taskRequests = gradle.startParameter.taskRequests.toString()
+
+    Pattern pattern = Pattern.compile("(assemble|bundle)(\\w+)(Release|Debug)")
+    Matcher matcher = pattern.matcher(taskRequests)
+
+    if (matcher.find()) {
+        return matcher.group(2).toLowerCase()
+    } else {
+        return null
+    }
+}
+
+def appendUnlessNull(String s1, String s2) {
+    if (s2 == null) {
+        return s1
+    }
+    return s1 + s2
 }
