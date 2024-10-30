@@ -6,6 +6,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:loggy/loggy.dart';
 import 'package:ouisync/native_channels.dart';
 import 'package:ouisync/ouisync.dart' show Session;
+import 'package:ouisync/errors.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
@@ -99,7 +100,12 @@ class _AppContainerState extends State<AppContainer> {
       final session = await createSession(
         packageInfo: widget.packageInfo,
         logger: widget.logger,
-        onConnectionReset: () => unawaited(_restart())
+        onConnectionReset: () {
+          // the session is now defunct: switch to the loading screen
+          setState(() => state = null);
+          // and attempt to start a new one after a short delay
+          Timer(Duration(seconds: 1), () => unawaited(_restart()));
+        }
       );
       final settings = await loadAndMigrateSettings(session);
       final sessionId = await session.thisRuntimeId;
@@ -109,6 +115,11 @@ class _AppContainerState extends State<AppContainer> {
         settings: settings,
         sessionId: sessionId,
       )));
+    } on ProviderUnavailable catch(error) {
+      // this error is considered transient, retry after a short delay
+      print('Unable to acquire session:');
+      print(error);
+      Timer(Duration(seconds: 1), () => unawaited(_restart()));
     } on Exception catch(error) {
       setState(() => state = Failure(error));
     }
