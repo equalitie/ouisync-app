@@ -73,7 +73,7 @@ class RepoListState extends StatelessWidget
                 location: repoEntry.location,
                 mainAction: () {},
                 verticalDotsAction: () => deleteRepository(
-                  context,
+                  parentContext,
                   reposCubit: reposCubit,
                   repoLocation: repoEntry.location,
                 ),

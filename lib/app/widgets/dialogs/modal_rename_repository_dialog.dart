@@ -3,9 +3,18 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import '../../../generated/l10n.dart';
-import '../../cubits/cubits.dart';
-import '../../utils/utils.dart';
-import '../widgets.dart';
+import '../../cubits/cubits.dart' show RepoCubit;
+import '../../utils/utils.dart'
+    show
+        AppThemeExtension,
+        Dialogs,
+        Dimensions,
+        Fields,
+        Strings,
+        TextEditingControllerExtension,
+        ThemeGetter,
+        validateNoEmptyMaybeRegExpr;
+import '../widgets.dart' show NegativeButton, PositiveButton;
 
 class RenameRepository extends StatefulWidget {
   RenameRepository(this.repoCubit, {super.key});
@@ -70,7 +79,7 @@ class _RenameRepository extends State<RenameRepository> {
   List<Widget> buildActions(BuildContext context) => [
         NegativeButton(
           text: S.current.actionCancel,
-          onPressed: () => Navigator.of(context).pop(null),
+          onPressed: () async => await Navigator.of(context).maybePop(null),
           buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
         ),
         PositiveButton(
@@ -88,7 +97,7 @@ class _RenameRepository extends State<RenameRepository> {
       return;
     }
 
-    Navigator.of(context).pop(newNameController.text);
+    await Navigator.of(context).maybePop(newNameController.text);
   }
 
   Future<bool> validate(BuildContext context) async {
@@ -100,7 +109,7 @@ class _RenameRepository extends State<RenameRepository> {
     final newLocation =
         widget.repoCubit.location.rename(newNameController.text);
     final exists = await Dialogs.executeFutureWithLoadingDialog(
-      context,
+      null,
       File(newLocation.path).exists(),
     );
 

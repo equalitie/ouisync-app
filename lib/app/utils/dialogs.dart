@@ -81,10 +81,10 @@ abstract class Dialogs {
                 [
                   TextButton(
                     child: Text(S.current.actionCloseCapital),
-                    onPressed: () => Navigator.of(
+                    onPressed: () async => await Navigator.of(
                       context,
                       rootNavigator: true,
-                    ).pop(false),
+                    ).maybePop(false),
                   ),
                 ],
           );
@@ -134,8 +134,9 @@ abstract class Dialogs {
               Fields.dialogActions(context, buttons: [
                 NegativeButton(
                     text: S.current.actionCancel,
-                    onPressed: () =>
-                        Navigator.of(context, rootNavigator: true).pop(),
+                    onPressed: () async =>
+                        await Navigator.of(context, rootNavigator: true)
+                            .maybePop(),
                     buttonsAspectRatio:
                         Dimensions.aspectRatioModalDialogButton),
                 PositiveButton(
@@ -143,7 +144,7 @@ abstract class Dialogs {
                     isDangerButton: true,
                     onPressed: () async {
                       await repo.deleteFile(path);
-                      Navigator.of(context).pop(fileName);
+                      await Navigator.of(context).maybePop(fileName);
                     },
                     buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton)
               ])
@@ -171,15 +172,17 @@ abstract class Dialogs {
                 buttons: [
                   NegativeButton(
                     text: S.current.actionCancel,
-                    onPressed: () =>
-                        Navigator.of(context, rootNavigator: true).pop(false),
+                    onPressed: () async =>
+                        await Navigator.of(context, rootNavigator: true)
+                            .maybePop(false),
                     buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
                   ),
                   PositiveButton(
                     text: S.current.actionDelete,
                     isDangerButton: true,
-                    onPressed: () =>
-                        Navigator.of(context, rootNavigator: true).pop(true),
+                    onPressed: () async =>
+                        await Navigator.of(context, rootNavigator: true)
+                            .maybePop(true),
                     buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
                   ),
                 ],

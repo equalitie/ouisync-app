@@ -5,17 +5,24 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync/ouisync.dart';
 
 import '../../generated/l10n.dart';
-import '../cubits/repo_creation.dart';
-import '../cubits/repo_security.dart';
-import '../utils/constants.dart';
-import '../utils/dialogs.dart';
-import '../utils/dimensions.dart';
-import '../utils/extensions.dart';
-import '../utils/fields.dart';
-import 'holder.dart';
-import 'repo_security.dart';
-import 'states/content_with_sticky_footer_state.dart';
-import 'switches/custom_adaptive_switch.dart';
+import '../cubits/cubits.dart'
+    show
+        RepoCreationCubit,
+        RepoCreationFailure,
+        RepoCreationPending,
+        RepoCreationSuccess,
+        RepoCreationState,
+        RepoCreationValid,
+        RepoSecurityCubit,
+        RepoSecurityState;
+import '../utils/utils.dart'
+    show AppThemeExtension, Constants, Dialogs, Dimensions, Fields, ThemeGetter;
+import 'widgets.dart'
+    show
+        BlocHolder,
+        ContentWithStickyFooterState,
+        CustomAdaptiveSwitch,
+        RepoSecurity;
 
 class RepoCreation extends StatelessWidget {
   RepoCreation(this.creationCubit, {super.key});
@@ -98,7 +105,7 @@ class RepoCreation extends StatelessWidget {
       [
         Fields.inPageButton(
           text: S.current.actionCancel,
-          onPressed: () => Navigator.of(context).pop(null),
+          onPressed: () async => await Navigator.of(context).maybePop(null),
         ),
         BlocBuilder<RepoSecurityCubit, RepoSecurityState>(
           bloc: securityCubit,
@@ -216,7 +223,7 @@ class RepoCreation extends StatelessWidget {
       case RepoCreationValid():
         break;
       case RepoCreationSuccess(location: final location):
-        Navigator.of(context).pop(location);
+        await Navigator.of(context).maybePop(location);
       case RepoCreationFailure(location: final location, error: final error):
         await Dialogs.simpleAlertDialog(
           context: context,

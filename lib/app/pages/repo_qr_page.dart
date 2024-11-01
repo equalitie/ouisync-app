@@ -23,7 +23,7 @@ class _RepositoryQRPageState extends State<RepositoryQRPage> {
       appBar: DirectionalAppBar(
         leading: Fields.actionIcon(
           const Icon(Icons.close, color: Colors.white),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () async => await Navigator.of(context).maybePop(),
         ),
         backgroundColor: Colors.transparent,
       ),

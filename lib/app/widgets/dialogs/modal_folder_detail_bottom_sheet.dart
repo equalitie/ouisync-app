@@ -56,8 +56,8 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
               iconData: Icons.drive_file_move_outlined,
               title: S.current.iconMove,
               dense: true,
-              onTap: () {
-                Navigator.of(context).pop();
+              onTap: () async {
+                await Navigator.of(context).maybePop();
 
                 final entryPath = widget.entry.path;
                 final entryType = EntryType.directory;
@@ -131,7 +131,7 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
 
     final recursive = !isEmpty;
     final deleteFolderOk = await Dialogs.executeFutureWithLoadingDialog(
-      context,
+      null,
       repo.deleteFolder(path, recursive),
     );
     if (deleteFolderOk) {
@@ -189,7 +189,7 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
               destination: newEntryPath,
             );
 
-            Navigator.of(context).pop();
+            await Navigator.of(context).maybePop();
           }
         },
       );

@@ -2,10 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../../generated/l10n.dart';
-import '../../cubits/repo.dart';
 import '../../utils/repo_path.dart' as repo_path;
-import '../../utils/platform/platform.dart';
-import '../../utils/utils.dart';
+import '../../cubits/cubits.dart' show RepoCubit;
+import '../../utils/platform/platform.dart' show PlatformValues;
+import '../../utils/utils.dart'
+    show
+        AppLogger,
+        AppThemeExtension,
+        Dialogs,
+        Dimensions,
+        Fields,
+        TextEditingControllerExtension,
+        Strings,
+        ThemeGetter,
+        validateNoEmptyMaybeRegExpr;
 import '../widgets.dart';
 
 class RenameEntry extends HookWidget with AppLogger {
@@ -97,7 +107,7 @@ class RenameEntry extends HookWidget with AppLogger {
                   onFieldSubmitted: (newName) async {
                     final submitted = await _submitField(parent, newName);
                     if (submitted && PlatformValues.isDesktopDevice) {
-                      Navigator.of(context).pop(newName);
+                      await Navigator.of(context).maybePop(newName);
                     }
                   },
                   validator: validateNoEmptyMaybeRegExpr(
@@ -184,11 +194,13 @@ class RenameEntry extends HookWidget with AppLogger {
         actions: [
           TextButton(
             child: Text(S.current.actionRename.toUpperCase()),
-            onPressed: () => Navigator.of(parentContext).pop(true),
+            onPressed: () async =>
+                await Navigator.of(parentContext).maybePop(true),
           ),
           TextButton(
             child: Text(S.current.actionCancelCapital),
-            onPressed: () => Navigator.of(parentContext).pop(false),
+            onPressed: () async =>
+                await Navigator.of(parentContext).maybePop(false),
           )
         ]);
 
@@ -213,7 +225,7 @@ class RenameEntry extends HookWidget with AppLogger {
   List<Widget> _actions(BuildContext context) => [
         NegativeButton(
             text: S.current.actionCancel,
-            onPressed: () => Navigator.of(context).pop(''),
+            onPressed: () async => await Navigator.of(context).maybePop(''),
             buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton),
         PositiveButton(
             text: S.current.actionRename,
@@ -230,7 +242,7 @@ class RenameEntry extends HookWidget with AppLogger {
   ) async {
     final submitted = await _submitField(parent, newName);
     if (submitted) {
-      Navigator.of(context).pop(newName);
+      await Navigator.of(context).maybePop(newName);
     }
   }
 }
