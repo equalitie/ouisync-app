@@ -246,7 +246,7 @@ class RepoCreation extends StatelessWidget {
       await creationCubit.stream.where((state) => !state.loading).first;
     }
 
-    await Dialogs.executeFutureWithLoadingDialog(context, done());
+    await done();
   }
 
   void _handleLocalSecretChanged(
