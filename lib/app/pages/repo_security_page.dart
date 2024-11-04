@@ -92,10 +92,10 @@ class RepoSecurityPage extends StatelessWidget {
       actions: [
         TextButton(
             child: Text(S.current.actionCancel),
-            onPressed: () => Navigator.of(context).pop(false)),
+            onPressed: () async => await Navigator.of(context).maybePop(false)),
         TextButton(
             child: Text(S.current.actionDiscard),
-            onPressed: () => Navigator.of(context).pop(true))
+            onPressed: () async => await Navigator.of(context).maybePop(true))
       ],
     ).then((pop) {
       if (pop ?? false) {
@@ -131,10 +131,10 @@ class RepoSecurityPage extends StatelessWidget {
       actions: [
         TextButton(
             child: Text(S.current.actionCancel),
-            onPressed: () => Navigator.of(context).pop(false)),
+            onPressed: () async => await Navigator.of(context).maybePop(false)),
         TextButton(
             child: Text(S.current.actionAccept),
-            onPressed: () => Navigator.of(context).pop(true))
+            onPressed: () async => await Navigator.of(context).maybePop(true))
       ],
     );
 

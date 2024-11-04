@@ -10,13 +10,33 @@ import 'package:path/path.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../generated/l10n.dart';
-import '../../cubits/cubits.dart';
-import '../../cubits/launch_at_startup.dart';
-import '../../pages/pages.dart';
-import '../../pages/peers_page.dart';
-import '../../utils/platform/platform.dart';
-import '../../utils/utils.dart';
-import '../widgets.dart';
+import '../../cubits/cubits.dart'
+    show
+        ConnectivityInfo,
+        LaunchAtStartupCubit,
+        LocaleCubit,
+        NatDetection,
+        PeerSet,
+        PeerSetCubit,
+        PowerControl,
+        ReposCubit,
+        UpgradeExistsCubit;
+import '../../pages/pages.dart' show LanguagePicker, PeersPage, WebViewPage;
+import '../../utils/platform/platform.dart'
+    show PlatformValues, PlatformWebView;
+import '../../utils/utils.dart'
+    show
+        AppLogger,
+        AppThemeExtension,
+        Constants,
+        Dialogs,
+        Dimensions,
+        dumpAll,
+        Fields,
+        formatSize,
+        Settings,
+        ThemeGetter;
+import '../widgets.dart' show InfoBuble, NegativeButton, PositiveButton;
 import 'app_version_tile.dart';
 import 'settings_section.dart';
 import 'settings_tile.dart';
@@ -293,11 +313,13 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
             Fields.dialogActions(context, buttons: [
               NegativeButton(
                   text: S.current.actionCancel,
-                  onPressed: () => Navigator.of(context).pop(null),
+                  onPressed: () async =>
+                      await Navigator.of(context).maybePop(null),
                   buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton),
               PositiveButton(
                   text: S.current.actionOK,
-                  onPressed: () async => Navigator.of(context).pop(attachments),
+                  onPressed: () async =>
+                      await Navigator.of(context).maybePop(attachments),
                   buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton)
             ])
           ]);

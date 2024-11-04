@@ -5,11 +5,18 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync/ouisync.dart';
 
 import '../../../generated/l10n.dart';
-import '../../cubits/cubits.dart';
-import '../../mixins/mixins.dart';
-import '../../utils/utils.dart';
-import '../repo_status.dart';
-import '../widgets.dart';
+import '../../cubits/cubits.dart' show RepoCubit, ReposCubit, RepoState;
+import '../../mixins/mixins.dart' show RepositoryActionsMixin;
+import '../../utils/utils.dart'
+    show
+        AppLogger,
+        AppThemeExtension,
+        Dimensions,
+        Fields,
+        ProgressExtension,
+        Settings,
+        ThemeGetter;
+import '../widgets.dart' show EntryActionItem, RepoProgressBuilder;
 
 class RepositorySettings extends StatefulWidget {
   const RepositorySettings({
@@ -91,7 +98,7 @@ class _RepositorySettingsState extends State<RepositorySettings>
                           title: S.current.actionShare,
                           dense: true,
                           onTap: () async {
-                            Navigator.of(context).pop();
+                            await Navigator.of(context).maybePop();
                             await shareRepository(context,
                                 repository: widget.repoCubit);
                           }),
@@ -135,14 +142,17 @@ class _RepositorySettingsState extends State<RepositorySettings>
                         ),
                       ),
                       EntryActionItem(
-                          iconData: Icons.delete_outline,
-                          title: S.current.actionDelete,
-                          dense: true,
-                          isDanger: true,
-                          onTap: () async => await deleteRepository(context,
-                              repoLocation: widget.repoCubit.location,
-                              reposCubit: widget.reposCubit,
-                              popDialog: () => Navigator.of(context).pop()))
+                        iconData: Icons.delete_outline,
+                        title: S.current.actionDelete,
+                        dense: true,
+                        isDanger: true,
+                        onTap: () async => await deleteRepository(
+                          context,
+                          repoLocation: widget.repoCubit.location,
+                          reposCubit: widget.reposCubit,
+                          popDialog: () => Navigator.of(context).pop(),
+                        ),
+                      ),
                     ]))),
       );
 }

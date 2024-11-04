@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import '../../../generated/l10n.dart';
-import '../../utils/utils.dart';
+import '../../utils/utils.dart' show AppThemeExtension, ThemeGetter;
 
 /// Dialog for adding user provided peer
 class AddPeerDialog extends StatefulWidget {
@@ -54,11 +54,11 @@ class _AddPeerDialogState extends State<AddPeerDialog> {
           actions: [
             TextButton(
               child: Text(S.current.actionOK),
-              onPressed: () => _submit(context),
+              onPressed: () async => await _submit(context),
             ),
             TextButton(
               child: Text(S.current.actionCancel),
-              onPressed: () => _cancel(context),
+              onPressed: () async => await _cancel(context),
             )
           ]);
 
@@ -98,13 +98,14 @@ class _AddPeerDialogState extends State<AddPeerDialog> {
     }
   }
 
-  void _submit(BuildContext context) {
+  Future<void> _submit(BuildContext context) async {
     if (_formKey.currentState?.validate() ?? false) {
-      Navigator.of(context).pop(_value);
+      await Navigator.of(context).maybePop(_value);
     }
   }
 
-  void _cancel(BuildContext context) => Navigator.of(context).pop();
+  Future<void> _cancel(BuildContext context) async =>
+      await Navigator.of(context).maybePop();
 
   String? get _value {
     final a = _address;

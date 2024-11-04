@@ -91,7 +91,8 @@ class _QRScannerState extends State<QRScanner> with AppLogger {
 
             loggy.debug('Barcode found! $code');
             scanned = true;
-            Navigator.of(context).pop(code);
+
+            await Navigator.of(context).maybePop(code);
           }
         });
   }
