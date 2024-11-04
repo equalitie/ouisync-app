@@ -168,7 +168,7 @@ mixin RepositoryActionsMixin on LoggyType {
       actions: [
         TextButton(
           child: Text(S.current.actionCloseCapital),
-          onPressed: () => Navigator.of(context).pop(false),
+          onPressed: () async => await Navigator.of(context).maybePop(false),
         ),
       ],
     );
@@ -205,11 +205,12 @@ mixin RepositoryActionsMixin on LoggyType {
           Fields.dialogActions(context, buttons: [
             NegativeButton(
                 text: S.current.actionCancelCapital,
-                onPressed: () => Navigator.of(context).pop(false),
+                onPressed: () async =>
+                    await Navigator.of(context).maybePop(false),
                 buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton),
             PositiveButton(
               text: S.current.actionDeleteCapital,
-              onPressed: () => Navigator.of(context).pop(true),
+              onPressed: () async => await Navigator.of(context).maybePop(true),
               buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
               isDangerButton: true,
             )
@@ -220,7 +221,7 @@ mixin RepositoryActionsMixin on LoggyType {
 
     if (deleteRepo ?? false) {
       await Dialogs.executeFutureWithLoadingDialog(
-        context,
+        null,
         reposCubit.deleteRepository(repoLocation),
       );
 

@@ -108,7 +108,7 @@ class _FileDetailState extends State<FileDetail> {
                 title: S.current.iconPreview,
                 dense: true,
                 onTap: () async {
-                  Navigator.of(context).pop();
+                  await Navigator.of(context).maybePop();
 
                   await widget.onPreviewFile.call(
                     widget.repoCubit,
@@ -160,8 +160,8 @@ class _FileDetailState extends State<FileDetail> {
                 iconData: Icons.drive_file_move_outlined,
                 title: S.current.iconMove,
                 dense: true,
-                onTap: () {
-                  Navigator.of(context).pop();
+                onTap: () async {
+                  await Navigator.of(context).maybePop();
 
                   final entryPath = widget.entry.path;
                   final entryType = EntryType.file;
@@ -197,7 +197,7 @@ class _FileDetailState extends State<FileDetail> {
                       parent);
 
                   if (deletedFileName != null && deletedFileName.isNotEmpty) {
-                    Navigator.of(context).pop();
+                    await Navigator.of(context).maybePop();
                   }
                 },
                 enabledValidation: () => widget.isActionAvailableValidator(
@@ -268,7 +268,7 @@ class _FileDetailState extends State<FileDetail> {
               destination: newEntryPath,
             );
 
-            Navigator.of(context).pop();
+            await Navigator.of(context).maybePop();
           }
         },
       );

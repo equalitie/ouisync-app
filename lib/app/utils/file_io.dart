@@ -172,9 +172,7 @@ class FileIO with AppLogger {
   }
 
   Future<bool> _maybeRequestPermission(BuildContext context) async {
-    if (!io.Platform.isAndroid &&
-        !io.Platform.isIOS &&
-        !io.Platform.isWindows) {
+    if (!io.Platform.isAndroid) {
       return true;
     }
 

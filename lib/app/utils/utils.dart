@@ -19,6 +19,7 @@ export 'hotspot.dart';
 export 'inline_text_styles.dart';
 export 'local_auth.dart';
 export 'log.dart';
+export 'master_key.dart';
 export 'log_reader.dart';
 export 'move_entry.dart';
 export 'password_hasher.dart';

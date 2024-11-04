@@ -2,11 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:ouisync/ouisync.dart';
 
 import '../../../generated/l10n.dart';
-import '../../utils/master_key.dart';
-import '../../utils/utils.dart';
-import '../../models/models.dart';
-import '../../cubits/cubits.dart';
-import '../widgets.dart';
+import '../../utils/utils.dart'
+    show
+        AppLogger,
+        Constants,
+        Dialogs,
+        Dimensions,
+        Fields,
+        MasterKey,
+        PasswordHasher,
+        validateNoEmptyMaybeRegExpr;
+import '../../models/models.dart'
+    show AuthModeKeyStoredOnDevice, RepoLocation, SecretKeyOrigin;
+import '../../cubits/cubits.dart' show RepoCubit;
+import '../widgets.dart' show NegativeButton, PositiveButton;
 
 class UnlockRepository extends StatefulWidget {
   UnlockRepository({
@@ -102,7 +111,7 @@ class _UnlockRepositoryState extends State<UnlockRepository> with AppLogger {
   List<Widget> buildActions(context) => [
         NegativeButton(
           text: S.current.actionCancel,
-          onPressed: () => Navigator.of(context).pop(null),
+          onPressed: () async => await Navigator.of(context).maybePop(null),
           buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
         ),
         PositiveButton(
@@ -148,7 +157,7 @@ class _UnlockRepositoryState extends State<UnlockRepository> with AppLogger {
       );
     }
 
-    Navigator.of(context).pop(UnlockRepositoryResult(
+    await Navigator.of(context).maybePop(UnlockRepositoryResult(
       repoLocation: widget.repoCubit.location,
       password: password,
       accessMode: accessMode,

@@ -863,7 +863,8 @@ class _MainPageState extends State<MainPage>
                 ])),
                 actions: [
                   TextButton(
-                      onPressed: () => Navigator.of(context).pop(),
+                      onPressed: () async =>
+                          await Navigator.of(context).maybePop(),
                       child: Text(S.current.actionCloseCapital))
                 ]);
           });

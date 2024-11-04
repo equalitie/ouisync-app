@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../generated/l10n.dart';
-import 'utils.dart';
+import 'utils.dart' show Dialogs, Dimensions;
 
 class Permissions {
   static Future<PermissionStatus> requestPermission(
@@ -42,22 +42,25 @@ class Permissions {
           ? <Widget>[
               TextButton(
                 child: Text(S.current.actionCloseCapital),
-                onPressed: () =>
-                    Navigator.of(context, rootNavigator: true).pop(false),
+                onPressed: () async =>
+                    await Navigator.of(context, rootNavigator: true)
+                        .maybePop(false),
               ),
               TextButton(
                   child: Text(S.current.actionGoToSettings.toUpperCase()),
-                  onPressed: () {
-                    openAppSettings();
+                  onPressed: () async {
+                    await openAppSettings();
 
-                    Navigator.of(context, rootNavigator: true).pop(true);
+                    await Navigator.of(context, rootNavigator: true)
+                        .maybePop(true);
                   })
             ]
           : <Widget>[
               TextButton(
                 child: Text(S.current.actionCloseCapital),
-                onPressed: () =>
-                    Navigator.of(context, rootNavigator: true).pop(false),
+                onPressed: () async =>
+                    await Navigator.of(context, rootNavigator: true)
+                        .maybePop(false),
               )
             ];
 
