@@ -226,22 +226,6 @@ class RepoCreation extends StatelessWidget {
     }
   }
 
-  Future<void> _handleLoading(
-    BuildContext context,
-    RepoCreationState state,
-  ) async {
-    Future<void> done() async {
-      // Make sure to check the initial state as well, to avoid race conditions.
-      if (!creationCubit.state.loading) {
-        return;
-      }
-
-      await creationCubit.stream.where((state) => !state.loading).first;
-    }
-
-    await done();
-  }
-
   void _handleLocalSecretChanged(
     BuildContext context,
     RepoSecurityState state,
