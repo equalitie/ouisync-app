@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../../generated/l10n.dart';
-import '../../cubits/cubits.dart';
-import '../../utils/utils.dart';
-import '../../models/models.dart';
+import '../../cubits/cubits.dart' show ReposCubit;
+import '../../models/models.dart' show RepoLocation;
+import '../../utils/utils.dart' show AppLogger, Dimensions, Fields;
 
 class RepoListActions extends StatelessWidget with AppLogger {
   RepoListActions({
@@ -41,7 +41,7 @@ class RepoListActions extends StatelessWidget with AppLogger {
                         return;
                       }
 
-                      Navigator.of(context).pop();
+                      await Navigator.of(context).maybePop();
                     }),
                 _buildAction(
                     name: S.current.actionImportRepo,
@@ -53,7 +53,7 @@ class RepoListActions extends StatelessWidget with AppLogger {
                         return;
                       }
 
-                      Navigator.of(context).pop();
+                      await Navigator.of(context).maybePop();
                     })
               ],
             ),

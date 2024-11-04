@@ -210,11 +210,13 @@ class _MainPageState extends State<MainPage>
                     actions: [
                       TextButton(
                         child: Text(S.current.actionSkip.toUpperCase()),
-                        onPressed: () => Navigator.of(context).pop(false),
+                        onPressed: () async =>
+                            await Navigator.of(context).maybePop(false),
                       ),
                       TextButton(
                         child: Text(S.current.actionInstallDokan.toUpperCase()),
-                        onPressed: () => Navigator.of(context).pop(true),
+                        onPressed: () async =>
+                            await Navigator.of(context).maybePop(true),
                       )
                     ],
                   ),
@@ -276,11 +278,13 @@ class _MainPageState extends State<MainPage>
                     actions: [
                       TextButton(
                         child: Text(S.current.actionSkip.toUpperCase()),
-                        onPressed: () => Navigator.of(context).pop(false),
+                        onPressed: () async =>
+                            Navigator.of(context).maybePop(false),
                       ),
                       TextButton(
                         child: Text(S.current.actionInstallDokan.toUpperCase()),
-                        onPressed: () => Navigator.of(context).pop(true),
+                        onPressed: () async =>
+                            await Navigator.of(context).maybePop(true),
                       )
                     ],
                   ),
@@ -341,8 +345,9 @@ class _MainPageState extends State<MainPage>
                   actions: [
                     TextButton(
                       child: Text(S.current.actionCloseCapital),
-                      onPressed: () =>
-                          Navigator.of(context, rootNavigator: true).pop(false),
+                      onPressed: () async =>
+                          await Navigator.of(context, rootNavigator: true)
+                              .maybePop(false),
                     )
                   ],
                 ),
@@ -1048,7 +1053,8 @@ class _MainPageState extends State<MainPage>
                 ])),
                 actions: [
                   TextButton(
-                      onPressed: () => Navigator.of(context).pop(),
+                      onPressed: () async =>
+                          await Navigator.of(context).maybePop(),
                       child: Text(S.current.actionCloseCapital))
                 ]);
           });

@@ -53,8 +53,8 @@ class FolderCreation extends HookWidget {
                         if (submitted && PlatformValues.isDesktopDevice) {
                           final newFolderPath =
                               repo_path.join(parent, newFolderName!);
-                          Navigator.of(context).pop(newFolderPath);
-                          await _saveAndPop(context, parent, newFolderName!);
+                          await Navigator.of(context).maybePop(newFolderPath);
+                          await _saveAndPop(newFolderPath);
                         }
                       },
                       validator: validateNoEmptyMaybeRegExpr(
@@ -128,30 +128,41 @@ class FolderCreation extends HookWidget {
   List<Widget> _actions(BuildContext context, String parent) => [
         NegativeButton(
             text: S.current.actionCancel,
-            onPressed: () => Navigator.of(context).pop(''),
+            onPressed: () async => await Navigator.of(context).maybePop(''),
             buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton),
         PositiveButton(
-            text: S.current.actionCreate,
-            onPressed: () =>
-                _onCreateButtonPress(context, parent, nameController.text),
-            buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
-            focusNode: positiveButtonFocus)
+          text: S.current.actionCreate,
+          onPressed: () async {
+            final newFolderName = nameController.text;
+            final newFolderPath = repo_path.join(parent, newFolderName);
+
+            await _onCreateButtonPress(
+              parent,
+              newFolderName,
+              newFolderPath,
+            );
+
+            Navigator.of(context).pop(newFolderPath);
+          },
+          buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
+          focusNode: positiveButtonFocus,
+        )
       ];
 
-  void _onCreateButtonPress(
-      BuildContext context, String parent, String newFolderName) async {
+  Future<void> _onCreateButtonPress(
+    String parent,
+    String newFolderName,
+    String newFolderPath,
+  ) async {
     final submitted = await submitField(parent, newFolderName);
     if (submitted) {
-      await _saveAndPop(context, parent, newFolderName);
+      return _saveAndPop(newFolderPath);
     }
   }
 
-  Future<void> _saveAndPop(
-      BuildContext context, String parent, String newFolderName) async {
-    final newFolderPath = repo_path.join(parent, newFolderName);
-    await Dialogs.executeWithLoadingDialog(context, () async {
-      await cubit.createFolder(newFolderPath);
-    });
-    Navigator.of(context).pop(newFolderPath);
-  }
+  Future<void> _saveAndPop(String newFolderPath) async =>
+      Dialogs.executeWithLoadingDialog(
+        null,
+        () async => await cubit.createFolder(newFolderPath),
+      );
 }

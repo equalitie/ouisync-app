@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:ouisync/ouisync.dart';
 
 import '../../../generated/l10n.dart';
-import '../../utils/utils.dart';
-import '../widgets.dart';
+import '../../utils/utils.dart'
+    show AppThemeExtension, Dimensions, Fields, showSnackBar, ThemeGetter;
+import '../widgets.dart' show NegativeButton, PositiveButton;
 
 class ReplaceKeepEntry extends StatelessWidget {
   ReplaceKeepEntry({required this.name, required this.type});
@@ -75,11 +76,12 @@ class ReplaceKeepEntry extends StatelessWidget {
   List<Widget> _actions(context) => [
         NegativeButton(
             text: S.current.actionCancel,
-            onPressed: () => Navigator.of(context).pop(null),
+            onPressed: () async => await Navigator.of(context).maybePop(null),
             buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton),
         PositiveButton(
             text: S.current.actionAccept,
-            onPressed: () => Navigator.of(context).pop(_fileAction.value),
+            onPressed: () async =>
+                await Navigator.of(context).maybePop(_fileAction.value),
             buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton),
       ];
 

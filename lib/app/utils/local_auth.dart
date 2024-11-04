@@ -1,7 +1,9 @@
 import 'dart:io';
-import 'package:flutter/material.dart';
+
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:local_auth/local_auth.dart';
+
 import '../../generated/l10n.dart';
 
 abstract class LocalAuth {
@@ -55,9 +57,7 @@ abstract class LocalAuth {
 Future<bool> _debugAuthenticate(BuildContext context, String reason) async {
   Widget button(context, text, value) => TextButton(
         child: Text(text),
-        onPressed: () {
-          Navigator.of(context).pop(value);
-        },
+        onPressed: () => Navigator.of(context).pop(value),
       );
 
   bool? authenticated = await showDialog(

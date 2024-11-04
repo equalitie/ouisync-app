@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:ouisync/ouisync.dart';
 
 import '../../../generated/l10n.dart';
-import '../../cubits/repo.dart';
-import '../../utils/utils.dart';
-import '../widgets.dart';
+import '../../cubits/repo.dart' show RepoCubit;
+import '../../utils/utils.dart'
+    show AppLogger, Constants, Dimensions, Fields, validateNoEmptyMaybeRegExpr;
+import '../widgets.dart' show NegativeButton, PositiveButton;
 
 class UnlockDialog extends StatefulWidget {
   UnlockDialog(this.repoCubit, {super.key});
@@ -77,7 +78,7 @@ class _UnlockDialogState extends State<UnlockDialog> with AppLogger {
   List<Widget> buildActions(BuildContext context) => [
         NegativeButton(
           text: S.current.actionCancel,
-          onPressed: () => Navigator.of(context).pop(null),
+          onPressed: () async => await Navigator.of(context).maybePop(null),
           buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
         ),
         PositiveButton(

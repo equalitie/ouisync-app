@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../generated/l10n.dart';
-import '../../cubits/cubits.dart';
-import '../../models/models.dart';
-import '../../utils/utils.dart';
-import '../buttons/sort_by_button.dart';
-import '../buttons/sort_direction_button.dart';
+import '../../cubits/cubits.dart'
+    show ReposCubit, SortBy, SortDirection, SortListCubit, SortListState;
+import '../../models/models.dart' show OpenRepoEntry;
+import '../../utils/utils.dart'
+    show AppLogger, Dialogs, Dimensions, Fields, StringExtension;
+import '../widgets.dart' show SortByButton, SortDirectionButton;
 
 class SortContentsBar extends StatefulWidget {
   const SortContentsBar(
@@ -150,7 +151,7 @@ class _SortByList extends StatelessWidget with AppLogger {
                   textOverflow: TextOverflow.ellipsis,
                   textSoftWrap: false,
                   style: settingStyle,
-                  onTap: () {
+                  onTap: () async {
                     _sortCubit.sortBy(sortByItem);
 
                     if (_reposCubit.showList) {
@@ -160,8 +161,8 @@ class _SortByList extends StatelessWidget with AppLogger {
                     }
 
                     if (_reposCubit.currentRepo is OpenRepoEntry) {
-                      Dialogs.executeFutureWithLoadingDialog(
-                        context,
+                      await Dialogs.executeFutureWithLoadingDialog(
+                        null,
                         (_reposCubit.currentRepo as OpenRepoEntry)
                             .cubit
                             .refresh(
