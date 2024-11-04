@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:path/path.dart' as p;
 
 import '../../../generated/l10n.dart';
-import '../../utils/repo_path.dart' as repo_path;
 import '../../cubits/cubits.dart' show RepoCubit;
 import '../../utils/platform/platform.dart' show PlatformValues;
 import '../../utils/utils.dart'
@@ -16,7 +16,7 @@ import '../../utils/utils.dart'
         Strings,
         ThemeGetter,
         validateNoEmptyMaybeRegExpr;
-import '../widgets.dart';
+import '../widgets.dart' show NegativeButton, PositiveButton;
 
 class RenameEntry extends HookWidget with AppLogger {
   RenameEntry({
@@ -135,7 +135,7 @@ class RenameEntry extends HookWidget with AppLogger {
 
     final validationOk = await _validateNewName(parent, newName);
     if (!validationOk) {
-      final newExtension = repo_path.extension(newName);
+      final newExtension = p.extension(newName);
       selectEntryName(newName, newExtension, isFile);
 
       _nameTextFieldFocus.requestFocus();
@@ -166,7 +166,7 @@ class RenameEntry extends HookWidget with AppLogger {
   }
 
   Future<bool> _validateExtension(String name) async {
-    final fileExtension = repo_path.extension(name);
+    final fileExtension = p.extension(name);
 
     /// If there was not extension originally, then no need to have or validate
     /// a new one
@@ -211,7 +211,7 @@ class RenameEntry extends HookWidget with AppLogger {
     String parent,
     String newName,
   ) async {
-    final newPath = repo_path.join(parent, newName);
+    final newPath = p.join(parent, newName);
     final exist = await repoCubit.exists(newPath);
     if (exist) {
       _errorMessage.value = S.current.messageEntryAlreadyExist(newName);

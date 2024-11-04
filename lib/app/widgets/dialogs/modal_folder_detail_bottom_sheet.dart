@@ -1,12 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:ouisync/ouisync.dart';
+import 'package:path/path.dart' as p;
 
 import '../../../generated/l10n.dart';
-import '../../cubits/cubits.dart';
-import '../../models/models.dart';
-import '../../utils/repo_path.dart' as repo_path;
-import '../../utils/utils.dart';
-import '../widgets.dart';
+import '../../cubits/cubits.dart' show BottomSheetType, RepoCubit;
+import '../../models/models.dart' show DirectoryEntry;
+import '../../utils/utils.dart'
+    show
+        AppLogger,
+        AppThemeExtension,
+        Constants,
+        Dialogs,
+        Dimensions,
+        Fields,
+        AppLoggy,
+        showSnackBar,
+        ThemeGetter;
+import '../widgets.dart'
+    show
+        ActionsDialog,
+        EntryAction,
+        EntryActionItem,
+        EntryInfoTable,
+        RenameEntry;
 
 class FolderDetail extends StatefulWidget {
   const FolderDetail({
@@ -102,7 +118,7 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
             EntryInfoTable(
               entryInfo: {
                 S.current.labelName: widget.entry.name,
-                S.current.labelLocation: repo_path.dirname(widget.entry.path),
+                S.current.labelLocation: p.dirname(widget.entry.path),
               },
             ),
           ],
@@ -161,8 +177,8 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
-          final parent = repo_path.dirname(entry.path);
-          final oldName = repo_path.basename(entry.path);
+          final parent = p.dirname(entry.path);
+          final oldName = p.basename(entry.path);
 
           return ActionsDialog(
             title: S.current.messageRenameFolder,
@@ -181,8 +197,8 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
         (newName) async {
           if (newName.isNotEmpty) {
             // The new name provided by the user.
-            final parent = repo_path.dirname(entry.path);
-            final newEntryPath = repo_path.join(parent, newName);
+            final parent = p.dirname(entry.path);
+            final newEntryPath = p.join(parent, newName);
 
             await widget.repoCubit.moveEntry(
               source: entry.path,
