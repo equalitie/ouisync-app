@@ -53,7 +53,7 @@ class FolderCreation extends HookWidget {
                         if (submitted && PlatformValues.isDesktopDevice) {
                           final newFolderPath =
                               repo_path.join(parent, newFolderName!);
-                          Navigator.of(context).pop(newFolderPath);
+                          await Navigator.of(context).maybePop(newFolderPath);
                           await _saveAndPop(context, parent, newFolderName!);
                         }
                       },
@@ -128,7 +128,7 @@ class FolderCreation extends HookWidget {
   List<Widget> _actions(BuildContext context, String parent) => [
         NegativeButton(
             text: S.current.actionCancel,
-            onPressed: () => Navigator.of(context).pop(''),
+            onPressed: () async => await Navigator.of(context).maybePop(''),
             buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton),
         PositiveButton(
             text: S.current.actionCreate,
