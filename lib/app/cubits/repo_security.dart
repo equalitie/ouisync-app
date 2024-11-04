@@ -2,13 +2,24 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../models/auth_mode.dart';
-import '../models/local_secret.dart';
-import '../utils/local_auth.dart';
-import '../utils/log.dart';
-import '../utils/master_key.dart';
-import '../utils/option.dart';
-import '../utils/password_hasher.dart';
+import '../models/models.dart'
+    show
+        AuthMode,
+        AuthModeBlindOrManual,
+        AuthModeKeyStoredOnDevice,
+        AuthModePasswordStoredOnDevice,
+        LocalSecret,
+        LocalSecretKeyAndSalt,
+        LocalSecretInput,
+        LocalSecretKey,
+        LocalSecretManual,
+        LocalSecretMode,
+        LocalSecretRandom,
+        LocalPassword,
+        SecretKeyOrigin,
+        SecretKeyStore;
+import '../utils/utils.dart'
+    show AppLogger, LocalAuth, MasterKey, None, Option, PasswordHasher, Some;
 import 'repo.dart';
 import 'utils.dart';
 
@@ -175,19 +186,19 @@ class RepoSecurityCubit extends Cubit<RepoSecurityState>
   }
 
   void setOrigin(SecretKeyOrigin value) {
-    emit(state.copyWith(origin: value));
+    emitUnlessClosed(state.copyWith(origin: value));
   }
 
   void setStore(bool value) {
-    emit(state.copyWith(userWantsToStoreSecret: value));
+    emitUnlessClosed(state.copyWith(userWantsToStoreSecret: value));
   }
 
   void setSecureWithBiometrics(bool value) {
-    emit(state.copyWith(secureWithBiometrics: value));
+    emitUnlessClosed(state.copyWith(secureWithBiometrics: value));
   }
 
   void setLocalPassword(String? value) {
-    emit(state.copyWith(
+    emitUnlessClosed(state.copyWith(
       localPassword: value != null ? Some(LocalPassword(value)) : None(),
     ));
   }
@@ -221,7 +232,7 @@ class RepoSecurityCubit extends Cubit<RepoSecurityState>
               ? Some(newLocalSecretInput.password)
               : None<LocalPassword>();
 
-      emit(state.copyWith(
+      emitUnlessClosed(state.copyWith(
         oldLocalSecretMode: newAuthMode.localSecretMode,
         updatedLocalPassword: newLocalPassword,
       ));
@@ -244,7 +255,8 @@ class RepoSecurityCubit extends Cubit<RepoSecurityState>
           oldSecret: state.oldLocalSecret,
           newSecret: newLocalSecret,
         );
-        emit(state.copyWith(oldLocalSecret: newLocalSecret.toLocalSecret()));
+        emitUnlessClosed(
+            state.copyWith(oldLocalSecret: newLocalSecret.toLocalSecret()));
         loggy.debug('Repo local secret updated');
       } catch (e, st) {
         loggy.error(

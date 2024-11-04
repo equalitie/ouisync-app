@@ -1,7 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../utils/log.dart';
+import '../utils/utils.dart' show AppLogger;
+import 'cubits.dart' show CubitActions;
 
 class SortListState extends Equatable {
   final SortBy sortBy;
@@ -24,7 +25,7 @@ class SortListState extends Equatable {
   List<Object?> get props => [sortBy, direction, listType];
 }
 
-class SortListCubit extends Cubit<SortListState> with AppLogger {
+class SortListCubit extends Cubit<SortListState> with AppLogger, CubitActions {
   SortListCubit._(super.state);
 
   static SortListCubit create(
@@ -37,13 +38,14 @@ class SortListCubit extends Cubit<SortListState> with AppLogger {
     return SortListCubit._(initialState);
   }
 
-  void sortBy(SortBy sortBy) => emit(state.copyWith(sortBy: sortBy));
+  void sortBy(SortBy sortBy) =>
+      emitUnlessClosed(state.copyWith(sortBy: sortBy));
 
   void switchListType(ListType listType) =>
-      emit(state.copyWith(listType: listType));
+      emitUnlessClosed(state.copyWith(listType: listType));
 
   void switchSortDirection(SortDirection direction) =>
-      emit(state.copyWith(direction: direction));
+      emitUnlessClosed(state.copyWith(direction: direction));
 }
 
 enum SortBy { name, size, type }

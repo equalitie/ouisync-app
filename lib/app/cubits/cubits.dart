@@ -17,5 +17,6 @@ export 'repos.dart';
 export 'sort_list.dart';
 export 'state_monitor.dart';
 export 'upgrade_exists.dart';
+export 'utils.dart';
 export 'value.dart';
 export 'watch.dart';

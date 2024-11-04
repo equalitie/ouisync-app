@@ -1,12 +1,14 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-class WatchSelf<Self> extends Cubit<Changed> {
+import 'cubits.dart' show CubitActions;
+
+class WatchSelf<Self> extends Cubit<Changed> with CubitActions {
   WatchSelf() : super(Changed(0));
 
   void changed() {
-    emit(state.next);
+    emitUnlessClosed(state.next);
   }
 
   void update(void Function(Self) f) {
