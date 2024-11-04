@@ -105,7 +105,7 @@ class _AddPeerDialogState extends State<AddPeerDialog> {
   }
 
   Future<void> _cancel(BuildContext context) async =>
-      await Navigator.of(context).maybePop();
+      Navigator.of(context).maybePop();
 
   String? get _value {
     final a = _address;

@@ -68,10 +68,7 @@ class _UnlockDialogState extends State<UnlockDialog> with AppLogger {
             ),
             autofocus: true,
           ),
-          Fields.dialogActions(
-            context,
-            buttons: buildActions(context),
-          ),
+          Fields.dialogActions(buttons: buildActions(context)),
         ],
       );
 

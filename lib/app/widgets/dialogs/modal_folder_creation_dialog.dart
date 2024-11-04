@@ -67,7 +67,7 @@ class FolderCreation extends HookWidget {
                       focusNode: nameTextFieldFocus);
                 },
               ),
-              Fields.dialogActions(context, buttons: _actions(context, parent)),
+              Fields.dialogActions(buttons: _actions(context, parent)),
             ]));
   }
 

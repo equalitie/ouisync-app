@@ -55,7 +55,7 @@ class _UnlockRepositoryState extends State<UnlockRepository> with AppLogger {
             buildPasswordField(context),
             buildStoreSwitch(),
             buildBiometricsSwitch(),
-            Fields.dialogActions(context, buttons: buildActions(context)),
+            Fields.dialogActions(buttons: buildActions(context)),
           ],
         ),
       );
