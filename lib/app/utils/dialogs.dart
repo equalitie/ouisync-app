@@ -4,13 +4,15 @@ import 'package:build_context_provider/build_context_provider.dart';
 import 'package:flutter/material.dart';
 
 import '../../generated/l10n.dart';
-import '../cubits/cubits.dart';
-import '../widgets/widgets.dart';
-import 'utils.dart';
+import '../cubits/cubits.dart' show RepoCubit;
+import '../widgets/widgets.dart'
+    show ActionsDialog, NegativeButton, PositiveButton;
+import 'utils.dart'
+    show AppThemeExtension, Dimensions, Fields, Strings, ThemeGetter;
 
 abstract class Dialogs {
   static Future<T> executeWithLoadingDialog<T>(
-      BuildContext context, Future<T> func()) {
+      BuildContext? context, Future<T> Function() func) {
     return executeFutureWithLoadingDialog(context, func());
   }
 
@@ -26,11 +28,11 @@ abstract class Dialogs {
   }
 
   static void _showLoadingDialog(BuildContext? context) => context != null
-      ? _loadingDialog(context)
-      : WidgetsBinding.instance
-          .addPostFrameCallback((_) => BuildContextProvider()(_loadingDialog));
+      ? unawaited(_loadingDialog(context))
+      : WidgetsBinding.instance.addPostFrameCallback(
+          (_) => BuildContextProvider()((c) => unawaited(_loadingDialog(c))));
 
-  static Future<void> _loadingDialog(BuildContext context) => showDialog(
+  static Future<void> _loadingDialog(BuildContext context) async => showDialog(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) => PopScope(
@@ -42,10 +44,10 @@ abstract class Dialogs {
             ),
           ));
 
-  static _hideLoadingDialog(BuildContext? context) => context != null
-      ? _popDialog(context)
-      : BuildContextProvider()
-          .call((globalContext) => _popDialog(globalContext));
+  static void _hideLoadingDialog(BuildContext? context) =>
+      WidgetsBinding.instance.addPostFrameCallback((_) => context != null
+          ? _popDialog(context)
+          : BuildContextProvider().call((c) => _popDialog(c)));
 
   static void _popDialog(BuildContext context) =>
       Navigator.of(context, rootNavigator: true).pop();
