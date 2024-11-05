@@ -157,7 +157,7 @@ class _UnlockRepositoryState extends State<UnlockRepository> with AppLogger {
       );
     }
 
-    await Navigator.of(context).maybePop(UnlockRepositoryResult(
+    Navigator.of(context).pop(UnlockRepositoryResult(
       repoLocation: widget.repoCubit.location,
       password: password,
       accessMode: accessMode,
