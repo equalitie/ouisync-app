@@ -257,7 +257,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "menuItemLogs": MessageLookupByLibrary.simpleMessage("Логи"),
         "menuItemNetwork": MessageLookupByLibrary.simpleMessage("Сеть"),
         "menuItemRepository": MessageLookupByLibrary.simpleMessage("Хранилище"),
-        "mesageNoMediaPresent":
+        "messageNoMediaPresent":
             MessageLookupByLibrary.simpleMessage("Медиафайлов не обнаружено."),
         "messageAccessModeDisabled": m0,
         "messageAccessingSecureStorage": MessageLookupByLibrary.simpleMessage(
@@ -517,7 +517,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageLogDataP3": MessageLookupByLibrary.simpleMessage(
             "Никакие из этих данных не передаются третьим лицам"),
         "messageLogLevelAll": MessageLookupByLibrary.simpleMessage("Всё"),
-        "messageLogLevelErroWarnInfoDebug":
+        "messageLogLevelErrorWarnInfoDebug":
             MessageLookupByLibrary.simpleMessage(
                 "Ошибки, предупреждения, информация и отладка"),
         "messageLogLevelError":
@@ -727,8 +727,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Полный доступ. Вашр пиры могут и просматривать, и изменять содержимое"),
         "messageWritingFileCanceled": m26,
         "messageWritingFileError": m27,
-        "messsageFailedAddRepository": m28,
-        "messsageFailedCreateRepository": m29,
+        "messageFailedAddRepository": m28,
+        "messageFailedCreateRepository": m29,
         "popupMenuItemChangePassword":
             MessageLookupByLibrary.simpleMessage("Изменить пароль"),
         "popupMenuItemCopyPassword":
@@ -804,7 +804,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "titleFolderActions": MessageLookupByLibrary.simpleMessage("Добавить"),
         "titleFolderDetails":
             MessageLookupByLibrary.simpleMessage("Информация о папке"),
-        "titleFreedomExpresionAccessInfo": MessageLookupByLibrary.simpleMessage(
+        "titleFreedomExpressionAccessInfo": MessageLookupByLibrary.simpleMessage(
             "Свобода выражения и доступа к информации"),
         "titleIssueTracker":
             MessageLookupByLibrary.simpleMessage("Трекер проблем"),

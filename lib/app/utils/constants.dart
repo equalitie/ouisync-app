@@ -141,5 +141,5 @@ class Constants {
   static const int android12SDK = 32;
 
   static const String dokanMayorRequired = '2';
-  static const String dokanMinimunVersion = '2.1.0.1000';
+  static const String dokanMinimumVersion = '2.1.0.1000';
 }

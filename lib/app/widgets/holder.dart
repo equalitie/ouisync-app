@@ -7,7 +7,7 @@ import '../utils/extensions.dart';
 
 /// Helper widget that maintains a lifecycle of some resource and explicitly provides it to the
 /// descendant widgets. This is similar to `Provider` from the `provider` package but it passes the
-/// resource expicitly via the `builder` callback instead of implicitly via `context`. This means
+/// resource explicitly via the `builder` callback instead of implicitly via `context`. This means
 /// that it's impossible to forget to pass the resource as it would lead to compile time error,
 /// unlike `Provider` which would cause runtime error in such case.
 class ObjectHolder<T> extends StatefulWidget {

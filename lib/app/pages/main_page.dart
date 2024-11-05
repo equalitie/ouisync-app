@@ -148,7 +148,7 @@ class _MainPageState extends State<MainPage>
   void checkForDokan() {
     final dokanCheck = DokanCheck(
       requiredMayor: Constants.dokanMayorRequired,
-      minimumRequiredVersion: Constants.dokanMinimunVersion,
+      minimumRequiredVersion: Constants.dokanMinimumVersion,
     );
 
     final dokanCheckResult = dokanCheck.checkDokanInstallation();
@@ -409,7 +409,7 @@ class _MainPageState extends State<MainPage>
         // final sortDirection =
         //     _sortListCubit?.state.direction ?? SortDirection.asc;
 
-        /// Usiing the "back" arrow causes the app settings icon (gear) to get
+        /// Using the "back" arrow causes the app settings icon (gear) to get
         /// the focus, even if we explicitly ask for it to losse it.
         /// So for now we request focus for the FAB, then unfocused it.
         _fabFocus.requestFocus();
