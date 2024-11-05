@@ -31,7 +31,6 @@ class _AcceptEqualitieValuesTermsPrivacyPageState
             child: ContentWithStickyFooterState(
               content: _buildContent(context),
               footer: Fields.dialogActions(
-                context,
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 buttons: _buildActions(context),
               ),

@@ -132,7 +132,6 @@ class _SaveSharedMediaState extends State<SaveSharedMedia> {
 
   Widget _buildActions() => widget.reposCubit.builder(
         (reposCubit) => Fields.dialogActions(
-          context,
           buttons: _actions(reposCubit),
           padding: const EdgeInsetsDirectional.only(top: 20.0),
           mainAxisAlignment: MainAxisAlignment.end,

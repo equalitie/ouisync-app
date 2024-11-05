@@ -2,11 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../../generated/l10n.dart';
-import '../../cubits/cubits.dart';
+import '../../cubits/cubits.dart' show RepoCubit;
+import '../../utils/platform/platform.dart' show PlatformValues;
 import '../../utils/repo_path.dart' as repo_path;
-import '../../utils/platform/platform.dart';
-import '../../utils/utils.dart';
-import '../widgets.dart';
+import '../../utils/utils.dart'
+    show
+        Dimensions,
+        Fields,
+        Strings,
+        TextEditingControllerExtension,
+        validateNoEmptyMaybeRegExpr;
+import '../widgets.dart' show NegativeButton, PositiveButton;
 
 class FolderCreation extends HookWidget {
   FolderCreation({required this.cubit, required this.parent});
@@ -47,15 +53,16 @@ class FolderCreation extends HookWidget {
                       hintText: S.current.messageFolderName,
                       errorText:
                           nameController.text.isEmpty ? '' : errorMessage,
-                      onFieldSubmitted: (newFolderName) async {
-                        final submitted =
-                            await submitField(parent, newFolderName);
-                        if (submitted && PlatformValues.isDesktopDevice) {
-                          final newFolderPath =
-                              repo_path.join(parent, newFolderName!);
-                          await Navigator.of(context).maybePop(newFolderPath);
-                          await _saveAndPop(newFolderPath);
+                      onFieldSubmitted: (String? newFolderName) async {
+                        if (newFolderName == null || newFolderName.isEmpty) {
+                          return;
                         }
+
+                        await _onCreateButtonPress(
+                          context,
+                          parent: parent,
+                          newFolderName: newFolderName,
+                        );
                       },
                       validator: validateNoEmptyMaybeRegExpr(
                           emptyError:
@@ -67,7 +74,7 @@ class FolderCreation extends HookWidget {
                       focusNode: nameTextFieldFocus);
                 },
               ),
-              Fields.dialogActions(context, buttons: _actions(context, parent)),
+              Fields.dialogActions(buttons: _actions(context, parent: parent)),
             ]));
   }
 
@@ -125,44 +132,37 @@ class FolderCreation extends HookWidget {
     return true;
   }
 
-  List<Widget> _actions(BuildContext context, String parent) => [
+  List<Widget> _actions(
+    BuildContext context, {
+    required String parent,
+  }) =>
+      [
         NegativeButton(
             text: S.current.actionCancel,
             onPressed: () async => await Navigator.of(context).maybePop(''),
             buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton),
         PositiveButton(
           text: S.current.actionCreate,
-          onPressed: () async {
-            final newFolderName = nameController.text;
-            final newFolderPath = repo_path.join(parent, newFolderName);
-
-            await _onCreateButtonPress(
-              parent,
-              newFolderName,
-              newFolderPath,
-            );
-
-            Navigator.of(context).pop(newFolderPath);
-          },
+          onPressed: () async => await _onCreateButtonPress(
+            context,
+            parent: parent,
+            newFolderName: nameController.text,
+          ),
           buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
           focusNode: positiveButtonFocus,
         )
       ];
 
   Future<void> _onCreateButtonPress(
-    String parent,
-    String newFolderName,
-    String newFolderPath,
-  ) async {
+    BuildContext context, {
+    required String parent,
+    required String newFolderName,
+  }) async {
     final submitted = await submitField(parent, newFolderName);
+
     if (submitted) {
-      return _saveAndPop(newFolderPath);
+      final newFolderPath = repo_path.join(parent, newFolderName);
+      await Navigator.of(context).maybePop(newFolderPath);
     }
   }
-
-  Future<void> _saveAndPop(String newFolderPath) async =>
-      Dialogs.executeWithLoadingDialog(
-        null,
-        () async => await cubit.createFolder(newFolderPath),
-      );
 }
