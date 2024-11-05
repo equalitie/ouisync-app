@@ -120,7 +120,7 @@ class RenameEntry extends HookWidget with AppLogger {
                 );
               },
             ),
-            Fields.dialogActions(context, buttons: _actions(context)),
+            Fields.dialogActions(buttons: _actions(context)),
           ]);
 
   Future<bool> _submitField(String parent, String? newName) async {

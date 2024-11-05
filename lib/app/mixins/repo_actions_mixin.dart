@@ -35,7 +35,7 @@ mixin RepositoryActionsMixin on LoggyType {
     }
 
     await Dialogs.executeFutureWithLoadingDialog(
-      context,
+      null,
       reposCubit.renameRepository(repoCubit.location, newName),
     );
 
@@ -202,12 +202,13 @@ mixin RepositoryActionsMixin on LoggyType {
           ),
         ),
         actions: [
-          Fields.dialogActions(context, buttons: [
+          Fields.dialogActions(buttons: [
             NegativeButton(
-                text: S.current.actionCancelCapital,
-                onPressed: () async =>
-                    await Navigator.of(context).maybePop(false),
-                buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton),
+              text: S.current.actionCancelCapital,
+              onPressed: () async =>
+                  await Navigator.of(context).maybePop(false),
+              buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
+            ),
             PositiveButton(
               text: S.current.actionDeleteCapital,
               onPressed: () async => await Navigator.of(context).maybePop(true),

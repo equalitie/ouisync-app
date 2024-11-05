@@ -69,7 +69,7 @@ class ReplaceKeepEntry extends StatelessWidget {
             },
           ),
           Dimensions.spacingVertical,
-          Fields.dialogActions(context, buttons: _actions(context)),
+          Fields.dialogActions(buttons: _actions(context)),
         ]);
   }
 

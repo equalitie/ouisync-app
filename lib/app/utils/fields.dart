@@ -494,16 +494,19 @@ class Fields {
         ));
   }
 
-  static Widget dialogActions(BuildContext context,
-          {required List<Widget> buttons,
-          EdgeInsetsDirectional padding = Dimensions.paddingActionsSection,
-          MainAxisAlignment mainAxisAlignment = MainAxisAlignment.center}) =>
+  static Widget dialogActions({
+    required List<Widget> buttons,
+    EdgeInsetsDirectional padding = Dimensions.paddingActionsSection,
+    MainAxisAlignment mainAxisAlignment = MainAxisAlignment.center,
+  }) =>
       Padding(
-          padding: padding,
-          child: Row(
-              mainAxisAlignment: mainAxisAlignment,
-              mainAxisSize: MainAxisSize.max,
-              children: buttons));
+        padding: padding,
+        child: Row(
+          mainAxisAlignment: mainAxisAlignment,
+          mainAxisSize: MainAxisSize.max,
+          children: buttons,
+        ),
+      );
 
   static Widget placeholderWidget(
       {required String assetName,
@@ -592,7 +595,7 @@ class Fields {
     }
 
     final content = await Dialogs.executeFutureWithLoadingDialog(
-      context,
+      null,
       webView.loadUrl(context, url),
     );
 

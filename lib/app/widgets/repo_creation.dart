@@ -68,7 +68,6 @@ class RepoCreation extends StatelessWidget {
             builder: (context, state) => ContentWithStickyFooterState(
               content: _buildContent(context, securityCubit, state),
               footer: Fields.dialogActions(
-                context,
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 buttons: _buildActions(context, securityCubit, state),
               ),
