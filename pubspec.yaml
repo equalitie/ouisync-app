@@ -96,6 +96,7 @@ dependencies:
   share_plus: ^10.0.2
   shared_preferences: ^2.3.2
   shelf: ^1.4.1
+  stack_trace: ^1.11.1
   stream_transform: ^2.1.0
   styled_text: ^8.1.0
   system_tray: ^2.0.3

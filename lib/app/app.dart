@@ -6,9 +6,11 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:loggy/loggy.dart';
 import 'package:ouisync/native_channels.dart';
 import 'package:ouisync/ouisync.dart' show Session;
+import 'package:ouisync/errors.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:result_type/result_type.dart';
 
 import '../generated/l10n.dart';
 import 'cubits/cubits.dart'
@@ -30,49 +32,96 @@ Future<Widget> initOuiSyncApp(List<String> args) async {
     args,
     packageInfo.appName,
   );
-  final session = await createSession(
+
+  return AppContainer(
     packageInfo: packageInfo,
     windowManager: windowManager,
     logger: foregroundLogger,
   );
+}
 
-  Settings settings;
+class AppContainer extends StatefulWidget {
+  @override State<AppContainer> createState() => _AppContainerState();
 
-  try {
-    settings = await loadAndMigrateSettings(session);
+  final PackageInfo packageInfo;
+  final PlatformWindowManager windowManager;
+  final Loggy<AppLogger> logger;
+  AppContainer({required this.packageInfo, required this.windowManager, required this.logger});
+}
+class _AppContainerWrappedState {
+  final Session session;
+  final NativeChannels nativeChannels;
+  final Settings settings;
+  final String sessionId;
 
-    final localeCubit = LocaleCubit(settings);
-    final nativeChannels = NativeChannels(session);
-    final appRouteObserver = NavigatorObserver();
+  _AppContainerWrappedState({
+    required this.session,
+    required this.nativeChannels,
+    required this.settings,
+    required this.sessionId,
+  });
+}
+class _AppContainerState extends State<AppContainer> {
+  Result<_AppContainerWrappedState, Exception>? state;
 
-    return BlocProvider<LocaleCubit>(
-      create: (context) => localeCubit,
+  @override void initState() {
+    super.initState();
+    unawaited(_restart());
+  }
+
+  @override
+  Widget build(BuildContext context) => switch (state) {
+    null => _createInMaterialApp(ErrorScreen(message: "Loading...")),
+    Success(value: final state) => BlocProvider<LocaleCubit>(
+      create: (context) => LocaleCubit(state.settings),
       child: BlocBuilder<LocaleCubit, LocaleState>(
-        builder: (context, localeState) {
-          return _createInMaterialApp(
-            OuisyncApp(
-              session: session,
-              windowManager: windowManager,
-              settings: settings,
-              packageInfo: packageInfo,
-              localeCubit: localeCubit,
-              nativeChannels: nativeChannels,
-            ),
-            currentLocale: localeCubit.currentLocale,
-            navigatorObservers: [_AppNavigatorObserver(foregroundLogger)],
-          );
-        },
-      ),
-    );
-  } on InvalidSettingsVersion catch (e) {
-    if (e.statedVersion > Settings.version) {
-      return _createInMaterialApp(ErrorSettingsHigherVersion());
-    } else {
-      assert(
-          false,
-          "This should not happen because previous settings versions "
-          "should have been migrated to the current one.");
-      rethrow;
+        builder: (context, localeState) => _createInMaterialApp(OuisyncApp(
+          session: state.session,
+          windowManager: widget.windowManager,
+          settings: state.settings,
+          packageInfo: widget.packageInfo,
+          localeCubit: context.read(),
+          nativeChannels: state.nativeChannels,
+          // we use a custom key tied to the session to force the child
+          // component to drop state whenever the session disconnects
+          key: Key(state.sessionId)
+        ), currentLocale: localeState.currentLocale)
+      )
+    ),
+    Failure(value: final error) => _createInMaterialApp(ErrorScreen(message:
+      error is InvalidSettingsVersion
+        ? S.current.messageSettingsVersionNewerThanCurrent
+        : "Internal error\n$error",
+    ))
+  };
+
+  Future<void> _restart() async {
+    try {
+      final session = await createSession(
+        packageInfo: widget.packageInfo,
+        logger: widget.logger,
+        onConnectionReset: () {
+          // the session is now defunct: switch to the loading screen
+          setState(() => state = null);
+          // and attempt to start a new one after a short delay
+          Timer(Duration(seconds: 1), () => unawaited(_restart()));
+        }
+      );
+      final settings = await loadAndMigrateSettings(session);
+      final sessionId = await session.thisRuntimeId;
+      setState(() => state = Success(_AppContainerWrappedState(
+        session: session,
+        nativeChannels: NativeChannels(session),
+        settings: settings,
+        sessionId: sessionId,
+      )));
+    } on ProviderUnavailable catch(error) {
+      // this error is considered transient, retry after a short delay
+      print('Unable to acquire session:');
+      print(error);
+      Timer(Duration(seconds: 1), () => unawaited(_restart()));
+    } on Exception catch(error) {
+      setState(() => state = Failure(error));
     }
   }
 }
@@ -204,16 +253,17 @@ MaterialApp _createInMaterialApp(Widget topWidget,
       navigatorObservers: navigatorObservers,
     );
 
-class ErrorSettingsHigherVersion extends StatelessWidget {
-  const ErrorSettingsHigherVersion({super.key});
+class ErrorScreen extends StatelessWidget {
+  final String message;
+  const ErrorScreen({ required this.message, super.key });
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        body: Center(
-            child: Text(S.current.messageSettingsVersionNewerThanCurrent,
-                textAlign: TextAlign.center)));
-  }
+  Widget build(BuildContext context) =>
+    Scaffold(body:
+      Center(child:
+        Text(message, textAlign: TextAlign.center)
+      )
+    );
 }
 
 // Due to race conditions the app sometimes `pop`s more from the stack than have been pushed

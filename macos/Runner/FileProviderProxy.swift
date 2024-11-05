@@ -4,142 +4,104 @@
 //
 //  Created by Peter Jankuliak on 03/04/2024.
 //
-
-import Foundation
 import FileProvider
 import Common
 import FlutterMacOS
-import OuisyncLib
 import MessagePack
 
-class FileProviderProxy {
-    var extensionManager: NSFileProviderManager? = nil
-    var extensionService: NSFileProviderService? = nil
-    var connectionToExtension: NSXPCConnection? = nil
-    let flutterMethodChannel: FlutterMethodChannel
+
+// TODO: this memory copy is unavoidable unless OuisyncLib is updated to use Data (itself [UInt8]-like)
+extension Data {
+    var bytes: [UInt8] { [UInt8](self) }
+}
+extension FlutterError: Error {}
+
+@MainActor
+class FileProviderProxy: FromFileProviderToAppProtocol {
+    private var manager: NSFileProviderManager!
+    private var service: NSFileProviderService!
+    private var connection: NSXPCConnection!
+    let channel: FlutterMethodChannel
 
     init(_ flutterBinaryMessenger: FlutterBinaryMessenger) {
-        flutterMethodChannel = FlutterMethodChannel(name: "org.equalitie.ouisync/backend", binaryMessenger: flutterBinaryMessenger)
-        flutterMethodChannel.setMethodCallHandler(handleMessageFromFlutter)
+        channel = FlutterMethodChannel(name: "org.equalitie.ouisync/backend",
+                                       binaryMessenger: flutterBinaryMessenger)
+        channel.setMethodCallHandler {
+            [weak self] call, result in guard let self
+            else { return result(FlutterError(code: "OS00",
+                                              message: "Host shutdown",
+                                              details: nil)) }
+            Task {
+                do {
+                    let res = try await self.invoke(call)
+                    result(res is Void ? nil : res)
+                } catch {
+                    result(error as? FlutterError ?? FlutterError(code: "OS01",
+                                                                  message: "Unknown error in host",
+                                                                  details: String(describing: error)))
+                }
+            }
+        }
     }
 
-    private func handleMessageFromFlutter(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        let flutterData = call.arguments as! FlutterStandardTypedData
-        let data = Data(flutterData.data)
-        // TODO: Get rid of this conversion
-        let bytes = [UInt8](unsafeUninitializedCapacity: data.count) {
-            pointer, copied_count in
-            let length_written = data.copyBytes(to: pointer)
-            copied_count = length_written
-            assert(copied_count == data.count)
+    nonisolated func fromFileProviderToApp(_ message: [UInt8]) {
+        DispatchQueue.main.async {
+            self.channel.invokeMethod("response", arguments: message)
         }
+    }
+
+    private func invoke(_ call: FlutterMethodCall) async throws -> Any? {
         switch call.method {
         case "initialize":
-            let message = OuisyncRequestMessage.deserialize(bytes)!
-            Task {
-                await initialize(message.messageId)
-            }
-        case "invoke":
-            Task {
-                //NSLog("app -> extension \(OuisyncRequestMessage.deserialize(bytes) as Optional)");
-                sendToExtension(bytes)
-            }
-        default:
-            fatalError("Received an unrecognized message from Flutter: \(call.method)(\(call.arguments as Optional))")
-        }
-        result(nil)
-    }
+            try await NSFileProviderManager.add(ouisyncFileProviderDomain)
+            manager = NSFileProviderManager(for: ouisyncFileProviderDomain)
+            if manager == nil { throw FlutterError(code: "OS02",
+                                                   message: "Unable to obtain File Provider manager",
+                                                   details: nil) }
+            // the following two concurrency warnings can be ignored because they're just transferring
+            // ownership of instances created in a different actor; it's better to see them than
+            // declaring unchecked Sendable conformance because they should be isolated otherwise
+            service = try await manager.service(named: ouisyncFileProviderServiceName,
+                                                for: NSFileProviderItemIdentifier.rootContainer)
+            if service == nil { throw FlutterError(code: "OS02",
+                                                   message: "Unable to obtain File Provider service",
+                                                   details: nil) }
 
-    private func initialize(_ requestMessageId: MessageId) async {
-        let domain = ouisyncFileProviderDomain
-
-        do {
-            while true {
-                do {
-                    try await NSFileProviderManager.add(domain)
-                    NSLog("😀 NSFileProviderManager added domain successfully")
-                    break
-                } catch {
-                    NSLog("😡 Error starting file provider for domain \(domain): \(String(describing: error))")
-                    try await Task.sleep(for: .seconds(1))
-                }
-            }
-
-            let manager = NSFileProviderManager(for: domain)!
-
-            while true {
-                do {
-                    extensionService = try await manager.service(named: ouisyncFileProviderServiceName, for: NSFileProviderItemIdentifier.rootContainer)
-                    break
-                } catch {
-                    NSLog("😡 Failed to acquire service from NSFileProviderManager: \(error)")
-                    try await Task.sleep(for: .seconds(1))
-                }
-            }
-
-            guard let service = extensionService else {
-                NSLog("😡 Failed to acquire service from NSFileProviderManager")
-                return;
-            }
-
-            extensionManager = manager
-            extensionService = service
-
-            let connection = try await service.fileProviderConnection()
+            connection = try await service.fileProviderConnection()
             connection.remoteObjectInterface = NSXPCInterface(with: FromAppToFileProviderProtocol.self)
 
-            connection.interruptionHandler = { [weak self] in
-                if let self = self {
-                    NSLog("😡 Connection to File Provider XPC service has been interrupted")
-                    self.connectionToExtension = nil
-                }
-            }
+            connection.interruptionHandler = { [weak self] in self?.reset("interrupted") }
+            connection.invalidationHandler = { [weak self] in self?.reset("invalidated") }
 
-            connection.invalidationHandler = { [weak self] in
-                if let self = self {
-                    NSLog("😡 Connection to File Provider XPC service has been invalidated")
-                    connectionToExtension = nil
-                }
-            }
-
-            class FromFileProviderToApp : FromFileProviderToAppProtocol {
-                weak var proxy: FileProviderProxy?
-
-                init(_ proxy: FileProviderProxy) {
-                    self.proxy = proxy
-                }
-
-                func fromFileProviderToApp(_ message: [UInt8]) {
-                    guard let proxy = proxy else {
-                        NSLog("😡 Received a message from Extension but proxy is already gone")
-                        return
-                    }
-                    proxy.sendToFlutter(message)
-                }
-            }
-
-            connection.exportedObject = FromFileProviderToApp(self)
+            connection.exportedObject = self
             connection.exportedInterface = NSXPCInterface(with: FromFileProviderToAppProtocol.self)
+            connection.resume()
+        case "invoke":
+            guard let bytes = (call.arguments as? FlutterStandardTypedData)?.data.bytes
+            else { throw FlutterError(code: "OS03",
+                                      message: "Unable to parse message",
+                                      details: nil) }
+            guard let connection
+            else { throw FlutterError(code: "OS04",
+                                      message: "Extension is not connected",
+                                      details: nil) }
+            guard let proto = connection.remoteObjectProxy() as? FromAppToFileProviderProtocol
+            else { throw FlutterError(code: "OS05",
+                                      message: "Extension is incompatible with host",
+                                      details: nil) }
 
-            connectionToExtension = connection
-            connection.resume();
-
-            sendToFlutter(OuisyncResponseMessage(requestMessageId, OuisyncResponsePayload.response(Response(MessagePackValue.string("none")))).serialize())
-
-        } catch {
-            fatalError("Failed to initialize FileProviderProxy \(error)")
+            proto.fromAppToFileProvider(bytes)
+        default: throw FlutterError(code: "OS06",
+                                    message: "Method \"\(call.method)\" not exported by host",
+                                    details: nil)
         }
+        return nil
     }
 
-    fileprivate func sendToFlutter(_ message: [UInt8]) {
-        let channel = flutterMethodChannel
+    nonisolated private func reset(_ reason: String) {
         DispatchQueue.main.async {
-            channel.invokeMethod("response", arguments: message)
+            self.connection = nil
+            self.channel.invokeMethod("reset", arguments: reason)
         }
-    }
-
-    fileprivate func sendToExtension(_ message: [UInt8]) {
-        let proto = connectionToExtension!.remoteObjectProxy() as! FromAppToFileProviderProtocol;
-        proto.fromAppToFileProvider(message)
     }
 }
