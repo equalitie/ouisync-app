@@ -17,7 +17,7 @@ jobs:
         name: [android, linux, windows]
         include:
           - name: android
-            os: ubuntu-latest
+            os: ubuntu-24.04
             env:
               OUISYNC_LIB: ouisync/target/debug/libouisync_ffi.so
             target: aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
@@ -28,7 +28,7 @@ jobs:
             artifact-files: ouisync*.apk
 
           - name: linux
-            os: ubuntu-latest
+            os: ubuntu-24.04
             env:
               OUISYNC_LIB: ouisync/target/debug/libouisync_ffi.so
             # TODO: enable analysis
