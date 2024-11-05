@@ -29,10 +29,7 @@ class DokanDifferentMayorFound extends StatelessWidget {
               ],
             ),
           ),
-          Fields.dialogActions(
-            context,
-            buttons: buildActions(context),
-          ),
+          Fields.dialogActions(buttons: buildActions(context)),
         ],
       );
 
