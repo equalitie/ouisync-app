@@ -162,7 +162,7 @@ jobs:
 
       - name: Build artifacts
         run: |
-          flavor=$([ -f secrets/android/key.properties ] && echo 'nightly' || echo 'unofficial' )
+          flavor=$([ -f secrets/nightly/android/key.properties ] && echo 'nightly' || echo 'unofficial' )
           dart run util/release.dart --flavor=$flavor ${{ matrix.build-args }}
         shell: bash
 
