@@ -4,13 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:ouisync/native_channels.dart';
 import 'package:ouisync/ouisync.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart' show BottomSheetType, RepoCubit;
 import '../../models/models.dart' show FileEntry;
 import '../../pages/pages.dart' show PreviewFileCallback;
+import '../../utils/repo_path.dart' as repo_path;
 import '../../utils/utils.dart'
     show
         AppThemeExtension,
@@ -186,8 +186,8 @@ class _FileDetailState extends State<FileDetail> {
                 isDanger: true,
                 dense: true,
                 onTap: () async {
-                  final fileName = p.basename(widget.entry.path);
-                  final parent = p.dirname(widget.entry.path);
+                  final fileName = repo_path.basename(widget.entry.path);
+                  final parent = repo_path.dirname(widget.entry.path);
 
                   final deletedFileName = await Dialogs.deleteFileAlertDialog(
                       widget.repoCubit,
@@ -217,7 +217,7 @@ class _FileDetailState extends State<FileDetail> {
               EntryInfoTable(
                 entryInfo: {
                   S.current.labelName: widget.entry.name,
-                  S.current.labelLocation: p.dirname(widget.entry.path),
+                  S.current.labelLocation: repo_path.dirname(widget.entry.path),
                   S.current.labelSize: formatSize(widget.entry.size ?? 0),
                 },
               )
@@ -233,9 +233,9 @@ class _FileDetailState extends State<FileDetail> {
           return ScaffoldMessenger(
             child: Builder(
               builder: (context) {
-                final parent = p.dirname(entry.path);
-                final oldName = p.basename(entry.path);
-                final originalExtension = p.extension(entry.path);
+                final parent = repo_path.dirname(entry.path);
+                final oldName = repo_path.basename(entry.path);
+                final originalExtension = repo_path.extension(entry.path);
 
                 return Scaffold(
                   backgroundColor: Colors.transparent,
@@ -260,8 +260,8 @@ class _FileDetailState extends State<FileDetail> {
         (newName) async {
           if (newName.isNotEmpty) {
             // The new name provided by the user.
-            final parent = p.dirname(entry.path);
-            final newEntryPath = p.join(parent, newName);
+            final parent = repo_path.dirname(entry.path);
+            final newEntryPath = repo_path.join(parent, newName);
 
             await widget.repoCubit.moveEntry(
               source: entry.path,
