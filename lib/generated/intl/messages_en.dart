@@ -265,7 +265,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "menuItemNetwork": MessageLookupByLibrary.simpleMessage("Network"),
         "menuItemRepository":
             MessageLookupByLibrary.simpleMessage("Repository"),
-        "mesageNoMediaPresent":
+        "messageNoMediaPresent":
             MessageLookupByLibrary.simpleMessage("There is no media present."),
         "messageAccessModeDisabled": m0,
         "messageAccessingSecureStorage":
@@ -548,11 +548,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageLogDataP1": MessageLookupByLibrary.simpleMessage(
             "The Ouisync app creates logfiles on users\' devices. Their purpose is only to log device’s activity to facilitate the debugging process in case the user experiences difficulties in connecting with their peers or otherwise in using the Ouisync app. The logfile remains on a user\'s device unless the user decides to send it to us for support purposes"),
         "messageLogDataP2": MessageLookupByLibrary.simpleMessage(
-            "If the user does decide to contact us, the personally indetifiable data we may collect is:"),
+            "If the user does decide to contact us, the personally identifiable data we may collect is:"),
         "messageLogDataP3": MessageLookupByLibrary.simpleMessage(
             "None of this data is shared with any third parties"),
         "messageLogLevelAll": MessageLookupByLibrary.simpleMessage("All"),
-        "messageLogLevelErroWarnInfoDebug":
+        "messageLogLevelErrorWarnInfoDebug":
             MessageLookupByLibrary.simpleMessage("Error, Warn, Info and Debug"),
         "messageLogLevelError":
             MessageLookupByLibrary.simpleMessage("Only Error"),
@@ -703,7 +703,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageSecurityPracticesP3": MessageLookupByLibrary.simpleMessage(
             "The Ouisync app stores users’ data on an \'Always-On Peer\', which is a server located in Canada. All data is stored as encrypted chunks and is not readable by the server or its operators. The purpose of this server is simply to bridge the gaps between peers who are not online at the same time. All data is periodically purged from this server - its purpose is not to provide permanent data storage but simply facilitation of data syncing by peers"),
         "messageSecurityPracticesP4": MessageLookupByLibrary.simpleMessage(
-            "If you have a reason to believe that your personal data has been illegaly obtained and shared by other Ouisync users, please contact us at the address below"),
+            "If you have a reason to believe that your personal data has been illegally obtained and shared by other Ouisync users, please contact us at the address below"),
         "messageSelectAccessMode": MessageLookupByLibrary.simpleMessage(
             "Select a permission to create a share link"),
         "messageSelectLocation":
@@ -784,8 +784,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Full access. Your peer can read and write"),
         "messageWritingFileCanceled": m26,
         "messageWritingFileError": m27,
-        "messsageFailedAddRepository": m28,
-        "messsageFailedCreateRepository": m29,
+        "messageFailedAddRepository": m28,
+        "messageFailedCreateRepository": m29,
         "popupMenuItemChangePassword":
             MessageLookupByLibrary.simpleMessage("Change password"),
         "popupMenuItemCopyPassword":
@@ -866,7 +866,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "titleFolderActions": MessageLookupByLibrary.simpleMessage("Add"),
         "titleFolderDetails":
             MessageLookupByLibrary.simpleMessage("Folder details"),
-        "titleFreedomExpresionAccessInfo": MessageLookupByLibrary.simpleMessage(
+        "titleFreedomExpressionAccessInfo": MessageLookupByLibrary.simpleMessage(
             "Freedom of expression and access to information"),
         "titleIssueTracker":
             MessageLookupByLibrary.simpleMessage("Issue tracker"),

@@ -261,7 +261,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "menuItemNetwork": MessageLookupByLibrary.simpleMessage("Мережа"),
         "menuItemRepository":
             MessageLookupByLibrary.simpleMessage("Репозиторій"),
-        "mesageNoMediaPresent":
+        "messageNoMediaPresent":
             MessageLookupByLibrary.simpleMessage("Не маж медіа файлів."),
         "messageAccessModeDisabled": m0,
         "messageAccessingSecureStorage": MessageLookupByLibrary.simpleMessage(
@@ -528,7 +528,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageLogDataP3": MessageLookupByLibrary.simpleMessage(
             "Жодні з цих даних не передаються третім особам"),
         "messageLogLevelAll": MessageLookupByLibrary.simpleMessage("Все"),
-        "messageLogLevelErroWarnInfoDebug":
+        "messageLogLevelErrorWarnInfoDebug":
             MessageLookupByLibrary.simpleMessage(
                 "Помилки, попередження, інформація та дебаг"),
         "messageLogLevelError":
@@ -751,8 +751,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Повний доступ. Ваш вузол може читати і писати"),
         "messageWritingFileCanceled": m26,
         "messageWritingFileError": m27,
-        "messsageFailedAddRepository": m28,
-        "messsageFailedCreateRepository": m29,
+        "messageFailedAddRepository": m28,
+        "messageFailedCreateRepository": m29,
         "popupMenuItemChangePassword":
             MessageLookupByLibrary.simpleMessage("Змінити пароль"),
         "popupMenuItemCopyPassword":
@@ -833,7 +833,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "titleFolderActions": MessageLookupByLibrary.simpleMessage("Додати"),
         "titleFolderDetails":
             MessageLookupByLibrary.simpleMessage("Подробиці папки"),
-        "titleFreedomExpresionAccessInfo": MessageLookupByLibrary.simpleMessage(
+        "titleFreedomExpressionAccessInfo": MessageLookupByLibrary.simpleMessage(
             "Свобода вираження та доступ до інформації"),
         "titleIssueTracker":
             MessageLookupByLibrary.simpleMessage("Відстеження проблем"),

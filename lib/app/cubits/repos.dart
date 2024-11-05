@@ -260,7 +260,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
 
     await repo.setSyncEnabled(true);
 
-    // Check for the situation where we alredy have an entry for the repository
+    // Check for the situation where we already have an entry for the repository
     // but it's location has changed. If so, reuse the existing stored secrets
     // (if any).
     final databaseId = DatabaseId(await repo.hexDatabaseId());

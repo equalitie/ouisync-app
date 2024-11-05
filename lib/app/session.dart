@@ -45,7 +45,7 @@ Future<Session> createSession({
       defaultLocalDiscoveryEnabled: true,
     );
 
-    // Add cache servers as user defined peers so we immediatelly connect to them.
+    // Add cache servers as user defined peers so we immediately connect to them.
     for (final host in Constants.cacheServers) {
       unawaited(addCacheServerAsPeer(session, host, logger: logger));
     }
