@@ -1,9 +1,9 @@
 import 'dart:io' show Platform;
 
 import 'package:biometric_storage/biometric_storage.dart';
-import 'package:result_type/result_type.dart';
-import './v0.dart';
-import '../../utils.dart';
+import 'package:result_type/result_type.dart' show Result, Success, Failure;
+import 'v0.dart';
+import '../../utils.dart' show DatabaseId;
 
 BiometricStorage _chooseStorageByPlatform() {
   if (Platform.isAndroid ||

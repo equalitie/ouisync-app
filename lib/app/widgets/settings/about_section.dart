@@ -196,7 +196,7 @@ class AboutSection extends SettingsSection with AppLogger {
     if (PlatformValues.isMobileDevice) {
       final pageTitle = Text(title);
       final content = await Dialogs.executeFutureWithLoadingDialog(
-        context,
+        null,
         webView.loadUrl(context, url),
       );
 
@@ -310,17 +310,19 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
             },
           ),
           actions: [
-            Fields.dialogActions(context, buttons: [
+            Fields.dialogActions(buttons: [
               NegativeButton(
-                  text: S.current.actionCancel,
-                  onPressed: () async =>
-                      await Navigator.of(context).maybePop(null),
-                  buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton),
+                text: S.current.actionCancel,
+                onPressed: () async =>
+                    await Navigator.of(context).maybePop(null),
+                buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
+              ),
               PositiveButton(
-                  text: S.current.actionOK,
-                  onPressed: () async =>
-                      await Navigator.of(context).maybePop(attachments),
-                  buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton)
+                text: S.current.actionOK,
+                onPressed: () async =>
+                    await Navigator.of(context).maybePop(attachments),
+                buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
+              )
             ])
           ]);
 }

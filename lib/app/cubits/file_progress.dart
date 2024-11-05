@@ -3,14 +3,14 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:stream_transform/stream_transform.dart';
 
-import 'repo.dart';
+import 'cubits.dart' show CubitActions, RepoCubit;
 
 /// Cubit representing sync progress of a file.
-class FileProgress extends Cubit<int?> {
+class FileProgress extends Cubit<int?> with CubitActions {
   FileProgress(RepoCubit repo, this.path) : super(null) {
     _subscription =
         repo.events.startWith(null).asyncMapSample((_) => _fetch(repo)).listen(
-              emit,
+              emitUnlessClosed,
               onError: (e, st) {}, // these errors are not important - ignore
             );
   }

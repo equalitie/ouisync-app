@@ -110,7 +110,6 @@ class _MoveEntryDialogState extends State<MoveEntryDialog> {
         builder: (context, state) {
           final aspectRatio = _getButtonAspectRatio(widgetSize);
           return Fields.dialogActions(
-            context,
             buttons: _actions(context, isRepoList, aspectRatio),
             padding: const EdgeInsetsDirectional.only(top: 20.0),
             mainAxisAlignment: MainAxisAlignment.end,
@@ -152,7 +151,7 @@ class _MoveEntryDialogState extends State<MoveEntryDialog> {
               onPressed: canMove
                   ? () async {
                       await Dialogs.executeFutureWithLoadingDialog(
-                        context,
+                        null,
                         widget.onMoveEntry(),
                       ).then(
                         (_) {

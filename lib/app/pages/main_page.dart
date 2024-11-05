@@ -390,7 +390,7 @@ class _MainPageState extends State<MainPage>
           focusNode: _fabFocus,
           heroTag: Constants.heroTagRepoListActions,
           child: icon,
-          onPressed: () => _showRepoListActions(context),
+          onPressed: () => unawaited(_showRepoListActions(context)),
         );
       }
     } else if (current is OpenRepoEntry) {
@@ -403,7 +403,10 @@ class _MainPageState extends State<MainPage>
             focusNode: _fabFocus,
             heroTag: Constants.heroTagMainPageActions,
             child: icon,
-            onPressed: () => _showDirectoryActions(context, current),
+            onPressed: () => unawaited(_showDirectoryActions(
+              context,
+              current,
+            )),
           ),
         ),
       );
@@ -578,7 +581,7 @@ class _MainPageState extends State<MainPage>
       /// using a local HTTP server and the internet navigator previewer.
       try {
         final url = await Dialogs.executeFutureWithLoadingDialog(
-          context,
+          null,
           repo.previewFileUrl(entry.path),
         );
 
@@ -924,24 +927,21 @@ class _MainPageState extends State<MainPage>
     );
   }
 
-  Future<dynamic> _showDirectoryActions(
+  Future<void> _showDirectoryActions(
     BuildContext parentContext,
     OpenRepoEntry repo,
-  ) =>
+  ) async =>
       showModalBottomSheet(
         isScrollControlled: true,
         context: parentContext,
         shape: Dimensions.borderBottomSheetTop,
-        builder: (context) {
-          return DirectoryActions(
-            parentContext: parentContext,
-            repoCubit: repo.cubit,
-            bottomSheetCubit: widget.reposCubit.bottomSheet,
-          );
-        },
+        builder: (context) => DirectoryActions(
+          repoCubit: repo.cubit,
+          bottomSheetCubit: widget.reposCubit.bottomSheet,
+        ),
       );
 
-  Future<dynamic> _showRepoListActions(BuildContext context) =>
+  Future<void> _showRepoListActions(BuildContext context) async =>
       showModalBottomSheet(
         isScrollControlled: true,
         context: context,

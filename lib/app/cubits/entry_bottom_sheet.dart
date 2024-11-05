@@ -2,8 +2,8 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync/bindings.dart';
 
-import '../utils/log.dart';
-import 'cubits.dart';
+import '../utils/utils.dart' show AppLogger;
+import 'cubits.dart' show CubitActions, NavigationCubit, RepoCubit, ReposCubit;
 
 enum BottomSheetType { move, upload, gone }
 
@@ -73,7 +73,7 @@ class SaveMediaSheetState extends Equatable implements EntryBottomSheetState {
 class HideSheetState implements EntryBottomSheetState {}
 
 class EntryBottomSheetCubit extends Cubit<EntryBottomSheetState>
-    with AppLogger {
+    with AppLogger, CubitActions {
   EntryBottomSheetCubit() : super(HideSheetState());
 
   void showMoveEntry({
@@ -82,7 +82,7 @@ class EntryBottomSheetCubit extends Cubit<EntryBottomSheetState>
     required String entryPath,
     required EntryType entryType,
   }) =>
-      emit(
+      emitUnlessClosed(
         MoveEntrySheetState(
           repoCubit: repoCubit,
           navigationCubit: navigationCubit,
@@ -93,12 +93,12 @@ class EntryBottomSheetCubit extends Cubit<EntryBottomSheetState>
 
   void showSaveMedia(
           {required ReposCubit reposCubit, required List<String> paths}) =>
-      emit(
+      emitUnlessClosed(
         SaveMediaSheetState(
           reposCubit: reposCubit,
           sharedMediaPaths: paths,
         ),
       );
 
-  void hide() => emit(HideSheetState());
+  void hide() => emitUnlessClosed(HideSheetState());
 }

@@ -144,7 +144,7 @@ abstract class Dialogs {
               ]),
               const SizedBox(height: 20.0),
               Text(S.current.messageConfirmFileDeletion),
-              Fields.dialogActions(context, buttons: [
+              Fields.dialogActions(buttons: [
                 NegativeButton(
                     text: S.current.actionCancel,
                     onPressed: () async =>
@@ -181,7 +181,6 @@ abstract class Dialogs {
               const SizedBox(height: 20.0),
               Text(validationMessage),
               Fields.dialogActions(
-                context,
                 buttons: [
                   NegativeButton(
                     text: S.current.actionCancel,

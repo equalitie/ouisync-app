@@ -12,17 +12,15 @@ import '../../cubits/cubits.dart'
         HideSheetState,
         RepoCubit;
 import '../../utils/utils.dart'
-    show AppLogger, Dialogs, Dimensions, Fields, FileIO;
+    show AppLogger, Dialogs, Dimensions, Fields, FileIO, showSnackBar;
 import '../widgets.dart' show ActionsDialog, FolderCreation;
 
 class DirectoryActions extends StatelessWidget with AppLogger {
   const DirectoryActions({
-    required this.parentContext,
     required this.repoCubit,
     required this.bottomSheetCubit,
   });
 
-  final BuildContext parentContext;
   final RepoCubit repoCubit;
   final EntryBottomSheetCubit bottomSheetCubit;
 
@@ -53,9 +51,12 @@ class DirectoryActions extends StatelessWidget with AppLogger {
                 _buildAction(
                   name: S.current.actionNewFolder,
                   icon: Icons.create_new_folder_outlined,
-                  action: () => createFolderDialog(context, repoCubit),
+                  action: () async => await createFolderDialog(
+                    context,
+                    repoCubit,
+                  ),
                 ),
-                _buildNewFileAction(parentContext),
+                _buildNewFileAction(cubit: repoCubit),
               ],
             ),
           ),
@@ -94,7 +95,7 @@ class DirectoryActions extends StatelessWidget with AppLogger {
     );
   }
 
-  Widget _buildNewFileAction(BuildContext parentContext) =>
+  Widget _buildNewFileAction({required RepoCubit cubit}) =>
       BlocBuilder<EntryBottomSheetCubit, EntryBottomSheetState>(
         bloc: bottomSheetCubit,
         builder: (context, state) {
@@ -111,9 +112,9 @@ class DirectoryActions extends StatelessWidget with AppLogger {
                 icon: Icons.upload_file_outlined,
                 action: enable
                     ? () async => await addFile(
-                          parentContext,
-                          repoCubit,
-                          FileType.any,
+                          context,
+                          repoCubit: cubit,
+                          type: FileType.any,
                         )
                     : null,
               ),
@@ -123,9 +124,9 @@ class DirectoryActions extends StatelessWidget with AppLogger {
                   icon: Icons.photo_library_outlined,
                   action: enable
                       ? () async => await addFile(
-                            parentContext,
-                            repoCubit,
-                            FileType.media,
+                            context,
+                            repoCubit: cubit,
+                            type: FileType.media,
                           )
                       : () async => await _showNotAvailableAlertDialog(context),
                 ),
@@ -141,28 +142,43 @@ class DirectoryActions extends StatelessWidget with AppLogger {
         message: S.current.messageMovingEntry,
       );
 
-  void createFolderDialog(context, RepoCubit cubit) async {
+  Future<void> createFolderDialog(BuildContext context, RepoCubit cubit) async {
     final parent = cubit.state.currentFolder.path;
-    var newFolderPath = await showDialog<String?>(
+
+    final newFolderPath = await showDialog<String>(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) => ActionsDialog(
-          title: S.current.titleCreateFolder,
-          body: FolderCreation(cubit: cubit, parent: parent)),
+        title: S.current.titleCreateFolder,
+        body: FolderCreation(cubit: cubit, parent: parent),
+      ),
     );
 
     if (newFolderPath == null || newFolderPath.isEmpty) {
       return;
     }
 
-    await Navigator.of(parentContext).maybePop();
+    final result = await Dialogs.executeWithLoadingDialog(
+      null,
+      () async => await cubit.createFolder(newFolderPath),
+    );
+
+    if (!result) {
+      showSnackBar('Error creating folder $newFolderPath');
+      return;
+    }
+
+    Navigator.of(context).pop();
   }
 
   Future<void> addFile(
-    parentContext,
-    RepoCubit repoCubit,
-    FileType type,
-  ) async =>
-      FileIO(context: parentContext, repoCubit: repoCubit)
-          .addFileFromDevice(type: type);
+    BuildContext context, {
+    required RepoCubit repoCubit,
+    required FileType type,
+  }) async {
+    final callback = Navigator.of(context).maybePop();
+
+    await FileIO(context: context, repoCubit: repoCubit)
+        .addFileFromDevice(type: type, popCallback: callback);
+  }
 }

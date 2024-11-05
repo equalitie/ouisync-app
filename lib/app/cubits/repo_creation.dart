@@ -6,15 +6,21 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync/ouisync.dart' show AccessMode, ShareToken;
 
 import '../../generated/l10n.dart';
-import '../models/auth_mode.dart';
-import '../models/local_secret.dart';
-import '../models/repo_entry.dart';
-import '../models/repo_location.dart';
-import '../utils/dialogs.dart';
-import '../utils/log.dart';
-import '../utils/strings.dart';
-import 'repos.dart';
-import 'utils.dart';
+import '../models/models.dart'
+    show
+        ErrorRepoEntry,
+        LocalSecretKeyAndSalt,
+        LocalSecretInput,
+        LocalSecretManual,
+        LocalSecretMode,
+        LocalSecretRandom,
+        LoadingRepoEntry,
+        MissingRepoEntry,
+        OpenRepoEntry,
+        RepoLocation,
+        SetLocalSecret;
+import '../utils/utils.dart' show AppLogger, Dialogs, Strings;
+import 'cubits.dart' show CubitActions, ReposCubit;
 
 class RepoCreationState {
   static const initialLocalSecretMode = LocalSecretMode.randomStored;
@@ -159,7 +165,7 @@ class RepoCreationCubit extends Cubit<RepoCreationState>
         final useCacheServers =
             await reposCubit.cacheServers.isEnabledForShareToken(token);
 
-        emit(state.copyWith(
+        emitUnlessClosed(state.copyWith(
           accessMode: accessMode,
           suggestedName: suggestedName,
           token: token,
@@ -175,7 +181,7 @@ class RepoCreationCubit extends Cubit<RepoCreationState>
   }
 
   void setUseCacheServers(bool value) {
-    emit(state.copyWith(useCacheServers: value));
+    emitUnlessClosed(state.copyWith(useCacheServers: value));
   }
 
   void setLocalSecret(LocalSecretInput input) {
@@ -213,7 +219,8 @@ class RepoCreationCubit extends Cubit<RepoCreationState>
         ),
     };
 
-    emit(state.copyWith(substate: substate, localSecretMode: input.mode));
+    emitUnlessClosed(
+        state.copyWith(substate: substate, localSecretMode: input.mode));
   }
 
   Future<void> save() async {
@@ -245,11 +252,11 @@ class RepoCreationCubit extends Cubit<RepoCreationState>
 
     switch (repoEntry) {
       case OpenRepoEntry():
-        emit(state.copyWith(
+        emitUnlessClosed(state.copyWith(
           substate: RepoCreationSuccess(location: substate.location),
         ));
       case ErrorRepoEntry():
-        emit(state.copyWith(
+        emitUnlessClosed(state.copyWith(
           substate: RepoCreationFailure(
             location: substate.location,
             error: repoEntry.error,

@@ -1,14 +1,15 @@
 import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync/ouisync.dart' as oui;
-import 'package:equatable/equatable.dart';
 
 import '../../generated/l10n.dart';
-import '../utils/utils.dart';
-import 'utils.dart';
+import '../utils/utils.dart'
+    show AppLogger, LocalInterfaceAddr, LocalInterfaceWatch, AppLoggy, Settings;
 import '../utils/watch.dart' as watch;
+import 'cubits.dart' show CubitActions;
 
 const _unspecifiedV4 = "0.0.0.0:0";
 const _unspecifiedV6 = "[::]:0";
@@ -105,7 +106,7 @@ class PowerControlState {
 }
 
 class PowerControl extends Cubit<PowerControlState>
-    with CubitActions, AppLogger {
+    with AppLogger, CubitActions {
   final oui.Session _session;
   final Settings _settings;
   final Connectivity _connectivity;
@@ -171,7 +172,7 @@ class PowerControl extends Cubit<PowerControlState>
       return;
     }
 
-    emit(state.copyWith(userWantsPortForwardingEnabled: value));
+    emitUnlessClosed(state.copyWith(userWantsPortForwardingEnabled: value));
 
     await _session.setPortForwardingEnabled(value);
   }
