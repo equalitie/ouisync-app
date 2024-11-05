@@ -1033,5 +1033,13 @@
   "languageIsNotAvailable": "no disponible",
   "@languageIsNotAvailable": {},
   "messageSettingsVersionNewerThanCurrent": "Los ajustes de este dispositivo se crearón con una versión más reciente de Ouisync y no se pueden migrar.",
-  "@messageSettingsVersionNewerThanCurrent": {}
+  "@messageSettingsVersionNewerThanCurrent": {},
+  "messageFailedCreateRepository": "No se pudo crear el repositorio {name}",
+  "@messageFailedCreateRepository": {},
+  "messageFailedAddRepository": "Error al importar el repositorio {name}",
+  "@messageFailedAddRepository": {},
+  "messageNoMediaPresent": "No hay medios presentes.",
+  "@messageNoMediaPresent": {},
+  "messageLogLevelErrorWarnInfoDebug": "Errores, advertencias, información y depuración",
+  "@messageLogLevelErrorWarnInfoDebug": {}
 }
