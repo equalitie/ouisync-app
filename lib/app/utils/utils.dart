@@ -34,4 +34,3 @@ export 'settings/settings.dart';
 export 'spinning_icon.dart';
 export 'static_file_handler.dart';
 export 'strings.dart';
-export 'watch.dart';
