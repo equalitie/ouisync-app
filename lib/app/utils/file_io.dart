@@ -3,7 +3,7 @@ import 'dart:io' as io;
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart'
-    show AlertDialog, Axis, BuildContext, Flex, Navigator, showDialog;
+    show AlertDialog, Axis, BuildContext, Flex, showDialog;
 import 'package:ouisync/ouisync.dart';
 import 'package:path/path.dart' as p;
 import 'package:permission_handler/permission_handler.dart';
@@ -26,14 +26,16 @@ import 'utils.dart'
 enum FileDestination { device, ouisync }
 
 class FileIO with AppLogger {
-  const FileIO({required this.context, required this.repoCubit});
+  const FileIO({
+    required this.context,
+    required this.repoCubit,
+  });
 
   final BuildContext context;
   final RepoCubit repoCubit;
 
-  Future<void> addFileFromDevice({
-    required FileType type,
-  }) async {
+  Future<void> addFileFromDevice(
+      {required FileType type, required Future<bool> popCallback}) async {
     final storagePermissionOk = await _maybeRequestPermission(context);
     if (storagePermissionOk == false) {
       return;
@@ -51,7 +53,7 @@ class FileIO with AppLogger {
         return 'Adding files $fileNames';
       });
 
-      await Navigator.of(context).maybePop();
+      await popCallback;
 
       for (final srcFile in result.files) {
         final parentPath = repoCubit.state.currentFolder.path;
@@ -67,7 +69,10 @@ class FileIO with AppLogger {
           );
         }
 
-        final replaceOrKeepEntry = await _confirmKeepOrReplaceEntry(fileName);
+        final replaceOrKeepEntry = await _confirmKeepOrReplaceEntry(
+          context,
+          fileName: fileName,
+        );
 
         if (replaceOrKeepEntry == null) {
           return;
@@ -98,7 +103,10 @@ class FileIO with AppLogger {
     }
   }
 
-  Future<FileAction?> _confirmKeepOrReplaceEntry(String fileName) async =>
+  Future<FileAction?> _confirmKeepOrReplaceEntry(
+    BuildContext context, {
+    required String fileName,
+  }) async =>
       showDialog<FileAction>(
         context: context,
         builder: (BuildContext context) => AlertDialog(
