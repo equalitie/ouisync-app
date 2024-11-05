@@ -595,7 +595,7 @@ class Fields {
     }
 
     final content = await Dialogs.executeFutureWithLoadingDialog(
-      context,
+      null,
       webView.loadUrl(context, url),
     );
 

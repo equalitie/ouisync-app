@@ -35,7 +35,7 @@ mixin RepositoryActionsMixin on LoggyType {
     }
 
     await Dialogs.executeFutureWithLoadingDialog(
-      context,
+      null,
       reposCubit.renameRepository(repoCubit.location, newName),
     );
 

@@ -768,7 +768,7 @@ class _MainPageState extends State<MainPage>
       /// using a local HTTP server and the internet navigator previewer.
       try {
         final url = await Dialogs.executeFutureWithLoadingDialog(
-          context,
+          null,
           repo.previewFileUrl(entry.path),
         );
 

@@ -196,7 +196,7 @@ class AboutSection extends SettingsSection with AppLogger {
     if (PlatformValues.isMobileDevice) {
       final pageTitle = Text(title);
       final content = await Dialogs.executeFutureWithLoadingDialog(
-        context,
+        null,
         webView.loadUrl(context, url),
       );
 
