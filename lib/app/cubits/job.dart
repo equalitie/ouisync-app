@@ -1,5 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'cubits.dart' show CubitActions;
+
 class JobState {
   int soFar;
   int total;
@@ -14,14 +16,14 @@ class JobState {
       );
 }
 
-class Job extends Cubit<JobState> {
+class Job extends Cubit<JobState> with CubitActions {
   Job(int soFar, int total) : super(JobState(soFar: soFar, total: total));
 
   void update(int soFar) {
-    emit(state.copyWith(soFar: soFar));
+    emitUnlessClosed(state.copyWith(soFar: soFar));
   }
 
   void cancel() {
-    emit(state.copyWith(cancel: true));
+    emitUnlessClosed(state.copyWith(cancel: true));
   }
 }

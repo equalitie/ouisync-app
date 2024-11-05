@@ -1,6 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../models/repo_location.dart';
-import '../utils/utils.dart';
+
+import '../models/models.dart' show RepoLocation;
+import '../utils/utils.dart' show AppLogger;
+import 'cubits.dart' show CubitActions;
 
 class NavigationState {
   final RepoLocation? repoLocation;
@@ -14,7 +16,8 @@ class NavigationState {
   });
 }
 
-class NavigationCubit extends Cubit<NavigationState> with AppLogger {
+class NavigationCubit extends Cubit<NavigationState>
+    with AppLogger, CubitActions {
   NavigationCubit()
       : super(NavigationState(
           repoLocation: null,
@@ -23,7 +26,7 @@ class NavigationCubit extends Cubit<NavigationState> with AppLogger {
         ));
 
   void current(RepoLocation repoLocation, String path, bool isFolder) =>
-      emit(NavigationState(
+      emitUnlessClosed(NavigationState(
         repoLocation: repoLocation,
         path: path,
         isFolder: isFolder,
