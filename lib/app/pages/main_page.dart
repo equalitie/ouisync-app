@@ -936,6 +936,7 @@ class _MainPageState extends State<MainPage>
         context: parentContext,
         shape: Dimensions.borderBottomSheetTop,
         builder: (context) => DirectoryActions(
+          parentContext,
           repoCubit: repo.cubit,
           bottomSheetCubit: widget.reposCubit.bottomSheet,
         ),

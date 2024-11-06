@@ -8,8 +8,8 @@ plugins {
     id "dev.flutter.flutter-gradle-plugin"
 }
 
-def properties = new Properties()
-rootProject.file("local.properties").withInputStream { properties.load(it) }
+def localProperties = new Properties()
+rootProject.file("local.properties").withInputStream { localProperties.load(it) }
 
 android {
     namespace = "org.equalitie.ouisync"
@@ -36,7 +36,9 @@ android {
 
     // Suffix to append to the application id, name and version. This allows installing multiple
     // versions of the app on the same device (e.g., production and development).
-    def appSuffix = System.getenv("APP_SUFFIX") ?: properties.getProperty("app.suffix")
+    def appSuffix = System.getenv("APP_SUFFIX") ?: localProperties.getProperty("app.suffix")
+
+    def keystoreProperties = loadKeystorePropertiesFile(System.getenv('STORE_FILE') ?: localProperties['STORE_FILE'])
 
     defaultConfig {
         def appId = "org.equalitie.ouisync"
@@ -59,19 +61,11 @@ android {
     }
 
     signingConfigs {
-        production {
-            def cfg = loadKeystorePropertiesFile("production")
-            keyAlias cfg?.keyAlias
-            keyPassword cfg?.keyPassword
-            storeFile cfg?.storeFile
-            storePassword cfg?.storePassword
-        }
-        nightly {
-            def cfg = loadKeystorePropertiesFile("nightly")
-            keyAlias cfg?.keyAlias
-            keyPassword cfg?.keyPassword
-            storeFile cfg?.storeFile
-            storePassword cfg?.storePassword
+        release {
+            keyAlias keystoreProperties?.keyAlias
+            keyPassword keystoreProperties?.keyPassword
+            storeFile keystoreProperties?.storeFile
+            storePassword keystoreProperties?.storePassword
         }
     }
 
@@ -79,18 +73,15 @@ android {
     productFlavors {
         production {
             dimension "releaseType"
-            signingConfig signingConfigs.production
             applicationIdSuffix applicationIdSuffix
         }
         nightly {
             dimension "releaseType"
             applicationIdSuffix appendUnlessNull(".nightly", applicationIdSuffix)
-            signingConfig signingConfigs.nightly
         }
         unofficial {
             dimension "releaseType"
             applicationIdSuffix appendUnlessNull(".unofficial", applicationIdSuffix)
-            signingConfig signingConfigs.debug
         }
     }
 
@@ -102,6 +93,11 @@ android {
 
     buildTypes {
         release {
+            if (keystoreProperties != null) {
+                signingConfig signingConfigs.release
+            } else {
+                signingConfig signingConfigs.debug
+            }
         }
 
         debug {
@@ -183,20 +179,25 @@ class SigningConfig {
     String storePassword
 }
 
-def loadKeystorePropertiesFile(String flavor) {
-    def keystoreProperties = new Properties()
-    def keystoreFilePath = "../secrets/${flavor}/android/key.properties"
-    def keystorePropertiesFile = rootProject.file(keystoreFilePath)
-    if (!keystorePropertiesFile.exists()) {
+def loadKeystorePropertiesFile(String keystorePropertiesPath) {
+    if (keystorePropertiesPath == null) {
+        return null;
+    }
+    def properties = new Properties()
+
+    def proFile = rootProject.file(keystorePropertiesPath)
+
+    if (!proFile.exists()) {
         return null
     }
-    keystorePropertiesFile.withInputStream { keystoreProperties.load(it) }
+
+    proFile.withInputStream { properties.load(it) }
 
     def config = new SigningConfig(
-        keyAlias: keystoreProperties['keyAlias'],
-        keyPassword: keystoreProperties['keyPassword'],
-        storeFile: file(keystoreProperties['storeFile']),
-        storePassword: keystoreProperties['storePassword']
+        keyAlias: properties['keyAlias'],
+        keyPassword: properties['keyPassword'],
+        storeFile: file(properties['storeFile']),
+        storePassword: properties['storePassword']
     )
 
     return config

@@ -41,9 +41,7 @@ enum Flavor {
       case "unofficial":
         return Flavor.unofficial;
       default:
-        print(
-            'Invalid flavor "$name", must be one of {production, nightly, unofficial}');
-        exit(1);
+        throw ('Invalid flavor "$name", must be one of {production, nightly, unofficial}');
     }
   }
 
@@ -75,6 +73,7 @@ Future<void> main(List<String> args) async {
   final options = await Options.parse(args);
 
   final pubspec = Pubspec.parse(await File("pubspec.yaml").readAsString());
+  final sentryDSN = await getSentryDSN(options);
 
   final git = await GitDir.fromExisting(p.current);
 
@@ -82,13 +81,6 @@ Future<void> main(List<String> args) async {
 
   final commit = await getCommit();
   final buildDesc = BuildDesc(version, commit);
-
-  final sentryDSN =
-      await readSentryDSN('secrets/${buildDesc.flavor}/sentry_dsn');
-  if (sentryDSN == null && buildDesc.flavor.requiresSentryDSN) {
-    print("Sentry DSN is required for this flavor, but could not be found");
-    exit(1);
-  }
 
   if (buildDesc.flavor.doGitCleanCheck && !await checkWorkingTreeIsClean(git)) {
     return;
@@ -106,15 +98,28 @@ Future<void> main(List<String> args) async {
   List<File> assets = [];
 
   if (options.apk || options.aab) {
-    final aab = await buildAab(buildDesc, sentryDSN);
+    Flavor flavor = buildDesc.flavor;
 
-    if (options.aab) {
-      assets.add(await collateAsset(outputDir, name, buildDesc, aab));
-    }
+    final secrets = switch (flavor.requiresSigning) {
+      true => options.androidKeyPropertiesPath != null
+          ? AndroidSecrets(options.androidKeyPropertiesPath!)
+          : await prepareAndroidSecretsFromPass(flavor),
+      false => null,
+    };
 
-    if (options.apk) {
-      final apk = await extractApk(aab, buildDesc.flavor);
-      assets.add(await collateAsset(outputDir, name, buildDesc, apk));
+    try {
+      final aab = await buildAab(buildDesc, secrets, sentryDSN);
+
+      if (options.aab) {
+        assets.add(await collateAsset(outputDir, name, buildDesc, aab));
+      }
+
+      if (options.apk) {
+        final apk = await extractApk(aab, flavor, secrets);
+        assets.add(await collateAsset(outputDir, name, buildDesc, apk));
+      }
+    } finally {
+      secrets?.destroy();
     }
   }
 
@@ -220,6 +225,8 @@ class Options {
   final String? publisher;
   final bool awaitUpload;
   final Flavor flavor;
+  final String? androidKeyPropertiesPath;
+  final String? sentryDSN;
 
   Options._({
     this.apk = false,
@@ -237,6 +244,8 @@ class Options {
     this.publisher,
     this.awaitUpload = false,
     this.flavor = Flavor.production,
+    this.androidKeyPropertiesPath = null,
+    this.sentryDSN = null,
   });
 
   static Future<Options> parse(List<String> args) async {
@@ -321,6 +330,12 @@ class Options {
         help:
             'Specify a build flavor, one of {production, nightly, unofficial}, nightly is the default');
 
+    parser.addOption('android-key-properties',
+        help: 'Path to Android key.properties file');
+
+    parser.addOption('sentry',
+        help: 'Path to file containing Sentry DSN (single line)');
+
     final results = parser.parse(args);
 
     if (results['help']) {
@@ -354,6 +369,35 @@ class Options {
       }
     }
 
+    final androidKeyProperties = results['android-key-properties'];
+
+    if (androidKeyProperties != null) {
+      if (!await File(androidKeyProperties).exists()) {
+        print(
+            "Android keystore properties file '$androidKeyProperties' does not exist");
+        exit(1);
+      }
+    }
+
+    final sentryDSNFile = results['sentry'];
+    String? sentryDSN = null;
+
+    if (sentryDSNFile != null) {
+      final file = File(sentryDSNFile);
+
+      if (!await file.exists()) {
+        print("File containing Sentry DSN does not exist (${file.path})");
+        exit(1);
+      }
+
+      sentryDSN = (await file.readAsString()).trim();
+
+      if (!(Uri.tryParse(sentryDSN)?.hasAbsolutePath ?? false)) {
+        print("Sentry DSN in ${file.path} file is not a valid URI");
+        exit(1);
+      }
+    }
+
     final apk = results['apk'];
     final aab = results['aab'];
     final exe = results['exe'];
@@ -383,6 +427,8 @@ class Options {
       publisher: results['publisher'],
       awaitUpload: results['await-upload'],
       flavor: Flavor.fromString(results['flavor']),
+      androidKeyPropertiesPath: androidKeyProperties,
+      sentryDSN: sentryDSN,
     );
   }
 }
@@ -708,8 +754,8 @@ Future<File> buildDebCLI(
     String description = ''}) async {
   final buildName = buildDesc.toString();
 
-  await run(
-      'cargo', ['build', '--release', '--package', 'ouisync-cli'], './ouisync');
+  await run('cargo', ['build', '--release', '--package', 'ouisync-cli'],
+      workingDirectory: './ouisync');
 
   final arch = 'amd64';
   final packageName = '$name-cli_${buildDesc}_$arch';
@@ -760,25 +806,36 @@ Future<File> buildDebCLI(
 // aab
 //
 ////////////////////////////////////////////////////////////////////////////////
-Future<File> buildAab(BuildDesc buildDesc, String? sentryDSN) async {
-  String flavor = buildDesc.flavor.toString();
+Future<File> buildAab(
+    BuildDesc buildDesc, AndroidSecrets? secrets, String? sentryDSN) async {
+  Flavor flavor = buildDesc.flavor;
+
+  final env = Map<String, String>();
+
+  if (secrets != null) {
+    env['KEYSTORE_PROPERTIES'] = secrets.keystorePropertiesPath;
+  }
 
   final inputFileName = "app-$flavor-release.aab";
   final inputPath = 'build/app/outputs/bundle/${flavor}Release/$inputFileName';
 
   print('Creating Android App Bundle ...');
 
-  await run('flutter', [
-    'build',
-    'appbundle',
-    '--release',
-    if (sentryDSN != null) '--dart-define=SENTRY_DSN=$sentryDSN',
-    '--build-number',
-    buildDesc.buildIdentifier,
-    '--flavor=$flavor',
-    '--build-name',
-    buildDesc.toString(),
-  ]);
+  await run(
+    'flutter',
+    [
+      'build',
+      'appbundle',
+      '--release',
+      if (sentryDSN != null) '--dart-define=SENTRY_DSN=$sentryDSN',
+      '--build-number',
+      buildDesc.buildIdentifier,
+      '--flavor=$flavor',
+      '--build-name',
+      buildDesc.toString(),
+    ],
+    environment: env,
+  );
 
   return File(inputPath);
 }
@@ -788,7 +845,8 @@ Future<File> buildAab(BuildDesc buildDesc, String? sentryDSN) async {
 // apk
 //
 ////////////////////////////////////////////////////////////////////////////////
-Future<File> extractApk(File bundle, Flavor flavor) async {
+Future<File> extractApk(
+    File bundle, Flavor flavor, AndroidSecrets? secrets) async {
   final outputPath = p.setExtension(bundle.path, '.apk');
   final outputFile = File(outputPath);
 
@@ -800,25 +858,17 @@ Future<File> extractApk(File bundle, Flavor flavor) async {
 
   final bundletool = await prepareBundletool();
 
-  final keyPropertiesPath =
-      'secrets/${flavor.toString()}/android/key.properties';
-
   String? storeFile;
   String? storePassword;
   String? keyPassword;
   String? keyAlias;
 
-  if (await File(keyPropertiesPath).exists()) {
-    final keyProperties = Properties.fromFile(keyPropertiesPath);
+  if (secrets != null) {
+    final keyProperties = Properties.fromFile(secrets.keystorePropertiesPath);
     storeFile = p.join('android/app', keyProperties.get('storeFile')!);
     storePassword = keyProperties.get('storePassword')!;
     keyPassword = keyProperties.get('keyPassword')!;
     keyAlias = keyProperties.get('keyAlias')!;
-  } else {
-    if (flavor.requiresSigning) {
-      print('Key properties file "$keyPropertiesPath" not found');
-      exit(1);
-    }
   }
 
   final tempPath = p.setExtension(bundle.path, '.apks');
@@ -1062,7 +1112,7 @@ Future<String> buildReleaseNotes(
 Future<String> getCommit([String? workingDirectory]) => runCapture(
       'git',
       ['rev-parse', '--short', 'HEAD'],
-      workingDirectory,
+      workingDirectory: workingDirectory,
     );
 
 Future<String?> getSubmoduleCommit(String superCommit, String submodule) async {
@@ -1093,7 +1143,7 @@ Future<String> getLog(
         '$first...$last',
         '--pretty=format:- https://github.com/${slug.owner}/${slug.name}/commit/%h %s'
       ],
-      workingDirectory,
+      workingDirectory: workingDirectory,
     );
 
 String changelogUrl(RepositorySlug slug, String first, String last) {
@@ -1144,15 +1194,17 @@ Version determineVersion(Pubspec pubspec, Options options) {
 
 Future<void> run(
   String command,
-  List<String> args, [
+  List<String> args, {
   String? workingDirectory,
-]) async {
+  Map<String, String>? environment,
+}) async {
   final process = await Process.start(
     command,
     args,
     workingDirectory: workingDirectory,
     // This helps on Windows with finding `command` in $PATH environment variable.
     runInShell: true,
+    environment: environment,
   );
 
   unawaited(process.stdout.transform(utf8.decoder).forEach(stdout.write));
@@ -1167,9 +1219,9 @@ Future<void> run(
 
 Future<String> runCapture(
   String command,
-  List<String> args, [
+  List<String> args, {
   String? workingDirectory,
-]) async {
+}) async {
   final result = await Process.run(
     command,
     args,
@@ -1230,23 +1282,18 @@ Future<void> createIcon(File src, File dst, int resolution) async {
   await command.executeThread();
 }
 
-Future<String?> readSentryDSN(String path) async {
-  String sentryDSN;
+Future<String?> getSentryDSN(Options options) async {
+  if (options.sentryDSN != null) {
+    return options.sentryDSN;
+  }
 
-  try {
-    sentryDSN = (await File(path).readAsString()).trim();
-  } catch (e) {
-    print('Failed to open file containing Sentry DSN "$path"');
-    print(e);
+  if (!options.flavor.requiresSentryDSN) {
     return null;
   }
-  // Validate
-  bool isValid = Uri.tryParse(sentryDSN)?.hasAbsolutePath ?? false;
-  if (!isValid) {
-    print("Invalid Sentry DSN in $path");
-    return null;
-  }
-  return sentryDSN;
+
+  // Get Sentry DSN from `pass`.
+  final base = 'cenoers/ouisync/app/${options.flavor}';
+  return await runCapture('pass', ['$base/sentry_dsn']);
 }
 
 class IconBadgeDesc {
@@ -1296,5 +1343,49 @@ Future<void> addBadgeToIcons(String text) async {
       text,
       'assets/${desc.fileName}',
     ]);
+  }
+}
+
+class AndroidSecrets {
+  String keystorePropertiesPath;
+  Future<void> Function()? onDestroy;
+
+  AndroidSecrets(this.keystorePropertiesPath, [this.onDestroy = null]);
+  Future<void> destroy() async {
+    onDestroy?.call();
+  }
+}
+
+Future<AndroidSecrets> prepareAndroidSecretsFromPass(Flavor flavor) async {
+  final dir = await (await Directory(
+              "${Directory.systemTemp.path}/ouisync-android-secrets")
+          .create())
+      .createTemp();
+
+  final deleteSecrets = () => dir.delete(recursive: true);
+
+  try {
+    final base = 'cenoers/ouisync/app/$flavor/android';
+
+    final storePassword = await runCapture('pass', ['$base/storePassword']);
+    final keyAlias = await runCapture('pass', ['$base/keyAlias']);
+    final keyPassword = await runCapture('pass', ['$base/keyPassword']);
+
+    final keystoreJks = File(dir.path + "/keystore.jks");
+    final keystoreJksContent =
+        await Process.run('pass', ['$base/keystore.jks'], stdoutEncoding: null);
+
+    await keystoreJks.writeAsBytes(keystoreJksContent.stdout);
+
+    final keystoreProperties = File(dir.path + "/key.properties");
+    await keystoreProperties.writeAsString("storePassword=$storePassword\n" +
+        "keyAlias=$keyAlias\n" +
+        "keyPassword=$keyPassword\n" +
+        "storeFile=${keystoreJks.path}\n");
+
+    return AndroidSecrets(keystoreProperties.path, deleteSecrets);
+  } catch (e) {
+    await deleteSecrets();
+    rethrow;
   }
 }
