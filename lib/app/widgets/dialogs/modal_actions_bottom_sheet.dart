@@ -70,7 +70,7 @@ class DirectoryActions extends StatelessWidget with AppLogger {
     required IconData icon,
     required Function()? action,
   }) {
-    Color? dissabledColor = action == null ? Colors.grey : null;
+    Color? disabledColor = action == null ? Colors.grey : null;
 
     return Padding(
       padding: Dimensions.paddingBottomSheetActions,
@@ -82,12 +82,12 @@ class DirectoryActions extends StatelessWidget with AppLogger {
             Icon(
               icon,
               size: Dimensions.sizeIconBig,
-              color: dissabledColor,
+              color: disabledColor,
             ),
             Dimensions.spacingVertical,
             Text(
               name,
-              style: TextStyle(color: dissabledColor),
+              style: TextStyle(color: disabledColor),
             )
           ],
         ),
@@ -101,7 +101,7 @@ class DirectoryActions extends StatelessWidget with AppLogger {
         builder: (context, state) {
           /// If we are not using the modal bottom sheet, this is, we
           /// are not moving entries or adding media from the device,
-          /// we dissable the add File button.
+          /// we disable the add File button.
           final enable = state is HideSheetState;
 
           return Row(

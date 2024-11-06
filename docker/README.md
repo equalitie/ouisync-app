@@ -41,5 +41,5 @@ The previous command would look like this:
 
 `sudo docker build --build-arg build_name=<build-name> --build-arg build_number=<build-number> --build-arg keystore=<keystore-name> --build-arg keystore_password_file=<password-file-name> --build-arg ndk_version=<ndk-version> --build-arg branch=<branch> -f <dockerfile-location> -t <tag> .`
 
-**Note:** By default, docker will run using **BuildKit**. If you want to dissable it, just add `DOCKER_BUILDKIT=0` at the beginning of the command, right 
+**Note:** By default, docker will run using **BuildKit**. If you want to disable it, just add `DOCKER_BUILDKIT=0` at the beginning of the command, right 
 between `sudo` and `docker`

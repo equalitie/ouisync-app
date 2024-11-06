@@ -59,7 +59,7 @@ void main() {
     expect(prefs.getKeys().length, 1);
     expect(s1.repos, unorderedEquals([RepoLocation.fromDbPath(fooPath)]));
 
-    // The auth mode should have been transfered to the repo metadata
+    // The auth mode should have been transferred to the repo metadata
     final repo = await Repository.open(session, store: fooPath);
     expect(await repo.getAuthMode(), isA<AuthModeBlindOrManual>());
 

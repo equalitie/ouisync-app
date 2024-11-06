@@ -116,7 +116,7 @@ RUN cd C:\code\ouisync-app\ouisync-plugin && \
 RUN cd C:\code\ouisync-app && \
         flutter pub get
 
-# If you want the hability to SSH into this container, uncomment the following section
+# If you want the ability to SSH into this container, uncomment the following section
 
 # FROM ouisync-code as SSHLogLevel
 

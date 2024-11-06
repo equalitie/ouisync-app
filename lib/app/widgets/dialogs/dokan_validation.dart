@@ -25,7 +25,7 @@ class DokanValidation {
 
   final _dokanScripts = const DokanScripts(
     requiredMayor: Constants.dokanMayorRequired,
-    minimumRequiredVersion: Constants.dokanMinimunVersion,
+    minimumRequiredVersion: Constants.dokanMinimumVersion,
   );
 
   DokanCheckResult get checkDokanInstallation =>

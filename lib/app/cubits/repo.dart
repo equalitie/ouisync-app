@@ -552,7 +552,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     }
   }
 
-  /// Returns null if the authMode is AuthModeBlindOrManual or if decrytion fails.
+  /// Returns null if the authMode is AuthModeBlindOrManual or if decryption fails.
   /// TODO: If decryption fails, we should throw and catch that above to inform
   /// the user about the fact.
   Future<LocalSecret?> getLocalSecret(MasterKey masterKey) async {
