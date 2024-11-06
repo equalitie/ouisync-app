@@ -16,11 +16,13 @@ import '../../utils/utils.dart'
 import '../widgets.dart' show ActionsDialog, FolderCreation;
 
 class DirectoryActions extends StatelessWidget with AppLogger {
-  const DirectoryActions({
+  const DirectoryActions(
+    this.parentContext, {
     required this.repoCubit,
     required this.bottomSheetCubit,
   });
 
+  final BuildContext parentContext;
   final RepoCubit repoCubit;
   final EntryBottomSheetCubit bottomSheetCubit;
 
@@ -38,7 +40,7 @@ class DirectoryActions extends StatelessWidget with AppLogger {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Fields.bottomSheetHandle(context),
+          Fields.bottomSheetHandle(parentContext),
           Fields.bottomSheetTitle(
             S.current.titleFolderActions,
             style: sheetTitleStyle,
@@ -52,11 +54,11 @@ class DirectoryActions extends StatelessWidget with AppLogger {
                   name: S.current.actionNewFolder,
                   icon: Icons.create_new_folder_outlined,
                   action: () async => await createFolderDialog(
-                    context,
+                    parentContext,
                     repoCubit,
                   ),
                 ),
-                _buildNewFileAction(cubit: repoCubit),
+                _buildNewFileAction(parentContext, cubit: repoCubit),
               ],
             ),
           ),
@@ -95,7 +97,10 @@ class DirectoryActions extends StatelessWidget with AppLogger {
     );
   }
 
-  Widget _buildNewFileAction({required RepoCubit cubit}) =>
+  Widget _buildNewFileAction(
+    BuildContext parentContext, {
+    required RepoCubit cubit,
+  }) =>
       BlocBuilder<EntryBottomSheetCubit, EntryBottomSheetState>(
         bloc: bottomSheetCubit,
         builder: (context, state) {
@@ -112,7 +117,7 @@ class DirectoryActions extends StatelessWidget with AppLogger {
                 icon: Icons.upload_file_outlined,
                 action: enable
                     ? () async => await addFile(
-                          context,
+                          parentContext,
                           repoCubit: cubit,
                           type: FileType.any,
                         )
@@ -124,11 +129,12 @@ class DirectoryActions extends StatelessWidget with AppLogger {
                   icon: Icons.photo_library_outlined,
                   action: enable
                       ? () async => await addFile(
-                            context,
+                            parentContext,
                             repoCubit: cubit,
                             type: FileType.media,
                           )
-                      : () async => await _showNotAvailableAlertDialog(context),
+                      : () async =>
+                          await _showNotAvailableAlertDialog(parentContext),
                 ),
             ],
           );
