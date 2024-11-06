@@ -1,3 +1,6 @@
+import java.util.regex.Matcher
+import java.util.regex.Pattern
+
 plugins {
     id "com.android.application"
     id "kotlin-android"
@@ -5,14 +8,8 @@ plugins {
     id "dev.flutter.flutter-gradle-plugin"
 }
 
-def properties = new Properties()
-rootProject.file("local.properties").withInputStream { properties.load(it) }
-
-def keystoreProperties = new Properties()
-def keystorePropertiesFile = rootProject.file('../secrets/android/key.properties')
-if (keystorePropertiesFile.exists()) {
-    keystorePropertiesFile.withInputStream { keystoreProperties.load(it) }
-}
+def localProperties = new Properties()
+rootProject.file("local.properties").withInputStream { localProperties.load(it) }
 
 android {
     namespace = "org.equalitie.ouisync"
@@ -39,7 +36,9 @@ android {
 
     // Suffix to append to the application id, name and version. This allows installing multiple
     // versions of the app on the same device (e.g., production and development).
-    def appSuffix = System.getenv("APP_SUFFIX") ?: properties.getProperty("app.suffix")
+    def appSuffix = System.getenv("APP_SUFFIX") ?: localProperties.getProperty("app.suffix")
+
+    def keystoreProperties = loadKeystorePropertiesFile(System.getenv('STORE_FILE') ?: localProperties['STORE_FILE'])
 
     defaultConfig {
         def appId = "org.equalitie.ouisync"
@@ -63,16 +62,38 @@ android {
 
     signingConfigs {
         release {
-            keyAlias keystoreProperties['keyAlias']
-            keyPassword keystoreProperties['keyPassword']
-            storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
-            storePassword keystoreProperties['storePassword']
+            keyAlias keystoreProperties?.keyAlias
+            keyPassword keystoreProperties?.keyPassword
+            storeFile keystoreProperties?.storeFile
+            storePassword keystoreProperties?.storePassword
         }
     }
 
+    flavorDimensions "releaseType"
+    productFlavors {
+        production {
+            dimension "releaseType"
+            applicationIdSuffix applicationIdSuffix
+        }
+        nightly {
+            dimension "releaseType"
+            applicationIdSuffix appendUnlessNull(".nightly", applicationIdSuffix)
+        }
+        unofficial {
+            dimension "releaseType"
+            applicationIdSuffix appendUnlessNull(".unofficial", applicationIdSuffix)
+        }
+    }
+
+    // Flutter building will exit with an incomprehensive error if the flavor
+    // is not specified. So in this function we do our own check if the
+    // --flavor parameter was used and tell the user that it needs to be set if
+    // it's not.
+    checkFlavorParameter(getCurrentFlavor(), productFlavors)
+
     buildTypes {
         release {
-            if (keystorePropertiesFile.exists()) {
+            if (keystoreProperties != null) {
                 signingConfig signingConfigs.release
             } else {
                 signingConfig signingConfigs.debug
@@ -81,21 +102,6 @@ android {
 
         debug {
             android.packagingOptions.doNotStrip "**.so"
-        }
-    }
-
-    flavorDimensions "releaseType"
-    productFlavors {
-        production {
-            dimension "releaseType"
-        }
-        nightly {
-            dimension "releaseType"
-            applicationIdSuffix ".nightly"
-        }
-        unofficial {
-            dimension "releaseType"
-            applicationIdSuffix ".unofficial"
         }
     }
 }
@@ -164,4 +170,72 @@ task generateResourceImages() {
 
 gradle.projectsEvaluated {
     preBuild.dependsOn('generateResourceImages')
+}
+
+class SigningConfig {
+    String keyAlias
+    String keyPassword
+    File storeFile
+    String storePassword
+}
+
+def loadKeystorePropertiesFile(String keystorePropertiesPath) {
+    if (keystorePropertiesPath == null) {
+        return null;
+    }
+    def properties = new Properties()
+
+    def proFile = rootProject.file(keystorePropertiesPath)
+
+    if (!proFile.exists()) {
+        return null
+    }
+
+    proFile.withInputStream { properties.load(it) }
+
+    def config = new SigningConfig(
+        keyAlias: properties['keyAlias'],
+        keyPassword: properties['keyPassword'],
+        storeFile: file(properties['storeFile']),
+        storePassword: properties['storePassword']
+    )
+
+    return config
+}
+
+// Check if the user provided the `--flavor=` argument.
+def checkFlavorParameter(String currentFlavor, availableFlavors) {
+    def availableFlavorNames = availableFlavors.collect { it.name }
+
+    if (currentFlavor == null) {
+        if (availableFlavors.empty) {
+            return
+        }
+        throw new GradleException("Missing '--flavor=${availableFlavorNames}' argument.")
+    }
+
+    if (!availableFlavorNames.contains(currentFlavor)) {
+        throw new GradleException("Unrecognized flavor '${currentFlavor}'. Use one from ${availableFlavorNames}.")
+    }
+}
+
+// Return the current flavor or null.
+def getCurrentFlavor() {
+    String taskRequests = gradle.startParameter.taskRequests.toString()
+
+    Pattern pattern = Pattern.compile("(assemble|bundle)(\\w+)(Release|Debug)")
+    Matcher matcher = pattern.matcher(taskRequests)
+
+    if (matcher.find()) {
+        return matcher.group(2).toLowerCase()
+    } else {
+        return null
+    }
+}
+
+def appendUnlessNull(String s1, String s2) {
+    if (s2 == null) {
+        return s1
+    }
+    return s1 + s2
 }
