@@ -17,7 +17,7 @@ jobs:
         name: [android, linux, windows]
         include:
           - name: android
-            os: ubuntu-latest
+            os: ubuntu-24.04
             env:
               OUISYNC_LIB: ouisync/target/debug/libouisync_ffi.so
             target: aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
@@ -28,7 +28,7 @@ jobs:
             artifact-files: ouisync*.apk
 
           - name: linux
-            os: ubuntu-latest
+            os: ubuntu-24.04
             env:
               OUISYNC_LIB: ouisync/target/debug/libouisync_ffi.so
             # TODO: enable analysis
@@ -70,14 +70,16 @@ jobs:
           sudo apt-get install libappindicator3-dev   \
                                libfuse-dev            \
                                libgtk-3-dev           \
-                               ninja-build
+                               libsecret-1-dev        \
+                               ninja-build            \
+                               imagemagick
         if: matrix.name == 'linux'
 
       - name: Install build dependencies (android)
         # Note that libfuse-dev is not required to build the Android app, but
         # later in this CI script we also run tests on Linux which do require
         # it.
-        run: sudo apt-get install libfuse-dev
+        run: sudo apt-get install libfuse-dev imagemagick
         if: matrix.name == 'android'
 
       - name: Install Android NDK
