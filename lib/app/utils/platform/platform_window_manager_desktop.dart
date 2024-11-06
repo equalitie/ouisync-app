@@ -116,7 +116,7 @@ class PlatformWindowManagerDesktop
     /// For some reason, if we use a constant value for the title in the
     /// WindowsOptions, the app hangs. This is true for the localized strings,
     /// or a regular constant value in Constants.
-    /// So we use a harcoded string to start, then we use the localized string
+    /// So we use a hardcoded string to start, then we use the localized string
     /// in app.dart -for now.
 
     // Make it usable on older HD displays.

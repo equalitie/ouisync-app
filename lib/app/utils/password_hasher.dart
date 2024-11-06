@@ -1,6 +1,6 @@
 import 'package:ouisync/ouisync.dart';
 
-// This class exists mainly to avoid passing the ouisync Session througout the
+// This class exists mainly to avoid passing the ouisync Session throughout the
 // code where only it's password hashing functionality is needed.
 class PasswordHasher {
   final Session _ouisyncSession;

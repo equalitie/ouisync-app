@@ -84,10 +84,10 @@ extension Extension {
             }
 
             if ext.ouisyncSession != nil {
-                // TODO: What shoudld we do if there is another app trying to connect? Right now Ouisync
+                // TODO: What should we do if there is another app trying to connect? Right now Ouisync
                 // runs inside the app, so that would mean we have two or more Ouisyncs running at the
                 // same time. The app is set up in Flutter to only allow one instance, but whether that
-                // actually works remains to be tested. If it happens that there are acually more than
+                // actually works remains to be tested. If it happens that there are actually more than
                 // one Ouisync instance, we might need to move the backend to the extension, but that
                 // would require a lot of boilerplate to make it accessible from Dart.
                 NSLog("😡 Session already exists")

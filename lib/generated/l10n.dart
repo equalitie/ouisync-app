@@ -591,10 +591,10 @@ class S {
   }
 
   /// `Freedom of expression and access to information`
-  String get titleFreedomExpresionAccessInfo {
+  String get titleFreedomExpressionAccessInfo {
     return Intl.message(
       'Freedom of expression and access to information',
-      name: 'titleFreedomExpresionAccessInfo',
+      name: 'titleFreedomExpressionAccessInfo',
       desc: '',
       args: [],
     );
@@ -1411,20 +1411,20 @@ class S {
   }
 
   /// `Failed to create repository {name}`
-  String messsageFailedCreateRepository(Object name) {
+  String messageFailedCreateRepository(Object name) {
     return Intl.message(
       'Failed to create repository $name',
-      name: 'messsageFailedCreateRepository',
+      name: 'messageFailedCreateRepository',
       desc: '',
       args: [name],
     );
   }
 
   /// `Failed to import repository {name}`
-  String messsageFailedAddRepository(Object name) {
+  String messageFailedAddRepository(Object name) {
     return Intl.message(
       'Failed to import repository $name',
-      name: 'messsageFailedAddRepository',
+      name: 'messageFailedAddRepository',
       desc: '',
       args: [name],
     );
@@ -1991,10 +1991,10 @@ class S {
   }
 
   /// `There is no media present.`
-  String get mesageNoMediaPresent {
+  String get messageNoMediaPresent {
     return Intl.message(
       'There is no media present.',
-      name: 'mesageNoMediaPresent',
+      name: 'messageNoMediaPresent',
       desc: '',
       args: [],
     );
@@ -2451,10 +2451,10 @@ class S {
   }
 
   /// `Error, Warn, Info and Debug`
-  String get messageLogLevelErroWarnInfoDebug {
+  String get messageLogLevelErrorWarnInfoDebug {
     return Intl.message(
       'Error, Warn, Info and Debug',
-      name: 'messageLogLevelErroWarnInfoDebug',
+      name: 'messageLogLevelErrorWarnInfoDebug',
       desc: '',
       args: [],
     );
@@ -3390,10 +3390,10 @@ class S {
     );
   }
 
-  /// `If you have a reason to believe that your personal data has been illegaly obtained and shared by other Ouisync users, please contact us at the address below`
+  /// `If you have a reason to believe that your personal data has been illegally obtained and shared by other Ouisync users, please contact us at the address below`
   String get messageSecurityPracticesP4 {
     return Intl.message(
-      'If you have a reason to believe that your personal data has been illegaly obtained and shared by other Ouisync users, please contact us at the address below',
+      'If you have a reason to believe that your personal data has been illegally obtained and shared by other Ouisync users, please contact us at the address below',
       name: 'messageSecurityPracticesP4',
       desc: '',
       args: [],
@@ -3430,10 +3430,10 @@ class S {
     );
   }
 
-  /// `If the user does decide to contact us, the personally indetifiable data we may collect is:`
+  /// `If the user does decide to contact us, the personally identifiable data we may collect is:`
   String get messageLogDataP2 {
     return Intl.message(
-      'If the user does decide to contact us, the personally indetifiable data we may collect is:',
+      'If the user does decide to contact us, the personally identifiable data we may collect is:',
       name: 'messageLogDataP2',
       desc: '',
       args: [],
