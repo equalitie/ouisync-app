@@ -82,13 +82,6 @@ jobs:
         run: sudo apt-get install libfuse-dev imagemagick
         if: matrix.name == 'android'
 
-      - name: Install Android NDK
-        uses: nttld/setup-ndk@v1
-        with:
-            ndk-version: ${{ matrix.ndk.version }}
-            link-to-sdk: true
-        if: matrix.ndk.version != ''
-
       - name: Set NDK ABI filter
         run: echo "ndk.abiFilters=${{ matrix.ndk.abi }}" >> android/local.properties
         if: matrix.ndk.abi != ''
