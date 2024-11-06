@@ -82,6 +82,10 @@ jobs:
         run: sudo apt-get install libfuse-dev imagemagick
         if: matrix.name == 'android'
 
+      - name: Show path to Android NDK
+        run: echo "ANDROID_NDK_ROOT=$ANDROID_NDK_ROOT"
+        if: matrix.name == 'android'
+
       - name: Set NDK ABI filter
         run: echo "ndk.abiFilters=${{ matrix.ndk.abi }}" >> android/local.properties
         if: matrix.ndk.abi != ''
