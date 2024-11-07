@@ -17,18 +17,17 @@ jobs:
         name: [android, linux, windows]
         include:
           - name: android
-            os: ubuntu-latest
+            os: ubuntu-24.04
             env:
               OUISYNC_LIB: ouisync/target/debug/libouisync_ffi.so
             target: aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
             ndk:
-              version: r27
               abi: arm64-v8a
             build-args: --apk
             artifact-files: ouisync*.apk
 
           - name: linux
-            os: ubuntu-latest
+            os: ubuntu-24.04
             env:
               OUISYNC_LIB: ouisync/target/debug/libouisync_ffi.so
             # TODO: enable analysis
@@ -63,29 +62,25 @@ jobs:
           java-version: '17'
         if: matrix.name == 'android'
 
-      - name: Install build dependencies (linux)
+      - name: Install dependencies (linux)
         run: |
           # https://github.com/orgs/community/discussions/109146
           sudo apt update -y
           sudo apt-get install libappindicator3-dev   \
                                libfuse-dev            \
                                libgtk-3-dev           \
-                               ninja-build
+                               ninja-build            \
+                               imagemagick            \
+                               libsecret-1-dev
         if: matrix.name == 'linux'
 
-      - name: Install build dependencies (android)
+      - name: Install dependencies (android)
         # Note that libfuse-dev is not required to build the Android app, but
         # later in this CI script we also run tests on Linux which do require
         # it.
-        run: sudo apt-get install libfuse-dev
+        run: |
+          sudo apt-get install libfuse-dev imagemagick
         if: matrix.name == 'android'
-
-      - name: Install Android NDK
-        uses: nttld/setup-ndk@v1
-        with:
-            ndk-version: ${{ matrix.ndk.version }}
-            link-to-sdk: true
-        if: matrix.ndk.version != ''
 
       - name: Set NDK ABI filter
         run: echo "ndk.abiFilters=${{ matrix.ndk.abi }}" >> android/local.properties
