@@ -1,0 +1,2 @@
+#!/usr/bin/env sh
+rm -Rf ~/Library/Group\ Containers/5SR9R72Z83.org.equalitie.ouisync/logs/
