@@ -22,7 +22,6 @@ jobs:
               OUISYNC_LIB: ouisync/target/debug/libouisync_ffi.so
             target: aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
             ndk:
-              version: r27
               abi: arm64-v8a
             build-args: --apk
             artifact-files: ouisync*.apk
@@ -63,7 +62,7 @@ jobs:
           java-version: '17'
         if: matrix.name == 'android'
 
-      - name: Install build dependencies (linux)
+      - name: Install dependencies (linux)
         run: |
           # https://github.com/orgs/community/discussions/109146
           sudo apt update -y
@@ -75,15 +74,11 @@ jobs:
                                imagemagick
         if: matrix.name == 'linux'
 
-      - name: Install build dependencies (android)
+      - name: Install dependencies (android)
         # Note that libfuse-dev is not required to build the Android app, but
         # later in this CI script we also run tests on Linux which do require
         # it.
         run: sudo apt-get install libfuse-dev imagemagick
-        if: matrix.name == 'android'
-
-      - name: Show path to Android NDK
-        run: echo "ANDROID_NDK_ROOT=$ANDROID_NDK_ROOT"
         if: matrix.name == 'android'
 
       - name: Set NDK ABI filter
