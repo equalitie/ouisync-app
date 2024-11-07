@@ -1236,6 +1236,26 @@ Future<String> runCapture(
   return result.stdout.trim();
 }
 
+Future<List<int>> runCaptureBinary(
+  String command,
+  List<String> args, {
+  String? workingDirectory,
+}) async {
+  final result = await Process.run(
+    command,
+    args,
+    workingDirectory: workingDirectory,
+    stdoutEncoding: null,
+  );
+
+  if (result.exitCode != 0) {
+    stderr.write(result.stderr);
+    throw 'Command $command ${args.join(' ')} failed with exit code $exitCode';
+  }
+
+  return result.stdout;
+}
+
 // Copy directory including its contents
 Future<void> copyDirectory(Directory src, Directory dst) async {
   await for (final srcEntry in src.list(recursive: true, followLinks: false)) {
@@ -1293,7 +1313,7 @@ Future<String?> getSentryDSN(Options options) async {
 
   // Get Sentry DSN from `pass`.
   final base = 'cenoers/ouisync/app/${options.flavor}';
-  return await runCapture('pass', ['$base/sentry_dsn']);
+  return await Pass.string('$base/sentry_dsn');
 }
 
 class IconBadgeDesc {
@@ -1356,6 +1376,20 @@ class AndroidSecrets {
   }
 }
 
+class Pass {
+  // This is a bash script and on Cygwin `Process.run` won't run it without
+  // invoking it through bash.
+  static final _passScript = '/usr/bin/pass';
+
+  static Future<String> string(String key) async {
+    return await runCapture('bash', [_passScript, key]);
+  }
+
+  static Future<List<int>> binary(String key) async {
+    return await runCaptureBinary('bash', [_passScript, key]);
+  }
+}
+
 Future<AndroidSecrets> prepareAndroidSecretsFromPass(Flavor flavor) async {
   final dir = await (await Directory(
               "${Directory.systemTemp.path}/ouisync-android-secrets")
@@ -1367,15 +1401,14 @@ Future<AndroidSecrets> prepareAndroidSecretsFromPass(Flavor flavor) async {
   try {
     final base = 'cenoers/ouisync/app/$flavor/android';
 
-    final storePassword = await runCapture('pass', ['$base/storePassword']);
-    final keyAlias = await runCapture('pass', ['$base/keyAlias']);
-    final keyPassword = await runCapture('pass', ['$base/keyPassword']);
+    final storePassword = await Pass.string('$base/storePassword');
+    final keyAlias = await Pass.string('$base/keyAlias');
+    final keyPassword = await Pass.string('$base/keyPassword');
 
     final keystoreJks = File(dir.path + "/keystore.jks");
-    final keystoreJksContent =
-        await Process.run('pass', ['$base/keystore.jks'], stdoutEncoding: null);
+    final keystoreJksContent = await Pass.binary('$base/keystore.jks');
 
-    await keystoreJks.writeAsBytes(keystoreJksContent.stdout);
+    await keystoreJks.writeAsBytes(keystoreJksContent);
 
     final keystoreProperties = File(dir.path + "/key.properties");
     await keystoreProperties.writeAsString("storePassword=$storePassword\n" +
