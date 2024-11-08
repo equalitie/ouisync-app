@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ouisync/ouisync.dart' show AccessMode;
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
@@ -135,6 +136,11 @@ class _MoveEntryDialogState extends State<MoveEntryDialog> {
         BlocBuilder<NavigationCubit, NavigationState>(
           bloc: navigationCubit,
           builder: (context, state) {
+            final currentRepoAccessMode =
+                widget.reposCubit.currentRepo?.accessMode;
+            final isCurrentRepoWriteMode =
+                currentRepoAccessMode == AccessMode.write;
+
             final canMove = state.isFolder
                 ? _canMove(
                     originRepoLocation: originRepoCubit.location,
@@ -142,6 +148,7 @@ class _MoveEntryDialogState extends State<MoveEntryDialog> {
                     destinationRepoLocation: state.repoLocation,
                     destinationPath: state.path,
                     isRepoList: isRepoList,
+                    isCurrentRepoWriteMode: isCurrentRepoWriteMode,
                   )
                 : false;
             return PositiveButton(
@@ -179,15 +186,18 @@ class _MoveEntryDialogState extends State<MoveEntryDialog> {
     required RepoLocation? destinationRepoLocation,
     required String destinationPath,
     required bool isRepoList,
+    required bool isCurrentRepoWriteMode,
   }) {
     if (isRepoList) return false;
     if (destinationRepoLocation == null) return false;
+    if (!isCurrentRepoWriteMode) return false;
 
     bool isSameRepo = originRepoLocation.compareTo(destinationRepoLocation) == 0
         ? true
         : false;
     final isSamePath =
         originPath.compareTo(destinationPath) == 0 ? true : false;
+
     if (isSameRepo && isSamePath) return false;
 
     return true;
