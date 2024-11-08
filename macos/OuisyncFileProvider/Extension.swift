@@ -151,8 +151,25 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
         }
     }
 
+    // WARN: only mutate these while holding a lock on self
+    var active = true // this is set to false when shutting down
+    var invalidators: [() async -> Void] = [] // list of things called on invalidate(); only append if active = true!
     func invalidate() {
-        // TODO: cleanup any resources
+        let active = synchronized(self) {
+            defer { self.active = false }
+            return self.active
+        }
+        guard active else { return }
+        Task {
+            NSLog("👋 The File Provider extension is shutting down")
+            async let _ = ouisyncSession.client.close()
+            await withTaskGroup(of: Void.self) {
+                for invalidator in invalidators {
+                    $0.addTask(operation: invalidator)
+                }
+                invalidators.removeAll() // just in case they were holding strong refs
+            }
+        }
     }
     
     func item(for identifier: NSFileProviderItemIdentifier, request: NSFileProviderRequest, completionHandler: @escaping (NSFileProviderItem?, Error?) -> Void) -> Progress {
