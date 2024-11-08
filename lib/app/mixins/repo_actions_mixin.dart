@@ -19,7 +19,6 @@ mixin RepositoryActionsMixin on LoggyType {
     BuildContext context, {
     required RepoCubit repoCubit,
     required ReposCubit reposCubit,
-    void Function()? popDialog,
   }) async {
     final newName = await showDialog<String>(
       context: context,
@@ -37,10 +36,6 @@ mixin RepositoryActionsMixin on LoggyType {
       null,
       reposCubit.renameRepository(repoCubit.location, newName),
     );
-
-    if (popDialog != null) {
-      popDialog();
-    }
   }
 
   Future<dynamic> shareRepository(BuildContext context,

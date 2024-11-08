@@ -90,7 +90,6 @@ class _RepositorySettingsState extends State<RepositorySettings>
                           context,
                           repoCubit: widget.repoCubit,
                           reposCubit: widget.reposCubit,
-                          popDialog: () => Navigator.of(context).pop(),
                         ),
                       ),
                       EntryActionItem(
