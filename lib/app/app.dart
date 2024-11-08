@@ -116,6 +116,7 @@ class _AppContainerState extends State<AppContainer> {
       final session = await createSession(
           packageInfo: widget.packageInfo,
           logger: widget.logger,
+          windowManager: widget.windowManager,
           onConnectionReset: () {
             // the session is now defunct: switch to the loading screen
             setState(() => state = null);

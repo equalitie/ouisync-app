@@ -11,12 +11,11 @@ import 'utils/log.dart';
 import 'utils/native.dart';
 import 'utils/platform/platform_window_manager.dart';
 
-Future<Session> createSession({
-  required PackageInfo packageInfo,
-  required Loggy logger,
-  PlatformWindowManager? windowManager,
-  void Function()? onConnectionReset
-}) async {
+Future<Session> createSession(
+    {required PackageInfo packageInfo,
+    required Loggy logger,
+    PlatformWindowManager? windowManager,
+    void Function()? onConnectionReset}) async {
   final appDir = await Native.getBaseDir();
   final configPath = join(appDir.path, Constants.configDirName);
   final logPath = await LogUtils.path;
@@ -27,7 +26,8 @@ Future<Session> createSession({
     // On MacOS, later on iOS and possibly other platforms as well, the Ouisync
     // Rust backend runs in the native code and we communicate with it using
     // Flutter's `PlatformChannels`.
-    session = await Session.createChanneled("org.equalitie.ouisync/backend", onConnectionReset);
+    session = await Session.createChanneled(
+        "org.equalitie.ouisync/backend", onConnectionReset);
   } else {
     session = Session.create(
       configPath: configPath,
