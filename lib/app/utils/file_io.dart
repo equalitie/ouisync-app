@@ -62,11 +62,13 @@ class FileIO with AppLogger {
 
         final exist = await repoCubit.exists(destinationFilePath);
         if (!exist) {
-          return repoCubit.saveFile(
+          await repoCubit.saveFile(
             filePath: destinationFilePath,
             length: srcFile.size,
             fileByteStream: srcFile.readStream!,
           );
+
+          continue;
         }
 
         final replaceOrKeepEntry = await _confirmKeepOrReplaceEntry(
@@ -75,15 +77,17 @@ class FileIO with AppLogger {
         );
 
         if (replaceOrKeepEntry == null) {
-          return;
+          continue;
         }
 
         if (replaceOrKeepEntry == FileAction.replace) {
-          return repoCubit.replaceFile(
+          await repoCubit.replaceFile(
             filePath: destinationFilePath,
             length: srcFile.size,
             fileByteStream: srcFile.readStream!,
           );
+
+          continue;
         }
 
         if (replaceOrKeepEntry == FileAction.keep) {
@@ -93,7 +97,7 @@ class FileIO with AppLogger {
             FileDestination.ouisync,
           );
 
-          return repoCubit.saveFile(
+          await repoCubit.saveFile(
             filePath: newPath,
             length: srcFile.size,
             fileByteStream: srcFile.readStream!,
