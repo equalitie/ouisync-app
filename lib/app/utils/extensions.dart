@@ -2,7 +2,9 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:ouisync/ouisync.dart';
+import '../../generated/l10n.dart';
 
+import '../cubits/cubits.dart' show SortBy;
 import '../models/auth_mode.dart';
 import 'utils.dart';
 
@@ -155,4 +157,17 @@ extension ProgressExtension on Progress {
   double get fraction => total > 0 ? value.toDouble() / total.toDouble() : 1.0;
 
   bool get isComplete => value == total;
+}
+
+extension SortByLocalizedExtension on SortBy {
+  String get localized {
+    switch (this) {
+      case SortBy.name:
+        return S.current.sortByNameLabel;
+      case SortBy.size:
+        return S.current.sortBySizeLabel;
+      case SortBy.type:
+        return S.current.sortByTypeLabel;
+    }
+  }
 }
