@@ -44,6 +44,10 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m9(path) => "${path} no está vacío";
 
+  static String m10(name) => "Error al importar el repositorio ${name}";
+
+  static String m11(name) => "No se pudo crear el repositorio ${name}";
+
   static String m12(reason) =>
       "El acceso a los repositorios a través del Explorador de archivos no está disponible: ${reason}";
 
@@ -479,6 +483,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Presione de nuevo el botón para ir atrás para salir de la aplicación."),
         "messageFAQ":
             MessageLookupByLibrary.simpleMessage("Preguntas frecuentes"),
+        "messageFailedAddRepository": m10,
+        "messageFailedCreateRepository": m11,
         "messageFailedToMount": m12,
         "messageFile": MessageLookupByLibrary.simpleMessage("archivo"),
         "messageFileAlreadyExist": m13,
@@ -570,6 +576,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Error y Alerta"),
         "messageLogLevelErrorWarnInfo":
             MessageLookupByLibrary.simpleMessage("Error, Alerta e Información"),
+        "messageLogLevelErrorWarnInfoDebug":
+            MessageLookupByLibrary.simpleMessage(
+                "Errores, advertencias, información y depuración"),
         "messageLogViewer":
             MessageLookupByLibrary.simpleMessage("Visor de registro"),
         "messageMedium": MessageLookupByLibrary.simpleMessage("Mediana"),
@@ -593,6 +602,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Existe una nueva versión."),
         "messageNoAppsForThisAction": MessageLookupByLibrary.simpleMessage(
             "No se han encontrado aplicaciones que pueden realizar esta acción"),
+        "messageNoMediaPresent":
+            MessageLookupByLibrary.simpleMessage("No hay medios presentes."),
         "messageNoRepo": MessageLookupByLibrary.simpleMessage(
             "Antes de agregar archivos, tienes que crear un repositorio"),
         "messageNoRepoIsSelected": MessageLookupByLibrary.simpleMessage(
@@ -812,6 +823,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "replacementStatus": m37,
         "repositoryIsAlreadyImported": MessageLookupByLibrary.simpleMessage(
             "El repositorio ya ha sido importado"),
+        "sortByNameLabel": MessageLookupByLibrary.simpleMessage("Nombre"),
+        "sortBySizeLabel": MessageLookupByLibrary.simpleMessage("Tamaño"),
+        "sortByTypeLabel": MessageLookupByLibrary.simpleMessage("Tipo"),
         "statusSync": MessageLookupByLibrary.simpleMessage("SINCRONIZADO"),
         "statusUnspecified":
             MessageLookupByLibrary.simpleMessage("No especificado"),

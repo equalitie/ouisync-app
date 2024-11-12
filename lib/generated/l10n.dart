@@ -4929,6 +4929,36 @@ class S {
       args: [],
     );
   }
+
+  /// `Name`
+  String get sortByNameLabel {
+    return Intl.message(
+      'Name',
+      name: 'sortByNameLabel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Size`
+  String get sortBySizeLabel {
+    return Intl.message(
+      'Size',
+      name: 'sortBySizeLabel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Type`
+  String get sortByTypeLabel {
+    return Intl.message(
+      'Type',
+      name: 'sortByTypeLabel',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
