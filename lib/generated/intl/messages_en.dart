@@ -107,6 +107,9 @@ class MessageLookup extends MessageLookupByLibrary {
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
+        "accessModeBlindLabel": MessageLookupByLibrary.simpleMessage("blind"),
+        "accessModeReadLabel": MessageLookupByLibrary.simpleMessage("read"),
+        "accessModeWriteLabel": MessageLookupByLibrary.simpleMessage("write"),
         "actionAccept": MessageLookupByLibrary.simpleMessage("Accept"),
         "actionAcceptCapital": MessageLookupByLibrary.simpleMessage("ACCEPT"),
         "actionAddRepository":

@@ -823,9 +823,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "replacementStatus": m37,
         "repositoryIsAlreadyImported": MessageLookupByLibrary.simpleMessage(
             "El repositorio ya ha sido importado"),
-        "sortByNameLabel": MessageLookupByLibrary.simpleMessage("Nombre"),
-        "sortBySizeLabel": MessageLookupByLibrary.simpleMessage("Tamaño"),
-        "sortByTypeLabel": MessageLookupByLibrary.simpleMessage("Tipo"),
         "statusSync": MessageLookupByLibrary.simpleMessage("SINCRONIZADO"),
         "statusUnspecified":
             MessageLookupByLibrary.simpleMessage("No especificado"),
