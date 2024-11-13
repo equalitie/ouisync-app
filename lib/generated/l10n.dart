@@ -4989,6 +4989,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Synced`
+  String get labelSynced {
+    return Intl.message(
+      'Synced',
+      name: 'labelSynced',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

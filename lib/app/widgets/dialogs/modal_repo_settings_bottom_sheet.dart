@@ -195,7 +195,7 @@ class _Progress extends StatelessWidget {
   Widget build(BuildContext context) => RepoProgressBuilder(
         repoCubit: repoCubit,
         builder: (context, progress) => Fields.bottomSheetTitle(
-          'Synced: ${_formatProgress(progress)}',
+          '${S.current.labelSynced}: ${_formatProgress(progress)}',
         ),
       );
 }

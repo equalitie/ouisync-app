@@ -713,5 +713,6 @@
   "sortByTypeLabel": "Type",
   "accessModeBlindLabel":"blind",
   "accessModeReadLabel":"read",
-  "accessModeWriteLabel":"write"
+  "accessModeWriteLabel":"write",
+  "labelSynced":"Synced"
 }
