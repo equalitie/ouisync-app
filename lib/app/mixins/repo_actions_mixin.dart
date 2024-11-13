@@ -170,13 +170,6 @@ mixin RepositoryActionsMixin on LoggyType {
       return;
     }
 
-    await _showRepoLocationDialog(context, repoLocation);
-  }
-
-  Future<void> _showRepoLocationDialog(
-    BuildContext context,
-    RepoLocation repoLocation,
-  ) async {
     final dbFile = p.basename(repoLocation.path);
     final segments = p.split(repoLocation.dir.path);
 
@@ -189,26 +182,37 @@ mixin RepositoryActionsMixin on LoggyType {
       },
     );
 
-    await Dialogs.alertDialogWithActions(
-      context: context,
-      title: S.current.actionLocateRepo,
-      body: [
-        Text(
-          dbFile,
-          style: context.theme.appTextStyle.bodyMedium
-              .copyWith(fontWeight: FontWeight.w400),
-        ),
-        Dimensions.spacingVerticalDouble,
-        breadcrumbs,
-      ],
-      actions: [
-        TextButton(
-          child: Text(S.current.actionCloseCapital),
-          onPressed: () async => await Navigator.of(context).maybePop(false),
-        ),
-      ],
+    await _showRepoLocationDialog(
+      context,
+      dbFile: dbFile,
+      breadcrumbs: breadcrumbs,
     );
   }
+
+  Future<void> _showRepoLocationDialog(
+    BuildContext context, {
+    required String dbFile,
+    required BreadCrumb breadcrumbs,
+  }) async =>
+      Dialogs.alertDialogWithActions(
+        context: context,
+        title: S.current.actionLocateRepo,
+        body: [
+          Text(
+            dbFile,
+            style: context.theme.appTextStyle.bodyMedium
+                .copyWith(fontWeight: FontWeight.w400),
+          ),
+          Dimensions.spacingVerticalDouble,
+          breadcrumbs,
+        ],
+        actions: [
+          TextButton(
+            child: Text(S.current.actionCloseCapital),
+            onPressed: () async => await Navigator.of(context).maybePop(false),
+          ),
+        ],
+      );
 
   /// delete => ReposCubit.deleteRepository
   Future<void> deleteRepository(
