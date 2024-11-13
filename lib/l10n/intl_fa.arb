@@ -1041,5 +1041,11 @@
   "titleFreedomExpressionAccessInfo": "آزادی بیان و دسترسی به اطلاعات",
   "@titleFreedomExpressionAccessInfo": {},
   "labelSynced": "همگام‌سازی‌شده",
-  "@labelSynced": {}
+  "@labelSynced": {},
+  "messageFailedCreateRepository": "ناموفق در ایجاد مخزن {name}",
+  "@messageFailedCreateRepository": {},
+  "messageFailedAddRepository": "ناموفق در وارد کردن مخزن {name}",
+  "@messageFailedAddRepository": {},
+  "messageLogLevelErrorWarnInfoDebug": "خطا، هشدار، اطلاعات و اشکال‌زدایی",
+  "@messageLogLevelErrorWarnInfoDebug": {}
 }
