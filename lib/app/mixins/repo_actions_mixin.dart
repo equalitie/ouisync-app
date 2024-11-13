@@ -272,7 +272,7 @@ mixin RepositoryActionsMixin on LoggyType {
         }
 
         // If it didn't work, try to unlock using a password from the user.
-        final unlockResult = await unlockRepositoryManually(
+        final unlockResult = await _unlockRepositoryManually(
           context,
           repoCubit,
           masterKey,
@@ -313,7 +313,7 @@ mixin RepositoryActionsMixin on LoggyType {
     showSnackBar(message);
   }
 
-  Future<UnlockRepositoryResult?> unlockRepositoryManually(
+  Future<UnlockRepositoryResult?> _unlockRepositoryManually(
     BuildContext context,
     RepoCubit repoCubit,
     MasterKey masterKey,
@@ -321,7 +321,7 @@ mixin RepositoryActionsMixin on LoggyType {
   ) async {
     final isBiometricsAvailable = await LocalAuth.canAuthenticate();
 
-    return await showDialog<UnlockRepositoryResult?>(
+    final result = await showDialog<UnlockRepositoryResult?>(
       context: context,
       builder: (BuildContext context) => ScaffoldMessenger(
         child: Scaffold(
@@ -338,6 +338,8 @@ mixin RepositoryActionsMixin on LoggyType {
         ),
       ),
     );
+
+    return result;
   }
 }
 
