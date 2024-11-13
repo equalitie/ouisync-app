@@ -2,8 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:ouisync/ouisync.dart';
-import '../../generated/l10n.dart';
 
+import '../../generated/l10n.dart';
 import '../cubits/cubits.dart' show SortBy;
 import '../models/auth_mode.dart';
 import 'utils.dart';
@@ -168,6 +168,19 @@ extension SortByLocalizedExtension on SortBy {
         return S.current.sortBySizeLabel;
       case SortBy.type:
         return S.current.sortByTypeLabel;
+    }
+  }
+}
+
+extension AccessModeLocalizedExtension on AccessMode {
+  String get localized {
+    switch (this) {
+      case AccessMode.blind:
+        return S.current.accessModeBlindLabel;
+      case AccessMode.read:
+        return S.current.accessModeReadLabel;
+      case AccessMode.write:
+        return S.current.accessModeWriteLabel;
     }
   }
 }
