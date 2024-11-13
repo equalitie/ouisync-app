@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../mixins/mixins.dart';
 import '../../models/models.dart';
@@ -89,7 +90,7 @@ class RepoListState extends StatelessWidget
 
                     if (deleted == true) {
                       Navigator.of(context).pop();
-                      showSnackBar('"$repoName" deleted');
+                      showSnackBar(S.current.messageRepositoryDeleted(repoName));
                     }
                   });
             }

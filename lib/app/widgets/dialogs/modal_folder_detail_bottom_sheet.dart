@@ -75,7 +75,7 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
                 );
 
                 await Navigator.of(context).maybePop();
-                showSnackBar('Folder renamed as $newName');
+                showSnackBar(S.current.messageFolderRenamed(newName));
               },
               enabledValidation: () => widget.isActionAvailableValidator(
                 widget.repoCubit.state.accessMode,

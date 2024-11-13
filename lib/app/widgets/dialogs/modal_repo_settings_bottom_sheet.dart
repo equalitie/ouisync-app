@@ -97,7 +97,8 @@ class _RepositorySettingsState extends State<RepositorySettings>
 
                           if (newName.isNotEmpty) {
                             Navigator.of(context).pop();
-                            showSnackBar('Repository renamed as "$newName"');
+                            showSnackBar(
+                                S.current.messageRepositoryRenamed(newName));
                           }
                         },
                       ),
@@ -168,7 +169,8 @@ class _RepositorySettingsState extends State<RepositorySettings>
 
                           if (deleted == true) {
                             Navigator.of(context).pop();
-                            showSnackBar('"$repoName" deleted');
+                            showSnackBar(
+                                S.current.messageRepositoryDeleted(repoName));
                           }
                         },
                       ),
@@ -214,7 +216,7 @@ class _Progress extends StatelessWidget {
   Widget build(BuildContext context) => RepoProgressBuilder(
         repoCubit: repoCubit,
         builder: (context, progress) => Fields.bottomSheetTitle(
-          'Synced: ${_formatProgress(progress)}',
+          '${S.current.labelSynced}: ${_formatProgress(progress)}',
         ),
       );
 }

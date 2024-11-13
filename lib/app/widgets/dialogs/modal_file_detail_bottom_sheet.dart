@@ -164,7 +164,7 @@ class _FileDetailState extends State<FileDetail> {
                   );
 
                   await Navigator.of(context).maybePop();
-                  showSnackBar('File renamed as $newName');
+                  showSnackBar(S.current.messageFileRenamed(newName));
                 },
                 enabledValidation: () => widget.isActionAvailableValidator(
                   widget.repoCubit.state.accessMode,

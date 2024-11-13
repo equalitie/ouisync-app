@@ -169,7 +169,7 @@ class DirectoryActions extends StatelessWidget with AppLogger {
     );
 
     if (!result) {
-      showSnackBar('Error creating folder $newFolderPath');
+      showSnackBar(S.current.messageErrorCreatingFolder(newFolderPath));
       return;
     }
 
