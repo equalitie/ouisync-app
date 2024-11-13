@@ -1016,7 +1016,7 @@
   "@messageInstallDokanForOuisyncP1": {},
   "messageSecurityOptionsNotAvailableBlind": "گزینه‌های امنیت برای مخازن کور در دسترس نیستند",
   "@messageSecurityOptionsNotAvailableBlind": {},
-  "actionLocateRepo": "یافتن مخزن",
+  "actionLocateRepo": "موقعیت‌یابی مخزن",
   "@actionLocateRepo": {},
   "titleApplicationLanguage": "زبان برنامه",
   "@titleApplicationLanguage": {},
@@ -1037,5 +1037,7 @@
   "accessModeReadLabel": "نوشتنی",
   "@accessModeReadLabel": {},
   "sortByTypeLabel": "نوع",
-  "@sortByTypeLabel": {}
+  "@sortByTypeLabel": {},
+  "titleFreedomExpressionAccessInfo": "آزادی بیان و دسترسی به اطلاعات",
+  "@titleFreedomExpressionAccessInfo": {}
 }
