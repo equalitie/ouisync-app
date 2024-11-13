@@ -249,6 +249,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "labelSize": MessageLookupByLibrary.simpleMessage("Size: "),
         "labelSyncStatus":
             MessageLookupByLibrary.simpleMessage("Sync Status: "),
+        "labelSynced": MessageLookupByLibrary.simpleMessage("Synced"),
         "labelTcpListenerEndpointV4":
             MessageLookupByLibrary.simpleMessage("Listening on TCP IPv4"),
         "labelTcpListenerEndpointV6":
