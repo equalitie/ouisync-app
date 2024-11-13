@@ -80,7 +80,7 @@ class _AccessModeSelectorState extends State<AccessModeSelector>
                   await widget.onChanged(current);
                 }),
             Text(
-              mode.name,
+              mode.localized,
               textAlign: TextAlign.start,
               style: TextStyle().copyWith(color: _getModeStateColor(mode)),
             )
