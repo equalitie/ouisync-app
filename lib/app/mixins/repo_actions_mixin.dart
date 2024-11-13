@@ -113,8 +113,8 @@ mixin RepositoryActionsMixin on LoggyType {
 
     switch (repoCubit.state.authMode) {
       case (AuthModeBlindOrManual()):
-        final password = await manualUnlock(context, repoCubit);
-        if (password == null || password.isEmpty) return;
+        final password = await _getManualPassword(context, repoCubit);
+        if (password.isEmpty) return;
         secret = LocalPassword(password);
         break;
       case (AuthModeKeyStoredOnDevice()):
@@ -143,17 +143,21 @@ mixin RepositoryActionsMixin on LoggyType {
     );
   }
 
-  Future<String?> manualUnlock(
+  Future<String> _getManualPassword(
     BuildContext context,
     RepoCubit repoCubit,
-  ) =>
-      showDialog<String>(
-        context: context,
-        builder: (BuildContext context) => ActionsDialog(
-          title: S.current.messageValidateLocalPassword,
-          body: UnlockDialog(repoCubit),
-        ),
-      );
+  ) async {
+    final password = await showDialog<String>(
+          context: context,
+          builder: (BuildContext context) => ActionsDialog(
+            title: S.current.messageValidateLocalPassword,
+            body: UnlockDialog(repoCubit),
+          ),
+        ) ??
+        '';
+
+    return password;
+  }
 
   Future<void> locateRepository(
     BuildContext context, {
