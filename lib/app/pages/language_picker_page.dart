@@ -94,6 +94,8 @@ class LanguagePicker extends StatelessWidget {
                   trailing: Text(item.locale.countryCode ?? ''),
                   onTap: () async {
                     await localeCubit.changeLocale(item.locale);
+                    await S.delegate.load(item.locale);
+
                     if (onSelect != null) onSelect!();
                   });
             },
