@@ -891,6 +891,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "titleFolderActions": MessageLookupByLibrary.simpleMessage("Añadir"),
         "titleFolderDetails":
             MessageLookupByLibrary.simpleMessage("Detalles de directorio"),
+        "titleFreedomExpressionAccessInfo":
+            MessageLookupByLibrary.simpleMessage(
+                "Libertad de expresión y acceso a la información"),
         "titleIssueTracker":
             MessageLookupByLibrary.simpleMessage("Rastreador de los problemas"),
         "titleJustLegalSociety":

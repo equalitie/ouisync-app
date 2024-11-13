@@ -104,6 +104,9 @@ class MessageLookup extends MessageLookupByLibrary {
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
+        "accessModeBlindLabel": MessageLookupByLibrary.simpleMessage("کور"),
+        "accessModeReadLabel": MessageLookupByLibrary.simpleMessage("نوشتنی"),
+        "accessModeWriteLabel": MessageLookupByLibrary.simpleMessage("خواندنی"),
         "actionAccept": MessageLookupByLibrary.simpleMessage("تایید"),
         "actionAcceptCapital": MessageLookupByLibrary.simpleMessage("تایید"),
         "actionAddRepository":
@@ -167,7 +170,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionSaveChanges":
             MessageLookupByLibrary.simpleMessage("ذخیره تغییرات"),
         "actionScanQR":
-            MessageLookupByLibrary.simpleMessage("یک کد QR اسکن کنید"),
+            MessageLookupByLibrary.simpleMessage("کد QR را اسکن کنید"),
         "actionShare": MessageLookupByLibrary.simpleMessage("اشتراک‌گذاری‌"),
         "actionShareFile":
             MessageLookupByLibrary.simpleMessage("به‌اشتراک‌گذاری فایل"),
@@ -772,8 +775,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "شاخص‌های امنیتی مخزن به‌روزرسانی شده است."),
         "messageUseCacheServers": MessageLookupByLibrary.simpleMessage(
             "از سرورهای حافظه پنهان (کش) استفاده کنید"),
-        "messageUseLocalPassword": MessageLookupByLibrary.simpleMessage(
-            "از رمز عبور محلی استفاده کنید"),
+        "messageUseLocalPassword":
+            MessageLookupByLibrary.simpleMessage("استفاده از رمز عبور محلی"),
         "messageVPN": MessageLookupByLibrary.simpleMessage("وی‌پی‌ان"),
         "messageValidateLocalPassword":
             MessageLookupByLibrary.simpleMessage("تایید رمز عبور محلی"),
@@ -800,7 +803,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "replacementStatus": m37,
         "repositoryIsAlreadyImported":
             MessageLookupByLibrary.simpleMessage("مخزن قبلا وارد شده"),
-        "statusSync": MessageLookupByLibrary.simpleMessage("همگام‌سازی شد"),
+        "sortByNameLabel": MessageLookupByLibrary.simpleMessage("نام"),
+        "sortBySizeLabel": MessageLookupByLibrary.simpleMessage("سایز"),
+        "sortByTypeLabel": MessageLookupByLibrary.simpleMessage("نوع"),
+        "statusSync": MessageLookupByLibrary.simpleMessage("همگام‌سازی"),
         "statusUnspecified": MessageLookupByLibrary.simpleMessage("نامشخص"),
         "titleAbout": MessageLookupByLibrary.simpleMessage("درباره ما"),
         "titleAddFile":

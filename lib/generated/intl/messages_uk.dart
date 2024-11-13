@@ -23,6 +23,8 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m0(access) =>
       "Дозвіл не може бути вищим за поточний режим доступу до сховища: ${access}";
 
+  static String m1(path) => "Завантаження файлу в ${path}";
+
   static String m2(name) => "${name} - завантаження скасовано";
 
   static String m3(name) => "${name} - не вдалося завантажити";
@@ -31,6 +33,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m5(path) =>
       "Поточна папка відсутня, перехід до її батьківської: ${path}";
+
+  static String m6(error) => "Помилка: ${error}";
 
   static String m7(dokanUrl) =>
       "Відсутня інсталяція Dokan. Будь ласка, встановіть його з ${dokanUrl}";
@@ -74,6 +78,8 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m24(name) =>
       "Запропоновано: ${name}\n(натисніть тут, щоб використовувати цю назву)";
 
+  static String m25(name) => "Сортувати за: ${name}";
+
   static String m26(access) => "Розблоковано як ${access} копія";
 
   static String m27(name) => "Введіть пароль для розблокування \"${name}\"";
@@ -87,6 +93,8 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m31(changes) => "${changes}";
 
   static String m32(entry) => "${entry}";
+
+  static String m33(error) => "${error}";
 
   static String m34(name) => "${name}";
 
@@ -278,11 +286,15 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageAddingFileToReadRepository":
             MessageLookupByLibrary.simpleMessage(
                 "Цей репозиторій доступний тільки для читання."),
+        "messageAuthenticate":
+            MessageLookupByLibrary.simpleMessage("Автентицид"),
         "messageAutomaticUnlockRepositoryFailed":
             MessageLookupByLibrary.simpleMessage(
-                "Ми не змогли розблокувати репозиторій"),
+                "Ми не можемо розблокувати репозиторію"),
         "messageAvailableOnMobile": MessageLookupByLibrary.simpleMessage(
             "Доступно на мобільних пристроях"),
+        "messageAwaitingResult":
+            MessageLookupByLibrary.simpleMessage("Важкий результат ..."),
         "messageBackgroundAndroidPermissions": MessageLookupByLibrary.simpleMessage(
             "Незабаром операційна система запитає у вас дозвіл на виконання цієї програми у фоновому режимі.\n\nЦе необхідно для того, щоб продовжувати синхронізацію, коли програма не знаходиться на передньому плані"),
         "messageBackgroundNotificationAndroid":
@@ -312,11 +324,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageChangesToTermsP2": MessageLookupByLibrary.simpleMessage(
             "Поточна версія політики конфідеційності діє з 09 березня 2022 року"),
         "messageChildrensPolicyP1": MessageLookupByLibrary.simpleMessage(
-            "Ми свідомо не збираємо особисту інформацію від дітей. Ми закликаємо всіх дітей ніколи не надавати будь-яку особисту інформацію через Застосунок та/або Сервіси. Ми закликаємо батьків та законних опікунів контролювати використання інтернету їхніми дітьми та сприяти дотриманню цієї Політики, проінструктувавши своїх дітей ніколи не надавати особисту інформацію через Застосунок та/або Сервіси без їхнього дозволу. Якщо у вас є підстави вважати, що дитина надала нам особисту інформацію через Застосунок та/або Сервіси, будь ласка, зв\'яжіться з нами. Ви також повинні бути не молодше 16 років, щоб дати згоду на обробку вашої особистої інформації у вашій країні (у деяких країнах ми можемо дозволити вашим батькам або опікунам зробити це від вашого імені)"),
+            "Ми не знаємо, щоб зібрати особисту інформацію від дітей. Ми заохочуємо всіх дітей, які ніколи не подають особистої інформації через додаток та/або Послуги. Ми заохочуємо батьків та правоохоронців контролювати дітей Інтернет-користування та забезпечення дотримання цієї Політики, що перешкоджають їх дітям, ніколи не надавати особисту інформацію через додаток та/або Послуги без дозволу. Якщо ви хочете вірити, що дитина надавалася особистою ідентифікованою інформацією для нас через додаток та/або Послуги, будь ласка, зв\'яжіться з нами. Ви також повинні бути принаймні 16 років згоди на обробку вашої особистої інформації в країні (в деяких країнах, які ми можемо дозволити вашому батькові або опікуну таким чином від імені)"),
         "messageConfirmFileDeletion": MessageLookupByLibrary.simpleMessage(
             "Ви дійсно хочете видалити цей файл?"),
         "messageConfirmFolderDeletion": MessageLookupByLibrary.simpleMessage(
             "Ви впевнені, що хочете видалити цю папку?"),
+        "messageConfirmIrreversibleChange":
+            MessageLookupByLibrary.simpleMessage(
+                "Ця дія незворотна, б ви хотіли б продовжити?"),
         "messageConfirmNotEmptyFolderDeletion":
             MessageLookupByLibrary.simpleMessage(
                 "Ця папка не порожня.\n\nВи все ще хочете її видалити? (при цьому буде видалено весь її вміст)"),
@@ -338,7 +353,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageDataCollectionP1": MessageLookupByLibrary.simpleMessage(
             "Команда Ouisync цінує конфіденційність користувачів і тому не збирає жодної інформації про користувачів"),
         "messageDataCollectionP2": MessageLookupByLibrary.simpleMessage(
-            "Застосунок Ouisync розроблений таким чином, щоб надавати послуги обміну файлами без ідентифікатора користувача, імені, псевдоніма, облікового запису користувача або будь-якої іншої форми даних користувача. Ми не знаємо, хто саме користується нашим застосунком і з ким вони синхронізуються або обмінюються своїми даними"),
+            "Додаток Ouisync призначений для надання послуг з спільного доступу до файлів без ідентифікатора користувача, імені, прізвища, облікового запису користувача або іншої форми даних користувачів. Ми не знаємо, хто використовує наш додаток, і з ким вони синхронізація або поділитися своїми даними"),
         "messageDataSharingP1": MessageLookupByLibrary.simpleMessage(
             "Ouisync (та eQualit.ie) не передають жодних даних третім особам"),
         "messageDeclarationDOS": MessageLookupByLibrary.simpleMessage(
@@ -346,11 +361,21 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageDeletionDataServerNote": MessageLookupByLibrary.simpleMessage(
             "Команда Ouisync не може видаляти окремі файли зі сховищ, оскільки їх неможливо ідентифікувати, оскільки вони зашифровані. Ми можемо видаляти цілі сховища, якщо ви надішлете нам посилання на сховище, яке потрібно видалити"),
         "messageDeletionDataServerP1": MessageLookupByLibrary.simpleMessage(
-            "Найпростіший спосіб видалити дані - це видалити файли або сховища зі свого пристрою. Будь-яке видалення файлів буде поширене на всіх ваших колег - тобто, якщо ви маєте доступ на запис до сховища, ви можете видалити будь-які файли в ньому, і ті ж самі файли будуть видалені зі сховищ ваших колег, а також з нашого серверу Always-On-Peer. Якщо вам потрібно видалити лише репозиторії з нашого сервера Always-On-Peer (але зберегти їх у вашому власному репозиторії на вашому пристрої), будь ласка, зв\'яжіться з нами за вказаною нижче адресою"),
+            "Найпростіший спосіб видалити ваші дані можна шляхом видалення файлів або репозицій з власного пристрою. Будь-яке видалення файлів буде пропаговано для всіх ваших однолітків - тобто, якщо у вас є доступ до репозиторій, ви можете видалити будь-які файли в ньому, і ті ж файли будуть видалені з репозиторіїв ваших однолітків, а також від нашого Завжди-On-Peer. Якщо вам необхідно видалити тільки репозиторії з нашого Завжди-On-Peer (але все ще тримати їх у власній репозиторії на вашому пристрої), будь ласка, зв\'яжіться з нами за адресою нижче"),
         "messageDistributedHashTables":
             MessageLookupByLibrary.simpleMessage("Розподілені хеш-таблиці"),
+        "messageDokan": MessageLookupByLibrary.simpleMessage("Докан"),
+        "messageDokanDifferentMayorP1":
+            MessageLookupByLibrary.simpleMessage("Встановити"),
+        "messageDokanDifferentMayorP2": MessageLookupByLibrary.simpleMessage(
+            "з дати. Будь ласка, поновіть його в останню версію."),
+        "messageDokanInstallationFailed": MessageLookupByLibrary.simpleMessage(
+            "Встановлення Dokan не вдалося."),
+        "messageDokanOlderVersionP2": MessageLookupByLibrary.simpleMessage(
+            "з дати.\n\nБудь ласка, встановіть існуючу версію Dokan, перезавантажте систему і запустіть Ouisync знову."),
         "messageDownloadFileCanceled": MessageLookupByLibrary.simpleMessage(
             "Завантаження файлу скасовано"),
+        "messageDownloadFileLocation": m1,
         "messageDownloadingFileCanceled": m2,
         "messageDownloadingFileError": m3,
         "messageEmptyFolder": MessageLookupByLibrary.simpleMessage(
@@ -412,6 +437,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Щось пішло не так. Будь ласка, спробуйте ще раз."),
         "messageErrorDefaultShort":
             MessageLookupByLibrary.simpleMessage("Невдало."),
+        "messageErrorDetail": m6,
         "messageErrorDokanNotInstalled": m7,
         "messageErrorEntryNotFound":
             MessageLookupByLibrary.simpleMessage("запис не знайдено"),
@@ -419,7 +445,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "Будь ласка, введіть дійсну назву."),
         "messageErrorLoadingContents": MessageLookupByLibrary.simpleMessage(
-            "Не вдалося завантажити вміст цієї папки. Будь ласка, спробуйте ще раз."),
+            "Ми не можемо завантажувати вміст цієї папки. Будь ласка, спробуйте знову."),
         "messageErrorNewPasswordSameOldPassword":
             MessageLookupByLibrary.simpleMessage(
                 "Новий пароль збігається зі старим паролем"),
@@ -455,7 +481,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Файл завантажується"),
         "messageFileName": MessageLookupByLibrary.simpleMessage("Назва файлу"),
         "messageFilePreviewFailed": MessageLookupByLibrary.simpleMessage(
-            "Не вдалося запустити попередній перегляд файлу"),
+            "Ми не можемо запустити попередній перегляд файлів"),
         "messageFilePreviewNotAvailable": MessageLookupByLibrary.simpleMessage(
             "Попередній перегляд файлу ще не доступний"),
         "messageFiles": MessageLookupByLibrary.simpleMessage("файли"),
@@ -493,6 +519,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Ініціалізація…"),
         "messageInputPasswordToUnlock": MessageLookupByLibrary.simpleMessage(
             "Натисніть на кнопку <bold>Розблокувати</bold> та введіть пароль для доступу до контенту в цьому репозиторію."),
+        "messageInstallDokanForOuisyncP1":
+            MessageLookupByLibrary.simpleMessage("Ouisync використовує"),
+        "messageInstallDokanForOuisyncP2": MessageLookupByLibrary.simpleMessage(
+            "для репозиторіїв доступу за допомогою Провідника File Explorer.\nБудь ласка, встановіть Dokan для підвищення досвіду Ouisync."),
         "messageInternationalBillHumanRights":
             MessageLookupByLibrary.simpleMessage(
                 "Загальній декларації прав людини"),
@@ -522,9 +552,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageLogData3": MessageLookupByLibrary.simpleMessage(
             "IP-адреса користувача - для надання технічної підтримки"),
         "messageLogDataP1": MessageLookupByLibrary.simpleMessage(
-            "Застосунок Ouisync створює лог-файли на пристроях користувачів. Їхньою метою є лише реєстрація активності пристрою для полегшення процесу налагодження (дебагінг), якщо у користувача виникнуть труднощі з підключенням до мережі або інші проблеми з використанням програми Ouisync. Лог-файл залишається на пристрої користувача, якщо користувач не вирішить надіслати його нам для цілей технічної підтримки"),
+            "Додаток Ouisync створює логфайли на пристроях користувачів. Мета роботи полягає в тому, щоб полегшити процес відключення у разі виникнення труднощів користувачів, пов’язаних з ними або іншим чином за допомогою програми Ouisync. Файл журналу залишається на пристрої користувача, якщо користувач вирішить надсилати його нам для цілей підтримки"),
         "messageLogDataP2": MessageLookupByLibrary.simpleMessage(
-            "Якщо користувач вирішить зв\'язатися з нами, ми можемо збирати персональні дані, які не можуть бути визначені:"),
+            "Якщо користувач вирішить зв\'язатися з нами, ми можемо збирати персональні дані:"),
         "messageLogDataP3": MessageLookupByLibrary.simpleMessage(
             "Жодні з цих даних не передаються третім особам"),
         "messageLogLevelAll": MessageLookupByLibrary.simpleMessage("Все"),
@@ -592,10 +622,13 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Пароль скопійовано"),
         "messagePasswordStrength":
             MessageLookupByLibrary.simpleMessage("Надійність пароля"),
+        "messagePeerAdded": MessageLookupByLibrary.simpleMessage("П\'є додано"),
         "messagePeerExchange":
             MessageLookupByLibrary.simpleMessage("Обмін вузлів"),
         "messagePeerExchangeWikipedia": MessageLookupByLibrary.simpleMessage(
             "Пірінговий обмін у Вікіпедії"),
+        "messagePeerRemoved":
+            MessageLookupByLibrary.simpleMessage("Пірс видалений"),
         "messagePermissionRequired":
             MessageLookupByLibrary.simpleMessage("Цей дозвіл є обов\'язковим"),
         "messagePreviewingFileFailed": m19,
@@ -608,7 +641,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageReadReplicaExplanation": MessageLookupByLibrary.simpleMessage(
             "Не можна змінювати, тільки доступ до вмісту"),
         "messageRememberSavePasswordAlert": MessageLookupByLibrary.simpleMessage(
-            "Не забувайте надійно зберігати пароль, адже якщо ви його забудете, відновити його буде неможливо."),
+            "Пам\'ятайте, що надійно зберігати пароль. Немає способу, щоб отримати його, якщо втратили або забули."),
         "messageRemoveBiometricValidation":
             MessageLookupByLibrary.simpleMessage(
                 "Прибрати біометричну перевірку"),
@@ -659,6 +692,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageRepositorySuggestedName": m24,
         "messageRepositoryToken":
             MessageLookupByLibrary.simpleMessage("Вставте посилання сюди"),
+        "messageResetLocalSecret":
+            MessageLookupByLibrary.simpleMessage("Відновити місцевий секрет"),
         "messageRousseau":
             MessageLookupByLibrary.simpleMessage("Жан-Жак Руссо"),
         "messageSaveLogFile":
@@ -671,14 +706,17 @@ class MessageLookup extends MessageLookupByLibrary {
             "Відскануйте його на іншому пристрої або поділіться ним з вузлами"),
         "messageSecureUsingBiometrics": MessageLookupByLibrary.simpleMessage(
             "Безпека за допомогою біометрії"),
+        "messageSecurityOptionsNotAvailableBlind":
+            MessageLookupByLibrary.simpleMessage(
+                "Опції безпеки не доступні для сліпих репозицій"),
         "messageSecurityPracticesP1": MessageLookupByLibrary.simpleMessage(
             "Дані, які користувач завантажує до сховищ Ouisync, наскрізно шифруються як під час передачі, так і за замовчуванням. Йдеться про метадані, зокрема імена файлів, розміри, структура папок тощо. В Ouisync дані можуть читати лише той, хто їх завантажив, і ті, з ким він поділився своїми сховищами"),
         "messageSecurityPracticesP2": MessageLookupByLibrary.simpleMessage(
             "Ви можете дізнатися більше про методи шифрування, що використовуються в нашій документації"),
         "messageSecurityPracticesP3": MessageLookupByLibrary.simpleMessage(
-            "Додаток Ouisync зберігає дані користувачів на \"Always-On Peer\" - сервері, розташованому в Канаді. Всі дані зберігаються у зашифрованому вигляді і не можуть бути прочитані ні сервером, ні його операторами. Мета цього сервера - просто подолати розриви між одноранговими користувачами, які не перебувають в мережі одночасно. Всі дані періодично видаляються з цього сервера - його метою не є забезпечення постійного зберігання даних, а лише полегшення синхронізації даних між користувачами"),
+            "Додаток Ouisync зберігає дані користувачів на \"Always-On Peer\", який знаходиться в Канаді. Всі дані зберігаються як зашифровані шматки і не прочитаються сервером або його операторами. Мета цього сервера - просто перемістити проміжки між однолітками, які не онлайн одночасно. Всі дані періодично очищаються від цього сервера - його мета не забезпечити постійного зберігання даних, але просто полегшення синхронізації даних однолітками"),
         "messageSecurityPracticesP4": MessageLookupByLibrary.simpleMessage(
-            "Якщо у вас є підстави вважати, що ваші персональні дані були незаконно отримані та передані іншим користувачам Ouisync, будь ласка, зв\'яжіться з нами за вказаною нижче адресою"),
+            "Якщо у вас є підстави вважати, що ваші персональні дані були незаконно отримані і поділені іншими користувачами Ouisync, будь ласка, зв\'яжіться з нами за адресою нижче"),
         "messageSelectAccessMode": MessageLookupByLibrary.simpleMessage(
             "Виберіть дозвіл на створення спільного посилання"),
         "messageSelectLocation":
@@ -689,6 +727,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Для створення посилання на репозиторій спочатку потрібно вибрати один дозвіл"),
         "messageShareWithWR": MessageLookupByLibrary.simpleMessage(
             "Поширити за допомогою QR коду"),
+        "messageSortBy": m25,
         "messageStorage": MessageLookupByLibrary.simpleMessage("Сховище"),
         "messageStoragePermission": MessageLookupByLibrary.simpleMessage(
             "Потрібно для отримання доступу до файлів"),
@@ -697,7 +736,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Синхронізація під час використання мобільних даних"),
         "messageSyncingIsDisabledOnMobileInternet":
             MessageLookupByLibrary.simpleMessage(
-                "Синхронізація вимкнена під час користування мобільним інтернетом"),
+                "Синхронізація Інтернету вимкнено при використанні мобільних даних"),
         "messageTapForTermsPrivacy": MessageLookupByLibrary.simpleMessage(
             "Натисніть тут, щоб прочитати наші Умови використання та Політику конфіденційності"),
         "messageTapForValues": MessageLookupByLibrary.simpleMessage(
@@ -731,7 +770,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageUnlockUsingBiometrics": MessageLookupByLibrary.simpleMessage(
             "Розблокувати за допомогою біометричних даних"),
         "messageUnsavedChanges": MessageLookupByLibrary.simpleMessage(
-            "У вас є незбережені зміни.\n\nВи хочете їх скасувати?"),
+            "У вас немає змін.\n\nБажаєте відкинути їх?"),
         "messageUpdateLocalPasswordConfirmation":
             MessageLookupByLibrary.simpleMessage(
                 "Оновити локальний пароль для цього сховища?"),
@@ -739,6 +778,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Не вдалося оновити дані про безпеку сховища."),
         "messageUpdateLocalSecretOk": MessageLookupByLibrary.simpleMessage(
             "Оновленo дані безпеки репозиторію."),
+        "messageUseCacheServers":
+            MessageLookupByLibrary.simpleMessage("Використання кеш-серверів"),
         "messageUseLocalPassword": MessageLookupByLibrary.simpleMessage(
             "Використовуйте локальний пароль"),
         "messageVPN": MessageLookupByLibrary.simpleMessage("ВПН"),
@@ -760,6 +801,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "replacementAccess": m30,
         "replacementChanges": m31,
         "replacementEntry": m32,
+        "replacementError": m33,
         "replacementName": m34,
         "replacementNumber": m35,
         "replacementPath": m36,
