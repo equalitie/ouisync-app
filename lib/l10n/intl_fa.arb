@@ -1039,5 +1039,7 @@
   "sortByTypeLabel": "نوع",
   "@sortByTypeLabel": {},
   "titleFreedomExpressionAccessInfo": "آزادی بیان و دسترسی به اطلاعات",
-  "@titleFreedomExpressionAccessInfo": {}
+  "@titleFreedomExpressionAccessInfo": {},
+  "labelSynced": "همگام‌سازی‌شده",
+  "@labelSynced": {}
 }
