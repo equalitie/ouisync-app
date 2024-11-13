@@ -6,36 +6,74 @@ import 'package:path/path.dart' as p;
 import 'package:url_launcher/url_launcher.dart' as launcher;
 
 import '../../generated/l10n.dart';
-import '../cubits/cubits.dart';
-import '../models/models.dart';
-import '../pages/pages.dart';
-import '../utils/platform/platform.dart';
-import '../utils/utils.dart';
-import '../widgets/widgets.dart';
+import '../cubits/cubits.dart' show RepoCubit;
+import '../models/models.dart'
+    show
+        AuthModeBlindOrManual,
+        AuthModeKeyStoredOnDevice,
+        AuthModePasswordStoredOnDevice,
+        RepoLocation;
+import '../pages/pages.dart' show RepoSecurityPage;
+import '../utils/platform/platform.dart' show PlatformValues;
+import '../utils/utils.dart'
+    show
+        AppThemeExtension,
+        Dialogs,
+        Dimensions,
+        LocalAuth,
+        MasterKey,
+        PasswordHasher,
+        Settings,
+        showSnackBar,
+        ThemeGetter;
+import '../widgets/widgets.dart'
+    show
+        ActionsDialog,
+        DeleteRepoDialog,
+        RenameRepository,
+        ShareRepository,
+        UnlockDialog,
+        UnlockRepository,
+        UnlockRepositoryResult;
 
 mixin RepositoryActionsMixin on LoggyType {
-  /// rename => ReposCubit.renameRepository
-  Future<void> renameRepository(
+  Future<String> renameRepository(
     BuildContext context, {
     required RepoCubit repoCubit,
-    required ReposCubit reposCubit,
+    required RepoLocation location,
+    required Future<void> Function(RepoLocation, String) renameRepoFuture,
   }) async {
-    final newName = await showDialog<String>(
-      context: context,
-      builder: (BuildContext context) => ActionsDialog(
-        title: S.current.messageRenameRepository,
-        body: RenameRepository(repoCubit),
-      ),
+    final newName = await _getRepositoryNewName(
+      context,
+      repoCubit: repoCubit,
     );
 
-    if (newName == null || newName.isEmpty) {
-      return;
+    if (newName.isNotEmpty) {
+      await Dialogs.executeFutureWithLoadingDialog(
+        null,
+        renameRepoFuture(location, newName),
+      );
+
+      return newName;
     }
 
-    await Dialogs.executeFutureWithLoadingDialog(
-      null,
-      reposCubit.renameRepository(repoCubit.location, newName),
-    );
+    return '';
+  }
+
+  Future<String> _getRepositoryNewName(
+    BuildContext context, {
+    required RepoCubit repoCubit,
+  }) async {
+    final newName = await showDialog<String>(
+          context: context,
+          builder: (BuildContext context) => ActionsDialog(
+            title: S.current.messageRenameRepository,
+            body: RenameRepository(repoCubit),
+          ),
+        ) ??
+        '';
+
+    return newName;
   }
 
   Future<dynamic> shareRepository(BuildContext context,

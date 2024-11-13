@@ -15,18 +15,17 @@ import '../../utils/utils.dart'
         Fields,
         ProgressExtension,
         Settings,
+        showSnackBar,
         ThemeGetter;
 import '../widgets.dart' show EntryActionItem, RepoProgressBuilder;
 
 class RepositorySettings extends StatefulWidget {
   const RepositorySettings({
-    required this.context,
     required this.settings,
     required this.repoCubit,
     required this.reposCubit,
   });
 
-  final BuildContext context;
   final Settings settings;
   final RepoCubit repoCubit;
   final ReposCubit reposCubit;
@@ -40,7 +39,7 @@ class _RepositorySettingsState extends State<RepositorySettings>
   @override
   Widget build(BuildContext context) => BlocBuilder<RepoCubit, RepoState>(
         bloc: widget.repoCubit,
-        builder: (context, state) => SingleChildScrollView(
+        builder: (c, state) => SingleChildScrollView(
             child: Container(
                 padding: Dimensions.paddingBottomSheet,
                 child: Column(
@@ -86,11 +85,21 @@ class _RepositorySettingsState extends State<RepositorySettings>
                         iconData: Icons.edit_outlined,
                         title: S.current.actionRename,
                         dense: true,
-                        onTap: () async => await renameRepository(
-                          context,
-                          repoCubit: widget.repoCubit,
-                          reposCubit: widget.reposCubit,
-                        ),
+                        onTap: () async {
+                          final location = widget.repoCubit.location;
+                          final renameRepoFuture =
+                              widget.reposCubit.renameRepository;
+
+                          final newName = await renameRepository(context,
+                              repoCubit: widget.repoCubit,
+                              location: location,
+                              renameRepoFuture: renameRepoFuture);
+
+                          if (newName.isNotEmpty) {
+                            Navigator.of(context).pop();
+                            showSnackBar('Repository renamed as "$newName"');
+                          }
+                        },
                       ),
                       EntryActionItem(
                           iconData: Icons.share_outlined,
