@@ -21,6 +21,7 @@ import '../../utils/utils.dart'
         Fields,
         formatSize,
         Native,
+        showSnackBar,
         ThemeGetter;
 import '../widgets.dart'
     show
@@ -147,7 +148,24 @@ class _FileDetailState extends State<FileDetail> {
                 iconData: Icons.edit_outlined,
                 title: S.current.iconRename,
                 dense: true,
-                onTap: () async => _showRenameDialog(widget.entry),
+                onTap: () async {
+                  final entry = widget.entry;
+                  final newName = await _getNewFileName(entry);
+
+                  if (newName.isEmpty) return;
+
+                  // The new name provided by the user.
+                  final parent = repo_path.dirname(entry.path);
+                  final newEntryPath = repo_path.join(parent, newName);
+
+                  await widget.repoCubit.moveEntry(
+                    source: entry.path,
+                    destination: newEntryPath,
+                  );
+
+                  await Navigator.of(context).maybePop();
+                  showSnackBar('File renamed as $newName');
+                },
                 enabledValidation: () => widget.isActionAvailableValidator(
                   widget.repoCubit.state.accessMode,
                   EntryAction.rename,
@@ -226,50 +244,31 @@ class _FileDetailState extends State<FileDetail> {
         ),
       );
 
-  void _showRenameDialog(FileEntry entry) async => await showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return ScaffoldMessenger(
-            child: Builder(
-              builder: (context) {
-                final parent = repo_path.dirname(entry.path);
-                final oldName = repo_path.basename(entry.path);
-                final originalExtension = repo_path.extension(entry.path);
-
-                return Scaffold(
-                  backgroundColor: Colors.transparent,
-                  body: ActionsDialog(
-                    title: S.current.messageRenameFile,
-                    body: RenameEntry(
-                      parentContext: context,
-                      repoCubit: widget.repoCubit,
-                      parent: parent,
-                      oldName: oldName,
-                      originalExtension: originalExtension,
-                      isFile: true,
-                      hint: S.current.messageFileName,
-                    ),
-                  ),
-                );
-              },
-            ),
-          );
-        },
-      ).then(
-        (newName) async {
-          if (newName.isNotEmpty) {
-            // The new name provided by the user.
+  Future<String> _getNewFileName(FileEntry entry) async {
+    final newName = await showDialog<String>(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) {
             final parent = repo_path.dirname(entry.path);
-            final newEntryPath = repo_path.join(parent, newName);
+            final oldName = repo_path.basename(entry.path);
+            final originalExtension = repo_path.extension(entry.path);
 
-            await widget.repoCubit.moveEntry(
-              source: entry.path,
-              destination: newEntryPath,
+            return ActionsDialog(
+              title: S.current.messageRenameFile,
+              body: RenameEntry(
+                parentContext: context,
+                repoCubit: widget.repoCubit,
+                parent: parent,
+                oldName: oldName,
+                originalExtension: originalExtension,
+                isFile: true,
+                hint: S.current.messageFileName,
+              ),
             );
+          },
+        ) ??
+        '';
 
-            await Navigator.of(context).maybePop();
-          }
-        },
-      );
+    return newName;
+  }
 }
