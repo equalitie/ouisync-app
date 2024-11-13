@@ -37,7 +37,7 @@ class DokanValidation {
       linkLaunchDokanGitHub: _buildLinkToDokanWebsite(_context),
     );
 
-    return _runInstallation(title, body);
+    await _runInstallation(title, body);
   }
 
   Future<void> tryInstallNewerDokanMayor() async {
@@ -46,7 +46,7 @@ class DokanValidation {
       linkLaunchDokanGitHub: _buildLinkToDokanWebsite(_context),
     );
 
-    return _runInstallation(title, body);
+    await _runInstallation(title, body);
   }
 
   Future<void> tryInstallDifferentDokanMayor() async {
@@ -55,7 +55,7 @@ class DokanValidation {
       linkLaunchDokanGitHub: _buildLinkToDokanWebsite(_context),
     );
 
-    return _runInstallation(title, body);
+    await _runInstallation(title, body);
   }
 
   TextSpan _buildLinkToDokanWebsite(BuildContext context) =>
@@ -70,25 +70,25 @@ class DokanValidation {
     await Fields.openUrl(context, title, Constants.dokanUrl);
   }
 
-  Future<void> _runInstallation(String title, Widget body) => showDialog<bool?>(
-        context: _context,
-        barrierDismissible: false,
-        builder: (BuildContext context) => ActionsDialog(
-          title: title,
-          body: body,
-        ),
-      ).then(
-        (bool? install) async {
-          if (install == null) return;
+  Future<void> _runInstallation(String title, Widget body) async {
+    final install = await showDialog<bool?>(
+          context: _context,
+          barrierDismissible: false,
+          builder: (BuildContext context) => ActionsDialog(
+            title: title,
+            body: body,
+          ),
+        ) ??
+        false;
 
-          if (install) {
-            final installationResult =
-                await _dokanScripts.runDokanMsiInstallation();
+    if (install == false) return;
 
-            installationResult == true
-                ? _installationOk.call()
-                : await _installationFailed.call();
-          }
-        },
-      );
+    final installationResult = await _dokanScripts.runDokanMsiInstallation();
+    if (installationResult == false) {
+      await _installationFailed.call();
+      return;
+    }
+
+    _installationOk.call();
+  }
 }
