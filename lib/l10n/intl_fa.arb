@@ -1025,5 +1025,17 @@
   "languageOfTheDevice": "زبان دستگاه",
   "@languageOfTheDevice": {},
   "messageSettingsVersionNewerThanCurrent": "تنظیمات موجود در این دستگاه با نسخه جدیدتری از وی‌سینک ایجاد شده‌اند و قابل انتقال نیستند.",
-  "@messageSettingsVersionNewerThanCurrent": {}
+  "@messageSettingsVersionNewerThanCurrent": {},
+  "sortBySizeLabel": "سایز",
+  "@sortBySizeLabel": {},
+  "accessModeWriteLabel": "خواندنی",
+  "@accessModeWriteLabel": {},
+  "sortByNameLabel": "نام",
+  "@sortByNameLabel": {},
+  "accessModeBlindLabel": "کور",
+  "@accessModeBlindLabel": {},
+  "accessModeReadLabel": "نوشتنی",
+  "@accessModeReadLabel": {},
+  "sortByTypeLabel": "نوع",
+  "@sortByTypeLabel": {}
 }
