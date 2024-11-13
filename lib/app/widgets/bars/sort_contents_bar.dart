@@ -6,7 +6,12 @@ import '../../cubits/cubits.dart'
     show ReposCubit, SortBy, SortDirection, SortListCubit, SortListState;
 import '../../models/models.dart' show OpenRepoEntry;
 import '../../utils/utils.dart'
-    show AppLogger, Dialogs, Dimensions, Fields, StringExtension;
+    show
+        AppLogger,
+        Dialogs,
+        Dimensions,
+        Fields,
+        SortByLocalizedExtension;
 import '../widgets.dart' show SortByButton, SortDirectionButton;
 
 class SortContentsBar extends StatefulWidget {
@@ -147,7 +152,7 @@ class _SortByList extends StatelessWidget with AppLogger {
             children: [
               Expanded(
                 child: Fields.actionListTile(
-                  sortByItem.name.capitalize(),
+                  sortByItem.localized,
                   textOverflow: TextOverflow.ellipsis,
                   textSoftWrap: false,
                   style: settingStyle,

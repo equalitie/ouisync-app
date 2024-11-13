@@ -707,5 +707,11 @@
         "dokanUrl": {}
     }
   },
-  "messageSettingsVersionNewerThanCurrent": "The settings found on this device were created with a newer version of Ouisync and can't be migrated."
+  "messageSettingsVersionNewerThanCurrent": "The settings found on this device were created with a newer version of Ouisync and can't be migrated.",
+  "sortByNameLabel": "Name",
+  "sortBySizeLabel": "Size",
+  "sortByTypeLabel": "Type",
+  "accessModeBlindLabel":"blind",
+  "accessModeReadLabel":"read",
+  "accessModeWriteLabel":"write"
 }

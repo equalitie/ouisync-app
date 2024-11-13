@@ -107,6 +107,9 @@ class MessageLookup extends MessageLookupByLibrary {
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
+        "accessModeBlindLabel": MessageLookupByLibrary.simpleMessage("blind"),
+        "accessModeReadLabel": MessageLookupByLibrary.simpleMessage("read"),
+        "accessModeWriteLabel": MessageLookupByLibrary.simpleMessage("write"),
         "actionAccept": MessageLookupByLibrary.simpleMessage("Accept"),
         "actionAcceptCapital": MessageLookupByLibrary.simpleMessage("ACCEPT"),
         "actionAddRepository":
@@ -800,6 +803,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "replacementStatus": m37,
         "repositoryIsAlreadyImported": MessageLookupByLibrary.simpleMessage(
             "Repository is already imported"),
+        "sortByNameLabel": MessageLookupByLibrary.simpleMessage("Name"),
+        "sortBySizeLabel": MessageLookupByLibrary.simpleMessage("Size"),
+        "sortByTypeLabel": MessageLookupByLibrary.simpleMessage("Type"),
         "statusSync": MessageLookupByLibrary.simpleMessage("SYNCED"),
         "statusUnspecified":
             MessageLookupByLibrary.simpleMessage("Unspecified"),

@@ -71,7 +71,7 @@ class _AccessModeSelectorState extends State<AccessModeSelector>
 
                   if (!widget.availableAccessMode.contains(mode)) {
                     final message = S.current.messageAccessModeDisabled(
-                        widget.currentAccessMode.name);
+                        widget.currentAccessMode.localized);
                     widget.onDisabledMessage(message);
                     return;
                   }

@@ -247,7 +247,7 @@ mixin RepositoryActionsMixin on LoggyType {
         await repoCubit.unlock(null);
         final accessMode = repoCubit.accessMode;
         if (accessMode != AccessMode.blind) {
-          showSnackBar(S.current.messageUnlockRepoOk(accessMode.name));
+          showSnackBar(S.current.messageUnlockRepoOk(accessMode.localized));
           return;
         }
 
@@ -287,7 +287,7 @@ mixin RepositoryActionsMixin on LoggyType {
     final accessMode = repoCubit.accessMode;
 
     final message = (accessMode != AccessMode.blind)
-        ? S.current.messageUnlockRepoOk(accessMode.name)
+        ? S.current.messageUnlockRepoOk(accessMode.localized)
         : S.current.messageUnlockRepoFailed;
 
     showSnackBar(message);

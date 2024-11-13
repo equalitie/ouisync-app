@@ -4929,6 +4929,66 @@ class S {
       args: [],
     );
   }
+
+  /// `Name`
+  String get sortByNameLabel {
+    return Intl.message(
+      'Name',
+      name: 'sortByNameLabel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Size`
+  String get sortBySizeLabel {
+    return Intl.message(
+      'Size',
+      name: 'sortBySizeLabel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Type`
+  String get sortByTypeLabel {
+    return Intl.message(
+      'Type',
+      name: 'sortByTypeLabel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `blind`
+  String get accessModeBlindLabel {
+    return Intl.message(
+      'blind',
+      name: 'accessModeBlindLabel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `read`
+  String get accessModeReadLabel {
+    return Intl.message(
+      'read',
+      name: 'accessModeReadLabel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `write`
+  String get accessModeWriteLabel {
+    return Intl.message(
+      'write',
+      name: 'accessModeWriteLabel',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
