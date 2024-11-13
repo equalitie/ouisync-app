@@ -36,8 +36,7 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m6(error) => "Помилка: ${error}";
 
-  static String m7(dokanUrl) =>
-      "Відсутня інсталяція Dokan. Будь ласка, встановіть його з ${dokanUrl}";
+  static String m7(dokanUrl) => "Докан відсутній ${dokanUrl}";
 
   static String m8(name) => "Не вдалося ініціалізувати репозиторій ${name}";
 
@@ -47,7 +46,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m11(name) => "Не вдалося створити репозиторій ${name}";
 
-  static String m12(reason) => "Не вдалося встановити: ${reason}";
+  static String m12(reason) =>
+      "Доступ до репозицій через File Explorer не доступний: ${reason}";
 
   static String m13(name) =>
       "${name} вже існують у цій локації.\n\nЩо ви хочете зробити?";
@@ -94,7 +94,7 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m32(entry) => "${entry}";
 
-  static String m33(error) => "${error}";
+  static String m33(error) => "${error} і";
 
   static String m34(name) => "${name}";
 
@@ -108,6 +108,9 @@ class MessageLookup extends MessageLookupByLibrary {
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
+        "accessModeBlindLabel": MessageLookupByLibrary.simpleMessage("сліпий"),
+        "accessModeReadLabel": MessageLookupByLibrary.simpleMessage("читати"),
+        "accessModeWriteLabel": MessageLookupByLibrary.simpleMessage("писати"),
         "actionAccept": MessageLookupByLibrary.simpleMessage("Прийняти"),
         "actionAcceptCapital": MessageLookupByLibrary.simpleMessage("ПРИЙНЯТИ"),
         "actionAddRepository":
@@ -135,6 +138,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionDone": MessageLookupByLibrary.simpleMessage("Завершено"),
         "actionEditRepositoryName":
             MessageLookupByLibrary.simpleMessage("Змінити назву"),
+        "actionEject": MessageLookupByLibrary.simpleMessage("Вилучити"),
         "actionExit": MessageLookupByLibrary.simpleMessage("Вихід"),
         "actionGoToSettings":
             MessageLookupByLibrary.simpleMessage("Перейти до налаштувань"),
@@ -146,11 +150,16 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionImport": MessageLookupByLibrary.simpleMessage("Імпортувати"),
         "actionImportRepo":
             MessageLookupByLibrary.simpleMessage("Імпортувати репозиторій"),
+        "actionInstallDokan":
+            MessageLookupByLibrary.simpleMessage("Встановити Dokan"),
+        "actionLocateRepo":
+            MessageLookupByLibrary.simpleMessage("Репозиторій локації"),
         "actionLockCapital":
             MessageLookupByLibrary.simpleMessage("ЗАБЛОКУВАТИ"),
         "actionMove": MessageLookupByLibrary.simpleMessage("Перемістити"),
         "actionNewFile": MessageLookupByLibrary.simpleMessage("Файл"),
         "actionNewFolder": MessageLookupByLibrary.simpleMessage("Папка"),
+        "actionNewMediaFile": MessageLookupByLibrary.simpleMessage("Медіа"),
         "actionNewRepo":
             MessageLookupByLibrary.simpleMessage("Створити репозиторій"),
         "actionNext": MessageLookupByLibrary.simpleMessage("Наступний"),
@@ -182,6 +191,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionUndo": MessageLookupByLibrary.simpleMessage("Відмінити"),
         "actionUnlock": MessageLookupByLibrary.simpleMessage("Розблокувати"),
         "actionUpdate": MessageLookupByLibrary.simpleMessage("Оновити"),
+        "actionUpdateDokan":
+            MessageLookupByLibrary.simpleMessage("Оновлення Dokan"),
         "actionYes": MessageLookupByLibrary.simpleMessage("Так"),
         "buttonLocateRepository":
             MessageLookupByLibrary.simpleMessage("Знайти"),
@@ -264,6 +275,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Введіть пароль: "),
         "labelUseExternalStorage": MessageLookupByLibrary.simpleMessage(
             "Використовувати зовнішній накопичувач"),
+        "languageIsNotAvailable":
+            MessageLookupByLibrary.simpleMessage("недоступно"),
+        "languageOfTheDevice":
+            MessageLookupByLibrary.simpleMessage("мова пристрою"),
         "menuItemAbout": MessageLookupByLibrary.simpleMessage("Про нас"),
         "menuItemLogs": MessageLookupByLibrary.simpleMessage("Журнали"),
         "menuItemNetwork": MessageLookupByLibrary.simpleMessage("Мережа"),
@@ -723,6 +738,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Виберіть шлях"),
         "messageSettingsRuntimeID":
             MessageLookupByLibrary.simpleMessage("Ідентифікатор виконання"),
+        "messageSettingsVersionNewerThanCurrent":
+            MessageLookupByLibrary.simpleMessage(
+                "У налаштуваннях, знайдені на цьому пристрої були створені з новою версією Ouisync і не можуть бути мігровані."),
         "messageShareActionDisabled": MessageLookupByLibrary.simpleMessage(
             "Для створення посилання на репозиторій спочатку потрібно вибрати один дозвіл"),
         "messageShareWithWR": MessageLookupByLibrary.simpleMessage(
@@ -808,6 +826,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "replacementStatus": m37,
         "repositoryIsAlreadyImported":
             MessageLookupByLibrary.simpleMessage("Репозиторій вже імпортовано"),
+        "sortByNameLabel": MessageLookupByLibrary.simpleMessage("Назва"),
+        "sortBySizeLabel": MessageLookupByLibrary.simpleMessage("Розмiр"),
+        "sortByTypeLabel": MessageLookupByLibrary.simpleMessage("Вид одягу"),
         "statusSync": MessageLookupByLibrary.simpleMessage("СИНХРОНІЗОВАНО"),
         "statusUnspecified":
             MessageLookupByLibrary.simpleMessage("Не визначено"),
@@ -819,6 +840,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "titleAddRepository":
             MessageLookupByLibrary.simpleMessage("Імпортувати репозиторій"),
         "titleAppTitle": MessageLookupByLibrary.simpleMessage("Ouisync"),
+        "titleApplicationLanguage":
+            MessageLookupByLibrary.simpleMessage("Мова застосунку"),
         "titleBackgroundAndroidPermissionsTitle":
             MessageLookupByLibrary.simpleMessage("Необхідні дозволи"),
         "titleChangePassword":

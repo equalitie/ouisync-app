@@ -144,7 +144,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("وارد کردن مخزن"),
         "actionInstallDokan":
             MessageLookupByLibrary.simpleMessage("نصب رابط کاربری Dokan"),
-        "actionLocateRepo": MessageLookupByLibrary.simpleMessage("یافتن مخزن"),
+        "actionLocateRepo":
+            MessageLookupByLibrary.simpleMessage("موقعیت‌یابی مخزن"),
         "actionLockCapital": MessageLookupByLibrary.simpleMessage("قفل کردن"),
         "actionMove": MessageLookupByLibrary.simpleMessage("انتقال"),
         "actionNewFile": MessageLookupByLibrary.simpleMessage("فایل"),
@@ -248,6 +249,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "labelSize": MessageLookupByLibrary.simpleMessage("سایز: "),
         "labelSyncStatus":
             MessageLookupByLibrary.simpleMessage("وضعیت همگام‌سازی: "),
+        "labelSynced": MessageLookupByLibrary.simpleMessage("همگام‌سازی‌شده"),
         "labelTcpListenerEndpointV4":
             MessageLookupByLibrary.simpleMessage("Listening on TCP IPv4‌"),
         "labelTcpListenerEndpointV6":
@@ -871,6 +873,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("اضافه‌ کردن"),
         "titleFolderDetails":
             MessageLookupByLibrary.simpleMessage("جزییات پوشه"),
+        "titleFreedomExpressionAccessInfo":
+            MessageLookupByLibrary.simpleMessage(
+                "آزادی بیان و دسترسی به اطلاعات"),
         "titleIssueTracker":
             MessageLookupByLibrary.simpleMessage("ردیاب اشکالات"),
         "titleJustLegalSociety":
