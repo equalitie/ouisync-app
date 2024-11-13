@@ -215,61 +215,41 @@ mixin RepositoryActionsMixin on LoggyType {
       );
 
   /// delete => ReposCubit.deleteRepository
-  Future<void> deleteRepository(
+  Future<bool> deleteRepository(
     BuildContext context, {
-    required ReposCubit reposCubit,
-    required RepoLocation repoLocation,
-    void Function()? popDialog,
+    required String repoName,
+    required Future deleteRepoFuture,
   }) async {
-    final deleteRepo = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Flex(direction: Axis.horizontal, children: [
-          Fields.constrainedText(
-            S.current.titleDeleteRepository,
-            style: context.theme.appTextStyle.titleMedium,
-            maxLines: 2,
-          )
-        ]),
-        content: SingleChildScrollView(
-          child: ListBody(
-            children: [
-              Text(
-                S.current.messageConfirmRepositoryDeletion,
-                style: context.theme.appTextStyle.bodyMedium,
-              )
-            ],
-          ),
-        ),
-        actions: [
-          Fields.dialogActions(buttons: [
-            NegativeButton(
-              text: S.current.actionCancelCapital,
-              onPressed: () async =>
-                  await Navigator.of(context).maybePop(false),
-              buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
-            ),
-            PositiveButton(
-              text: S.current.actionDeleteCapital,
-              onPressed: () async => await Navigator.of(context).maybePop(true),
-              buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
-              isDangerButton: true,
-            )
-          ])
-        ],
-      ),
+    final delete = await _getDeleteRepoConfirmation(
+      context,
+      repoName: repoName,
     );
 
-    if (deleteRepo ?? false) {
+    if (delete == true) {
       await Dialogs.executeFutureWithLoadingDialog(
         null,
-        reposCubit.deleteRepository(repoLocation),
+        deleteRepoFuture,
       );
 
-      if (popDialog != null) {
-        popDialog();
-      }
+      return true;
     }
+
+    return false;
+  }
+
+  Future<bool> _getDeleteRepoConfirmation(
+    BuildContext context, {
+    required String repoName,
+  }) async {
+    final delete = await showDialog<bool>(
+          context: context,
+          builder: (BuildContext context) => ActionsDialog(
+              title: S.current.messageRenameRepository,
+              body: DeleteRepoDialog(repoName: repoName)),
+        ) ??
+        false;
+
+    return delete;
   }
 
   Future<void> unlockRepository(

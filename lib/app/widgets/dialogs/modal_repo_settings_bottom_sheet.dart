@@ -154,12 +154,23 @@ class _RepositorySettingsState extends State<RepositorySettings>
                         title: S.current.actionDelete,
                         dense: true,
                         isDanger: true,
-                        onTap: () async => await deleteRepository(
-                          context,
-                          repoLocation: widget.repoCubit.location,
-                          reposCubit: widget.reposCubit,
-                          popDialog: () => Navigator.of(context).pop(),
-                        ),
+                        onTap: () async {
+                          final repoName = widget.repoCubit.name;
+                          final location = widget.repoCubit.location;
+                          final deleteRepoFuture =
+                              widget.reposCubit.deleteRepository(location);
+
+                          final deleted = await deleteRepository(
+                            context,
+                            repoName: repoName,
+                            deleteRepoFuture: deleteRepoFuture,
+                          );
+
+                          if (deleted == true) {
+                            Navigator.of(context).pop();
+                            showSnackBar('"$repoName" deleted');
+                          }
+                        },
                       ),
                     ]))),
       );
