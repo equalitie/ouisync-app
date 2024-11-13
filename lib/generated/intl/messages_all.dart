@@ -11,7 +11,6 @@
 
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/message_lookup_by_library.dart';
 import 'package:intl/src/intl_helpers.dart';
@@ -28,15 +27,15 @@ import 'messages_zh-TW.dart' as messages_zh_tw;
 
 typedef Future<dynamic> LibraryLoader();
 Map<String, LibraryLoader> _deferredLibraries = {
-  'en': () => new SynchronousFuture(null),
-  'es': () => new SynchronousFuture(null),
-  'fa': () => new SynchronousFuture(null),
-  'fr': () => new SynchronousFuture(null),
-  'my': () => new SynchronousFuture(null),
-  'ru': () => new SynchronousFuture(null),
-  'uk': () => new SynchronousFuture(null),
-  'zh_CN': () => new SynchronousFuture(null),
-  'zh_TW': () => new SynchronousFuture(null),
+  'en': () => new Future.value(null),
+  'es': () => new Future.value(null),
+  'fa': () => new Future.value(null),
+  'fr': () => new Future.value(null),
+  'my': () => new Future.value(null),
+  'ru': () => new Future.value(null),
+  'uk': () => new Future.value(null),
+  'zh_CN': () => new Future.value(null),
+  'zh_TW': () => new Future.value(null),
 };
 
 MessageLookupByLibrary? _findExact(String localeName) {
@@ -65,18 +64,18 @@ MessageLookupByLibrary? _findExact(String localeName) {
 }
 
 /// User programs should call this before using [localeName] for messages.
-Future<bool> initializeMessages(String localeName) {
+Future<bool> initializeMessages(String localeName) async {
   var availableLocale = Intl.verifiedLocale(
       localeName, (locale) => _deferredLibraries[locale] != null,
       onFailure: (_) => null);
   if (availableLocale == null) {
-    return new SynchronousFuture(false);
+    return new Future.value(false);
   }
   var lib = _deferredLibraries[availableLocale];
-  lib == null ? new SynchronousFuture(false) : lib();
+  await (lib == null ? new Future.value(false) : lib());
   initializeInternalMessageLookup(() => new CompositeMessageLookup());
   messageLookup.addLocale(availableLocale, _findGeneratedMessagesFor);
-  return new SynchronousFuture(true);
+  return new Future.value(true);
 }
 
 bool _messagesExistFor(String locale) {
