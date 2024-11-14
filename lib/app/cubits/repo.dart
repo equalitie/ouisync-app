@@ -111,6 +111,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   final NavigationCubit _navigation;
   final EntryBottomSheetCubit _bottomSheet;
   final Repository _repo;
+  final Session _session;
   final Cipher _pathCipher;
   final CacheServers _cacheServers;
   final Mounter _mounter;
@@ -120,6 +121,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     this._navigation,
     this._bottomSheet,
     this._repo,
+    this._session,
     this._pathCipher,
     this._cacheServers,
     this._mounter,
@@ -131,6 +133,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   static Future<RepoCubit> create({
     required NativeChannels nativeChannels,
     required Repository repo,
+    required Session session,
     required RepoLocation location,
     required NavigationCubit navigation,
     required EntryBottomSheetCubit bottomSheet,
@@ -169,6 +172,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
       navigation,
       bottomSheet,
       repo,
+      session,
       pathCipher,
       cacheServers,
       mounter,
@@ -184,6 +188,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     return cubit;
   }
 
+  Session get session => _session;
   RepoLocation get location => state.location;
   String get name => state.location.name;
   AccessMode get accessMode => state.accessMode;
