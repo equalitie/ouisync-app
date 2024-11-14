@@ -813,7 +813,7 @@ Future<File> buildAab(
   final env = Map<String, String>();
 
   if (secrets != null) {
-    env['KEYSTORE_PROPERTIES'] = secrets.keystorePropertiesPath;
+    env['STORE_FILE'] = secrets.keystorePropertiesPath;
   }
 
   final inputFileName = "app-$flavor-release.aab";
