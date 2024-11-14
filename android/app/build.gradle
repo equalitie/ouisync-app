@@ -102,68 +102,6 @@ flutter {
    source = "../.."
 }
 
-// Generate images in `android/src/main/res/mipmap-*/` based on those in `assets/
-task generateResourceImages() {
-    def images = [
-        "ic_launcher.png": [
-            "hdpi": "72x72",
-            "mdpi": "48x48",
-            "xhdpi": "96x96",
-            "xxhdpi": "144x144",
-            "xxxhdpi": "192x192",
-        ],
-        "ic_launcher_background.png": [
-            "hdpi": "162x162",
-            "mdpi": "108x108",
-            "xhdpi": "216x216",
-            "xxhdpi": "324x324",
-            "xxxhdpi": "432x432",
-        ],
-        "ic_launcher_foreground.png": [
-            "hdpi": "162x162",
-            "mdpi": "108x108",
-            "xhdpi": "216x216",
-            "xxhdpi": "324x324",
-            "xxxhdpi": "432x432",
-        ],
-        "ic_launcher_round.png": [
-            "hdpi": "72x72",
-            "mdpi": "48x48",
-            "xhdpi": "96x96",
-            "xxhdpi": "144x144",
-            "xxxhdpi": "192x192",
-        ],
-    ]
-
-    def imagemagick
-
-    def Os = org.apache.tools.ant.taskdefs.condition.Os
-
-    if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-        imagemagick = 'magick'
-    } else {
-        imagemagick = 'convert'
-    }
-
-    images.each { file, resolutions ->
-        resolutions.each { resName, dimensions ->
-            exec {
-                // TODO: With these `{in,out}put.file` lines I'd like gradle to not re-generate the output files
-                // if input files did not change, but changing the paths don't result in an error, so I'm not sure
-                // the lines do anything useful.
-                inputs.file "../../assets/$file"
-                outputs.file "src/main/res/mipmap-$resName/$file"
-                // PWD is `ouisync-app/android/app/`
-                commandLine imagemagick, "../../assets/$file", "-resize", dimensions, "src/main/res/mipmap-$resName/$file"
-            }
-        }
-    }
-}
-
-gradle.projectsEvaluated {
-    preBuild.dependsOn('generateResourceImages')
-}
-
 class SigningConfig {
     String keyAlias
     String keyPassword
