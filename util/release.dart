@@ -334,9 +334,11 @@ class Options {
       negatable: false,
       help: 'Print this usage information',
     );
-    parser.addOption('flavor',
-        help:
-            'Specify a build flavor, one of {production, nightly, unofficial}, nightly is the default');
+    parser.addOption(
+      'flavor',
+      help: 'Specify a build flavor, one of {production, nightly, unofficial}',
+      defaultsTo: 'nightly',
+    );
 
     parser.addOption('android-key-properties',
         help: 'Path to Android key.properties file');
@@ -512,7 +514,9 @@ class BuildDesc {
 //
 ////////////////////////////////////////////////////////////////////////////////
 Future<File> buildWindowsInstaller(
-    BuildDesc buildDesc, String? sentryDSN) async {
+  BuildDesc buildDesc,
+  String? sentryDSN,
+) async {
   final buildName = buildDesc.toString();
 
   await run('flutter', [
@@ -523,6 +527,9 @@ Future<File> buildWindowsInstaller(
     if (sentryDSN != null) '--dart-define=SENTRY_DSN=$sentryDSN',
     '--build-name',
     buildName,
+    // HACK: `flutter build windows` doesn't support --flavor yet. Pass it via env variable instead.
+    '--dart-define',
+    'FLUTTER_APP_FLAVOR=${buildDesc.flavor}',
   ]);
 
   /// Download the Dokan MSI to be bundle with the Ouisync MSIX, into the source
@@ -658,6 +665,9 @@ Future<File> buildDebGUI({
     if (sentryDSN != null) '--dart-define=SENTRY_DSN=$sentryDSN',
     '--build-name',
     buildName,
+    // HACK: `flutter build linux` doesn't support --flavor yet. Pass it via env variable instead.
+    '--dart-define',
+    'FLUTTER_APP_FLAVOR=${buildDesc.flavor}',
   ]);
 
   final arch = 'amd64';
