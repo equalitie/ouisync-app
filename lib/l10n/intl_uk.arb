@@ -1037,5 +1037,7 @@
   "languageIsNotAvailable": "недоступно",
   "@languageIsNotAvailable": {},
   "messageSettingsVersionNewerThanCurrent": "У налаштуваннях, знайдені на цьому пристрої були створені з новою версією Ouisync і не можуть бути мігровані.",
-  "@messageSettingsVersionNewerThanCurrent": {}
+  "@messageSettingsVersionNewerThanCurrent": {},
+  "labelSynced": "Синхронізовано",
+  "@labelSynced": {}
 }
