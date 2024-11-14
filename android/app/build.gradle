@@ -6,6 +6,7 @@ plugins {
     id "kotlin-android"
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id "dev.flutter.flutter-gradle-plugin"
+    id "com.starter.easylauncher" version "6.4.0"
 }
 
 def localProperties = new Properties()
@@ -123,6 +124,28 @@ afterEvaluate {
 
 flutter {
    source = "../.."
+}
+
+easylauncher {
+    defaultFlavorNaming true
+
+    productFlavors {
+        production {
+            enable false
+        }
+
+        nightly {
+            filters = [
+                customRibbon(position: "topRight", ribbonColor: "#FFE65100")
+            ]
+        }
+
+        unofficial {
+            filters = [
+                customRibbon(position: "topRight", ribbonColor: "#FF0D47A1")
+            ]
+        }
+    }
 }
 
 class SigningConfig {
