@@ -77,12 +77,6 @@ android {
         }
     }
 
-    // Flutter building will exit with an incomprehensive error if the flavor
-    // is not specified. So in this function we do our own check if the
-    // --flavor parameter was used and tell the user that it needs to be set if
-    // it's not.
-    checkFlavorParameter(getCurrentFlavor(), productFlavors)
-
     buildTypes {
         release {
             if (keystoreProperties != null) {
@@ -94,6 +88,44 @@ android {
 
         debug {
             android.packagingOptions.doNotStrip "**.so"
+        }
+    }
+}
+
+// Generate launcher icons by invoking [icons_launcher](https://pub.dev/packages/icons_launcher)
+tasks.register("generateLauncherIcons", Exec) {
+    workingDir "${project.rootDir}/.."
+    // TODO: This generates icons for all platforms. Ideally we would restrict it to generate only
+    // android (and set it up separately in other platforms' respective build systems).
+    commandLine 'dart', 'run', 'icons_launcher:create'
+}
+
+afterEvaluate {
+    android.applicationVariants.each { variant ->
+        tasks.named("generate${variant.name.capitalize()}Assets") {
+            dependsOn "generateLauncherIcons"
+        }
+    }
+
+    // Flutter building will exit with an incomprehensive error if the flavor is not specified. So
+    // we do our own check if the --flavor parameter was used and tell the user that it needs to be
+    // set if it's not.
+    //
+    // NOTE: We are injecting this check into the `preBuild` task which is (one of) the first tasks
+    // run during a build so that this check happens as soon as possible. Also this way it doesn't
+    // interfere with any non-build tasks (e.g. `clean` or `tasks`, ...).
+    tasks.named("preBuild") {
+        doFirst {
+            android.buildTypes.each { buildType ->
+                def unflavoredTaskName = "assemble${buildType.name.capitalize()}"
+
+                gradle.startParameter.taskNames.each { taskName ->
+                    if (taskName == unflavoredTaskName) {
+                        def flavors = android.productFlavors.collect { it.name }
+                        throw new GradleException("Missing '--flavor=${flavors.join('|')}' argument.")
+                    }
+                }
+            }
         }
     }
 }
@@ -131,36 +163,6 @@ def loadKeystorePropertiesFile(String keystorePropertiesPath) {
     )
 
     return config
-}
-
-// Check if the user provided the `--flavor=` argument.
-def checkFlavorParameter(String currentFlavor, availableFlavors) {
-    def availableFlavorNames = availableFlavors.collect { it.name }
-
-    if (currentFlavor == null) {
-        if (availableFlavors.empty) {
-            return
-        }
-        throw new GradleException("Missing '--flavor=${availableFlavorNames}' argument.")
-    }
-
-    if (!availableFlavorNames.contains(currentFlavor)) {
-        throw new GradleException("Unrecognized flavor '${currentFlavor}'. Use one from ${availableFlavorNames}.")
-    }
-}
-
-// Return the current flavor or null.
-def getCurrentFlavor() {
-    String taskRequests = gradle.startParameter.taskRequests.toString()
-
-    Pattern pattern = Pattern.compile("(assemble|bundle)(\\w+)(Release|Debug)")
-    Matcher matcher = pattern.matcher(taskRequests)
-
-    if (matcher.find()) {
-        return matcher.group(2).toLowerCase()
-    } else {
-        return null
-    }
 }
 
 def appendUnlessNull(String s1, String s2) {
