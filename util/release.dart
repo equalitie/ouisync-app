@@ -25,7 +25,10 @@ enum Flavor {
   unofficial(false, false, false);
 
   const Flavor(
-      this.requiresSigning, this.requiresSentryDSN, this.doGitCleanCheck);
+    this.requiresSigning,
+    this.requiresSentryDSN,
+    this.doGitCleanCheck,
+  );
 
   final bool requiresSigning;
   final bool requiresSentryDSN;
@@ -86,10 +89,6 @@ Future<void> main(List<String> args) async {
     return;
   }
 
-  if (buildDesc.flavor != Flavor.production) {
-    await addBadgeToIcons(buildDesc.flavor.displayString);
-  }
-
   // TODO: use `pubspec.name` here but first rename it from "ouisync_app" to "ouisync"
   final name = 'ouisync';
 
@@ -119,7 +118,7 @@ Future<void> main(List<String> args) async {
         assets.add(await collateAsset(outputDir, name, buildDesc, apk));
       }
     } finally {
-      secrets?.destroy();
+      await secrets?.destroy();
     }
   }
 
@@ -244,8 +243,8 @@ class Options {
     this.publisher,
     this.awaitUpload = false,
     this.flavor = Flavor.production,
-    this.androidKeyPropertiesPath = null,
-    this.sentryDSN = null,
+    this.androidKeyPropertiesPath,
+    this.sentryDSN,
   });
 
   static Future<Options> parse(List<String> args) async {
@@ -254,12 +253,21 @@ class Options {
     parser.addFlag('apk', help: 'Build Android APK', defaultsTo: false);
     parser.addFlag('aab', help: 'Build Android App Bundle', defaultsTo: false);
     parser.addFlag('exe', help: 'Build Windows installer', defaultsTo: false);
-    parser.addFlag('msix',
-        help: 'Build Windows MSIX package', defaultsTo: false);
-    parser.addFlag('deb-gui',
-        help: 'Build Linux deb GUI package', defaultsTo: false);
-    parser.addFlag('deb-cli',
-        help: 'Build Linux deb CLI package', defaultsTo: false);
+    parser.addFlag(
+      'msix',
+      help: 'Build Windows MSIX package',
+      defaultsTo: false,
+    );
+    parser.addFlag(
+      'deb-gui',
+      help: 'Build Linux deb GUI package',
+      defaultsTo: false,
+    );
+    parser.addFlag(
+      'deb-cli',
+      help: 'Build Linux deb CLI package',
+      defaultsTo: false,
+    );
 
     parser.addOption(
       'token-file',
@@ -326,9 +334,11 @@ class Options {
       negatable: false,
       help: 'Print this usage information',
     );
-    parser.addOption('flavor',
-        help:
-            'Specify a build flavor, one of {production, nightly, unofficial}, nightly is the default');
+    parser.addOption(
+      'flavor',
+      help: 'Specify a build flavor, one of {production, nightly, unofficial}',
+      defaultsTo: 'nightly',
+    );
 
     parser.addOption('android-key-properties',
         help: 'Path to Android key.properties file');
@@ -380,7 +390,7 @@ class Options {
     }
 
     final sentryDSNFile = results['sentry'];
-    String? sentryDSN = null;
+    String? sentryDSN;
 
     if (sentryDSNFile != null) {
       final file = File(sentryDSNFile);
@@ -445,8 +455,6 @@ class BuildDesc {
 
   BuildDesc(this.version, this.commit) : timestamp = DateTime.now();
 
-  String get versionString => _formatVersion(StringBuffer()).toString();
-  String get revisionString => _formatRevision(StringBuffer()).toString();
   // The "foo" in "1.2.3+foo".
   String get buildIdentifier => version.build[0].toString();
 
@@ -472,12 +480,6 @@ class BuildDesc {
       ..write(version.minor)
       ..write('.')
       ..write(version.patch);
-
-    if (flavor.displayString.isNotEmpty) {
-      buffer
-        ..write('-')
-        ..write(flavor.displayString);
-    }
 
     return buffer;
   }
@@ -512,7 +514,9 @@ class BuildDesc {
 //
 ////////////////////////////////////////////////////////////////////////////////
 Future<File> buildWindowsInstaller(
-    BuildDesc buildDesc, String? sentryDSN) async {
+  BuildDesc buildDesc,
+  String? sentryDSN,
+) async {
   final buildName = buildDesc.toString();
 
   await run('flutter', [
@@ -523,6 +527,9 @@ Future<File> buildWindowsInstaller(
     if (sentryDSN != null) '--dart-define=SENTRY_DSN=$sentryDSN',
     '--build-name',
     buildName,
+    // HACK: `flutter build windows` doesn't support --flavor yet. Pass it via env variable instead.
+    '--dart-define',
+    'FLUTTER_APP_FLAVOR=${buildDesc.flavor}',
   ]);
 
   /// Download the Dokan MSI to be bundle with the Ouisync MSIX, into the source
@@ -658,6 +665,9 @@ Future<File> buildDebGUI({
     if (sentryDSN != null) '--dart-define=SENTRY_DSN=$sentryDSN',
     '--build-name',
     buildName,
+    // HACK: `flutter build linux` doesn't support --flavor yet. Pass it via env variable instead.
+    '--dart-define',
+    'FLUTTER_APP_FLAVOR=${buildDesc.flavor}',
   ]);
 
   final arch = 'amd64';
@@ -807,13 +817,16 @@ Future<File> buildDebCLI(
 //
 ////////////////////////////////////////////////////////////////////////////////
 Future<File> buildAab(
-    BuildDesc buildDesc, AndroidSecrets? secrets, String? sentryDSN) async {
+  BuildDesc buildDesc,
+  AndroidSecrets? secrets,
+  String? sentryDSN,
+) async {
   Flavor flavor = buildDesc.flavor;
 
-  final env = Map<String, String>();
+  final env = <String, String>{};
 
   if (secrets != null) {
-    env['KEYSTORE_PROPERTIES'] = secrets.keystorePropertiesPath;
+    env['STORE_FILE'] = secrets.keystorePropertiesPath;
   }
 
   final inputFileName = "app-$flavor-release.aab";
@@ -1316,63 +1329,14 @@ Future<String?> getSentryDSN(Options options) async {
   return await Pass.string('$base/sentry_dsn');
 }
 
-class IconBadgeDesc {
-  String fileName;
-  String geometry;
-  String pointsize;
-
-  IconBadgeDesc(this.fileName, this.pointsize, this.geometry);
-}
-
-Future<void> addBadgeToIcons(String text) async {
-  String binaryName;
-
-  if (Platform.isWindows) {
-    binaryName = "magick";
-  } else {
-    binaryName = "convert";
-  }
-
-  final descriptions = [
-    IconBadgeDesc("ic_launcher.png", '40', "+16+16"),
-    IconBadgeDesc("ic_launcher_foreground.png", '40', "+100+120"),
-    IconBadgeDesc("ic_launcher_round.png", '40', "+16+16"),
-    IconBadgeDesc("ouisync_icon.png", '40', "+16+16"),
-    IconBadgeDesc("OuisyncFull.png", '40', "+300+16"),
-    IconBadgeDesc("Ouisync_v1_1560x1553.png", '200', "+64+124"),
-  ];
-
-  for (final desc in descriptions) {
-    // Use imagemagick's `convert` because the 'package:image/image.dart' lacks features
-    // (and some things like setting a font color doesn't seem to work).
-    // TODO: This overwrites the existing png files in git, which is annoying when done not
-    // on CI.
-    await run(binaryName, [
-      'assets/${desc.fileName}',
-      '-undercolor',
-      'red',
-      '-font',
-      // Picked randomly by what is on my and the CI machines.
-      'DejaVu-Sans',
-      '-gravity',
-      'SouthEast',
-      '-pointsize',
-      desc.pointsize,
-      '-annotate',
-      desc.geometry,
-      text,
-      'assets/${desc.fileName}',
-    ]);
-  }
-}
-
 class AndroidSecrets {
-  String keystorePropertiesPath;
-  Future<void> Function()? onDestroy;
+  final String keystorePropertiesPath;
+  final Future<void> Function()? onDestroy;
 
-  AndroidSecrets(this.keystorePropertiesPath, [this.onDestroy = null]);
+  AndroidSecrets(this.keystorePropertiesPath, [this.onDestroy]);
+
   Future<void> destroy() async {
-    onDestroy?.call();
+    await onDestroy?.call();
   }
 }
 
@@ -1392,11 +1356,11 @@ class Pass {
 
 Future<AndroidSecrets> prepareAndroidSecretsFromPass(Flavor flavor) async {
   final dir = await (await Directory(
-              "${Directory.systemTemp.path}/ouisync-android-secrets")
+              '${Directory.systemTemp.path}/ouisync-android-secrets')
           .create())
       .createTemp();
 
-  final deleteSecrets = () => dir.delete(recursive: true);
+  Future<void> deleteSecrets() => dir.delete(recursive: true);
 
   try {
     final base = 'cenoers/ouisync/app/$flavor/android';
@@ -1405,16 +1369,18 @@ Future<AndroidSecrets> prepareAndroidSecretsFromPass(Flavor flavor) async {
     final keyAlias = await Pass.string('$base/keyAlias');
     final keyPassword = await Pass.string('$base/keyPassword');
 
-    final keystoreJks = File(dir.path + "/keystore.jks");
+    final keystoreJks = File('${dir.path}/keystore.jks');
     final keystoreJksContent = await Pass.binary('$base/keystore.jks');
 
     await keystoreJks.writeAsBytes(keystoreJksContent);
 
-    final keystoreProperties = File(dir.path + "/key.properties");
-    await keystoreProperties.writeAsString("storePassword=$storePassword\n" +
-        "keyAlias=$keyAlias\n" +
-        "keyPassword=$keyPassword\n" +
-        "storeFile=${keystoreJks.path}\n");
+    final keystoreProperties = File('${dir.path}/key.properties');
+    await keystoreProperties.writeAsString(
+      'storePassword=$storePassword\n'
+      'keyAlias=$keyAlias\n'
+      'keyPassword=$keyPassword\n'
+      'storeFile=${keystoreJks.path}\n"',
+    );
 
     return AndroidSecrets(keystoreProperties.path, deleteSecrets);
   } catch (e) {

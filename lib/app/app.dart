@@ -29,6 +29,7 @@ import 'utils/utils.dart'
         loadAndMigrateSettings,
         Mounter,
         Settings;
+import 'widgets/flavor_banner.dart';
 import 'widgets/media_receiver.dart';
 
 Future<Widget> initOuiSyncApp(List<String> args) async {
@@ -251,9 +252,11 @@ ThemeData _setupAppThemeData() => ThemeData().copyWith(
               labelSmall: AppTypography.labelSmall)
         ]);
 
-MaterialApp _createInMaterialApp(Widget topWidget,
-        {Locale? currentLocale = null,
-        List<NavigatorObserver> navigatorObservers = const []}) =>
+MaterialApp _createInMaterialApp(
+  Widget topWidget, {
+  Locale? currentLocale,
+  List<NavigatorObserver> navigatorObservers = const [],
+}) =>
     MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: _setupAppThemeData(),
@@ -266,6 +269,9 @@ MaterialApp _createInMaterialApp(Widget topWidget,
       ],
       supportedLocales: S.delegate.supportedLocales,
       home: topWidget,
+      builder: (context, child) => FlavorBanner(
+        child: child ?? SizedBox.shrink(),
+      ),
       navigatorObservers: navigatorObservers,
     );
 
