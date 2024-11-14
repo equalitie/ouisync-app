@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/sort_list.dart';
+import '../../utils/utils.dart' show SortByLocalizedExtension;
 
 class SortByButton extends StatelessWidget {
   const SortByButton({
@@ -28,7 +29,7 @@ class SortByButton extends StatelessWidget {
                 shape: BoxShape.rectangle,
                 borderRadius: BorderRadiusDirectional.all(Radius.circular(6.0)),
               ),
-              child: Text(S.current.messageSortBy(sortBy.name)),
+              child: Text(S.current.messageSortBy(sortBy.localized)),
             ),
           ),
           onTap: () async => sort(),

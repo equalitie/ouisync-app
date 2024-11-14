@@ -36,7 +36,7 @@ class RepoDescription extends StatelessWidget with AppLogger {
             ),
           ),
           Fields.autosizeText(
-            state.accessMode.name,
+            state.accessMode.localized,
             style: descriptionTextStyle,
           ),
         ],

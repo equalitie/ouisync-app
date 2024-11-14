@@ -71,7 +71,7 @@ class _AccessModeSelectorState extends State<AccessModeSelector>
 
                   if (!widget.availableAccessMode.contains(mode)) {
                     final message = S.current.messageAccessModeDisabled(
-                        widget.currentAccessMode.name);
+                        widget.currentAccessMode.localized);
                     widget.onDisabledMessage(message);
                     return;
                   }
@@ -80,7 +80,7 @@ class _AccessModeSelectorState extends State<AccessModeSelector>
                   await widget.onChanged(current);
                 }),
             Text(
-              mode.name,
+              mode.localized,
               textAlign: TextAlign.start,
               style: TextStyle().copyWith(color: _getModeStateColor(mode)),
             )

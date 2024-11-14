@@ -1041,5 +1041,7 @@
   "messageNoMediaPresent": "No hay medios presentes.",
   "@messageNoMediaPresent": {},
   "messageLogLevelErrorWarnInfoDebug": "Errores, advertencias, información y depuración",
-  "@messageLogLevelErrorWarnInfoDebug": {}
+  "@messageLogLevelErrorWarnInfoDebug": {},
+  "titleFreedomExpressionAccessInfo": "Libertad de expresión y acceso a la información",
+  "@titleFreedomExpressionAccessInfo": {}
 }

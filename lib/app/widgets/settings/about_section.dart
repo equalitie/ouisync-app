@@ -178,9 +178,16 @@ class AboutSection extends SettingsSection with AppLogger {
     BuildContext context,
     Settings settings,
   ) async {
-    await Navigator.of(context).push(MaterialPageRoute(
-        builder: (_) =>
-            LanguagePicker(localeCubit: localeCubit, canPop: true)));
+    await Navigator.of(context).push<Locale>(
+      MaterialPageRoute(
+        builder: (_) => LanguagePicker(
+          localeCubit: localeCubit,
+          canPop: true,
+        ),
+      ),
+    );
+
+    await S.delegate.load(localeCubit.currentLocale);
   }
 
   void _navigateToPeers(BuildContext context) => Navigator.push(
@@ -195,16 +202,23 @@ class AboutSection extends SettingsSection with AppLogger {
 
     if (PlatformValues.isMobileDevice) {
       final pageTitle = Text(title);
-      final content = await Dialogs.executeFutureWithLoadingDialog(
-        null,
-        webView.loadUrl(context, url),
-      );
 
-      await Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) =>
-                  WebViewPage(title: pageTitle, content: content)));
+      await Dialogs.executeWithLoadingDialog(
+        null,
+        () async {
+          final content = await webView.loadUrl(context, url);
+
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => WebViewPage(
+                title: pageTitle,
+                content: content,
+              ),
+            ),
+          );
+        },
+      );
     } else {
       await webView.launchUrl(url);
     }

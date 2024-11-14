@@ -4,6 +4,7 @@ import 'package:ouisync/ouisync.dart';
 import '../../../generated/l10n.dart';
 import '../../utils/utils.dart'
     show
+        AccessModeLocalizedExtension,
         AppLogger,
         Constants,
         Dialogs,
@@ -161,7 +162,7 @@ class _UnlockRepositoryState extends State<UnlockRepository> with AppLogger {
       repoLocation: widget.repoCubit.location,
       password: password,
       accessMode: accessMode,
-      message: S.current.messageUnlockRepoOk(accessMode.name),
+      message: S.current.messageUnlockRepoOk(accessMode.localized),
     ));
   }
 
