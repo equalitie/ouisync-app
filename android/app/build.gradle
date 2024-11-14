@@ -26,10 +26,6 @@ android {
         disable 'InvalidPackage'
     }
 
-    // Suffix to append to the application id, name and version. This allows installing multiple
-    // versions of the app on the same device (e.g., production and development).
-    def appSuffix = System.getenv("APP_SUFFIX") ?: localProperties.getProperty("app.suffix")
-
     def keystoreProperties = loadKeystorePropertiesFile(System.getenv('STORE_FILE') ?: localProperties['STORE_FILE'])
 
     defaultConfig {
@@ -44,12 +40,6 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
         multiDexEnabled = true
-
-        if (appSuffix != null) {
-            applicationIdSuffix = ".$appSuffix"
-            versionNameSuffix = "-$appSuffix"
-            resValue "string", "app_name", "Ouisync $appSuffix"
-        }
     }
 
     signingConfigs {
@@ -65,15 +55,16 @@ android {
     productFlavors {
         production {
             dimension "releaseType"
-            applicationIdSuffix applicationIdSuffix
         }
         nightly {
             dimension "releaseType"
-            applicationIdSuffix appendUnlessNull(".nightly", applicationIdSuffix)
+            applicationIdSuffix ".nightly"
+            resValue "string", "app_name", "Ouisync nightly"
         }
         unofficial {
             dimension "releaseType"
-            applicationIdSuffix appendUnlessNull(".unofficial", applicationIdSuffix)
+            applicationIdSuffix ".unofficial"
+            resValue "string", "app_name", "Ouisync unofficial"
         }
     }
 
@@ -95,8 +86,8 @@ android {
 // Generate launcher icons by invoking [icons_launcher](https://pub.dev/packages/icons_launcher)
 tasks.register("generateLauncherIcons", Exec) {
     workingDir "${project.rootDir}/.."
-    // TODO: This generates icons for all platforms. Ideally we would restrict it to generate only
-    // android (and set it up separately in other platforms' respective build systems).
+    // TODO: This generates icons for all platforms. Ideally we would restrict it to generate them
+    // only for android (and set it up separately in other platforms' respective build systems).
     commandLine 'dart', 'run', 'icons_launcher:create'
 }
 

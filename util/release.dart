@@ -453,8 +453,6 @@ class BuildDesc {
 
   BuildDesc(this.version, this.commit) : timestamp = DateTime.now();
 
-  String get versionString => _formatVersion(StringBuffer()).toString();
-  String get revisionString => _formatRevision(StringBuffer()).toString();
   // The "foo" in "1.2.3+foo".
   String get buildIdentifier => version.build[0].toString();
 
@@ -480,12 +478,6 @@ class BuildDesc {
       ..write(version.minor)
       ..write('.')
       ..write(version.patch);
-
-    if (flavor.displayString.isNotEmpty) {
-      buffer
-        ..write('-')
-        ..write(flavor.displayString);
-    }
 
     return buffer;
   }
