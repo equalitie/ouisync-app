@@ -7,6 +7,7 @@ import './cipher.dart' as cipher;
 
 class MasterKey {
   static const String _masterKey = 'masterKey';
+  static final _mutex = Mutex();
 
   final cipher.Cipher _cipher;
 
@@ -18,8 +19,7 @@ class MasterKey {
 
     // Ensure nothing else tries to initialize the MasterKey concurrently or data
     // loss could happen.
-    final mutex = Mutex();
-    await mutex.acquire();
+    await _mutex.acquire();
 
     try {
       var masterKeyBase64 = await storage.read(key: _masterKey);
@@ -34,7 +34,7 @@ class MasterKey {
 
       return MasterKey._(cipher.SecretKey(base64.decode(masterKeyBase64)));
     } finally {
-      mutex.release();
+      _mutex.release();
     }
   }
 
