@@ -81,7 +81,7 @@ mixin RepositoryActionsMixin on LoggyType {
 
     switch (repoCubit.state.authMode) {
       case (AuthModeBlindOrManual()):
-        final password = await manualUnlock(context, repoCubit);
+        final password = await manualUnlock(context, repoCubit, settings);
         if (password == null || password.isEmpty) return;
         secret = LocalPassword(password);
         break;
@@ -114,12 +114,13 @@ mixin RepositoryActionsMixin on LoggyType {
   Future<String?> manualUnlock(
     BuildContext context,
     RepoCubit repoCubit,
+    Settings settings,
   ) =>
       showDialog<String>(
         context: context,
         builder: (BuildContext context) => ActionsDialog(
           title: S.current.messageValidateLocalPassword,
-          body: UnlockDialog(repoCubit),
+          body: UnlockDialog(repoCubit, settings),
         ),
       );
 

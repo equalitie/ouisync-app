@@ -3,14 +3,22 @@ import 'package:ouisync/ouisync.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/repo.dart' show RepoCubit;
+import '../../pages/repo_reset_access.dart';
 import '../../utils/utils.dart'
-    show AppLogger, Constants, Dimensions, Fields, validateNoEmptyMaybeRegExpr;
+    show
+        AppLogger,
+        Constants,
+        Dimensions,
+        Fields,
+        Settings,
+        validateNoEmptyMaybeRegExpr;
 import '../widgets.dart' show NegativeButton, PositiveButton;
 
 class UnlockDialog extends StatefulWidget {
-  UnlockDialog(this.repoCubit, {super.key});
+  UnlockDialog(this.repoCubit, this.settings, {super.key});
 
   final RepoCubit repoCubit;
+  final Settings settings;
 
   @override
   State<UnlockDialog> createState() => _UnlockDialogState();
@@ -68,9 +76,25 @@ class _UnlockDialogState extends State<UnlockDialog> with AppLogger {
             ),
             autofocus: true,
           ),
+          buildIDontHaveLocalPasswordButton(context),
           Fields.dialogActions(buttons: buildActions(context)),
         ],
       );
+
+  Widget buildIDontHaveLocalPasswordButton(BuildContext context) {
+    return InkWell(
+        child: RichText(
+            text: TextSpan(
+                text: "\nI don't have a local password for this repository\n",
+                style: TextStyle(color: Colors.blue))),
+        onTap: () {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => RepoResetAccessPage(
+                      settings: widget.settings, repo: widget.repoCubit)));
+        });
+  }
 
   List<Widget> buildActions(BuildContext context) => [
         NegativeButton(

@@ -294,6 +294,12 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     emitUnlessClosed(state.copyWith(accessMode: accessMode));
   }
 
+  Future<void> resetCredentials(ShareToken token) async {
+    await _repo.resetCredentials(token);
+    final accessMode = await _repo.accessMode;
+    final foo = emitUnlessClosed(state.copyWith(accessMode: accessMode));
+  }
+
   Future<void> mount() async {
     if (_mounter.mountPoint == null) {
       // Mounting not supported.
@@ -555,6 +561,27 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
       await _repo.setCredentials(credentials);
       emitUnlessClosed(state.copyWith(isLoading: false));
     }
+  }
+
+  Future<void> setAccess({
+    AccessChange? read,
+    AccessChange? write,
+  }) async {
+    await _repo.setAccess(read: read, write: write);
+
+    // Operation succeeded (did not throw), so we can set `state.accessMode`
+    // based on `read` and `write`.
+    AccessMode newAccessMode;
+
+    if (read is DisableAccess && write is DisableAccess) {
+      newAccessMode = AccessMode.blind;
+    } else if (write is DisableAccess) {
+      newAccessMode = AccessMode.read;
+    } else /* `write` or both (`read` and `write`) are `EnableAccess` */ {
+      newAccessMode = AccessMode.write;
+    }
+
+    emitUnlessClosed(state.copyWith(accessMode: newAccessMode));
   }
 
   /// Returns null if the authMode is AuthModeBlindOrManual or if decryption fails.
