@@ -81,9 +81,13 @@ mixin RepositoryActionsMixin on LoggyType {
 
     switch (repoCubit.state.authMode) {
       case (AuthModeBlindOrManual()):
-        final password = await manualUnlock(context, repoCubit, settings);
-        if (password == null || password.isEmpty) return;
-        secret = LocalPassword(password);
+        final result =
+            await unlockRepositoryManually(context, repoCubit, settings);
+
+        if (result == null) return;
+
+        secret = result.localSecret;
+
         break;
       case (AuthModeKeyStoredOnDevice()):
       case (AuthModePasswordStoredOnDevice()):
@@ -110,19 +114,6 @@ mixin RepositoryActionsMixin on LoggyType {
       ),
     );
   }
-
-  Future<String?> manualUnlock(
-    BuildContext context,
-    RepoCubit repoCubit,
-    Settings settings,
-  ) =>
-      showDialog<String>(
-        context: context,
-        builder: (BuildContext context) => ActionsDialog(
-          title: S.current.messageValidateLocalPassword,
-          body: UnlockDialog(repoCubit, settings),
-        ),
-      );
 
   Future<void> locateRepository(
     BuildContext context, {
@@ -236,8 +227,8 @@ mixin RepositoryActionsMixin on LoggyType {
   Future<void> unlockRepository(
     BuildContext context,
     RepoCubit repoCubit,
-    MasterKey masterKey,
     PasswordHasher passwordHasher,
+    Settings settings,
   ) async {
     final authMode = repoCubit.state.authMode;
     String? errorMessage;
@@ -256,12 +247,13 @@ mixin RepositoryActionsMixin on LoggyType {
         final unlockResult = await unlockRepositoryManually(
           context,
           repoCubit,
-          masterKey,
-          passwordHasher,
+          settings,
         );
+
         if (unlockResult == null) return;
 
-        showSnackBar(unlockResult.message);
+        showSnackBar(
+            S.current.messageUnlockRepoOk(unlockResult.accessMode.localized));
 
         return;
       case AuthModeKeyStoredOnDevice(secureWithBiometrics: true):
@@ -277,7 +269,7 @@ mixin RepositoryActionsMixin on LoggyType {
         errorMessage = S.current.messageAutomaticUnlockRepositoryFailed;
     }
 
-    final secret = await repoCubit.getLocalSecret(masterKey);
+    final secret = await repoCubit.getLocalSecret(settings.masterKey);
 
     if (secret == null) {
       showSnackBar(errorMessage);
@@ -297,11 +289,8 @@ mixin RepositoryActionsMixin on LoggyType {
   Future<UnlockRepositoryResult?> unlockRepositoryManually(
     BuildContext context,
     RepoCubit repoCubit,
-    MasterKey masterKey,
-    PasswordHasher passwordHasher,
+    Settings settings,
   ) async {
-    final isBiometricsAvailable = await LocalAuth.canAuthenticate();
-
     return await showDialog<UnlockRepositoryResult?>(
       context: context,
       builder: (BuildContext context) => ScaffoldMessenger(
@@ -311,9 +300,7 @@ mixin RepositoryActionsMixin on LoggyType {
             title: S.current.messageUnlockRepository(repoCubit.name),
             body: UnlockRepository(
               repoCubit: repoCubit,
-              masterKey: masterKey,
-              passwordHasher: passwordHasher,
-              isBiometricsAvailable: isBiometricsAvailable,
+              settings: settings,
             ),
           ),
         ),

@@ -441,7 +441,9 @@ class _MainPageState extends State<MainPage>
           parentContext: context,
           directionality: directionality,
           repoCubit: current.cubit,
+          // TODO: masterKey is not needed when passing settings.
           masterKey: widget.settings.masterKey,
+          settings: widget.settings,
           passwordHasher: PasswordHasher(widget.session),
         );
       }

@@ -3,6 +3,7 @@ import 'package:ouisync/ouisync.dart';
 
 import '../../../generated/l10n.dart';
 import '../../pages/repo_reset_access.dart';
+import '../../widgets/dialogs/actions_dialog.dart';
 import '../../utils/utils.dart'
     show
         AccessModeLocalizedExtension,
@@ -16,11 +17,12 @@ import '../../utils/utils.dart'
         validateNoEmptyMaybeRegExpr;
 import '../../models/models.dart'
     show AuthModeKeyStoredOnDevice, RepoLocation, SecretKeyOrigin;
+import '../../models/access_mode.dart';
 import '../../cubits/cubits.dart' show RepoCubit;
 import '../widgets.dart' show NegativeButton, PositiveButton;
 
-class UnlockRepository extends StatefulWidget {
-  UnlockRepository({
+class ManualRepoUnlockDialog extends StatefulWidget {
+  ManualRepoUnlockDialog({
     required this.repoCubit,
     required this.settings,
   });
@@ -28,11 +30,33 @@ class UnlockRepository extends StatefulWidget {
   final RepoCubit repoCubit;
   final Settings settings;
 
+  static Future<UnlockRepositoryResult?> show(
+    BuildContext context,
+    RepoCubit repoCubit,
+    Settings settings,
+  ) async {
+    return await showDialog<UnlockRepositoryResult?>(
+      context: context,
+      builder: (BuildContext context) => ScaffoldMessenger(
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: ActionsDialog(
+            title: S.current.messageUnlockRepository(repoCubit.name),
+            body: ManualRepoUnlockDialog(
+              repoCubit: repoCubit,
+              settings: settings,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
-  State<UnlockRepository> createState() => _State();
+  State<ManualRepoUnlockDialog> createState() => _State();
 }
 
-class _State extends State<UnlockRepository> with AppLogger {
+class _State extends State<ManualRepoUnlockDialog> with AppLogger {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   final TextEditingController passwordController = TextEditingController();
 
@@ -63,12 +87,28 @@ class _State extends State<UnlockRepository> with AppLogger {
                 // TODO(inetic): locales
                 text: "\nI don't have a local password for this repository\n",
                 style: TextStyle(color: Colors.blue))),
-        onTap: () {
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => RepoResetAccessPage(
-                      settings: widget.settings, repo: widget.repoCubit)));
+        onTap: () async {
+          final localSecret = await RepoResetAccessPage.show(
+              context, widget.repoCubit, widget.settings);
+
+          if (localSecret == null) {
+            return;
+          }
+
+          switch (widget.repoCubit.state.accessMode) {
+            case AccessMode.blind:
+              return;
+            case AccessMode.read:
+              Navigator.of(context).maybePop(UnlockRepositoryResult(
+                unlockedAccessMode: ReadAccessMode(),
+                localSecret: localSecret,
+              ));
+            case AccessMode.write:
+              Navigator.of(context).maybePop(UnlockRepositoryResult(
+                unlockedAccessMode: WriteAccessMode(),
+                localSecret: localSecret,
+              ));
+          }
         });
   }
 
@@ -127,33 +167,35 @@ class _State extends State<UnlockRepository> with AppLogger {
     );
 
     final accessMode = widget.repoCubit.accessMode;
+    UnlockedAccessMode unlockedAccessMode;
 
-    if (accessMode == AccessMode.blind) {
-      setState(() {
-        passwordInvalid = true;
-      });
-      return;
-    } else {
-      setState(() {
-        passwordInvalid = false;
-      });
+    switch (accessMode) {
+      case AccessMode.blind:
+        setState(() {
+          passwordInvalid = true;
+        });
+        return;
+      case AccessMode.read:
+        unlockedAccessMode = ReadAccessMode();
+      case AccessMode.write:
+        unlockedAccessMode = WriteAccessMode();
     }
 
-    //Navigator.of(context).pop(UnlockRepositoryResult(
-    //  message: S.current.messageUnlockRepoOk(accessMode.localized),
-    //));
+    setState(() {
+      passwordInvalid = false;
+    });
+
     Navigator.of(context).pop(UnlockRepositoryResult(
-      accessMode: accessMode,
+      unlockedAccessMode: unlockedAccessMode,
       localSecret: password,
     ));
   }
 }
 
 class UnlockRepositoryResult {
-  //UnlockRepositoryResult({required this.message});
-
-  //final String message;
-  UnlockRepositoryResult({required this.accessMode, required this.localSecret});
-  final AccessMode accessMode;
+  final UnlockedAccessMode unlockedAccessMode;
   final LocalSecret localSecret;
+
+  UnlockRepositoryResult(
+      {required this.unlockedAccessMode, required this.localSecret});
 }
