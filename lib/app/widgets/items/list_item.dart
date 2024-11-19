@@ -206,6 +206,7 @@ class _VerticalDotsButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => IconButton(
+        key: ValueKey('file_vert'),
         icon: const Icon(
           Icons.more_vert_rounded,
           size: Dimensions.sizeIconSmall,

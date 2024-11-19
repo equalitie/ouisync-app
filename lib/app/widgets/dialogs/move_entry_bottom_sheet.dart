@@ -111,7 +111,7 @@ class _MoveEntryDialogState extends State<MoveEntryDialog> {
         builder: (context, state) {
           final aspectRatio = _getButtonAspectRatio(widgetSize);
           return Fields.dialogActions(
-            buttons: _actions(context, isRepoList, aspectRatio),
+            buttons: _actions(context, state, isRepoList, aspectRatio),
             padding: const EdgeInsetsDirectional.only(top: 20.0),
             mainAxisAlignment: MainAxisAlignment.end,
           );
@@ -120,65 +120,62 @@ class _MoveEntryDialogState extends State<MoveEntryDialog> {
 
   List<Widget> _actions(
     BuildContext context,
+    NavigationState state,
     bool isRepoList,
     double aspectRatio,
-  ) =>
-      [
-        NegativeButton(
-          buttonsAspectRatio: aspectRatio,
-          buttonConstrains: Dimensions.sizeConstrainsBottomDialogAction,
-          text: S.current.actionCancel,
-          onPressed: () {
-            widget.onUpdateBottomSheet(BottomSheetType.gone, 0.0, '');
-            widget.onCancel();
-          },
-        ),
-        BlocBuilder<NavigationCubit, NavigationState>(
-          bloc: navigationCubit,
-          builder: (context, state) {
-            final currentRepoAccessMode =
-                widget.reposCubit.currentRepo?.accessMode;
-            final isCurrentRepoWriteMode =
-                currentRepoAccessMode == AccessMode.write;
+  ) {
+    final currentRepoAccessMode = widget.reposCubit.currentRepo?.accessMode;
+    final isCurrentRepoWriteMode = currentRepoAccessMode == AccessMode.write;
 
-            final canMove = state.isFolder
-                ? _canMove(
-                    originRepoLocation: originRepoCubit.location,
-                    originPath: repo_path.dirname(entryPath),
-                    destinationRepoLocation: state.repoLocation,
-                    destinationPath: state.path,
-                    isRepoList: isRepoList,
-                    isCurrentRepoWriteMode: isCurrentRepoWriteMode,
-                  )
-                : false;
-            return PositiveButton(
-              buttonsAspectRatio: aspectRatio,
-              buttonConstrains: Dimensions.sizeConstrainsBottomDialogAction,
-              text: S.current.actionMove,
-              onPressed: canMove
-                  ? () async {
-                      await Dialogs.executeFutureWithLoadingDialog(
-                        null,
-                        widget.onMoveEntry(),
-                      ).then(
-                        (_) {
-                          widget.onUpdateBottomSheet(
-                            BottomSheetType.gone,
-                            0.0,
-                            '',
-                          );
-                          widget.onCancel();
-                        },
-                      );
-                    }
-                  : null,
-            );
-          },
-        ),
+    final canMove = state.isFolder
+        ? _canMove(
+            originRepoLocation: originRepoCubit.location,
+            originPath: repo_path.dirname(entryPath),
+            destinationRepoLocation:
+                widget.reposCubit.currentRepo?.cubit?.location ??
+                    state.repoLocation,
+            destinationPath: state.path,
+            isRepoList: isRepoList,
+            isCurrentRepoWriteMode: isCurrentRepoWriteMode,
+          )
+        : false;
 
-        /// If the entry can't be moved (the user selected the same entry/path, for example)
-        /// Then null is used instead of the function, which disable the button.
-      ];
+    return [
+      NegativeButton(
+        buttonsAspectRatio: aspectRatio,
+        buttonConstrains: Dimensions.sizeConstrainsBottomDialogAction,
+        text: S.current.actionCancel,
+        onPressed: () {
+          widget.onUpdateBottomSheet(BottomSheetType.gone, 0.0, '');
+          widget.onCancel();
+        },
+      ),
+      PositiveButton(
+        key: ValueKey('move_entry'),
+        buttonsAspectRatio: aspectRatio,
+        buttonConstrains: Dimensions.sizeConstrainsBottomDialogAction,
+        text: S.current.actionMove,
+        onPressed: canMove
+            ? () async {
+                widget.onUpdateBottomSheet(
+                  BottomSheetType.gone,
+                  0.0,
+                  '',
+                );
+                widget.onCancel();
+
+                await Dialogs.executeFutureWithLoadingDialog(
+                  null,
+                  widget.onMoveEntry(),
+                );
+              }
+            : null,
+      )
+
+      /// If the entry can't be moved (the user selected the same entry/path, for example)
+      /// Then null is used instead of the function, which disable the button.
+    ];
+  }
 
   bool _canMove({
     required RepoLocation originRepoLocation,
