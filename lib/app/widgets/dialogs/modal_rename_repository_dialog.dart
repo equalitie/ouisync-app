@@ -97,7 +97,8 @@ class _RenameRepository extends State<RenameRepository> {
       return;
     }
 
-    await Navigator.of(context).maybePop(newNameController.text);
+    final newName = newNameController.text;
+    Navigator.of(context).pop(newName);
   }
 
   Future<bool> validate(BuildContext context) async {

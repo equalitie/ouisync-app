@@ -75,7 +75,7 @@ class _UnlockDialogState extends State<UnlockDialog> with AppLogger {
   List<Widget> buildActions(BuildContext context) => [
         NegativeButton(
           text: S.current.actionCancel,
-          onPressed: () async => await Navigator.of(context).maybePop(null),
+          onPressed: () async => await Navigator.of(context).maybePop(''),
           buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
         ),
         PositiveButton(

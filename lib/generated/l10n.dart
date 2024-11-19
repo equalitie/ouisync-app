@@ -4999,6 +4999,56 @@ class S {
       args: [],
     );
   }
+
+  /// `Repository {name} deleted`
+  String messageRepositoryDeleted(Object name) {
+    return Intl.message(
+      'Repository $name deleted',
+      name: 'messageRepositoryDeleted',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Repository renamed as {name}`
+  String messageRepositoryRenamed(Object name) {
+    return Intl.message(
+      'Repository renamed as $name',
+      name: 'messageRepositoryRenamed',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `File renamed as {name}`
+  String messageFileRenamed(Object name) {
+    return Intl.message(
+      'File renamed as $name',
+      name: 'messageFileRenamed',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Error creating folder {name}`
+  String messageErrorCreatingFolder(Object name) {
+    return Intl.message(
+      'Error creating folder $name',
+      name: 'messageErrorCreatingFolder',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Folder renamed as {name}`
+  String messageFolderRenamed(Object name) {
+    return Intl.message(
+      'Folder renamed as $name',
+      name: 'messageFolderRenamed',
+      desc: '',
+      args: [name],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

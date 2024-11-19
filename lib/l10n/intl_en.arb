@@ -714,5 +714,10 @@
   "accessModeBlindLabel":"blind",
   "accessModeReadLabel":"read",
   "accessModeWriteLabel":"write",
-  "labelSynced":"Synced"
+  "labelSynced":"Synced",
+  "messageRepositoryDeleted":"Repository {name} deleted",
+  "messageRepositoryRenamed":"Repository renamed as {name}",
+  "messageFileRenamed":"File renamed as {name}",
+  "messageErrorCreatingFolder":"Error creating folder {name}",
+  "messageFolderRenamed":"Folder renamed as {name}"
 }

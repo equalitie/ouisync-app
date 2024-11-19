@@ -6,42 +6,75 @@ import 'package:path/path.dart' as p;
 import 'package:url_launcher/url_launcher.dart' as launcher;
 
 import '../../generated/l10n.dart';
-import '../cubits/cubits.dart';
-import '../models/models.dart';
-import '../pages/pages.dart';
-import '../utils/master_key.dart';
-import '../utils/platform/platform.dart';
-import '../utils/utils.dart';
-import '../widgets/widgets.dart';
+import '../cubits/cubits.dart' show RepoCubit;
+import '../models/models.dart'
+    show
+        AuthModeBlindOrManual,
+        AuthModeKeyStoredOnDevice,
+        AuthModePasswordStoredOnDevice,
+        RepoLocation;
+import '../pages/pages.dart' show RepoSecurityPage;
+import '../utils/platform/platform.dart' show PlatformValues;
+import '../utils/utils.dart'
+    show
+        AccessModeLocalizedExtension,
+        AppThemeExtension,
+        Dialogs,
+        Dimensions,
+        LocalAuth,
+        MasterKey,
+        PasswordHasher,
+        Settings,
+        ThemeGetter,
+        showSnackBar;
+import '../widgets/widgets.dart'
+    show
+        ActionsDialog,
+        DeleteRepoDialog,
+        RenameRepository,
+        ShareRepository,
+        UnlockDialog,
+        UnlockRepository,
+        UnlockRepositoryResult;
 
 mixin RepositoryActionsMixin on LoggyType {
-  /// rename => ReposCubit.renameRepository
-  Future<void> renameRepository(
+  Future<String> renameRepository(
     BuildContext context, {
     required RepoCubit repoCubit,
-    required ReposCubit reposCubit,
-    void Function()? popDialog,
+    required RepoLocation location,
+    required Future<void> Function(RepoLocation, String) renameRepoFuture,
+  }) async {
+    final newName = await _getRepositoryNewName(
+      context,
+      repoCubit: repoCubit,
+    );
+
+    if (newName.isNotEmpty) {
+      await Dialogs.executeFutureWithLoadingDialog(
+        null,
+        renameRepoFuture(location, newName),
+      );
+
+      return newName;
+    }
+
+    return '';
+  }
+
+  Future<String> _getRepositoryNewName(
+    BuildContext context, {
+    required RepoCubit repoCubit,
   }) async {
     final newName = await showDialog<String>(
-      context: context,
-      builder: (BuildContext context) => ActionsDialog(
-        title: S.current.messageRenameRepository,
-        body: RenameRepository(repoCubit),
-      ),
-    );
+          context: context,
+          builder: (BuildContext context) => ActionsDialog(
+            title: S.current.messageRenameRepository,
+            body: RenameRepository(repoCubit),
+          ),
+        ) ??
+        '';
 
-    if (newName == null || newName.isEmpty) {
-      return;
-    }
-
-    await Dialogs.executeFutureWithLoadingDialog(
-      null,
-      reposCubit.renameRepository(repoCubit.location, newName),
-    );
-
-    if (popDialog != null) {
-      popDialog();
-    }
+    return newName;
   }
 
   Future<dynamic> shareRepository(BuildContext context,
@@ -81,8 +114,8 @@ mixin RepositoryActionsMixin on LoggyType {
 
     switch (repoCubit.state.authMode) {
       case (AuthModeBlindOrManual()):
-        final password = await manualUnlock(context, repoCubit);
-        if (password == null || password.isEmpty) return;
+        final password = await _getManualPassword(context, repoCubit);
+        if (password.isEmpty) return;
         secret = LocalPassword(password);
         break;
       case (AuthModeKeyStoredOnDevice()):
@@ -111,17 +144,21 @@ mixin RepositoryActionsMixin on LoggyType {
     );
   }
 
-  Future<String?> manualUnlock(
+  Future<String> _getManualPassword(
     BuildContext context,
     RepoCubit repoCubit,
-  ) =>
-      showDialog<String>(
-        context: context,
-        builder: (BuildContext context) => ActionsDialog(
-          title: S.current.messageValidateLocalPassword,
-          body: UnlockDialog(repoCubit),
-        ),
-      );
+  ) async {
+    final password = await showDialog<String>(
+          context: context,
+          builder: (BuildContext context) => ActionsDialog(
+            title: S.current.messageValidateLocalPassword,
+            body: UnlockDialog(repoCubit),
+          ),
+        ) ??
+        '';
+
+    return password;
+  }
 
   Future<void> locateRepository(
     BuildContext context, {
@@ -134,13 +171,6 @@ mixin RepositoryActionsMixin on LoggyType {
       return;
     }
 
-    await _showRepoLocationDialog(context, repoLocation);
-  }
-
-  Future<void> _showRepoLocationDialog(
-    BuildContext context,
-    RepoLocation repoLocation,
-  ) async {
     final dbFile = p.basename(repoLocation.path);
     final segments = p.split(repoLocation.dir.path);
 
@@ -153,83 +183,74 @@ mixin RepositoryActionsMixin on LoggyType {
       },
     );
 
-    await Dialogs.alertDialogWithActions(
-      context: context,
-      title: S.current.actionLocateRepo,
-      body: [
-        Text(
-          dbFile,
-          style: context.theme.appTextStyle.bodyMedium
-              .copyWith(fontWeight: FontWeight.w400),
-        ),
-        Dimensions.spacingVerticalDouble,
-        breadcrumbs,
-      ],
-      actions: [
-        TextButton(
-          child: Text(S.current.actionCloseCapital),
-          onPressed: () async => await Navigator.of(context).maybePop(false),
-        ),
-      ],
+    await _showRepoLocationDialog(
+      context,
+      dbFile: dbFile,
+      breadcrumbs: breadcrumbs,
     );
   }
 
-  /// delete => ReposCubit.deleteRepository
-  Future<void> deleteRepository(
+  Future<void> _showRepoLocationDialog(
     BuildContext context, {
-    required ReposCubit reposCubit,
-    required RepoLocation repoLocation,
-    void Function()? popDialog,
-  }) async {
-    final deleteRepo = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Flex(direction: Axis.horizontal, children: [
-          Fields.constrainedText(
-            S.current.titleDeleteRepository,
-            style: context.theme.appTextStyle.titleMedium,
-            maxLines: 2,
-          )
-        ]),
-        content: SingleChildScrollView(
-          child: ListBody(
-            children: [
-              Text(
-                S.current.messageConfirmRepositoryDeletion,
-                style: context.theme.appTextStyle.bodyMedium,
-              )
-            ],
+    required String dbFile,
+    required BreadCrumb breadcrumbs,
+  }) async =>
+      Dialogs.alertDialogWithActions(
+        context: context,
+        title: S.current.actionLocateRepo,
+        body: [
+          Text(
+            dbFile,
+            style: context.theme.appTextStyle.bodyMedium
+                .copyWith(fontWeight: FontWeight.w400),
           ),
-        ),
-        actions: [
-          Fields.dialogActions(buttons: [
-            NegativeButton(
-              text: S.current.actionCancelCapital,
-              onPressed: () async =>
-                  await Navigator.of(context).maybePop(false),
-              buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
-            ),
-            PositiveButton(
-              text: S.current.actionDeleteCapital,
-              onPressed: () async => await Navigator.of(context).maybePop(true),
-              buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
-              isDangerButton: true,
-            )
-          ])
+          Dimensions.spacingVerticalDouble,
+          breadcrumbs,
         ],
-      ),
-    );
-
-    if (deleteRepo ?? false) {
-      await Dialogs.executeFutureWithLoadingDialog(
-        null,
-        reposCubit.deleteRepository(repoLocation),
+        actions: [
+          TextButton(
+            child: Text(S.current.actionCloseCapital),
+            onPressed: () async => await Navigator.of(context).maybePop(false),
+          ),
+        ],
       );
 
-      if (popDialog != null) {
-        popDialog();
-      }
+  /// delete => ReposCubit.deleteRepository
+  Future<bool> deleteRepository(
+    BuildContext context, {
+    required String repoName,
+    required Future deleteRepoFuture,
+  }) async {
+    final delete = await _getDeleteRepoConfirmation(
+      context,
+      repoName: repoName,
+    );
+
+    if (delete == true) {
+      await Dialogs.executeFutureWithLoadingDialog(
+        null,
+        deleteRepoFuture,
+      );
+
+      return true;
     }
+
+    return false;
+  }
+
+  Future<bool> _getDeleteRepoConfirmation(
+    BuildContext context, {
+    required String repoName,
+  }) async {
+    final delete = await showDialog<bool>(
+          context: context,
+          builder: (BuildContext context) => ActionsDialog(
+              title: S.current.messageRenameRepository,
+              body: DeleteRepoDialog(repoName: repoName)),
+        ) ??
+        false;
+
+    return delete;
   }
 
   Future<void> unlockRepository(
@@ -252,7 +273,7 @@ mixin RepositoryActionsMixin on LoggyType {
         }
 
         // If it didn't work, try to unlock using a password from the user.
-        final unlockResult = await unlockRepositoryManually(
+        final unlockResult = await _unlockRepositoryManually(
           context,
           repoCubit,
           masterKey,
@@ -293,7 +314,7 @@ mixin RepositoryActionsMixin on LoggyType {
     showSnackBar(message);
   }
 
-  Future<UnlockRepositoryResult?> unlockRepositoryManually(
+  Future<UnlockRepositoryResult?> _unlockRepositoryManually(
     BuildContext context,
     RepoCubit repoCubit,
     MasterKey masterKey,
@@ -301,7 +322,7 @@ mixin RepositoryActionsMixin on LoggyType {
   ) async {
     final isBiometricsAvailable = await LocalAuth.canAuthenticate();
 
-    return await showDialog<UnlockRepositoryResult?>(
+    final result = await showDialog<UnlockRepositoryResult?>(
       context: context,
       builder: (BuildContext context) => ScaffoldMessenger(
         child: Scaffold(
@@ -318,6 +339,8 @@ mixin RepositoryActionsMixin on LoggyType {
         ),
       ),
     );
+
+    return result;
   }
 }
 

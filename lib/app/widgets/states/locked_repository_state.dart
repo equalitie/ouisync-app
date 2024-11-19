@@ -4,7 +4,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../mixins/mixins.dart';
-import '../../utils/master_key.dart';
 import '../../utils/utils.dart';
 
 class LockedRepositoryState extends HookWidget

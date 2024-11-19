@@ -1066,7 +1066,6 @@ class _MainPageState extends State<MainPage>
         shape: Dimensions.borderBottomSheetTop,
         builder: (context) {
           return RepositorySettings(
-            context: context,
             settings: widget.settings,
             repoCubit: repoCubit,
             reposCubit: widget.reposCubit,
