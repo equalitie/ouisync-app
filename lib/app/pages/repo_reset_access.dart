@@ -6,35 +6,33 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../generated/l10n.dart';
 import '../models/auth_mode.dart';
-import '../cubits/cubits.dart'
-    show RepoCubit, RepoState, RepoSecurityCubit, RepoSecurityState;
+import '../models/access_mode.dart';
+import '../cubits/cubits.dart' show RepoCubit, RepoState;
 import '../models/models.dart' show LocalSecret;
 import '../utils/utils.dart'
-    show
-        AppThemeExtension,
-        Constants,
-        Dialogs,
-        Fields,
-        LocalAuth,
-        Settings,
-        showSnackBar,
-        ThemeGetter;
-import '../widgets/widgets.dart'
-    show
-        BlocHolder,
-        ContentWithStickyFooterState,
-        DirectionalAppBar,
-        RepoSecurity;
+    show AppThemeExtension, Constants, Fields, LocalAuth, Settings, ThemeGetter;
+import '../widgets/widgets.dart' show DirectionalAppBar;
 
 class RepoResetAccessPage extends StatefulWidget {
-  RepoResetAccessPage({
-    required this.settings,
-    required this.repo,
-  }) : jobs = _Jobs();
-
   final Settings settings;
   final RepoCubit repo;
   final _Jobs jobs;
+
+  static Future<LocalSecret?> show(
+      BuildContext context, RepoCubit repo, Settings settings) {
+    final route = MaterialPageRoute<LocalSecret>(
+        builder: (context) =>
+            RepoResetAccessPage._(settings: settings, repo: repo));
+
+    Navigator.push(context, route);
+
+    return route.popped;
+  }
+
+  RepoResetAccessPage._({
+    required this.settings,
+    required this.repo,
+  }) : jobs = _Jobs();
 
   @override
   State<RepoResetAccessPage> createState() => _State();
@@ -42,6 +40,7 @@ class RepoResetAccessPage extends StatefulWidget {
 
 class _State extends State<RepoResetAccessPage> {
   _TokenStatus tokenStatus;
+  LocalSecret? result = null;
 
   _State() : tokenStatus = _InvalidTokenStatus(_InvalidTokenType.empty);
 
@@ -259,11 +258,11 @@ class _State extends State<RepoResetAccessPage> {
         };
       case _InvalidTokenStatus():
       case _NonMatchingTokenStatus():
-        buttonText = "Submit";
-        onPressed = null;
       case _SameAccessTokenStatus():
         buttonText = "Done";
-        onPressed = null;
+        onPressed = () async {
+          Navigator.pop(context, result);
+        };
     }
 
     return AsyncTextButton(child: Text(buttonText), onPressed: onPressed);
@@ -310,8 +309,11 @@ class _State extends State<RepoResetAccessPage> {
         // access.
         secureWithBiometrics: await LocalAuth.canAuthenticate(),
       );
+
+      result = newLocalSecret.key;
     } else {
       newAuthMode = AuthModeBlindOrManual();
+      result = null;
     }
 
     // Store the auth mode inside the repository so it can be the next time

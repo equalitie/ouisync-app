@@ -82,7 +82,7 @@ mixin RepositoryActionsMixin on LoggyType {
     switch (repoCubit.state.authMode) {
       case (AuthModeBlindOrManual()):
         final result =
-            await unlockRepositoryManually(context, repoCubit, settings);
+            await ManualRepoUnlockDialog.show(context, repoCubit, settings);
 
         if (result == null) return;
 
@@ -244,7 +244,7 @@ mixin RepositoryActionsMixin on LoggyType {
         }
 
         // If it didn't work, try to unlock using a password from the user.
-        final unlockResult = await unlockRepositoryManually(
+        final unlockResult = await ManualRepoUnlockDialog.show(
           context,
           repoCubit,
           settings,
@@ -252,8 +252,8 @@ mixin RepositoryActionsMixin on LoggyType {
 
         if (unlockResult == null) return;
 
-        showSnackBar(
-            S.current.messageUnlockRepoOk(unlockResult.accessMode.localized));
+        showSnackBar(S.current.messageUnlockRepoOk(
+            unlockResult.unlockedAccessMode.general.localized));
 
         return;
       case AuthModeKeyStoredOnDevice(secureWithBiometrics: true):
@@ -284,28 +284,6 @@ mixin RepositoryActionsMixin on LoggyType {
         : S.current.messageUnlockRepoFailed;
 
     showSnackBar(message);
-  }
-
-  Future<UnlockRepositoryResult?> unlockRepositoryManually(
-    BuildContext context,
-    RepoCubit repoCubit,
-    Settings settings,
-  ) async {
-    return await showDialog<UnlockRepositoryResult?>(
-      context: context,
-      builder: (BuildContext context) => ScaffoldMessenger(
-        child: Scaffold(
-          backgroundColor: Colors.transparent,
-          body: ActionsDialog(
-            title: S.current.messageUnlockRepository(repoCubit.name),
-            body: UnlockRepository(
-              repoCubit: repoCubit,
-              settings: settings,
-            ),
-          ),
-        ),
-      ),
-    );
   }
 }
 
