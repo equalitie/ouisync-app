@@ -12,7 +12,7 @@ import OSLog
 import Common
 import Network
 
-class Extension: NSObject, NSFileProviderReplicatedExtension {
+open class Extension: NSObject, NSFileProviderReplicatedExtension {
     static let WRITE_CHUNK_SIZE: UInt64 = 32768 // TODO: Decide on optimal value
     static let READ_CHUNK_SIZE: Int = 32768 // TODO: Decide on optimal value
 
@@ -25,7 +25,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
     let pastEnumerations: PastEnumerations?
     let manager: NSFileProviderManager
 
-    required init(domain: NSFileProviderDomain) {
+    public required init(domain: NSFileProviderDomain) {
         // TODO: The containing application must create a domain using
         // `NSFileProviderManager.add(_:, completionHandler:)`. The system will
         // then launch the application extension process, call
@@ -151,11 +151,28 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
         }
     }
 
-    func invalidate() {
-        // TODO: cleanup any resources
+    // WARN: only mutate these while holding a lock on self
+    var active = true // this is set to false when shutting down
+    var invalidators: [@Sendable () async -> Void] = [] // list of things called on invalidate(); only append if active = true!
+    public func invalidate() {
+        let active = synchronized(self) {
+            defer { self.active = false }
+            return self.active
+        }
+        guard active else { return }
+        Task {
+            NSLog("👋 The File Provider extension is shutting down")
+            async let _ = ouisyncSession.client.close()
+            await withTaskGroup(of: Void.self) {
+                for invalidator in invalidators {
+                    $0.addTask(operation: invalidator)
+                }
+                invalidators.removeAll() // just in case they were holding strong refs
+            }
+        }
     }
     
-    func item(for identifier: NSFileProviderItemIdentifier, request: NSFileProviderRequest, completionHandler: @escaping (NSFileProviderItem?, Error?) -> Void) -> Progress {
+    public func item(for identifier: NSFileProviderItemIdentifier, request: NSFileProviderRequest, completionHandler: @escaping (NSFileProviderItem?, Error?) -> Void) -> Progress {
         let log = self.log.child("item").trace("invoked(\(identifier))")
 
         let handler = { (item: NSFileProviderItem?, error: Error?) in
@@ -187,7 +204,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
         return Progress()
     }
     
-    func fetchContents(for itemIdentifier: NSFileProviderItemIdentifier, version requestedVersion: NSFileProviderItemVersion?, request: NSFileProviderRequest, completionHandler: @escaping (URL?, NSFileProviderItem?, Error?) -> Void) -> Progress {
+    public func fetchContents(for itemIdentifier: NSFileProviderItemIdentifier, version requestedVersion: NSFileProviderItemVersion?, request: NSFileProviderRequest, completionHandler: @escaping (URL?, NSFileProviderItem?, Error?) -> Void) -> Progress {
         let log = self.log.child("fetchContents").info("invoked(\(itemIdentifier), \(requestedVersion.flatMap{Version($0)} as Optional)")
         // TODO: implement fetching of the contents for the itemIdentifier at the specified version
         
@@ -281,7 +298,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
         return progress
     }
     
-    func createItem(basedOn itemTemplate: NSFileProviderItem, fields: NSFileProviderItemFields, contents url: URL?, options: NSFileProviderCreateItemOptions = [], request: NSFileProviderRequest, completionHandler: @escaping (NSFileProviderItem?, NSFileProviderItemFields, Bool, Error?) -> Void) -> Progress {
+    public func createItem(basedOn itemTemplate: NSFileProviderItem, fields: NSFileProviderItemFields, contents url: URL?, options: NSFileProviderCreateItemOptions = [], request: NSFileProviderRequest, completionHandler: @escaping (NSFileProviderItem?, NSFileProviderItemFields, Bool, Error?) -> Void) -> Progress {
         // TODO: a new item was created on disk, process the item's creation
         let log = log.child("createItem").trace("invoked(itemTemplate:\(itemTemplate), fields:\(fields), url:\(url as Optional), options:\(options))")
 
@@ -348,7 +365,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
         return Progress()
     }
     
-    func modifyItem(_ item: NSFileProviderItem, baseVersion version: NSFileProviderItemVersion, changedFields: NSFileProviderItemFields, contents newContents: URL?, options: NSFileProviderModifyItemOptions = [], request: NSFileProviderRequest, completionHandler: @escaping (NSFileProviderItem?, NSFileProviderItemFields, Bool, Error?) -> Void) -> Progress {
+    public func modifyItem(_ item: NSFileProviderItem, baseVersion version: NSFileProviderItemVersion, changedFields: NSFileProviderItemFields, contents newContents: URL?, options: NSFileProviderModifyItemOptions = [], request: NSFileProviderRequest, completionHandler: @escaping (NSFileProviderItem?, NSFileProviderItemFields, Bool, Error?) -> Void) -> Progress {
         // TODO: an item was modified on disk, process the item's modification
         let log = self.log.child("modifyItem").trace("invoked(\(item), changedFields: \(changedFields))")
 
@@ -461,7 +478,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
         return Progress()
     }
     
-    func deleteItem(identifier: NSFileProviderItemIdentifier, baseVersion version: NSFileProviderItemVersion, options: NSFileProviderDeleteItemOptions = [], request: NSFileProviderRequest, completionHandler: @escaping (Error?) -> Void) -> Progress {
+    public func deleteItem(identifier: NSFileProviderItemIdentifier, baseVersion version: NSFileProviderItemVersion, options: NSFileProviderDeleteItemOptions = [], request: NSFileProviderRequest, completionHandler: @escaping (Error?) -> Void) -> Progress {
         // TODO: an item was deleted on disk, process the item's deletion
         let log = log.child("deleteItem").trace("invoked(\(identifier))")
 
@@ -498,7 +515,7 @@ class Extension: NSObject, NSFileProviderReplicatedExtension {
         return Progress()
     }
     
-    func enumerator(for rawIdentifier: NSFileProviderItemIdentifier, request: NSFileProviderRequest) throws -> NSFileProviderEnumerator {
+    public func enumerator(for rawIdentifier: NSFileProviderItemIdentifier, request: NSFileProviderRequest) throws -> NSFileProviderEnumerator {
         let identifier = ItemIdentifier(rawIdentifier)
 
         let log = self.log.child("enumerator").level(.trace).trace("invoked(\(identifier))")

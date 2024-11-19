@@ -70,23 +70,17 @@ extension Extension {
 
             let proxyId = generateProxyId()
 
-            connection.interruptionHandler = { [weak self] in
+            connection.interruptionHandler = { [weak self] in guard let self else { return }
                 NSLog("😡 Connection to Ouisync XPC service has been interrupted")
-                if let s = self {
-                    synchronized(s) {
-                        s.proxies.removeValue(forKey: proxyId)
-                        return
-                    }
+                synchronized(self) {
+                    _ = self.proxies.removeValue(forKey: proxyId)
                 }
             }
 
-            connection.invalidationHandler = { [weak self] in
+            connection.invalidationHandler = { [weak self] in guard let self else { return }
                 NSLog("😡 Connection to Ouisync XPC service has been invalidated")
-                if let s = self {
-                    synchronized(s) {
-                        s.proxies.removeValue(forKey: proxyId)
-                        return
-                    }
+                synchronized(self) {
+                    _ = self.proxies.removeValue(forKey: proxyId)
                 }
             }
 
@@ -109,12 +103,34 @@ extension Extension {
                 return false
             }
 
+            // this is a bit awkward because to avoid a reference leak, we have to atomically add
+            // our invalidation closure iff the base extension has not been shut down yet, but we
+            // also don't want to lift the rest of this function into the synchronized block,
+            // thus resulting in two checks against the same value
+            let active = synchronized(ext) {
+                if ext.active {
+                    ext.invalidators.append {
+                        connection.invalidate() // this should notify peer; invalidationHandler cleans up proxies
+                        await ouisyncClient.close()
+                    }
+                }
+                return ext.active
+            }
+            guard active else {
+                // presumably the OS is smart enough to not keep using this service provider bound
+                // to an instance it has already invalidate()d but stranger things have happened
+                NSLog("👋 The File Provider extension has received a connection from the app but is in the process of shutting down")
+                return false
+            }
+
             let proxy = AppToBackendProxy(connection, sendToApp, ouisyncClient)
 
             connection.exportedObject = proxy
             connection.exportedInterface = NSXPCInterface(with: FromAppToFileProviderProtocol.self)
 
-            proxies[proxyId] = proxy
+            synchronized(self) {
+                proxies[proxyId] = proxy
+            }
 
             connection.resume()
 

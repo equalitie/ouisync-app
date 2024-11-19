@@ -36,6 +36,7 @@ class FileProviderProxy: FromFileProviderToAppProtocol {
                     let res = try await self.invoke(call)
                     result(res is Void ? nil : res)
                 } catch {
+                    print(error)
                     result(error as? FlutterError ?? FlutterError(code: "OS01",
                                                                   message: "Unknown error in host",
                                                                   details: String(describing: error)))
