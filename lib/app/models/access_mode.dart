@@ -1,5 +1,7 @@
-import 'package:ouisync/ouisync.dart' show AccessMode;
+import 'package:ouisync/ouisync.dart' show AccessMode, LocalSecret;
 export 'package:ouisync/ouisync.dart' show AccessMode;
+
+//--------------------------------------------------------------------
 
 sealed class UnlockedAccessMode {
   bool get canRead;
@@ -28,3 +30,23 @@ class WriteAccessMode implements UnlockedAccessMode {
   @override
   AccessMode get general => AccessMode.write;
 }
+
+//--------------------------------------------------------------------
+
+sealed class Access {}
+
+class BlindAccess implements Access {}
+
+class ReadAccess implements Access {
+  LocalSecret localSecret;
+
+  ReadAccess(this.localSecret);
+}
+
+class WriteAccess implements Access {
+  LocalSecret localSecret;
+
+  WriteAccess(this.localSecret);
+}
+
+//--------------------------------------------------------------------

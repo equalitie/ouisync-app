@@ -108,7 +108,7 @@ mixin RepositoryActionsMixin on LoggyType {
         builder: (context) => RepoSecurityPage(
           settings: settings,
           repo: repoCubit,
-          currentLocalSecret: secret,
+          localSecret: secret,
           passwordHasher: passwordHasher,
         ),
       ),

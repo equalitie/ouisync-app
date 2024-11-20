@@ -86,25 +86,22 @@ class _State extends State<ManualRepoUnlockDialog> with AppLogger {
         // TODO(inetic): locales
         text: "\nI don't have a local password for this repository\n",
         onTap: () async {
-          final localSecret = await RepoResetAccessPage.show(
+          final access = await RepoResetAccessPage.show(
               context, widget.repoCubit, widget.settings);
 
-          if (localSecret == null) {
-            return;
-          }
-
-          switch (widget.repoCubit.state.accessMode) {
-            case AccessMode.blind:
+          switch (access) {
+            case null:
+            case BlindAccess():
               return;
-            case AccessMode.read:
+            case ReadAccess():
               Navigator.of(context).maybePop(UnlockRepositoryResult(
                 unlockedAccessMode: ReadAccessMode(),
-                localSecret: localSecret,
+                localSecret: access.localSecret,
               ));
-            case AccessMode.write:
+            case WriteAccess():
               Navigator.of(context).maybePop(UnlockRepositoryResult(
                 unlockedAccessMode: WriteAccessMode(),
-                localSecret: localSecret,
+                localSecret: access.localSecret,
               ));
           }
         });

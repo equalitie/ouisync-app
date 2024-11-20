@@ -7,7 +7,8 @@ import '../../generated/l10n.dart';
 import '../pages/repo_reset_access.dart';
 import '../cubits/cubits.dart'
     show RepoCubit, RepoSecurityCubit, RepoSecurityState;
-import '../models/models.dart' show LocalSecret;
+import '../models/models.dart'
+    show LocalSecret, Access, BlindAccess, ReadAccess, WriteAccess;
 import '../utils/utils.dart'
     show
         AppThemeExtension,
@@ -25,25 +26,34 @@ import '../widgets/widgets.dart'
         RepoSecurity,
         LinkStyleAsyncButton;
 
-class RepoSecurityPage extends StatelessWidget {
+class RepoSecurityPage extends StatefulWidget {
   const RepoSecurityPage({
     required this.settings,
     required this.repo,
-    required this.currentLocalSecret,
+    required this.localSecret,
     required this.passwordHasher,
   });
 
   final Settings settings;
   final RepoCubit repo;
-  final LocalSecret currentLocalSecret;
+  final LocalSecret localSecret;
   final PasswordHasher passwordHasher;
+
+  @override
+  State<RepoSecurityPage> createState() => _State(localSecret);
+}
+
+class _State extends State<RepoSecurityPage> {
+  LocalSecret? currentLocalSecret;
+
+  _State(this.currentLocalSecret);
 
   @override
   Widget build(BuildContext context) => Scaffold(
         appBar: DirectionalAppBar(title: Text(S.current.titleSecurity)),
         body: BlocHolder(
           create: () => RepoSecurityCubit(
-            oldLocalSecretMode: repo.state.authMode.localSecretMode,
+            oldLocalSecretMode: widget.repo.state.authMode.localSecretMode,
             oldLocalSecret: currentLocalSecret,
           ),
           builder: _buildContent,
@@ -59,11 +69,9 @@ class RepoSecurityPage extends StatelessWidget {
           canPop: false,
           onPopInvokedWithResult: (didPop, _) =>
               _onPopInvoked(context, didPop, cubit.state),
-          // We know the `currentLocalSecret` so the repository is not blind.
-          //child: RepoSecurity(cubit, isBlind: false),
           child:
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            RepoSecurity(cubit, isBlind: false),
+            if (currentLocalSecret != null) RepoSecurity(cubit, isBlind: false),
             // TODO: Arbitrary size, this can likely be done better.
             SizedBox(height: 14),
             _buildResetRepoUsingTokenButton(context),
@@ -84,10 +92,26 @@ class RepoSecurityPage extends StatelessWidget {
     return LinkStyleAsyncButton(
         text: "Reset repository access using a share token",
         onTap: () async {
-          final newLocalSecret =
-              await RepoResetAccessPage.show(context, repo, settings);
+          final newAccess = await RepoResetAccessPage.show(
+              context, widget.repo, widget.settings);
 
-          if (newLocalSecret == null) {}
+          switch (newAccess) {
+            case null:
+              return;
+            case BlindAccess():
+              setState(() {
+                currentLocalSecret = null;
+              });
+              Navigator.pop(context);
+            case ReadAccess():
+              setState(() {
+                currentLocalSecret = newAccess.localSecret;
+              });
+            case WriteAccess():
+              setState(() {
+                currentLocalSecret = newAccess.localSecret;
+              });
+          }
         });
   }
 
@@ -131,9 +155,9 @@ class RepoSecurityPage extends StatelessWidget {
     }
 
     if (await cubit.apply(
-      repo,
-      passwordHasher: passwordHasher,
-      masterKey: settings.masterKey,
+      widget.repo,
+      passwordHasher: widget.passwordHasher,
+      masterKey: widget.settings.masterKey,
     )) {
       showSnackBar(S.current.messageUpdateLocalSecretOk);
     } else {

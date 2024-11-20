@@ -18,9 +18,11 @@ class RepoResetAccessPage extends StatefulWidget {
   final RepoCubit repo;
   final _Jobs jobs;
 
-  static Future<LocalSecret?> show(
+  // Returns `null` if nothing changes (e.g. the user presses the back button
+  // before submitting any changes).
+  static Future<Access?> show(
       BuildContext context, RepoCubit repo, Settings settings) {
-    final route = MaterialPageRoute<LocalSecret>(
+    final route = MaterialPageRoute<Access>(
         builder: (context) =>
             RepoResetAccessPage._(settings: settings, repo: repo));
 
@@ -40,7 +42,8 @@ class RepoResetAccessPage extends StatefulWidget {
 
 class _State extends State<RepoResetAccessPage> {
   _TokenStatus tokenStatus;
-  LocalSecret? result = null;
+  // Null means nothing has changed.
+  Access? result = null;
 
   _State() : tokenStatus = _InvalidTokenStatus(_InvalidTokenType.empty);
 
@@ -276,27 +279,28 @@ class _State extends State<RepoResetAccessPage> {
 
     // Generate new local secret which will unlock the repo in the future.
     final newLocalSecret = LocalSecretKeyAndSalt.random();
-    bool usedLocalSecret;
+    AccessChange readAccessChange;
+    AccessChange writeAccessChange;
+
+    switch (input.accessMode) {
+      case AccessMode.blind:
+        readAccessChange = DisableAccess();
+        writeAccessChange = DisableAccess();
+      case AccessMode.read:
+        readAccessChange = EnableAccess(newLocalSecret);
+        writeAccessChange = DisableAccess();
+      case AccessMode.write:
+        readAccessChange = DisableAccess();
+        writeAccessChange = EnableAccess(newLocalSecret);
+    }
 
     // Encrypt the global secret from the token using the `newLocalSecret` and
     // store it (the encrypted global secret) in the repo.
-    switch (input.accessMode) {
-      case AccessMode.blind:
-        usedLocalSecret = false;
-        await repo.setAccess(read: DisableAccess(), write: DisableAccess());
-      case AccessMode.read:
-        usedLocalSecret = true;
-        await repo.setAccess(
-            read: EnableAccess(newLocalSecret), write: DisableAccess());
-      case AccessMode.write:
-        usedLocalSecret = true;
-        await repo.setAccess(
-            read: DisableAccess(), write: EnableAccess(newLocalSecret));
-    }
+    await repo.setAccess(read: readAccessChange, write: writeAccessChange);
 
     AuthMode newAuthMode;
 
-    if (usedLocalSecret) {
+    if (readAccessChange is EnableAccess || writeAccessChange is EnableAccess) {
       // Use a reasonably secure and convenient auth mode, the user can go to
       // the security screen to change it later.
       newAuthMode = await AuthModeKeyStoredOnDevice.encrypt(
@@ -310,10 +314,14 @@ class _State extends State<RepoResetAccessPage> {
         secureWithBiometrics: await LocalAuth.canAuthenticate(),
       );
 
-      result = newLocalSecret.key;
+      if (writeAccessChange is EnableAccess) {
+        result = WriteAccess(newLocalSecret.key);
+      } else {
+        result = ReadAccess(newLocalSecret.key);
+      }
     } else {
       newAuthMode = AuthModeBlindOrManual();
-      result = null;
+      result = BlindAccess();
     }
 
     // Store the auth mode inside the repository so it can be the next time
