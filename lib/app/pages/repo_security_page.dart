@@ -8,7 +8,7 @@ import '../pages/repo_reset_access.dart';
 import '../cubits/cubits.dart'
     show RepoCubit, RepoSecurityCubit, RepoSecurityState;
 import '../models/models.dart'
-    show LocalSecret, Access, BlindAccess, ReadAccess, WriteAccess;
+    show LocalSecret, BlindAccess, ReadAccess, WriteAccess;
 import '../utils/utils.dart'
     show
         AppThemeExtension,

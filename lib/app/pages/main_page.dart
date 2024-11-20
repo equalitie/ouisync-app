@@ -539,7 +539,6 @@ class _MainPageState extends State<MainPage>
       }
 
       bool previewOk = false;
-      var errorMessage = S.current.messagePreviewingFileFailed(entry.path);
       try {
         if (io.Platform.isWindows) {
           // Special non ASCII characters are encoded using Escape Encoding
@@ -548,7 +547,6 @@ class _MainPageState extends State<MainPage>
           // before passing to the system for execution. Thus on Windows
           // we use the `launchUrlString` function instead of `launchUrl`.
           final path = '$mountPoint${entry.path}';
-          final can = await canLaunchUrlString(path);
           previewOk = await launchUrlString(path);
         } else if (io.Platform.isMacOS) {
           // TODO: There is some issue with permissions, launchUrl doesn't work
@@ -561,7 +559,6 @@ class _MainPageState extends State<MainPage>
           return;
         } else {
           final url = Uri.parse('file:$mountPoint${entry.path}');
-          final can = await canLaunchUrl(url);
           previewOk = await launchUrl(url);
         }
       } on PlatformException catch (e, st) {

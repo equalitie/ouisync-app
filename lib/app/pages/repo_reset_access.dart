@@ -4,11 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:ouisync/ouisync.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../generated/l10n.dart';
 import '../models/auth_mode.dart';
 import '../models/access_mode.dart';
 import '../cubits/cubits.dart' show RepoCubit, RepoState;
-import '../models/models.dart' show LocalSecret;
 import '../utils/utils.dart'
     show AppThemeExtension, Constants, Fields, LocalAuth, Settings, ThemeGetter;
 import '../widgets/widgets.dart' show DirectionalAppBar;
@@ -16,7 +14,7 @@ import '../widgets/widgets.dart' show DirectionalAppBar;
 class RepoResetAccessPage extends StatefulWidget {
   final Settings settings;
   final RepoCubit repo;
-  final _Jobs jobs;
+  final _Jobs _jobs;
 
   // Returns `null` if nothing changes (e.g. the user presses the back button
   // before submitting any changes).
@@ -34,7 +32,7 @@ class RepoResetAccessPage extends StatefulWidget {
   RepoResetAccessPage._({
     required this.settings,
     required this.repo,
-  }) : jobs = _Jobs();
+  }) : _jobs = _Jobs();
 
   @override
   State<RepoResetAccessPage> createState() => _State();
@@ -43,7 +41,7 @@ class RepoResetAccessPage extends StatefulWidget {
 class _State extends State<RepoResetAccessPage> {
   _TokenStatus tokenStatus;
   // Null means nothing has changed.
-  Access? result = null;
+  Access? result;
 
   _State() : tokenStatus = _InvalidTokenStatus(_InvalidTokenType.empty);
 
@@ -53,14 +51,6 @@ class _State extends State<RepoResetAccessPage> {
         body: BlocBuilder<RepoCubit, RepoState>(
           bloc: widget.repo,
           builder: (context, repoState) {
-            final stateText = switch (repoState.authMode) {
-              AuthModeBlindOrManual() =>
-                "The repository is currently \"blind\" or locked with a local password.",
-              AuthModeKeyStoredOnDevice() => "Repository is device protected",
-              AuthModePasswordStoredOnDevice() =>
-                "Repository is device protected2",
-            };
-
             return ListView(children: [
               _buildRepoNameInfo(),
               _buildCurrentAccessModeInfo(),
@@ -146,23 +136,17 @@ class _State extends State<RepoResetAccessPage> {
   }
 
   Widget _buildTokenInfo() {
-    final accessModeString = (AccessMode mode) => switch (mode) {
-          AccessMode.blind => "Blind",
-          AccessMode.read => "Read",
-          AccessMode.write => "Write",
-        };
-
     final info = switch (tokenStatus) {
       _SubmitableTokenStatus status =>
-        accessModeString(status.inputToken.accessMode),
+        _localizedAccessModeName(status.inputToken.accessMode),
       _InvalidTokenStatus status => switch (status.type) {
           _InvalidTokenType.empty => "",
           _InvalidTokenType.malformed => "Invalid",
         },
       _NonMatchingTokenStatus status =>
-        accessModeString(status.inputToken.accessMode),
+        _localizedAccessModeName(status.inputToken.accessMode),
       _SameAccessTokenStatus status =>
-        accessModeString(status.inputToken.accessMode),
+        _localizedAccessModeName(status.inputToken.accessMode),
     };
 
     return _buildInfoWidget(
@@ -170,6 +154,13 @@ class _State extends State<RepoResetAccessPage> {
       subtitle: info,
     );
   }
+
+  // TODO: Localize the strings.
+  String _localizedAccessModeName(AccessMode mode) => switch (mode) {
+        AccessMode.blind => "Blind",
+        AccessMode.read => "Read",
+        AccessMode.write => "Write",
+      };
 
   Widget _buildActionInfo() {
     final action = switch (tokenStatus) {
@@ -210,10 +201,6 @@ class _State extends State<RepoResetAccessPage> {
           return "The repository will gain read and write access";
         }
     }
-
-    return widget.repo.state.accessMode != status.inputToken.accessMode
-        ? "Valid: ${status.inputToken.accessMode}"
-        : "Token and reository access match";
   }
 
   String _buildTokenStatusInvalid(_InvalidTokenStatus status) {
@@ -240,7 +227,7 @@ class _State extends State<RepoResetAccessPage> {
           title: Fields.formTextField(
         context: context,
         onChanged: (input) {
-          widget.jobs.addJob(() async {
+          widget._jobs.addJob(() async {
             final inputToken = await parseTokenInput(input);
             _updateTokenStatusOnTokenInputChange(inputToken);
           });
@@ -351,13 +338,13 @@ class _State extends State<RepoResetAccessPage> {
     }
 
     setState(() {
-      this.tokenStatus = newStatus;
+      tokenStatus = newStatus;
     });
   }
 
   void _updateTokenStatusOnRepoStateChange() {
     final _TokenStatus newStatus;
-    final oldStatus = this.tokenStatus;
+    final oldStatus = tokenStatus;
 
     switch (oldStatus) {
       case _InvalidTokenStatus status:
@@ -456,10 +443,10 @@ class _InvalidInputToken implements _InputToken {
 
 // Job queue with the maximum size of two: One running and one pending.
 class _Jobs {
-  Future<void>? runningJob = null;
-  Future<void> Function()? pendingJob = null;
+  Future<void>? runningJob;
+  Future<void> Function()? pendingJob;
 
-  _Jobs() {}
+  _Jobs();
 
   void addJob(Future<void> Function() job) {
     if (runningJob == null) {
@@ -472,7 +459,7 @@ class _Jobs {
         pendingJob = null;
 
         if (pj != null) {
-          addJob(pj!);
+          addJob(pj);
         }
       }();
     } else {
@@ -486,7 +473,7 @@ class _Jobs {
 class AsyncTextButton extends StatefulWidget {
   AsyncTextButton({
     required this.child,
-    this.onPressed = null,
+    this.onPressed,
   });
 
   final Widget child;

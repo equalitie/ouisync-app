@@ -297,7 +297,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   Future<void> resetCredentials(ShareToken token) async {
     await _repo.resetCredentials(token);
     final accessMode = await _repo.accessMode;
-    final foo = emitUnlessClosed(state.copyWith(accessMode: accessMode));
+    emitUnlessClosed(state.copyWith(accessMode: accessMode));
   }
 
   Future<void> mount() async {
