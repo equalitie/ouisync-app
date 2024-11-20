@@ -36,8 +36,8 @@ class RepoSecurity extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildRepoName(context, repoName),
-          _buildPasswordFields(state),
           _buildOriginSwitch(state),
+          _buildPasswordFields(state),
           _buildStoreSwitch(state),
           _buildSecureWithBiometricsSwitch(state),
           _buildDisabledOptionsMessage(isBlind, warningStyle),

@@ -19,7 +19,8 @@ import '../../models/models.dart'
     show AuthModeKeyStoredOnDevice, RepoLocation, SecretKeyOrigin;
 import '../../models/access_mode.dart';
 import '../../cubits/cubits.dart' show RepoCubit;
-import '../widgets.dart' show NegativeButton, PositiveButton;
+import '../widgets.dart'
+    show NegativeButton, PositiveButton, LinkStyleAsyncButton;
 
 class ManualRepoUnlockDialog extends StatefulWidget {
   ManualRepoUnlockDialog({
@@ -81,12 +82,9 @@ class _State extends State<ManualRepoUnlockDialog> with AppLogger {
       );
 
   Widget _buildIDontHaveLocalPasswordButton(BuildContext context) {
-    return InkWell(
-        child: RichText(
-            text: TextSpan(
-                // TODO(inetic): locales
-                text: "\nI don't have a local password for this repository\n",
-                style: TextStyle(color: Colors.blue))),
+    return LinkStyleAsyncButton(
+        // TODO(inetic): locales
+        text: "\nI don't have a local password for this repository\n",
         onTap: () async {
           final localSecret = await RepoResetAccessPage.show(
               context, widget.repoCubit, widget.settings);

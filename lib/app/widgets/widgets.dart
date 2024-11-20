@@ -12,6 +12,7 @@ export 'buttons/dialog_negative_button.dart';
 export 'buttons/dialog_positive_button.dart';
 export 'buttons/sort_by_button.dart';
 export 'buttons/sort_direction_button.dart';
+export 'buttons/link_style_async_button.dart';
 
 export 'dialogs/actions_dialog.dart';
 export 'dialogs/add_peer_dialog.dart';

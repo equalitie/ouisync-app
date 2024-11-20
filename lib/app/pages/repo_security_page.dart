@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../generated/l10n.dart';
+import '../pages/repo_reset_access.dart';
 import '../cubits/cubits.dart'
     show RepoCubit, RepoSecurityCubit, RepoSecurityState;
 import '../models/models.dart' show LocalSecret;
@@ -21,7 +22,8 @@ import '../widgets/widgets.dart'
         BlocHolder,
         ContentWithStickyFooterState,
         DirectionalAppBar,
-        RepoSecurity;
+        RepoSecurity,
+        LinkStyleAsyncButton;
 
 class RepoSecurityPage extends StatelessWidget {
   const RepoSecurityPage({
@@ -58,7 +60,14 @@ class RepoSecurityPage extends StatelessWidget {
           onPopInvokedWithResult: (didPop, _) =>
               _onPopInvoked(context, didPop, cubit.state),
           // We know the `currentLocalSecret` so the repository is not blind.
-          child: RepoSecurity(cubit, isBlind: false),
+          //child: RepoSecurity(cubit, isBlind: false),
+          child:
+              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            RepoSecurity(cubit, isBlind: false),
+            // TODO: Arbitrary size, this can likely be done better.
+            SizedBox(height: 14),
+            _buildResetRepoUsingTokenButton(context),
+          ]),
         ),
         footer: BlocBuilder<RepoSecurityCubit, RepoSecurityState>(
           bloc: cubit,
@@ -70,6 +79,17 @@ class RepoSecurityPage extends StatelessWidget {
           ),
         ),
       );
+
+  Widget _buildResetRepoUsingTokenButton(BuildContext context) {
+    return LinkStyleAsyncButton(
+        text: "Reset repository access using a share token",
+        onTap: () async {
+          final newLocalSecret =
+              await RepoResetAccessPage.show(context, repo, settings);
+
+          if (newLocalSecret == null) {}
+        });
+  }
 
   void _onPopInvoked(
     BuildContext context,
