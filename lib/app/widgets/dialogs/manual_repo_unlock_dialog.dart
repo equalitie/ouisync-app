@@ -31,12 +31,12 @@ class ManualRepoUnlockDialog extends StatefulWidget {
   final RepoCubit repoCubit;
   final Settings settings;
 
-  static Future<UnlockRepositoryResult?> show(
+  static Future<Access?> show(
     BuildContext topContext,
     RepoCubit repoCubit,
     Settings settings,
   ) async {
-    return await showDialog<UnlockRepositoryResult>(
+    return await showDialog<Access>(
       context: topContext,
       builder: (BuildContext dialogContext) => ScaffoldMessenger(
         child: Scaffold(
@@ -73,9 +73,9 @@ class _State extends State<ManualRepoUnlockDialog> with AppLogger {
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          buildPasswordField(context),
+          _buildPasswordField(context),
           _buildIDontHaveLocalPasswordButton(context),
-          Fields.dialogActions(buttons: buildActions(context)),
+          Fields.dialogActions(buttons: _buildActions(context)),
         ],
       ));
 
@@ -87,25 +87,11 @@ class _State extends State<ManualRepoUnlockDialog> with AppLogger {
           final access = await RepoResetAccessPage.show(
               context, widget.repoCubit, widget.settings);
 
-          switch (access) {
-            case null:
-            case BlindAccess():
-              return;
-            case ReadAccess():
-              Navigator.of(context).pop(UnlockRepositoryResult(
-                unlockedAccessMode: ReadAccessMode(),
-                localSecret: access.localSecret,
-              ));
-            case WriteAccess():
-              Navigator.of(context).pop(UnlockRepositoryResult(
-                unlockedAccessMode: WriteAccessMode(),
-                localSecret: access.localSecret,
-              ));
-          }
+          Navigator.of(context).pop(access);
         });
   }
 
-  Widget buildPasswordField(BuildContext context) => Fields.formTextField(
+  Widget _buildPasswordField(BuildContext context) => Fields.formTextField(
         context: context,
         controller: passwordController,
         obscureText: obscurePassword,
@@ -130,7 +116,7 @@ class _State extends State<ManualRepoUnlockDialog> with AppLogger {
         autofocus: true,
       );
 
-  List<Widget> buildActions(context) => [
+  List<Widget> _buildActions(context) => [
         NegativeButton(
           text: S.current.actionCancel,
           onPressed: () async => await Navigator.of(context).maybePop(null),
@@ -138,12 +124,12 @@ class _State extends State<ManualRepoUnlockDialog> with AppLogger {
         ),
         PositiveButton(
           text: S.current.actionUnlock,
-          onPressed: () => onSubmit(context),
+          onPressed: () => _onSubmit(context),
           buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
         )
       ];
 
-  Future<void> onSubmit(BuildContext context) async {
+  Future<void> _onSubmit(BuildContext context) async {
     if (!formKey.currentState!.validate()) {
       return;
     }
@@ -154,27 +140,21 @@ class _State extends State<ManualRepoUnlockDialog> with AppLogger {
 
     final password = LocalPassword(passwordController.text);
 
-    // TODO: It is not always ideal to actually unlock the repository. For
-    // example when entering the security screen, we only want to change the
-    // local secret properties, but while in that screen this unlocks the repo
-    // and makes it available on the file system. I think we need an API to
-    // convert the password to a key if the password is valid and return it.
-    // Then the rest of the code may use it to "unlock" the repo if desired.
+    final AccessMode accessMode;
 
     if (false) {
       // TODO: Find out why if we use `executefutureWithLoadingDialog` this
       // dialog alwayrs returns `null`. Seems to also be related to the dialog
       // using a `Form`.
-      await Dialogs.executeFutureWithLoadingDialog(
+      accessMode = await Dialogs.executeFutureWithLoadingDialog(
         context,
-        widget.repoCubit.unlock(password),
+        widget.repoCubit.getPasswordAccessMode(password),
       );
     } else {
-      await widget.repoCubit.unlock(password);
+      accessMode = await widget.repoCubit.getPasswordAccessMode(password);
     }
 
-    final accessMode = widget.repoCubit.accessMode;
-    UnlockedAccessMode unlockedAccessMode;
+    Access access;
 
     switch (accessMode) {
       case AccessMode.blind:
@@ -183,26 +163,15 @@ class _State extends State<ManualRepoUnlockDialog> with AppLogger {
         });
         return;
       case AccessMode.read:
-        unlockedAccessMode = ReadAccessMode();
+        access = ReadAccess(password);
       case AccessMode.write:
-        unlockedAccessMode = WriteAccessMode();
+        access = WriteAccess(password);
     }
 
     setState(() {
       passwordInvalid = false;
     });
 
-    Navigator.of(context).pop(UnlockRepositoryResult(
-      unlockedAccessMode: unlockedAccessMode,
-      localSecret: password,
-    ));
+    Navigator.of(context).pop(access);
   }
-}
-
-class UnlockRepositoryResult {
-  final UnlockedAccessMode unlockedAccessMode;
-  final LocalSecret localSecret;
-
-  UnlockRepositoryResult(
-      {required this.unlockedAccessMode, required this.localSecret});
 }

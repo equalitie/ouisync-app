@@ -497,14 +497,14 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   }
 
   /// Returns which access mode does the given password provide.
-  Future<AccessMode> getPasswordAccessMode(String password) async {
+  Future<AccessMode> getPasswordAccessMode(LocalPassword password) async {
     final credentials = await _repo.credentials;
 
     try {
       await _repo.setAccessMode(AccessMode.blind);
       await _repo.setAccessMode(
         AccessMode.write,
-        secret: LocalPassword(password),
+        secret: password,
       );
       return await _repo.accessMode;
     } finally {

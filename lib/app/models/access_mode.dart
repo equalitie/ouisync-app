@@ -33,20 +33,31 @@ class WriteAccessMode implements UnlockedAccessMode {
 
 //--------------------------------------------------------------------
 
-sealed class Access {}
+sealed class Access {
+  AccessMode get mode;
+}
 
-class BlindAccess implements Access {}
+class BlindAccess implements Access {
+  @override
+  AccessMode get mode => AccessMode.blind;
+}
 
 class ReadAccess implements Access {
   LocalSecret localSecret;
 
   ReadAccess(this.localSecret);
+
+  @override
+  AccessMode get mode => AccessMode.read;
 }
 
 class WriteAccess implements Access {
   LocalSecret localSecret;
 
   WriteAccess(this.localSecret);
+
+  @override
+  AccessMode get mode => AccessMode.write;
 }
 
 //--------------------------------------------------------------------

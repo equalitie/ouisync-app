@@ -80,14 +80,19 @@ mixin RepositoryActionsMixin on LoggyType {
 
     switch (repoCubit.state.authMode) {
       case (AuthModeBlindOrManual()):
-        final result =
+        final access =
             await ManualRepoUnlockDialog.show(context, repoCubit, settings);
 
-        if (result == null) return;
+        switch (access) {
+          case null:
+          case BlindAccess():
+            return;
+          case ReadAccess():
+            secret = access.localSecret;
+          case WriteAccess():
+            secret = access.localSecret;
+        }
 
-        secret = result.localSecret;
-
-        break;
       case (AuthModeKeyStoredOnDevice()):
       case (AuthModePasswordStoredOnDevice()):
         if (!await LocalAuth.authenticateIfPossible(
@@ -96,7 +101,6 @@ mixin RepositoryActionsMixin on LoggyType {
         )) return;
 
         secret = (await repoCubit.getLocalSecret(settings.masterKey))!;
-        break;
     }
 
     popDialog();
@@ -230,6 +234,7 @@ mixin RepositoryActionsMixin on LoggyType {
     Settings settings,
   ) async {
     final authMode = repoCubit.state.authMode;
+    final LocalSecret? secret;
     String? errorMessage;
 
     switch (authMode) {
@@ -243,18 +248,22 @@ mixin RepositoryActionsMixin on LoggyType {
         }
 
         // If it didn't work, try to unlock using a password from the user.
-        final unlockResult = await ManualRepoUnlockDialog.show(
+        final access = await ManualRepoUnlockDialog.show(
           context,
           repoCubit,
           settings,
         );
 
-        if (unlockResult == null) return;
+        switch (access) {
+          case null:
+          case BlindAccess():
+            return;
+          case ReadAccess():
+            secret = access.localSecret;
+          case WriteAccess():
+            secret = access.localSecret;
+        }
 
-        showSnackBar(S.current.messageUnlockRepoOk(
-            unlockResult.unlockedAccessMode.general.localized));
-
-        return;
       case AuthModeKeyStoredOnDevice(secureWithBiometrics: true):
       case AuthModePasswordStoredOnDevice(secureWithBiometrics: true):
         if (!await LocalAuth.authenticateIfPossible(
@@ -263,15 +272,17 @@ mixin RepositoryActionsMixin on LoggyType {
         )) return;
 
         errorMessage = S.current.messageBiometricUnlockRepositoryFailed;
+        secret = await repoCubit.getLocalSecret(settings.masterKey);
       case AuthModeKeyStoredOnDevice():
       case AuthModePasswordStoredOnDevice():
         errorMessage = S.current.messageAutomaticUnlockRepositoryFailed;
+        secret = await repoCubit.getLocalSecret(settings.masterKey);
     }
 
-    final secret = await repoCubit.getLocalSecret(settings.masterKey);
-
     if (secret == null) {
-      showSnackBar(errorMessage);
+      if (errorMessage != null) {
+        showSnackBar(errorMessage);
+      }
       return;
     }
 
