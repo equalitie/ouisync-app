@@ -32,13 +32,13 @@ class ManualRepoUnlockDialog extends StatefulWidget {
   final Settings settings;
 
   static Future<UnlockRepositoryResult?> show(
-    BuildContext context,
+    BuildContext topContext,
     RepoCubit repoCubit,
     Settings settings,
   ) async {
-    return await showDialog<UnlockRepositoryResult?>(
-      context: context,
-      builder: (BuildContext context) => ScaffoldMessenger(
+    return await showDialog<UnlockRepositoryResult>(
+      context: topContext,
+      builder: (BuildContext dialogContext) => ScaffoldMessenger(
         child: Scaffold(
           backgroundColor: Colors.transparent,
           body: ActionsDialog(
@@ -62,28 +62,26 @@ class _State extends State<ManualRepoUnlockDialog> with AppLogger {
   final TextEditingController passwordController = TextEditingController();
 
   bool obscurePassword = true;
-  bool secureWithBiometrics = false;
   bool passwordInvalid = false;
 
   @override
   Widget build(BuildContext context) => Form(
-        key: formKey,
-        autovalidateMode: AutovalidateMode.onUserInteraction,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.max,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            buildPasswordField(context),
-            _buildIDontHaveLocalPasswordButton(context),
-            Fields.dialogActions(buttons: buildActions(context)),
-          ],
-        ),
-      );
+      key: formKey,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.max,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          buildPasswordField(context),
+          _buildIDontHaveLocalPasswordButton(context),
+          Fields.dialogActions(buttons: buildActions(context)),
+        ],
+      ));
 
   Widget _buildIDontHaveLocalPasswordButton(BuildContext context) {
     return LinkStyleAsyncButton(
-        // TODO(inetic): locales
+        // TODO: locales
         text: "\nI don't have a local password for this repository\n",
         onTap: () async {
           final access = await RepoResetAccessPage.show(
@@ -94,12 +92,12 @@ class _State extends State<ManualRepoUnlockDialog> with AppLogger {
             case BlindAccess():
               return;
             case ReadAccess():
-              Navigator.of(context).maybePop(UnlockRepositoryResult(
+              Navigator.of(context).pop(UnlockRepositoryResult(
                 unlockedAccessMode: ReadAccessMode(),
                 localSecret: access.localSecret,
               ));
             case WriteAccess():
-              Navigator.of(context).maybePop(UnlockRepositoryResult(
+              Navigator.of(context).pop(UnlockRepositoryResult(
                 unlockedAccessMode: WriteAccessMode(),
                 localSecret: access.localSecret,
               ));
@@ -156,10 +154,24 @@ class _State extends State<ManualRepoUnlockDialog> with AppLogger {
 
     final password = LocalPassword(passwordController.text);
 
-    await Dialogs.executeFutureWithLoadingDialog(
-      context,
-      widget.repoCubit.unlock(password),
-    );
+    // TODO: It is not always ideal to actually unlock the repository. For
+    // example when entering the security screen, we only want to change the
+    // local secret properties, but while in that screen this unlocks the repo
+    // and makes it available on the file system. I think we need an API to
+    // convert the password to a key if the password is valid and return it.
+    // Then the rest of the code may use it to "unlock" the repo if desired.
+
+    if (false) {
+      // TODO: Find out why if we use `executefutureWithLoadingDialog` this
+      // dialog alwayrs returns `null`. Seems to also be related to the dialog
+      // using a `Form`.
+      await Dialogs.executeFutureWithLoadingDialog(
+        context,
+        widget.repoCubit.unlock(password),
+      );
+    } else {
+      await widget.repoCubit.unlock(password);
+    }
 
     final accessMode = widget.repoCubit.accessMode;
     UnlockedAccessMode unlockedAccessMode;
