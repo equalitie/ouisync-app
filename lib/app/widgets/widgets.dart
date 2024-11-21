@@ -31,7 +31,7 @@ export 'dialogs/modal_replace_keep_entry_dialog.dart';
 export 'dialogs/modal_repo_list_actions_bottom_sheet.dart';
 export 'dialogs/modal_repo_settings_bottom_sheet.dart';
 export 'dialogs/modal_share_repository_bottom_sheet.dart';
-export 'dialogs/manual_repo_unlock_dialog.dart';
+export 'dialogs/get_password_access_dialog.dart';
 export 'dialogs/move_entry_bottom_sheet.dart';
 export 'dialogs/save_shared_media.dart';
 

@@ -81,7 +81,7 @@ mixin RepositoryActionsMixin on LoggyType {
     switch (repoCubit.state.authMode) {
       case (AuthModeBlindOrManual()):
         final access =
-            await ManualRepoUnlockDialog.show(context, repoCubit, settings);
+            await GetPasswordAccessDialog.show(context, repoCubit, settings);
 
         switch (access) {
           case null:
@@ -248,7 +248,7 @@ mixin RepositoryActionsMixin on LoggyType {
         }
 
         // If it didn't work, try to unlock using a password from the user.
-        final access = await ManualRepoUnlockDialog.show(
+        final access = await GetPasswordAccessDialog.show(
           context,
           repoCubit,
           settings,

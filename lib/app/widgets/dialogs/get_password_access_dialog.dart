@@ -22,8 +22,8 @@ import '../../cubits/cubits.dart' show RepoCubit;
 import '../widgets.dart'
     show NegativeButton, PositiveButton, LinkStyleAsyncButton;
 
-class ManualRepoUnlockDialog extends StatefulWidget {
-  ManualRepoUnlockDialog({
+class GetPasswordAccessDialog extends StatefulWidget {
+  GetPasswordAccessDialog({
     required this.repoCubit,
     required this.settings,
   });
@@ -43,7 +43,7 @@ class ManualRepoUnlockDialog extends StatefulWidget {
           backgroundColor: Colors.transparent,
           body: ActionsDialog(
             title: S.current.messageUnlockRepository(repoCubit.name),
-            body: ManualRepoUnlockDialog(
+            body: GetPasswordAccessDialog(
               repoCubit: repoCubit,
               settings: settings,
             ),
@@ -54,10 +54,10 @@ class ManualRepoUnlockDialog extends StatefulWidget {
   }
 
   @override
-  State<ManualRepoUnlockDialog> createState() => _State();
+  State<GetPasswordAccessDialog> createState() => _State();
 }
 
-class _State extends State<ManualRepoUnlockDialog> with AppLogger {
+class _State extends State<GetPasswordAccessDialog> with AppLogger {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   final TextEditingController passwordController = TextEditingController();
 
