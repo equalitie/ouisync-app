@@ -37,7 +37,7 @@ void main() {
   RepoSecurityPage createRepoSecurityPage() => RepoSecurityPage(
         settings: deps.settings,
         repo: repoCubit,
-        currentLocalSecret: localSecret,
+        localSecret: localSecret,
         passwordHasher: PasswordHasher(deps.session),
       );
 

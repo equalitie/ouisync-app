@@ -68,6 +68,7 @@ void main() {
       bottomSheet: bottomSheetCubit,
       cacheServers: CacheServers.disabled,
       mounter: mounter,
+      session: session,
     );
 
     otherRepoCubit = await RepoCubit.create(
@@ -78,6 +79,7 @@ void main() {
       bottomSheet: bottomSheetCubit,
       cacheServers: CacheServers.disabled,
       mounter: mounter,
+      session: session,
     );
   });
 
