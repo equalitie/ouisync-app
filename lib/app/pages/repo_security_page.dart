@@ -79,7 +79,8 @@ class _State extends State<RepoSecurityPage> {
         ),
         footer: BlocBuilder<RepoSecurityCubit, RepoSecurityState>(
           bloc: cubit,
-          builder: (context, state) => Fields.inPageButton(
+          builder: (context, state) => Fields.inPageAsyncButton(
+            key: Key('security-update-button'),
             text: S.current.actionUpdate,
             onPressed: state.hasPendingChanges && state.isValid
                 ? () => _onSubmit(context, cubit)
@@ -90,6 +91,7 @@ class _State extends State<RepoSecurityPage> {
 
   Widget _buildResetRepoUsingTokenButton(BuildContext context) {
     return LinkStyleAsyncButton(
+        key: Key('enter-repo-reset-screen'), // Used in tests
         text: "Reset repository access using a share token",
         onTap: () async {
           final newAccess = await RepoResetAccessPage.show(

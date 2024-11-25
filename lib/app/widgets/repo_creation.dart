@@ -190,7 +190,7 @@ class RepoCreation extends StatelessWidget {
       case RepoCreationValid():
         break;
       case RepoCreationSuccess(location: final location):
-        await Navigator.of(context).maybePop(location);
+        Navigator.of(context).pop(location);
       case RepoCreationFailure(location: final location, error: final error):
         await Dialogs.simpleAlertDialog(
           context: context,

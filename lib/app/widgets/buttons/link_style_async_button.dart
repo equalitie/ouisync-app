@@ -3,6 +3,7 @@ import 'dart:async';
 
 class LinkStyleAsyncButton extends StatefulWidget {
   LinkStyleAsyncButton({
+    super.key,
     required this.text,
     this.onTap = null,
   });

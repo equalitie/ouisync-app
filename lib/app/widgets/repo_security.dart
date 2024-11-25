@@ -78,7 +78,7 @@ class RepoSecurity extends StatelessWidget {
       };
 
   Widget _buildOriginSwitch(RepoSecurityState state) => _buildSwitch(
-        key: ValueKey('use-local-password'),
+        key: Key('use-local-password'), // Used in tests
         value: state.origin == SecretKeyOrigin.manual,
         title: S.current.messageUseLocalPassword,
         onChanged: isBlind
@@ -89,6 +89,7 @@ class RepoSecurity extends StatelessWidget {
 
   Widget _buildStoreSwitch(RepoSecurityState state) => switch (state.origin) {
         SecretKeyOrigin.manual => _buildSwitch(
+            key: Key('store-on-device'),
             value: state.secretWillBeStored,
             title: S.current.labelRememberPassword,
             onChanged: cubit.setStore,

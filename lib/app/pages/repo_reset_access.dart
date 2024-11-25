@@ -225,6 +225,7 @@ class _State extends State<RepoResetAccessPage> {
 
   Widget _buildTokenInputWidget() => ListTile(
           title: Fields.formTextField(
+        key: Key('token-input'), // Used in tests
         context: context,
         onChanged: (input) {
           widget._jobs.addJob(() async {
