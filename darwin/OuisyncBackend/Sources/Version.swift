@@ -4,9 +4,9 @@
 //
 //  Created by Peter Jankuliak on 18/06/2024.
 //
-
-import Foundation
 import FileProvider
+import Foundation
+
 
 enum Version: Codable, CustomDebugStringConvertible {
     case valid(ValidVersion)

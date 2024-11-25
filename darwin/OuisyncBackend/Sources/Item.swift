@@ -4,12 +4,12 @@
 //
 //  Created by Peter Jankuliak on 15/03/2024.
 //
-
 import FileProvider
-import UniformTypeIdentifiers
 import MessagePack
 import OuisyncLib
 import System
+import UniformTypeIdentifiers
+
 
 enum EntryItem: Hashable, Equatable, CustomDebugStringConvertible {
     case file(FileItem)

@@ -22,3 +22,4 @@ public let ouisyncFileProviderDomain = NSFileProviderDomain(identifier: ouisyncF
     // Used to send notifications from the extension's backend to Flutter.
     func fromFileProviderToApp(_ message: [UInt8])
 }
+

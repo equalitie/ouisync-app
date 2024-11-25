@@ -4,11 +4,11 @@
 //
 //  Created by Peter Jankuliak on 04/06/2024.
 //
-
 import Foundation
 
-class Log {
-    enum Level: UInt8 {
+
+public class Log {
+    public enum Level: UInt8 {
         case trace = 0
         case info
         case error
@@ -22,7 +22,7 @@ class Log {
     fileprivate var nextChildId: UInt64 = 0
     var selfLevel: Level? = nil
 
-    init(_ label: String) {
+    public init(_ label: String) {
         self.parent = nil
         self.label = label
         self.id = Self.nextRootId
@@ -37,22 +37,22 @@ class Log {
         parent.nextChildId += 1
     }
 
-    func child(_ label: String) -> Log {
+    public func child(_ label: String) -> Log {
         Log(label, self, selfLevel)
     }
 
     @discardableResult
-    func trace(_ msg: String) -> Log {
+    public func trace(_ msg: String) -> Log {
         print(.trace, msg)
     }
 
     @discardableResult
-    func info(_ msg: String) -> Log {
+    public func info(_ msg: String) -> Log {
         print(.info, msg)
     }
 
     @discardableResult
-    func error(_ msg: String) -> Log {
+    public func error(_ msg: String) -> Log {
         print(.error, msg)
     }
 
@@ -64,7 +64,7 @@ class Log {
         return self
     }
 
-    func level(_ l: Level) -> Log {
+    public func level(_ l: Level) -> Log {
         self.selfLevel = l
         return self
     }

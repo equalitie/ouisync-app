@@ -4,9 +4,9 @@
 //
 //  Created by Peter Jankuliak on 24/05/2024.
 //
-
-import Foundation
 import FileProvider
+import Foundation
+
 
 extension NSFileProviderSyncAnchor: CustomDebugStringConvertible {
     public var debugDescription: String {

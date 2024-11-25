@@ -4,13 +4,13 @@
 //
 //  Created by Peter Jankuliak on 15/03/2024.
 //
-
 import FileProvider
-import OuisyncLib
-import System
-import OSLog
-import Common
 import Network
+import OuisyncLib
+import OuisyncCommon
+import OSLog
+import System
+
 
 open class Extension: NSObject, NSFileProviderReplicatedExtension {
     static let WRITE_CHUNK_SIZE: UInt64 = 32768 // TODO: Decide on optimal value
@@ -539,7 +539,7 @@ open class Extension: NSObject, NSFileProviderReplicatedExtension {
         do {
             try await manager.signalEnumerator(for: .workingSet)
         } catch let error as NSError {
-            NSLog("❌ failed to signal working set for \(Common.ouisyncFileProviderDomain): \(error)")
+            NSLog("❌ failed to signal working set for \(ouisyncFileProviderDomain): \(error)")
         }
     }
 }

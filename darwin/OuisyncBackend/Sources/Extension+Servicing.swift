@@ -4,11 +4,11 @@
 //
 //  Created by Peter Jankuliak on 25/03/2024.
 //
-
-import Common
-import Foundation
 import FileProvider
+import Foundation
+import OuisyncCommon
 import OuisyncLib
+
 
 extension Extension: NSFileProviderServicing {
     public func supportedServiceSources(for itemIdentifier: NSFileProviderItemIdentifier,

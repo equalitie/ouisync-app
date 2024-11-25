@@ -4,8 +4,8 @@
 //
 //  Created by Peter Jankuliak on 10/06/2024.
 //
-
 import Foundation
+
 
 struct Hash: Codable, Equatable, CustomDebugStringConvertible {
     let data: Data
