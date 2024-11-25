@@ -9,6 +9,7 @@ import 'package:styled_text/styled_text.dart';
 
 import '../pages/pages.dart';
 import '../widgets/async_text_form_field.dart';
+import '../widgets/buttons/elevated_async_button.dart';
 import 'platform/platform.dart';
 import 'utils.dart';
 
@@ -92,6 +93,38 @@ class Fields {
     Color? foregroundColor,
   }) =>
       ElevatedButton(
+          onPressed: onPressed,
+          child: Row(mainAxisSize: MainAxisSize.min, children: [
+            if (leadingIcon != null) leadingIcon,
+            if (leadingIcon != null) Dimensions.spacingHorizontal,
+            Text(text.toUpperCase())
+          ]),
+          style: ButtonStyle(
+              alignment: alignment,
+              minimumSize: WidgetStateProperty.all<Size?>(size),
+              backgroundColor: backgroundColor != null
+                  ? WidgetStateProperty.all<Color>(backgroundColor)
+                  : null,
+              foregroundColor: foregroundColor != null
+                  ? WidgetStateProperty.all<Color>(foregroundColor)
+                  : null),
+          autofocus: autofocus,
+          focusNode: focusNode);
+
+  static Widget inPageAsyncButton({
+    Key? key,
+    required Future<void> Function()? onPressed,
+    Icon? leadingIcon,
+    required String text,
+    AlignmentDirectional alignment = AlignmentDirectional.center,
+    Size size = Dimensions.sizeInPageButtonRegular,
+    bool autofocus = false,
+    FocusNode? focusNode,
+    Color? backgroundColor,
+    Color? foregroundColor,
+  }) =>
+      ElevatedAsyncButton(
+          key: key,
           onPressed: onPressed,
           child: Row(mainAxisSize: MainAxisSize.min, children: [
             if (leadingIcon != null) leadingIcon,
