@@ -280,7 +280,7 @@ void main() {
 
           // We should now be on the repo creation page. Wait until it loads.
           await stateObserver.waitUntil((state) => state.token != null);
-          await tester.pump();
+          await tester.pumpAndSettle();
 
           // Apply the suggested name.
           await tester.tap(find.textContaining('Suggested: $repoName'));
