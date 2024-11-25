@@ -337,9 +337,11 @@ class _State extends State<RepoResetAccessPage> {
         }
     }
 
-    setState(() {
-      tokenStatus = newStatus;
-    });
+    if (mounted) {
+      setState(() {
+        tokenStatus = newStatus;
+      });
+    }
   }
 
   void _updateTokenStatusOnRepoStateChange() {
