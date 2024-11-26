@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:path/path.dart' as p;
 
 import '../models/models.dart' show DirectoryEntry, FileEntry, FileSystemEntry;
 import '../widgets/widgets.dart' show SelectionState;
@@ -85,6 +86,10 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState> with CubitActions {
     if (_entriesPath.containsKey(path)) return;
 
     if (entry is FileEntry) {
+      final parentPath = p.dirname(path);
+      if (parentPath != '/') {
+        _entriesPath.putIfAbsent(parentPath, () => true);
+      }
       _entriesPath.putIfAbsent(path, () => false);
 
       emitUnlessClosed(state.copyWith(selectedEntriesPath: _entriesPath));
@@ -92,7 +97,7 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState> with CubitActions {
     }
 
     if (entry is DirectoryEntry) {
-      _entriesPath.putIfAbsent(path, () => false);
+      _entriesPath.putIfAbsent(path, () => true);
 
       final contents = await _getContents(path);
       if (contents == null || contents.isEmpty) {
@@ -116,6 +121,7 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState> with CubitActions {
     final path = entry.path;
 
     if (entry is FileEntry) {
+      await _removeParentIfLast(path);
       _entriesPath.remove(path);
 
       emitUnlessClosed(state.copyWith(selectedEntriesPath: _entriesPath));
@@ -135,8 +141,23 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState> with CubitActions {
         await clearEntry(repoInfoHash, item);
       }
 
+      await _removeParentIfLast(path);
       _entriesPath.remove(path);
+
       emitUnlessClosed(state.copyWith(selectedEntriesPath: _entriesPath));
+    }
+  }
+
+  Future<void> _removeParentIfLast(String path) async {
+    final parentPath = p.dirname(path);
+
+    final parentContents = await _getContents(parentPath);
+    final selected = parentContents
+        ?.where((e) => e.path != path && _entriesPath.containsKey(e.path))
+        .toList();
+
+    if (selected == null || selected.isEmpty) {
+      _entriesPath.remove(parentPath);
     }
   }
 
