@@ -75,7 +75,7 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState> with CubitActions {
     ));
   }
 
-  Future<void> addEntry(String repoInfoHash, FileSystemEntry entry) async {
+  Future<void> selectEntry(String repoInfoHash, FileSystemEntry entry) async {
     if (_originRepoInfoHash != repoInfoHash) {
       emitUnlessClosed(state);
       return;
@@ -101,14 +101,14 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState> with CubitActions {
       }
 
       await for (var item in Stream.fromIterable(contents)) {
-        await addEntry(repoInfoHash, item);
+        await selectEntry(repoInfoHash, item);
       }
 
       emitUnlessClosed(state.copyWith(selectedEntriesPath: _entriesPath));
     }
   }
 
-  Future<void> removeEntry(String repoInfoHash, FileSystemEntry entry) async {
+  Future<void> clearEntry(String repoInfoHash, FileSystemEntry entry) async {
     if (_originRepoInfoHash != repoInfoHash) {
       emitUnlessClosed(state);
     }
@@ -132,7 +132,7 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState> with CubitActions {
       }
 
       await for (var item in Stream.fromIterable(contents)) {
-        await removeEntry(repoInfoHash, item);
+        await clearEntry(repoInfoHash, item);
       }
 
       _entriesPath.remove(path);

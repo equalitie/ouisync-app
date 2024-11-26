@@ -52,8 +52,8 @@ class FileListItem extends StatelessWidget {
       entry.path,
     );
 
-    final onAddEntry = repoCubit.entrySelectionCubit.addEntry;
-    final onRemoveEntry = repoCubit.entrySelectionCubit.removeEntry;
+    final onSelectEntry = repoCubit.entrySelectionCubit.selectEntry;
+    final onClearEntry = repoCubit.entrySelectionCubit.clearEntry;
 
     _updateSelection(
       context,
@@ -62,8 +62,8 @@ class FileListItem extends StatelessWidget {
       entry: entry,
       valueNotifier: _selected,
       colorNotifier: _backgroundColor,
-      onAddEntry: onAddEntry,
-      onRemoveEntry: onRemoveEntry,
+      onSelectEntry: onSelectEntry,
+      onClearEntry: onClearEntry,
     );
 
     final uploadJob = repoCubit.state.uploads[entry.path];
@@ -89,8 +89,8 @@ class FileListItem extends StatelessWidget {
               isSelectingNotifier: _isSelecting,
               selectedNotifier: _selected,
               backgroundColorNotifier: _backgroundColor,
-              onAddEntry: onAddEntry,
-              onRemoveEntry: onRemoveEntry,
+              onSelectEntry: onSelectEntry,
+              onClearEntry: onClearEntry,
               uploadJob: uploadJob,
               verticalDotsAction: verticalDotsAction,
             ),
@@ -138,8 +138,8 @@ class DirectoryListItem extends StatelessWidget {
       entry.path,
     );
 
-    final onAddEntry = repoCubit.entrySelectionCubit.addEntry;
-    final onRemoveEntry = repoCubit.entrySelectionCubit.removeEntry;
+    final onSelectEntry = repoCubit.entrySelectionCubit.selectEntry;
+    final onClearEntry = repoCubit.entrySelectionCubit.clearEntry;
 
     _updateSelection(
       context,
@@ -148,8 +148,8 @@ class DirectoryListItem extends StatelessWidget {
       entry: entry,
       valueNotifier: _selected,
       colorNotifier: _backgroundColor,
-      onAddEntry: onAddEntry,
-      onRemoveEntry: onRemoveEntry,
+      onSelectEntry: onSelectEntry,
+      onClearEntry: onClearEntry,
     );
 
     return ValueListenableBuilder(
@@ -177,8 +177,8 @@ class DirectoryListItem extends StatelessWidget {
               isSelectingNotifier: _isSelecting,
               selectedNotifier: _selected,
               backgroundColorNotifier: _backgroundColor,
-              onAddEntry: onAddEntry,
-              onRemoveEntry: onRemoveEntry,
+              onSelectEntry: onSelectEntry,
+              onClearEntry: onClearEntry,
               uploadJob: null,
               verticalDotsAction: verticalDotsAction,
             ),
@@ -318,8 +318,8 @@ class TrailAction extends StatelessWidget {
     required ValueNotifier<bool> isSelectingNotifier,
     required ValueNotifier<bool> selectedNotifier,
     required ValueNotifier<Color?> backgroundColorNotifier,
-    required this.onAddEntry,
-    required this.onRemoveEntry,
+    required this.onSelectEntry,
+    required this.onClearEntry,
     required this.uploadJob,
     required this.verticalDotsAction,
     super.key,
@@ -336,8 +336,8 @@ class TrailAction extends StatelessWidget {
   final ValueNotifier<bool> _selectedNotifier;
   final ValueNotifier<Color?> _backgroundColorNotifier;
 
-  final Future<void> Function(String, FileSystemEntry) onAddEntry;
-  final Future<void> Function(String, FileSystemEntry) onRemoveEntry;
+  final Future<void> Function(String, FileSystemEntry) onSelectEntry;
+  final Future<void> Function(String, FileSystemEntry) onClearEntry;
 
   final Job? uploadJob;
   final void Function() verticalDotsAction;
@@ -360,8 +360,8 @@ class TrailAction extends StatelessWidget {
             entry: entry,
             valueNotifier: _selectedNotifier,
             colorNotifier: _backgroundColorNotifier,
-            onAddEntry: onAddEntry,
-            onRemoveEntry: onRemoveEntry,
+            onSelectEntry: onSelectEntry,
+            onClearEntry: onClearEntry,
           );
         }
       },
@@ -389,8 +389,8 @@ class TrailAction extends StatelessWidget {
                         entry: entry,
                         valueNotifier: _selectedNotifier,
                         colorNotifier: _backgroundColorNotifier,
-                        onAddEntry: onAddEntry,
-                        onRemoveEntry: onRemoveEntry,
+                        onSelectEntry: onSelectEntry,
+                        onClearEntry: onClearEntry,
                       );
                     },
                   ),
@@ -411,15 +411,15 @@ Future<void> _updateSelection(
   required FileSystemEntry entry,
   required ValueNotifier<bool> valueNotifier,
   required ValueNotifier<Color?> colorNotifier,
-  required Future<void> Function(String, FileSystemEntry) onAddEntry,
-  required Future<void> Function(String, FileSystemEntry) onRemoveEntry,
+  required Future<void> Function(String, FileSystemEntry) onSelectEntry,
+  required Future<void> Function(String, FileSystemEntry) onClearEntry,
 }) async {
   if (valueNotifier.value == value) return;
 
   valueNotifier.value = value;
   value
-      ? await onAddEntry(repoInfoHash, entry)
-      : await onRemoveEntry(repoInfoHash, entry);
+      ? await onSelectEntry(repoInfoHash, entry)
+      : await onClearEntry(repoInfoHash, entry);
 
   _getBackgroundColor(
     context,
