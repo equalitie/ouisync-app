@@ -492,9 +492,15 @@ class _MainPageState extends State<MainPage>
             // TODO: A shadow would be nicer.
             const Divider(height: 1),
             if (folder.content.isNotEmpty)
-              SortContentsBar(
-                sortListCubit: sortListCubit,
-                reposCubit: widget.reposCubit,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  SortContentsBar(
+                    sortListCubit: sortListCubit,
+                    reposCubit: widget.reposCubit,
+                  ),
+                  SelectEntriesButton(repoCubit: repo),
+                ],
               ),
             Expanded(child: child),
           ],
@@ -641,6 +647,7 @@ class _MainPageState extends State<MainPage>
                   DirectoryEntry entry => DirectoryListItem(
                       key: key,
                       entry: entry,
+                      repoCubit: currentRepoCubit,
                       mainAction: () {
                         if (_bottomSheetInfo.value.entry != entry.path) {
                           currentRepoCubit.navigateTo(entry.path);

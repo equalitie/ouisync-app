@@ -8,7 +8,6 @@ import 'package:ouisync/state_monitor.dart';
 
 import '../../generated/l10n.dart';
 import '../models/models.dart';
-import '../utils/mounter.dart';
 import '../utils/utils.dart';
 import 'cubits.dart';
 
@@ -29,6 +28,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
   final EntryBottomSheetCubit bottomSheet;
   final CacheServers cacheServers;
   final NavigationCubit navigation;
+  late final EntrySelectionCubit entriesSelection;
   final PasswordHasher passwordHasher;
   final Mounter mounter;
 
@@ -40,11 +40,13 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     required this.mounter,
     EntryBottomSheetCubit? bottomSheet,
     NavigationCubit? navigation,
+    EntrySelectionCubit? entriesSelection,
   })  : _session = session,
         _nativeChannels = nativeChannels,
         _settings = settings,
         bottomSheet = bottomSheet ?? EntryBottomSheetCubit(),
         navigation = navigation ?? NavigationCubit(),
+        entriesSelection = entriesSelection ?? EntrySelectionCubit(),
         passwordHasher = PasswordHasher(session) {
     unawaited(_init());
   }
@@ -288,6 +290,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     final cubit = await RepoCubit.create(
       nativeChannels: _nativeChannels,
       navigation: navigation,
+      entrySelection: entriesSelection,
       bottomSheet: bottomSheet,
       repo: repo,
       location: location,
@@ -479,6 +482,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
       final cubit = await RepoCubit.create(
         nativeChannels: _nativeChannels,
         navigation: navigation,
+        entrySelection: entriesSelection,
         bottomSheet: bottomSheet,
         repo: repo,
         location: location,
@@ -563,6 +567,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
       final cubit = await RepoCubit.create(
         nativeChannels: _nativeChannels,
         navigation: navigation,
+        entrySelection: entriesSelection,
         bottomSheet: bottomSheet,
         repo: repo,
         location: location,

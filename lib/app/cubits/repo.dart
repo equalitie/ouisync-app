@@ -13,12 +13,9 @@ import 'package:stream_transform/stream_transform.dart';
 
 import '../../generated/l10n.dart';
 import '../models/models.dart';
-import '../utils/master_key.dart';
-import '../utils/mounter.dart';
 import '../utils/repo_path.dart' as repo_path;
 import '../utils/utils.dart';
 import 'cubits.dart';
-import 'utils.dart';
 
 class RepoState extends Equatable {
   final bool isLoading;
@@ -109,6 +106,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   final _currentFolder = Folder();
   final NativeChannels _nativeChannels;
   final NavigationCubit _navigation;
+  final EntrySelectionCubit _entrySelection;
   final EntryBottomSheetCubit _bottomSheet;
   final Repository _repo;
   final Cipher _pathCipher;
@@ -118,6 +116,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   RepoCubit._(
     this._nativeChannels,
     this._navigation,
+    this._entrySelection,
     this._bottomSheet,
     this._repo,
     this._pathCipher,
@@ -133,6 +132,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     required Repository repo,
     required RepoLocation location,
     required NavigationCubit navigation,
+    required EntrySelectionCubit entrySelection,
     required EntryBottomSheetCubit bottomSheet,
     required CacheServers cacheServers,
     required Mounter mounter,
@@ -167,6 +167,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     final cubit = RepoCubit._(
       nativeChannels,
       navigation,
+      entrySelection,
       bottomSheet,
       repo,
       pathCipher,
@@ -189,6 +190,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   AccessMode get accessMode => state.accessMode;
   String get currentFolder => _currentFolder.state.path;
   Stream<void> get events => _repo.events;
+  EntrySelectionCubit get entrySelectionCubit => _entrySelection;
 
   void setCurrent() {
     _nativeChannels.repository = _repo;
@@ -196,6 +198,10 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
 
   void updateNavigation({required bool isFolder}) {
     _navigation.current(location, currentFolder, isFolder);
+  }
+
+  void startEntriesSelection() {
+    _entrySelection.startSelectionForRepo(this);
   }
 
   void showMoveEntryBottomSheet({
