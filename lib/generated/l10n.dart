@@ -4870,6 +4870,36 @@ class S {
     );
   }
 
+  /// `Select`
+  String get actionSelect {
+    return Intl.message(
+      'Select',
+      name: 'actionSelect',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Download`
+  String get actionDownload {
+    return Intl.message(
+      'Download',
+      name: 'actionDownload',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Copy`
+  String get actionCopy {
+    return Intl.message(
+      'Copy',
+      name: 'actionCopy',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `App language`
   String get titleApplicationLanguage {
     return Intl.message(

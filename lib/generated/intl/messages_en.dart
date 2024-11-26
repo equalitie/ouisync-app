@@ -131,6 +131,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionCancelCapital": MessageLookupByLibrary.simpleMessage("CANCEL"),
         "actionClear": MessageLookupByLibrary.simpleMessage("Clear"),
         "actionCloseCapital": MessageLookupByLibrary.simpleMessage("CLOSE"),
+        "actionCopy": MessageLookupByLibrary.simpleMessage("Copy"),
         "actionCreate": MessageLookupByLibrary.simpleMessage("Create"),
         "actionCreateRepository":
             MessageLookupByLibrary.simpleMessage("Create Repository"),
@@ -143,6 +144,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Delete repository"),
         "actionDiscard": MessageLookupByLibrary.simpleMessage("Discard"),
         "actionDone": MessageLookupByLibrary.simpleMessage("Done"),
+        "actionDownload": MessageLookupByLibrary.simpleMessage("Download"),
         "actionEditRepositoryName":
             MessageLookupByLibrary.simpleMessage("Edit name"),
         "actionEject": MessageLookupByLibrary.simpleMessage("Eject"),
@@ -187,6 +189,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionSaveChanges":
             MessageLookupByLibrary.simpleMessage("Save changes"),
         "actionScanQR": MessageLookupByLibrary.simpleMessage("Scan a QR code"),
+        "actionSelect": MessageLookupByLibrary.simpleMessage("Select"),
         "actionShare": MessageLookupByLibrary.simpleMessage("Share"),
         "actionShareFile": MessageLookupByLibrary.simpleMessage("Share file"),
         "actionShow": MessageLookupByLibrary.simpleMessage("Show"),
