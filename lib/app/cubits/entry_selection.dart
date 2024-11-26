@@ -4,6 +4,7 @@ import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../models/models.dart' show DirectoryEntry, FileEntry, FileSystemEntry;
 import '../widgets/widgets.dart' show SelectionState;
 import 'cubits.dart' show CubitActions, RepoCubit;
 
@@ -74,24 +75,69 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState> with CubitActions {
     ));
   }
 
-  Future<void> addEntry(String repoInfoHash, String path, bool isFolder) async {
+  Future<void> addEntry(String repoInfoHash, FileSystemEntry entry) async {
     if (_originRepoInfoHash != repoInfoHash) {
       emitUnlessClosed(state);
+      return;
     }
 
-    _entriesPath.putIfAbsent(path, () => isFolder);
+    final path = entry.path;
+    if (_entriesPath.containsKey(path)) return;
 
-    emitUnlessClosed(state.copyWith(selectedEntriesPath: _entriesPath));
+    if (entry is FileEntry) {
+      _entriesPath.putIfAbsent(path, () => false);
+
+      emitUnlessClosed(state.copyWith(selectedEntriesPath: _entriesPath));
+      return;
+    }
+
+    if (entry is DirectoryEntry) {
+      _entriesPath.putIfAbsent(path, () => false);
+
+      final contents = await _getContents(path);
+      if (contents == null || contents.isEmpty) {
+        emitUnlessClosed(state.copyWith(selectedEntriesPath: _entriesPath));
+        return;
+      }
+
+      await for (var item in Stream.fromIterable(contents)) {
+        await addEntry(repoInfoHash, item);
+      }
+
+      emitUnlessClosed(state.copyWith(selectedEntriesPath: _entriesPath));
+    }
   }
 
-  Future<void> removeEntry(String repoInfoHash, String path) async {
+  Future<void> removeEntry(String repoInfoHash, FileSystemEntry entry) async {
     if (_originRepoInfoHash != repoInfoHash) {
       emitUnlessClosed(state);
     }
 
-    _entriesPath.remove(path);
+    final path = entry.path;
 
-    emitUnlessClosed(state.copyWith(selectedEntriesPath: selectedEntries));
+    if (entry is FileEntry) {
+      _entriesPath.remove(path);
+
+      emitUnlessClosed(state.copyWith(selectedEntriesPath: _entriesPath));
+      return;
+    }
+
+    if (entry is DirectoryEntry) {
+      final contents = await _getContents(path);
+      if (contents == null || contents.isEmpty) {
+        _entriesPath.remove(path);
+
+        emitUnlessClosed(state.copyWith(selectedEntriesPath: _entriesPath));
+        return;
+      }
+
+      await for (var item in Stream.fromIterable(contents)) {
+        await removeEntry(repoInfoHash, item);
+      }
+
+      _entriesPath.remove(path);
+      emitUnlessClosed(state.copyWith(selectedEntriesPath: _entriesPath));
+    }
   }
 
   Future<void> deleteEntries() async {
@@ -101,6 +147,9 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState> with CubitActions {
           : await _originRepoCubit?.deleteFile(entry.key);
     }
   }
+
+  Future<List<FileSystemEntry>?> _getContents(String path) async =>
+      await _originRepoCubit?.getFolderContents(path);
 }
 
 enum EntrySelectionActions { download, copy, move, delete }

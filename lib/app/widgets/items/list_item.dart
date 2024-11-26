@@ -3,7 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../cubits/cubits.dart'
     show EntrySelectionCubit, EntrySelectionState, Job, RepoCubit, RepoState;
-import '../../models/models.dart' show DirectoryEntry, FileEntry, RepoLocation;
+import '../../models/models.dart'
+    show DirectoryEntry, FileEntry, FileSystemEntry, RepoLocation;
 import '../../utils/utils.dart' show Constants, Dimensions, Fields, ThemeGetter;
 import '../widgets.dart'
     show
@@ -37,7 +38,6 @@ class FileListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     // TODO: should this be inside of a BlockBuilder of fileItem.repoCubit?
     final repoInfoHash = repoCubit.state.infoHash;
-    final path = entry.path;
 
     final entrySelectionCubit = repoCubit.entrySelectionCubit;
     final entrySelectionState = entrySelectionCubit.state;
@@ -49,7 +49,7 @@ class FileListItem extends StatelessWidget {
 
     final isSelected = entrySelectionState.isEntrySelected(
       repoInfoHash,
-      path,
+      entry.path,
     );
 
     final onAddEntry = repoCubit.entrySelectionCubit.addEntry;
@@ -59,8 +59,7 @@ class FileListItem extends StatelessWidget {
       context,
       isSelected,
       repoInfoHash: repoInfoHash,
-      path: path,
-      isFolder: false,
+      entry: entry,
       valueNotifier: _selected,
       colorNotifier: _backgroundColor,
       onAddEntry: onAddEntry,
@@ -85,8 +84,7 @@ class FileListItem extends StatelessWidget {
             ),
             TrailAction(
               repoInfoHash,
-              path,
-              false,
+              entry,
               entrySelectionCubit: entrySelectionCubit,
               isSelectingNotifier: _isSelecting,
               selectedNotifier: _selected,
@@ -126,7 +124,6 @@ class DirectoryListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final repoInfoHash = repoCubit.state.infoHash;
-    final path = entry.path;
 
     final entrySelectionCubit = repoCubit.entrySelectionCubit;
     final entrySelectionState = entrySelectionCubit.state;
@@ -148,8 +145,7 @@ class DirectoryListItem extends StatelessWidget {
       context,
       isSelected,
       repoInfoHash: repoInfoHash,
-      path: path,
-      isFolder: true,
+      entry: entry,
       valueNotifier: _selected,
       colorNotifier: _backgroundColor,
       onAddEntry: onAddEntry,
@@ -176,8 +172,7 @@ class DirectoryListItem extends StatelessWidget {
             ),
             TrailAction(
               repoInfoHash,
-              path,
-              true,
+              entry,
               entrySelectionCubit: entrySelectionCubit,
               isSelectingNotifier: _isSelecting,
               selectedNotifier: _selected,
@@ -303,7 +298,7 @@ class _ListItemContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Material(
-        color: backgroundColor,
+        color: backgroundColor ?? Colors.white,
         child: InkWell(
           onTap: () => mainAction.call(),
           splashColor: Colors.blue,
@@ -318,8 +313,7 @@ class _ListItemContainer extends StatelessWidget {
 class TrailAction extends StatelessWidget {
   const TrailAction(
     this.repoInfoHash,
-    this.path,
-    this.isFolder, {
+    this.entry, {
     required this.entrySelectionCubit,
     required ValueNotifier<bool> isSelectingNotifier,
     required ValueNotifier<bool> selectedNotifier,
@@ -334,8 +328,7 @@ class TrailAction extends StatelessWidget {
         _backgroundColorNotifier = backgroundColorNotifier;
 
   final String repoInfoHash;
-  final String path;
-  final bool isFolder;
+  final FileSystemEntry entry;
 
   final EntrySelectionCubit entrySelectionCubit;
 
@@ -343,8 +336,8 @@ class TrailAction extends StatelessWidget {
   final ValueNotifier<bool> _selectedNotifier;
   final ValueNotifier<Color?> _backgroundColorNotifier;
 
-  final Future<void> Function(String, String, bool) onAddEntry;
-  final Future<void> Function(String, String) onRemoveEntry;
+  final Future<void> Function(String, FileSystemEntry) onAddEntry;
+  final Future<void> Function(String, FileSystemEntry) onRemoveEntry;
 
   final Job? uploadJob;
   final void Function() verticalDotsAction;
@@ -364,8 +357,7 @@ class TrailAction extends StatelessWidget {
             context,
             false,
             repoInfoHash: repoInfoHash,
-            path: path,
-            isFolder: isFolder,
+            entry: entry,
             valueNotifier: _selectedNotifier,
             colorNotifier: _backgroundColorNotifier,
             onAddEntry: onAddEntry,
@@ -394,8 +386,7 @@ class TrailAction extends StatelessWidget {
                         context,
                         value,
                         repoInfoHash: repoInfoHash,
-                        path: path,
-                        isFolder: isFolder,
+                        entry: entry,
                         valueNotifier: _selectedNotifier,
                         colorNotifier: _backgroundColorNotifier,
                         onAddEntry: onAddEntry,
@@ -417,18 +408,19 @@ Future<void> _updateSelection(
   BuildContext context,
   bool value, {
   required String repoInfoHash,
-  required String path,
-  required bool isFolder,
+  required FileSystemEntry entry,
   required ValueNotifier<bool> valueNotifier,
   required ValueNotifier<Color?> colorNotifier,
-  required Future<void> Function(String, String, bool) onAddEntry,
-  required Future<void> Function(String, String) onRemoveEntry,
+  required Future<void> Function(String, FileSystemEntry) onAddEntry,
+  required Future<void> Function(String, FileSystemEntry) onRemoveEntry,
 }) async {
-  value
-      ? await onAddEntry(repoInfoHash, path, isFolder)
-      : await onRemoveEntry(repoInfoHash, path);
+  if (valueNotifier.value == value) return;
 
   valueNotifier.value = value;
+  value
+      ? await onAddEntry(repoInfoHash, entry)
+      : await onRemoveEntry(repoInfoHash, entry);
+
   _getBackgroundColor(
     context,
     notifier: colorNotifier,
