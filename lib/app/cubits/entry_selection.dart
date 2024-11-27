@@ -86,10 +86,7 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState> with CubitActions {
     if (_entriesPath.containsKey(path)) return;
 
     if (entry is FileEntry) {
-      final parentPath = p.dirname(path);
-      if (parentPath != '/') {
-        _entriesPath.putIfAbsent(parentPath, () => true);
-      }
+      await _selectParentIfAll(path);
       _entriesPath.putIfAbsent(path, () => false);
 
       emitUnlessClosed(state.copyWith(selectedEntriesPath: _entriesPath));
@@ -97,6 +94,7 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState> with CubitActions {
     }
 
     if (entry is DirectoryEntry) {
+      await _selectParentIfAll(path);
       _entriesPath.putIfAbsent(path, () => true);
 
       final contents = await _getContents(path);
@@ -121,7 +119,7 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState> with CubitActions {
     final path = entry.path;
 
     if (entry is FileEntry) {
-      await _removeParentIfLast(path);
+      await _clearParentIfLast(path);
       _entriesPath.remove(path);
 
       emitUnlessClosed(state.copyWith(selectedEntriesPath: _entriesPath));
@@ -141,7 +139,7 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState> with CubitActions {
         await clearEntry(repoInfoHash, item);
       }
 
-      await _removeParentIfLast(path);
+      await _clearParentIfLast(path);
       _entriesPath.remove(path);
 
       emitUnlessClosed(state.copyWith(selectedEntriesPath: _entriesPath));
@@ -161,11 +159,30 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState> with CubitActions {
     }
   }
 
-  Future<void> deleteEntries() async {
-    await for (var entry in Stream.fromIterable(_entriesPath.entries)) {
-      entry.value
-          ? await _originRepoCubit?.deleteFolder(entry.key, true)
-          : await _originRepoCubit?.deleteFile(entry.key);
+  Future<void> _selectParentIfAll(String path) async {
+    final parentPath = p.dirname(path);
+    if (parentPath == '/') return;
+
+    final parentContents = await _getContents(parentPath);
+    final unselected = parentContents
+        ?.where((e) => e.path != path && !_entriesPath.containsKey(e.path))
+        .toList();
+
+    if (unselected == null || unselected.isEmpty) {
+      _entriesPath.putIfAbsent(parentPath, () => true);
+    }
+  }
+
+  Future<void> _clearParentIfLast(String path) async {
+    final parentPath = p.dirname(path);
+
+    final parentContents = await _getContents(parentPath);
+    final selected = parentContents
+        ?.where((e) => e.path != path && _entriesPath.containsKey(e.path))
+        .toList();
+
+    if (selected == null || selected.isEmpty) {
+      _entriesPath.remove(parentPath);
     }
   }
 
