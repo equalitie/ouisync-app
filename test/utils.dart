@@ -90,6 +90,9 @@ Future<void> testEnv(FutureOr<void> Function() callback) async {
       // This sometimes happen on the CI on windows. It seems to be caused by another process
       // accessing the temp directory for some reason. It probably doesn't indicate a problem in
       // the code under test so it should be safe to ignore it.
+    } catch (exception) {
+      print("Exception during temporary directory removal: $exception");
+      rethrow;
     }
   });
 
