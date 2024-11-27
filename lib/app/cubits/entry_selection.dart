@@ -4,6 +4,7 @@ import 'dart:collection';
 import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ouisync/ouisync.dart' show EntryType;
 import 'package:path/path.dart' as p;
 
 import '../models/models.dart' show DirectoryEntry, FileEntry, FileSystemEntry;
@@ -184,6 +185,15 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState> with CubitActions {
 
     if (selected == null || selected.isEmpty) {
       _entriesPath.remove(parentPath);
+
+      final grandparentPath = p.dirname(parentPath);
+      if (grandparentPath == '/') return;
+
+      final isGrandparentDirectory =
+          await _originRepoCubit?.type(grandparentPath);
+      if (isGrandparentDirectory == EntryType.directory) {
+        await _clearParentIfLast(parentPath);
+      }
     }
   }
 
