@@ -175,7 +175,9 @@ void main() {
         await enterTokenInRepoResetScreen(tester, blindToken);
         await awaitFoundThenTap(tester, find.byKey(Key('repo-reset-submit')));
         await awaitRepoResetComplete(tester);
+
         await tester.pageBack();
+        await tester.pumpAndSettle();
 
         await tapButton(tester, 'UNLOCK');
         await enterRepoResetScreen(tester);
@@ -183,7 +185,9 @@ void main() {
         await enterTokenInRepoResetScreen(tester, readToken);
         await awaitFoundThenTap(tester, find.byKey(Key('repo-reset-submit')));
         await awaitRepoResetComplete(tester);
+
         await tester.pageBack();
+        await tester.pumpAndSettle();
 
         await enterRepoSettings(tester);
         await tapSecurityButton(tester);

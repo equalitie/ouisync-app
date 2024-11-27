@@ -61,15 +61,24 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
         body: BlocBuilder<RepoCubit, RepoState>(
           bloc: widget.repo,
           builder: (context, repoState) {
-            return ListView(children: [
-              _buildRepoNameInfo(),
-              _buildCurrentAccessModeInfo(),
-              _buildAuthMethodInfo(),
-              _buildTokenInputWidget(),
-              _buildTokenInfo(),
-              _buildActionInfo(),
-              _buildSubmitButton(),
-            ]);
+            return Column(
+              children: [
+                Expanded(
+                    child: ListView(children: [
+                  _buildRepoNameInfo(),
+                  _buildCurrentAccessModeInfo(),
+                  _buildAuthMethodInfo(),
+                  _buildTokenInputWidget(),
+                  _buildTokenInfo(),
+                  _buildActionInfo(),
+                ])),
+                Container(
+                  // TODO: Constants should be defined globally.
+                  padding: EdgeInsetsDirectional.symmetric(vertical: 18.0),
+                  child: _buildSubmitButton(),
+                ),
+              ],
+            );
           },
         ),
       ));
@@ -449,46 +458,5 @@ class _Jobs {
     } else {
       pendingJob = job;
     }
-  }
-}
-
-//--------------------------------------------------------------------
-
-class AsyncTextButton extends StatefulWidget {
-  AsyncTextButton({
-    required this.child,
-    this.onPressed,
-  });
-
-  final Widget child;
-  final Future<void> Function()? onPressed;
-
-  @override
-  State<AsyncTextButton> createState() => _AsyncTextButtonState();
-}
-
-class _AsyncTextButtonState extends State<AsyncTextButton> {
-  bool isRunning = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final asyncOnPressed = widget.onPressed;
-    final enabled = (asyncOnPressed != null && isRunning == false);
-
-    final onPressed = enabled
-        ? () {
-            unawaited(() async {
-              setState(() {
-                isRunning = true;
-              });
-              await asyncOnPressed();
-              setState(() {
-                isRunning = false;
-              });
-            }());
-          }
-        : null;
-
-    return TextButton(child: widget.child, onPressed: onPressed);
   }
 }
