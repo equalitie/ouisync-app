@@ -121,8 +121,8 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState> with CubitActions {
     final path = entry.path;
 
     if (entry is FileEntry) {
-      await _clearParentIfLast(path);
       _entriesPath.remove(path);
+      await _clearParentIfLast(path);
 
       emitUnlessClosed(state.copyWith(selectedEntriesPath: _entriesPath));
       return;
@@ -131,8 +131,8 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState> with CubitActions {
     if (entry is DirectoryEntry) {
       final contents = await _getContents(path);
       if (contents == null || contents.isEmpty) {
-        await _clearParentIfLast(path);
         _entriesPath.remove(path);
+        await _clearParentIfLast(path);
 
         emitUnlessClosed(state.copyWith(selectedEntriesPath: _entriesPath));
         return;
@@ -142,8 +142,8 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState> with CubitActions {
         await clearEntry(repoInfoHash, item);
       }
 
-      await _clearParentIfLast(path);
       _entriesPath.remove(path);
+      await _clearParentIfLast(path);
 
       emitUnlessClosed(state.copyWith(selectedEntriesPath: _entriesPath));
     }
