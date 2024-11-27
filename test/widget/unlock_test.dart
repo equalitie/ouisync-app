@@ -133,7 +133,10 @@ void main() {
 
   // Silly dialog that mimics the biometric test by asking if it's "me".
   Future<void> confirmMockBiometricTest(WidgetTester tester) async {
-    await tapButton(tester, 'Yes');
+    if (await LocalAuth.canAuthenticate()) {
+      await tapButton(tester, 'Yes');
+      await tester.pumpAndSettle();
+    }
   }
 
   Future<void> hideSnackBarFrom(WidgetTester tester, Finder finder) async {
