@@ -278,6 +278,9 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
           title: Fields.formTextField(
         key: Key('token-input'), // Used in tests
         context: context,
+        labelText: S.current.labelRepositoryLink,
+        hintText: S.current.messageRepositoryToken,
+        suffixIcon: const Icon(Icons.key_rounded),
         onChanged: (input) {
           widget._jobs.addJob(() async {
             final inputToken = await parseTokenInput(input);
