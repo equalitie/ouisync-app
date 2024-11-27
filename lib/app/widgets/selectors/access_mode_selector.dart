@@ -3,6 +3,7 @@ import 'package:ouisync/ouisync.dart';
 
 import '../../../generated/l10n.dart';
 import '../../utils/utils.dart';
+import '../../models/access_mode.dart';
 
 class AccessModeSelector extends StatefulWidget {
   const AccessModeSelector({

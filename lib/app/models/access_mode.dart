@@ -1,5 +1,21 @@
 import 'package:ouisync/ouisync.dart' show AccessMode, LocalSecret;
 export 'package:ouisync/ouisync.dart' show AccessMode;
+import '../../generated/l10n.dart' show S;
+
+//--------------------------------------------------------------------
+
+extension AccessModeLocalizedExtension on AccessMode {
+  String get localized {
+    switch (this) {
+      case AccessMode.blind:
+        return S.current.accessModeBlindLabel;
+      case AccessMode.read:
+        return S.current.accessModeReadLabel;
+      case AccessMode.write:
+        return S.current.accessModeWriteLabel;
+    }
+  }
+}
 
 //--------------------------------------------------------------------
 
