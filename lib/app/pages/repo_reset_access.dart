@@ -114,7 +114,11 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
 
     switch (widget.repo.state.accessMode) {
       case AccessMode.blind:
-        subtitle = "Blind or locked";
+        if (newAccess is BlindAccess) {
+          subtitle = "Blind";
+        } else {
+          subtitle = "Blind or locked";
+        }
       case AccessMode.read:
         subtitle = "Read";
       case AccessMode.write:
@@ -133,8 +137,12 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
 
     switch (widget.repo.state.authMode) {
       case AuthModeBlindOrManual():
-        subtitle = "Blind or protected by a local password";
-        warning = "The application cannot tell the difference";
+        if (newAccess is BlindAccess) {
+          subtitle = "Blind";
+        } else {
+          subtitle = "Blind or locked behind a local password";
+          warning = "The application cannot tell the difference";
+        }
       case AuthModePasswordStoredOnDevice():
         subtitle = "Password stored on device";
         warning = null;
@@ -157,14 +165,15 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
   Widget _buildTokenInfo() {
     final info = switch (tokenStatus) {
       _SubmitableTokenStatus status =>
-        _localizedAccessModeName(status.inputToken.accessMode),
-      _SubmittedTokenStatus status => "Already submitted",
+        _capitalized(status.inputToken.accessMode.localized),
+      _SubmittedTokenStatus status =>
+        _capitalized(status.inputToken.accessMode.localized),
+      _NonMatchingTokenStatus status =>
+        _capitalized(status.inputToken.accessMode.localized),
       _InvalidTokenStatus status => switch (status.type) {
           _InvalidTokenType.empty => "",
           _InvalidTokenType.malformed => "Invalid",
         },
-      _NonMatchingTokenStatus status =>
-        _localizedAccessModeName(status.inputToken.accessMode),
     };
 
     return _buildInfoWidget(
@@ -173,15 +182,15 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
     );
   }
 
-  // TODO: Localize the strings.
-  String _localizedAccessModeName(AccessMode mode) => switch (mode) {
-        AccessMode.blind => "Blind",
-        AccessMode.read => "Read",
-        AccessMode.write => "Write",
-      };
+  // Capitalize first letter of a string
+  String _capitalized(String str) {
+    return str.length > 0
+        ? '${str[0].toUpperCase()}${str.substring(1).toLowerCase()}'
+        : str;
+  }
 
   Widget _buildActionInfo() {
-    final action = switch (tokenStatus) {
+    final (action, warning) = switch (tokenStatus) {
       _SubmitableTokenStatus status => _buildTokenStatusSubmitable(status),
       _SubmittedTokenStatus status => _buildTokenStatusSubmitted(status),
       _InvalidTokenStatus status => _buildTokenStatusInvalid(status),
@@ -191,51 +200,76 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
     return _buildInfoWidget(
       title: "Action to be submitted",
       subtitle: action,
+      warning: warning,
     );
   }
 
   // -----------------------------------------------------------------
 
-  String _buildTokenStatusSubmitable(_SubmitableTokenStatus status) {
+  (String, String?) _buildTokenStatusSubmitable(_SubmitableTokenStatus status) {
     final repoAccessMode = widget.repo.state.accessMode;
 
+    final String info;
+    String? warning;
+
     if (repoAccessMode == status.inputToken.accessMode) {
-      return "No action will be performed because the token and repository access match";
+      if (status.inputToken.accessMode != AccessMode.blind) {
+        info =
+            "No action will be performed because the token and repository access match";
+      } else {
+        info = "The repository will become blind";
+        warning =
+            "This repository mode may have 'read' or 'write' permissions locked behind a local password. If so, unlocking will not be possible after this action is executed";
+      }
+    } else {
+      switch (status.inputToken.accessMode) {
+        case AccessMode.blind:
+          info =
+              "The repository will become \"blind\" and no further writing nor reading will be possible";
+        case AccessMode.read:
+          if (repoAccessMode == AccessMode.write) {
+            info = "The repository will become read only";
+            warning = "Unlocking to write mode will not be possible";
+          } else {
+            info = "The repository will gain read access";
+          }
+        case AccessMode.write:
+          if (repoAccessMode == AccessMode.read) {
+            info = "The repository will gain write access";
+          } else {
+            info = "The repository will gain read and write access";
+          }
+      }
     }
 
-    switch (status.inputToken.accessMode) {
-      case AccessMode.blind:
-        return "The repository will become \"blind\" and no further writing nor reading will be possible";
-      case AccessMode.read:
-        if (repoAccessMode == AccessMode.write) {
-          return "The repository will become read only";
-        } else {
-          return "The repository will gain read access";
-        }
-      case AccessMode.write:
-        if (repoAccessMode == AccessMode.read) {
-          return "The repository will gain write access";
-        } else {
-          return "The repository will gain read and write access";
-        }
-    }
+    return (info, warning);
   }
 
-  String _buildTokenStatusInvalid(_InvalidTokenStatus status) {
+  (String, String?) _buildTokenStatusInvalid(_InvalidTokenStatus status) {
+    final String info;
     switch (status.type) {
       case _InvalidTokenType.empty:
-        return "Please provide a valid token to determine the action";
+        info = "Please provide a valid token to determine the action";
       case _InvalidTokenType.malformed:
-        return "The token is invalid, please ensure you are using a valid token";
+        info =
+            "The token is invalid, please ensure you are using a valid token";
     }
+    return (info, null);
   }
 
-  String _buildTokenStatusNonMatching(_NonMatchingTokenStatus status) {
-    return "No action can be performed because the token does not correspond to this repository";
+  (String, String?) _buildTokenStatusNonMatching(
+      _NonMatchingTokenStatus status) {
+    return (
+      "No action can be performed because the token does not correspond to this repository",
+      null
+    );
   }
 
-  String _buildTokenStatusSubmitted(_SubmittedTokenStatus status) {
-    return "No action will be performed because the token has already been submitted";
+  (String, String?) _buildTokenStatusSubmitted(_SubmittedTokenStatus status) {
+    return (
+      "No action will be performed because the token has already been submitted",
+      null
+    );
   }
 
   // -----------------------------------------------------------------
