@@ -87,8 +87,8 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
 
   Widget _buildInfoWidget(
       {required String title, required String subtitle, String? warning}) {
-    final warningStyle = context.theme.appTextStyle.bodySmall
-        .copyWith(color: Constants.warningColor);
+    final dangerStyle = context.theme.appTextStyle.bodySmall
+        .copyWith(color: Constants.dangerColor);
 
     return ListTile(
       title: Text(title),
@@ -96,7 +96,8 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SelectableText(subtitle),
-          if (warning != null) SelectableText(warning, style: warningStyle),
+          if (warning != null)
+            SelectableText("⚠️ $warning", style: dangerStyle),
         ],
       ),
     );
@@ -115,7 +116,16 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
     switch (widget.repo.state.accessMode) {
       case AccessMode.blind:
         if (newAccess is BlindAccess) {
+          // When the user submitted a blind token, we know the repository is
+          // indeed blind and not locked.
           subtitle = "Blind";
+        } else if (widget.repo.state.authMode.localSecretMode.store.isStored) {
+          // When the local secret key is stored, we know the repository is
+          // locked and not blind.
+          // TODO: We can do better in this case. We should authenticate the
+          // user if possible before entering this screen and determine what
+          // access the stored local secret will provide.
+          subtitle = "Locked";
         } else {
           subtitle = "Blind or locked";
         }
@@ -148,9 +158,9 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
         warning = null;
       case AuthModeKeyStoredOnDevice authMode:
         subtitle = switch (authMode.secureWithBiometrics) {
-          false => "Key is stored on this device",
+          false => "Key is stored on this device.",
           true =>
-            "Key is stored on this device and additional verification is needed to open the repository",
+            "Key is stored on this device and additional verification is needed to open the repository.",
         };
         warning = null;
     }
@@ -208,38 +218,37 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
 
   (String, String?) _buildTokenStatusSubmitable(_SubmitableTokenStatus status) {
     final repoAccessMode = widget.repo.state.accessMode;
+    final tokenAccessMode = status.inputToken.accessMode;
 
     final String info;
     String? warning;
 
-    if (repoAccessMode == status.inputToken.accessMode) {
-      if (status.inputToken.accessMode != AccessMode.blind) {
-        info =
-            "No action will be performed because the token and repository access match";
-      } else {
-        info = "The repository will become blind";
+    switch ((repoAccessMode, tokenAccessMode)) {
+      case (AccessMode.blind, AccessMode.blind):
+        info = "The repository will become blind.";
         warning =
-            "This repository mode may have 'read' or 'write' permissions locked behind a local password. If so, unlocking will not be possible after this action is executed";
-      }
-    } else {
-      switch (status.inputToken.accessMode) {
-        case AccessMode.blind:
-          info =
-              "The repository will become \"blind\" and no further writing nor reading will be possible";
-        case AccessMode.read:
-          if (repoAccessMode == AccessMode.write) {
-            info = "The repository will become read only";
-            warning = "Unlocking to write mode will not be possible";
-          } else {
-            info = "The repository will gain read access";
-          }
-        case AccessMode.write:
-          if (repoAccessMode == AccessMode.read) {
-            info = "The repository will gain write access";
-          } else {
-            info = "The repository will gain read and write access";
-          }
-      }
+            "This repository may have read or write access locked behind a local password. If so, unlocking will not be possible after this action is executed.";
+      case (AccessMode.read, AccessMode.read):
+      case (AccessMode.write, AccessMode.write):
+        info =
+            "No action will be performed because the token and repository access are the same.";
+      case (AccessMode.blind, AccessMode.read):
+        info = "The repository will become read only.";
+        warning =
+            "This repository may have write access locked behind a local password. If so, unlocking for writing will not be possible after this action is executed.";
+      case (AccessMode.blind, AccessMode.write):
+      case (AccessMode.read, AccessMode.write):
+        info = "The repository will gain write access.";
+      case (AccessMode.read, AccessMode.blind):
+        info = "The repository will lose its read access.";
+        warning =
+            "This action is irreversible without a read or write token link.";
+      case (AccessMode.write, AccessMode.read):
+        info = "The repository will lose its write access.";
+        warning = "This action is irreversible without a write token link.";
+      case (AccessMode.write, AccessMode.blind):
+        info = "The repository will lose its read and write access.";
+        warning = "This action is irreversible without a write token link.";
     }
 
     return (info, warning);
@@ -249,10 +258,9 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
     final String info;
     switch (status.type) {
       case _InvalidTokenType.empty:
-        info = "Please provide a valid token to determine the action";
+        info = "Please provide a valid token link to determine the action.";
       case _InvalidTokenType.malformed:
-        info =
-            "The token is invalid, please ensure you are using a valid token";
+        info = "The token link is invalid.";
     }
     return (info, null);
   }
@@ -260,14 +268,14 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
   (String, String?) _buildTokenStatusNonMatching(
       _NonMatchingTokenStatus status) {
     return (
-      "No action can be performed because the token does not correspond to this repository",
+      "No action can be performed because the token does not correspond to this repository.",
       null
     );
   }
 
   (String, String?) _buildTokenStatusSubmitted(_SubmittedTokenStatus status) {
     return (
-      "No action will be performed because the token has already been submitted",
+      "No action will be performed because the token has already been submitted.",
       null
     );
   }
