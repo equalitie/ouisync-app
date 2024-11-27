@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
@@ -52,8 +53,8 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState> with CubitActions {
   String get _originRepoInfoHash => _originRepoCubit?.state.infoHash ?? '';
 
   /// key: entry pasth
-  /// value: is entry a folder
-  final Map<String, bool> _entriesPath = <String, bool>{};
+  /// value: recursive (for folders)
+  final SplayTreeMap<String, bool> _entriesPath = SplayTreeMap();
   Map<String, bool> get selectedEntries => _entriesPath;
 
   Future<void> startSelectionForRepo(RepoCubit originRepoCubit) async {
