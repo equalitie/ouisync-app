@@ -131,6 +131,7 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState> with CubitActions {
     if (entry is DirectoryEntry) {
       final contents = await _getContents(path);
       if (contents == null || contents.isEmpty) {
+        await _clearParentIfLast(path);
         _entriesPath.remove(path);
 
         emitUnlessClosed(state.copyWith(selectedEntriesPath: _entriesPath));
