@@ -189,11 +189,7 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState> with CubitActions {
       final grandparentPath = p.dirname(parentPath);
       if (grandparentPath == '/') return;
 
-      final isGrandparentDirectory =
-          await _originRepoCubit?.type(grandparentPath);
-      if (isGrandparentDirectory == EntryType.directory) {
-        await _clearParentIfLast(parentPath);
-      }
+      await _clearParentIfLast(parentPath);
     }
   }
 
