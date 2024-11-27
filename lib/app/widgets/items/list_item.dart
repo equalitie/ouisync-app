@@ -106,6 +106,7 @@ class RepoListItem extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               IconButton(
+                key: Key('access-mode-button'),
                 icon: Icon(
                   Fields.accessModeIcon(state.accessMode),
                   size: Dimensions.sizeIconAverage,

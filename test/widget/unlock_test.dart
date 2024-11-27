@@ -126,8 +126,8 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  Future<void> awaitFoundThenTap(WidgetTester tester, String text) async {
-    await tester.tap(await tester.pumpUntilFound(find.text(text)));
+  Future<void> awaitFoundThenTap(WidgetTester tester, Finder finder) async {
+    await tester.tap(await tester.pumpUntilFound(finder));
     await tester.pumpAndSettle();
   }
 
@@ -147,7 +147,7 @@ void main() {
     'go to repo security while unlocked',
     (tester) => tester.runAsync(
       () async {
-        // Uncommend when debugging.
+        // Uncomment when debugging.
         //await tester.loadFonts();
 
         final repoCubit = await createAndEnterRepository(tester);
@@ -162,15 +162,15 @@ void main() {
         await enterRepoResetScreen(tester);
 
         await enterTokenInRepoResetScreen(tester, blindToken);
-        await awaitFoundThenTap(tester, 'Submit');
-        await awaitFoundThenTap(tester, 'Done');
+        await awaitFoundThenTap(tester, find.text('Submit'));
+        await awaitFoundThenTap(tester, find.text('Done'));
 
         await tapButton(tester, 'UNLOCK');
         await enterRepoResetScreen(tester);
 
         await enterTokenInRepoResetScreen(tester, readToken);
-        await awaitFoundThenTap(tester, 'Submit');
-        await awaitFoundThenTap(tester, 'Done');
+        await awaitFoundThenTap(tester, find.text('Submit'));
+        await awaitFoundThenTap(tester, find.text('Done'));
 
         await enterRepoSettings(tester);
         await tapSecurityButton(tester);
@@ -208,6 +208,36 @@ void main() {
             tester.widget<RepoSecurity>(find.byType(RepoSecurity));
 
         expect(repoSecurityWidget.cubit.state.hasPendingChanges, false);
+      },
+    ),
+  );
+
+  testWidgets(
+    'reset to blind even if locked',
+    (tester) => tester.runAsync(
+      () async {
+        // Uncomment when debugging.
+        //await tester.loadFonts();
+
+        final repoCubit = await createAndEnterRepository(tester);
+
+        final blindToken = await repoCubit.createShareToken(AccessMode.blind);
+        final writeToken = await repoCubit.createShareToken(AccessMode.write);
+
+        // The repo is in write mode, tapping this button will lock it.
+        await awaitFoundThenTap(tester, find.byKey(Key('access-mode-button')));
+
+        await enterRepoSettings(tester);
+        await tapSecurityButton(tester);
+        await confirmMockBiometricTest(tester);
+        await enterRepoResetScreen(tester);
+
+        await enterTokenInRepoResetScreen(tester, blindToken);
+
+        // Check that we can still submit a blind token even if the repository
+        // is locked (i.e. appearing as already blind).
+        await awaitFoundThenTap(tester, find.text('Submit'));
+        await awaitFoundThenTap(tester, find.text('Done'));
       },
     ),
   );

@@ -41,7 +41,7 @@ class RepoResetAccessPage extends StatefulWidget {
 class _State extends State<RepoResetAccessPage> {
   _TokenStatus tokenStatus;
   // Null means nothing has changed.
-  Access? result;
+  Access? newAccess;
 
   _State() : tokenStatus = _InvalidTokenStatus(_InvalidTokenType.empty);
 
@@ -139,13 +139,12 @@ class _State extends State<RepoResetAccessPage> {
     final info = switch (tokenStatus) {
       _SubmitableTokenStatus status =>
         _localizedAccessModeName(status.inputToken.accessMode),
+      _SubmittedTokenStatus status => "Already submitted",
       _InvalidTokenStatus status => switch (status.type) {
           _InvalidTokenType.empty => "",
           _InvalidTokenType.malformed => "Invalid",
         },
       _NonMatchingTokenStatus status =>
-        _localizedAccessModeName(status.inputToken.accessMode),
-      _SameAccessTokenStatus status =>
         _localizedAccessModeName(status.inputToken.accessMode),
     };
 
@@ -165,9 +164,9 @@ class _State extends State<RepoResetAccessPage> {
   Widget _buildActionInfo() {
     final action = switch (tokenStatus) {
       _SubmitableTokenStatus status => _buildTokenStatusSubmitable(status),
+      _SubmittedTokenStatus status => _buildTokenStatusSubmitted(status),
       _InvalidTokenStatus status => _buildTokenStatusInvalid(status),
       _NonMatchingTokenStatus status => _buildTokenStatusNonMatching(status),
-      _SameAccessTokenStatus status => _buildTokenStatusSameAccess(status),
     };
 
     return _buildInfoWidget(
@@ -216,9 +215,8 @@ class _State extends State<RepoResetAccessPage> {
     return "No action can be performed because the token does not correspond to this repository";
   }
 
-  // TODO: This is handled inside *Submitable as well.
-  String _buildTokenStatusSameAccess(_SameAccessTokenStatus status) {
-    return "No action will be performed because the token and repository access are the same";
+  String _buildTokenStatusSubmitted(_SubmittedTokenStatus status) {
+    return "No action will be performed because the token has already been submitted";
   }
 
   // -----------------------------------------------------------------
@@ -247,12 +245,12 @@ class _State extends State<RepoResetAccessPage> {
         onPressed = () async {
           await _submit(valid.inputToken);
         };
+      case _SubmittedTokenStatus():
       case _InvalidTokenStatus():
       case _NonMatchingTokenStatus():
-      case _SameAccessTokenStatus():
         buttonText = "Done";
         onPressed = () async {
-          Navigator.pop(context, result);
+          Navigator.pop(context, newAccess);
         };
     }
 
@@ -286,7 +284,8 @@ class _State extends State<RepoResetAccessPage> {
     // store it (the encrypted global secret) in the repo.
     await repo.setAccess(read: readAccessChange, write: writeAccessChange);
 
-    AuthMode newAuthMode;
+    final AuthMode newAuthMode;
+    final Access newAccess;
 
     if (readAccessChange is EnableAccess || writeAccessChange is EnableAccess) {
       // Use a reasonably secure and convenient auth mode, the user can go to
@@ -303,20 +302,23 @@ class _State extends State<RepoResetAccessPage> {
       );
 
       if (writeAccessChange is EnableAccess) {
-        result = WriteAccess(newLocalSecret.key);
+        newAccess = WriteAccess(newLocalSecret.key);
       } else {
-        result = ReadAccess(newLocalSecret.key);
+        newAccess = ReadAccess(newLocalSecret.key);
       }
     } else {
       newAuthMode = AuthModeBlindOrManual();
-      result = BlindAccess();
+      newAccess = BlindAccess();
     }
 
     // Store the auth mode inside the repository so it can be the next time
     // after it's locked (e.g. after the app restart).
     await repo.setAuthMode(newAuthMode);
 
-    _updateTokenStatusOnRepoStateChange();
+    setState(() {
+      tokenStatus = _SubmittedTokenStatus(input);
+      this.newAccess = newAccess;
+    });
   }
 
   // -----------------------------------------------------------------
@@ -331,8 +333,6 @@ class _State extends State<RepoResetAccessPage> {
       case _ValidInputToken token:
         if (repoState.infoHash != token.infoHash) {
           newStatus = _NonMatchingTokenStatus(token);
-        } else if (repoState.accessMode == token.accessMode) {
-          newStatus = _SameAccessTokenStatus(token);
         } else {
           newStatus = _SubmitableTokenStatus(token);
         }
@@ -343,30 +343,6 @@ class _State extends State<RepoResetAccessPage> {
         tokenStatus = newStatus;
       });
     }
-  }
-
-  void _updateTokenStatusOnRepoStateChange() {
-    final _TokenStatus newStatus;
-    final oldStatus = tokenStatus;
-
-    switch (oldStatus) {
-      case _InvalidTokenStatus status:
-        newStatus = status;
-      case _NonMatchingTokenStatus status:
-        newStatus = status;
-      case _SameAccessTokenStatus status:
-        newStatus = status;
-      case _SubmitableTokenStatus status:
-        if (widget.repo.state.accessMode == status.inputToken.accessMode) {
-          newStatus = _SameAccessTokenStatus(status.inputToken);
-        } else {
-          newStatus = status;
-        }
-    }
-
-    setState(() {
-      tokenStatus = newStatus;
-    });
   }
 
   // -----------------------------------------------------------------
@@ -400,23 +376,23 @@ enum _InvalidTokenType { empty, malformed }
 sealed class _TokenStatus {}
 
 class _SubmitableTokenStatus implements _TokenStatus {
-  _ValidInputToken inputToken;
+  final _ValidInputToken inputToken;
   _SubmitableTokenStatus(this.inputToken);
 }
 
+class _SubmittedTokenStatus implements _TokenStatus {
+  final _ValidInputToken inputToken;
+  _SubmittedTokenStatus(this.inputToken);
+}
+
 class _NonMatchingTokenStatus implements _TokenStatus {
-  _ValidInputToken inputToken;
+  final _ValidInputToken inputToken;
   _NonMatchingTokenStatus(this.inputToken);
 }
 
-class _SameAccessTokenStatus implements _TokenStatus {
-  _ValidInputToken inputToken;
-  _SameAccessTokenStatus(this.inputToken);
-}
-
 class _InvalidTokenStatus implements _TokenStatus {
-  _InvalidTokenStatus(this.type);
   final _InvalidTokenType type;
+  _InvalidTokenStatus(this.type);
 }
 
 //--------------------------------------------------------------------
