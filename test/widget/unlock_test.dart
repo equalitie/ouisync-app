@@ -6,6 +6,7 @@ import 'package:ouisync_app/app/models/auth_mode.dart';
 import 'package:ouisync_app/app/models/repo_location.dart';
 import 'package:ouisync_app/app/models/repo_entry.dart';
 import 'package:ouisync_app/app/pages/repo_security_page.dart';
+import 'package:ouisync_app/app/pages/repo_reset_access.dart';
 import 'package:ouisync_app/app/utils/utils.dart';
 import 'package:ouisync_app/app/widgets/buttons/elevated_async_button.dart';
 import 'package:ouisync_app/app/widgets/repo_security.dart';
@@ -144,6 +145,13 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  Future<void> awaitRepoResetComplete(WidgetTester tester) async {
+    final accessResetPage = tester
+        .state<RepoResetAccessPageState>(find.byType(RepoResetAccessPage));
+
+    await tester.pumpUntil(() => accessResetPage.hasPendingChanges == false);
+  }
+
   //------------------------------------------------------------------
 
   testWidgets(
@@ -165,15 +173,17 @@ void main() {
         await enterRepoResetScreen(tester);
 
         await enterTokenInRepoResetScreen(tester, blindToken);
-        await awaitFoundThenTap(tester, find.text('Submit'));
-        await awaitFoundThenTap(tester, find.text('Done'));
+        await awaitFoundThenTap(tester, find.byKey(Key('repo-reset-submit')));
+        await awaitRepoResetComplete(tester);
+        await tester.pageBack();
 
         await tapButton(tester, 'UNLOCK');
         await enterRepoResetScreen(tester);
 
         await enterTokenInRepoResetScreen(tester, readToken);
-        await awaitFoundThenTap(tester, find.text('Submit'));
-        await awaitFoundThenTap(tester, find.text('Done'));
+        await awaitFoundThenTap(tester, find.byKey(Key('repo-reset-submit')));
+        await awaitRepoResetComplete(tester);
+        await tester.pageBack();
 
         await enterRepoSettings(tester);
         await tapSecurityButton(tester);
@@ -239,8 +249,8 @@ void main() {
 
         // Check that we can still submit a blind token even if the repository
         // is locked (i.e. appearing as already blind).
-        await awaitFoundThenTap(tester, find.text('Submit'));
-        await awaitFoundThenTap(tester, find.text('Done'));
+        await awaitFoundThenTap(tester, find.byKey(Key('repo-reset-submit')));
+        await awaitRepoResetComplete(tester);
       },
     ),
   );

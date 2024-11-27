@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:ouisync/ouisync.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../generated/l10n.dart';
 import '../models/auth_mode.dart';
 import '../models/access_mode.dart';
 import '../cubits/cubits.dart' show RepoCubit, RepoState;
@@ -35,18 +36,27 @@ class RepoResetAccessPage extends StatefulWidget {
   }) : _jobs = _Jobs();
 
   @override
-  State<RepoResetAccessPage> createState() => _State();
+  State<RepoResetAccessPage> createState() => RepoResetAccessPageState();
 }
 
-class _State extends State<RepoResetAccessPage> {
+class RepoResetAccessPageState extends State<RepoResetAccessPage> {
   _TokenStatus tokenStatus;
   // Null means nothing has changed.
   Access? newAccess;
 
-  _State() : tokenStatus = _InvalidTokenStatus(_InvalidTokenType.empty);
+  RepoResetAccessPageState()
+      : tokenStatus = _InvalidTokenStatus(_InvalidTokenType.empty);
+
+  bool get hasPendingChanges => tokenStatus is _SubmitableTokenStatus;
 
   @override
-  Widget build(BuildContext context) => Scaffold(
+  Widget build(BuildContext context) => PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        Navigator.pop(context, newAccess);
+      },
+      child: Scaffold(
         appBar: DirectionalAppBar(title: Text("Reset repository access")),
         body: BlocBuilder<RepoCubit, RepoState>(
           bloc: widget.repo,
@@ -62,7 +72,7 @@ class _State extends State<RepoResetAccessPage> {
             ]);
           },
         ),
-      );
+      ));
 
   // -----------------------------------------------------------------
 
@@ -236,25 +246,20 @@ class _State extends State<RepoResetAccessPage> {
   // -----------------------------------------------------------------
 
   Widget _buildSubmitButton() {
-    String buttonText;
     Future<void> Function()? onPressed;
 
     switch (tokenStatus) {
       case _SubmitableTokenStatus valid:
-        buttonText = "Submit";
         onPressed = () async {
           await _submit(valid.inputToken);
         };
-      case _SubmittedTokenStatus():
-      case _InvalidTokenStatus():
-      case _NonMatchingTokenStatus():
-        buttonText = "Done";
-        onPressed = () async {
-          Navigator.pop(context, newAccess);
-        };
+      default:
     }
 
-    return AsyncTextButton(child: Text(buttonText), onPressed: onPressed);
+    return Fields.inPageAsyncButton(
+        key: Key('repo-reset-submit'),
+        text: S.current.actionUpdate,
+        onPressed: onPressed);
   }
 
   Future<void> _submit(_ValidInputToken input) async {
