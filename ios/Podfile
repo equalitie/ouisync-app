@@ -32,109 +32,16 @@ target 'Runner' do
   use_modular_headers!
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
-
-  # Sharing Extension is name of Extension which you created. It is 'Share Extension' and 'Sharing Extension' in example
-  target 'Share Extension' do
+  target 'RunnerTests' do
     inherit! :search_paths
   end
 end
 
-#post_install do |installer|
-#  installer.pods_project.targets.each do |target|
-#    flutter_additional_ios_build_settings(target)
-#  end
-#end
-
-# post install
 post_install do |installer|
-  # fix xcode 15 DT_TOOLCHAIN_DIR - remove after fix officially - https://github.com/CocoaPods/CocoaPods/issues/12065
-  installer.aggregate_targets.each do |target|
-      target.xcconfigs.each do |variant, xcconfig|
-        xcconfig_path = target.client_root + target.xcconfig_relative_path(variant)
-        IO.write(xcconfig_path, IO.read(xcconfig_path).gsub("DT_TOOLCHAIN_DIR", "TOOLCHAIN_DIR"))
-      end
-  end
-
-  installer.pods_project.targets.each do |target|
-    target.build_configurations.each do |config|
-      config.build_settings.delete 'IPHONEOS_DEPLOYMENT_TARGET'
-      if config.base_configuration_reference.is_a? Xcodeproj::Project::Object::PBXFileReference
-          xcconfig_path = config.base_configuration_reference.real_path
-          IO.write(xcconfig_path, IO.read(xcconfig_path).gsub("DT_TOOLCHAIN_DIR", "TOOLCHAIN_DIR"))
-      end
-    end
-  end
-  
-  
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
-      
-    # Add the line below
-    target_is_resource_bundle = target.respond_to?(:product_type) && target.product_type == 'com.apple.product-type.bundle'
-
     target.build_configurations.each do |config|
-
-      # And lines from here
-      if target_is_resource_bundle
-        config.build_settings['CODE_SIGNING_ALLOWED'] = 'NO'
-            config.build_settings['CODE_SIGNING_REQUIRED'] = 'NO'
-            config.build_settings['CODE_SIGNING_IDENTITY'] = '-'
-            config.build_settings['EXPANDED_CODE_SIGN_IDENTITY'] = '-'
-      end
-      # to here
-
-      # You can enable the permissions needed here. For example to enable camera
-      # permission, just remove the `#` character in front so it looks like this:
-      #
-      # ## dart: PermissionGroup.camera
-      # 'PERMISSION_CAMERA=1'
-      #
-      #  Preprocessor definitions can be found in: https://github.com/Baseflow/flutter-permission-handler/blob/master/permission_handler_apple/ios/Classes/PermissionHandlerEnums.h
-      config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= [
-        '$(inherited)',
-  
-        ## dart: PermissionGroup.calendar
-        # 'PERMISSION_EVENTS=1',
-  
-        ## dart: PermissionGroup.reminders
-        # 'PERMISSION_REMINDERS=1',
-  
-        ## dart: PermissionGroup.contacts
-        # 'PERMISSION_CONTACTS=1',
-  
-        ## dart: PermissionGroup.camera
-        'PERMISSION_CAMERA=1',
-  
-        ## dart: PermissionGroup.microphone
-        # 'PERMISSION_MICROPHONE=1',
-  
-        ## dart: PermissionGroup.speech
-        # 'PERMISSION_SPEECH_RECOGNIZER=1',
-  
-        ## dart: PermissionGroup.photos
-        'PERMISSION_PHOTOS=1',
-  
-        ## dart: [PermissionGroup.location, PermissionGroup.locationAlways, PermissionGroup.locationWhenInUse]
-        # 'PERMISSION_LOCATION=1',
-          
-        ## dart: PermissionGroup.notification
-        # 'PERMISSION_NOTIFICATIONS=1',
-  
-        ## dart: PermissionGroup.mediaLibrary
-        # 'PERMISSION_MEDIA_LIBRARY=1',
-  
-        ## dart: PermissionGroup.sensors
-        # 'PERMISSION_SENSORS=1',   
-           
-        ## dart: PermissionGroup.bluetooth
-        # 'PERMISSION_BLUETOOTH=1',
-   
-        ## dart: PermissionGroup.appTrackingTransparency
-        # 'PERMISSION_APP_TRACKING_TRANSPARENCY=1',
-   
-        ## dart: PermissionGroup.criticalAlerts
-        # 'PERMISSION_CRITICAL_ALERTS=1'
-      ]
+      config.build_settings.delete 'IPHONEOS_DEPLOYMENT_TARGET'
     end
   end
 end

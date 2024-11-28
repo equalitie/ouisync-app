@@ -13,7 +13,7 @@ import OuisyncCommon
 extension Data {
     var bytes: [UInt8] { [UInt8](self) }
 }
-extension FlutterError: @retroactive Error {}
+extension FlutterError: Error {}
 
 @MainActor
 class FileProviderProxy: FromFileProviderToAppProtocol {

@@ -63,7 +63,7 @@ class MainFlutterWindow: NSWindow {
     // Setup handing of message from flutter to this app instance
     // ------------------------------------------------------------------
     fileprivate func setupFlutterMethodChannel(_ binaryMessenger: FlutterBinaryMessenger) {
-        let channel = FlutterMethodChannel(name: Constants., binaryMessenger: binaryMessenger)
+        let channel = FlutterMethodChannel(name: Constants.flutterConfigChannel, binaryMessenger: binaryMessenger)
         channel.setMethodCallHandler({ [weak self] (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
             guard let self = self else { return }
             handleFlutterMethodCall(call, result: result)

@@ -1,15 +1,8 @@
-//
-//  DocumentActionViewController.swift
-//  ReplicatedFileProviderUI
-//
-//  Created by Radu Dan on 21.11.2024.
-//
-
 import UIKit
 import FileProviderUI
 
+
 class DocumentActionViewController: FPUIActionExtensionViewController {
-    
     @IBOutlet weak var identifierLabel: UILabel!
     @IBOutlet weak var actionTypeLabel: UILabel!
     
@@ -31,6 +24,4 @@ class DocumentActionViewController: FPUIActionExtensionViewController {
     @IBAction func cancelButtonTapped(_ sender: Any) {
         extensionContext.cancelRequest(withError: NSError(domain: FPUIErrorDomain, code: Int(FPUIExtensionErrorCode.userCancelled.rawValue), userInfo: nil))
     }
-    
 }
-
