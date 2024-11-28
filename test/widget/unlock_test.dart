@@ -19,8 +19,7 @@ void main() {
     'go to repo security while unlocked',
     (tester) => tester.runAsync(
       () async {
-        // Uncomment when debugging.
-        //await tester.loadFonts();
+        await tester.loadFonts();
 
         final mainPage = MainPage(tester, deps);
 
@@ -70,8 +69,7 @@ void main() {
     'reset to blind even if locked',
     (tester) => tester.runAsync(
       () async {
-        // Uncomment when debugging.
-        //await tester.loadFonts();
+        await tester.loadFonts();
 
         final mainPage = MainPage(tester, deps);
         final repoPage = await mainPage.createAndEnterRepository();
