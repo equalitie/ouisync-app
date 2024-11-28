@@ -53,7 +53,7 @@ void main() {
 
         await repoSecurity.tapUseLocalPasswordSwitch();
 
-        final isStored = repoSecurity.getSecretIsStoredOnDeviceValue();
+        final isStored = repoSecurity.getRememberPasswordValue();
 
         expect(isStored, true,
             reason:
@@ -88,6 +88,52 @@ void main() {
         // is locked (i.e. appearing as already blind).
         await repoReset.enterToken(blindToken);
         await repoReset.submit();
+      },
+    ),
+  );
+
+  testWidgets(
+    'set password without store on repo reset to write',
+    (tester) => tester.runAsync(
+      () async {
+        await tester.loadFonts();
+
+        final mainPage = MainPage(tester, deps);
+        final repoPage = await mainPage.createAndEnterRepository();
+
+        final blindToken = await repoPage.createBlindToken();
+        final writeToken = await repoPage.createWriteToken();
+
+        final repoSettings = await repoPage.enterRepoSettings();
+        final repoSecurity = await repoSettings.enterSecurityPage();
+        final repoReset = await repoSecurity.enterRepoResetPage();
+
+        await repoReset.enterToken(blindToken);
+        await repoReset.submit();
+
+        // Given that we used the blind token, going back will navigate us to
+        // the repo page instead of the security page.
+        await tester.pageBack();
+        await tester.pumpAndSettle();
+
+        await repoPage.enterRepoSettings();
+        await repoSettings.tapSecurityButton();
+        await UnlockDialog.enterRepoResetPage(tester);
+        await repoReset.enterToken(writeToken);
+        await repoReset.submit();
+
+        // Given that we used the write token, going back will navigate us to
+        // the security page.
+        await tester.pageBack();
+        await tester.pumpAndSettle();
+
+        await repoSecurity.tapUseLocalPasswordSwitch();
+        await repoSecurity.enterPasswords("12345");
+        await repoSecurity.tapRememberPasswordSwitch();
+
+        expect(repoSecurity.getRememberPasswordValue(), false);
+
+        await repoSecurity.submit();
       },
     ),
   );

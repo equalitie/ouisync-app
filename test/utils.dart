@@ -346,6 +346,16 @@ extension WidgetTesterExtension on WidgetTester {
     }
   }
 
+  // This is useful to observe the screen when things are still moving.
+  Future<void> takeNScreenshots(int n, String name) async {
+    assert(n > 0 && n < 1000); // sanity
+    for (int i = 0; i < n; i++) {
+      await takeScreenshot(name: "$name-$i");
+      await pump(Duration(milliseconds: 200));
+      await Future.delayed(Duration(milliseconds: 200));
+    }
+  }
+
   // Invoke this somewhere at the beginning of a test so that the above
   // `takeScreenshot` renders normal fonts instead of squares.
   Future<void> loadFonts() async {

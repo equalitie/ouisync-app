@@ -15,6 +15,8 @@ import 'package:ouisync_app/app/widgets/items/entry_action_item.dart'
 import 'package:ouisync/ouisync.dart';
 import '../utils.dart';
 
+//--------------------------------------------------------------------
+
 class MainPage {
   final WidgetTester tester;
   final TestDependencies deps;
@@ -63,6 +65,8 @@ class MainPage {
   }
 }
 
+//--------------------------------------------------------------------
+
 class RepoPage {
   final WidgetTester tester;
   final RepoCubit repoCubit;
@@ -104,6 +108,8 @@ class RepoPage {
   }
 }
 
+//--------------------------------------------------------------------
+
 class RepoSettings {
   final WidgetTester tester;
 
@@ -125,6 +131,8 @@ class RepoSettings {
   }
 }
 
+//--------------------------------------------------------------------
+
 class SecurityPage {
   final WidgetTester tester;
   SecurityPage(this.tester);
@@ -144,7 +152,15 @@ class SecurityPage {
     await tester.pumpAndSettle();
   }
 
-  bool getSecretIsStoredOnDeviceValue() {
+  Future<void> tapRememberPasswordSwitch() async {
+    await tester.tap(find.descendant(
+      of: find.byKey(Key('store-on-device')),
+      matching: find.byType(Switch),
+    ));
+    await tester.pumpAndSettle();
+  }
+
+  bool getRememberPasswordValue() {
     return tester
         .widget<Switch>(find.descendant(
             of: find.byKey(Key('store-on-device')),
@@ -174,17 +190,23 @@ class SecurityPage {
     await tester.tap(find.text('Accept'));
     await tester.pumpAndSettle();
 
+    // Wait for the update to finish.
     expect(updateButtonState.isExecuting, true);
     await tester.pumpUntil(() {
       return updateButtonState.isExecuting == false;
     });
 
+    // Ensure that after the submission the user may exit the page without
+    // being prompted to discard pending changes.
     final repoSecurityWidget =
         tester.widget<RepoSecurity>(find.byType(RepoSecurity));
 
-    expect(repoSecurityWidget.cubit.state.hasPendingChanges, false);
+    expect(repoSecurityWidget.cubit.state.hasPendingChanges, false,
+        reason: "There should be no more pending changes");
   }
 }
+
+//--------------------------------------------------------------------
 
 class RepoResetPage {
   final WidgetTester tester;
@@ -210,6 +232,8 @@ class RepoResetPage {
   }
 }
 
+//--------------------------------------------------------------------
+
 class MockAuthDialog {
   // Silly dialog that mimics the biometric test by asking if it's "me".
   static Future<void> confirm(WidgetTester tester) async {
@@ -219,6 +243,8 @@ class MockAuthDialog {
     }
   }
 }
+
+//--------------------------------------------------------------------
 
 class UnlockDialog {
   static Future<RepoResetPage> enterRepoResetPage(WidgetTester tester) async {

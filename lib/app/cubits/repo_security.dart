@@ -231,6 +231,8 @@ class RepoSecurityCubit extends Cubit<RepoSecurityState>
       emitUnlessClosed(state.copyWith(
         oldLocalSecretMode: newAuthMode.localSecretMode,
         updatedLocalPassword: newLocalPassword,
+        secureWithBiometrics:
+            newAuthMode.localSecretMode.store.isSecuredWithBiometrics,
       ));
 
       loggy.debug('Repo auth mode updated: $newAuthMode');
