@@ -900,7 +900,7 @@
   "@messageGoToMailApp": {},
   "messageUnlockUsingBiometricsConfirmation": "قفل این مخزن را با استفاده از بیومتریک باز کنید؟",
   "@messageUnlockUsingBiometricsConfirmation": {},
-  "messageLogDataP2": "اگر کاربر تصمیم بگیرد با ما تماس بگیرد، اطلاعات غیرقابل شناسایی شخصی که ممکن است جمع‌آوری کنیم عبارتند از:",
+  "messageLogDataP2": "اگر کاربر تصمیم بگیرد با ما تماس بگیرد، اطلاعات قابل شناسایی شخصی که ممکن است جمع‌آوری کنیم عبارتند از:",
   "@messageLogDataP2": {},
   "messageGoToPeers": "به (بخش) همتاها بروید",
   "@messageGoToPeers": {},
