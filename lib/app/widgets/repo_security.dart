@@ -103,7 +103,7 @@ class RepoSecurity extends StatelessWidget {
   // of security. Therefore unlocking repositories with system authentication is
   // not supported on these systems.
   Widget _buildSecureWithBiometricsSwitch(RepoSecurityState state) =>
-      PlatformValues.isMobileDevice
+      state.isBiometricsAvailable
           ? _buildSwitch(
               value: state.secureWithBiometrics,
               title: S.current.messageSecureUsingBiometrics,
