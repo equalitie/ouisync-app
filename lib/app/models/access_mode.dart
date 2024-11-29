@@ -51,29 +51,60 @@ class WriteAccessMode implements UnlockedAccessMode {
 
 sealed class Access {
   AccessMode get mode;
+  UnlockedAccess? get asUnlocked;
 }
+
+sealed class UnlockedAccess implements Access {
+  UnlockedAccessMode get unlockedMode;
+  LocalSecret get localSecret;
+
+  UnlockedAccess copyWithLocalSecret(LocalSecret secret);
+}
+
+//---------------------------------
 
 class BlindAccess implements Access {
   @override
   AccessMode get mode => AccessMode.blind;
+
+  @override
+  UnlockedAccess? get asUnlocked => null;
 }
 
-class ReadAccess implements Access {
+class ReadAccess implements Access, UnlockedAccess {
   LocalSecret localSecret;
 
   ReadAccess(this.localSecret);
 
   @override
   AccessMode get mode => AccessMode.read;
+
+  @override
+  UnlockedAccessMode get unlockedMode => ReadAccessMode();
+
+  @override
+  ReadAccess? get asUnlocked => this;
+
+  @override
+  ReadAccess copyWithLocalSecret(LocalSecret secret) => ReadAccess(secret);
 }
 
-class WriteAccess implements Access {
+class WriteAccess implements Access, UnlockedAccess {
   LocalSecret localSecret;
 
   WriteAccess(this.localSecret);
 
   @override
   AccessMode get mode => AccessMode.write;
+
+  @override
+  UnlockedAccessMode get unlockedMode => WriteAccessMode();
+
+  @override
+  WriteAccess? get asUnlocked => this;
+
+  @override
+  WriteAccess copyWithLocalSecret(LocalSecret secret) => WriteAccess(secret);
 }
 
 //--------------------------------------------------------------------

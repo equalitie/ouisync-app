@@ -91,7 +91,7 @@ class _State extends State<GetPasswordAccessDialog> with AppLogger {
           }
 
           final access = await RepoResetAccessPage.show(
-              context, widget.repoCubit, widget.settings);
+              BlindAccess(), context, widget.repoCubit, widget.settings);
 
           Navigator.of(context).pop(access);
         });

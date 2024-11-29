@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ouisync_app/app/cubits/repo.dart';
 import 'package:ouisync_app/app/models/auth_mode.dart';
+import 'package:ouisync_app/app/models/access_mode.dart';
 import 'package:ouisync_app/app/models/repo_location.dart';
 import 'package:ouisync_app/app/pages/repo_security_page.dart';
 import 'package:ouisync_app/app/utils/utils.dart';
@@ -39,7 +40,7 @@ void main() {
 
   RepoSecurityPage createRepoSecurityPage() => RepoSecurityPage(
         repoCubit,
-        localSecret,
+        WriteAccess(localSecret),
         deps.settings,
         PasswordHasher(deps.session),
       );

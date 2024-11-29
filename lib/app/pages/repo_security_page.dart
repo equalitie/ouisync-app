@@ -8,7 +8,7 @@ import '../pages/repo_reset_access.dart';
 import '../cubits/cubits.dart'
     show RepoCubit, RepoSecurityCubit, RepoSecurityState;
 import '../models/models.dart'
-    show LocalSecret, BlindAccess, ReadAccess, WriteAccess;
+    show Access, UnlockedAccess, BlindAccess, ReadAccess, WriteAccess;
 import '../utils/utils.dart'
     show
         AppThemeExtension,
@@ -37,7 +37,7 @@ class RepoSecurityPage extends StatefulWidget {
   static Future<void> show(
       BuildContext context,
       RepoCubit repo,
-      LocalSecret localSecret,
+      UnlockedAccess originalAccess,
       Settings settings,
       PasswordHasher passwordHasher) async {
     await Navigator.push(
@@ -45,7 +45,7 @@ class RepoSecurityPage extends StatefulWidget {
       MaterialPageRoute(
         builder: (context) => RepoSecurityPage(
           repo,
-          localSecret,
+          originalAccess,
           settings,
           passwordHasher,
         ),
@@ -55,26 +55,26 @@ class RepoSecurityPage extends StatefulWidget {
 
   const RepoSecurityPage(
     this.repo,
-    this.localSecret,
+    this.originalAccess,
     this.settings,
     this.passwordHasher,
   );
 
   final Settings settings;
   final RepoCubit repo;
-  final LocalSecret localSecret;
+  final UnlockedAccess originalAccess;
   final PasswordHasher passwordHasher;
 
   @override
-  State<RepoSecurityPage> createState() => _State(localSecret);
+  State<RepoSecurityPage> createState() => _State(originalAccess);
 }
 
 //--------------------------------------------------------------------
 
 class _State extends State<RepoSecurityPage> {
-  LocalSecret? currentLocalSecret;
+  UnlockedAccess access;
 
-  _State(this.currentLocalSecret);
+  _State(this.access);
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -82,7 +82,7 @@ class _State extends State<RepoSecurityPage> {
         body: BlocHolder(
           create: () => RepoSecurityCubit(
             currentLocalSecretMode: widget.repo.state.authMode.localSecretMode,
-            currentLocalSecret: currentLocalSecret,
+            currentAccess: access,
           ),
           builder: _buildContent,
         ),
@@ -99,7 +99,7 @@ class _State extends State<RepoSecurityPage> {
               _onPopInvoked(context, didPop, cubit.state),
           child:
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            if (currentLocalSecret != null) RepoSecurityWidget(cubit),
+            RepoSecurityWidget(cubit),
             // TODO: Arbitrary size, this can likely be done better.
             SizedBox(height: 14),
             _buildResetRepoUsingTokenButton(context),
@@ -123,25 +123,18 @@ class _State extends State<RepoSecurityPage> {
         text: "Reset repository access using a share token",
         onTap: () async {
           final newAccess = await RepoResetAccessPage.show(
-              context, widget.repo, widget.settings);
+              access, context, widget.repo, widget.settings);
 
-          switch (newAccess) {
-            case null:
-              return;
-            case BlindAccess():
-              setState(() {
-                currentLocalSecret = null;
-              });
-              Navigator.pop(context);
-            case ReadAccess():
-              setState(() {
-                currentLocalSecret = newAccess.localSecret;
-              });
-            case WriteAccess():
-              setState(() {
-                currentLocalSecret = newAccess.localSecret;
-              });
+          final unlockedAccess = newAccess?.asUnlocked;
+
+          if (unlockedAccess == null) {
+            Navigator.pop(context);
+            return;
           }
+
+          setState(() {
+            access = unlockedAccess;
+          });
         });
   }
 

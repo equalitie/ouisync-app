@@ -13,38 +13,40 @@ import '../utils/utils.dart'
 import '../widgets/widgets.dart' show DirectionalAppBar;
 
 class RepoResetAccessPage extends StatefulWidget {
-  final Settings settings;
   final RepoCubit repo;
+  final Access startAccess;
+  final Settings settings;
   final _Jobs _jobs;
 
   // Returns `null` if nothing changes (e.g. the user presses the back button
   // before submitting any changes).
-  static Future<Access?> show(
-      BuildContext context, RepoCubit repo, Settings settings) {
+  static Future<Access> show(Access startAccess, BuildContext context,
+      RepoCubit repo, Settings settings) async {
     final route = MaterialPageRoute<Access>(
         builder: (context) =>
-            RepoResetAccessPage._(settings: settings, repo: repo));
+            RepoResetAccessPage._(repo, startAccess, settings));
 
     Navigator.push(context, route);
 
-    return route.popped;
+    return (await route.popped)!;
   }
 
-  RepoResetAccessPage._({
-    required this.settings,
-    required this.repo,
-  }) : _jobs = _Jobs();
+  RepoResetAccessPage._(
+    this.repo,
+    this.startAccess,
+    this.settings,
+  ) : _jobs = _Jobs();
 
   @override
-  State<RepoResetAccessPage> createState() => RepoResetAccessPageState();
+  State<RepoResetAccessPage> createState() =>
+      RepoResetAccessPageState(startAccess);
 }
 
 class RepoResetAccessPageState extends State<RepoResetAccessPage> {
   _TokenStatus tokenStatus;
-  // Null means nothing has changed.
-  Access? newAccess;
+  Access currentAccess;
 
-  RepoResetAccessPageState()
+  RepoResetAccessPageState(this.currentAccess)
       : tokenStatus = _InvalidTokenStatus(_InvalidTokenType.empty);
 
   bool get hasPendingChanges => tokenStatus is _SubmitableTokenStatus;
@@ -54,7 +56,7 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
         if (didPop) return;
-        Navigator.pop(context, newAccess);
+        Navigator.pop(context, currentAccess);
       },
       child: Scaffold(
         appBar: DirectionalAppBar(title: Text("Reset repository access")),
@@ -115,16 +117,13 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
 
     switch (widget.repo.state.accessMode) {
       case AccessMode.blind:
-        if (newAccess is BlindAccess) {
+        if (currentAccess is BlindAccess) {
           // When the user submitted a blind token, we know the repository is
           // indeed blind and not locked.
           subtitle = "Blind";
-        } else if (widget.repo.state.authMode.localSecretMode.store.isStored) {
+        } else if (widget.repo.state.authMode.isStored) {
           // When the local secret key is stored, we know the repository is
           // locked and not blind.
-          // TODO: We can do better in this case. We should authenticate the
-          // user if possible before entering this screen and determine what
-          // access the stored local secret will provide.
           subtitle = "Locked";
         } else {
           subtitle = "Blind or locked";
@@ -147,7 +146,7 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
 
     switch (widget.repo.state.authMode) {
       case AuthModeBlindOrManual():
-        if (newAccess is BlindAccess) {
+        if (currentAccess is BlindAccess) {
           subtitle = "Blind";
         } else {
           subtitle = "Blind or locked behind a local password";
@@ -344,7 +343,7 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
     await repo.setAccess(read: readAccessChange, write: writeAccessChange);
 
     final AuthMode newAuthMode;
-    final Access newAccess;
+    final Access currentAccess;
 
     if (readAccessChange is EnableAccess || writeAccessChange is EnableAccess) {
       // Use a reasonably secure and convenient auth mode, the user can go to
@@ -361,13 +360,13 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
       );
 
       if (writeAccessChange is EnableAccess) {
-        newAccess = WriteAccess(newLocalSecret.key);
+        currentAccess = WriteAccess(newLocalSecret.key);
       } else {
-        newAccess = ReadAccess(newLocalSecret.key);
+        currentAccess = ReadAccess(newLocalSecret.key);
       }
     } else {
       newAuthMode = AuthModeBlindOrManual();
-      newAccess = BlindAccess();
+      currentAccess = BlindAccess();
     }
 
     // Store the auth mode inside the repository so it can be the next time
@@ -376,7 +375,7 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
 
     setState(() {
       tokenStatus = _SubmittedTokenStatus(input);
-      this.newAccess = newAccess;
+      this.currentAccess = currentAccess;
     });
   }
 

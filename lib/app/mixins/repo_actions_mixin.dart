@@ -76,26 +76,17 @@ mixin RepositoryActionsMixin on LoggyType {
     required PasswordHasher passwordHasher,
     required void Function() popDialog,
   }) async {
-    LocalSecret secret;
+    //LocalSecret secret;
     final authMode = repoCubit.state.authMode;
     final encryptedSecret = authMode.storedLocalSecret;
+
+    final Access? access;
 
     if (encryptedSecret == null) {
       // TODO: Check if the repo can be unlocked without a secret and if so,
       // proceed with `authenticateIfPossible`.
 
-      final access =
-          await GetPasswordAccessDialog.show(context, repoCubit, settings);
-
-      switch (access) {
-        case null:
-        case BlindAccess():
-          return;
-        case ReadAccess():
-          secret = access.localSecret;
-        case WriteAccess():
-          secret = access.localSecret;
-      }
+      access = await GetPasswordAccessDialog.show(context, repoCubit, settings);
     } else {
       if (!await LocalAuth.authenticateIfPossible(
         context,
@@ -103,13 +94,20 @@ mixin RepositoryActionsMixin on LoggyType {
       )) return;
 
       // TODO: Tell the user when the decryption fails.
-      secret = (await encryptedSecret.decrypt(settings.masterKey))!;
+      final secret = (await encryptedSecret.decrypt(settings.masterKey))!;
+      access = await repoCubit.getAccessOf(secret);
     }
 
     popDialog();
 
+    final UnlockedAccess? unlockedAccess = access?.asUnlocked;
+
+    if (unlockedAccess == null) {
+      return;
+    }
+
     await RepoSecurityPage.show(
-        context, repoCubit, secret, settings, passwordHasher);
+        context, repoCubit, unlockedAccess, settings, passwordHasher);
   }
 
   Future<void> locateRepository(

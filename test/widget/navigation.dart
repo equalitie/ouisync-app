@@ -126,6 +126,8 @@ class RepoSettings {
   Future<SecurityPage> enterSecurityPage() async {
     await tapSecurityButton();
     await MockAuthDialog.confirm(tester);
+    await tester.pumpUntilFound(find.byType(RepoSecurityPage));
+    await tester.pumpAndSettle();
     return SecurityPage(tester);
   }
 }

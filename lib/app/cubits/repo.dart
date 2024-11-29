@@ -514,6 +514,16 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     }
   }
 
+  Future<Access> getAccessOf(LocalSecret secret) async {
+    final accessMode = await getSecretAccessMode(secret);
+
+    return switch (accessMode) {
+      AccessMode.blind => BlindAccess(),
+      AccessMode.read => ReadAccess(secret),
+      AccessMode.write => WriteAccess(secret),
+    };
+  }
+
   Future<void> setAuthMode(AuthMode authMode) async {
     emitUnlessClosed(state.copyWith(isLoading: true));
     await _repo.setAuthMode(authMode);

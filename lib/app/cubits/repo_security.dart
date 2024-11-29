@@ -8,6 +8,7 @@ import '../models/models.dart'
         AuthModeBlindOrManual,
         AuthModeKeyStoredOnDevice,
         AuthModePasswordStoredOnDevice,
+        UnlockedAccess,
         LocalSecret,
         LocalSecretKeyAndSalt,
         LocalSecretInput,
@@ -27,24 +28,24 @@ import 'utils.dart';
 
 class RepoSecurityCurrentState {
   final LocalSecretMode localSecretMode;
-  final LocalSecret localSecret;
+  final UnlockedAccess access;
   // This is `Some` when the user submits local password and it is used to
   // determine whether the password has changed since the last submission.
   final Option<LocalPassword> localPassword;
 
   RepoSecurityCurrentState(
       {required this.localSecretMode,
-      required this.localSecret,
+      required this.access,
       this.localPassword = const None()});
 
   RepoSecurityCurrentState copyWith({
     LocalSecretMode? localSecretMode,
-    LocalSecret? localSecret,
+    UnlockedAccess? access,
     Option<LocalPassword>? localPassword,
   }) =>
       RepoSecurityCurrentState(
           localSecretMode: localSecretMode ?? this.localSecretMode,
-          localSecret: localSecret ?? this.localSecret,
+          access: access ?? this.access,
           localPassword: localPassword ?? this.localPassword);
 }
 
@@ -134,7 +135,7 @@ class RepoSecurityState {
   //void debugPrint() {
   //  print("RepoSecurityState:");
   //  print("  current.localSecretMode: ${current.localSecretMode}");
-  //  print("  current.localSecret: ${current.localSecret}");
+  //  print("  current.access: ${current.access}");
   //  print("  current.localPassword: ${current.localPassword}");
   //  print("  plannedOrigin: $plannedOrigin");
   //  print("  plannedStoreSecret: $plannedStoreSecret");
@@ -192,12 +193,11 @@ class RepoSecurityCubit extends Cubit<RepoSecurityState>
     with CubitActions, AppLogger {
   RepoSecurityCubit({
     required LocalSecretMode currentLocalSecretMode,
-    // TODO: Does this need to be nullable?
-    LocalSecret? currentLocalSecret,
+    required UnlockedAccess currentAccess,
   }) : super(RepoSecurityState(
             current: RepoSecurityCurrentState(
               localSecretMode: currentLocalSecretMode,
-              localSecret: currentLocalSecret ?? LocalSecretKey.random(),
+              access: currentAccess,
             ),
             plannedStoreSecret: currentLocalSecretMode.isStored)) {
     unawaited(_init());
@@ -290,12 +290,13 @@ class RepoSecurityCubit extends Cubit<RepoSecurityState>
     if (newLocalSecret != null) {
       try {
         await repoCubit.setLocalSecret(
-          oldSecret: state.current.localSecret,
+          oldSecret: state.current.access.localSecret,
           newSecret: newLocalSecret,
         );
         emitUnlessClosed(state.copyWith(
-            current: state.current
-                .copyWith(localSecret: newLocalSecret.toLocalSecret())));
+            current: state.current.copyWith(
+                access: state.current.access
+                    .copyWithLocalSecret(newLocalSecret.toLocalSecret()))));
         loggy.debug('Repo local secret updated');
       } catch (e, st) {
         loggy.error(
