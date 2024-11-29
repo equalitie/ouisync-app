@@ -35,10 +35,10 @@ void main() {
   });
 
   RepoSecurityPage createRepoSecurityPage() => RepoSecurityPage(
-        settings: deps.settings,
-        repo: repoCubit,
-        localSecret: localSecret,
-        passwordHasher: PasswordHasher(deps.session),
+        repoCubit,
+        localSecret,
+        deps.settings,
+        PasswordHasher(deps.session),
       );
 
   testWidgets(

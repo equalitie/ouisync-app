@@ -34,12 +34,31 @@ import '../utils/platform/platform_values.dart' show PlatformValues;
 //--------------------------------------------------------------------
 
 class RepoSecurityPage extends StatefulWidget {
-  const RepoSecurityPage({
-    required this.settings,
-    required this.repo,
-    required this.localSecret,
-    required this.passwordHasher,
-  });
+  static Future<void> show(
+      BuildContext context,
+      RepoCubit repo,
+      LocalSecret localSecret,
+      Settings settings,
+      PasswordHasher passwordHasher) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => RepoSecurityPage(
+          repo,
+          localSecret,
+          settings,
+          passwordHasher,
+        ),
+      ),
+    );
+  }
+
+  const RepoSecurityPage(
+    this.repo,
+    this.localSecret,
+    this.settings,
+    this.passwordHasher,
+  );
 
   final Settings settings;
   final RepoCubit repo;

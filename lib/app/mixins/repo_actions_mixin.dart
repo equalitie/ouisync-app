@@ -105,17 +105,8 @@ mixin RepositoryActionsMixin on LoggyType {
 
     popDialog();
 
-    await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => RepoSecurityPage(
-          settings: settings,
-          repo: repoCubit,
-          localSecret: secret,
-          passwordHasher: passwordHasher,
-        ),
-      ),
-    );
+    await RepoSecurityPage.show(
+        context, repoCubit, secret, settings, passwordHasher);
   }
 
   Future<void> locateRepository(
