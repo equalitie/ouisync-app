@@ -12,6 +12,7 @@ import '../../utils/utils.dart'
         Dialogs,
         Dimensions,
         Fields,
+        LocalAuth,
         MasterKey,
         Settings,
         validateNoEmptyMaybeRegExpr;
@@ -82,9 +83,13 @@ class _State extends State<GetPasswordAccessDialog> with AppLogger {
   Widget _buildIDontHaveLocalPasswordButton(BuildContext context) {
     return LinkStyleAsyncButton(
         key: Key('enter-repo-reset-screen'),
-        // TODO: locales
         text: "\n${S.current.actionIDontHaveALocalPassword}\n",
         onTap: () async {
+          if (!await LocalAuth.authenticateIfPossible(
+              context, S.current.messagePleaseAuthenticate)) {
+            return;
+          }
+
           final access = await RepoResetAccessPage.show(
               context, widget.repoCubit, widget.settings);
 

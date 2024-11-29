@@ -139,6 +139,7 @@ class SecurityPage {
   Future<RepoResetPage> enterRepoResetPage() async {
     await tester.tap(await tester
         .pumpUntilFound(find.byKey(Key('enter-repo-reset-screen'))));
+    await tester.pumpUntilFound(find.byType(RepoResetAccessPage));
     await tester.pumpAndSettle();
     return RepoResetPage(tester);
   }
@@ -250,6 +251,12 @@ class UnlockDialog {
     await tester.tap(await tester
         .pumpUntilFound(find.byKey(Key('enter-repo-reset-screen'))));
     await tester.pumpAndSettle();
+
+    await MockAuthDialog.confirm(tester);
+
+    await tester.pumpUntilFound(find.byType(RepoResetAccessPage));
+    await tester.pumpAndSettle();
+
     return RepoResetPage(tester);
   }
 }
