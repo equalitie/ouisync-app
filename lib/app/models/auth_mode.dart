@@ -21,6 +21,7 @@ sealed class AuthMode {
       _decodeError(data);
 
   bool get isSecuredWithBiometrics => localSecretMode.isSecuredWithBiometrics;
+  bool get isStored => localSecretMode.isSecuredWithBiometrics;
 
   LocalSecretMode get localSecretMode => switch (this) {
         AuthModeBlindOrManual() => LocalSecretMode.manual,
@@ -274,6 +275,7 @@ enum LocalSecretMode {
         randomStored || randomSecuredWithBiometrics => SecretKeyOrigin.random,
       };
 
+  bool get isStored => store.isStored;
   bool get isSecuredWithBiometrics => store.isSecuredWithBiometrics;
 
   SecretKeyStore get store => switch (this) {
