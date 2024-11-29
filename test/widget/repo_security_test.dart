@@ -27,7 +27,10 @@ void main() {
     );
     repoCubit = repoEntry.cubit!;
 
-    localSecret = (await repoCubit.getLocalSecret(deps.settings.masterKey))!;
+    final authMode = repoCubit.state.authMode;
+
+    localSecret =
+        (await authMode.storedLocalSecret!.decrypt(deps.settings.masterKey))!;
   });
 
   tearDown(() async {

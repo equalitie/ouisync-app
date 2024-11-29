@@ -159,9 +159,10 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
       };
 
       if (unlock) {
-        final secret = await repo.cubit.getLocalSecret(_settings.masterKey);
+        final encryptedSecret = authMode.storedLocalSecret;
 
-        if (secret != null) {
+        if (encryptedSecret != null) {
+          final secret = await encryptedSecret.decrypt(_settings.masterKey);
           await repo.cubit.unlock(secret);
         } else {
           loggy.error('Failed to load secret key for ${repo.location.path}');
