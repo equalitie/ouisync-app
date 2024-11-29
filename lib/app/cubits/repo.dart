@@ -496,15 +496,17 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     return content;
   }
 
-  /// Returns which access mode does the given password provide.
-  Future<AccessMode> getPasswordAccessMode(LocalPassword password) async {
+  /// Returns which access mode does the given secret provide.
+  /// TODO: It should be possible to add API which does not temporarily unlock
+  /// the repository.
+  Future<AccessMode> getSecretAccessMode(LocalSecret secret) async {
     final credentials = await _repo.credentials;
 
     try {
       await _repo.setAccessMode(AccessMode.blind);
       await _repo.setAccessMode(
         AccessMode.write,
-        secret: password,
+        secret: secret,
       );
       return await _repo.accessMode;
     } finally {

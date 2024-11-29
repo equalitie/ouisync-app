@@ -149,10 +149,10 @@ class _State extends State<GetPasswordAccessDialog> with AppLogger {
       // using a `Form`.
       accessMode = await Dialogs.executeFutureWithLoadingDialog(
         context,
-        widget.repoCubit.getPasswordAccessMode(password),
+        widget.repoCubit.getSecretAccessMode(password),
       );
     } else {
-      accessMode = await widget.repoCubit.getPasswordAccessMode(password);
+      accessMode = await widget.repoCubit.getSecretAccessMode(password);
     }
 
     Access access;
