@@ -11,8 +11,8 @@ void main() {
 
   test('manualStored', () async {
     final cubit = RepoSecurityCubit(
-      oldLocalSecretMode: LocalSecretMode.manualStored,
-      oldLocalSecret: LocalPassword("my password"),
+      currentLocalSecretMode: LocalSecretMode.manualStored,
+      currentLocalSecret: LocalPassword("my password"),
     );
 
     expect(cubit.state.secretWillBeStored, true);
@@ -20,8 +20,8 @@ void main() {
 
   test('randomStored', () async {
     final cubit = RepoSecurityCubit(
-      oldLocalSecretMode: LocalSecretMode.randomStored,
-      oldLocalSecret: LocalPassword("my password"),
+      currentLocalSecretMode: LocalSecretMode.randomStored,
+      currentLocalSecret: LocalPassword("my password"),
     );
 
     expect(cubit.state.secretWillBeStored, true);

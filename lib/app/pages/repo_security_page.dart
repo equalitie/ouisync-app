@@ -62,8 +62,8 @@ class _State extends State<RepoSecurityPage> {
         appBar: DirectionalAppBar(title: Text(S.current.titleSecurity)),
         body: BlocHolder(
           create: () => RepoSecurityCubit(
-            oldLocalSecretMode: widget.repo.state.authMode.localSecretMode,
-            oldLocalSecret: currentLocalSecret,
+            currentLocalSecretMode: widget.repo.state.authMode.localSecretMode,
+            currentLocalSecret: currentLocalSecret,
           ),
           builder: _buildContent,
         ),
@@ -259,7 +259,7 @@ class RepoSecurityWidget extends StatelessWidget {
   }
 
   Widget _buildPasswordFields(RepoSecurityState state) =>
-      switch (state.origin) {
+      switch (state.plannedOrigin) {
         SecretKeyOrigin.manual => PasswordValidation(
             onChanged: cubit.setLocalPassword,
             required: state.isLocalPasswordRequired,
@@ -269,7 +269,7 @@ class RepoSecurityWidget extends StatelessWidget {
 
   Widget _buildOriginSwitch(RepoSecurityState state) => _buildSwitch(
         key: Key('use-local-password'), // Used in tests
-        value: state.origin == SecretKeyOrigin.manual,
+        value: state.plannedOrigin == SecretKeyOrigin.manual,
         title: S.current.messageUseLocalPassword,
         onChanged: isBlind
             ? null
@@ -277,7 +277,8 @@ class RepoSecurityWidget extends StatelessWidget {
                 value ? SecretKeyOrigin.manual : SecretKeyOrigin.random),
       );
 
-  Widget _buildStoreSwitch(RepoSecurityState state) => switch (state.origin) {
+  Widget _buildStoreSwitch(RepoSecurityState state) =>
+      switch (state.plannedOrigin) {
         SecretKeyOrigin.manual => _buildSwitch(
             key: Key('store-on-device'),
             value: state.secretWillBeStored,
@@ -295,7 +296,7 @@ class RepoSecurityWidget extends StatelessWidget {
   Widget _buildSecureWithBiometricsSwitch(RepoSecurityState state) =>
       state.isBiometricsAvailable
           ? _buildSwitch(
-              value: state.secureWithBiometrics,
+              value: state.plannedWithBiometrics.toBool,
               title: S.current.messageSecureUsingBiometrics,
               onChanged: isBlind
                   ? null
