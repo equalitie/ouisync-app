@@ -144,6 +144,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionIAgree": MessageLookupByLibrary.simpleMessage("I agree"),
         "actionIDontAgree":
             MessageLookupByLibrary.simpleMessage("I don’t agree"),
+        "actionIDontHaveALocalPassword": MessageLookupByLibrary.simpleMessage(
+            "I don\'t have a local password for this repository"),
         "actionImport": MessageLookupByLibrary.simpleMessage("Import"),
         "actionImportRepo":
             MessageLookupByLibrary.simpleMessage("Import repository"),
@@ -625,6 +627,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Peer removed"),
         "messagePermissionRequired":
             MessageLookupByLibrary.simpleMessage("This permission is required"),
+        "messagePleaseAuthenticate":
+            MessageLookupByLibrary.simpleMessage("Please authenticate"),
         "messagePreviewingFileFailed": m19,
         "messagePrivacyIntro": MessageLookupByLibrary.simpleMessage(
             "This section is used to inform visitors regarding our policies with the collection, use, and disclosure of Personal Information if anyone decides to use our Service"),

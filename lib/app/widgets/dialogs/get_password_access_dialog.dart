@@ -83,7 +83,7 @@ class _State extends State<GetPasswordAccessDialog> with AppLogger {
     return LinkStyleAsyncButton(
         key: Key('enter-repo-reset-screen'),
         // TODO: locales
-        text: "\nI don't have a local password for this repository\n",
+        text: "\n${S.current.actionIDontHaveALocalPassword}\n",
         onTap: () async {
           final access = await RepoResetAccessPage.show(
               context, widget.repoCubit, widget.settings);

@@ -2760,6 +2760,16 @@ class S {
     );
   }
 
+  /// `Please authenticate`
+  String get messagePleaseAuthenticate {
+    return Intl.message(
+      'Please authenticate',
+      name: 'messagePleaseAuthenticate',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Accessing secure storage`
   String get messageAccessingSecureStorage {
     return Intl.message(
@@ -4325,6 +4335,16 @@ class S {
     return Intl.message(
       'Create repository',
       name: 'actionNewRepo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `I don't have a local password for this repository`
+  String get actionIDontHaveALocalPassword {
+    return Intl.message(
+      'I don\'t have a local password for this repository',
+      name: 'actionIDontHaveALocalPassword',
       desc: '',
       args: [],
     );
