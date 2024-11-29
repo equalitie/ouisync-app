@@ -9,7 +9,6 @@ import 'package:ouisync_app/app/pages/repo_security_page.dart';
 import 'package:ouisync_app/app/pages/repo_reset_access.dart';
 import 'package:ouisync_app/app/utils/utils.dart';
 import 'package:ouisync_app/app/widgets/buttons/elevated_async_button.dart';
-import 'package:ouisync_app/app/widgets/repo_security.dart';
 import 'package:ouisync_app/app/widgets/items/entry_action_item.dart'
     show EntryActionItem;
 import 'package:ouisync/ouisync.dart';
@@ -199,7 +198,7 @@ class SecurityPage {
     // Ensure that after the submission the user may exit the page without
     // being prompted to discard pending changes.
     final repoSecurityWidget =
-        tester.widget<RepoSecurity>(find.byType(RepoSecurity));
+        tester.widget<RepoSecurityWidget>(find.byType(RepoSecurityWidget));
 
     expect(repoSecurityWidget.cubit.state.hasPendingChanges, false,
         reason: "There should be no more pending changes");

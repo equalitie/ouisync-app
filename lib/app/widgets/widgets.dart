@@ -69,6 +69,5 @@ export 'holder.dart';
 export 'log_view.dart';
 export 'long_text.dart';
 export 'repo_creation.dart';
-export 'repo_security.dart';
 export 'repo_status.dart';
 export 'throughput_display.dart';
