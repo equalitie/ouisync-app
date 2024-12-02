@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:local_auth/local_auth.dart';
 
 import '../../generated/l10n.dart';
+import 'utils.dart' show AppThemeExtension, ThemeGetter;
 
 abstract class LocalAuth {
   static final LocalAuthentication _localAuth = LocalAuthentication();
@@ -63,8 +64,9 @@ Future<bool> _debugAuthenticate(BuildContext context, String reason) async {
   bool? authenticated = await showDialog(
       context: context,
       builder: (BuildContext context) => AlertDialog(
-            title: Text("Is it you?"),
-            content: Text(reason),
+            title: Text("Mock authentication"),
+            titleTextStyle: context.theme.appTextStyle.titleMedium,
+            content: Text("$reason. Is it you?"),
             actions: [
               button(context, "Yes", true),
               button(context, "No", false),
