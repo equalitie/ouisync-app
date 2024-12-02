@@ -9,12 +9,12 @@ on:
 
 jobs:
   build_and_test:
-    name: build and test on ${{ matrix.name }}
+    name: build and/or test on ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
 
     strategy:
       matrix:
-        name: [android, linux, windows]
+        name: [android, linux-test, linux-build, windows]
         include:
           - name: android
             os: ubuntu-24.04
@@ -25,8 +25,10 @@ jobs:
               abi: arm64-v8a
             build-args: --apk
             artifact-files: ouisync*.apk
+            test: true
+            build: true
 
-          - name: linux
+          - name: linux-test
             os: ubuntu-24.04
             env:
               OUISYNC_LIB: ouisync/target/debug/libouisync_ffi.so
@@ -34,6 +36,20 @@ jobs:
             # analyze: true
             build-args: --deb-gui --deb-cli
             artifact-files: ouisync*.deb
+            test: true
+            build: false
+
+          # For GLIBC and GLIBCXX compatibility we build on not-the-most-recent Ubuntu version
+          - name: linux-build
+            os: ubuntu-22.04
+            env:
+              OUISYNC_LIB: ouisync/target/debug/libouisync_ffi.so
+            # TODO: enable analysis
+            # analyze: true
+            build-args: --deb-gui --deb-cli
+            artifact-files: ouisync*.deb
+            test: false
+            build: true
 
           - name: windows
             os: windows-latest
@@ -43,6 +59,8 @@ jobs:
               OUISYNC_LIB: ouisync\target\debug\ouisync_ffi.dll
             build-args: --exe
             artifact-files: ouisync*.exe
+            test: true
+            build: true
 
     env: ${{ matrix.env }}
 
@@ -72,7 +90,7 @@ jobs:
                                libsecret-1-dev        \
                                ninja-build            \
                                imagemagick
-        if: matrix.name == 'linux'
+        if: matrix.name == 'linux-test' || matrix.name == 'linux-build'
 
       - name: Install dependencies (android)
         # Note that libfuse-dev is not required to build the Android app, but
@@ -119,10 +137,12 @@ jobs:
       - name: Build Ouisync library for tests
         working-directory: ouisync
         run: cargo build --package ouisync-ffi --lib
+        if: matrix.test
 
       - name: Run tests
         run:
           flutter test
+        if: matrix.test
 
       - name: Setup Sentry DSN for artifact build (different from the production releases)
         run: |
@@ -131,7 +151,7 @@ jobs:
         shell: bash
         env:
           NIGHTLY_SENTRY_DSN : ${{ secrets.NIGHTLY_SENTRY_DSN }}
-        if: env.NIGHTLY_SENTRY_DSN != null
+        if: matrix.build && env.NIGHTLY_SENTRY_DSN != null
 
       - name: Setup secrets for artifact signing (different from the production releases)
         run: |
@@ -152,7 +172,7 @@ jobs:
         env:
           NIGHTLY_KEYSTORE_JKS_HEX : ${{ secrets.NIGHTLY_KEYSTORE_JKS_HEX }}
           NIGHTLY_KEYSTORE_PASSWORD : ${{ secrets.NIGHTLY_KEYSTORE_PASSWORD }}
-        if: env.NIGHTLY_KEYSTORE_JKS_HEX != null && env.NIGHTLY_KEYSTORE_PASSWORD != null
+        if: matrix.build && env.NIGHTLY_KEYSTORE_JKS_HEX != null && env.NIGHTLY_KEYSTORE_PASSWORD != null
 
       - name: Build artifacts
         run: |
@@ -165,6 +185,7 @@ jobs:
 
           dart run util/release.dart --flavor=$flavor $keystore $sentry ${{ matrix.build-args }}
         shell: bash
+        if: matrix.build
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -172,3 +193,4 @@ jobs:
           # Name of the produced zip file
           name: ${{ matrix.name }}
           path: releases/release_*/${{ matrix.artifact-files }}
+        if: matrix.build
