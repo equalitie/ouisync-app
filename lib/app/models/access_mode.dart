@@ -72,6 +72,7 @@ class BlindAccess implements Access {
 }
 
 class ReadAccess implements Access, UnlockedAccess {
+  @override
   LocalSecret localSecret;
 
   ReadAccess(this.localSecret);
@@ -90,6 +91,7 @@ class ReadAccess implements Access, UnlockedAccess {
 }
 
 class WriteAccess implements Access, UnlockedAccess {
+  @override
   LocalSecret localSecret;
 
   WriteAccess(this.localSecret);

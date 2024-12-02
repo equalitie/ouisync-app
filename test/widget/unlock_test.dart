@@ -75,7 +75,6 @@ void main() {
         final repoPage = await mainPage.createAndEnterRepository();
 
         final blindToken = await repoPage.createBlindToken();
-        final writeToken = await repoPage.createWriteToken();
 
         // The repo is in write mode, tapping this button will lock it.
         await repoPage.tapAccessModeButton();

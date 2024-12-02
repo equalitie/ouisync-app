@@ -7,13 +7,11 @@ import '../../generated/l10n.dart';
 import '../pages/repo_reset_access.dart';
 import '../cubits/cubits.dart'
     show RepoCubit, RepoSecurityCubit, RepoSecurityState;
-import '../models/models.dart'
-    show Access, UnlockedAccess, BlindAccess, ReadAccess, WriteAccess;
+import '../models/models.dart' show UnlockedAccess;
 import '../utils/utils.dart'
     show
         AppThemeExtension,
         Dialogs,
-        Dimensions,
         Fields,
         PasswordHasher,
         Settings,
@@ -26,10 +24,8 @@ import '../widgets/widgets.dart'
         DirectionalAppBar,
         LinkStyleAsyncButton,
         CustomAdaptiveSwitch,
-        PasswordValidation,
-        ScrollableTextWidget;
+        PasswordValidation;
 import '../models/models.dart' show SecretKeyOrigin;
-import '../utils/platform/platform_values.dart' show PlatformValues;
 
 //--------------------------------------------------------------------
 
@@ -125,7 +121,7 @@ class _State extends State<RepoSecurityPage> {
           final newAccess = await RepoResetAccessPage.show(
               access, context, widget.repo, widget.settings);
 
-          final unlockedAccess = newAccess?.asUnlocked;
+          final unlockedAccess = newAccess.asUnlocked;
 
           if (unlockedAccess == null) {
             Navigator.pop(context);

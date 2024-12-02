@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../cubits/cubits.dart';
 import '../../models/models.dart';
 import '../../utils/utils.dart';
-import '../repo_status.dart';
 import '../widgets.dart';
 
 class FileListItem extends StatelessWidget {

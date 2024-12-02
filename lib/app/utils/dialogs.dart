@@ -7,8 +7,7 @@ import '../../generated/l10n.dart';
 import '../cubits/cubits.dart' show RepoCubit;
 import '../widgets/widgets.dart'
     show ActionsDialog, NegativeButton, PositiveButton;
-import 'utils.dart'
-    show AppThemeExtension, Dimensions, Fields, Strings, ThemeGetter;
+import 'utils.dart' show AppThemeExtension, Fields, Strings, ThemeGetter;
 
 abstract class Dialogs {
   static int _loadingInvocations = 0;

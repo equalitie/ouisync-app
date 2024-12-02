@@ -9,14 +9,7 @@ import '../models/auth_mode.dart';
 import '../models/access_mode.dart';
 import '../cubits/cubits.dart' show RepoCubit, RepoState;
 import '../utils/utils.dart'
-    show
-        AppThemeExtension,
-        Constants,
-        Dimensions,
-        Fields,
-        LocalAuth,
-        Settings,
-        ThemeGetter;
+    show AppThemeExtension, Constants, Fields, LocalAuth, Settings, ThemeGetter;
 import '../widgets/widgets.dart'
     show ActionsDialog, DirectionalAppBar, PositiveButton, NegativeButton;
 
@@ -34,9 +27,7 @@ class RepoResetAccessPage extends StatefulWidget {
         builder: (context) =>
             RepoResetAccessPage._(repo, startAccess, settings));
 
-    Navigator.push(context, route);
-
-    return (await route.popped)!;
+    return (await Navigator.push(context, route)) ?? startAccess;
   }
 
   RepoResetAccessPage._(
@@ -51,13 +42,13 @@ class RepoResetAccessPage extends StatefulWidget {
 }
 
 class RepoResetAccessPageState extends State<RepoResetAccessPage> {
-  _TokenStatus tokenStatus;
+  _TokenStatus _tokenStatus;
   Access currentAccess;
 
   RepoResetAccessPageState(this.currentAccess)
-      : tokenStatus = _InvalidTokenStatus(_InvalidTokenType.empty);
+      : _tokenStatus = _InvalidTokenStatus(_InvalidTokenType.empty);
 
-  bool get hasPendingChanges => tokenStatus is _SubmitableTokenStatus;
+  bool get hasPendingChanges => _tokenStatus is _SubmitableTokenStatus;
 
   @override
   Widget build(BuildContext context) => PopScope(
@@ -171,7 +162,7 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
   }
 
   Widget _buildTokenInfo() {
-    final info = switch (tokenStatus) {
+    final info = switch (_tokenStatus) {
       _SubmitableTokenStatus status =>
         _capitalized(status.inputToken.accessMode.localized),
       _SubmittedTokenStatus status =>
@@ -192,13 +183,13 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
 
   // Capitalize first letter of a string
   String _capitalized(String str) {
-    return str.length > 0
+    return str.isNotEmpty
         ? '${str[0].toUpperCase()}${str.substring(1).toLowerCase()}'
         : str;
   }
 
   Widget _buildActionInfo() {
-    final (action, warning) = switch (tokenStatus) {
+    final (action, warning) = switch (_tokenStatus) {
       _SubmitableTokenStatus status => _buildTokenStatusSubmitable(status),
       _SubmittedTokenStatus status => _buildTokenStatusSubmitted(status),
       _InvalidTokenStatus status => _buildTokenStatusInvalid(status),
@@ -281,7 +272,7 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
         suffixIcon: const Icon(Icons.key_rounded),
         onChanged: (input) {
           widget._jobs.addJob(() async {
-            final inputToken = await parseTokenInput(input);
+            final inputToken = await _parseTokenInput(input);
             _updateTokenStatusOnTokenInputChange(inputToken);
           });
         },
@@ -292,7 +283,7 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
   Widget _buildSubmitButton() {
     Future<void> Function()? onPressed;
 
-    switch (tokenStatus) {
+    switch (_tokenStatus) {
       case _SubmitableTokenStatus valid:
         onPressed = () async {
           if (await _confirmUpdateDialog()) {
@@ -403,7 +394,7 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
     await repo.setAuthMode(newAuthMode);
 
     setState(() {
-      tokenStatus = _SubmittedTokenStatus(input);
+      _tokenStatus = _SubmittedTokenStatus(input);
       this.currentAccess = currentAccess;
     });
   }
@@ -427,14 +418,14 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
 
     if (mounted) {
       setState(() {
-        tokenStatus = newStatus;
+        _tokenStatus = newStatus;
       });
     }
   }
 
   // -----------------------------------------------------------------
 
-  Future<_InputToken> parseTokenInput(String input) async {
+  Future<_InputToken> _parseTokenInput(String input) async {
     if (input.isEmpty) {
       return _InvalidInputToken.empty();
     }

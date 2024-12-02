@@ -5,7 +5,7 @@ class LinkStyleAsyncButton extends StatefulWidget {
   LinkStyleAsyncButton({
     super.key,
     required this.text,
-    this.onTap = null,
+    this.onTap,
   });
 
   final String text;

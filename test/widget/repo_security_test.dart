@@ -105,7 +105,7 @@ void main() {
         await tester.pumpAndSettle();
 
         // Tap that we don't want the password to be stored.
-        return tester.tap(find.descendant(
+        await tester.tap(find.descendant(
             of: find.byKey(Key('store-on-device')),
             matching: find.byType(Switch)));
 

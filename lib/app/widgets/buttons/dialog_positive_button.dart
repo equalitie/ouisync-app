@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../utils/utils.dart';
 
 class PositiveButton extends StatelessWidget {
-  const PositiveButton({
+  PositiveButton({
     required this.text,
     required this.onPressed,
     double? buttonsAspectRatio,
@@ -11,7 +11,7 @@ class PositiveButton extends StatelessWidget {
     this.focusNode,
     this.isDangerButton = false,
     super.key,
-  }) : this.buttonsAspectRatio =
+  }) : buttonsAspectRatio =
             buttonsAspectRatio ?? Dimensions.aspectRatioModalDialogButton;
 
   final String? text;

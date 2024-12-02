@@ -27,7 +27,6 @@ import 'package:path_provider_platform_interface/path_provider_platform_interfac
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stack_trace/stack_trace.dart';
-import 'dart:typed_data' show ByteData, Uint8List;
 
 /// Setup the test environment and run `callback` inside it.
 ///
@@ -379,7 +378,7 @@ extension WidgetTesterExtension on WidgetTester {
   // A workaround for the issue with pumpAndSettle as described here
   // https://stackoverflow.com/questions/67186472/error-pumpandsettle-timed-out-maybe-due-to-riverpod
   Future<Finder> pumpUntilFound(Finder finder,
-      {Duration? timeout = null, Duration? pumpTime = null}) async {
+      {Duration? timeout, Duration? pumpTime}) async {
     final found = await pumpUntilNonNull(
         () => finder.tryEvaluate() ? finder : null,
         timeout: timeout,
@@ -392,14 +391,14 @@ extension WidgetTesterExtension on WidgetTester {
   }
 
   Future<void> pumpUntil(bool Function() predicate,
-      {Duration? timeout = null, Duration? pumpTime = null}) async {
+      {Duration? timeout, Duration? pumpTime}) async {
     await pumpUntilNonNull(() => predicate() ? true : null,
         timeout: timeout, pumpTime: pumpTime);
     return;
   }
 
   Future<T> pumpUntilNonNull<T>(T? Function() f,
-      {Duration? timeout = null, Duration? pumpTime = null}) async {
+      {Duration? timeout, Duration? pumpTime}) async {
     timeout ??= Duration(seconds: 5);
     pumpTime ??= Duration(milliseconds: 100);
 

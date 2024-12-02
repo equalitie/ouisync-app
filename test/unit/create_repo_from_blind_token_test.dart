@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:ouisync/ouisync.dart';
 import 'package:ouisync_app/app/cubits/repo_creation.dart';
 import 'package:ouisync_app/app/models/models.dart';
 import 'package:ouisync_app/app/utils/share_token.dart';

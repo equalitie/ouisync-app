@@ -10,7 +10,7 @@ class NegativeButton extends StatelessWidget {
     this.buttonConstrains = Dimensions.sizeConstrainsDialogAction,
     this.focusNode,
     super.key,
-  }) : this.buttonsAspectRatio =
+  }) : buttonsAspectRatio =
             buttonsAspectRatio ?? Dimensions.aspectRatioModalDialogButton;
 
   final String? text;

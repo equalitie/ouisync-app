@@ -8,7 +8,6 @@ import '../../utils/utils.dart'
     show
         AppThemeExtension,
         Dialogs,
-        Dimensions,
         Fields,
         Strings,
         TextEditingControllerExtension,

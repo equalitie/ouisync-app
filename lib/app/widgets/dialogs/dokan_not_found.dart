@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../generated/l10n.dart';
-import '../../utils/utils.dart'
-    show AppThemeExtension, Dimensions, Fields, ThemeGetter;
+import '../../utils/utils.dart' show AppThemeExtension, Fields, ThemeGetter;
 import '../widgets.dart' show NegativeButton, PositiveButton;
 
 class DokanNotFound extends StatelessWidget {

@@ -9,10 +9,8 @@ import '../models/models.dart'
         AuthModeKeyStoredOnDevice,
         AuthModePasswordStoredOnDevice,
         UnlockedAccess,
-        LocalSecret,
         LocalSecretKeyAndSalt,
         LocalSecretInput,
-        LocalSecretKey,
         LocalSecretManual,
         LocalSecretMode,
         LocalSecretRandom,
@@ -56,7 +54,7 @@ class RepoSecurityState {
 
   final SecretKeyOrigin plannedOrigin;
   final bool plannedStoreSecret;
-  final _TriBool plannedWithBiometrics;
+  final BiometricsValue plannedWithBiometrics;
   final Option<LocalPassword> plannedPassword;
 
   final bool isBiometricsAvailable;
@@ -65,20 +63,20 @@ class RepoSecurityState {
     required this.current,
     SecretKeyOrigin? plannedOrigin,
     bool? plannedStoreSecret,
-    _TriBool? plannedWithBiometrics,
+    BiometricsValue? plannedWithBiometrics,
     this.plannedPassword = const None(),
     this.isBiometricsAvailable = false,
   })  : plannedOrigin = plannedOrigin ?? current.localSecretMode.origin,
         plannedStoreSecret =
             plannedStoreSecret ?? current.localSecretMode.store.isStored,
         plannedWithBiometrics = plannedWithBiometrics ??
-            _TriBool(current.localSecretMode.isSecuredWithBiometrics);
+            BiometricsValue(current.localSecretMode.isSecuredWithBiometrics);
 
   RepoSecurityState copyWith({
     RepoSecurityCurrentState? current,
     SecretKeyOrigin? plannedOrigin,
     bool? plannedStoreSecret,
-    _TriBool? plannedWithBiometrics,
+    BiometricsValue? plannedWithBiometrics,
     Option<LocalPassword>? plannedPassword,
     bool? isBiometricsAvailable,
   }) =>
@@ -217,12 +215,12 @@ class RepoSecurityCubit extends Cubit<RepoSecurityState>
   void setStore(bool value) {
     final plannedWithBiometrics =
         switch ((value, state.plannedWithBiometrics)) {
-      (true, _True()) => _True(),
-      (true, _False()) => _False(),
-      (true, _ImpliedFalse()) => _True(),
-      (false, _True()) => _ImpliedFalse(),
-      (false, _False()) => _False(),
-      (false, _ImpliedFalse()) => _ImpliedFalse(),
+      (true, BiometricsTrue()) => BiometricsTrue(),
+      (true, BiometricsFalse()) => BiometricsFalse(),
+      (true, BiometricsImpliedFalse()) => BiometricsTrue(),
+      (false, BiometricsTrue()) => BiometricsImpliedFalse(),
+      (false, BiometricsFalse()) => BiometricsFalse(),
+      (false, BiometricsImpliedFalse()) => BiometricsImpliedFalse(),
     };
 
     emitUnlessClosed(state.copyWith(
@@ -231,7 +229,8 @@ class RepoSecurityCubit extends Cubit<RepoSecurityState>
   }
 
   void setSecureWithBiometrics(bool value) {
-    emitUnlessClosed(state.copyWith(plannedWithBiometrics: _TriBool(value)));
+    emitUnlessClosed(
+        state.copyWith(plannedWithBiometrics: BiometricsValue(value)));
   }
 
   void setLocalPassword(String? value) {
@@ -376,21 +375,24 @@ Future<(LocalSecretKeyAndSalt?, AuthMode)> _computeLocalSecretAndAuthMode(
 
 //--------------------------------------------------------------------
 
-sealed class _TriBool {
+sealed class BiometricsValue {
   bool get toBool;
 
-  factory _TriBool(bool b) => b ? _True() : _False();
+  factory BiometricsValue(bool b) => b ? BiometricsTrue() : BiometricsFalse();
 }
 
-class _True implements _TriBool {
+class BiometricsTrue implements BiometricsValue {
+  @override
   bool get toBool => true;
 }
 
-class _False implements _TriBool {
+class BiometricsFalse implements BiometricsValue {
+  @override
   bool get toBool => false;
 }
 
-class _ImpliedFalse implements _TriBool {
+class BiometricsImpliedFalse implements BiometricsValue {
+  @override
   bool get toBool => false;
 }
 

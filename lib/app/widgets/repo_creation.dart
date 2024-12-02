@@ -15,8 +15,7 @@ import '../cubits/cubits.dart'
         RepoCreationValid;
 import '../utils/utils.dart'
     show AppThemeExtension, Constants, Dialogs, Dimensions, Fields, ThemeGetter;
-import 'widgets.dart'
-    show BlocHolder, ContentWithStickyFooterState, CustomAdaptiveSwitch;
+import 'widgets.dart' show ContentWithStickyFooterState, CustomAdaptiveSwitch;
 
 class RepoCreation extends StatelessWidget {
   RepoCreation(this.creationCubit, {super.key});

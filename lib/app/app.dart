@@ -288,8 +288,8 @@ class ErrorScreen extends StatelessWidget {
 // resulting in black screens. This class should help us find those race conditions.
 class _AppNavigatorObserver extends NavigatorObserver {
   final int _maxHistoryLength = 16;
-  List<_RouteHistoryEntry> _stackHistory = [];
-  Loggy<AppLogger> _logger;
+  final List<_RouteHistoryEntry> _stackHistory = [];
+  final Loggy<AppLogger> _logger;
 
   _AppNavigatorObserver(this._logger);
 

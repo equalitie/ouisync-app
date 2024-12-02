@@ -6,18 +6,13 @@ import '../../pages/repo_reset_access.dart';
 import '../../widgets/dialogs/actions_dialog.dart';
 import '../../utils/utils.dart'
     show
-        AccessModeLocalizedExtension,
         AppLogger,
         Constants,
-        Dialogs,
         Dimensions,
         Fields,
         LocalAuth,
-        MasterKey,
         Settings,
         validateNoEmptyMaybeRegExpr;
-import '../../models/models.dart'
-    show AuthModeKeyStoredOnDevice, RepoLocation, SecretKeyOrigin;
 import '../../models/access_mode.dart';
 import '../../cubits/cubits.dart' show RepoCubit;
 import '../widgets.dart'
@@ -146,17 +141,17 @@ class _State extends State<GetPasswordAccessDialog> with AppLogger {
 
     final AccessMode accessMode;
 
-    if (false) {
-      // TODO: Find out why if we use `executefutureWithLoadingDialog` this
-      // dialog alwayrs returns `null`. Seems to also be related to the dialog
-      // using a `Form`.
-      accessMode = await Dialogs.executeFutureWithLoadingDialog(
-        context,
-        widget.repoCubit.getSecretAccessMode(password),
-      );
-    } else {
-      accessMode = await widget.repoCubit.getSecretAccessMode(password);
-    }
+    //if (FIXME) {
+    //  // TODO: Find out why if we use `executefutureWithLoadingDialog` this
+    //  // dialog alwayrs returns `null`. Seems to also be related to the dialog
+    //  // using a `Form`.
+    //  accessMode = await Dialogs.executeFutureWithLoadingDialog(
+    //    context,
+    //    widget.repoCubit.getSecretAccessMode(password),
+    //  );
+    //} else {
+    accessMode = await widget.repoCubit.getSecretAccessMode(password);
+    //}
 
     Access access;
 
