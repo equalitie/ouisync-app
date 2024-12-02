@@ -3,14 +3,15 @@ import 'package:flutter/material.dart';
 import '../../utils/utils.dart';
 
 class NegativeButton extends StatelessWidget {
-  const NegativeButton({
+  NegativeButton({
     required this.text,
     required this.onPressed,
-    required this.buttonsAspectRatio,
+    double? buttonsAspectRatio,
     this.buttonConstrains = Dimensions.sizeConstrainsDialogAction,
     this.focusNode,
     super.key,
-  });
+  }) : buttonsAspectRatio =
+            buttonsAspectRatio ?? Dimensions.aspectRatioModalDialogButton;
 
   final String? text;
   final GestureTapCallback? onPressed;

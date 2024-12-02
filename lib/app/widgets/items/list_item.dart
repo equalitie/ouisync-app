@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../cubits/cubits.dart';
 import '../../models/models.dart';
 import '../../utils/utils.dart';
-import '../repo_status.dart';
 import '../widgets.dart';
 
 class FileListItem extends StatelessWidget {
@@ -106,6 +105,7 @@ class RepoListItem extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               IconButton(
+                key: Key('access-mode-button'),
                 icon: Icon(
                   Fields.accessModeIcon(state.accessMode),
                   size: Dimensions.sizeIconAverage,

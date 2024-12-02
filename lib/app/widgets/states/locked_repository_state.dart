@@ -4,7 +4,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../mixins/mixins.dart';
-import '../../utils/master_key.dart';
 import '../../utils/utils.dart';
 
 class LockedRepositoryState extends HookWidget
@@ -15,6 +14,7 @@ class LockedRepositoryState extends HookWidget
     required this.repoCubit,
     required this.masterKey,
     required this.passwordHasher,
+    required this.settings,
   });
 
   final BuildContext parentContext;
@@ -22,6 +22,7 @@ class LockedRepositoryState extends HookWidget
   final RepoCubit repoCubit;
   final MasterKey masterKey;
   final PasswordHasher passwordHasher;
+  final Settings settings;
 
   @override
   Widget build(BuildContext context) {
@@ -73,8 +74,8 @@ class LockedRepositoryState extends HookWidget
                     await unlockRepository(
                       parentContext,
                       repoCubit,
-                      masterKey,
                       passwordHasher,
+                      settings,
                     );
                   },
                   leadingIcon: const Icon(Icons.lock_open_rounded),

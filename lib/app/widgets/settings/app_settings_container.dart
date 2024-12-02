@@ -5,7 +5,6 @@ import 'package:ouisync/ouisync.dart';
 import 'package:settings_ui/settings_ui.dart' as s;
 
 import '../../cubits/cubits.dart';
-import '../../cubits/launch_at_startup.dart';
 import '../../utils/platform/platform.dart';
 import '../../utils/utils.dart';
 import 'about_section.dart';
