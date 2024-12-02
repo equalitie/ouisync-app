@@ -67,7 +67,7 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
         Navigator.pop(context, currentAccess);
       },
       child: Scaffold(
-        appBar: DirectionalAppBar(title: Text("Reset repository access")),
+        appBar: DirectionalAppBar(title: Text(S.current.repoResetTitle)),
         body: BlocBuilder<RepoCubit, RepoState>(
           bloc: widget.repo,
           builder: (context, repoState) {
@@ -125,11 +125,11 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
 
     switch (currentAccess) {
       case BlindAccess():
-        subtitle = "Blind or locked";
+        subtitle = S.current.repoResetAccessTypeInfoBlindOrLocked;
       case ReadAccess():
-        subtitle = "Read";
+        subtitle = S.current.repoResetAccessTypeInfoRead;
       case WriteAccess():
-        subtitle = "Write";
+        subtitle = S.current.repoResetAccessTypeInfoWrite;
     }
 
     return _buildInfoWidget(
@@ -144,16 +144,21 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
 
     switch (widget.repo.state.authMode) {
       case AuthModeBlindOrManual():
-        subtitle = "Blind or locked behind a local password";
-        warning = "The application cannot tell the difference";
+        switch (currentAccess) {
+          case BlindAccess():
+            subtitle = S.current.repoResetAuthInfoBlindOrLocked;
+            warning = S.current.repoResetAuthInfoBlindOrLockedWarn;
+          case ReadAccess():
+          case WriteAccess():
+            subtitle = S.current.repoResetAuthInfoLocked;
+        }
       case AuthModePasswordStoredOnDevice():
-        subtitle = "Password stored on device";
+        subtitle = S.current.repoResetAuthInfoPasswordIsStored;
         warning = null;
       case AuthModeKeyStoredOnDevice authMode:
         subtitle = switch (authMode.secureWithBiometrics) {
-          false => "Key is stored on this device.",
-          true =>
-            "Key is stored on this device and additional verification is needed to open the repository.",
+          false => S.current.repoResetAuthInfoKeyIsStored,
+          true => S.current.repoResetAuthInfoKeyIsStoredAndProtected,
         };
         warning = null;
     }
@@ -175,7 +180,7 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
         _capitalized(status.inputToken.accessMode.localized),
       _InvalidTokenStatus status => switch (status.type) {
           _InvalidTokenType.empty => "",
-          _InvalidTokenType.malformed => "Invalid",
+          _InvalidTokenType.malformed => S.current.repoResetTokenInvalid,
         },
     };
 
@@ -214,63 +219,55 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
     final tokenAccessMode = status.inputToken.accessMode;
 
     final String info;
-    String? warning;
+    final String? warn;
 
     switch ((repoAccessMode, tokenAccessMode)) {
       case (AccessMode.blind, AccessMode.blind):
-        info = "The repository will become blind.";
-        warning =
-            "This repository may have read or write access locked behind a local password. If so, unlocking will not be possible after this action is executed.";
+        info = S.current.repoResetActionBlindToBlind;
+        warn = S.current.repoResetActionBlindToBlindWarn;
       case (AccessMode.read, AccessMode.read):
       case (AccessMode.write, AccessMode.write):
-        info =
-            "No action will be performed because the token and repository access are the same.";
+        info = S.current.repoResetActionSame;
+        warn = null;
       case (AccessMode.blind, AccessMode.read):
-        info = "The repository will become read only.";
-        warning =
-            "This repository may have write access locked behind a local password. If so, unlocking for writing will not be possible after this action is executed.";
+        info = S.current.repoResetActionBlindToRead;
+        warn = S.current.repoResetActionBlindToReadWarn;
       case (AccessMode.blind, AccessMode.write):
       case (AccessMode.read, AccessMode.write):
-        info = "The repository will gain write access.";
+        info = S.current.repoResetActionAnyToWrite;
+        warn = null;
       case (AccessMode.read, AccessMode.blind):
-        info = "The repository will lose its read access.";
-        warning =
-            "This action is irreversible without a read or write token link.";
+        info = S.current.repoResetActionReadToBlind;
+        warn = S.current.repoResetActionReadToBlindWarn;
       case (AccessMode.write, AccessMode.read):
-        info = "The repository will lose its write access.";
-        warning = "This action is irreversible without a write token link.";
+        info = S.current.repoResetActionWriteToRead;
+        warn = S.current.repoResetActionWriteToReadWarn;
       case (AccessMode.write, AccessMode.blind):
-        info = "The repository will lose its read and write access.";
-        warning = "This action is irreversible without a write token link.";
+        info = S.current.repoResetActionWriteToBlind;
+        warn = S.current.repoResetActionWriteToBlindWarn;
     }
 
-    return (info, warning);
+    return (info, warn);
   }
 
   (String, String?) _buildTokenStatusInvalid(_InvalidTokenStatus status) {
     final String info;
     switch (status.type) {
       case _InvalidTokenType.empty:
-        info = "Please provide a valid token link to determine the action.";
+        info = S.current.repoResetTokenEmptyInfo;
       case _InvalidTokenType.malformed:
-        info = "The token link is invalid.";
+        info = S.current.repoResetTokenInvalidInfo;
     }
     return (info, null);
   }
 
   (String, String?) _buildTokenStatusNonMatching(
       _NonMatchingTokenStatus status) {
-    return (
-      "No action can be performed because the token does not correspond to this repository.",
-      null
-    );
+    return (S.current.repoResetTokenNonMatching, null);
   }
 
   (String, String?) _buildTokenStatusSubmitted(_SubmittedTokenStatus status) {
-    return (
-      "No action will be performed because the token has already been submitted.",
-      null
-    );
+    return (S.current.repoResetTokenAlreadySubmitted, null);
   }
 
   // -----------------------------------------------------------------
