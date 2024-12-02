@@ -25,6 +25,7 @@ void main() {
 
   late NativeChannels nativeChannels;
   late NavigationCubit navigationCubit;
+  late EntrySelectionCubit entrySelectionCubit;
   late EntryBottomSheetCubit bottomSheetCubit;
 
   setUp(() async {
@@ -56,6 +57,7 @@ void main() {
     FlutterSecureStorage.setMockInitialValues({});
     SharedPreferences.setMockInitialValues({});
     navigationCubit = NavigationCubit();
+    entrySelectionCubit = EntrySelectionCubit();
     bottomSheetCubit = EntryBottomSheetCubit();
 
     final mounter = Mounter(session);
@@ -65,6 +67,7 @@ void main() {
       repo: originRepo,
       location: locationOrigin,
       navigation: navigationCubit,
+      entrySelection: entrySelectionCubit,
       bottomSheet: bottomSheetCubit,
       cacheServers: CacheServers.disabled,
       mounter: mounter,
@@ -75,6 +78,7 @@ void main() {
       repo: otherRepo,
       location: locationOther,
       navigation: navigationCubit,
+      entrySelection: entrySelectionCubit,
       bottomSheet: bottomSheetCubit,
       cacheServers: CacheServers.disabled,
       mounter: mounter,
