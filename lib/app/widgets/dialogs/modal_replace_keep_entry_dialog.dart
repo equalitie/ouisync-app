@@ -76,13 +76,11 @@ class ReplaceKeepEntry extends StatelessWidget {
   List<Widget> _actions(context) => [
         NegativeButton(
             text: S.current.actionCancel,
-            onPressed: () async => await Navigator.of(context).maybePop(null),
-            buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton),
+            onPressed: () async => await Navigator.of(context).maybePop(null)),
         PositiveButton(
             text: S.current.actionAccept,
             onPressed: () async =>
-                await Navigator.of(context).maybePop(_fileAction.value),
-            buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton),
+                await Navigator.of(context).maybePop(_fileAction.value)),
       ];
 
   void _onFileActionChanged(FileAction? value) =>

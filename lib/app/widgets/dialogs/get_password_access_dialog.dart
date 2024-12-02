@@ -126,12 +126,10 @@ class _State extends State<GetPasswordAccessDialog> with AppLogger {
         NegativeButton(
           text: S.current.actionCancel,
           onPressed: () async => await Navigator.of(context).maybePop(null),
-          buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
         ),
         PositiveButton(
           text: S.current.actionUnlock,
           onPressed: () => _onSubmit(context),
-          buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
         )
       ];
 

@@ -37,12 +37,10 @@ class DokanNotFound extends StatelessWidget {
         NegativeButton(
           text: S.current.actionSkip.toLowerCase(),
           onPressed: () => Navigator.of(context).maybePop(false),
-          buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
         ),
         PositiveButton(
           text: S.current.actionInstallDokan.toUpperCase(),
           onPressed: () => Navigator.of(context).maybePop(true),
-          buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
         ),
       ];
 }

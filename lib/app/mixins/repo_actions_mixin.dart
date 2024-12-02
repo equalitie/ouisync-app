@@ -194,12 +194,10 @@ mixin RepositoryActionsMixin on LoggyType {
               text: S.current.actionCancelCapital,
               onPressed: () async =>
                   await Navigator.of(context).maybePop(false),
-              buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
             ),
             PositiveButton(
               text: S.current.actionDeleteCapital,
               onPressed: () async => await Navigator.of(context).maybePop(true),
-              buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
               isDangerButton: true,
             )
           ])

@@ -329,13 +329,11 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                 text: S.current.actionCancel,
                 onPressed: () async =>
                     await Navigator.of(context).maybePop(null),
-                buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
               ),
               PositiveButton(
                 text: S.current.actionOK,
                 onPressed: () async =>
                     await Navigator.of(context).maybePop(attachments),
-                buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
               )
             ])
           ]);

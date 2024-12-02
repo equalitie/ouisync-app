@@ -6,12 +6,13 @@ class PositiveButton extends StatelessWidget {
   const PositiveButton({
     required this.text,
     required this.onPressed,
-    required this.buttonsAspectRatio,
+    double? buttonsAspectRatio,
     this.buttonConstrains = Dimensions.sizeConstrainsDialogAction,
     this.focusNode,
     this.isDangerButton = false,
     super.key,
-  });
+  }) : this.buttonsAspectRatio =
+            buttonsAspectRatio ?? Dimensions.aspectRatioModalDialogButton;
 
   final String? text;
   final GestureTapCallback? onPressed;

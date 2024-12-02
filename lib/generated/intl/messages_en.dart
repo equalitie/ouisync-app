@@ -806,6 +806,20 @@ class MessageLookup extends MessageLookupByLibrary {
         "replacementNumber": m35,
         "replacementPath": m36,
         "replacementStatus": m37,
+        "repoResetAccessTypeLabel":
+            MessageLookupByLibrary.simpleMessage("Repository access type"),
+        "repoResetActionInfoLabel":
+            MessageLookupByLibrary.simpleMessage("Action to be submitted"),
+        "repoResetAuthInfoLabel":
+            MessageLookupByLibrary.simpleMessage("Authentication method"),
+        "repoResetConfirmUpdateMessage": MessageLookupByLibrary.simpleMessage(
+            "Are you sure you want to proceed with the Update action?"),
+        "repoResetConfirmUpdateTitle":
+            MessageLookupByLibrary.simpleMessage("Please confirm"),
+        "repoResetRepoNameLabel":
+            MessageLookupByLibrary.simpleMessage("Repository name"),
+        "repoResetTokenTypeLabel":
+            MessageLookupByLibrary.simpleMessage("Token access type"),
         "repositoryIsAlreadyImported": MessageLookupByLibrary.simpleMessage(
             "Repository is already imported"),
         "sortByNameLabel": MessageLookupByLibrary.simpleMessage("Name"),

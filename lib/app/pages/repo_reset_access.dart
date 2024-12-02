@@ -9,8 +9,16 @@ import '../models/auth_mode.dart';
 import '../models/access_mode.dart';
 import '../cubits/cubits.dart' show RepoCubit, RepoState;
 import '../utils/utils.dart'
-    show AppThemeExtension, Constants, Fields, LocalAuth, Settings, ThemeGetter;
-import '../widgets/widgets.dart' show DirectionalAppBar;
+    show
+        AppThemeExtension,
+        Constants,
+        Dimensions,
+        Fields,
+        LocalAuth,
+        Settings,
+        ThemeGetter;
+import '../widgets/widgets.dart'
+    show ActionsDialog, DirectionalAppBar, PositiveButton, NegativeButton;
 
 class RepoResetAccessPage extends StatefulWidget {
   final RepoCubit repo;
@@ -107,7 +115,7 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
 
   Widget _buildRepoNameInfo() {
     return ListTile(
-      title: Text("Repository name"),
+      title: Text(S.current.repoResetRepoNameLabel),
       subtitle: Text(widget.repo.name),
     );
   }
@@ -115,27 +123,17 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
   Widget _buildCurrentAccessModeInfo() {
     String subtitle;
 
-    switch (widget.repo.state.accessMode) {
-      case AccessMode.blind:
-        if (currentAccess is BlindAccess) {
-          // When the user submitted a blind token, we know the repository is
-          // indeed blind and not locked.
-          subtitle = "Blind";
-        } else if (widget.repo.state.authMode.isStored) {
-          // When the local secret key is stored, we know the repository is
-          // locked and not blind.
-          subtitle = "Locked";
-        } else {
-          subtitle = "Blind or locked";
-        }
-      case AccessMode.read:
+    switch (currentAccess) {
+      case BlindAccess():
+        subtitle = "Blind or locked";
+      case ReadAccess():
         subtitle = "Read";
-      case AccessMode.write:
+      case WriteAccess():
         subtitle = "Write";
     }
 
     return _buildInfoWidget(
-      title: "Repository access type",
+      title: S.current.repoResetAccessTypeLabel,
       subtitle: subtitle,
     );
   }
@@ -146,12 +144,8 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
 
     switch (widget.repo.state.authMode) {
       case AuthModeBlindOrManual():
-        if (currentAccess is BlindAccess) {
-          subtitle = "Blind";
-        } else {
-          subtitle = "Blind or locked behind a local password";
-          warning = "The application cannot tell the difference";
-        }
+        subtitle = "Blind or locked behind a local password";
+        warning = "The application cannot tell the difference";
       case AuthModePasswordStoredOnDevice():
         subtitle = "Password stored on device";
         warning = null;
@@ -165,7 +159,7 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
     }
 
     return _buildInfoWidget(
-      title: "Authentication method",
+      title: S.current.repoResetAuthInfoLabel,
       subtitle: subtitle,
       warning: warning,
     );
@@ -186,7 +180,7 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
     };
 
     return _buildInfoWidget(
-      title: "Token access type",
+      title: S.current.repoResetTokenTypeLabel,
       subtitle: info,
     );
   }
@@ -207,7 +201,7 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
     };
 
     return _buildInfoWidget(
-      title: "Action to be submitted",
+      title: S.current.repoResetActionInfoLabel,
       subtitle: action,
       warning: warning,
     );
@@ -304,7 +298,9 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
     switch (tokenStatus) {
       case _SubmitableTokenStatus valid:
         onPressed = () async {
-          await _submit(valid.inputToken);
+          if (await _confirmUpdateDialog()) {
+            await _submit(valid.inputToken);
+          }
         };
       default:
     }
@@ -313,6 +309,42 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
         key: Key('repo-reset-submit'),
         text: S.current.actionUpdate,
         onPressed: onPressed);
+  }
+
+  Future<bool> _confirmUpdateDialog() async {
+    final bool? confirmed = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) => ActionsDialog(
+        title: S.current.repoResetConfirmUpdateTitle,
+        body: ListBody(
+          children: <Widget>[
+            const SizedBox(height: 20.0),
+            Text(
+              S.current.repoResetConfirmUpdateMessage,
+              style: context.theme.appTextStyle.bodyMedium
+                  .copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 20.0),
+            Fields.dialogActions(
+              buttons: [
+                NegativeButton(
+                  text: S.current.actionCancel,
+                  onPressed: () async =>
+                      await Navigator.of(context).maybePop(false),
+                ),
+                PositiveButton(
+                  text: S.current.actionYes,
+                  isDangerButton: true,
+                  onPressed: () async =>
+                      await Navigator.of(context).maybePop(true),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+    return confirmed ?? false;
   }
 
   Future<void> _submit(_ValidInputToken input) async {

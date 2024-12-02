@@ -4040,6 +4040,76 @@ class S {
     );
   }
 
+  /// `Repository name`
+  String get repoResetRepoNameLabel {
+    return Intl.message(
+      'Repository name',
+      name: 'repoResetRepoNameLabel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Repository access type`
+  String get repoResetAccessTypeLabel {
+    return Intl.message(
+      'Repository access type',
+      name: 'repoResetAccessTypeLabel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Token access type`
+  String get repoResetTokenTypeLabel {
+    return Intl.message(
+      'Token access type',
+      name: 'repoResetTokenTypeLabel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Action to be submitted`
+  String get repoResetActionInfoLabel {
+    return Intl.message(
+      'Action to be submitted',
+      name: 'repoResetActionInfoLabel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Authentication method`
+  String get repoResetAuthInfoLabel {
+    return Intl.message(
+      'Authentication method',
+      name: 'repoResetAuthInfoLabel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please confirm`
+  String get repoResetConfirmUpdateTitle {
+    return Intl.message(
+      'Please confirm',
+      name: 'repoResetConfirmUpdateTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Are you sure you want to proceed with the Update action?`
+  String get repoResetConfirmUpdateMessage {
+    return Intl.message(
+      'Are you sure you want to proceed with the Update action?',
+      name: 'repoResetConfirmUpdateMessage',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Repository`
   String get menuItemRepository {
     return Intl.message(

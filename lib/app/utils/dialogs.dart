@@ -149,17 +149,14 @@ abstract class Dialogs {
                     text: S.current.actionCancel,
                     onPressed: () async =>
                         await Navigator.of(context, rootNavigator: true)
-                            .maybePop(),
-                    buttonsAspectRatio:
-                        Dimensions.aspectRatioModalDialogButton),
+                            .maybePop()),
                 PositiveButton(
                     text: S.current.actionDelete,
                     isDangerButton: true,
                     onPressed: () async {
                       await repo.deleteFile(path);
                       await Navigator.of(context).maybePop(fileName);
-                    },
-                    buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton)
+                    })
               ])
             ])));
   }
@@ -187,7 +184,6 @@ abstract class Dialogs {
                     onPressed: () async =>
                         await Navigator.of(context, rootNavigator: true)
                             .maybePop(false),
-                    buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
                   ),
                   PositiveButton(
                     text: S.current.actionDelete,
@@ -195,7 +191,6 @@ abstract class Dialogs {
                     onPressed: () async =>
                         await Navigator.of(context, rootNavigator: true)
                             .maybePop(true),
-                    buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
                   ),
                 ],
               ),
