@@ -41,7 +41,7 @@ abstract class AppTypography {
       textBaseline: TextBaseline.alphabetic,
       decoration: TextDecoration.none);
   static const titleSmall = TextStyle(
-      color: Color(0xff000000),
+      color: Color(0xdd000000),
       fontSize: 14.0,
       fontWeight: FontWeight.w500,
       letterSpacing: 0.1,
@@ -57,14 +57,14 @@ abstract class AppTypography {
       decoration: TextDecoration.none);
 
   static const labelMedium = TextStyle(
-      color: Color(0xff000000),
+      color: Color(0xdd000000),
       fontSize: 12.0,
       fontWeight: FontWeight.w400,
       textBaseline: TextBaseline.alphabetic,
       decoration: TextDecoration.none);
 
   static const labelSmall = TextStyle(
-      color: Color(0xff000000),
+      color: Color(0xdd000000),
       fontSize: 10.0,
       fontWeight: FontWeight.w400,
       letterSpacing: 1.5,
