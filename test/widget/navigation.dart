@@ -226,6 +226,10 @@ class RepoResetPage {
         .tap(await tester.pumpUntilFound(find.byKey(Key('repo-reset-submit'))));
     await tester.pumpAndSettle();
 
+    // Confirm
+    await tester.tap(find.text('YES'));
+    await tester.pumpAndSettle();
+
     // Await until finished submitting/updating.
     final accessResetPage = tester
         .state<RepoResetAccessPageState>(find.byType(RepoResetAccessPage));
