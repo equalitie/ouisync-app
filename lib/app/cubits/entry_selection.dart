@@ -4,7 +4,6 @@ import 'dart:collection';
 import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync/ouisync.dart' show EntryType;
 import 'package:path/path.dart' as p;
 
 import '../models/models.dart' show DirectoryEntry, FileEntry, FileSystemEntry;
@@ -20,7 +19,7 @@ class EntrySelectionState extends Equatable {
 
   final String originRepoInfoHash;
   final SelectionState selectionState;
-  final Map<String, bool> selectedEntriesPath;
+  final Map<String, bool?> selectedEntriesPath;
 
   bool isEntrySelected(String repoInfoHash, String path) =>
       selectedEntriesPath.entries.firstWhereOrNull(
@@ -30,7 +29,7 @@ class EntrySelectionState extends Equatable {
   EntrySelectionState copyWith({
     String? originRepoInfoHash,
     SelectionState? selectionState,
-    Map<String, bool>? selectedEntriesPath,
+    Map<String, bool?>? selectedEntriesPath,
   }) =>
       EntrySelectionState(
         originRepoInfoHash: originRepoInfoHash ?? this.originRepoInfoHash,
@@ -54,9 +53,10 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState> with CubitActions {
   String get _originRepoInfoHash => _originRepoCubit?.state.infoHash ?? '';
 
   /// key: entry pasth
-  /// value: recursive (for folders)
-  final SplayTreeMap<String, bool> _entriesPath = SplayTreeMap();
-  Map<String, bool> get selectedEntries => _entriesPath;
+  /// value: dierctory tristate: null, false, true - file: true, false
+  /// Where value == null: at least one child selected; true: all children selected; false: no children selected
+  final SplayTreeMap<String, bool?> _entriesPath = SplayTreeMap();
+  Map<String, bool?> get selectedEntries => _entriesPath;
 
   Future<void> startSelectionForRepo(RepoCubit originRepoCubit) async {
     _originRepoCubit = originRepoCubit;
@@ -88,29 +88,24 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState> with CubitActions {
     if (_entriesPath.containsKey(path)) return;
 
     if (entry is FileEntry) {
-      await _selectParentIfAll(path);
-      _entriesPath.putIfAbsent(path, () => false);
-
-      emitUnlessClosed(state.copyWith(selectedEntriesPath: _entriesPath));
-      return;
+      _entriesPath.update(path, (value) => true, ifAbsent: () => true);
+      await _selectOrUpdateParent(path);
     }
 
     if (entry is DirectoryEntry) {
-      await _selectParentIfAll(path);
-      _entriesPath.putIfAbsent(path, () => true);
-
       final contents = await _getContents(path);
-      if (contents == null || contents.isEmpty) {
-        emitUnlessClosed(state.copyWith(selectedEntriesPath: _entriesPath));
-        return;
-      }
 
-      await for (var item in Stream.fromIterable(contents)) {
-        await selectEntry(repoInfoHash, item);
-      }
+      (contents != null && contents.isNotEmpty)
+          ? {
+              await for (var item in Stream.fromIterable(contents))
+                {await selectEntry(repoInfoHash, item)}
+            }
+          : _entriesPath.update(path, (value) => true, ifAbsent: () => true);
 
-      emitUnlessClosed(state.copyWith(selectedEntriesPath: _entriesPath));
+      await _selectOrUpdateParent(path);
     }
+
+    emitUnlessClosed(state.copyWith(selectedEntriesPath: _entriesPath));
   }
 
   Future<void> clearEntry(String repoInfoHash, FileSystemEntry entry) async {
@@ -122,7 +117,7 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState> with CubitActions {
 
     if (entry is FileEntry) {
       _entriesPath.remove(path);
-      await _clearParentIfLast(path);
+      await _clearOrUpdateParent(path);
 
       emitUnlessClosed(state.copyWith(selectedEntriesPath: _entriesPath));
       return;
@@ -132,7 +127,7 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState> with CubitActions {
       final contents = await _getContents(path);
       if (contents == null || contents.isEmpty) {
         _entriesPath.remove(path);
-        await _clearParentIfLast(path);
+        await _clearOrUpdateParent(path);
 
         emitUnlessClosed(state.copyWith(selectedEntriesPath: _entriesPath));
         return;
@@ -143,7 +138,7 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState> with CubitActions {
       }
 
       _entriesPath.remove(path);
-      await _clearParentIfLast(path);
+      await _clearOrUpdateParent(path);
 
       emitUnlessClosed(state.copyWith(selectedEntriesPath: _entriesPath));
     }
@@ -162,21 +157,36 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState> with CubitActions {
     }
   }
 
-  Future<void> _selectParentIfAll(String path) async {
+  //===================== Helper functions =============================================
+
+  Future<void> _selectOrUpdateParent(String path) async {
     final parentPath = p.dirname(path);
     if (parentPath == '/') return;
 
     final parentContents = await _getContents(parentPath);
-    final unselected = parentContents
-        ?.where((e) => e.path != path && !_entriesPath.containsKey(e.path))
-        .toList();
+    final unselected = parentContents?.where((e) {
+      if (e.path == path) return false;
 
-    if (unselected == null || unselected.isEmpty) {
-      _entriesPath.putIfAbsent(parentPath, () => true);
-    }
+      if (_entriesPath.containsKey(e.path)) {
+        final value = _entriesPath[e.path];
+        return value == null ? true : false;
+      }
+
+      return true;
+    }).toList();
+
+    final parentTristate =
+        (unselected == null || unselected.isEmpty) ? true : null;
+
+    parentTristate == true
+        ? _entriesPath.update(parentPath, (value) => true, ifAbsent: () => true)
+        : _entriesPath[parentPath] = null;
+
+    if (parentPath == '/') return;
+    await _selectOrUpdateParent(parentPath);
   }
 
-  Future<void> _clearParentIfLast(String path) async {
+  Future<void> _clearOrUpdateParent(String path) async {
     final parentPath = p.dirname(path);
 
     final parentContents = await _getContents(parentPath);
@@ -184,13 +194,20 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState> with CubitActions {
         ?.where((e) => e.path != path && _entriesPath.containsKey(e.path))
         .toList();
 
-    if (selected == null || selected.isEmpty) {
-      _entriesPath.remove(parentPath);
+    final parentTristate =
+        (selected == null || selected.isEmpty) ? false : null;
 
-      final grandparentPath = p.dirname(parentPath);
-      if (grandparentPath == '/') return;
+    parentTristate == false
+        ? _entriesPath.remove(parentPath)
+        : _entriesPath[parentPath] = null;
 
-      await _clearParentIfLast(parentPath);
+    var grandparentPath = p.dirname(parentPath);
+    while (grandparentPath != '/') {
+      parentTristate == false
+          ? await _clearOrUpdateParent(parentPath)
+          : _entriesPath[grandparentPath] = null;
+
+      grandparentPath = p.dirname(grandparentPath);
     }
   }
 

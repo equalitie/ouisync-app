@@ -5,7 +5,8 @@ import '../../cubits/cubits.dart'
     show EntrySelectionCubit, EntrySelectionState, Job, RepoCubit, RepoState;
 import '../../models/models.dart'
     show DirectoryEntry, FileEntry, FileSystemEntry, RepoLocation;
-import '../../utils/utils.dart' show Constants, Dimensions, Fields, ThemeGetter;
+import '../../utils/utils.dart'
+    show Constants, Dialogs, Dimensions, Fields, ThemeGetter;
 import '../widgets.dart'
     show
         FileDescription,
@@ -31,7 +32,7 @@ class FileListItem extends StatelessWidget {
   final void Function() verticalDotsAction;
 
   final ValueNotifier<bool> _isSelecting = ValueNotifier<bool>(false);
-  final ValueNotifier<bool> _selected = ValueNotifier<bool>(false);
+  final ValueNotifier<bool?> _selected = ValueNotifier<bool?>(false);
   final ValueNotifier<Color?> _backgroundColor = ValueNotifier<Color?>(null);
 
   @override
@@ -118,7 +119,7 @@ class DirectoryListItem extends StatelessWidget {
   final void Function() verticalDotsAction;
 
   final ValueNotifier<bool> _isSelecting = ValueNotifier<bool>(false);
-  final ValueNotifier<bool> _selected = ValueNotifier<bool>(false);
+  final ValueNotifier<bool?> _selected = ValueNotifier<bool?>(false);
   final ValueNotifier<Color?> _backgroundColor = ValueNotifier<Color?>(null);
 
   @override
@@ -137,13 +138,16 @@ class DirectoryListItem extends StatelessWidget {
       repoInfoHash,
       entry.path,
     );
+    final tristate = isSelected
+        ? entrySelectionState.selectedEntriesPath[entry.path]
+        : false;
 
     final onSelectEntry = repoCubit.entrySelectionCubit.selectEntry;
     final onClearEntry = repoCubit.entrySelectionCubit.clearEntry;
 
     _updateSelection(
       context,
-      isSelected,
+      tristate,
       repoInfoHash: repoInfoHash,
       entry: entry,
       valueNotifier: _selected,
@@ -316,7 +320,7 @@ class TrailAction extends StatelessWidget {
     this.entry, {
     required this.entrySelectionCubit,
     required ValueNotifier<bool> isSelectingNotifier,
-    required ValueNotifier<bool> selectedNotifier,
+    required ValueNotifier<bool?> selectedNotifier,
     required ValueNotifier<Color?> backgroundColorNotifier,
     required this.onSelectEntry,
     required this.onClearEntry,
@@ -333,7 +337,7 @@ class TrailAction extends StatelessWidget {
   final EntrySelectionCubit entrySelectionCubit;
 
   final ValueNotifier<bool> _isSelectingNotifier;
-  final ValueNotifier<bool> _selectedNotifier;
+  final ValueNotifier<bool?> _selectedNotifier;
   final ValueNotifier<Color?> _backgroundColorNotifier;
 
   final Future<void> Function(String, FileSystemEntry) onSelectEntry;
@@ -373,26 +377,23 @@ class TrailAction extends StatelessWidget {
                   valueListenable: _selectedNotifier,
                   builder: (
                     BuildContext context,
-                    dynamic value,
+                    bool? value,
                     Widget? child,
                   ) =>
                       Checkbox.adaptive(
                     visualDensity: VisualDensity.adaptivePlatformDensity,
+                    tristate: true,
                     value: value,
-                    onChanged: (value) async {
-                      if (value == null) return;
-
-                      await _updateSelection(
-                        context,
-                        value,
-                        repoInfoHash: repoInfoHash,
-                        entry: entry,
-                        valueNotifier: _selectedNotifier,
-                        colorNotifier: _backgroundColorNotifier,
-                        onSelectEntry: onSelectEntry,
-                        onClearEntry: onClearEntry,
-                      );
-                    },
+                    onChanged: (value) async => await _updateSelection(
+                      context,
+                      value ?? false,
+                      repoInfoHash: repoInfoHash,
+                      entry: entry,
+                      valueNotifier: _selectedNotifier,
+                      colorNotifier: _backgroundColorNotifier,
+                      onSelectEntry: onSelectEntry,
+                      onClearEntry: onClearEntry,
+                    ),
                   ),
                 )
               : _VerticalDotsButton(
@@ -406,10 +407,10 @@ class TrailAction extends StatelessWidget {
 
 Future<void> _updateSelection(
   BuildContext context,
-  bool value, {
+  bool? value, {
   required String repoInfoHash,
   required FileSystemEntry entry,
-  required ValueNotifier<bool> valueNotifier,
+  required ValueNotifier<bool?> valueNotifier,
   required ValueNotifier<Color?> colorNotifier,
   required Future<void> Function(String, FileSystemEntry) onSelectEntry,
   required Future<void> Function(String, FileSystemEntry) onClearEntry,
@@ -417,9 +418,15 @@ Future<void> _updateSelection(
   if (valueNotifier.value == value) return;
 
   valueNotifier.value = value;
-  value
-      ? await onSelectEntry(repoInfoHash, entry)
-      : await onClearEntry(repoInfoHash, entry);
+
+  if (value == null) return;
+
+  await Dialogs.executeFutureWithLoadingDialog(
+    null,
+    value
+        ? onSelectEntry(repoInfoHash, entry)
+        : onClearEntry(repoInfoHash, entry),
+  );
 
   _getBackgroundColor(
     context,
