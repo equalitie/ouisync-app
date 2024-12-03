@@ -161,13 +161,19 @@ def loadKeystorePropertiesFile(String keystorePropertiesPath) {
     }
     def properties = new Properties()
 
-    def proFile = rootProject.file(keystorePropertiesPath)
+    def propFile = rootProject.file(keystorePropertiesPath)
 
-    if (!proFile.exists()) {
-        return null
+    if (!propFile.exists()) {
+        throw new GradleException("The keystore properties file does not exist: ${keystorePropertiesPath}");
     }
 
-    proFile.withInputStream { properties.load(it) }
+    propFile.withInputStream { properties.load(it) }
+
+    def storeFile = file(properties['storeFile']);
+
+    if (!storeFile.exists()) {
+        throw new GradleException("The store file does not exist: ${storeFile.getPath()}");
+    }
 
     def config = new SigningConfig(
         keyAlias: properties['keyAlias'],

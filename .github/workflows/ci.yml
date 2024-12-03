@@ -155,7 +155,7 @@ jobs:
 
       - name: Setup secrets for artifact signing (different from the production releases)
         run: |
-          dir=secrets/nightly/android
+          dir=secrets/android
           mkdir -p $dir
           echo $NIGHTLY_KEYSTORE_JKS_HEX > $dir/keystore.jks.hex
           # Use `keytool` to generate the `keystore.jks` keystore.
