@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:path/path.dart' as p;
 
 import '../models/models.dart' show DirectoryEntry, FileEntry, FileSystemEntry;
+import '../utils/utils.dart' show AppLogger;
 import '../widgets/widgets.dart' show SelectionState;
 import 'cubits.dart' show CubitActions, RepoCubit;
 
@@ -46,7 +47,8 @@ class EntrySelectionState extends Equatable {
 }
 
 /// Cubit for selecting multiple files or folders for copy, moving, delete, or download.
-class EntrySelectionCubit extends Cubit<EntrySelectionState> with CubitActions {
+class EntrySelectionCubit extends Cubit<EntrySelectionState>
+    with CubitActions, AppLogger {
   EntrySelectionCubit() : super(EntrySelectionState());
 
   RepoCubit? _originRepoCubit;
