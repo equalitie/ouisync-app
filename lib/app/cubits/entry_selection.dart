@@ -55,7 +55,18 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState> with CubitActions {
   /// key: entry pasth
   /// value: dierctory tristate: null, false, true - file: true, false
   /// Where value == null: at least one child selected; true: all children selected; false: no children selected
-  final SplayTreeMap<String, bool?> _entriesPath = SplayTreeMap();
+  final SplayTreeMap<String, bool?> _entriesPath = SplayTreeMap((key1, key2) {
+    final isKey1Dir = p.extension(key1).isEmpty;
+    final isKey2Dir = p.extension(key2).isEmpty;
+
+    if (!isKey1Dir && !isKey2Dir) {
+      return key2.compareTo(key1);
+    }
+    if (isKey1Dir && isKey2Dir) {
+      return key2.compareTo(key1);
+    }
+    return isKey1Dir ? -1 : 1;
+  });
   Map<String, bool?> get selectedEntries => _entriesPath;
 
   Future<void> startSelectionForRepo(RepoCubit originRepoCubit) async {
