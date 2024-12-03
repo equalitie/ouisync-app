@@ -157,17 +157,22 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
     }
   }
 
-  Future<void> _removeParentIfLast(String path) async {
-    final parentPath = p.dirname(path);
+  Future<void> deleteEntries() async {
+    final reversed = _entriesPath.entries.toList().reversed;
 
-    final parentContents = await _getContents(parentPath);
-    final selected = parentContents
-        ?.where((e) => e.path != path && _entriesPath.containsKey(e.path))
-        .toList();
-
-    if (selected == null || selected.isEmpty) {
-      _entriesPath.remove(parentPath);
+    final results = <String, bool>{};
+    await for (var entry in Stream.fromIterable(reversed)) {
+      final isDir = p.extension(entry.key).isEmpty;
+      if (isDir && entry.value == true) {
+        final r = await _originRepoCubit!.deleteFolder(entry.key, true);
+        results.putIfAbsent(entry.key, () => r);
+        continue;
+      }
+      final r2 = await _originRepoCubit!.deleteFile(entry.key);
+      results.putIfAbsent(entry.key, () => r2);
     }
+
+    loggy.debug(results.entries.map((e) => 'Deletion: ${e.key} (${e.value})'));
   }
 
   //===================== Helper functions =============================================
