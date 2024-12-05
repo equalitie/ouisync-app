@@ -139,7 +139,7 @@ class DirectoryListItem extends StatelessWidget {
       entry.path,
     );
     final tristate = isSelected
-        ? entrySelectionState.selectedEntriesPath[entry.path]?.$2
+        ? entrySelectionState.selectedEntriesPath[entry.path]?.tristate
         : false;
 
     final onSelectEntry = repoCubit.entrySelectionCubit.selectEntry;
