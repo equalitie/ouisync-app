@@ -3,11 +3,13 @@ import 'dart:collection';
 
 import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:path/path.dart' as p;
 
+import '../../generated/l10n.dart';
 import '../models/models.dart' show DirectoryEntry, FileEntry, FileSystemEntry;
-import '../utils/utils.dart' show AppLogger;
+import '../utils/utils.dart' show AppLogger, FileIO, showSnackBar;
 import '../widgets/widgets.dart' show SelectionState;
 import 'cubits.dart' show CubitActions, RepoCubit;
 
@@ -165,6 +167,48 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
 
       emitUnlessClosed(state.copyWith(selectedEntriesPath: _entriesPath));
     }
+  }
+
+  Future<void> saveEntriesToDevice(
+    BuildContext context, {
+    required String defaultDirectoryPath,
+  }) async {
+    final fileIO = FileIO(
+      context: context,
+      repoCubit: _originRepoCubit!,
+    );
+
+    final destinationPaths =
+        await fileIO.getDestinationPath(defaultDirectoryPath);
+    if (destinationPaths.canceled) {
+      final errorMessage = S.current.messageDownloadFileCanceled;
+      showSnackBar(errorMessage);
+
+      return;
+    }
+
+    final separator = p.split(_entriesPath.keys.first).first;
+    String rootPath = destinationPaths.destinationPath;
+
+    await for (var entry in Stream.fromIterable(_entriesPath.entries)) {
+      if (entry.value.isDir) {
+        continue;
+      }
+
+      final path = entry.key.replaceAll(separator, p.separator);
+      final destinationPath = '$rootPath$path';
+
+      final fileEntry = FileEntry(path: entry.key, size: 0);
+      await fileIO.saveFileToDevice(
+        fileEntry,
+        null,
+        (
+          parentPath: destinationPaths.parentPath,
+          destinationPath: destinationPath,
+        ),
+      );
+    }
+    ;
   }
 
   Future<void> deleteEntries() async {

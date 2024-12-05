@@ -89,10 +89,7 @@ class _FileDetailState extends State<FileDetail> {
                   await FileIO(
                     context: context,
                     repoCubit: widget.repoCubit,
-                  ).saveFileToDevice(
-                    entry: widget.entry,
-                    defaultPath: defaultDirectoryPath,
-                  );
+                  ).saveFileToDevice(widget.entry, defaultDirectoryPath);
 
                   await Navigator.of(context, rootNavigator: false).maybePop();
                 },
