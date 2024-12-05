@@ -1,5 +1,8 @@
+import 'dart:io' as io;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart'
@@ -9,7 +12,13 @@ import '../../cubits/cubits.dart'
         EntrySelectionState,
         RepoCubit;
 import '../../utils/utils.dart'
-    show AppLogger, Dimensions, EntrySelectionActionsExtension, Fields;
+    show
+        AppLogger,
+        Dialogs,
+        Dimensions,
+        EntrySelectionActionsExtension,
+        Fields,
+        Native;
 
 class SelectEntriesButton extends StatefulWidget {
   const SelectEntriesButton({
@@ -142,7 +151,44 @@ class _EntrySelectionActionsList extends StatelessWidget with AppLogger {
                   textOverflow: TextOverflow.ellipsis,
                   textSoftWrap: false,
                   style: Theme.of(context).textTheme.bodyMedium,
-                  onTap: () async {},
+                  onTap: () async {
+                    if (actionItem == EntrySelectionActions.delete) {
+                      await Dialogs.executeFutureWithLoadingDialog(
+                        null,
+                        cubit.deleteEntries(),
+                      );
+
+                      await cubit.endSelection();
+                      Navigator.of(context).pop();
+                    }
+
+                    if (actionItem == EntrySelectionActions.download) {
+                      String? defaultDirectoryPath;
+                      if (io.Platform.isAndroid) {
+                        defaultDirectoryPath =
+                            await Native.getDownloadPathForAndroid();
+                      } else {
+                        final defaultDirectory = io.Platform.isIOS
+                            ? await getApplicationDocumentsDirectory()
+                            : await getDownloadsDirectory();
+
+                        defaultDirectoryPath = defaultDirectory?.path;
+                      }
+
+                      if (defaultDirectoryPath == null) return;
+
+                      await Dialogs.executeFutureWithLoadingDialog(
+                        null,
+                        cubit.saveEntriesToDevice(
+                          context,
+                          defaultDirectoryPath: defaultDirectoryPath,
+                        ),
+                      );
+
+                      await cubit.endSelection();
+                      Navigator.of(context).pop();
+                    }
+                  },
                   dense: true,
                   visualDensity: VisualDensity.compact,
                 ),
