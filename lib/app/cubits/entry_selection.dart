@@ -194,11 +194,11 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
 
     final parentContents = await _getContents(parentPath);
     final unselected = parentContents?.where((e) {
-      if (e.path == path) return false;
+      // if (e.path == path) return false;
 
       if (_entriesPath.containsKey(e.path)) {
         final value = _entriesPath[e.path];
-        return value?.$2 == null ? true : false;
+        return value?.tristate == null ? true : false;
       }
 
       return true;
