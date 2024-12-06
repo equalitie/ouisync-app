@@ -491,17 +491,13 @@ class _MainPageState extends State<MainPage>
           children: <Widget>[
             // TODO: A shadow would be nicer.
             const Divider(height: 1),
-            if (folder.content.isNotEmpty)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  SortContentsBar(
-                    sortListCubit: sortListCubit,
-                    reposCubit: widget.reposCubit,
-                  ),
-                  SelectEntriesButton(repoCubit: repo),
-                ],
-              ),
+            FolderContentsBar(
+              reposCubit: widget.reposCubit,
+              repoCubit: repo,
+              hasContents: folder.content.isNotEmpty,
+              sortListCubit: sortListCubit,
+              entrySelectionCubit: repo.entrySelectionCubit,
+            ),
             Expanded(child: child),
           ],
         ),
