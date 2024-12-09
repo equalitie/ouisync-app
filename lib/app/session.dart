@@ -22,7 +22,7 @@ Future<Session> createSession(
 
   final Session session;
 
-  if (Platform.isMacOS) {
+  if (Platform.isMacOS || Platform.isIOS) {
     // On MacOS, later on iOS and possibly other platforms as well, the Ouisync
     // Rust backend runs in the native code and we communicate with it using
     // Flutter's `PlatformChannels`.

@@ -2,6 +2,15 @@
 <Workspace
    version = "1.0">
    <FileRef
+      location = "group:../darwin/OuisyncBackend">
+   </FileRef>
+   <FileRef
+      location = "group:../darwin/OuisyncCommon">
+   </FileRef>
+   <FileRef
+      location = "group:../ouisync/bindings/swift/OuisyncLib">
+   </FileRef>
+   <FileRef
       location = "group:Runner.xcodeproj">
    </FileRef>
    <FileRef

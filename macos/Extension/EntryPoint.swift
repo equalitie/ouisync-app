@@ -1,4 +1,4 @@
-import Backend // bit of a hack until we sort out the visibility
+import OuisyncBackend
 
 
 final class FileProvider: Extension {}
