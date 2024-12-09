@@ -6,9 +6,7 @@ import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../models/models.dart';
-import '../master_key.dart';
 import '../utils.dart';
-import '../option.dart';
 import 'atomic_shared_prefs_settings_key.dart';
 import 'v1.dart' as v1;
 

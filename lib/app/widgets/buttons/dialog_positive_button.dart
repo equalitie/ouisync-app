@@ -3,15 +3,16 @@ import 'package:flutter/material.dart';
 import '../../utils/utils.dart';
 
 class PositiveButton extends StatelessWidget {
-  const PositiveButton({
+  PositiveButton({
     required this.text,
     required this.onPressed,
-    required this.buttonsAspectRatio,
+    double? buttonsAspectRatio,
     this.buttonConstrains = Dimensions.sizeConstrainsDialogAction,
     this.focusNode,
     this.isDangerButton = false,
     super.key,
-  });
+  }) : buttonsAspectRatio =
+            buttonsAspectRatio ?? Dimensions.aspectRatioModalDialogButton;
 
   final String? text;
   final GestureTapCallback? onPressed;

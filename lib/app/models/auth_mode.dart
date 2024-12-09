@@ -20,6 +20,9 @@ sealed class AuthMode {
       AuthModeKeyStoredOnDevice.fromJson(data) ??
       _decodeError(data);
 
+  bool get isSecuredWithBiometrics => localSecretMode.isSecuredWithBiometrics;
+  bool get isStored => localSecretMode.isSecuredWithBiometrics;
+
   LocalSecretMode get localSecretMode => switch (this) {
         AuthModeBlindOrManual() => LocalSecretMode.manual,
         AuthModeKeyStoredOnDevice(
@@ -47,6 +50,17 @@ sealed class AuthMode {
         AuthModePasswordStoredOnDevice(secureWithBiometrics: true) =>
           LocalSecretMode.manualSecuredWithBiometrics,
       };
+
+  EncryptedLocalSecret? get storedLocalSecret {
+    switch (this) {
+      case AuthModeBlindOrManual():
+        return null;
+      case AuthModeKeyStoredOnDevice auth:
+        return EncryptedLocalSecretKey(auth.encryptedKey);
+      case AuthModePasswordStoredOnDevice auth:
+        return EncryptedLocalPassword(auth.encryptedPassword);
+    }
+  }
 }
 
 class AuthModeBlindOrManual extends AuthMode {
@@ -85,9 +99,10 @@ class AuthModePasswordStoredOnDevice extends AuthMode {
 
   // May throw.
   Future<LocalPassword> getRepositoryPassword(MasterKey masterKey) async {
-    final decrypted = await masterKey.decrypt(encryptedPassword);
+    final decrypted =
+        await EncryptedLocalPassword(encryptedPassword).decrypt(masterKey);
     if (decrypted == null) throw AuthModeDecryptFailed;
-    return LocalPassword(decrypted);
+    return decrypted;
   }
 
   @override
@@ -153,9 +168,10 @@ class AuthModeKeyStoredOnDevice extends AuthMode {
 
   // May throw.
   Future<LocalSecretKey> decryptKey(MasterKey masterKey) async {
-    final decrypted = await masterKey.decryptBytes(encryptedKey);
+    final decrypted =
+        await EncryptedLocalSecretKey(encryptedKey).decrypt(masterKey);
     if (decrypted == null) throw AuthModeDecryptFailed();
-    return LocalSecretKey(decrypted);
+    return decrypted;
   }
 
   @override
@@ -259,6 +275,9 @@ enum LocalSecretMode {
         randomStored || randomSecuredWithBiometrics => SecretKeyOrigin.random,
       };
 
+  bool get isStored => store.isStored;
+  bool get isSecuredWithBiometrics => store.isSecuredWithBiometrics;
+
   SecretKeyStore get store => switch (this) {
         manual => SecretKeyStore.notStored,
         manualStored || randomStored => SecretKeyStore.stored,
@@ -315,3 +334,35 @@ AuthMode _decodeError(Object? data) {
   staticLogger<AuthMode>().error('invalid auth mode data: `$data`');
   throw AuthModeParseFailed();
 }
+
+//--------------------------------------------------------------------
+
+sealed class EncryptedLocalSecret {
+  Future<LocalSecret?> decrypt(MasterKey masterKey);
+}
+
+class EncryptedLocalSecretKey implements EncryptedLocalSecret {
+  String encryptedKey;
+  EncryptedLocalSecretKey(this.encryptedKey);
+
+  @override
+  Future<LocalSecretKey?> decrypt(MasterKey masterKey) async {
+    final decrypted = await masterKey.decryptBytes(encryptedKey);
+    if (decrypted == null) return null;
+    return LocalSecretKey(decrypted);
+  }
+}
+
+class EncryptedLocalPassword implements EncryptedLocalSecret {
+  String encryptedPassword;
+  EncryptedLocalPassword(this.encryptedPassword);
+
+  @override
+  Future<LocalPassword?> decrypt(MasterKey masterKey) async {
+    final decrypted = await masterKey.decrypt(encryptedPassword);
+    if (decrypted == null) return null;
+    return LocalPassword(decrypted);
+  }
+}
+
+//--------------------------------------------------------------------

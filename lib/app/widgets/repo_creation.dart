@@ -12,17 +12,10 @@ import '../cubits/cubits.dart'
         RepoCreationPending,
         RepoCreationSuccess,
         RepoCreationState,
-        RepoCreationValid,
-        RepoSecurityCubit,
-        RepoSecurityState;
+        RepoCreationValid;
 import '../utils/utils.dart'
     show AppThemeExtension, Constants, Dialogs, Dimensions, Fields, ThemeGetter;
-import 'widgets.dart'
-    show
-        BlocHolder,
-        ContentWithStickyFooterState,
-        CustomAdaptiveSwitch,
-        RepoSecurity;
+import 'widgets.dart' show ContentWithStickyFooterState, CustomAdaptiveSwitch;
 
 class RepoCreation extends StatelessWidget {
   RepoCreation(this.creationCubit, {super.key});
@@ -30,40 +23,31 @@ class RepoCreation extends StatelessWidget {
   final RepoCreationCubit creationCubit;
 
   @override
-  Widget build(BuildContext context) => BlocHolder(
-        create: () => RepoSecurityCubit(
-          oldLocalSecretMode: RepoCreationState.initialLocalSecretMode,
-        ),
-        builder: (context, securityCubit) => MultiBlocListener(
-          listeners: [
-            // Handle substate changes
-            BlocListener<RepoCreationCubit, RepoCreationState>(
-              bloc: creationCubit,
-              listenWhen: (previous, current) =>
-                  current.substate != previous.substate,
-              listener: _handleSubstateChange,
-            ),
-            // Prefill suggested name on first load
-            BlocListener<RepoCreationCubit, RepoCreationState>(
-              bloc: creationCubit,
-              listenWhen: (previous, current) =>
-                  current.suggestedName.isNotEmpty &&
-                  previous.suggestedName.isEmpty,
-              listener: _handlePrefillSuggestedName,
-            ),
-            BlocListener<RepoSecurityCubit, RepoSecurityState>(
-              bloc: securityCubit,
-              listener: _handleLocalSecretChanged,
-            ),
-          ],
-          child: BlocBuilder<RepoCreationCubit, RepoCreationState>(
+  Widget build(BuildContext context) => MultiBlocListener(
+        listeners: [
+          // Handle substate changes
+          BlocListener<RepoCreationCubit, RepoCreationState>(
             bloc: creationCubit,
-            builder: (context, state) => ContentWithStickyFooterState(
-              content: _buildContent(context, securityCubit, state),
-              footer: Fields.dialogActions(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                buttons: _buildActions(context, securityCubit, state),
-              ),
+            listenWhen: (previous, current) =>
+                current.substate != previous.substate,
+            listener: _handleSubstateChange,
+          ),
+          // Prefill suggested name on first load
+          BlocListener<RepoCreationCubit, RepoCreationState>(
+            bloc: creationCubit,
+            listenWhen: (previous, current) =>
+                current.suggestedName.isNotEmpty &&
+                previous.suggestedName.isEmpty,
+            listener: _handlePrefillSuggestedName,
+          ),
+        ],
+        child: BlocBuilder<RepoCreationCubit, RepoCreationState>(
+          bloc: creationCubit,
+          builder: (context, state) => ContentWithStickyFooterState(
+            content: _buildContent(context, state),
+            footer: Fields.dialogActions(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              buttons: _buildActions(context, state),
             ),
           ),
         ),
@@ -71,7 +55,6 @@ class RepoCreation extends StatelessWidget {
 
   Widget _buildContent(
     BuildContext context,
-    RepoSecurityCubit securityCubit,
     RepoCreationState creationState,
   ) =>
       Column(
@@ -82,16 +65,11 @@ class RepoCreation extends StatelessWidget {
             ..._buildTokenLabel(context, creationState),
           ..._buildNameField(context, creationState),
           _buildUseCacheServersSwitch(context, creationState),
-          RepoSecurity(
-            securityCubit,
-            isBlind: creationState.accessMode == AccessMode.blind,
-          ),
         ],
       );
 
   List<Widget> _buildActions(
     BuildContext context,
-    RepoSecurityCubit securityCubit,
     RepoCreationState creationState,
   ) =>
       [
@@ -99,20 +77,16 @@ class RepoCreation extends StatelessWidget {
           text: S.current.actionCancel,
           onPressed: () async => await Navigator.of(context).maybePop(null),
         ),
-        BlocBuilder<RepoSecurityCubit, RepoSecurityState>(
-          bloc: securityCubit,
-          builder: (context, securityState) => Fields.inPageButton(
-            text: creationState.token == null
-                ? S.current.actionCreate
-                : S.current.actionImport,
-            onPressed: creationState.substate is RepoCreationValid &&
-                    securityState.isValid
-                ? () => creationCubit.save()
-                : null,
-            autofocus: true,
-            focusNode: creationCubit.positiveButtonFocusNode,
-          ),
-        ),
+        Fields.inPageButton(
+          text: creationState.token == null
+              ? S.current.actionCreate
+              : S.current.actionImport,
+          onPressed: creationState.substate is RepoCreationValid
+              ? () => creationCubit.save()
+              : null,
+          autofocus: true,
+          focusNode: creationCubit.positiveButtonFocusNode,
+        )
       ];
 
   List<Widget> _buildTokenLabel(
@@ -215,7 +189,7 @@ class RepoCreation extends StatelessWidget {
       case RepoCreationValid():
         break;
       case RepoCreationSuccess(location: final location):
-        await Navigator.of(context).maybePop(location);
+        Navigator.of(context).pop(location);
       case RepoCreationFailure(location: final location, error: final error):
         await Dialogs.simpleAlertDialog(
           context: context,
@@ -223,18 +197,6 @@ class RepoCreation extends StatelessWidget {
           message: error,
         );
     }
-  }
-
-  void _handleLocalSecretChanged(
-    BuildContext context,
-    RepoSecurityState state,
-  ) {
-    final localSecretInput = state.newLocalSecretInput;
-    if (localSecretInput == null) {
-      return;
-    }
-
-    creationCubit.setLocalSecret(localSecretInput);
   }
 
   void _handlePrefillSuggestedName(

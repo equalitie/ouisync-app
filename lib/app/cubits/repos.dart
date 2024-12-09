@@ -8,7 +8,6 @@ import 'package:ouisync/state_monitor.dart';
 
 import '../../generated/l10n.dart';
 import '../models/models.dart';
-import '../utils/mounter.dart';
 import '../utils/utils.dart';
 import 'cubits.dart';
 
@@ -159,9 +158,10 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
       };
 
       if (unlock) {
-        final secret = await repo.cubit.getLocalSecret(_settings.masterKey);
+        final encryptedSecret = authMode.storedLocalSecret;
 
-        if (secret != null) {
+        if (encryptedSecret != null) {
+          final secret = await encryptedSecret.decrypt(_settings.masterKey);
           await repo.cubit.unlock(secret);
         } else {
           loggy.error('Failed to load secret key for ${repo.location.path}');
@@ -290,6 +290,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
       navigation: navigation,
       bottomSheet: bottomSheet,
       repo: repo,
+      session: _session,
       location: location,
       cacheServers: cacheServers,
       mounter: mounter,
@@ -481,6 +482,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
         navigation: navigation,
         bottomSheet: bottomSheet,
         repo: repo,
+        session: _session,
         location: location,
         cacheServers: cacheServers,
         mounter: mounter,
@@ -565,6 +567,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
         navigation: navigation,
         bottomSheet: bottomSheet,
         repo: repo,
+        session: _session,
         location: location,
         cacheServers: cacheServers,
         mounter: mounter,

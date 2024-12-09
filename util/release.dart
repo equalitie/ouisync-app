@@ -379,14 +379,19 @@ class Options {
       }
     }
 
-    final androidKeyProperties = results['android-key-properties'];
+    String? androidKeyProperties = results['android-key-properties'];
 
     if (androidKeyProperties != null) {
-      if (!await File(androidKeyProperties).exists()) {
+      final file = File(androidKeyProperties);
+      if (!await file.exists()) {
         print(
             "Android keystore properties file '$androidKeyProperties' does not exist");
         exit(1);
       }
+
+      // Convert to absolute path because if it's relative the build.gradle
+      // script expects it to be relative to the ./android/ directory.
+      androidKeyProperties = file.absolute.path;
     }
 
     final sentryDSNFile = results['sentry'];

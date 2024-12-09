@@ -13,12 +13,9 @@ import 'package:stream_transform/stream_transform.dart';
 
 import '../../generated/l10n.dart';
 import '../models/models.dart';
-import '../utils/master_key.dart';
-import '../utils/mounter.dart';
 import '../utils/repo_path.dart' as repo_path;
 import '../utils/utils.dart';
 import 'cubits.dart';
-import 'utils.dart';
 
 class RepoState extends Equatable {
   final bool isLoading;
@@ -111,6 +108,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   final NavigationCubit _navigation;
   final EntryBottomSheetCubit _bottomSheet;
   final Repository _repo;
+  final Session _session;
   final Cipher _pathCipher;
   final CacheServers _cacheServers;
   final Mounter _mounter;
@@ -120,6 +118,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     this._navigation,
     this._bottomSheet,
     this._repo,
+    this._session,
     this._pathCipher,
     this._cacheServers,
     this._mounter,
@@ -131,6 +130,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   static Future<RepoCubit> create({
     required NativeChannels nativeChannels,
     required Repository repo,
+    required Session session,
     required RepoLocation location,
     required NavigationCubit navigation,
     required EntryBottomSheetCubit bottomSheet,
@@ -169,6 +169,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
       navigation,
       bottomSheet,
       repo,
+      session,
       pathCipher,
       cacheServers,
       mounter,
@@ -184,6 +185,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     return cubit;
   }
 
+  Session get session => _session;
   RepoLocation get location => state.location;
   String get name => state.location.name;
   AccessMode get accessMode => state.accessMode;
@@ -285,6 +287,12 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
 
   Future<void> setCredentials(Uint8List credentials) async {
     await _repo.setCredentials(credentials);
+    final accessMode = await _repo.accessMode;
+    emitUnlessClosed(state.copyWith(accessMode: accessMode));
+  }
+
+  Future<void> resetCredentials(ShareToken token) async {
+    await _repo.resetCredentials(token);
     final accessMode = await _repo.accessMode;
     emitUnlessClosed(state.copyWith(accessMode: accessMode));
   }
@@ -485,20 +493,32 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     return content;
   }
 
-  /// Returns which access mode does the given password provide.
-  Future<AccessMode> getPasswordAccessMode(String password) async {
+  /// Returns which access mode does the given secret provide.
+  /// TODO: It should be possible to add API which does not temporarily unlock
+  /// the repository.
+  Future<AccessMode> getSecretAccessMode(LocalSecret secret) async {
     final credentials = await _repo.credentials;
 
     try {
       await _repo.setAccessMode(AccessMode.blind);
       await _repo.setAccessMode(
         AccessMode.write,
-        secret: LocalPassword(password),
+        secret: secret,
       );
       return await _repo.accessMode;
     } finally {
       await _repo.setCredentials(credentials);
     }
+  }
+
+  Future<Access> getAccessOf(LocalSecret secret) async {
+    final accessMode = await getSecretAccessMode(secret);
+
+    return switch (accessMode) {
+      AccessMode.blind => BlindAccess(),
+      AccessMode.read => ReadAccess(secret),
+      AccessMode.write => WriteAccess(secret),
+    };
   }
 
   Future<void> setAuthMode(AuthMode authMode) async {
@@ -552,29 +572,25 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     }
   }
 
-  /// Returns null if the authMode is AuthModeBlindOrManual or if decryption fails.
-  /// TODO: If decryption fails, we should throw and catch that above to inform
-  /// the user about the fact.
-  Future<LocalSecret?> getLocalSecret(MasterKey masterKey) async {
-    final authMode = state.authMode;
+  Future<void> setAccess({
+    AccessChange? read,
+    AccessChange? write,
+  }) async {
+    await _repo.setAccess(read: read, write: write);
 
-    try {
-      switch (authMode) {
-        case AuthModeBlindOrManual():
-          return null;
-        case AuthModePasswordStoredOnDevice(encryptedPassword: final encrypted):
-          final decrypted = await masterKey.decrypt(encrypted);
-          if (decrypted == null) throw AuthModeDecryptFailed();
-          return LocalPassword(decrypted);
-        case AuthModeKeyStoredOnDevice(encryptedKey: final encrypted):
-          final decrypted = await masterKey.decryptBytes(encrypted);
-          if (decrypted == null) throw AuthModeDecryptFailed();
-          return LocalSecretKey(decrypted);
-      }
-    } catch (e) {
-      loggy.error("Failed to decrypt local secret: $e");
-      return null;
+    // Operation succeeded (did not throw), so we can set `state.accessMode`
+    // based on `read` and `write`.
+    AccessMode newAccessMode;
+
+    if (read is DisableAccess && write is DisableAccess) {
+      newAccessMode = AccessMode.blind;
+    } else if (write is DisableAccess) {
+      newAccessMode = AccessMode.read;
+    } else /* `write` or both (`read` and `write`) are `EnableAccess` */ {
+      newAccessMode = AccessMode.write;
     }
+
+    emitUnlessClosed(state.copyWith(accessMode: newAccessMode));
   }
 
   /// Unlocks the repository using the secret. The access mode the repository ends up in depends on

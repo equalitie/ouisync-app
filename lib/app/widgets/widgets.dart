@@ -12,6 +12,7 @@ export 'buttons/dialog_negative_button.dart';
 export 'buttons/dialog_positive_button.dart';
 export 'buttons/sort_by_button.dart';
 export 'buttons/sort_direction_button.dart';
+export 'buttons/link_style_async_button.dart';
 
 export 'dialogs/actions_dialog.dart';
 export 'dialogs/add_peer_dialog.dart';
@@ -30,10 +31,9 @@ export 'dialogs/modal_replace_keep_entry_dialog.dart';
 export 'dialogs/modal_repo_list_actions_bottom_sheet.dart';
 export 'dialogs/modal_repo_settings_bottom_sheet.dart';
 export 'dialogs/modal_share_repository_bottom_sheet.dart';
-export 'dialogs/modal_unlock_repository_dialog.dart';
+export 'dialogs/get_password_access_dialog.dart';
 export 'dialogs/move_entry_bottom_sheet.dart';
 export 'dialogs/save_shared_media.dart';
-export 'dialogs/unlock_dialog.dart';
 
 export 'inputs/password_validation_input.dart';
 
@@ -69,6 +69,5 @@ export 'holder.dart';
 export 'log_view.dart';
 export 'long_text.dart';
 export 'repo_creation.dart';
-export 'repo_security.dart';
 export 'repo_status.dart';
 export 'throughput_display.dart';

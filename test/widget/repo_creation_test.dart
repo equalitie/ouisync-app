@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ouisync_app/app/cubits/repo_creation.dart';
 import 'package:ouisync_app/app/models/auth_mode.dart';
-import 'package:ouisync_app/app/models/local_secret.dart';
 import 'package:ouisync_app/app/models/repo_location.dart';
 import 'package:ouisync_app/app/utils/share_token.dart';
 import 'package:ouisync/ouisync.dart'
@@ -64,54 +63,6 @@ void main() {
 
         expect(repoCubit.state.accessMode, equals(AccessMode.write));
         expect(repoCubit.state.isCacheServersEnabled, isFalse);
-      },
-    ),
-  );
-
-  testWidgets(
-    'create repository with password',
-    (tester) => tester.runAsync(
-      () async {
-        final name = 'my repo';
-        final password = 'supersecret';
-
-        final repoCreationObserver = StateObserver.install<RepoCreationState>();
-
-        await tester.pumpWidget(testApp(deps.createMainPage()));
-        await tester.pumpAndSettle();
-
-        await tester.tap(find.text('CREATE REPOSITORY'));
-        await tester.pumpAndSettle();
-
-        await tester.enterText(find.byKey(ValueKey('name')), name);
-        await tester.pumpAndSettle();
-
-        await tester.tap(find.byKey(ValueKey('use-local-password')));
-        await tester.pumpAndSettle();
-
-        await tester.enterText(find.byKey(ValueKey('password')), password);
-        await tester.enterText(
-            find.byKey(ValueKey('retype-password')), password);
-        await tester.pumpAndSettle();
-
-        final submit = find.text('CREATE');
-        await tester.ensureVisible(submit);
-        await tester.tap(submit);
-
-        await repoCreationObserver
-            .waitUntil((state) => state.substate is RepoCreationSuccess);
-
-        final repoCubit = deps.reposCubit.repos
-            .where((entry) => entry.name == name)
-            .first
-            .cubit!;
-        expect(repoCubit.state.accessMode, equals(AccessMode.write));
-
-        await repoCubit.lock();
-        expect(repoCubit.state.accessMode, equals(AccessMode.blind));
-
-        await repoCubit.unlock(LocalPassword(password));
-        expect(repoCubit.state.accessMode, equals(AccessMode.write));
       },
     ),
   );

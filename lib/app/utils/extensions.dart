@@ -171,16 +171,3 @@ extension SortByLocalizedExtension on SortBy {
     }
   }
 }
-
-extension AccessModeLocalizedExtension on AccessMode {
-  String get localized {
-    switch (this) {
-      case AccessMode.blind:
-        return S.current.accessModeBlindLabel;
-      case AccessMode.read:
-        return S.current.accessModeReadLabel;
-      case AccessMode.write:
-        return S.current.accessModeWriteLabel;
-    }
-  }
-}
