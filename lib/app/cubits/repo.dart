@@ -702,6 +702,71 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     }
   }
 
+  Future<bool> copyEntry({
+    required String source,
+    required String destination,
+    required EntryType type,
+    RepoCubit? destinationRepoCubit,
+  }) async {
+    emitUnlessClosed(state.copyWith(isLoading: true));
+    try {
+      final result = type == EntryType.file
+          ? await _copyFile(source, destination, destinationRepoCubit)
+          : await _copyFolder(source, destination, destinationRepoCubit);
+
+      return result;
+    } catch (e, st) {
+      loggy.app('Move entry from $source to $destination failed', e, st);
+      return false;
+    } finally {
+      await refresh();
+    }
+  }
+
+  Future<bool> _copyFile(
+    String source,
+    String destination,
+    RepoCubit? destinationRepoCubit,
+  ) async {
+    final originFile = await openFile(source);
+    final originFileLength = await originFile.length;
+
+    await (destinationRepoCubit ?? this).saveFile(
+      filePath: destination,
+      length: originFileLength,
+      fileByteStream: originFile.read(0, originFileLength).asStream(),
+    );
+
+    return true;
+  }
+
+  Future<bool> _copyFolder(
+    String source,
+    String destination,
+    RepoCubit? destinationRepoCubit,
+  ) async {
+    final createFolderOk = await (destinationRepoCubit ?? this).createFolder(
+      destination,
+    );
+    if (!createFolderOk) return false;
+
+    await openDirectory(source).then(
+      (contents) async {
+        for (var entry in contents) {
+          final from = repo_path.join(source, entry.name);
+          final to = repo_path.join(destination, entry.name);
+          final copyOk = entry.entryType == EntryType.file
+              ? await _copyFile(from, to, destinationRepoCubit)
+              : await _copyFolder(from, to, destinationRepoCubit);
+
+          if (!copyOk) return false;
+        }
+      },
+    );
+
+    return true;
+  }
+
   Future<bool> moveEntry({
     required String source,
     required String destination,
@@ -754,17 +819,16 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     String source,
     String destination,
   ) async {
-    final originFile = await openFile(source);
-    final originFileLength = await originFile.length;
-
-    await destinationRepoCubit.saveFile(
-      filePath: destination,
-      length: originFileLength,
-      fileByteStream: originFile.read(0, originFileLength).asStream(),
+    final copied = await _copyFile(
+      source,
+      destination,
+      destinationRepoCubit,
     );
-
-    await File.remove(_repo, source);
-    return true;
+    if (copied) {
+      await File.remove(_repo, source);
+      return true;
+    }
+    return false;
   }
 
   Future<bool> _moveFolderToRepo(
@@ -772,25 +836,17 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     String source,
     String destination,
   ) async {
-    final createFolderOk = await destinationRepoCubit.createFolder(destination);
-    if (!createFolderOk) return false;
-
-    await openDirectory(source).then(
-      (contents) async {
-        for (var entry in contents) {
-          final from = repo_path.join(source, entry.name);
-          final to = repo_path.join(destination, entry.name);
-          final moveOk = entry.entryType == EntryType.file
-              ? await _moveFileToRepo(destinationRepoCubit, from, to)
-              : await _moveFolderToRepo(destinationRepoCubit, from, to);
-
-          if (!moveOk) return false;
-        }
-      },
+    final copied = await _copyFolder(
+      source,
+      destination,
+      destinationRepoCubit,
     );
+    if (copied) {
+      await Directory.remove(_repo, source);
+      return true;
+    }
 
-    await Directory.remove(_repo, source);
-    return true;
+    return false;
   }
 
   Future<bool> deleteFile(String filePath) async {
