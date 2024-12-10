@@ -17,12 +17,23 @@ class EntrySelectionState extends Equatable {
   EntrySelectionState({
     this.originRepoInfoHash = '',
     this.selectionState = SelectionState.off,
-    this.selectedEntriesPath = const <String, ({bool isDir, bool? tristate})>{},
+    this.selectedEntriesPath = const <String,
+        ({
+      bool isDir,
+      bool selected,
+      bool? tristate,
+    })>{},
   });
 
   final String originRepoInfoHash;
   final SelectionState selectionState;
-  final Map<String, ({bool isDir, bool? tristate})> selectedEntriesPath;
+  final Map<
+      String,
+      ({
+        bool isDir,
+        bool selected,
+        bool? tristate,
+      })> selectedEntriesPath;
 
   bool isEntrySelected(String repoInfoHash, String path) =>
       selectedEntriesPath.entries.firstWhereOrNull(
@@ -32,7 +43,14 @@ class EntrySelectionState extends Equatable {
   EntrySelectionState copyWith({
     String? originRepoInfoHash,
     SelectionState? selectionState,
-    Map<String, ({bool isDir, bool? tristate})>? selectedEntriesPath,
+    Map<
+            String,
+            ({
+              bool isDir,
+              bool selected,
+              bool? tristate,
+            })>?
+        selectedEntriesPath,
   }) =>
       EntrySelectionState(
         originRepoInfoHash: originRepoInfoHash ?? this.originRepoInfoHash,
@@ -59,8 +77,8 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
   /// key: Entry path
   /// value: (#1: isDir, #2: state) (directory tristate: null, _, true; file: true, _)
   /// Where tristate == null: at least one child selected; true: all children selected
-  final SplayTreeMap<String, ({bool isDir, bool? tristate})> _entriesPath =
-      SplayTreeMap((key1, key2) {
+  final SplayTreeMap<String, ({bool isDir, bool selected, bool? tristate})>
+      _entriesPath = SplayTreeMap((key1, key2) {
     final isKey1Dir = p.extension(key1).isEmpty;
     final isKey2Dir = p.extension(key2).isEmpty;
 
@@ -72,8 +90,12 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
     }
     return isKey1Dir ? -1 : 1;
   });
-  Map<String, ({bool isDir, bool? tristate})> get selectedEntries =>
-      _entriesPath;
+  Map<String, ({bool isDir, bool selected, bool? tristate})>
+      get selectedEntries => _entriesPath;
+
+  String? get rootDirPath => selectedEntries.entries
+      .firstWhereOrNull((e) => e.value.isDir && e.value.tristate == true)
+      ?.key;
 
   Future<void> startSelectionForRepo(RepoCubit originRepoCubit) async {
     _originRepoCubit = originRepoCubit;
@@ -91,7 +113,12 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
 
     emitUnlessClosed(state.copyWith(
       selectionState: SelectionState.off,
-      selectedEntriesPath: <String, ({bool isDir, bool? tristate})>{},
+      selectedEntriesPath: <String,
+          ({
+        bool isDir,
+        bool selected,
+        bool? tristate,
+      })>{},
     ));
   }
 
@@ -107,8 +134,8 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
     if (entry is FileEntry) {
       _entriesPath.update(
         path,
-        (value) => (isDir: false, tristate: true),
-        ifAbsent: () => (isDir: false, tristate: true),
+        (value) => (isDir: false, selected: true, tristate: true),
+        ifAbsent: () => (isDir: false, selected: true, tristate: true),
       );
       await _selectOrUpdateParent(path);
     }
@@ -116,16 +143,16 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
     if (entry is DirectoryEntry) {
       final contents = await _getContents(path);
 
-      (contents != null && contents.isNotEmpty)
-          ? {
-              await for (var item in Stream.fromIterable(contents))
-                {await selectEntry(repoInfoHash, item)}
-            }
-          : _entriesPath.update(
-              path,
-              (value) => (isDir: true, tristate: true),
-              ifAbsent: () => (isDir: true, tristate: true),
-            );
+      if (contents != null && contents.isNotEmpty) {
+        await for (var item in Stream.fromIterable(contents)) {
+          await selectEntry(repoInfoHash, item);
+        }
+      }
+      _entriesPath.update(
+        path,
+        (value) => (isDir: true, selected: true, tristate: true),
+        ifAbsent: () => (isDir: true, selected: true, tristate: true),
+      );
 
       await _selectOrUpdateParent(path);
     }
@@ -168,6 +195,8 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
       emitUnlessClosed(state.copyWith(selectedEntriesPath: _entriesPath));
     }
   }
+
+  //============================================================================
 
   Future<void> saveEntriesToDevice(
     BuildContext context, {
@@ -214,23 +243,23 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
   Future<void> deleteEntries() async {
     final reversed = _entriesPath.entries.toList().reversed;
 
-    final results = <String, bool>{};
     await for (var selectedEntry in Stream.fromIterable(reversed)) {
       final path = selectedEntry.key;
 
-      if (selectedEntry.value.isDir && selectedEntry.value.tristate == true) {
-        final r = await _originRepoCubit!.deleteFolder(path, true);
-        results.putIfAbsent(path, () => r);
+      if (selectedEntry.value.isDir &&
+          selectedEntry.value.selected &&
+          selectedEntry.value.tristate == true) {
+        await _originRepoCubit!.deleteFolder(path, true);
         continue;
       }
-      final r2 = await _originRepoCubit!.deleteFile(path);
-      results.putIfAbsent(path, () => r2);
-    }
 
-    loggy.debug(results.entries.map((e) => 'Deletion: ${e.key} (${e.value})'));
+      if (!selectedEntry.value.isDir) {
+        await _originRepoCubit!.deleteFile(path);
+      }
+    }
   }
 
-  //===================== Helper functions =============================================
+  //===================== Helper functions =====================================
 
   Future<void> _selectOrUpdateParent(String path) async {
     final parentPath = p.dirname(path);
@@ -254,10 +283,14 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
     parentTristate == true
         ? _entriesPath.update(
             parentPath,
-            (value) => (isDir: true, tristate: true),
-            ifAbsent: () => (isDir: true, tristate: true),
+            (value) => (isDir: true, selected: false, tristate: true),
+            ifAbsent: () => (isDir: true, selected: false, tristate: true),
           )
-        : _entriesPath[parentPath] = (isDir: true, tristate: null);
+        : _entriesPath[parentPath] = (
+            isDir: true,
+            selected: false,
+            tristate: null,
+          );
 
     if (parentPath == '/') return;
     await _selectOrUpdateParent(parentPath);
@@ -276,13 +309,21 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
 
     parentTristate == false
         ? _entriesPath.remove(parentPath)
-        : _entriesPath[parentPath] = (isDir: true, tristate: null);
+        : _entriesPath[parentPath] = (
+            isDir: true,
+            selected: false,
+            tristate: null,
+          );
 
     var grandparentPath = p.dirname(parentPath);
     while (grandparentPath != '/') {
       parentTristate == false
           ? await _clearOrUpdateParent(parentPath)
-          : _entriesPath[grandparentPath] = (isDir: true, tristate: null);
+          : _entriesPath[grandparentPath] = (
+              isDir: true,
+              selected: false,
+              tristate: null,
+            );
 
       grandparentPath = p.dirname(grandparentPath);
     }
