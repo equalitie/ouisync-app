@@ -7,6 +7,7 @@ export 'cache_servers.dart';
 export 'cipher.dart';
 export 'click_counter.dart';
 export 'constants.dart';
+export 'copy_entry.dart';
 export 'dialogs.dart';
 export 'dimensions.dart';
 export 'dokan_scripts.dart';
