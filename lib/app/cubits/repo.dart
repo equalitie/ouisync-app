@@ -200,8 +200,12 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     _navigation.current(location, currentFolder, isFolder);
   }
 
-  void startEntriesSelection() {
-    _entrySelection.startSelectionForRepo(this);
+  Future<void> startEntriesSelection() async {
+    await _entrySelection.startSelectionForRepo(this);
+  }
+
+  Future<void> endEntriesSelection() async {
+    await _entrySelection.endSelection();
   }
 
   void showMoveEntryBottomSheet({

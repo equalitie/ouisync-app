@@ -58,7 +58,7 @@ class DoneState extends StatelessWidget {
   Widget build(BuildContext context) => TextButton.icon(
         onPressed: () async =>
             repoCubit.entrySelectionCubit.selectedEntries.isEmpty
-                ? await repoCubit.entrySelectionCubit.endSelection()
+                ? await repoCubit.endEntriesSelection()
                 : await showModalBottomSheet(
                     isScrollControlled: true,
                     context: context,
@@ -80,8 +80,7 @@ class EditState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => TextButton.icon(
-        onPressed: () async => await repoCubit.entrySelectionCubit
-            .startSelectionForRepo(repoCubit),
+        onPressed: () async => await repoCubit.startEntriesSelection(),
         label: Text(S.current.actionSelect),
         icon: const Icon(Icons.check),
         iconAlignment: IconAlignment.end,
@@ -114,7 +113,7 @@ class _EntrySelectionActionsList extends StatelessWidget with AppLogger {
                     TextButton(
                       child: Text('Cancel'),
                       onPressed: () async {
-                        await _entrySelectionCubit.endSelection();
+                        await _repoCubit.endEntriesSelection();
 
                         Navigator.of(context).pop();
                       },
