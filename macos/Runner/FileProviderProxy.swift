@@ -5,9 +5,8 @@
 //  Created by Peter Jankuliak on 03/04/2024.
 //
 import FileProvider
-import Common
 import FlutterMacOS
-import MessagePack
+import OuisyncCommon
 
 
 // TODO: this memory copy is unavoidable unless OuisyncLib is updated to use Data (itself [UInt8]-like)
@@ -24,7 +23,7 @@ class FileProviderProxy: FromFileProviderToAppProtocol {
     let channel: FlutterMethodChannel
 
     init(_ flutterBinaryMessenger: FlutterBinaryMessenger) {
-        channel = FlutterMethodChannel(name: "org.equalitie.ouisync/backend",
+        channel = FlutterMethodChannel(name: Constants.flutterForwardingChannel,
                                        binaryMessenger: flutterBinaryMessenger)
         channel.setMethodCallHandler {
             [weak self] call, result in guard let self

@@ -54,13 +54,7 @@ dependencies:
     sdk: flutter
   flutter_loggy: ^2.0.1
   flutter_password_strength: ^0.1.6
-  #flutter_secure_storage: ^9.0.0
-  # https://github.com/mogol/flutter_secure_storage/issues/618
-  flutter_secure_storage:
-    git:
-      url: https://github.com/inetic/flutter_secure_storage
-      ref: local-platform-dependencies
-      path: flutter_secure_storage
+  flutter_secure_storage: ^9.2.2
   intl: ^0.19.0
   intro_slider: ^4.2.0
   introduction_screen: ^3.1.14
@@ -91,7 +85,7 @@ dependencies:
   qr_flutter: ^4.0.0
   receive_sharing_intent: ^1.8.0
   result_type: ^1.0.0
-  sentry_flutter: ^8.8.0
+  sentry_flutter: ^8.10.1
   settings_ui: ^2.0.2
   share_plus: ^10.0.2
   shared_preferences: ^2.3.2

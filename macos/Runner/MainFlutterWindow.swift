@@ -1,14 +1,12 @@
-import Cocoa
 import FlutterMacOS
-import Common
 import FileProvider
 import LaunchAtLogin
+import OuisyncCommon
 
 
 class MainFlutterWindow: NSWindow {
     var fileProviderProxy: FileProviderProxy? = nil
     var flutterMethodChannel: FlutterMethodChannel? = nil
-    let methodChannelName: String = "org.equalitie.ouisync/native"
 
     override func awakeFromNib() {
         let flutterViewController = FlutterViewController()
@@ -65,7 +63,7 @@ class MainFlutterWindow: NSWindow {
     // Setup handing of message from flutter to this app instance
     // ------------------------------------------------------------------
     fileprivate func setupFlutterMethodChannel(_ binaryMessenger: FlutterBinaryMessenger) {
-        let channel = FlutterMethodChannel(name: methodChannelName, binaryMessenger: binaryMessenger)
+        let channel = FlutterMethodChannel(name: Constants.flutterConfigChannel, binaryMessenger: binaryMessenger)
         channel.setMethodCallHandler({ [weak self] (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
             guard let self = self else { return }
             handleFlutterMethodCall(call, result: result)

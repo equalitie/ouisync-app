@@ -7,7 +7,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   desktop_drop
   flutter_secure_storage_linux
   ouisync
-  screen_retriever
+  screen_retriever_linux
   sentry_flutter
   system_tray
   url_launcher_linux

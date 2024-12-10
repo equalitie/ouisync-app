@@ -104,7 +104,8 @@ class _AppContainerState extends State<AppContainer> {
                         // we use a custom key tied to the session to force the child
                         // component to drop state whenever the session disconnects
                         key: Key(state.sessionId)),
-                    currentLocale: localeState.currentLocale))),
+                    currentLocale: localeState.currentLocale,
+                    navigatorObservers: [_AppNavigatorObserver(widget.logger)]))),
         Failure(value: final error) => _createInMaterialApp(ErrorScreen(
             message: error is InvalidSettingsVersion
                 ? S.current.messageSettingsVersionNewerThanCurrent
