@@ -1,17 +1,20 @@
 import 'dart:async';
 import 'dart:collection';
 
+import 'package:build_context_provider/build_context_provider.dart';
 import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ouisync/ouisync.dart';
 import 'package:path/path.dart' as p;
 
 import '../../generated/l10n.dart';
 import '../models/models.dart' show DirectoryEntry, FileEntry, FileSystemEntry;
-import '../utils/utils.dart' show AppLogger, FileIO, showSnackBar;
+import '../utils/utils.dart'
+    show AppLogger, CopyEntry, FileIO, MoveEntry, showSnackBar;
 import '../widgets/widgets.dart' show SelectionState;
-import 'cubits.dart' show CubitActions, RepoCubit;
+import 'cubits.dart' show CubitActions, RepoCubit, ReposCubit;
 
 class EntrySelectionState extends Equatable {
   EntrySelectionState({
@@ -237,7 +240,60 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
         ),
       );
     }
-    ;
+  }
+
+  Future<void> copyEntriesTo(
+    BuildContext context, {
+    required ReposCubit reposCubit,
+    required String destinationPath,
+  }) async {
+    BuildContext? mainContext;
+    BuildContextProvider()((c) => mainContext = c);
+
+    final currentRepoInfoHash = reposCubit.currentRepo?.infoHash;
+    final cubit = _originRepoInfoHash != currentRepoInfoHash
+        ? reposCubit.currentRepo?.cubit
+        : null;
+    await for (var entry in Stream.fromIterable(_entriesPath.entries)) {
+      // final entryType =
+      //     entry.value.isDir ? EntryType.directory : EntryType.file;
+      if (entry.value.isDir) {
+        continue;
+      }
+
+      await CopyEntry(
+        mainContext!,
+        repoCubit: _originRepoCubit!,
+        srcPath: entry.key,
+        type: EntryType.file,
+      ).copy(toRepoCubit: cubit);
+    }
+  }
+
+  Future<void> movedEntriesTo(
+    BuildContext context, {
+    required ReposCubit reposCubit,
+    String? destinationPath,
+  }) async {
+    BuildContext? mainContext;
+    BuildContextProvider()((c) => mainContext = c);
+
+    final currentRepoInfoHash = reposCubit.currentRepo?.infoHash;
+    final cubit = _originRepoInfoHash != currentRepoInfoHash
+        ? reposCubit.currentRepo?.cubit
+        : null;
+    await for (var entry in Stream.fromIterable(_entriesPath.entries)) {
+      if (entry.value.isDir) {
+        continue;
+      }
+
+      await MoveEntry(
+        mainContext!,
+        repoCubit: _originRepoCubit!,
+        srcPath: entry.key,
+        type: EntryType.file,
+      ).move(toRepoCubit: cubit, originBasename: entry.key);
+    }
   }
 
   Future<void> deleteEntries() async {
@@ -331,6 +387,40 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
 
   Future<List<FileSystemEntry>?> _getContents(String path) async =>
       await _originRepoCubit?.getFolderContents(path);
+
+  ({bool destinationOk, String errorMessage}) validateDestination(
+    RepoCubit destinationRepoCubit,
+    String destinationPath,
+  ) {
+    if (destinationRepoCubit.state.infoHash != _originRepoInfoHash) {
+      return (destinationOk: true, errorMessage: '');
+    }
+
+    bool validationOk = true;
+    String errorMessage = '';
+
+    final startingPath = rootDirPath ??
+        selectedEntries.entries
+            .firstWhereOrNull((e) => e.value.tristate == true)
+            ?.key;
+
+    final isSameParent = destinationPath == p.dirname(startingPath!);
+    if (isSameParent) {
+      validationOk = false;
+      errorMessage = 'The destination is the same as the '
+          'source';
+    }
+
+    final isSamePath = startingPath == destinationPath;
+    final isWithin = p.isWithin(startingPath, destinationPath);
+    if (isSamePath || isWithin) {
+      validationOk = false;
+      errorMessage = 'The destination folder is a subfolder of the '
+          'source folder';
+    }
+
+    return (destinationOk: validationOk, errorMessage: errorMessage);
+  }
 }
 
 enum EntrySelectionActions { download, copy, move, delete }

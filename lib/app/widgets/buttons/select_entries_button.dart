@@ -10,7 +10,8 @@ import '../../cubits/cubits.dart'
         EntrySelectionActions,
         EntrySelectionCubit,
         EntrySelectionState,
-        RepoCubit;
+        RepoCubit,
+        ReposCubit;
 import '../../utils/utils.dart'
     show
         AppLogger,
@@ -22,10 +23,12 @@ import '../../utils/utils.dart'
 
 class SelectEntriesButton extends StatefulWidget {
   const SelectEntriesButton({
+    required this.reposCubit,
     required this.repoCubit,
     super.key,
   });
 
+  final ReposCubit reposCubit;
   final RepoCubit repoCubit;
 
   @override
@@ -39,19 +42,33 @@ class _SelectEntriesButtonState extends State<SelectEntriesButton> {
         bloc: widget.repoCubit.entrySelectionCubit,
         builder: (context, state) => Container(
           padding: EdgeInsetsDirectional.only(start: 6.0, end: 2.0),
-          child: _selectState(state.selectionState == SelectionState.on),
+          child: _selectState(
+            widget.reposCubit,
+            widget.repoCubit,
+            state.selectionState == SelectionState.on,
+          ),
         ),
       );
 
-  Widget _selectState(bool selecting) => switch (selecting) {
-        true => DoneState(repoCubit: widget.repoCubit),
-        false => EditState(repoCubit: widget.repoCubit),
+  Widget _selectState(
+    ReposCubit reposCubit,
+    RepoCubit repoCubit,
+    bool selecting,
+  ) =>
+      switch (selecting) {
+        true => DoneState(reposCubit: reposCubit, repoCubit: repoCubit),
+        false => EditState(repoCubit: repoCubit),
       };
 }
 
 class DoneState extends StatelessWidget {
-  const DoneState({required this.repoCubit, super.key});
+  const DoneState({
+    required this.reposCubit,
+    required this.repoCubit,
+    super.key,
+  });
 
+  final ReposCubit reposCubit;
   final RepoCubit repoCubit;
 
   @override
@@ -64,7 +81,8 @@ class DoneState extends StatelessWidget {
                     context: context,
                     shape: Dimensions.borderBottomSheetTop,
                     builder: (context) => _EntrySelectionActionsList(
-                      repoCubit.entrySelectionCubit,
+                      reposCubit,
+                      repoCubit,
                     ),
                   ),
         label: Text(S.current.actionDone),
@@ -90,15 +108,17 @@ class EditState extends StatelessWidget {
 enum SelectionState { off, on }
 
 class _EntrySelectionActionsList extends StatelessWidget with AppLogger {
-  _EntrySelectionActionsList(EntrySelectionCubit entrySelectionCubit)
-      : _entrySelectionCubit = entrySelectionCubit;
+  _EntrySelectionActionsList(ReposCubit reposCubit, RepoCubit repoCubit)
+      : _reposCubit = reposCubit,
+        _repoCubit = repoCubit;
 
-  final EntrySelectionCubit _entrySelectionCubit;
+  final ReposCubit _reposCubit;
+  final RepoCubit _repoCubit;
 
   @override
   Widget build(BuildContext context) =>
       BlocBuilder<EntrySelectionCubit, EntrySelectionState>(
-        bloc: _entrySelectionCubit,
+        bloc: _repoCubit.entrySelectionCubit,
         builder: (context, state) {
           return Container(
             padding: Dimensions.paddingBottomSheet,
@@ -120,15 +140,20 @@ class _EntrySelectionActionsList extends StatelessWidget with AppLogger {
                     ),
                   ],
                 ),
-                _buildSortByList(context, cubit: _entrySelectionCubit),
+                _buildSelectedEntriesActionList(
+                  context,
+                  reposCubit: _reposCubit,
+                  cubit: _repoCubit.entrySelectionCubit,
+                ),
               ],
             ),
           );
         },
       );
 
-  Widget _buildSortByList(
+  Widget _buildSelectedEntriesActionList(
     BuildContext context, {
+    required ReposCubit reposCubit,
     required EntrySelectionCubit cubit,
   }) =>
       ListView.separated(
@@ -151,16 +176,6 @@ class _EntrySelectionActionsList extends StatelessWidget with AppLogger {
                   textSoftWrap: false,
                   style: Theme.of(context).textTheme.bodyMedium,
                   onTap: () async {
-                    if (actionItem == EntrySelectionActions.delete) {
-                      await Dialogs.executeFutureWithLoadingDialog(
-                        null,
-                        cubit.deleteEntries(),
-                      );
-
-                      await cubit.endSelection();
-                      Navigator.of(context).pop();
-                    }
-
                     if (actionItem == EntrySelectionActions.download) {
                       String? defaultDirectoryPath;
                       if (io.Platform.isAndroid) {
@@ -176,12 +191,79 @@ class _EntrySelectionActionsList extends StatelessWidget with AppLogger {
 
                       if (defaultDirectoryPath == null) return;
 
+                      Navigator.of(context).pop();
+
                       await Dialogs.executeFutureWithLoadingDialog(
                         null,
                         cubit.saveEntriesToDevice(
                           context,
                           defaultDirectoryPath: defaultDirectoryPath,
                         ),
+                      );
+
+                      await cubit.endSelection();
+                    }
+
+                    if (actionItem == EntrySelectionActions.copy) {
+                      final currentRepo = reposCubit.currentRepo?.cubit;
+                      final currentPath = currentRepo?.currentFolder;
+                      if (currentPath == null || currentPath.isEmpty) return;
+
+                      final canCopyOrMove = await canCopyMoveToDestination(
+                        context,
+                        destinationRepoCubit: currentRepo!,
+                        entrySelectionCubit: cubit,
+                        destinationPath: currentPath,
+                        errorAlertTitle: 'Copy entries to $currentPath',
+                      );
+                      if (!canCopyOrMove) return;
+
+                      Navigator.of(context).pop();
+
+                      // await Dialogs.executeFutureWithLoadingDialog(
+                      //   null,
+                      await cubit.copyEntriesTo(
+                        context,
+                        reposCubit: reposCubit,
+                        destinationPath: currentPath,
+                      );
+                      // );
+
+                      await cubit.endSelection();
+                    }
+
+                    if (actionItem == EntrySelectionActions.move) {
+                      final currentRepo = reposCubit.currentRepo?.cubit;
+                      final currentPath = currentRepo?.currentFolder;
+                      if (currentPath == null || currentPath.isEmpty) return;
+
+                      final canCopyOrMove = await canCopyMoveToDestination(
+                        context,
+                        destinationRepoCubit: currentRepo!,
+                        entrySelectionCubit: cubit,
+                        destinationPath: currentPath,
+                        errorAlertTitle: 'Move entries to $currentPath',
+                      );
+                      if (!canCopyOrMove) return;
+
+                      Navigator.of(context).pop();
+
+                      await Dialogs.executeFutureWithLoadingDialog(
+                        null,
+                        cubit.movedEntriesTo(
+                          context,
+                          reposCubit: reposCubit,
+                          destinationPath: currentPath,
+                        ),
+                      );
+
+                      await cubit.endSelection();
+                    }
+
+                    if (actionItem == EntrySelectionActions.delete) {
+                      await Dialogs.executeFutureWithLoadingDialog(
+                        null,
+                        cubit.deleteEntries(),
                       );
 
                       await cubit.endSelection();
@@ -196,4 +278,26 @@ class _EntrySelectionActionsList extends StatelessWidget with AppLogger {
           );
         },
       );
+
+  Future<bool> canCopyMoveToDestination(
+    BuildContext context, {
+    required RepoCubit destinationRepoCubit,
+    required EntrySelectionCubit entrySelectionCubit,
+    required String destinationPath,
+    required String errorAlertTitle,
+  }) async {
+    final result = entrySelectionCubit.validateDestination(
+      destinationRepoCubit,
+      destinationPath,
+    );
+    if (result.destinationOk) return true;
+
+    await Dialogs.simpleAlertDialog(
+      context: context,
+      title: errorAlertTitle,
+      message: result.errorMessage,
+    );
+
+    return false;
+  }
 }
