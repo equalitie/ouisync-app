@@ -7,6 +7,7 @@ import 'package:ouisync_app/app/cubits/cubits.dart'
         RepoCubit,
         ReposCubit,
         SortListCubit;
+import 'package:ouisync_app/app/utils/utils.dart' show ThemeGetter;
 import 'package:ouisync_app/app/widgets/widgets.dart'
     show SelectEntriesButton, SelectionState, SortContentsBar;
 
@@ -32,30 +33,41 @@ class FolderContentsBar extends StatefulWidget {
 
 class _FolderContentsBarState extends State<FolderContentsBar> {
   @override
-  Widget build(BuildContext context) => Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          if (widget.hasContents)
-            SortContentsBar(
-              sortListCubit: widget.sortListCubit,
-              reposCubit: widget.reposCubit,
-            ),
-          BlocBuilder<EntrySelectionCubit, EntrySelectionState>(
-            bloc: widget.entrySelectionCubit,
-            builder: (context, state) => Expanded(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  if (widget.hasContents ||
-                      state.selectionState == SelectionState.on)
-                    SelectEntriesButton(
-                      reposCubit: widget.reposCubit,
-                      repoCubit: widget.repoCubit,
-                    ),
-                ],
+  Widget build(BuildContext context) =>
+      BlocBuilder<EntrySelectionCubit, EntrySelectionState>(
+        bloc: widget.entrySelectionCubit,
+        builder: (context, state) => Container(
+          padding:
+              EdgeInsetsDirectional.symmetric(vertical: 4.0, horizontal: 2.0),
+          color: _getColorState(state.selectionState),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              if (widget.hasContents)
+                SortContentsBar(
+                  sortListCubit: widget.sortListCubit,
+                  reposCubit: widget.reposCubit,
+                ),
+              Expanded(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    if (widget.hasContents ||
+                        state.selectionState == SelectionState.on)
+                      SelectEntriesButton(
+                        reposCubit: widget.reposCubit,
+                        repoCubit: widget.repoCubit,
+                      ),
+                  ],
+                ),
               ),
-            ),
+            ],
           ),
-        ],
+        ),
       );
+
+  Color? _getColorState(SelectionState state) => switch (state) {
+        SelectionState.off => Colors.transparent,
+        SelectionState.on => context.theme.secondaryHeaderColor,
+      };
 }
