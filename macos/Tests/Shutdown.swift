@@ -1,6 +1,6 @@
 import XCTest
-@testable import Common
-@testable import Backend
+@testable import OuisyncCommon
+@testable import OuisyncBackend
 
 
 class ExtensionTest: XCTestCase {
@@ -20,4 +20,3 @@ class ExtensionTest: XCTestCase {
         try await Task.sleep(for: .seconds(5))
     }
 }
-
