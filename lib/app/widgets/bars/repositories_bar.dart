@@ -8,8 +8,6 @@ import '../../cubits/cubits.dart';
 import '../../models/models.dart';
 import '../../utils/utils.dart';
 import '../notification_badge.dart';
-import '../repo_status.dart';
-import '../throughput_display.dart';
 import '../widgets.dart';
 
 class RepositoriesBar extends StatelessWidget

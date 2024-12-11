@@ -132,7 +132,7 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
       return;
     }
 
-    final isEmpty = await _isEmpty(repo, path, context);
+    final isEmpty = await _isEmpty(context, repo, path);
     final validationMessage = isEmpty
         ? S.current.messageConfirmFolderDeletion
         : S.current.messageConfirmNotEmptyFolderDeletion;
@@ -158,14 +158,17 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
   }
 
   Future<bool> _isDirectory(RepoCubit repo, String path) async {
-    final type = await repo.type(path);
+    final type = await repo.entryType(path);
     return type == EntryType.directory;
   }
 
   Future<bool> _isEmpty(
-      RepoCubit repo, String path, BuildContext context) async {
-    final Directory directory = await repo.openDirectory(path);
-    if (directory.isNotEmpty) {
+    BuildContext context,
+    RepoCubit repo,
+    String path,
+  ) async {
+    final empty = await repo.isFolderEmpty(path);
+    if (!empty) {
       loggy.app('Directory $path is not empty');
       return false;
     }

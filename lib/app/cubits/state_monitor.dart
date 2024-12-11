@@ -2,24 +2,17 @@ import 'dart:async';
 
 import 'package:ouisync/state_monitor.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:stream_transform/stream_transform.dart';
 import 'utils.dart';
 
 class StateMonitorCubit extends Cubit<StateMonitorNode?> with CubitActions {
   final StateMonitor _monitor;
-  final Subscription _subscription;
+  StreamSubscription<void>? _subscription;
 
-  StateMonitorCubit(this._monitor)
-      : _subscription = _monitor.subscribe(),
-        super(null) {
-    unawaited(_init());
-  }
-
-  Future<void> _init() async {
-    await _load();
-
-    await for (final _ in _subscription.stream) {
-      await _load();
-    }
+  StateMonitorCubit(this._monitor) : super(null) {
+    _subscription =
+        _monitor.changes.asyncMapSample((_) => _load()).listen(null);
+    unawaited(_load());
   }
 
   Future<void> _load() async {
@@ -29,7 +22,7 @@ class StateMonitorCubit extends Cubit<StateMonitorNode?> with CubitActions {
 
   @override
   Future<void> close() async {
-    await _subscription.close();
+    await _subscription?.cancel();
     await super.close();
   }
 
@@ -40,20 +33,12 @@ class StateMonitorCubit extends Cubit<StateMonitorNode?> with CubitActions {
 class StateMonitorIntCubit extends Cubit<int?> with CubitActions {
   final StateMonitor _monitor;
   final String _name;
-  final Subscription _subscription;
+  StreamSubscription<void>? _subscription;
 
-  StateMonitorIntCubit(this._monitor, this._name)
-      : _subscription = _monitor.subscribe(),
-        super(null) {
-    unawaited(_init());
-  }
-
-  Future<void> _init() async {
-    await _load();
-
-    await for (final _ in _subscription.stream) {
-      await _load();
-    }
+  StateMonitorIntCubit(this._monitor, this._name) : super(null) {
+    _subscription =
+        _monitor.changes.asyncMapSample((_) => _load()).listen(null);
+    unawaited(_load());
   }
 
   Future<void> _load() async {
@@ -63,7 +48,7 @@ class StateMonitorIntCubit extends Cubit<int?> with CubitActions {
 
   @override
   Future<void> close() async {
-    await _subscription.close();
+    await _subscription?.cancel();
     await super.close();
   }
 }

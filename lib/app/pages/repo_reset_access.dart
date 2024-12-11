@@ -14,6 +14,7 @@ import '../widgets/widgets.dart'
     show ActionsDialog, DirectionalAppBar, PositiveButton, NegativeButton;
 
 class RepoResetAccessPage extends StatefulWidget {
+  final Session session;
   final RepoCubit repo;
   final Access startAccess;
   final Settings settings;
@@ -21,20 +22,31 @@ class RepoResetAccessPage extends StatefulWidget {
 
   // Returns `null` if nothing changes (e.g. the user presses the back button
   // before submitting any changes).
-  static Future<Access> show(Access startAccess, BuildContext context,
-      RepoCubit repo, Settings settings) async {
+  static Future<Access> show({
+    required BuildContext context,
+    required Session session,
+    required Settings settings,
+    required RepoCubit repo,
+    required Access startAccess,
+  }) async {
     final route = MaterialPageRoute<Access>(
-        builder: (context) =>
-            RepoResetAccessPage._(repo, startAccess, settings));
+      builder: (context) => RepoResetAccessPage._(
+        session: session,
+        settings: settings,
+        repo: repo,
+        startAccess: startAccess,
+      ),
+    );
 
     return (await Navigator.push(context, route)) ?? startAccess;
   }
 
-  RepoResetAccessPage._(
-    this.repo,
-    this.startAccess,
-    this.settings,
-  ) : _jobs = _Jobs();
+  RepoResetAccessPage._({
+    required this.session,
+    required this.settings,
+    required this.repo,
+    required this.startAccess,
+  }) : _jobs = _Jobs();
 
   @override
   State<RepoResetAccessPage> createState() =>
@@ -433,7 +445,7 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
     ShareToken token;
 
     try {
-      token = await ShareToken.fromString(widget.repo.session, input);
+      token = await ShareToken.fromString(widget.session, input);
     } catch (e) {
       return _InvalidInputToken.malformed();
     }

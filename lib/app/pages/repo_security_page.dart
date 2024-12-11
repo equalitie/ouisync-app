@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ouisync/ouisync.dart' show Session;
 
 import '../../generated/l10n.dart';
 import '../pages/repo_reset_access.dart';
@@ -30,32 +31,37 @@ import '../models/models.dart' show SecretKeyOrigin;
 //--------------------------------------------------------------------
 
 class RepoSecurityPage extends StatefulWidget {
-  static Future<void> show(
-      BuildContext context,
-      RepoCubit repo,
-      UnlockedAccess originalAccess,
-      Settings settings,
-      PasswordHasher passwordHasher) async {
+  static Future<void> show({
+    required BuildContext context,
+    required Session session,
+    required Settings settings,
+    required RepoCubit repo,
+    required UnlockedAccess originalAccess,
+    required PasswordHasher passwordHasher,
+  }) async {
     await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => RepoSecurityPage(
-          repo,
-          originalAccess,
-          settings,
-          passwordHasher,
+          session: session,
+          settings: settings,
+          repo: repo,
+          originalAccess: originalAccess,
+          passwordHasher: passwordHasher,
         ),
       ),
     );
   }
 
-  const RepoSecurityPage(
-    this.repo,
-    this.originalAccess,
-    this.settings,
-    this.passwordHasher,
-  );
+  const RepoSecurityPage({
+    required this.session,
+    required this.settings,
+    required this.repo,
+    required this.originalAccess,
+    required this.passwordHasher,
+  });
 
+  final Session session;
   final Settings settings;
   final RepoCubit repo;
   final UnlockedAccess originalAccess;
@@ -119,7 +125,12 @@ class _State extends State<RepoSecurityPage> {
         text: "Reset repository access using a share token",
         onTap: () async {
           final newAccess = await RepoResetAccessPage.show(
-              access, context, widget.repo, widget.settings);
+            context: context,
+            session: widget.session,
+            settings: widget.settings,
+            repo: widget.repo,
+            startAccess: access,
+          );
 
           final unlockedAccess = newAccess.asUnlocked;
 

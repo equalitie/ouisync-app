@@ -121,7 +121,7 @@ class FolderCreation extends HookWidget {
     if (!(formKey.currentState?.validate() ?? false)) return false;
 
     final newFolderPath = repo_path.join(parent, newName);
-    if (await cubit.exists(newFolderPath)) {
+    if (await cubit.entryExists(newFolderPath)) {
       errorMessage.value = S.current.messageEntryAlreadyExist(newName);
       return false;
     } else {

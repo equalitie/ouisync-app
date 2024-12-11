@@ -20,21 +20,24 @@ import '../widgets.dart'
 
 class GetPasswordAccessDialog extends StatefulWidget {
   GetPasswordAccessDialog({
-    required this.repoCubit,
+    required this.session,
     required this.settings,
+    required this.repoCubit,
   });
 
-  final RepoCubit repoCubit;
+  final Session session;
   final Settings settings;
+  final RepoCubit repoCubit;
 
   static Future<Access?> show(
-    BuildContext topContext,
-    RepoCubit repoCubit,
+    BuildContext context,
     Settings settings,
+    Session session,
+    RepoCubit repoCubit,
   ) async {
     return await showDialog<Access>(
-      context: topContext,
-      builder: (BuildContext dialogContext) => ScaffoldMessenger(
+      context: context,
+      builder: (BuildContext context) => ScaffoldMessenger(
         child: Scaffold(
           backgroundColor: Colors.transparent,
           body: ActionsDialog(
@@ -42,6 +45,7 @@ class GetPasswordAccessDialog extends StatefulWidget {
             body: GetPasswordAccessDialog(
               repoCubit: repoCubit,
               settings: settings,
+              session: session,
             ),
           ),
         ),
@@ -86,7 +90,12 @@ class _State extends State<GetPasswordAccessDialog> with AppLogger {
           }
 
           final access = await RepoResetAccessPage.show(
-              BlindAccess(), context, widget.repoCubit, widget.settings);
+            context: context,
+            session: widget.session,
+            settings: widget.settings,
+            repo: widget.repoCubit,
+            startAccess: BlindAccess(),
+          );
 
           Navigator.of(context).pop(access);
         });

@@ -60,7 +60,7 @@ class FileIO with AppLogger {
         String fileName = srcFile.name;
         String destinationFilePath = p.join(parentPath, fileName);
 
-        final exist = await repoCubit.exists(destinationFilePath);
+        final exist = await repoCubit.entryExists(destinationFilePath);
         if (!exist) {
           await repoCubit.saveFile(
             filePath: destinationFilePath,
@@ -252,7 +252,7 @@ class FileIO with AppLogger {
 
     final exist = destination == FileDestination.device
         ? io.File(newDestinationPath).exists()
-        : repoCubit.exists(newDestinationPath);
+        : repoCubit.entryExists(newDestinationPath);
 
     if (await exist) {
       return _renameFile(

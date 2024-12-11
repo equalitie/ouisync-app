@@ -532,7 +532,7 @@ class _MainPageState extends State<MainPage>
     } else if (io.Platform.isWindows ||
         io.Platform.isLinux ||
         io.Platform.isMacOS) {
-      final mountPoint = repo.mountPoint;
+      final mountPoint = await repo.mountPoint;
       if (mountPoint == null) {
         showSnackBar(S.current.messageRepositoryNotMounted);
         return;
@@ -1067,6 +1067,7 @@ class _MainPageState extends State<MainPage>
           return RepositorySettings(
             context: context,
             settings: widget.settings,
+            session: widget.session,
             repoCubit: repoCubit,
             reposCubit: widget.reposCubit,
           );

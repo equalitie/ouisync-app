@@ -18,7 +18,6 @@ mixin RepositoryActionsMixin on LoggyType {
   Future<void> renameRepository(
     BuildContext context, {
     required RepoCubit repoCubit,
-    required ReposCubit reposCubit,
     void Function()? popDialog,
   }) async {
     final newName = await showDialog<String>(
@@ -35,7 +34,7 @@ mixin RepositoryActionsMixin on LoggyType {
 
     await Dialogs.executeFutureWithLoadingDialog(
       null,
-      reposCubit.renameRepository(repoCubit.location, newName),
+      repoCubit.move(newName),
     );
 
     if (popDialog != null) {
@@ -71,6 +70,7 @@ mixin RepositoryActionsMixin on LoggyType {
 
   Future<void> navigateToRepositorySecurity(
     BuildContext context, {
+    required Session session,
     required Settings settings,
     required RepoCubit repoCubit,
     required PasswordHasher passwordHasher,
@@ -86,7 +86,12 @@ mixin RepositoryActionsMixin on LoggyType {
       // TODO: Check if the repo can be unlocked without a secret and if so,
       // proceed with `authenticateIfPossible`.
 
-      access = await GetPasswordAccessDialog.show(context, repoCubit, settings);
+      access = await GetPasswordAccessDialog.show(
+        context,
+        settings,
+        session,
+        repoCubit,
+      );
     } else {
       if (!await LocalAuth.authenticateIfPossible(
         context,
@@ -107,7 +112,13 @@ mixin RepositoryActionsMixin on LoggyType {
     }
 
     await RepoSecurityPage.show(
-        context, repoCubit, unlockedAccess, settings, passwordHasher);
+      context: context,
+      session: session,
+      settings: settings,
+      repo: repoCubit,
+      originalAccess: unlockedAccess,
+      passwordHasher: passwordHasher,
+    );
   }
 
   Future<void> locateRepository(
@@ -219,9 +230,10 @@ mixin RepositoryActionsMixin on LoggyType {
 
   Future<void> unlockRepository(
     BuildContext context,
+    Settings settings,
+    Session session,
     RepoCubit repoCubit,
     PasswordHasher passwordHasher,
-    Settings settings,
   ) async {
     final authMode = repoCubit.state.authMode;
     final LocalSecret? secret;
@@ -241,8 +253,9 @@ mixin RepositoryActionsMixin on LoggyType {
       // If it didn't work, try to unlock using a password from the user.
       final access = await GetPasswordAccessDialog.show(
         context,
-        repoCubit,
         settings,
+        session,
+        repoCubit,
       );
 
       switch (access) {

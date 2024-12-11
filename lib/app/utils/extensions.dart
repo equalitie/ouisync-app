@@ -135,19 +135,12 @@ extension RepositoryExtension on Repository {
     while (true) {
       // Currently we ignore any concurrent changes and always force the new value.
       final oldValue = await getMetadata(_authModeKey);
+      final changed = await setMetadata({
+        _authModeKey: (oldValue: oldValue, newValue: newValue),
+      });
 
-      try {
-        await setMetadata({
-          _authModeKey: (oldValue: oldValue, newValue: newValue),
-        });
-
+      if (changed) {
         break;
-      } on Error catch (e) {
-        if (e.code == ErrorCode.entryChanged) {
-          continue;
-        } else {
-          rethrow;
-        }
       }
     }
   }

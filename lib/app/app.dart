@@ -27,7 +27,6 @@ import 'utils/utils.dart'
         Constants,
         InvalidSettingsVersion,
         loadAndMigrateSettings,
-        Mounter,
         Settings;
 import 'widgets/flavor_banner.dart';
 import 'widgets/media_receiver.dart';
@@ -128,7 +127,7 @@ class _AppContainerState extends State<AppContainer> {
       final sessionId = await session.thisRuntimeId;
       setState(() => state = Success(_AppContainerWrappedState(
             session: session,
-            nativeChannels: NativeChannels(session),
+            nativeChannels: NativeChannels(),
             settings: settings,
             sessionId: sessionId,
           )));
@@ -176,14 +175,12 @@ class _OuisyncAppState extends State<OuisyncApp>
   void initState() {
     super.initState();
 
-    final mounter = Mounter(widget.session);
-    mountCubit = MountCubit(mounter)..init();
+    mountCubit = MountCubit(widget.session)..init();
     reposCubit = ReposCubit(
       session: widget.session,
       nativeChannels: widget.nativeChannels,
       settings: widget.settings,
       cacheServers: CacheServers(Constants.cacheServers),
-      mounter: mounter,
     );
 
     unawaited(_init());
