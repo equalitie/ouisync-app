@@ -18,14 +18,12 @@ void main() {
   late LocaleCubit localeCubit;
 
   setUp(() async {
-    final configPath = join(
-      (await getApplicationSupportDirectory()).path,
-      'config',
-    );
+    final appDir = await getApplicationSupportDirectory();
+    await appDir.create(recursive: true);
 
-    session = Session.create(
-      kind: SessionKind.unique,
-      configPath: configPath,
+    session = await Session.create(
+      socketPath: join(appDir.path, 'sock'),
+      configPath: join(appDir.path, 'config'),
     );
 
     settings = await Settings.init(MasterKey.random());
@@ -44,7 +42,7 @@ void main() {
       session: session,
       settings: settings,
       windowManager: FakeWindowManager(),
-      nativeChannels: NativeChannels(session),
+      nativeChannels: NativeChannels(),
     )));
     await tester.pumpAndSettle();
 

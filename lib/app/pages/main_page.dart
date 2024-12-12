@@ -438,12 +438,12 @@ class _MainPageState extends State<MainPage>
     if (current is OpenRepoEntry) {
       if (!current.cubit.state.canRead) {
         return LockedRepositoryState(
-          parentContext: context,
           directionality: directionality,
           repoCubit: current.cubit,
           // TODO: masterKey is not needed when passing settings.
           masterKey: widget.settings.masterKey,
           settings: widget.settings,
+          session: widget.session,
           passwordHasher: PasswordHasher(widget.session),
         );
       }

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io' as io;
-import 'dart:typed_data';
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -272,20 +271,6 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
       accessMode: accessMode,
       secret: password != null ? LocalPassword(password) : null,
     );
-  }
-
-  Future<Uint8List> get credentials => _repo.credentials;
-
-  Future<void> setCredentials(Uint8List credentials) async {
-    await _repo.setCredentials(credentials);
-    final accessMode = await _repo.accessMode;
-    emitUnlessClosed(state.copyWith(accessMode: accessMode));
-  }
-
-  Future<void> resetCredentials(ShareToken token) async {
-    await _repo.resetCredentials(token);
-    final accessMode = await _repo.accessMode;
-    emitUnlessClosed(state.copyWith(accessMode: accessMode));
   }
 
   Future<void> mount() async {
@@ -569,6 +554,12 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     }
 
     emitUnlessClosed(state.copyWith(accessMode: newAccessMode));
+  }
+
+  Future<void> resetAccess(ShareToken token) async {
+    await _repo.resetAccess(token);
+    final accessMode = await _repo.accessMode;
+    emitUnlessClosed(state.copyWith(accessMode: accessMode));
   }
 
   /// Unlocks the repository using the secret. The access mode the repository ends up in depends on

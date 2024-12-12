@@ -14,12 +14,11 @@ import 'package:ouisync_app/app/cubits/repos.dart';
 import 'package:ouisync_app/app/pages/main_page.dart';
 import 'package:ouisync_app/app/utils/cache_servers.dart';
 import 'package:ouisync_app/app/utils/master_key.dart';
-import 'package:ouisync_app/app/utils/mounter.dart';
 import 'package:ouisync_app/app/utils/platform/platform_window_manager.dart';
 import 'package:ouisync_app/app/utils/settings/settings.dart';
 import 'package:ouisync_app/generated/l10n.dart';
 import 'package:ouisync/native_channels.dart';
-import 'package:ouisync/ouisync.dart' show Session, SessionKind;
+import 'package:ouisync/ouisync.dart' show Session;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -111,18 +110,21 @@ class TestDependencies {
   );
 
   static Future<TestDependencies> create() async {
-    final configPath = join(
-      (await getApplicationSupportDirectory()).path,
-      'config',
-    );
+    final appDir = await getApplicationSupportDirectory();
+    await appDir.create(recursive: true);
 
-    final session = Session.create(
-      kind: SessionKind.unique,
+    final socketPath = join(appDir.path, 'sock');
+    final configPath = join(appDir.path, 'config');
+
+    final session = await Session.create(
+      socketPath: socketPath,
       configPath: configPath,
     );
 
+    await session.setStoreDir(join(appDir.path, 'repos'));
+
     final settings = await Settings.init(MasterKey.random());
-    final nativeChannels = NativeChannels(session);
+    final nativeChannels = NativeChannels();
     final powerControl = PowerControl(
       session,
       settings,
@@ -133,10 +135,9 @@ class TestDependencies {
       nativeChannels: nativeChannels,
       session: session,
       settings: settings,
-      mounter: Mounter(session),
     );
 
-    final mountCubit = MountCubit(reposCubit.mounter);
+    final mountCubit = MountCubit(session);
     final localeCubit = LocaleCubit(settings);
 
     return TestDependencies._(

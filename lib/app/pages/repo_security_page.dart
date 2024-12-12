@@ -31,38 +31,37 @@ import '../models/models.dart' show SecretKeyOrigin;
 //--------------------------------------------------------------------
 
 class RepoSecurityPage extends StatefulWidget {
-  static Future<void> show({
-    required BuildContext context,
-    required Session session,
-    required Settings settings,
-    required RepoCubit repo,
-    required UnlockedAccess originalAccess,
-    required PasswordHasher passwordHasher,
-  }) async {
-    await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => RepoSecurityPage(
-          session: session,
-          settings: settings,
-          repo: repo,
-          originalAccess: originalAccess,
-          passwordHasher: passwordHasher,
+  static Future<void> show(
+    BuildContext context,
+    Settings settings,
+    Session session,
+    RepoCubit repo,
+    UnlockedAccess originalAccess,
+    PasswordHasher passwordHasher,
+  ) =>
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => RepoSecurityPage(
+            settings,
+            session,
+            repo,
+            originalAccess,
+            passwordHasher,
+          ),
         ),
-      ),
-    );
-  }
+      );
 
-  const RepoSecurityPage({
-    required this.session,
-    required this.settings,
-    required this.repo,
-    required this.originalAccess,
-    required this.passwordHasher,
-  });
+  const RepoSecurityPage(
+    this.settings,
+    this.session,
+    this.repo,
+    this.originalAccess,
+    this.passwordHasher,
+  );
 
-  final Session session;
   final Settings settings;
+  final Session session;
   final RepoCubit repo;
   final UnlockedAccess originalAccess;
   final PasswordHasher passwordHasher;

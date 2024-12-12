@@ -4,7 +4,7 @@ import 'package:ouisync_app/app/utils/utils.dart';
 import 'package:ouisync_app/app/utils/settings/v0/v0.dart' as v0;
 import 'package:ouisync_app/app/utils/settings/v1.dart' as v1;
 import 'package:ouisync_app/app/models/repo_location.dart';
-import 'package:ouisync/ouisync.dart' show Repository, Session, SessionKind;
+import 'package:ouisync/ouisync.dart' show Repository, Session, logInit;
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -12,6 +12,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 // Run with `flutter test test/settings_test.dart`.
 void main() {
+  logInit();
+
   test('settings migration v0 to v1', () async {
     SharedPreferences.setMockInitialValues({});
     FlutterSecureStorage.setMockInitialValues({});
@@ -20,6 +22,7 @@ void main() {
     expect(prefs.getKeys().isEmpty, true);
 
     final baseDir = await getApplicationSupportDirectory();
+    await baseDir.create(recursive: true);
 
     final fooPath = join(baseDir.path, 'foo.db');
     final barPath = join(baseDir.path, 'bar.db');
@@ -38,14 +41,14 @@ void main() {
     );
     await s0.setDefaultRepo('foo');
 
-    final session = Session.create(
+    final session = await Session.create(
+      socketPath: join(baseDir.path, 'sock'),
       configPath: join(baseDir.path, 'config'),
-      kind: SessionKind.unique,
     );
 
     await Repository.create(
       session,
-      store: fooPath,
+      path: fooPath,
       readSecret: null,
       writeSecret: null,
     );
@@ -59,7 +62,7 @@ void main() {
     expect(s1.repos, unorderedEquals([RepoLocation.fromDbPath(fooPath)]));
 
     // The auth mode should have been transferred to the repo metadata
-    final repo = await Repository.open(session, store: fooPath);
+    final repo = await Repository.open(session, path: fooPath);
     expect(await repo.getAuthMode(), isA<AuthModeBlindOrManual>());
 
     await s1.setRepoLocation(
@@ -84,6 +87,7 @@ void main() {
     expect(prefs.getKeys().isEmpty, true);
 
     final baseDir = await getApplicationSupportDirectory();
+    await baseDir.create(recursive: true);
 
     final fooPath = join(baseDir.path, 'foo.db');
     final barPath = join(baseDir.path, 'bar.db');
@@ -100,14 +104,14 @@ void main() {
     await s1.setRepoLocation(DatabaseId('123'), repoLocation);
     await s1.setDefaultRepo(repoLocation);
 
-    final session = Session.create(
+    final session = await Session.create(
+      socketPath: join(baseDir.path, 'sock'),
       configPath: join(baseDir.path, 'config'),
-      kind: SessionKind.unique,
     );
 
     await Repository.create(
       session,
-      store: fooPath,
+      path: fooPath,
       readSecret: null,
       writeSecret: null,
     );
@@ -123,7 +127,7 @@ void main() {
     expect(s2.repos, unorderedEquals([RepoLocation.fromDbPath(fooPath)]));
 
     // The auth mode should have been transfered to the repo metadata
-    final repo = await Repository.open(session, store: fooPath);
+    final repo = await Repository.open(session, path: fooPath);
     expect(await repo.getAuthMode(), isA<AuthModeBlindOrManual>());
 
     await s2.setRepoLocation(

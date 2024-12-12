@@ -350,8 +350,8 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
   Future<void> _submit(_ValidInputToken input) async {
     final repo = widget.repo;
 
-    // This unlocks or locks the repository in the `AccessMode` of to the token.
-    await repo.resetCredentials(input.token);
+    // This unlocks or locks the repository in the `AccessMode` of the token.
+    await repo.resetAccess(input.token);
 
     // Generate new local secret which will unlock the repo in the future.
     final newLocalSecret = LocalSecretKeyAndSalt.random();
@@ -450,7 +450,7 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
       return _InvalidInputToken.malformed();
     }
 
-    final accessMode = await token.mode;
+    final accessMode = await token.accessMode;
     final infoHash = await token.infoHash;
 
     return _ValidInputToken(token, accessMode, infoHash);

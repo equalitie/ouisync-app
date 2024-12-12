@@ -70,8 +70,8 @@ mixin RepositoryActionsMixin on LoggyType {
 
   Future<void> navigateToRepositorySecurity(
     BuildContext context, {
-    required Session session,
     required Settings settings,
+    required Session session,
     required RepoCubit repoCubit,
     required PasswordHasher passwordHasher,
     required void Function() popDialog,
@@ -112,12 +112,12 @@ mixin RepositoryActionsMixin on LoggyType {
     }
 
     await RepoSecurityPage.show(
-      context: context,
-      session: session,
-      settings: settings,
-      repo: repoCubit,
-      originalAccess: unlockedAccess,
-      passwordHasher: passwordHasher,
+      context,
+      settings,
+      session,
+      repoCubit,
+      unlockedAccess,
+      passwordHasher,
     );
   }
 

@@ -7,7 +7,7 @@ import 'package:ouisync_app/app/models/auth_mode.dart';
 import 'package:ouisync_app/app/models/repo_location.dart';
 import 'package:ouisync_app/app/utils/share_token.dart';
 import 'package:ouisync/ouisync.dart'
-    show AccessMode, LocalSecretKeyAndSalt, Repository, Session, SessionKind;
+    show AccessMode, LocalSecretKeyAndSalt, Repository, Session;
 import 'package:path/path.dart' show join;
 
 import '../utils.dart';
@@ -215,28 +215,21 @@ Future<String> _createShareToken({
   required AccessMode accessMode,
 }) async {
   final dir = await Directory.systemTemp.createTemp();
-  final session = Session.create(
-    kind: SessionKind.unique,
+  final session = await Session.create(
+    socketPath: join(dir.path, 'sock'),
     configPath: join(dir.path, 'config'),
   );
 
   try {
     final repo = await Repository.create(
       session,
-      store: join(dir.path, 'store', 'repo.ouisyncdb'),
+      path: join(dir.path, 'store', 'repo'),
       readSecret: null,
       writeSecret: null,
     );
 
-    try {
-      final token = await repo.createShareToken(
-        name: name,
-        accessMode: accessMode,
-      );
-      return token.toString();
-    } finally {
-      await repo.close();
-    }
+    final token = await repo.share(accessMode: accessMode);
+    return token.toString();
   } finally {
     await session.close();
     await dir.delete(recursive: true);

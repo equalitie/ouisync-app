@@ -9,7 +9,7 @@ import 'package:ouisync_app/app/widgets/buttons/elevated_async_button.dart';
 import 'package:ouisync_app/app/widgets/items/entry_action_item.dart'
     show EntryActionItem;
 import 'package:ouisync/ouisync.dart';
-import '../utils.dart';
+import 'utils.dart';
 
 //--------------------------------------------------------------------
 

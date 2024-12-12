@@ -1,3 +1,5 @@
+import 'dart:io' show Directory;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
@@ -25,7 +27,7 @@ void main() {
   setUp(() async {
     deps = await TestDependencies.create();
 
-    final reposDir = await deps.reposCubit.settings.getDefaultRepositoriesDir();
+    final reposDir = Directory((await deps.session.storeDir)!);
 
     final originRepoLocation = RepoLocation.fromParts(
       dir: reposDir,
@@ -70,7 +72,7 @@ void main() {
 
     originRepo = await Repository.open(
       deps.session,
-      store: originRepoLocation.path,
+      path: originRepoLocation.path,
     );
 
     final newFile = await File.create(originRepo, '/file.txt');
