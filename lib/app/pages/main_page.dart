@@ -148,7 +148,7 @@ class _MainPageState extends State<MainPage>
   void checkForDokan() {
     installationOk() => widget.mountCubit.init();
     Future<bool?> installationFailed() => Dialogs.simpleAlertDialog(
-          context: context,
+          context,
           title: S.current.titleDokanInstallation,
           message: S.current.messageDokanInstallationFailed,
         );
@@ -674,7 +674,7 @@ class _MainPageState extends State<MainPage>
 
   Future<void> _showMovingEntryAlertDialog(BuildContext context) =>
       Dialogs.simpleAlertDialog(
-        context: context,
+        context,
         title: S.current.titleMovingEntry,
         message: S.current.messageMovingEntry,
       );
@@ -838,9 +838,10 @@ class _MainPageState extends State<MainPage>
     final currentRepo = _currentRepo;
     if (currentRepo is! OpenRepoEntry) {
       await Dialogs.simpleAlertDialog(
-          context: context,
-          title: S.current.titleAddFile,
-          message: S.current.messageNoRepo);
+        context,
+        title: S.current.titleAddFile,
+        message: S.current.messageNoRepo,
+      );
 
       return false;
     }

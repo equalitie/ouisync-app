@@ -185,8 +185,7 @@ class RenameEntry extends HookWidget with AppLogger {
 
     if (title.isEmpty) return true;
 
-    final continueAnyway = await Dialogs.alertDialogWithActions(
-        context: parentContext,
+    final continueAnyway = await Dialogs.alertDialogWithActions(parentContext,
         title: title,
         body: [
           Text(message)

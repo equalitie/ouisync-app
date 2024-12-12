@@ -196,7 +196,7 @@ mixin RepositoryActionsMixin on LoggyType {
     required BreadCrumb breadcrumbs,
   }) async =>
       Dialogs.alertDialogWithActions(
-        context: context,
+        context,
         title: S.current.actionLocateRepo,
         body: [
           Text(

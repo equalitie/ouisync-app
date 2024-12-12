@@ -218,7 +218,7 @@ class RepoCreation extends StatelessWidget {
         await Navigator.of(context).maybePop(location);
       case RepoCreationFailure(location: final location, error: final error):
         await Dialogs.simpleAlertDialog(
-          context: context,
+          context,
           title: S.current.messageFailedCreateRepository(location.path),
           message: error,
         );
