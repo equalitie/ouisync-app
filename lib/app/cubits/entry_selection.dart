@@ -102,7 +102,8 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
       get selectedEntries => _entriesPath;
 
   String? get rootDirPath => selectedEntries.entries
-      .firstWhereOrNull((e) => e.value.isDir && e.value.tristate == true)
+      .firstWhereOrNull(
+          (e) => e.value.isDir && e.value.selected && e.value.tristate == true)
       ?.key;
 
   Future<void> startSelectionForRepo(RepoCubit originRepoCubit) async {
