@@ -297,7 +297,7 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
     }
   }
 
-  Future<void> movedEntriesTo(
+  Future<bool> moveEntriesTo(
     BuildContext context, {
     required ReposCubit reposCubit,
     String? destinationPath,
