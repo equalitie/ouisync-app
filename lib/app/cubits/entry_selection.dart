@@ -17,7 +17,7 @@ import '../widgets/widgets.dart' show SelectionState;
 import 'cubits.dart' show CubitActions, RepoCubit, ReposCubit;
 
 class EntrySelectionState extends Equatable {
-  EntrySelectionState({
+  const EntrySelectionState({
     this.originRepoInfoHash = '',
     this.selectionState = SelectionState.off,
     this.selectedEntriesPath = const <String,
@@ -26,6 +26,7 @@ class EntrySelectionState extends Equatable {
       bool selected,
       bool? tristate,
     })>{},
+    this.updating = false,
   });
 
   final String originRepoInfoHash;
@@ -37,6 +38,7 @@ class EntrySelectionState extends Equatable {
         bool selected,
         bool? tristate,
       })> selectedEntriesPath;
+  final bool updating;
 
   bool isEntrySelected(String repoInfoHash, String path) =>
       selectedEntriesPath.entries.firstWhereOrNull(
@@ -54,11 +56,13 @@ class EntrySelectionState extends Equatable {
               bool? tristate,
             })>?
         selectedEntriesPath,
+    bool? updating,
   }) =>
       EntrySelectionState(
         originRepoInfoHash: originRepoInfoHash ?? this.originRepoInfoHash,
         selectionState: selectionState ?? this.selectionState,
         selectedEntriesPath: selectedEntriesPath ?? this.selectedEntriesPath,
+        updating: updating ?? false,
       );
 
   @override
@@ -66,6 +70,7 @@ class EntrySelectionState extends Equatable {
         originRepoInfoHash,
         selectionState,
         selectedEntriesPath,
+        updating,
       ];
 }
 
@@ -132,7 +137,11 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
     }
 
     final path = entry.path;
-    if (_entriesPath.containsKey(path)) return;
+    if (_entriesPath.containsKey(path)) {
+      return;
+    }
+
+    emitUnlessClosed(state.copyWith(updating: true));
 
     if (entry is FileEntry) {
       _entriesPath.update(
@@ -160,7 +169,10 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
       await _selectOrUpdateParent(path);
     }
 
-    emitUnlessClosed(state.copyWith(selectedEntriesPath: _entriesPath));
+    emitUnlessClosed(state.copyWith(
+      selectedEntriesPath: _entriesPath,
+      updating: false,
+    ));
   }
 
   Future<void> clearEntry(String repoInfoHash, FileSystemEntry entry) async {
@@ -168,14 +180,13 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
       emitUnlessClosed(state);
     }
 
+    emitUnlessClosed(state.copyWith(updating: true));
+
     final path = entry.path;
 
     if (entry is FileEntry) {
       _entriesPath.remove(path);
       await _clearOrUpdateParent(path);
-
-      emitUnlessClosed(state.copyWith(selectedEntriesPath: _entriesPath));
-      return;
     }
 
     if (entry is DirectoryEntry) {
@@ -184,7 +195,10 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
         _entriesPath.remove(path);
         await _clearOrUpdateParent(path);
 
-        emitUnlessClosed(state.copyWith(selectedEntriesPath: _entriesPath));
+        emitUnlessClosed(state.copyWith(
+          selectedEntriesPath: _entriesPath,
+          updating: false,
+        ));
         return;
       }
 
@@ -194,9 +208,12 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
 
       _entriesPath.remove(path);
       await _clearOrUpdateParent(path);
-
-      emitUnlessClosed(state.copyWith(selectedEntriesPath: _entriesPath));
     }
+
+    emitUnlessClosed(state.copyWith(
+      selectedEntriesPath: _entriesPath,
+      updating: false,
+    ));
   }
 
   //============================================================================
