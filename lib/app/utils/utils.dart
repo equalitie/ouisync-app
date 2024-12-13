@@ -24,6 +24,7 @@ export 'master_key.dart';
 export 'log_reader.dart';
 export 'mounter.dart';
 export 'move_entry.dart';
+export 'multi_entry_actions.dart';
 export 'option.dart';
 export 'password_hasher.dart';
 export 'native.dart';
