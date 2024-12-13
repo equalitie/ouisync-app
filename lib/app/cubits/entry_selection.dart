@@ -45,6 +45,15 @@ class EntrySelectionState extends Equatable {
           (p) => originRepoInfoHash == repoInfoHash && p.key == path) !=
       null;
 
+  String? get originPath {
+    if (selectedEntriesPath.entries.isEmpty) return null;
+
+    final entry = selectedEntriesPath.entries.first;
+    final info = entry.value;
+    final path = entry.key;
+    return (!info.isDir || info.selected) ? p.dirname(path) : path;
+  }
+
   EntrySelectionState copyWith({
     String? originRepoInfoHash,
     SelectionState? selectionState,
