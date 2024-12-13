@@ -39,7 +39,7 @@ class _FolderContentsBarState extends State<FolderContentsBar> {
         builder: (context, state) => Container(
           padding:
               EdgeInsetsDirectional.symmetric(vertical: 4.0, horizontal: 2.0),
-          color: _getColorState(state.selectionState),
+          decoration: _getDecorator(state),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
@@ -66,8 +66,21 @@ class _FolderContentsBarState extends State<FolderContentsBar> {
         ),
       );
 
-  Color? _getColorState(SelectionState state) => switch (state) {
-        SelectionState.off => Colors.transparent,
-        SelectionState.on => context.theme.secondaryHeaderColor,
-      };
+  Decoration _getDecorator(EntrySelectionState state) => BoxDecoration(
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(8.0),
+          bottomRight: Radius.circular(8.0),
+        ),
+        border: state.selectionState == SelectionState.on
+            ? Border(
+                bottom: BorderSide(
+                  color: Colors.black26,
+                  strokeAlign: BorderSide.strokeAlignInside,
+                ),
+              )
+            : null,
+        color: state.selectionState == SelectionState.on
+            ? context.theme.secondaryHeaderColor
+            : null,
+      );
 }
