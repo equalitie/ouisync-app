@@ -1,25 +1,17 @@
-import 'dart:io' as io;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:path_provider/path_provider.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart'
     show
+        BottomSheetType,
         EntrySelectionActions,
         EntrySelectionCubit,
         EntrySelectionState,
         RepoCubit,
         ReposCubit;
 import '../../utils/utils.dart'
-    show
-        AppLogger,
-        Dialogs,
-        Dimensions,
-        EntrySelectionActionsExtension,
-        Fields,
-        Native;
+    show AppLogger, Dimensions, EntrySelectionActionsExtension, Fields;
 
 class SelectEntriesButton extends StatefulWidget {
   const SelectEntriesButton({
@@ -143,6 +135,7 @@ class _EntrySelectionActionsList extends StatelessWidget with AppLogger {
                 _buildSelectedEntriesActionList(
                   context,
                   reposCubit: _reposCubit,
+                  repoCubit: _repoCubit,
                   cubit: _repoCubit.entrySelectionCubit,
                 ),
               ],
@@ -154,6 +147,7 @@ class _EntrySelectionActionsList extends StatelessWidget with AppLogger {
   Widget _buildSelectedEntriesActionList(
     BuildContext context, {
     required ReposCubit reposCubit,
+    required RepoCubit repoCubit,
     required EntrySelectionCubit cubit,
   }) =>
       ListView.separated(
@@ -176,99 +170,20 @@ class _EntrySelectionActionsList extends StatelessWidget with AppLogger {
                   textSoftWrap: false,
                   style: Theme.of(context).textTheme.bodyMedium,
                   onTap: () async {
-                    if (actionItem == EntrySelectionActions.download) {
-                      String? defaultDirectoryPath;
-                      if (io.Platform.isAndroid) {
-                        defaultDirectoryPath =
-                            await Native.getDownloadPathForAndroid();
-                      } else {
-                        final defaultDirectory = io.Platform.isIOS
-                            ? await getApplicationDocumentsDirectory()
-                            : await getDownloadsDirectory();
+                    final type = switch (actionItem) {
+                      EntrySelectionActions.download =>
+                        BottomSheetType.download,
+                      EntrySelectionActions.copy => BottomSheetType.copy,
+                      EntrySelectionActions.move => BottomSheetType.move,
+                      EntrySelectionActions.delete => BottomSheetType.delete,
+                    };
 
-                        defaultDirectoryPath = defaultDirectory?.path;
-                      }
+                    Navigator.of(context).pop();
+                    repoCubit.showMoveSelectedEntriesBottomSheet(
+                      sheetType: type,
+                    );
 
-                      if (defaultDirectoryPath == null) return;
-
-                      Navigator.of(context).pop();
-
-                      await Dialogs.executeFutureWithLoadingDialog(
-                        null,
-                        cubit.saveEntriesToDevice(
-                          context,
-                          defaultDirectoryPath: defaultDirectoryPath,
-                        ),
-                      );
-
-                      await cubit.endSelection();
-                    }
-
-                    if (actionItem == EntrySelectionActions.copy) {
-                      final currentRepo = reposCubit.currentRepo?.cubit;
-                      final currentPath = currentRepo?.currentFolder;
-                      if (currentPath == null || currentPath.isEmpty) return;
-
-                      final canCopyOrMove = await canCopyMoveToDestination(
-                        context,
-                        destinationRepoCubit: currentRepo!,
-                        entrySelectionCubit: cubit,
-                        destinationPath: currentPath,
-                        errorAlertTitle: 'Copy entries to $currentPath',
-                      );
-                      if (!canCopyOrMove) return;
-
-                      Navigator.of(context).pop();
-
-                      // await Dialogs.executeFutureWithLoadingDialog(
-                      //   null,
-                      await cubit.copyEntriesTo(
-                        context,
-                        reposCubit: reposCubit,
-                        destinationPath: currentPath,
-                      );
-                      // );
-
-                      await cubit.endSelection();
-                    }
-
-                    if (actionItem == EntrySelectionActions.move) {
-                      final currentRepo = reposCubit.currentRepo?.cubit;
-                      final currentPath = currentRepo?.currentFolder;
-                      if (currentPath == null || currentPath.isEmpty) return;
-
-                      final canCopyOrMove = await canCopyMoveToDestination(
-                        context,
-                        destinationRepoCubit: currentRepo!,
-                        entrySelectionCubit: cubit,
-                        destinationPath: currentPath,
-                        errorAlertTitle: 'Move entries to $currentPath',
-                      );
-                      if (!canCopyOrMove) return;
-
-                      Navigator.of(context).pop();
-
-                      await Dialogs.executeFutureWithLoadingDialog(
-                        null,
-                        cubit.movedEntriesTo(
-                          context,
-                          reposCubit: reposCubit,
-                          destinationPath: currentPath,
-                        ),
-                      );
-
-                      await cubit.endSelection();
-                    }
-
-                    if (actionItem == EntrySelectionActions.delete) {
-                      await Dialogs.executeFutureWithLoadingDialog(
-                        null,
-                        cubit.deleteEntries(),
-                      );
-
-                      await cubit.endSelection();
-                      Navigator.of(context).pop();
-                    }
+                    return;
                   },
                   dense: true,
                   visualDensity: VisualDensity.compact,
@@ -278,26 +193,4 @@ class _EntrySelectionActionsList extends StatelessWidget with AppLogger {
           );
         },
       );
-
-  Future<bool> canCopyMoveToDestination(
-    BuildContext context, {
-    required RepoCubit destinationRepoCubit,
-    required EntrySelectionCubit entrySelectionCubit,
-    required String destinationPath,
-    required String errorAlertTitle,
-  }) async {
-    final result = entrySelectionCubit.validateDestination(
-      destinationRepoCubit,
-      destinationPath,
-    );
-    if (result.destinationOk) return true;
-
-    await Dialogs.simpleAlertDialog(
-      context: context,
-      title: errorAlertTitle,
-      message: result.errorMessage,
-    );
-
-    return false;
-  }
 }
