@@ -221,6 +221,12 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     );
   }
 
+  void showMoveSelectedEntriesBottomSheet({
+    required BottomSheetType sheetType,
+  }) {
+    _bottomSheet.showMoveSelectedEntries(repoCubit: this, type: sheetType);
+  }
+
   Future<void> enableSync() async {
     await _repo.setSyncEnabled(true);
 

@@ -5,7 +5,7 @@ import 'package:ouisync/bindings.dart';
 import '../utils/utils.dart' show AppLogger;
 import 'cubits.dart' show CubitActions, NavigationCubit, RepoCubit, ReposCubit;
 
-enum BottomSheetType { move, upload, gone }
+enum BottomSheetType { copy, delete, download, move, upload, gone }
 
 class BottomSheetInfo extends Equatable {
   final BottomSheetType type;
@@ -57,6 +57,17 @@ class MoveEntrySheetState extends Equatable implements EntryBottomSheetState {
       ];
 }
 
+class MoveSelectedEntriesSheetState extends Equatable
+    implements EntryBottomSheetState {
+  final RepoCubit repoCubit;
+  final BottomSheetType type;
+
+  MoveSelectedEntriesSheetState({required this.repoCubit, required this.type});
+
+  @override
+  List<Object?> get props => [repoCubit, type];
+}
+
 class SaveMediaSheetState extends Equatable implements EntryBottomSheetState {
   final ReposCubit reposCubit;
   final List<String> sharedMediaPaths;
@@ -90,6 +101,15 @@ class EntryBottomSheetCubit extends Cubit<EntryBottomSheetState>
           entryType: entryType,
         ),
       );
+
+  void showMoveSelectedEntries({
+    required RepoCubit repoCubit,
+    required BottomSheetType type,
+  }) =>
+      emitUnlessClosed(MoveSelectedEntriesSheetState(
+        repoCubit: repoCubit,
+        type: type,
+      ));
 
   void showSaveMedia(
           {required ReposCubit reposCubit, required List<String> paths}) =>

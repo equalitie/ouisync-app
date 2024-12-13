@@ -747,6 +747,13 @@ class _MainPageState extends State<MainPage>
             );
           }
 
+          if (state is MoveSelectedEntriesSheetState) {
+            sheet = _moveSelectedEntriesState(
+              repoCubit: state.repoCubit,
+              type: state.type,
+            );
+          }
+
           if (state is SaveMediaSheetState) {
             sheet = _uploadFileState(
               reposCubit: state.reposCubit,
@@ -796,6 +803,19 @@ class _MainPageState extends State<MainPage>
       type: entryType,
     ).move(toRepoCubit: toRepoCubit);
   }
+
+  Widget _moveSelectedEntriesState({
+    required RepoCubit repoCubit,
+    required BottomSheetType type,
+  }) =>
+      MoveSelectedEntriesDialog(
+        context, 
+        reposCubit: widget.reposCubit,
+        repoCubit: repoCubit,
+        type: type,
+        onUpdateBottomSheet: updateBottomSheetInfo,
+        onCancel: widget.reposCubit.bottomSheet.hide,
+      );
 
   Widget _uploadFileState({
     required ReposCubit reposCubit,
