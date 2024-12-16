@@ -15,10 +15,10 @@ class MultiEntryActions {
     BuildContext context, {
     required EntrySelectionCubit entrySelectionCubit,
   })  : _context = context,
-        _cubit = entrySelectionCubit;
+        _entrySelectionCubit = entrySelectionCubit;
 
   final BuildContext _context;
-  final EntrySelectionCubit _cubit;
+  final EntrySelectionCubit _entrySelectionCubit;
 
   Future<bool> saveEntriesToDevice() async {
     String? defaultDirectoryPath = await _getDefaultPathForPlatform();
@@ -27,7 +27,7 @@ class MultiEntryActions {
     final result = await _confirmActionAndExecute(
       _context,
       EntrySelectionActions.download,
-      () async => await _cubit.saveEntriesToDevice(
+      () async => await _entrySelectionCubit.saveEntriesToDevice(
         _context,
         defaultDirectoryPath: defaultDirectoryPath,
       ),
@@ -48,7 +48,7 @@ class MultiEntryActions {
     final canCopyOrMove = await _canCopyMoveToDestination(
       _context,
       destinationRepoCubit: currentRepo,
-      entrySelectionCubit: _cubit,
+      entrySelectionCubit: _entrySelectionCubit,
       destinationPath: currentPath,
       errorAlertTitle: 'Copy entries to $currentPath',
     );
@@ -57,7 +57,7 @@ class MultiEntryActions {
     final result = await _confirmActionAndExecute(
       _context,
       EntrySelectionActions.copy,
-      () async => await _cubit.copyEntriesTo(
+      () async => await _entrySelectionCubit.copyEntriesTo(
         _context,
         reposCubit: reposCubit,
         destinationPath: currentPath,
@@ -79,7 +79,7 @@ class MultiEntryActions {
     final canCopyOrMove = await _canCopyMoveToDestination(
       _context,
       destinationRepoCubit: currentRepo,
-      entrySelectionCubit: _cubit,
+      entrySelectionCubit: _entrySelectionCubit,
       destinationPath: currentPath,
       errorAlertTitle: 'Move entries to $currentPath',
     );
@@ -88,7 +88,7 @@ class MultiEntryActions {
     final result = await _confirmActionAndExecute(
       _context,
       EntrySelectionActions.move,
-      () async => await _cubit.movedEntriesTo(
+      () async => await _entrySelectionCubit.moveEntriesTo(
         _context,
         reposCubit: reposCubit,
         destinationPath: currentPath,
@@ -102,7 +102,7 @@ class MultiEntryActions {
     final result = await _confirmActionAndExecute(
       _context,
       EntrySelectionActions.delete,
-      () async => await _cubit.deleteEntries(),
+      () async => await _entrySelectionCubit.deleteEntries(),
     );
 
     return result;
@@ -136,12 +136,13 @@ class MultiEntryActions {
         ) ??
         false;
 
+    bool result = false;
     if (confirmed) {
-      await _cubit.endSelection();
-      return await action.call();
+      result = await action.call();
+      await _entrySelectionCubit.endSelection();
     }
 
-    return false;
+    return result;
   }
 
   ({
