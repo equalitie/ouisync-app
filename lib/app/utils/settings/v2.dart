@@ -131,9 +131,7 @@ class Settings with AppLogger {
         atomicSharedPrefsSettingsKey, json.encode(_root.toJson()));
   }
 
-  static Future<Settings> init(
-    MasterKey masterKey,
-  ) async {
+  static Future<Settings> init(MasterKey masterKey) async {
     final prefs = await SharedPreferences.getInstance();
 
     final json = prefs.getString(atomicSharedPrefsSettingsKey);

@@ -52,8 +52,10 @@ Future<void> testEnv(FutureOr<void> Function() callback) async {
     origBlocObserver = Bloc.observer;
 
     tempDir = await Directory.systemTemp.createTemp();
-    final platform = Directory(join(tempDir.path, 'platform')).create();
-    PathProviderPlatform.instance = _FakePathProviderPlatform(await platform);
+
+    final platformDir = Directory(join(tempDir.path, 'platform'));
+    await platformDir.create();
+    PathProviderPlatform.instance = _FakePathProviderPlatform(platformDir);
 
     final shared = Directory(join(tempDir.path, 'shared')).create();
     final mount = Directory(join(tempDir.path, 'mount')).create();

@@ -81,8 +81,6 @@ void main() {
   });
 
   tearDown(() async {
-    await lockedRepoEntry.close();
-    await originRepo.close();
     await deps.dispose();
   });
 

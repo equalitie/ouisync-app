@@ -205,9 +205,10 @@ class Settings with AppLogger {
         await repo.close();
       } catch (e, st) {
         loggy.error(
-            'failed to migrate auth mode for repository ${location.path}:',
-            e,
-            st);
+          'failed to migrate auth mode for repository ${location.path}:',
+          e,
+          st,
+        );
         continue;
       }
 

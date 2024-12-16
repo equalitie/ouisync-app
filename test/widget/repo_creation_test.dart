@@ -17,6 +17,7 @@ void main() {
 
   setUp(() async {
     deps = await TestDependencies.create();
+    await deps.reposCubit.waitUntil((state) => !state.isLoading);
   });
 
   tearDown(() async {
@@ -223,7 +224,7 @@ Future<String> _createShareToken({
   try {
     final repo = await Repository.create(
       session,
-      path: join(dir.path, 'store', 'repo'),
+      path: join(dir.path, 'store', name),
       readSecret: null,
       writeSecret: null,
     );
