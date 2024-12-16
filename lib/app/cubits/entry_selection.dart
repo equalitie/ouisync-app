@@ -228,7 +228,7 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
 
   //============================================================================
 
-  Future<void> saveEntriesToDevice(
+  Future<bool> saveEntriesToDevice(
     BuildContext context, {
     required String defaultDirectoryPath,
   }) async {
@@ -243,7 +243,7 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
       final errorMessage = S.current.messageDownloadFileCanceled;
       showSnackBar(errorMessage);
 
-      return;
+      return false;
     }
 
     final separator = p.split(_entriesPath.keys.first).first;
@@ -267,9 +267,11 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
         ),
       );
     }
+
+    return true;
   }
 
-  Future<void> copyEntriesTo(
+  Future<bool> copyEntriesTo(
     BuildContext context, {
     required ReposCubit reposCubit,
     required String destinationPath,
@@ -295,6 +297,8 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
         type: EntryType.file,
       ).copy(toRepoCubit: cubit);
     }
+
+    return true;
   }
 
   Future<bool> moveEntriesTo(
@@ -321,9 +325,11 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
         type: EntryType.file,
       ).move(toRepoCubit: cubit, originBasename: entry.key);
     }
+
+    return true;
   }
 
-  Future<void> deleteEntries() async {
+  Future<bool> deleteEntries() async {
     final reversed = _entriesPath.entries.toList().reversed;
 
     await for (var selectedEntry in Stream.fromIterable(reversed)) {
@@ -340,6 +346,8 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
         await _originRepoCubit!.deleteFile(path);
       }
     }
+
+    return true;
   }
 
   //===================== Helper functions =====================================
