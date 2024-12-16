@@ -104,7 +104,7 @@ RUN echo "rust.cargoCommand=C:\\Users\\ContainerAdministrator\\.cargo\\bin\\carg
 
 # Build the ouisync library and generate the headers
 RUN cd C:\code\ouisync-app\ouisync-plugin\ouisync && \
-        cargo build --release -p ouisync-ffi && \
+        cargo build --release -p ouisync-service && \
         cargo run --bin bindgen
 
 # Get the plugin dependencies and generate the bindings for the library headers

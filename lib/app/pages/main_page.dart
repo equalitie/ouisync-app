@@ -100,7 +100,7 @@ class _MainPageState extends State<MainPage>
 
     panicCounter = StateMonitorIntCubit(
       widget.reposCubit.rootStateMonitor.child(
-        oui.MonitorId.expectUnique("Session"),
+        oui.MonitorId.expectUnique("Service"),
       ),
       "panic_counter",
     );

@@ -53,6 +53,11 @@ Future<Session> createSession({
     logger.debug('app dir: ${appDir.path}');
     logger.debug('log dir: ${File(logPath).parent.path}');
 
+    final storeDir = await session.storeDir;
+    if (storeDir == null) {
+      await session.setStoreDir(await defaultStoreDir.then((d) => d.path));
+    }
+
     await session.initNetwork(
       defaultBindAddrs: ['quic/0.0.0.0:0', 'quic/[::]:0'],
       defaultPortForwardingEnabled: true,

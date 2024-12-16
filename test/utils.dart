@@ -329,7 +329,6 @@ extension WidgetTesterExtension on WidgetTester {
       }
 
       final image = await captureImage(element);
-
       final bytes = (await image.toByteData(format: ImageByteFormat.png))!
           .buffer
           .asUint8List();
@@ -337,10 +336,9 @@ extension WidgetTesterExtension on WidgetTester {
       final path = join(_testDirPath, 'screenshots', '$name.png');
 
       await Directory(dirname(path)).create(recursive: true);
+      await File(path).writeAsBytes(bytes);
 
       debugPrint('screenshot saved to $path');
-
-      await File(path).writeAsBytes(bytes);
     } catch (e) {
       debugPrint('Failed to save screenshot: $e');
     }

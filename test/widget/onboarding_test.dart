@@ -18,6 +18,8 @@ void main() {
   late LocaleCubit localeCubit;
 
   setUp(() async {
+    logInit();
+
     final appDir = await getApplicationSupportDirectory();
     await appDir.create(recursive: true);
 
