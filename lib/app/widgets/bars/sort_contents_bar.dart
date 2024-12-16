@@ -3,23 +3,20 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart'
-    show ReposCubit, SortBy, SortDirection, SortListCubit, SortListState;
+    show SortBy, SortDirection, SortListCubit, SortListState, ReposState;
 import '../../models/models.dart' show OpenRepoEntry;
 import '../../utils/utils.dart'
-    show
-        AppLogger,
-        Dialogs,
-        Dimensions,
-        Fields,
-        SortByLocalizedExtension;
+    show AppLogger, Dialogs, Dimensions, Fields, SortByLocalizedExtension;
 import '../widgets.dart' show SortByButton, SortDirectionButton;
 
 class SortContentsBar extends StatefulWidget {
-  const SortContentsBar(
-      {required this.sortListCubit, required this.reposCubit});
+  const SortContentsBar({
+    required this.sortListCubit,
+    required this.reposState,
+  });
 
   final SortListCubit sortListCubit;
-  final ReposCubit reposCubit;
+  final ReposState reposState;
 
   @override
   State<SortContentsBar> createState() => _SortContentsBarState();
@@ -30,7 +27,7 @@ class _SortContentsBarState extends State<SortContentsBar> {
   Widget build(BuildContext context) =>
       BlocBuilder<SortListCubit, SortListState>(
           bloc: widget.sortListCubit,
-          builder: (context, state) => widget.reposCubit.showList
+          builder: (context, state) => widget.reposState.current == null
               ? SizedBox.shrink()
               : Container(
                   alignment: AlignmentDirectional.centerStart,
@@ -57,17 +54,15 @@ class _SortContentsBarState extends State<SortContentsBar> {
 
     widget.sortListCubit.switchSortDirection(newDirection);
 
-    if (widget.reposCubit.showList) {
-      return;
-    }
+    final current = widget.reposState.currentEntry;
 
-    if (widget.reposCubit.currentRepo is OpenRepoEntry) {
+    if (current is OpenRepoEntry) {
       Dialogs.executeFutureWithLoadingDialog(
         context,
-        (widget.reposCubit.currentRepo as OpenRepoEntry).cubit.refresh(
-              sortBy: sortBy,
-              sortDirection: newDirection,
-            ),
+        current.cubit.refresh(
+          sortBy: sortBy,
+          sortDirection: newDirection,
+        ),
       );
     }
   }
@@ -78,18 +73,16 @@ class _SortContentsBarState extends State<SortContentsBar> {
         shape: Dimensions.borderBottomSheetTop,
         builder: (context) => _SortByList(
           widget.sortListCubit,
-          widget.reposCubit,
+          widget.reposState,
         ),
       );
 }
 
 class _SortByList extends StatelessWidget with AppLogger {
-  _SortByList(SortListCubit sortCubit, ReposCubit reposCubit)
-      : _sortCubit = sortCubit,
-        _reposCubit = reposCubit;
+  _SortByList(this._sortCubit, this._reposState);
 
   final SortListCubit _sortCubit;
-  final ReposCubit _reposCubit;
+  final ReposState _reposState;
 
   final ValueNotifier<SortDirection> _sortDirection =
       ValueNotifier<SortDirection>(SortDirection.asc);
@@ -159,21 +152,21 @@ class _SortByList extends StatelessWidget with AppLogger {
                   onTap: () async {
                     _sortCubit.sortBy(sortByItem);
 
-                    if (_reposCubit.showList) {
+                    final current = _reposState.currentEntry;
+
+                    if (current == null) {
                       if (sortByItem.name != sortBy.name) return;
                       Navigator.of(context).pop();
                       return;
                     }
 
-                    if (_reposCubit.currentRepo is OpenRepoEntry) {
+                    if (current is OpenRepoEntry) {
                       await Dialogs.executeFutureWithLoadingDialog(
                         null,
-                        (_reposCubit.currentRepo as OpenRepoEntry)
-                            .cubit
-                            .refresh(
-                              sortBy: sortByItem,
-                              sortDirection: direction,
-                            ),
+                        current.cubit.refresh(
+                          sortBy: sortByItem,
+                          sortDirection: direction,
+                        ),
                       );
 
                       Navigator.of(context).pop();

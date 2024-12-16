@@ -56,7 +56,7 @@ void main() {
         await repoCreationObserver
             .waitUntil((state) => state.substate is RepoCreationSuccess);
 
-        final repoCubit = deps.reposCubit.repos
+        final repoCubit = deps.reposCubit.state.repos.values
             .where((entry) => entry.name == 'my repo')
             .first
             .cubit!;
@@ -120,7 +120,7 @@ void main() {
         final repoCreationObserver = StateObserver.install<RepoCreationState>();
         final repoImportObserver = StateObserver.install<ShareTokenResult?>();
 
-        expect(deps.reposCubit.repos, isEmpty);
+        expect(deps.reposCubit.state.repos, isEmpty);
 
         await tester.pumpWidget(testApp(deps.createMainPage()));
         await tester.pumpAndSettle();
@@ -199,7 +199,7 @@ void main() {
             .waitUntil((state) => state.substate is RepoCreationSuccess);
 
         // The repo got created correctly.
-        final repoCubit = deps.reposCubit.repos.first.cubit!;
+        final repoCubit = deps.reposCubit.state.repos.values.first.cubit!;
         final actualMode = repoCubit.state.accessMode;
         final actualToken = await repoCubit.createShareToken(AccessMode.read);
 

@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:collection';
 
+import 'package:collection/collection.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync/native_channels.dart';
 import 'package:ouisync/ouisync.dart' as oui;
 import 'package:ouisync/state_monitor.dart';
@@ -10,12 +12,38 @@ import '../models/models.dart';
 import '../utils/utils.dart';
 import 'cubits.dart';
 
-class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
-  final _repos = SplayTreeMap<RepoLocation, RepoEntry>(
-    (key1, key2) => key1.compareTo(key2),
-  );
-  bool _isLoading = false;
-  RepoEntry? _currentRepo;
+class ReposState {
+  final Map<RepoLocation, RepoEntry> repos;
+  final RepoLocation? current;
+  final bool isLoading;
+
+  ReposState({
+    Map<RepoLocation, RepoEntry>? repos,
+    this.current,
+    this.isLoading = false,
+  }) : repos = repos ?? SplayTreeMap();
+
+  ReposState copyWith({
+    Map<RepoLocation, RepoEntry>? repos,
+    Option<RepoLocation>? current,
+    bool? isLoading,
+  }) =>
+      ReposState(
+        repos: repos ?? this.repos,
+        current: current != null ? current.value : this.current,
+        isLoading: isLoading ?? this.isLoading,
+      );
+
+  Iterable<RepoLocation> get locations => repos.keys;
+  Iterable<String> get names => locations.map((location) => location.name);
+
+  RepoEntry? get currentEntry => current?.let((current) => repos[current]);
+
+  RepoEntry? findByInfoHash(String infoHash) =>
+      repos.values.firstWhereOrNull((repo) => repo.infoHash == infoHash);
+}
+
+class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
   final oui.Session _session;
   final NativeChannels _nativeChannels;
   StreamSubscription<void>? _subscription;
@@ -38,16 +66,15 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
         _settings = settings,
         bottomSheet = bottomSheet ?? EntryBottomSheetCubit(),
         navigation = navigation ?? NavigationCubit(),
-        passwordHasher = PasswordHasher(session) {
+        passwordHasher = PasswordHasher(session),
+        super(ReposState()) {
     unawaited(_init());
   }
 
   Settings get settings => _settings;
 
   Future<void> _init() async {
-    _update(() {
-      _isLoading = true;
-    });
+    emitUnlessClosed(state.copyWith(isLoading: true));
 
     final repos = await oui.Repository.list(_session);
 
@@ -55,49 +82,24 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
       await _addRepo(repo);
     }
 
-    final defaultRepo =
-        _settings.defaultRepo?.let((location) => _repos[location]);
+    await setCurrent(_settings.defaultRepo);
 
-    await setCurrent(defaultRepo);
-
-    _update(() {
-      _isLoading = false;
-    });
+    emitUnlessClosed(state.copyWith(isLoading: false));
   }
 
-  bool get isLoading => _isLoading;
   oui.Session get session => _session;
 
-  String? get currentRepoName => currentRepo?.name;
-  RepoLocation? get currentRepoLocation => currentRepo?.location;
-
-  Iterable<RepoLocation> repositoryLocations() => _repos.keys;
-  Iterable<String> repositoryNames() =>
-      repositoryLocations().map((location) => location.name);
-
-  bool get showList => _currentRepo == null;
-
-  RepoEntry? get currentRepo => _currentRepo;
-
   StateMonitor get rootStateMonitor => _session.rootStateMonitor;
-
-  Iterable<RepoEntry> get repos => _repos.entries.map((entry) => entry.value);
 
   Future<oui.ShareToken> createToken(String tokenString) =>
       oui.ShareToken.fromString(session, tokenString);
 
-  RepoEntry? findByInfoHash(String infoHash) {
-    try {
-      return repos.firstWhere((repo) => repo.infoHash == infoHash);
-    } on StateError {
-      return null;
-    }
-  }
-
-  Future<void> setCurrent(RepoEntry? entry) async {
-    if (currentRepo == entry) {
+  Future<void> setCurrent(RepoLocation? location) async {
+    if (state.current == location) {
       return;
     }
+
+    final entry = location != null ? state.repos[location] : null;
 
     entry?.cubit?.setCurrent();
 
@@ -118,15 +120,10 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     };
 
     if (setDefault) {
-      await _settings.setDefaultRepo(entry?.location);
+      await _settings.setDefaultRepo(location);
     }
 
-    _currentRepo = entry;
-    changed();
-  }
-
-  RepoEntry? get(RepoLocation location) {
-    return _repos[location];
+    emitUnlessClosed(state.copyWith(current: Option.from(location)));
   }
 
   void showRepoList() {
@@ -167,32 +164,18 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     await _addRepoEntry(OpenRepoEntry(cubit));
   }
 
-  Future<void> _addRepoEntry(
-    RepoEntry newRepo, {
-    bool setCurrent = false,
-  }) async {
-    RepoEntry? oldRepo = _repos.remove(newRepo.location);
+  Future<void> _addRepoEntry(RepoEntry newRepo) async {
+    final oldRepo = state.repos[newRepo.location];
 
-    var didChange = false;
-
-    if (oldRepo == null) {
-      didChange = true;
-    } else {
-      if (oldRepo != newRepo) {
-        await oldRepo.close();
-        didChange = true;
-      }
+    if (oldRepo == newRepo) {
+      return;
     }
 
-    _repos[newRepo.location] = newRepo;
+    await oldRepo?.close();
 
-    if (didChange) {
-      if (setCurrent) {
-        await this.setCurrent(newRepo);
-      } else {
-        changed();
-      }
-    }
+    emitUnlessClosed(
+      state.copyWith(repos: state.repos.withAdded(newRepo.location, newRepo)),
+    );
   }
 
   Future<RepoCubit> _createRepoCubit(oui.Repository repo) => RepoCubit.create(
@@ -206,22 +189,16 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
       );
 
   Future<String?> _forget(RepoLocation location) async {
-    if (currentRepo?.location == location) {
-      loggy.app('Canceling subscription to ${location.name}');
-      await _subscription?.cancel();
-      _subscription = null;
-      _currentRepo = null;
+    if (state.current == location) {
+      await setCurrent(null);
     }
 
-    final repo = _repos[location];
+    final repo = state.repos[location];
+    await repo?.close();
+    final infoHash = repo?.infoHash;
 
-    if (repo == null) {
-      return null;
-    }
+    emitUnlessClosed(state.copyWith(repos: state.repos.withRemoved(location)));
 
-    final infoHash = repo.infoHash;
-    await repo.close();
-    _repos.remove(location);
     return infoHash;
   }
 
@@ -229,17 +206,15 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
   Future<void> close() async {
     // Make sure this function is idempotent, i.e. that calling it more than once won't change it's
     // meaning nor it will crash.
-    _currentRepo = null;
 
+    final repos = state.repos;
     final subscription = _subscription;
-    _subscription = null;
 
-    final repos = _repos.values.toList();
-    _repos.clear();
+    emit(state.copyWith(repos: SplayTreeMap(), current: None()));
 
     await subscription?.cancel();
 
-    for (final repo in repos) {
+    for (final repo in repos.values) {
       await repo.close();
     }
 
@@ -247,7 +222,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
   }
 
   Future<void> importRepoFromLocation(RepoLocation location) async {
-    if (_repos.containsKey(location)) {
+    if (state.repos.containsKey(location)) {
       showSnackBar(S.current.repositoryIsAlreadyImported);
       return;
     }
@@ -267,8 +242,6 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     }
 
     await _addRepo(repo);
-
-    changed();
   }
 
   Future<RepoEntry> createRepository({
@@ -279,7 +252,11 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     bool useCacheServers = false,
     bool setCurrent = false,
   }) async {
-    await _addRepoEntry(LoadingRepoEntry(location), setCurrent: setCurrent);
+    await _addRepoEntry(LoadingRepoEntry(location));
+
+    if (setCurrent) {
+      await this.setCurrent(location);
+    }
 
     final localSecret = switch (setLocalSecret) {
       LocalSecretKeyAndSalt() => setLocalSecret,
@@ -362,40 +339,35 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
   }
 
   Future<void> deleteRepository(RepoLocation location) async {
-    final wasCurrent = currentRepo?.location == location;
-    final repoEntry = _repos.remove(location);
-
-    if (repoEntry == null) {
-      loggy.error('Failed to delete repository - not found');
+    final entry = state.repos[location];
+    if (entry == null) {
       return;
     }
 
-    await repoEntry.cubit?.delete();
+    emitUnlessClosed(state.copyWith(
+      repos: state.repos.withRemoved(location),
+      current: state.current == location ? None() : null,
+    ));
 
-    if (wasCurrent) {
-      await setCurrent(null);
-    }
-
-    changed();
+    await entry.cubit?.delete();
   }
 
   Future<void> ejectRepository(RepoLocation location) async {
-    final wasCurrent = currentRepo?.location == location;
-    final databaseId = _settings.findRepoByLocation(location)!;
-
-    await _forget(location);
-    await _settings.forgetRepo(databaseId);
-
-    if (wasCurrent) {
-      await setCurrent(null);
-      await _settings.setDefaultRepo(null);
+    final entry = state.repos[location];
+    if (entry == null) {
+      return;
     }
 
-    changed();
-  }
+    emitUnlessClosed(state.copyWith(
+      repos: state.repos.withRemoved(location),
+      current: state.current == location ? None() : null,
+    ));
 
-  void _update(void Function() changeState) {
-    changeState();
-    changed();
+    await _forget(location);
+
+    final databaseId = _settings.findRepoByLocation(location);
+    if (databaseId != null) {
+      await _settings.forgetRepo(databaseId);
+    }
   }
 }

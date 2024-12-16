@@ -126,9 +126,9 @@ void main() {
         await tester.pumpAndSettle();
 
         await tester.tap(find.text(repoName));
-        await deps.reposCubit.waitUntil((_) =>
-            !deps.reposCubit.isLoading &&
-            deps.reposCubit.currentRepo == repoEntry);
+        await deps.reposCubit.waitUntil(
+          (state) => !state.isLoading && state.currentEntry == repoEntry,
+        );
         await tester.pump();
 
         expect(find.widgetWithText(AppBar, repoName), findsOne);
@@ -171,9 +171,9 @@ void main() {
         final repoCubit = repoEntry.cubit!;
 
         await tester.pumpWidget(testApp(createMainPage()));
-        await deps.reposCubit.waitUntil((_) =>
-            !deps.reposCubit.isLoading &&
-            deps.reposCubit.currentRepo == repoEntry);
+        await deps.reposCubit.waitUntil(
+          (state) => !state.isLoading && state.currentEntry == repoEntry,
+        );
         await tester.pump();
 
         // Verify we are in the single repo screen
@@ -229,8 +229,7 @@ void main() {
             type: SharedMediaType.file,
           ),
         ]);
-        await deps.reposCubit
-            .waitUntil((_) => deps.reposCubit.repos.isNotEmpty);
+        await deps.reposCubit.waitUntil((state) => state.repos.isNotEmpty);
         await tester.pumpAndSettle();
 
         expect(find.text(repoName), findsOne);
@@ -291,7 +290,8 @@ void main() {
               .waitUntil((state) => state.substate is RepoCreationSuccess);
 
           expect(
-            deps.reposCubit.repos.where((entry) => entry.name == repoName),
+            deps.reposCubit.state.repos.values
+                .where((entry) => entry.name == repoName),
             isNotEmpty,
           );
         },

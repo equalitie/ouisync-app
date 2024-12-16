@@ -76,7 +76,9 @@ void main() {
     await repoCreationCubit.save();
     expect(repoCreationCubit.state.substate, isA<RepoCreationSuccess>());
     expect(
-      reposCubit.repos.where((entry) => entry.name == name).firstOrNull,
+      reposCubit.state.repos.values
+          .where((entry) => entry.name == name)
+          .firstOrNull,
       isA<OpenRepoEntry>(),
     );
   });

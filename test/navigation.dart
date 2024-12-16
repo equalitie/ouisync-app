@@ -49,7 +49,7 @@ class MainPage {
     await repoCreationObserver
         .waitUntil((state) => state.substate is RepoCreationSuccess);
 
-    final repoCubit = deps.reposCubit.repos
+    final repoCubit = deps.reposCubit.state.repos.values
         .where((entry) => entry.name == 'my repo')
         .first
         .cubit!;

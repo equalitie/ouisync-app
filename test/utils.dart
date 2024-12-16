@@ -2,14 +2,13 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 
-import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:connectivity_plus_platform_interface/connectivity_plus_platform_interface.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ouisync_app/app/cubits/locale.dart';
 import 'package:ouisync_app/app/cubits/mount.dart';
-import 'package:ouisync_app/app/cubits/power_control.dart';
 import 'package:ouisync_app/app/cubits/repos.dart';
 import 'package:ouisync_app/app/pages/main_page.dart';
 import 'package:ouisync_app/app/utils/cache_servers.dart';
@@ -74,6 +73,8 @@ Future<void> testEnv(FutureOr<void> Function() callback) async {
       }
     });
 
+    ConnectivityPlatform.instance = _FakeConnectivityPlatform();
+
     // TODO: add mock for 'org.equalitie.ouisync/backend' once the tests are updated to use channels
 
     SharedPreferences.setMockInitialValues({});
@@ -103,7 +104,6 @@ class TestDependencies {
     this.session,
     this.settings,
     this.nativeChannels,
-    this.powerControl,
     this.reposCubit,
     this.mountCubit,
     this.localeCubit,
@@ -125,11 +125,6 @@ class TestDependencies {
 
     final settings = await Settings.init(MasterKey.random());
     final nativeChannels = NativeChannels();
-    final powerControl = PowerControl(
-      session,
-      settings,
-      connectivity: FakeConnectivity(),
-    );
     final reposCubit = ReposCubit(
       cacheServers: CacheServers.disabled,
       nativeChannels: nativeChannels,
@@ -144,7 +139,6 @@ class TestDependencies {
       session,
       settings,
       nativeChannels,
-      powerControl,
       reposCubit,
       mountCubit,
       localeCubit,
@@ -155,7 +149,6 @@ class TestDependencies {
     await localeCubit.close();
     await mountCubit.close();
     await reposCubit.close();
-    await powerControl.close();
     await session.close();
   }
 
@@ -167,7 +160,6 @@ class TestDependencies {
         mountCubit: mountCubit,
         nativeChannels: nativeChannels,
         packageInfo: fakePackageInfo,
-        powerControl: powerControl,
         receivedMedia: receivedMedia ?? Stream.empty(),
         reposCubit: reposCubit,
         session: session,
@@ -178,10 +170,18 @@ class TestDependencies {
   final Session session;
   final Settings settings;
   final NativeChannels nativeChannels;
-  final PowerControl powerControl;
   final ReposCubit reposCubit;
   final MountCubit mountCubit;
   final LocaleCubit localeCubit;
+}
+
+class _FakeConnectivityPlatform extends ConnectivityPlatform {
+  @override
+  final Stream<List<ConnectivityResult>> onConnectivityChanged = Stream.empty();
+
+  @override
+  Future<List<ConnectivityResult>> checkConnectivity() =>
+      Future.value([ConnectivityResult.none]);
 }
 
 class _FakePathProviderPlatform extends PathProviderPlatform {
@@ -223,16 +223,6 @@ class FakeWindowManager extends PlatformWindowManager {
 
   @override
   Future<void> initSystemTray() => Future.value();
-}
-
-/// Fake Connectivity
-class FakeConnectivity implements Connectivity {
-  @override
-  final Stream<List<ConnectivityResult>> onConnectivityChanged = Stream.empty();
-
-  @override
-  Future<List<ConnectivityResult>> checkConnectivity() =>
-      Future.value([ConnectivityResult.none]);
 }
 
 /// Fake PackageInfo

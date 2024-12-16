@@ -62,7 +62,7 @@ void main() {
 
     expect(repoCreationCubit.state.substate, isA<RepoCreationSuccess>());
     expect(
-      deps.reposCubit.repos
+      deps.reposCubit.state.repos.values
           .where((entry) => entry.name == suggestedRepoName)
           .firstOrNull,
       isA<OpenRepoEntry>()

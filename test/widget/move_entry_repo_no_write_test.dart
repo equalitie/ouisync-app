@@ -99,7 +99,7 @@ void main() {
         expect(find.text(lockedRepoName), findsOne);
         expect(find.text(readRepoName), findsOne);
 
-        final originRepoCubit = deps.reposCubit.repos
+        final originRepoCubit = deps.reposCubit.state.repos.values
             .firstWhere((r) => r.name == originRepoName)
             .cubit!;
 
@@ -127,7 +127,7 @@ void main() {
         await tester.tap(backButton);
         await tester.pumpAndSettle();
 
-        final lockedRepoCubit = deps.reposCubit.repos
+        final lockedRepoCubit = deps.reposCubit.state.repos.values
             .firstWhere((r) => r.name == lockedRepoName)
             .cubit!;
 
@@ -138,7 +138,7 @@ void main() {
           lockedRepoCubit,
         );
 
-        final currentRepoEntry = deps.reposCubit.currentRepo;
+        final currentRepoEntry = deps.reposCubit.state.currentEntry;
         expect(currentRepoEntry?.accessMode, equals(AccessMode.blind));
 
         final moveButton = find.descendant(
@@ -166,7 +166,7 @@ void main() {
         expect(find.text(lockedRepoName), findsOne);
         expect(find.text(readRepoName), findsOne);
 
-        final originRepoCubit = deps.reposCubit.repos
+        final originRepoCubit = deps.reposCubit.state.repos.values
             .firstWhere((r) => r.name == originRepoName)
             .cubit!;
 
@@ -194,7 +194,7 @@ void main() {
         await tester.tap(backButton);
         await tester.pumpAndSettle();
 
-        final readRepoCubit = deps.reposCubit.repos
+        final readRepoCubit = deps.reposCubit.state.repos.values
             .firstWhere((r) => r.name == readRepoName)
             .cubit!;
 
@@ -205,7 +205,7 @@ void main() {
           readRepoCubit,
         );
 
-        final currentRepoEntry = deps.reposCubit.currentRepo;
+        final currentRepoEntry = deps.reposCubit.state.currentEntry;
         expect(currentRepoEntry?.accessMode, equals(AccessMode.read));
 
         final moveButton = find.descendant(
@@ -226,13 +226,13 @@ Future<void> _waitForNavigationIntoRepoToEnd(
   WidgetTester tester,
   RepoCubit repo,
 ) async {
-  await deps.reposCubit.waitUntil((_) =>
-      !deps.reposCubit.isLoading &&
-      deps.reposCubit.currentRepo?.name == repo.name);
+  await deps.reposCubit.waitUntil(
+    (state) => !state.isLoading && state.current?.name == repo.name,
+  );
   await tester.pump();
 
-  await deps.reposCubit.currentRepo?.cubit?.waitUntil(
-      (_) => deps.reposCubit.currentRepo?.cubit?.state.isLoading == false);
+  await deps.reposCubit.state.currentEntry?.cubit
+      ?.waitUntil((state) => !state.isLoading);
   await tester.pumpAndSettle();
   await tester.pump(Duration(seconds: 1));
 }

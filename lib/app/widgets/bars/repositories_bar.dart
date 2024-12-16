@@ -29,21 +29,26 @@ class RepositoriesBar extends StatelessWidget
   final UpgradeExistsCubit upgradeExists;
 
   @override
-  Widget build(BuildContext context) => reposCubit.builder((state) {
-        if (reposCubit.isLoading || reposCubit.showList) {
-          return SizedBox.shrink();
-        }
+  Widget build(BuildContext context) => BlocBuilder<ReposCubit, ReposState>(
+        bloc: reposCubit,
+        builder: (context, state) {
+          if (state.isLoading || state.current == null) {
+            return SizedBox.shrink();
+          }
 
-        return Row(
-          children: [
-            _buildBackButton(),
-            _buildName(context, reposCubit.currentRepo),
-            _buildStats(context, reposCubit.currentRepo),
-            _buildStatus(reposCubit.currentRepo),
-            _buildLockButton(reposCubit.currentRepo),
-          ],
-        );
-      });
+          final current = state.currentEntry;
+
+          return Row(
+            children: [
+              _buildBackButton(),
+              _buildName(context, current),
+              _buildStats(context, current),
+              _buildStatus(current),
+              _buildLockButton(current),
+            ],
+          );
+        },
+      );
 
   Widget _buildName(BuildContext context, RepoEntry? repo) {
     final parentColor =
