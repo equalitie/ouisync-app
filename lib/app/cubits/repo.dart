@@ -185,6 +185,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     return cubit;
   }
 
+  Future<String> get infoHash async => await _repo.infoHash;
   RepoLocation get location => state.location;
   String get name => state.location.name;
   AccessMode get accessMode => state.accessMode;
