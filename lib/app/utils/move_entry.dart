@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:ouisync/ouisync.dart';
 
-import '../cubits/cubits.dart';
-import '../widgets/widgets.dart';
+import '../cubits/cubits.dart' show RepoCubit;
+import '../widgets/widgets.dart' show FileAction;
+import 'utils.dart' show AppLogger, EntryOps;
 import 'repo_path.dart' as repo_path;
-import 'utils.dart';
 
 class MoveEntry with EntryOps, AppLogger {
   MoveEntry(
@@ -23,10 +23,11 @@ class MoveEntry with EntryOps, AppLogger {
   Future<void> move({
     required RepoCubit? toRepoCubit,
     String? originBasename,
+    bool navigateToDestination = true,
   }) async {
     final dstRepo = (toRepoCubit ?? _repoCubit);
     final dstFolder = dstRepo.state.currentFolder.path;
-    final basename = originBasename ?? repo_path.basename(srcPath);
+    final basename = repo_path.basename(srcPath);
     final dstPath = repo_path.join(dstFolder, basename);
 
     final exist = await dstRepo.exists(dstPath);

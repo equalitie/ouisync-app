@@ -188,21 +188,7 @@ class _MoveSelectedEntriesDialogState extends State<MoveSelectedEntriesDialog> {
         buttonConstrains: Dimensions.sizeConstrainsBottomDialogAction,
         text: _getActionText(type),
         onPressed: () async {
-          final action = switch (type) {
-            BottomSheetType.copy => multiEntryActions.copyEntriesTo(
-                reposCubit,
-                repoCubit,
-              ),
-            BottomSheetType.delete => multiEntryActions.deleteSelectedEntries(),
-            BottomSheetType.download => multiEntryActions.saveEntriesToDevice(),
-            BottomSheetType.move => multiEntryActions.moveEntriesTo(
-                reposCubit,
-                repoCubit,
-              ),
-            BottomSheetType.upload => null,
-            BottomSheetType.gone => null,
-          };
-
+          final action = _getAction(type, multiEntryActions, repoCubit);
           if (action == null) return;
 
           final resultOk = await action;
@@ -249,6 +235,20 @@ class _MoveSelectedEntriesDialogState extends State<MoveSelectedEntriesDialog> {
         BottomSheetType.move => S.current.actionMove,
         BottomSheetType.upload => '',
         BottomSheetType.gone => '',
+      };
+
+  Future<bool>? _getAction(
+    BottomSheetType type,
+    MultiEntryActions multiEntryActions,
+    RepoCubit repoCubit,
+  ) =>
+      switch (type) {
+        BottomSheetType.copy => multiEntryActions.copyEntriesTo(repoCubit),
+        BottomSheetType.delete => multiEntryActions.deleteSelectedEntries(),
+        BottomSheetType.download => multiEntryActions.saveEntriesToDevice(),
+        BottomSheetType.move => multiEntryActions.moveEntriesTo(repoCubit),
+        BottomSheetType.upload => null,
+        BottomSheetType.gone => null,
       };
 
   bool _canMove({

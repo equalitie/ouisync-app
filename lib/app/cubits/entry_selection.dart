@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:collection';
 
-import 'package:build_context_provider/build_context_provider.dart';
 import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
@@ -14,7 +13,7 @@ import '../models/models.dart' show DirectoryEntry, FileEntry, FileSystemEntry;
 import '../utils/utils.dart'
     show AppLogger, CopyEntry, FileIO, MoveEntry, showSnackBar;
 import '../widgets/widgets.dart' show SelectionState;
-import 'cubits.dart' show CubitActions, RepoCubit, ReposCubit;
+import 'cubits.dart' show CubitActions, RepoCubit;
 
 class EntrySelectionState extends Equatable {
   const EntrySelectionState({
@@ -286,15 +285,47 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
 
   Future<bool> copyEntriesTo(
     BuildContext context, {
-    required ReposCubit reposCubit,
+    required RepoCubit destinationRepoCubit,
     required String destinationPath,
   }) async {
-    BuildContext? mainContext;
-    BuildContextProvider()((c) => mainContext = c);
+    final destinationRepoInfoHash = await destinationRepoCubit.infoHash;
+    final result = await _moveOrCopy(
+      context,
+      action: EntrySelectionActions.copy,
+      destinationRepoInfoHash: destinationRepoInfoHash,
+      destinationRepoCubit: destinationRepoCubit,
+      destinationPath: destinationPath,
+    );
 
-    final currentRepoInfoHash = reposCubit.currentRepo?.infoHash;
-    final cubit = _originRepoInfoHash != currentRepoInfoHash
-        ? reposCubit.currentRepo?.cubit
+    return result;
+  }
+
+  Future<bool> moveEntriesTo(
+    BuildContext context, {
+    required RepoCubit destinationRepoCubit,
+    required String destinationPath,
+  }) async {
+    final destinationRepoInfoHash = await destinationRepoCubit.infoHash;
+    final result = await _moveOrCopy(
+      context,
+      action: EntrySelectionActions.move,
+      destinationRepoInfoHash: destinationRepoInfoHash,
+      destinationRepoCubit: destinationRepoCubit,
+      destinationPath: destinationPath,
+    );
+
+    return result;
+  }
+
+  Future<bool> _moveOrCopy(
+    BuildContext context, {
+    required EntrySelectionActions action,
+    required String destinationRepoInfoHash,
+    required RepoCubit destinationRepoCubit,
+    required String destinationPath,
+  }) async {
+    final toRepoCubit = _originRepoInfoHash != destinationRepoInfoHash
+        ? destinationRepoCubit
         : null;
 
     try {
@@ -309,47 +340,33 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
         }
 
         final navigateToDestination = path == lastEntryPath;
-        await CopyEntry(
-          mainContext!,
-          repoCubit: _originRepoCubit!,
-          srcPath: path,
-          type: type,
-        ).copy(
-          toRepoCubit: cubit,
-          navigateToDestination: navigateToDestination,
-        );
+        if (action == EntrySelectionActions.copy) {
+          await CopyEntry(
+            context,
+            repoCubit: _originRepoCubit!,
+            srcPath: path,
+            type: type,
+          ).copy(
+            toRepoCubit: toRepoCubit,
+            navigateToDestination: navigateToDestination,
+          );
+          continue;
+        }
+        if (action == EntrySelectionActions.move) {
+          await MoveEntry(
+            context,
+            repoCubit: _originRepoCubit!,
+            srcPath: path,
+            type: type,
+          ).move(
+            toRepoCubit: destinationRepoCubit,
+            navigateToDestination: navigateToDestination,
+          );
+        }
       }
     } on Exception catch (e) {
-      loggy.debug('Error copying selected entries: ${e.toString()}');
+      loggy.debug('Error ${action.name}ing selected entries: ${e.toString()}');
       return false;
-    }
-
-    return true;
-  }
-
-  Future<bool> moveEntriesTo(
-    BuildContext context, {
-    required ReposCubit reposCubit,
-    String? destinationPath,
-  }) async {
-    BuildContext? mainContext;
-    BuildContextProvider()((c) => mainContext = c);
-
-    final currentRepoInfoHash = reposCubit.currentRepo?.infoHash;
-    final cubit = _originRepoInfoHash != currentRepoInfoHash
-        ? reposCubit.currentRepo?.cubit
-        : null;
-    await for (var entry in Stream.fromIterable(_entriesPath.entries)) {
-      if (entry.value.isDir) {
-        continue;
-      }
-
-      await MoveEntry(
-        mainContext!,
-        repoCubit: _originRepoCubit!,
-        srcPath: entry.key,
-        type: EntryType.file,
-      ).move(toRepoCubit: cubit, originBasename: entry.key);
     }
 
     return true;

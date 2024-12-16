@@ -7,7 +7,7 @@ import 'package:path_provider/path_provider.dart';
 
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart'
-    show EntrySelectionCubit, EntrySelectionActions, RepoCubit, ReposCubit;
+    show EntrySelectionCubit, EntrySelectionActions, RepoCubit;
 import '../widgets/widgets.dart' show NegativeButton, PositiveButton;
 
 class MultiEntryActions {
@@ -36,18 +36,13 @@ class MultiEntryActions {
     return result;
   }
 
-  Future<bool> copyEntriesTo(
-    ReposCubit reposCubit,
-    RepoCubit? currentRepo,
-  ) async {
-    if (currentRepo == null) return false;
-
-    final currentPath = currentRepo.currentFolder;
+  Future<bool> copyEntriesTo(RepoCubit currentRepoCubit) async {
+    final currentPath = currentRepoCubit.currentFolder;
     if (currentPath.isEmpty) return false;
 
     final canCopyOrMove = await _canCopyMoveToDestination(
       _context,
-      destinationRepoCubit: currentRepo,
+      destinationRepoCubit: currentRepoCubit,
       entrySelectionCubit: _entrySelectionCubit,
       destinationPath: currentPath,
       errorAlertTitle: 'Copy entries to $currentPath',
@@ -59,7 +54,7 @@ class MultiEntryActions {
       EntrySelectionActions.copy,
       () async => await _entrySelectionCubit.copyEntriesTo(
         _context,
-        reposCubit: reposCubit,
+        destinationRepoCubit: currentRepoCubit,
         destinationPath: currentPath,
       ),
     );
@@ -67,18 +62,13 @@ class MultiEntryActions {
     return result;
   }
 
-  Future<bool> moveEntriesTo(
-    ReposCubit reposCubit,
-    RepoCubit? currentRepo,
-  ) async {
-    if (currentRepo == null) return false;
-
-    final currentPath = currentRepo.currentFolder;
+  Future<bool> moveEntriesTo(RepoCubit currentRepoCubit) async {
+    final currentPath = currentRepoCubit.currentFolder;
     if (currentPath.isEmpty) return false;
 
     final canCopyOrMove = await _canCopyMoveToDestination(
       _context,
-      destinationRepoCubit: currentRepo,
+      destinationRepoCubit: currentRepoCubit,
       entrySelectionCubit: _entrySelectionCubit,
       destinationPath: currentPath,
       errorAlertTitle: 'Move entries to $currentPath',
@@ -90,7 +80,7 @@ class MultiEntryActions {
       EntrySelectionActions.move,
       () async => await _entrySelectionCubit.moveEntriesTo(
         _context,
-        reposCubit: reposCubit,
+        destinationRepoCubit: currentRepoCubit,
         destinationPath: currentPath,
       ),
     );
