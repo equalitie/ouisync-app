@@ -717,19 +717,28 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     required String destination,
     required EntryType type,
     RepoCubit? destinationRepoCubit,
+    bool recursive = false,
+    bool navigateToDestination = true,
   }) async {
     emitUnlessClosed(state.copyWith(isLoading: true));
     try {
       final result = type == EntryType.file
           ? await _copyFile(source, destination, destinationRepoCubit)
-          : await _copyFolder(source, destination, destinationRepoCubit);
+          : await _copyFolder(
+              source,
+              destination,
+              destinationRepoCubit,
+              recursive: recursive,
+            );
 
       return result;
     } catch (e, st) {
       loggy.app('Move entry from $source to $destination failed', e, st);
       return false;
     } finally {
-      await refresh();
+      if (navigateToDestination) {
+        await refresh();
+      }
     }
   }
 
@@ -753,12 +762,14 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   Future<bool> _copyFolder(
     String source,
     String destination,
-    RepoCubit? destinationRepoCubit,
-  ) async {
+    RepoCubit? destinationRepoCubit, {
+    bool? recursive = false,
+  }) async {
     final createFolderOk = await (destinationRepoCubit ?? this).createFolder(
       destination,
     );
     if (!createFolderOk) return false;
+    if (!(recursive ?? false)) return true;
 
     await openDirectory(source).then(
       (contents) async {

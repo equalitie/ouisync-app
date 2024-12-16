@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:ouisync/ouisync.dart';
 
-import '../cubits/cubits.dart';
-import '../widgets/widgets.dart';
-import 'utils.dart';
+import '../cubits/cubits.dart' show RepoCubit;
+import '../widgets/widgets.dart' show FileAction;
+import 'utils.dart' show AppLogger, EntryOps;
 import 'repo_path.dart' as repo_path;
 
 class CopyEntry with EntryOps, AppLogger {
@@ -20,7 +20,10 @@ class CopyEntry with EntryOps, AppLogger {
   final String srcPath;
   final EntryType type;
 
-  Future<void> copy({required RepoCubit? toRepoCubit}) async {
+  Future<void> copy({
+    required RepoCubit? toRepoCubit,
+    required bool navigateToDestination,
+  }) async {
     final dstRepo = (toRepoCubit ?? _repoCubit);
     final dstFolder = dstRepo.state.currentFolder.path;
     final basename = repo_path.basename(srcPath);
@@ -28,7 +31,12 @@ class CopyEntry with EntryOps, AppLogger {
 
     final exist = await dstRepo.exists(dstPath);
     if (!exist) {
-      await _pickModeAndCopyEntry(toRepoCubit, dstPath, type);
+      await _pickModeAndCopyEntry(
+        toRepoCubit,
+        dstPath,
+        type,
+        navigateToDestination,
+      );
       return;
     }
 
@@ -42,11 +50,11 @@ class CopyEntry with EntryOps, AppLogger {
     if (fileAction == null) return;
 
     if (fileAction == FileAction.replace) {
-      await _copyAndReplace(toRepoCubit, dstPath, type);
+      await _copyAndReplace(toRepoCubit, dstPath, type, navigateToDestination);
     }
 
     if (fileAction == FileAction.keep) {
-      await _renameAndCopy(toRepoCubit, dstPath, type);
+      await _renameAndCopy(toRepoCubit, dstPath, type, navigateToDestination);
     }
   }
 
@@ -54,6 +62,7 @@ class CopyEntry with EntryOps, AppLogger {
     RepoCubit? toRepoCubit,
     String dstPath,
     EntryType type,
+    bool navigateToDestination, //NEDED?
   ) async {
     try {
       final file = await _repoCubit.openFile(srcPath);
@@ -75,24 +84,33 @@ class CopyEntry with EntryOps, AppLogger {
     RepoCubit? toRepoCubit,
     String dstPath,
     EntryType type,
+    bool navigateToDestination,
   ) async {
     final newPath = await disambiguateEntryName(
       repoCubit: (toRepoCubit ?? _repoCubit),
       path: dstPath,
     );
 
-    await _pickModeAndCopyEntry(toRepoCubit, newPath, type);
+    await _pickModeAndCopyEntry(
+      toRepoCubit,
+      newPath,
+      type,
+      navigateToDestination,
+    );
   }
 
   Future<void> _pickModeAndCopyEntry(
     RepoCubit? toRepoCubit,
     String dstPath,
     EntryType type,
+    bool navigateToDestination,
   ) async =>
       await _repoCubit.copyEntry(
         source: srcPath,
         destination: dstPath,
         type: type,
         destinationRepoCubit: toRepoCubit,
+        recursive: false,
+        navigateToDestination: navigateToDestination,
       );
 }

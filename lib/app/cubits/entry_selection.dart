@@ -115,6 +115,19 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
           (e) => e.value.isDir && e.value.selected && e.value.tristate == true)
       ?.key;
 
+  String? get pathSegmentToRemove {
+    final dirEntries = _entriesPath.entries.where((e) => e.value.isDir);
+
+    String segments = '';
+    for (var dir in dirEntries) {
+      if (!dir.value.selected) {
+        segments = p.join(segments, dir.key);
+      }
+    }
+
+    return segments;
+  }
+
   Future<void> startSelectionForRepo(RepoCubit originRepoCubit) async {
     _originRepoCubit = originRepoCubit;
 
@@ -283,19 +296,32 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
     final cubit = _originRepoInfoHash != currentRepoInfoHash
         ? reposCubit.currentRepo?.cubit
         : null;
-    await for (var entry in Stream.fromIterable(_entriesPath.entries)) {
-      // final entryType =
-      //     entry.value.isDir ? EntryType.directory : EntryType.file;
-      if (entry.value.isDir) {
-        continue;
-      }
 
-      await CopyEntry(
-        mainContext!,
-        repoCubit: _originRepoCubit!,
-        srcPath: entry.key,
-        type: EntryType.file,
-      ).copy(toRepoCubit: cubit);
+    try {
+      final lastEntryPath = _entriesPath.entries.last.key;
+      await for (var entry in Stream.fromIterable(_entriesPath.entries)) {
+        final path = entry.key;
+        final state = entry.value;
+
+        final type = state.isDir ? EntryType.directory : EntryType.file;
+        if (type == EntryType.directory) {
+          if (!state.selected) continue;
+        }
+
+        final navigateToDestination = path == lastEntryPath;
+        await CopyEntry(
+          mainContext!,
+          repoCubit: _originRepoCubit!,
+          srcPath: path,
+          type: type,
+        ).copy(
+          toRepoCubit: cubit,
+          navigateToDestination: navigateToDestination,
+        );
+      }
+    } on Exception catch (e) {
+      loggy.debug('Error copying selected entries: ${e.toString()}');
+      return false;
     }
 
     return true;
