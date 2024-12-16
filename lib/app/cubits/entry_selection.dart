@@ -373,21 +373,32 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
   }
 
   Future<bool> deleteEntries() async {
-    final reversed = _entriesPath.entries.toList().reversed;
-
-    await for (var selectedEntry in Stream.fromIterable(reversed)) {
-      final path = selectedEntry.key;
-
-      if (selectedEntry.value.isDir &&
-          selectedEntry.value.selected &&
-          selectedEntry.value.tristate == true) {
-        await _originRepoCubit!.deleteFolder(path, true);
-        continue;
-      }
-
-      if (!selectedEntry.value.isDir) {
+    try {
+      final fileEntriesPath = _entriesPath.entries
+          .where((e) => !e.value.isDir)
+          .map((e) => e.key)
+          .toList()
+          .reversed;
+      await for (var path in Stream.fromIterable(fileEntriesPath)) {
         await _originRepoCubit!.deleteFile(path);
       }
+    } on Exception catch (e) {
+      loggy.debug('Error deleting selected files: ${e.toString()}');
+      return false;
+    }
+
+    try {
+      final dirEntriesPath = _entriesPath.entries
+          .where((e) => e.value.isDir && e.value.selected)
+          .map((e) => e.key)
+          .toList()
+          .reversed;
+      await for (var path in Stream.fromIterable(dirEntriesPath)) {
+        await _originRepoCubit!.deleteFolder(path, false);
+      }
+    } on Exception catch (e) {
+      loggy.debug('Error deleting selected dirs: ${e.toString()}');
+      return false;
     }
 
     return true;
