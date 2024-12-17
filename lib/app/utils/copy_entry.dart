@@ -3,8 +3,8 @@ import 'package:ouisync/ouisync.dart';
 
 import '../cubits/cubits.dart' show RepoCubit;
 import '../widgets/widgets.dart' show FileAction;
-import 'utils.dart' show AppLogger, EntryOps;
 import 'repo_path.dart' as repo_path;
+import 'utils.dart' show AppLogger, EntryOps;
 
 class CopyEntry with EntryOps, AppLogger {
   CopyEntry(
@@ -59,7 +59,6 @@ class CopyEntry with EntryOps, AppLogger {
         toRepoCubit,
         _srcPath,
         dstFolderPath,
-        _type,
         navigateToDestination,
       );
     }
@@ -79,7 +78,6 @@ class CopyEntry with EntryOps, AppLogger {
     RepoCubit? toRepoCubit,
     String srcPath,
     String dstPath,
-    EntryType type,
     bool navigateToDestination, //NEDED?
   ) async {
     try {
