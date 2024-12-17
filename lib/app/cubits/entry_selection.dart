@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:collection';
+import 'dart:io' as io;
 
 import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
@@ -249,8 +250,9 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
       repoCubit: _originRepoCubit!,
     );
 
-    final destinationPaths =
-        await fileIO.getDestinationPath(defaultDirectoryPath);
+    final destinationPaths = await fileIO.getDestinationPath(
+      defaultDirectoryPath,
+    );
     if (destinationPaths.canceled) {
       final errorMessage = S.current.messageDownloadFileCanceled;
       showSnackBar(errorMessage);
@@ -259,25 +261,38 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
     }
 
     final separator = p.split(_entriesPath.keys.first).first;
-    String rootPath = destinationPaths.destinationPath;
+    String devicePath = destinationPaths.destinationPath;
 
-    await for (var entry in Stream.fromIterable(_entriesPath.entries)) {
-      if (entry.value.isDir) {
-        continue;
+    try {
+      await for (var entry in Stream.fromIterable(_entriesPath.entries)) {
+        final path = entry.key
+            .replaceAll('$pathSegmentToRemove', '')
+            .trim()
+            .replaceAll(separator, p.separator);
+        final state = entry.value;
+
+        final destinationPath = '$devicePath$path';
+        final type = state.isDir ? EntryType.directory : EntryType.file;
+        if (type == EntryType.directory) {
+          if (state.selected) {
+            await io.Directory(destinationPath).create(recursive: true);
+          }
+          continue;
+        }
+
+        final fileEntry = FileEntry(path: entry.key, size: 0);
+        await fileIO.saveFileToDevice(
+          fileEntry,
+          null,
+          (
+            parentPath: destinationPaths.parentPath,
+            destinationPath: destinationPath,
+          ),
+        );
       }
-
-      final path = entry.key.replaceAll(separator, p.separator);
-      final destinationPath = '$rootPath$path';
-
-      final fileEntry = FileEntry(path: entry.key, size: 0);
-      await fileIO.saveFileToDevice(
-        fileEntry,
-        null,
-        (
-          parentPath: destinationPaths.parentPath,
-          destinationPath: destinationPath,
-        ),
-      );
+    } on Exception catch (e) {
+      loggy.debug('Error saving selected entries to device: ${e.toString()}');
+      return false;
     }
 
     return true;
