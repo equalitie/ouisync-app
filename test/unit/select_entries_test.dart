@@ -103,20 +103,20 @@ void main() {
       () async {
     final repoInfoHash = await repo.infoHash;
 
-    final expectedFolder2SelectedAll = <String, ({bool isDir, bool? tristate})>{
-      '/folder1': (isDir: true, tristate: null),
-      '/folder1/folder2': (isDir: true, tristate: true),
-      '/folder1/folder2/file4.txt': (isDir: false, tristate: true),
-      '/folder1/folder2/file5.txt': (isDir: false, tristate: true),
-      '/folder1/folder2/file6.txt': (isDir: false, tristate: true),
-      '/folder1/folder2/file7.txt': (isDir: false, tristate: true)
+    final expectedFolder2SelectedAll = <String, ({bool isDir, bool selected, bool? tristate})>{
+      '/folder1': (isDir: true, selected: false, tristate: null),
+      '/folder1/folder2': (isDir: true, selected: true, tristate: true),
+      '/folder1/folder2/file4.txt': (isDir: false, selected: true, tristate: true),
+      '/folder1/folder2/file5.txt': (isDir: false, selected: true, tristate: true),
+      '/folder1/folder2/file6.txt': (isDir: false, selected: true, tristate: true),
+      '/folder1/folder2/file7.txt': (isDir: false, selected: true, tristate: true)
     };
 
     // Select folder2 selects all its contents, and folder1 tristate
     {
       final dirEntry = DirectoryEntry(path: '/folder1/folder2');
 
-      repoCubit.startEntriesSelection();
+      await repoCubit.startEntriesSelection();
       await repoCubit.entrySelectionCubit.selectEntry(repoInfoHash, dirEntry);
 
       final selectedEntries = repoCubit.entrySelectionCubit.selectedEntries;
@@ -127,6 +127,7 @@ void main() {
       // Expect /folder1 selected, tristate: /folder1: null
       expect(selectedEntries.keys.first, equals('/folder1'));
       expect(selectedEntries.values.first.isDir, equals(true));
+      expect(selectedEntries.values.first.selected, equals(false));
       expect(selectedEntries.values.first.tristate, equals(null));
 
       // Expect selected: /folder1: null, /folder1/folder2: null, /folder1/folder2/files4-7.txt: false
@@ -138,24 +139,24 @@ void main() {
       expect(noSelectedEntries, hasLength(0));
     }
 
-    final expectedFolder1SelectedAll = <String, ({bool isDir, bool? tristate})>{
-      '/folder1': (isDir: true, tristate: true),
-      '/folder1/file0.txt': (isDir: false, tristate: true),
-      '/folder1/file1.txt': (isDir: false, tristate: true),
-      '/folder1/file2.txt': (isDir: false, tristate: true),
-      '/folder1/file3.txt': (isDir: false, tristate: true),
-      '/folder1/folder2': (isDir: true, tristate: true),
-      '/folder1/folder2/file4.txt': (isDir: false, tristate: true),
-      '/folder1/folder2/file5.txt': (isDir: false, tristate: true),
-      '/folder1/folder2/file6.txt': (isDir: false, tristate: true),
-      '/folder1/folder2/file7.txt': (isDir: false, tristate: true)
+    final expectedFolder1SelectedAll = <String, ({bool isDir, bool selected, bool? tristate})>{
+      '/folder1': (isDir: true, selected: true, tristate: true),
+      '/folder1/file0.txt': (isDir: false, selected: true, tristate: true),
+      '/folder1/file1.txt': (isDir: false, selected: true, tristate: true),
+      '/folder1/file2.txt': (isDir: false, selected: true, tristate: true),
+      '/folder1/file3.txt': (isDir: false, selected: true, tristate: true),
+      '/folder1/folder2': (isDir: true, selected: true, tristate: true),
+      '/folder1/folder2/file4.txt': (isDir: false, selected: true, tristate: true),
+      '/folder1/folder2/file5.txt': (isDir: false, selected: true, tristate: true),
+      '/folder1/folder2/file6.txt': (isDir: false, selected: true, tristate: true),
+      '/folder1/folder2/file7.txt': (isDir: false, selected: true, tristate: true)
     };
 
     //Select folder1 selects all its contents
     {
       final dirEntry = DirectoryEntry(path: '/folder1');
 
-      repoCubit.startEntriesSelection();
+      await repoCubit.startEntriesSelection();
       await repoCubit.entrySelectionCubit.selectEntry(repoInfoHash, dirEntry);
 
       final selectedEntries = repoCubit.entrySelectionCubit.selectedEntries;
@@ -166,6 +167,7 @@ void main() {
       // Expect /folder1 selected: /folder1: true
       expect(selectedEntries.keys.first, equals('/folder1'));
       expect(selectedEntries.values.first.isDir, equals(true));
+      expect(selectedEntries.values.first.selected, equals(true));
       expect(selectedEntries.values.first.tristate, equals(true));
 
       // Expect all selected: /folder1, /folder1/file0-3.txt, /folder1/folder2, /folder1/folder2/file4-7.txt
@@ -183,17 +185,17 @@ void main() {
     final repoInfoHash = await repo.infoHash;
 
     final expectedFolder2SelectedOneChild =
-        <String, ({bool isDir, bool? tristate})>{
-      '/folder1': (isDir: true, tristate: null),
-      '/folder1/folder2': (isDir: true, tristate: null),
-      '/folder1/folder2/file6.txt': (isDir: false, tristate: true)
+        <String, ({bool isDir, bool selected, bool? tristate})>{
+      '/folder1': (isDir: true, selected: false, tristate: null),
+      '/folder1/folder2': (isDir: true, selected: false, tristate: null),
+      '/folder1/folder2/file6.txt': (isDir: false, selected: true, tristate: true)
     };
 
     // Select folder2 child updates folder1/folder2 and folder1, tristates
     {
       final fileEntry = FileEntry(path: '/folder1/folder2/file6.txt', size: 0);
 
-      repoCubit.startEntriesSelection();
+      await repoCubit.startEntriesSelection();
       await repoCubit.entrySelectionCubit.selectEntry(repoInfoHash, fileEntry);
 
       final selectedEntries = repoCubit.entrySelectionCubit.selectedEntries;
@@ -203,10 +205,12 @@ void main() {
 
       // Expect /folder1 selected, tristate: /folder1: null
       expect(selectedEntries['/folder1']?.isDir, equals(true));
+      expect(selectedEntries['/folder1']?.selected, equals(false));
       expect(selectedEntries['/folder1']?.tristate, equals(null));
 
       // Expect /folder1/folder2 selected, tristate: /folder1/folder2: null
       expect(selectedEntries['/folder1/folder2']?.isDir, equals(true));
+      expect(selectedEntries['/folder1/folder2']?.selected, equals(false));
       expect(selectedEntries['/folder1/folder2']?.tristate, equals(null));
 
       // Expect selected: /folder1: null, /folder1/folder2: null, /folder1/folder2/file6.txt: false
