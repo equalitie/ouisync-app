@@ -354,15 +354,21 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
           if (!state.selected) continue;
         }
 
+        final fromPathSegment = path
+            .replaceAll('$pathSegmentToRemove', '')
+            .replaceFirst('/', '')
+            .trim();
         final navigateToDestination = path == lastEntryPath;
         if (action == EntrySelectionActions.copy) {
           await CopyEntry(
             context,
             repoCubit: _originRepoCubit!,
             srcPath: path,
+            dstPath: destinationPath,
             type: type,
           ).copy(
             toRepoCubit: toRepoCubit,
+            fromPathSegment: fromPathSegment,
             navigateToDestination: navigateToDestination,
           );
           continue;

@@ -131,10 +131,10 @@ class _MoveSelectedEntriesDialogState extends State<MoveSelectedEntriesDialog> {
             entrySelectionCubit: repoCubit.entrySelectionCubit,
           );
           final aspectRatio = _getButtonAspectRatio(widgetSize);
+
           return Fields.dialogActions(
             buttons: _actions(
               reposCubit,
-              repoCubit,
               state,
               multiEntryActions,
               type,
@@ -148,7 +148,6 @@ class _MoveSelectedEntriesDialogState extends State<MoveSelectedEntriesDialog> {
 
   List<Widget> _actions(
     ReposCubit reposCubit,
-    RepoCubit repoCubit,
     EntrySelectionState state,
     MultiEntryActions multiEntryActions,
     BottomSheetType type,
@@ -188,7 +187,10 @@ class _MoveSelectedEntriesDialogState extends State<MoveSelectedEntriesDialog> {
         buttonConstrains: Dimensions.sizeConstrainsBottomDialogAction,
         text: _getActionText(type),
         onPressed: () async {
-          final action = _getAction(type, multiEntryActions, repoCubit);
+          final currentRepoCubit = reposCubit.currentRepo?.cubit;
+          if (currentRepoCubit == null) return;
+
+          final action = _getAction(type, multiEntryActions, currentRepoCubit);
           if (action == null) return;
 
           final resultOk = await action;
