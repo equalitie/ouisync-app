@@ -3,58 +3,83 @@ import 'package:ouisync/ouisync.dart';
 
 import '../cubits/cubits.dart' show RepoCubit;
 import '../widgets/widgets.dart' show FileAction;
-import 'utils.dart' show AppLogger, EntryOps;
 import 'repo_path.dart' as repo_path;
+import 'utils.dart' show AppLogger, EntryOps;
 
 class MoveEntry with EntryOps, AppLogger {
   MoveEntry(
     BuildContext context, {
     required RepoCubit repoCubit,
-    required this.srcPath,
-    required this.type,
+    required String srcPath,
+    required String dstPath,
+    required EntryType type,
   })  : _context = context,
-        _repoCubit = repoCubit;
+        _repoCubit = repoCubit,
+        _srcPath = srcPath,
+        _dstPath = dstPath,
+        _type = type;
 
   final BuildContext _context;
   final RepoCubit _repoCubit;
-  final String srcPath;
-  final EntryType type;
+  final String _srcPath;
+  final String _dstPath;
+  final EntryType _type;
 
   Future<void> move({
     required RepoCubit? toRepoCubit,
-    String? originBasename,
+    required String fromPathSegment,
     bool navigateToDestination = true,
   }) async {
     final dstRepo = (toRepoCubit ?? _repoCubit);
-    final dstFolder = dstRepo.state.currentFolder.path;
-    final basename = repo_path.basename(srcPath);
-    final dstPath = repo_path.join(dstFolder, basename);
+    final dstFolderPath = repo_path.join(_dstPath, fromPathSegment);
 
-    final exist = await dstRepo.exists(dstPath);
+    final exist = await dstRepo.exists(dstFolderPath);
     if (!exist) {
-      await _pickModeAndMoveEntry(toRepoCubit, dstPath);
+      await _pickModeAndMoveEntry(
+        toRepoCubit,
+        _srcPath,
+        dstFolderPath,
+        _type,
+        navigateToDestination,
+      );
       return;
     }
 
     final fileAction = await getFileActionType(
       _context,
-      basename,
-      dstPath,
-      type,
+      _srcPath,
+      dstFolderPath,
+      _type,
     );
 
     if (fileAction == null) return;
 
     if (fileAction == FileAction.replace) {
-      await _moveAndReplace(toRepoCubit, dstPath);
+      await _moveAndReplace(
+        toRepoCubit,
+        _srcPath,
+        dstFolderPath,
+        navigateToDestination,
+      );
     }
 
     if (fileAction == FileAction.keep) {
-      await _renameAndMove(toRepoCubit, dstPath);
+      await _renameAndMove(
+        toRepoCubit,
+        _srcPath,
+        dstFolderPath,
+        _type,
+        navigateToDestination,
+      );
     }
   }
 
-  Future<void> _moveAndReplace(RepoCubit? toRepoCubit, String dstPath) async {
+  Future<void> _moveAndReplace(
+    RepoCubit? toRepoCubit,
+    String srcPath,
+    String dstPath,
+    bool navigateToDestination, //NEDED?
+  ) async {
     try {
       final file = await _repoCubit.openFile(srcPath);
       final fileLength = await file.length;
@@ -71,18 +96,33 @@ class MoveEntry with EntryOps, AppLogger {
     }
   }
 
-  Future<void> _renameAndMove(RepoCubit? toRepoCubit, String dstPath) async {
+  Future<void> _renameAndMove(
+    RepoCubit? toRepoCubit,
+    String srcPath,
+    String dstPath,
+    EntryType type,
+    bool navigateToDestination,
+  ) async {
     final newPath = await disambiguateEntryName(
       repoCubit: (toRepoCubit ?? _repoCubit),
       path: dstPath,
     );
 
-    await _pickModeAndMoveEntry(toRepoCubit, newPath);
+    await _pickModeAndMoveEntry(
+      toRepoCubit,
+      srcPath,
+      newPath,
+      type,
+      navigateToDestination,
+    );
   }
 
   Future<void> _pickModeAndMoveEntry(
     RepoCubit? toRepoCubit,
+    String srcPath,
     String dstPath,
+    EntryType type,
+    bool navigateToDestination,
   ) async {
     if (toRepoCubit == null) {
       await _repoCubit.moveEntry(
@@ -98,6 +138,8 @@ class MoveEntry with EntryOps, AppLogger {
       type: type,
       source: srcPath,
       destination: dstPath,
+      recursive: false,
+      navigateToDestination: navigateToDestination,
     );
   }
 }

@@ -791,17 +791,24 @@ class _MainPageState extends State<MainPage>
   ) async {
     if (_currentRepo == null) return;
 
+    final currentFolderPath =
+        _currentRepo!.cubit?.state.currentFolder.path ?? '';
+    if (currentFolderPath.isEmpty) return;
+
     final toRepoCubit =
         originRepoCubit.location.compareTo(_currentRepo!.location) != 0
             ? _currentRepo!.cubit
             : null;
 
+    final entryBaseName = system_path.basename(entryPath);
+
     await MoveEntry(
       context,
       repoCubit: originRepoCubit,
       srcPath: entryPath,
+      dstPath: currentFolderPath,
       type: entryType,
-    ).move(toRepoCubit: toRepoCubit);
+    ).move(toRepoCubit: toRepoCubit, fromPathSegment: entryBaseName);
   }
 
   Widget _moveSelectedEntriesState({
@@ -809,7 +816,7 @@ class _MainPageState extends State<MainPage>
     required BottomSheetType type,
   }) =>
       MoveSelectedEntriesDialog(
-        context, 
+        context,
         reposCubit: widget.reposCubit,
         repoCubit: repoCubit,
         type: type,

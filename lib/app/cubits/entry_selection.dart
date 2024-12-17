@@ -378,9 +378,11 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
             context,
             repoCubit: _originRepoCubit!,
             srcPath: path,
+            dstPath: destinationPath,
             type: type,
           ).move(
             toRepoCubit: destinationRepoCubit,
+            fromPathSegment: fromPathSegment,
             navigateToDestination: navigateToDestination,
           );
         }
