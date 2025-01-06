@@ -85,11 +85,14 @@ android {
 }
 
 // Generate launcher icons by invoking [icons_launcher](https://pub.dev/packages/icons_launcher)
+def isWindows = System.getProperty('os.name').toLowerCase().contains('windows')
+def executable = isWindows ? 'cmd.exe' : 'dart'
+def arguments = isWindows ? ['dart', 'run', 'icons_launcher:create'] : ['run', 'icons_launcher:create']
 tasks.register("generateLauncherIcons", Exec) {
     workingDir "${project.rootDir}/.."
     // TODO: This generates icons for all platforms. Ideally we would restrict it to generate them
     // only for android (and set it up separately in other platforms' respective build systems).
-    commandLine 'dart', 'run', 'icons_launcher:create'
+    commandLine executable, arguments
 }
 
 afterEvaluate {
