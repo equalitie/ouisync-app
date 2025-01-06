@@ -112,6 +112,7 @@ void main() {
         type: EntryType.file,
         source: '/file1.txt',
         destination: 'file1.txt',
+        recursive: true,
       );
 
       expect(result, equals(true));
@@ -146,6 +147,7 @@ void main() {
         type: EntryType.directory,
         source: '/folder1',
         destination: '/folder1',
+        recursive: true,
       );
 
       expect(result, equals(true));
@@ -184,6 +186,7 @@ void main() {
         type: EntryType.directory,
         source: '/folder1',
         destination: '/folder1',
+        recursive: true
       );
 
       expect(result, equals(true));
