@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ouisync/ouisync.dart';
+import 'package:ouisync/ouisync.dart' show AccessMode, Directory, EntryType;
 import 'package:path/path.dart' as p;
 
 import '../../../generated/l10n.dart';
@@ -104,6 +104,30 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
               enabledValidation: () => widget.isActionAvailableValidator(
                 widget.repoCubit.state.accessMode,
                 EntryAction.move,
+              ),
+              disabledMessage: S.current.messageActionNotAvailable,
+              disabledMessageDuration:
+                  Constants.notAvailableActionMessageDuration,
+            ),
+            EntryActionItem(
+              iconData: Icons.copy_outlined,
+              title: S.current.iconCopy,
+              dense: true,
+              onTap: () async {
+                await Navigator.of(context).maybePop();
+
+                final entryPath = widget.entry.path;
+                final entryType = EntryType.directory;
+
+                widget.repoCubit.showMoveEntryBottomSheet(
+                  sheetType: BottomSheetType.copy,
+                  entryPath: entryPath,
+                  entryType: entryType,
+                );
+              },
+              enabledValidation: () => widget.isActionAvailableValidator(
+                widget.repoCubit.state.accessMode,
+                EntryAction.copy,
               ),
               disabledMessage: S.current.messageActionNotAvailable,
               disabledMessageDuration:

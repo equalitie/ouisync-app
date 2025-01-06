@@ -2,7 +2,7 @@ import 'dart:io' as io;
 
 import 'package:flutter/material.dart';
 import 'package:ouisync/native_channels.dart';
-import 'package:ouisync/ouisync.dart';
+import 'package:ouisync/ouisync.dart' show AccessMode, EntryType;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -166,6 +166,30 @@ class _FileDetailState extends State<FileDetail> {
                 enabledValidation: () => widget.isActionAvailableValidator(
                   widget.repoCubit.state.accessMode,
                   EntryAction.rename,
+                ),
+                disabledMessage: S.current.messageActionNotAvailable,
+                disabledMessageDuration:
+                    Constants.notAvailableActionMessageDuration,
+              ),
+              EntryActionItem(
+                iconData: Icons.copy_outlined,
+                title: S.current.iconCopy,
+                dense: true,
+                onTap: () async {
+                  await Navigator.of(context).maybePop();
+
+                  final entryPath = widget.entry.path;
+                  final entryType = EntryType.file;
+
+                  widget.repoCubit.showMoveEntryBottomSheet(
+                    sheetType: BottomSheetType.copy,
+                    entryPath: entryPath,
+                    entryType: entryType,
+                  );
+                },
+                enabledValidation: () => widget.isActionAvailableValidator(
+                  widget.repoCubit.state.accessMode,
+                  EntryAction.move,
                 ),
                 disabledMessage: S.current.messageActionNotAvailable,
                 disabledMessageDuration:
