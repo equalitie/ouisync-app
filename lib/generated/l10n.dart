@@ -4280,6 +4280,16 @@ class S {
     );
   }
 
+  /// `Copy`
+  String get iconCopy {
+    return Intl.message(
+      'Copy',
+      name: 'iconCopy',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Create Repository`
   String get actionCreateRepository {
     return Intl.message(

@@ -205,6 +205,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "iconAccessMode": MessageLookupByLibrary.simpleMessage("Access Mode"),
         "iconAddExistingRepository":
             MessageLookupByLibrary.simpleMessage("Import a repository"),
+        "iconCopy": MessageLookupByLibrary.simpleMessage("Copy"),
         "iconCreateRepository":
             MessageLookupByLibrary.simpleMessage("Create a new repository"),
         "iconDelete": MessageLookupByLibrary.simpleMessage("Delete"),
