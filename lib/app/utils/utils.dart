@@ -23,6 +23,7 @@ export 'log.dart';
 export 'master_key.dart';
 export 'log_reader.dart';
 export 'mounter.dart';
+export 'move_entries_actions.dart';
 export 'move_entry.dart';
 export 'multi_entry_actions.dart';
 export 'option.dart';
