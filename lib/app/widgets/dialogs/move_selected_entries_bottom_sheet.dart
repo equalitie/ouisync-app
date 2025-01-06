@@ -2,44 +2,71 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ouisync/ouisync.dart' show AccessMode, EntryType;
 
 import '../../../generated/l10n.dart';
-import '../../cubits/cubits.dart';
-import '../../models/repo_location.dart';
-import '../../utils/utils.dart';
-import '../widgets.dart';
+import '../../cubits/cubits.dart'
+    show
+        BottomSheetType,
+        EntrySelectionCubit,
+        EntrySelectionState,
+        NavigationCubit,
+        NavigationState,
+        RepoCubit,
+        ReposCubit;
+import '../../utils/repo_path.dart' as repo_path;
+import '../../utils/utils.dart'
+    show AppLogger, Dialogs, Dimensions, Fields, MoveEntriesActions, MultiEntryActions;
+import '../widgets.dart' show NegativeButton, PositiveButton;
 
 class MoveSelectedEntriesDialog extends StatefulWidget {
-  const MoveSelectedEntriesDialog(
+  const MoveSelectedEntriesDialog.single(
     this.parentContext, {
     required this.reposCubit,
-    required this.repoCubit,
-    required this.type,
+    required this.originRepoCubit,
+    required this.navigationCubit,
+    required this.entryPath,
+    required this.entryType,
+    required this.sheetType,
     required this.onUpdateBottomSheet,
-    required this.onCancel,
-  });
+  }) : entrySelectionCubit = null;
+
+  const MoveSelectedEntriesDialog.multiple(
+    this.parentContext, {
+    required this.reposCubit,
+    required this.originRepoCubit,
+    required this.navigationCubit,
+    required this.entrySelectionCubit,
+    required this.sheetType,
+    required this.onUpdateBottomSheet,
+  })  : entryPath = '',
+        entryType = null;
 
   final BuildContext parentContext;
   final ReposCubit reposCubit;
-  final RepoCubit repoCubit;
-  final BottomSheetType type;
+  final RepoCubit originRepoCubit;
+  final NavigationCubit navigationCubit;
+  final EntrySelectionCubit? entrySelectionCubit;
+
+  final String entryPath;
+  final EntryType? entryType;
+
+  final BottomSheetType sheetType;
   final void Function(
     BottomSheetType type,
     double padding,
     String entry,
   ) onUpdateBottomSheet;
-  final void Function() onCancel;
 
   @override
   State<MoveSelectedEntriesDialog> createState() =>
       _MoveSelectedEntriesDialogState();
 }
 
-class _MoveSelectedEntriesDialogState extends State<MoveSelectedEntriesDialog> {
+class _MoveSelectedEntriesDialogState extends State<MoveSelectedEntriesDialog>
+    with AppLogger {
   final bodyKey = GlobalKey();
   Size? widgetSize;
-
-  NavigationCubit get navigationCubit => widget.reposCubit.navigation;
 
   @override
   void initState() {
@@ -59,7 +86,7 @@ class _MoveSelectedEntriesDialogState extends State<MoveSelectedEntriesDialog> {
 
   @override
   Widget build(BuildContext context) => widget.reposCubit.builder(
-        (cubit) => Container(
+        (reposCubit) => Container(
           key: bodyKey,
           padding: Dimensions.paddingBottomSheet,
           decoration: Dimensions.decorationBottomSheetAlternative,
@@ -70,19 +97,45 @@ class _MoveSelectedEntriesDialogState extends State<MoveSelectedEntriesDialog> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Dimensions.spacingVertical,
-                _entriesCountLabel(widget.repoCubit.entrySelectionCubit),
-                _sourceLabel(widget.repoCubit.entrySelectionCubit),
+                ..._getLayout(),
                 _selectActions(
                   widget.parentContext,
-                  cubit,
-                  widget.repoCubit,
-                  widget.type,
+                  reposCubit,
+                  widget.originRepoCubit,
+                  widget.navigationCubit,
+                  widget.entrySelectionCubit,
+                  widget.entryPath,
+                  widget.entryType,
+                  widget.sheetType,
                 ),
               ],
             ),
           ),
         ),
       );
+
+  List<Widget> _getLayout() => widget.entryPath.isEmpty
+      ? [
+          _entriesCountLabel(widget.entrySelectionCubit!),
+          _sourceLabel(widget.entrySelectionCubit!),
+        ]
+      : [
+          Fields.iconLabel(
+            icon: Icons.drive_file_move_outlined,
+            text: repo_path.basename(widget.entryPath),
+          ),
+          Text(
+            S.current
+                .messageMoveEntryOrigin(repo_path.dirname(widget.entryPath)),
+            style: Theme.of(context)
+                .textTheme
+                .bodyMedium
+                ?.copyWith(fontWeight: FontWeight.w800),
+            maxLines: 1,
+            softWrap: true,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ];
 
   Widget _entriesCountLabel(EntrySelectionCubit entrySelectionCubit) =>
       BlocBuilder<EntrySelectionCubit, EntrySelectionState>(
@@ -117,29 +170,186 @@ class _MoveSelectedEntriesDialogState extends State<MoveSelectedEntriesDialog> {
       );
 
   Widget _selectActions(
-    BuildContext parentContext,
+    BuildContext context,
     ReposCubit reposCubit,
-    RepoCubit repoCubit,
-    BottomSheetType type,
-  ) =>
-      //BlocBuilder<NavigationCubit, NavigationState>(
-      BlocBuilder<EntrySelectionCubit, EntrySelectionState>(
-        bloc: repoCubit.entrySelectionCubit, //navigationCubit,
-        builder: (context, state) {
-          final multiEntryActions = MultiEntryActions(
-            parentContext,
-            entrySelectionCubit: repoCubit.entrySelectionCubit,
+    RepoCubit originRepoCubit,
+    NavigationCubit navigationCubit,
+    EntrySelectionCubit? entrySelectionCubit,
+    String entryPath,
+    EntryType? entryType,
+    BottomSheetType sheetType,
+  ) {
+    final moveEntriesActions = MoveEntriesActions(
+      context,
+      reposCubit: reposCubit,
+      originRepoCubit: originRepoCubit,
+      type: sheetType,
+    );
+
+    return widget.entryPath.isEmpty
+        ? _multipleEntriesActions(
+            context,
+            entrySelectionCubit!,
+            reposCubit,
+            moveEntriesActions,
+            sheetType,
+          )
+        : _singleEntryActions(
+            context,
+            navigationCubit,
+            reposCubit,
+            moveEntriesActions,
+            sheetType,
+            entryPath,
+            entryType!,
           );
+  }
+
+  Widget _singleEntryActions(
+    BuildContext parentContext,
+    NavigationCubit navigationCubit,
+    ReposCubit reposCubit,
+    MoveEntriesActions moveEntriesActions,
+    BottomSheetType sheetType,
+    String entryPath,
+    EntryType entryType,
+  ) =>
+      BlocBuilder<NavigationCubit, NavigationState>(
+        bloc: navigationCubit,
+        builder: (context, state) {
+          bool canMove = false;
+
+          final currentRepo = reposCubit.currentRepo;
+          if (currentRepo != null) {
+            final originPath = repo_path.dirname(entryPath);
+            final destinationRepoLocation = currentRepo.location;
+
+            final accessMode = currentRepo.accessMode;
+            final isCurrentRepoWriteMode = accessMode == AccessMode.write;
+
+            canMove = state.isFolder
+                ? moveEntriesActions.canMove(
+                    originPath: originPath,
+                    destinationRepoLocation: destinationRepoLocation,
+                    destinationPath: state.path,
+                    isCurrentRepoWriteMode: isCurrentRepoWriteMode,
+                  )
+                : false;
+          }
+
+          negativeAction() => cancelAndDismiss(moveEntriesActions);
+          final negativeText = S.current.actionCancel;
+
+          Future<void> positiveAction() async {
+            cancelAndDismiss(moveEntriesActions);
+
+            await Dialogs.executeFutureWithLoadingDialog(
+              null,
+              moveEntriesActions.copyOrMoveSingleEntry(
+                destinationRepoCubit: currentRepo!.cubit!,
+                entryPath: entryPath,
+                entryType: entryType,
+              ),
+            );
+          }
+
+          final positiveText = moveEntriesActions.getActionText(sheetType);
+
           final aspectRatio = _getButtonAspectRatio(widgetSize);
+          final actions = _actions(
+            canMove,
+            aspectRatio,
+            positiveAction,
+            positiveText,
+            negativeAction,
+            negativeText,
+          );
 
           return Fields.dialogActions(
-            buttons: _actions(
-              reposCubit,
-              state,
+            buttons: actions,
+            padding: const EdgeInsetsDirectional.only(top: 20.0),
+            mainAxisAlignment: MainAxisAlignment.end,
+          );
+        },
+      );
+
+  Widget _multipleEntriesActions(
+    BuildContext parentContext,
+    EntrySelectionCubit entrySelectionCubit,
+    ReposCubit reposCubit,
+    MoveEntriesActions moveEntriesActions,
+    BottomSheetType type,
+  ) =>
+      BlocBuilder<EntrySelectionCubit, EntrySelectionState>(
+        bloc: entrySelectionCubit,
+        builder: (context, state) {
+          bool enableAction = false;
+          if ([BottomSheetType.download, BottomSheetType.delete]
+              .contains(type)) {
+            enableAction = true;
+          } else {
+            final currentRepo = reposCubit.currentRepo;
+            final currentRepoCubit = currentRepo?.cubit;
+            if (currentRepo != null && currentRepoCubit != null) {
+              final currentPath = currentRepoCubit.currentFolder;
+
+              final accessMode = currentRepo.accessMode;
+              final isCurrentRepoWriteMode = accessMode == AccessMode.write;
+
+              final validationOk = entrySelectionCubit.validateDestination(
+                currentRepoCubit,
+                currentPath,
+              );
+
+              if (!validationOk.destinationOk) {
+                loggy.debug(
+                  'Error validating multi entry destination: ${validationOk.errorMessage}',
+                );
+              }
+
+              enableAction =
+                  isCurrentRepoWriteMode && validationOk.destinationOk;
+            }
+          }
+
+          negativeAction() => cancelAndDismiss(moveEntriesActions);
+          final negativeText = S.current.actionCancel;
+
+          Future<void> positiveAction() async {
+            final currentRepoCubit = reposCubit.currentRepo?.cubit;
+            if (currentRepoCubit == null) return;
+
+            final multiEntryActions = MultiEntryActions(
+              parentContext,
+              entrySelectionCubit: entrySelectionCubit,
+            );
+
+            final action = moveEntriesActions.getAction(
+              currentRepoCubit,
               multiEntryActions,
-              type,
-              aspectRatio,
-            ),
+            );
+            if (action == null) return;
+
+            final resultOk = await action;
+            if (!resultOk) return;
+
+            cancelAndDismiss(moveEntriesActions);
+          }
+
+          final positiveText = moveEntriesActions.getActionText(type);
+
+          final aspectRatio = _getButtonAspectRatio(widgetSize);
+          final actions = _actions(
+            enableAction,
+            aspectRatio,
+            positiveAction,
+            positiveText,
+            negativeAction,
+            negativeText,
+          );
+
+          return Fields.dialogActions(
+            buttons: actions,
             padding: const EdgeInsetsDirectional.only(top: 20.0),
             mainAxisAlignment: MainAxisAlignment.end,
           );
@@ -147,133 +357,35 @@ class _MoveSelectedEntriesDialogState extends State<MoveSelectedEntriesDialog> {
       );
 
   List<Widget> _actions(
-    ReposCubit reposCubit,
-    EntrySelectionState state,
-    MultiEntryActions multiEntryActions,
-    BottomSheetType type,
-    // NavigationState state,
+    bool canMove,
     double aspectRatio,
-  ) {
-    final isRepoList = reposCubit.showList;
-    // final currentRepoAccessMode = widget.reposCubit.currentRepo?.accessMode;
-    // final isCurrentRepoWriteMode = currentRepoAccessMode == AccessMode.write;
-
-    // final canMove = state.isFolder
-    //     ? _canMove(
-    //         originRepoLocation: originRepoCubit.location,
-    //         originPath: repo_path.dirname(entryPath),
-    //         destinationRepoLocation:
-    //             widget.reposCubit.currentRepo?.cubit?.location ??
-    //                 state.repoLocation,
-    //         destinationPath: state.path,
-    //         isRepoList: isRepoList,
-    //         isCurrentRepoWriteMode: isCurrentRepoWriteMode,
-    //       )
-    //     : false;
-
-    return [
-      NegativeButton(
-        buttonsAspectRatio: aspectRatio,
-        buttonConstrains: Dimensions.sizeConstrainsBottomDialogAction,
-        text: S.current.actionCancel,
-        onPressed: () {
-          widget.onUpdateBottomSheet(BottomSheetType.gone, 0.0, '');
-          widget.onCancel();
-        },
-      ),
-      PositiveButton(
-        key: ValueKey('move_entry'),
-        buttonsAspectRatio: aspectRatio,
-        buttonConstrains: Dimensions.sizeConstrainsBottomDialogAction,
-        text: _getActionText(type),
-        onPressed: () async {
-          final currentRepoCubit = reposCubit.currentRepo?.cubit;
-          if (currentRepoCubit == null) return;
-
-          final action = _getAction(type, multiEntryActions, currentRepoCubit);
-          if (action == null) return;
-
-          final resultOk = await action;
-          if (!resultOk) return;
-
-          widget.onUpdateBottomSheet(
-            BottomSheetType.gone,
-            0.0,
-            '',
-          );
-          widget.onCancel();
-
-          // await Dialogs.executeFutureWithLoadingDialog(
-          //   null,
-          //   widget.onMoveEntry(),
-          // );
-        },
-        // canMove
-        //     ? () async {
-        //         widget.onUpdateBottomSheet(
-        //           BottomSheetType.gone,
-        //           0.0,
-        //           '',
-        //         );
-        //         widget.onCancel();
-
-        //         await Dialogs.executeFutureWithLoadingDialog(
-        //           null,
-        //           widget.onMoveEntry(),
-        //         );
-        //       }
-        //     : null,
-      )
-
-      /// If the entry can't be moved (the user selected the same entry/path, for example)
-      /// Then null is used instead of the function, which disable the button.
-    ];
-  }
-
-  String _getActionText(BottomSheetType type) => switch (type) {
-        BottomSheetType.copy => S.current.actionCopy,
-        BottomSheetType.delete => S.current.actionDelete,
-        BottomSheetType.download => S.current.actionDownload,
-        BottomSheetType.move => S.current.actionMove,
-        BottomSheetType.upload => '',
-        BottomSheetType.gone => '',
-      };
-
-  Future<bool>? _getAction(
-    BottomSheetType type,
-    MultiEntryActions multiEntryActions,
-    RepoCubit repoCubit,
+    void Function()? positiveAction,
+    String positiveText,
+    void Function()? negativeAction,
+    String negativeText,
   ) =>
-      switch (type) {
-        BottomSheetType.copy => multiEntryActions.copyEntriesTo(repoCubit),
-        BottomSheetType.delete => multiEntryActions.deleteSelectedEntries(),
-        BottomSheetType.download => multiEntryActions.saveEntriesToDevice(),
-        BottomSheetType.move => multiEntryActions.moveEntriesTo(repoCubit),
-        BottomSheetType.upload => null,
-        BottomSheetType.gone => null,
-      };
+      [
+        NegativeButton(
+          buttonsAspectRatio: aspectRatio,
+          buttonConstrains: Dimensions.sizeConstrainsBottomDialogAction,
+          text: negativeText,
+          onPressed: negativeAction,
+        ),
+        PositiveButton(
+          key: ValueKey('move_entry'),
+          buttonsAspectRatio: aspectRatio,
+          buttonConstrains: Dimensions.sizeConstrainsBottomDialogAction,
+          text: positiveText,
+          onPressed: canMove ? positiveAction : null,
+        )
 
-  bool _canMove({
-    required RepoLocation originRepoLocation,
-    required String originPath,
-    required RepoLocation? destinationRepoLocation,
-    required String destinationPath,
-    required bool isRepoList,
-    required bool isCurrentRepoWriteMode,
-  }) {
-    if (isRepoList) return false;
-    if (destinationRepoLocation == null) return false;
-    if (!isCurrentRepoWriteMode) return false;
+        /// If the entry can't be moved (the user selected the same entry/path, for example)
+        /// Then null is used instead of the function, which disable the button.
+      ];
 
-    bool isSameRepo = originRepoLocation.compareTo(destinationRepoLocation) == 0
-        ? true
-        : false;
-    final isSamePath =
-        originPath.compareTo(destinationPath) == 0 ? true : false;
-
-    if (isSameRepo && isSamePath) return false;
-
-    return true;
+  void cancelAndDismiss(MoveEntriesActions moveEntriesActions) {
+    widget.onUpdateBottomSheet(BottomSheetType.gone, 0.0, '');
+    moveEntriesActions.cancel();
   }
 
   double _getButtonAspectRatio(Size? size) {

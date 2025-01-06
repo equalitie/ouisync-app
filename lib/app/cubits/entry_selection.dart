@@ -11,6 +11,7 @@ import 'package:path/path.dart' as p;
 
 import '../../generated/l10n.dart';
 import '../models/models.dart' show DirectoryEntry, FileEntry, FileSystemEntry;
+import '../utils/repo_path.dart' as repo_path;
 import '../utils/utils.dart'
     show AppLogger, CopyEntry, FileIO, MoveEntry, showSnackBar;
 import '../widgets/widgets.dart' show SelectionState;
@@ -86,7 +87,7 @@ class EntrySelectionState extends Equatable {
 /// Cubit for selecting multiple files or folders for copy, moving, delete, or download.
 class EntrySelectionCubit extends Cubit<EntrySelectionState>
     with CubitActions, AppLogger {
-  EntrySelectionCubit() : super(EntrySelectionState());
+  EntrySelectionCubit() : super(const EntrySelectionState());
 
   RepoCubit? _originRepoCubit;
   String get _originRepoInfoHash => _originRepoCubit?.state.infoHash ?? '';
@@ -304,15 +305,47 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
     required String destinationPath,
   }) async {
     final destinationRepoInfoHash = await destinationRepoCubit.infoHash;
-    final result = await _moveOrCopy(
-      context,
-      action: EntrySelectionActions.copy,
-      destinationRepoInfoHash: destinationRepoInfoHash,
-      destinationRepoCubit: destinationRepoCubit,
-      destinationPath: destinationPath,
-    );
 
-    return result;
+    final rootEntry = _entriesPath.entries.first;
+    final isRootSelected = rootEntry.value ==
+        (
+          isDir: true,
+          selected: true,
+          tristate: true,
+        );
+    final dirs = isRootSelected
+        ? [rootEntry]
+        : _entriesPath.entries.where((e) => e.value.isDir);
+    final discardRoot = !isRootSelected;
+
+    for (var dir in dirs) {
+      final recursive = dir.value.selected && dir.value.tristate == true;
+      final rootPath = discardRoot
+          ? dir.key.replaceAll(rootEntry.key, '').trim()
+          : rootEntry.key;
+
+      final children = recursive
+          ? [dir]
+          : _entriesPath.entries
+              .where((e) => !e.value.isDir && p.dirname(e.key) == dir.key);
+
+      if (children.isEmpty) continue;
+
+      final result = await _moveOrCopy(
+        context,
+        entries: children,
+        rootPath: rootPath,
+        action: EntrySelectionActions.copy,
+        destinationRepoInfoHash: destinationRepoInfoHash,
+        destinationRepoCubit: destinationRepoCubit,
+        destinationPath: destinationPath,
+        recursive: recursive,
+      );
+
+      if (!result) return false;
+    }
+
+    return true;
   }
 
   Future<bool> moveEntriesTo(
@@ -321,43 +354,86 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
     required String destinationPath,
   }) async {
     final destinationRepoInfoHash = await destinationRepoCubit.infoHash;
-    final result = await _moveOrCopy(
-      context,
-      action: EntrySelectionActions.move,
-      destinationRepoInfoHash: destinationRepoInfoHash,
-      destinationRepoCubit: destinationRepoCubit,
-      destinationPath: destinationPath,
-    );
 
-    return result;
+    final rootEntry = _entriesPath.entries.first;
+    final isRootSelected = rootEntry.value ==
+        (
+          isDir: true,
+          selected: true,
+          tristate: true,
+        );
+    final dirs = isRootSelected
+        ? [rootEntry]
+        : _entriesPath.entries.where((e) => e.value.isDir);
+    final discardRoot = !isRootSelected;
+
+    for (var dir in dirs) {
+      final recursive = dir.value.selected && dir.value.tristate == true;
+      final rootPath = discardRoot
+          ? dir.key.replaceAll(rootEntry.key, '').trim()
+          : rootEntry.key;
+
+      final children = recursive
+          ? [dir]
+          : _entriesPath.entries
+              .where((e) => !e.value.isDir && p.dirname(e.key) == dir.key);
+
+      if (children.isEmpty) continue;
+
+      final result = await _moveOrCopy(
+        context,
+        entries: children,
+        rootPath: rootPath,
+        action: EntrySelectionActions.move,
+        destinationRepoInfoHash: destinationRepoInfoHash,
+        destinationRepoCubit: destinationRepoCubit,
+        destinationPath: destinationPath,
+        recursive: recursive,
+      );
+
+      if (!result) return false;
+    }
+
+    return true;
   }
 
   Future<bool> _moveOrCopy(
     BuildContext context, {
+    required Iterable<
+            MapEntry<
+                String,
+                ({
+                  bool isDir,
+                  bool selected,
+                  bool? tristate,
+                })>>
+        entries,
+    required String rootPath,
     required EntrySelectionActions action,
     required String destinationRepoInfoHash,
     required RepoCubit destinationRepoCubit,
     required String destinationPath,
+    required bool recursive,
   }) async {
     final toRepoCubit = _originRepoInfoHash != destinationRepoInfoHash
         ? destinationRepoCubit
         : null;
 
     try {
-      final lastEntryPath = _entriesPath.entries.last.key;
-      await for (var entry in Stream.fromIterable(_entriesPath.entries)) {
+      final lastEntryPath = entries.last.key;
+      await for (var entry in Stream.fromIterable(entries)) {
         final path = entry.key;
         final state = entry.value;
 
         final type = state.isDir ? EntryType.directory : EntryType.file;
-        if (type == EntryType.directory) {
-          if (!state.selected) continue;
-        }
-
-        final fromPathSegment = path
-            .replaceAll('$pathSegmentToRemove', '')
-            .replaceFirst('/', '')
-            .trim();
+        final separator = repo_path.separator();
+        final entryName = p.basename(path);
+        final fromPathSegment = recursive
+            ? rootPath
+            : repo_path
+                .join(rootPath, entryName)
+                .replaceFirst(separator, '')
+                .trim();
         final navigateToDestination = path == lastEntryPath;
         if (action == EntrySelectionActions.copy) {
           await CopyEntry(
@@ -369,6 +445,7 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
           ).copy(
             toRepoCubit: toRepoCubit,
             fromPathSegment: fromPathSegment,
+            recursive: recursive,
             navigateToDestination: navigateToDestination,
           );
           continue;
@@ -384,6 +461,7 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
             toRepoCubit: destinationRepoCubit,
             fromPathSegment: fromPathSegment,
             navigateToDestination: navigateToDestination,
+            recursive: recursive,
           );
         }
       }

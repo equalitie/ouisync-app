@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ouisync/ouisync.dart';
+import 'package:ouisync/ouisync.dart' show EntryType;
 
 import '../cubits/cubits.dart' show RepoCubit;
 import '../widgets/widgets.dart' show FileAction;
@@ -28,6 +28,7 @@ class CopyEntry with EntryOps, AppLogger {
   Future<void> copy({
     required RepoCubit? toRepoCubit,
     required String fromPathSegment,
+    required bool recursive,
     required bool navigateToDestination,
   }) async {
     final dstRepo = (toRepoCubit ?? _repoCubit);
@@ -40,6 +41,7 @@ class CopyEntry with EntryOps, AppLogger {
         _srcPath,
         dstFolderPath,
         _type,
+        recursive,
         navigateToDestination,
       );
       return;
@@ -69,6 +71,7 @@ class CopyEntry with EntryOps, AppLogger {
         _srcPath,
         dstFolderPath,
         _type,
+        recursive,
         navigateToDestination,
       );
     }
@@ -101,6 +104,7 @@ class CopyEntry with EntryOps, AppLogger {
     String srcPath,
     String dstPath,
     EntryType type,
+    bool recursive,
     bool navigateToDestination,
   ) async {
     final newPath = await disambiguateEntryName(
@@ -113,6 +117,7 @@ class CopyEntry with EntryOps, AppLogger {
       srcPath,
       newPath,
       type,
+      recursive,
       navigateToDestination,
     );
   }
@@ -122,14 +127,15 @@ class CopyEntry with EntryOps, AppLogger {
     String srcPath,
     String dstPath,
     EntryType type,
+    bool recursive,
     bool navigateToDestination,
   ) async =>
-      await _repoCubit.copyEntry(
+      _repoCubit.copyEntry(
         source: srcPath,
         destination: dstPath,
         type: type,
         destinationRepoCubit: toRepoCubit,
-        recursive: false,
+        recursive: recursive,
         navigateToDestination: navigateToDestination,
       );
 }

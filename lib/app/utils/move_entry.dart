@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ouisync/ouisync.dart';
+import 'package:ouisync/ouisync.dart' show EntryType;
 
 import '../cubits/cubits.dart' show RepoCubit;
 import '../widgets/widgets.dart' show FileAction;
@@ -28,7 +28,8 @@ class MoveEntry with EntryOps, AppLogger {
   Future<void> move({
     required RepoCubit? toRepoCubit,
     required String fromPathSegment,
-    bool navigateToDestination = true,
+    required bool navigateToDestination,
+    required bool recursive,
   }) async {
     final dstRepo = (toRepoCubit ?? _repoCubit);
     final dstFolderPath = repo_path.join(_dstPath, fromPathSegment);
@@ -41,6 +42,7 @@ class MoveEntry with EntryOps, AppLogger {
         dstFolderPath,
         _type,
         navigateToDestination,
+        recursive,
       );
       return;
     }
@@ -70,6 +72,7 @@ class MoveEntry with EntryOps, AppLogger {
         dstFolderPath,
         _type,
         navigateToDestination,
+        recursive,
       );
     }
   }
@@ -78,7 +81,7 @@ class MoveEntry with EntryOps, AppLogger {
     RepoCubit? toRepoCubit,
     String srcPath,
     String dstPath,
-    bool navigateToDestination, //NEDED?
+    bool navigateToDestination, //NEEDED?
   ) async {
     try {
       final file = await _repoCubit.openFile(srcPath);
@@ -102,6 +105,7 @@ class MoveEntry with EntryOps, AppLogger {
     String dstPath,
     EntryType type,
     bool navigateToDestination,
+    bool recursive,
   ) async {
     final newPath = await disambiguateEntryName(
       repoCubit: (toRepoCubit ?? _repoCubit),
@@ -114,6 +118,7 @@ class MoveEntry with EntryOps, AppLogger {
       newPath,
       type,
       navigateToDestination,
+      recursive,
     );
   }
 
@@ -123,6 +128,7 @@ class MoveEntry with EntryOps, AppLogger {
     String dstPath,
     EntryType type,
     bool navigateToDestination,
+    bool recursive,
   ) async {
     if (toRepoCubit == null) {
       await _repoCubit.moveEntry(
@@ -138,7 +144,7 @@ class MoveEntry with EntryOps, AppLogger {
       type: type,
       source: srcPath,
       destination: dstPath,
-      recursive: false,
+      recursive: recursive,
       navigateToDestination: navigateToDestination,
     );
   }

@@ -217,6 +217,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     _bottomSheet.showMoveEntry(
       repoCubit: this,
       navigationCubit: _navigation,
+      type: sheetType,
       entryPath: entryPath,
       entryType: entryType,
     );
@@ -224,8 +225,15 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
 
   void showMoveSelectedEntriesBottomSheet({
     required BottomSheetType sheetType,
+    String? entryPath,
+    EntryType? entryType,
   }) {
-    _bottomSheet.showMoveSelectedEntries(repoCubit: this, type: sheetType);
+    _bottomSheet.showMoveSelectedEntries(
+      repoCubit: this,
+      type: sheetType,
+      entryPath: entryPath,
+      entryType: entryType,
+    );
   }
 
   Future<void> enableSync() async {
@@ -718,7 +726,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     required String destination,
     required EntryType type,
     RepoCubit? destinationRepoCubit,
-    bool recursive = false,
+    required bool recursive,
     bool navigateToDestination = true,
   }) async {
     emitUnlessClosed(state.copyWith(isLoading: true));
@@ -729,7 +737,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
               source,
               destination,
               destinationRepoCubit,
-              recursive: recursive,
+              recursive,
             );
 
       return result;
@@ -763,30 +771,35 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   Future<bool> _copyFolder(
     String source,
     String destination,
-    RepoCubit? destinationRepoCubit, {
-    bool? recursive = false,
-  }) async {
+    RepoCubit? destinationRepoCubit,
+    bool recursive,
+  ) async {
     final createFolderOk = await (destinationRepoCubit ?? this).createFolder(
       destination,
     );
-    if (!createFolderOk) return false;
-    if (!(recursive ?? false)) return true;
 
-    await openDirectory(source).then(
-      (contents) async {
-        for (var entry in contents) {
-          final from = repo_path.join(source, entry.name);
-          final to = repo_path.join(destination, entry.name);
-          final copyOk = entry.entryType == EntryType.file
-              ? await _copyFile(from, to, destinationRepoCubit)
-              : await _copyFolder(from, to, destinationRepoCubit);
+    if (createFolderOk && recursive) {
+      await openDirectory(source).then(
+        (contents) async {
+          for (var entry in contents) {
+            final from = repo_path.join(source, entry.name);
+            final to = repo_path.join(destination, entry.name);
+            final copyOk = entry.entryType == EntryType.file
+                ? await _copyFile(from, to, destinationRepoCubit)
+                : await _copyFolder(
+                    from,
+                    to,
+                    destinationRepoCubit,
+                    recursive,
+                  );
 
-          if (!copyOk) return false;
-        }
-      },
-    );
+            if (!copyOk) return false;
+          }
+        },
+      );
+    }
 
-    return true;
+    return createFolderOk;
   }
 
   Future<bool> moveEntry({
@@ -811,25 +824,29 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     required EntryType type,
     required String source,
     required String destination,
-    bool recursive = true,
+    required bool recursive,
     bool navigateToDestination = true,
   }) async {
     emitUnlessClosed(state.copyWith(isLoading: true));
     try {
-      final result = type == EntryType.file
-          ? await _moveFileToRepo(
-              destinationRepoCubit,
-              source,
-              destination,
-            )
-          : await _moveFolderToRepo(
-              destinationRepoCubit,
-              source,
-              destination,
-              recursive,
-            );
+      if (type == EntryType.file) {
+        final moveFileResult = await _moveFileToRepo(
+          destinationRepoCubit,
+          source,
+          destination,
+        );
 
-      return result;
+        return moveFileResult;
+      }
+
+      final moveFolderResult = await _moveFolderToRepo(
+        destinationRepoCubit,
+        source,
+        destination,
+        recursive,
+      );
+
+      return moveFolderResult;
     } catch (e, st) {
       loggy.app('Move entry from $source to $destination failed', e, st);
       return false;
@@ -853,12 +870,6 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     );
     if (copied) {
       await File.remove(_repo, source);
-
-      final parent = repo_path.dirname(source);
-      final parentContents = await Directory.open(_repo, parent);
-      if (parentContents.isEmpty) {
-        await Directory.remove(_repo, parent);
-      }
       return true;
     }
     return false;
@@ -874,12 +885,11 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
       source,
       destination,
       destinationRepoCubit,
-      recursive: recursive,
+      recursive,
     );
     if (copied) {
-      final contents = await Directory.open(_repo, source);
-      if (contents.isEmpty) {
-        await Directory.remove(_repo, source);
+      if (recursive) {
+        await Directory.remove(_repo, source, recursive: true);
       }
       return true;
     }
