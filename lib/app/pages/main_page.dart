@@ -744,8 +744,8 @@ class _MainPageState extends State<MainPage>
         },
       );
 
-  MoveSelectedEntriesDialog _moveSingleEntryState(MoveEntrySheetState state) =>
-      MoveSelectedEntriesDialog.single(
+  EntriesActionsDialog _moveSingleEntryState(MoveEntrySheetState state) =>
+      EntriesActionsDialog.single(
         context,
         reposCubit: widget.reposCubit,
         originRepoCubit: state.repoCubit,
@@ -756,10 +756,10 @@ class _MainPageState extends State<MainPage>
         onUpdateBottomSheet: updateBottomSheetInfo,
       );
 
-  MoveSelectedEntriesDialog _moveMultipleEntriesState(
+  EntriesActionsDialog _moveMultipleEntriesState(
     MoveSelectedEntriesSheetState state,
   ) =>
-      MoveSelectedEntriesDialog.multiple(
+      EntriesActionsDialog.multiple(
         context,
         reposCubit: widget.reposCubit,
         originRepoCubit: state.repoCubit,

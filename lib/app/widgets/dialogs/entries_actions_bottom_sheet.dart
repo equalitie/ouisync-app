@@ -16,11 +16,17 @@ import '../../cubits/cubits.dart'
         ReposCubit;
 import '../../utils/repo_path.dart' as repo_path;
 import '../../utils/utils.dart'
-    show AppLogger, Dialogs, Dimensions, Fields, MoveEntriesActions, MultiEntryActions;
+    show
+        AppLogger,
+        Dialogs,
+        Dimensions,
+        Fields,
+        MoveEntriesActions,
+        MultiEntryActions;
 import '../widgets.dart' show NegativeButton, PositiveButton;
 
-class MoveSelectedEntriesDialog extends StatefulWidget {
-  const MoveSelectedEntriesDialog.single(
+class EntriesActionsDialog extends StatefulWidget {
+  const EntriesActionsDialog.single(
     this.parentContext, {
     required this.reposCubit,
     required this.originRepoCubit,
@@ -31,7 +37,7 @@ class MoveSelectedEntriesDialog extends StatefulWidget {
     required this.onUpdateBottomSheet,
   }) : entrySelectionCubit = null;
 
-  const MoveSelectedEntriesDialog.multiple(
+  const EntriesActionsDialog.multiple(
     this.parentContext, {
     required this.reposCubit,
     required this.originRepoCubit,
@@ -59,11 +65,10 @@ class MoveSelectedEntriesDialog extends StatefulWidget {
   ) onUpdateBottomSheet;
 
   @override
-  State<MoveSelectedEntriesDialog> createState() =>
-      _MoveSelectedEntriesDialogState();
+  State<EntriesActionsDialog> createState() => _EntriesActionsDialogState();
 }
 
-class _MoveSelectedEntriesDialogState extends State<MoveSelectedEntriesDialog>
+class _EntriesActionsDialogState extends State<EntriesActionsDialog>
     with AppLogger {
   final bodyKey = GlobalKey();
   Size? widgetSize;
