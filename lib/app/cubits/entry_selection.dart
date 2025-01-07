@@ -424,7 +424,7 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
         final separator = repo_path.separator();
         final entryName = p.basename(path);
         final fromPathSegment = recursive
-            ? rootPath
+            ? rootPath.replaceFirst(separator, '').trim()
             : repo_path
                 .join(rootPath, entryName)
                 .replaceFirst(separator, '')
