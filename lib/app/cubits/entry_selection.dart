@@ -111,11 +111,6 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
   Map<String, ({bool isDir, bool selected, bool? tristate})>
       get selectedEntries => _entriesPath;
 
-  String? get rootDirPath => selectedEntries.entries
-      .firstWhereOrNull(
-          (e) => e.value.isDir && e.value.selected && e.value.tristate == true)
-      ?.key;
-
   String? get pathSegmentToRemove {
     final dirEntries = _entriesPath.entries.where((e) => e.value.isDir);
 
@@ -586,15 +581,24 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
       return (destinationOk: true, errorMessage: '');
     }
 
+    if (selectedEntries.isEmpty) {
+      return (destinationOk: false, errorMessage: '');
+    }
+
     bool validationOk = true;
     String errorMessage = '';
 
-    final startingPath = rootDirPath ??
-        selectedEntries.entries
-            .firstWhereOrNull((e) => e.value.tristate == true)
-            ?.key;
+    final rootEntry = selectedEntries.entries
+        .firstWhereOrNull((e) => e.value.tristate == true);
+    final startingPath = rootEntry?.value.isDir == true
+        ? rootEntry?.key ?? ''
+        : p.dirname(rootEntry?.key ?? '');
 
-    final isSameParent = destinationPath == p.dirname(startingPath!);
+    if (startingPath.isEmpty) {
+      return (destinationOk: false, errorMessage: '');
+    }
+
+    final isSameParent = destinationPath == p.dirname(startingPath);
     if (isSameParent) {
       validationOk = false;
       errorMessage = 'The destination is the same as the '
