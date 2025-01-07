@@ -260,8 +260,10 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
     }
 
     final positiveText = moveEntriesActions.getActionText(sheetType);
-    
+
     final aspectRatio = _getButtonAspectRatio(widgetSize);
+    final isDangerButton = sheetType == BottomSheetType.delete;
+
     final actions = _actions(
       canMove,
       aspectRatio,
@@ -269,6 +271,7 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
       positiveText,
       negativeAction,
       negativeText,
+      isDangerButton,
     );
 
     return Fields.dialogActions(
@@ -283,14 +286,14 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
     EntrySelectionCubit entrySelectionCubit,
     ReposCubit reposCubit,
     MoveEntriesActions moveEntriesActions,
-    BottomSheetType type,
+    BottomSheetType sheetType,
   ) =>
       BlocBuilder<EntrySelectionCubit, EntrySelectionState>(
         bloc: entrySelectionCubit,
         builder: (context, state) {
           bool enableAction = false;
           if ([BottomSheetType.download, BottomSheetType.delete]
-              .contains(type)) {
+              .contains(sheetType)) {
             enableAction = true;
           } else {
             final currentRepo = reposCubit.currentRepo;
@@ -341,9 +344,11 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
             cancelAndDismiss(moveEntriesActions);
           }
 
-          final positiveText = moveEntriesActions.getActionText(type);
+          final positiveText = moveEntriesActions.getActionText(sheetType);
 
           final aspectRatio = _getButtonAspectRatio(widgetSize);
+          final isDangerButton = sheetType == BottomSheetType.delete;
+
           final actions = _actions(
             enableAction,
             aspectRatio,
@@ -351,6 +356,7 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
             positiveText,
             negativeAction,
             negativeText,
+            isDangerButton,
           );
 
           return Fields.dialogActions(
@@ -368,6 +374,7 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
     String positiveText,
     void Function()? negativeAction,
     String negativeText,
+    bool isDangerButton,
   ) =>
       [
         NegativeButton(
@@ -379,6 +386,7 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
         PositiveButton(
           key: ValueKey('move_entry'),
           buttonsAspectRatio: aspectRatio,
+          isDangerButton: isDangerButton,
           buttonConstrains: Dimensions.sizeConstrainsBottomDialogAction,
           text: positiveText,
           onPressed: canMove ? positiveAction : null,

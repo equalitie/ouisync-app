@@ -20,6 +20,14 @@ class MultiEntryActions {
   final BuildContext _context;
   final EntrySelectionCubit _entrySelectionCubit;
 
+  int get totalSelectedDirs => _entrySelectionCubit.selectedEntries.entries
+      .where((e) => e.value.isDir && e.value.selected)
+      .length;
+
+  int get totalSelectedFiles => _entrySelectionCubit.selectedEntries.entries
+      .where((e) => !e.value.isDir)
+      .length;
+
   Future<bool> saveEntriesToDevice() async {
     String? defaultDirectoryPath = await _getDefaultPathForPlatform();
     if (defaultDirectoryPath == null) return false;
@@ -117,12 +125,16 @@ class MultiEntryActions {
     EntrySelectionActions actionType,
     Function action,
   ) async {
-    final strings = _getStringsForConfirmationDialog(actionType);
+    final totalsMessage =
+        'Folders: $totalSelectedDirs, Files: $totalSelectedFiles';
+    final strings = _getStringsForConfirmationDialog(actionType, totalsMessage);
+    final isDangerButton = actionType == EntrySelectionActions.delete;
     final confirmed = await _getConfirmation(
           context,
           strings.title,
           strings.message,
           strings.positiveText,
+          isDangerButton,
         ) ??
         false;
 
@@ -139,32 +151,35 @@ class MultiEntryActions {
     String title,
     String message,
     String positiveText,
-  }) _getStringsForConfirmationDialog(EntrySelectionActions actionType) {
+  }) _getStringsForConfirmationDialog(
+    EntrySelectionActions actionType,
+    String totalsMessage,
+  ) {
     final String title, message, positiveAction;
 
     switch (actionType) {
       case EntrySelectionActions.download:
         {
           title = 'Save to device';
-          message = 'Save selected entries to device';
+          message = 'Save selection:\n\n\t\t$totalsMessage';
           positiveAction = S.current.actionSave;
         }
       case EntrySelectionActions.copy:
         {
           title = 'Copy entries';
-          message = 'Copy entries here';
+          message = 'Copy selection here:\n\n\t\t$totalsMessage';
           positiveAction = S.current.actionCopy;
         }
       case EntrySelectionActions.move:
         {
           title = 'Move entries';
-          message = 'Move entries here';
+          message = 'Move selection here:\n\n\t\t$totalsMessage';
           positiveAction = S.current.actionMove;
         }
       case EntrySelectionActions.delete:
         {
           title = 'Delete entries';
-          message = 'Delete selected entries';
+          message = 'Delete selected entries:\n\n\t\t$totalsMessage';
           positiveAction = S.current.actionDelete;
         }
     }
@@ -177,6 +192,7 @@ class MultiEntryActions {
     String title,
     String message,
     String positiveAction,
+    bool isDangerButton,
   ) async {
     final result = await Dialogs.alertDialogWithActions(
       context,
@@ -193,6 +209,7 @@ class MultiEntryActions {
             ),
             PositiveButton(
               text: positiveAction,
+              isDangerButton: isDangerButton,
               onPressed: () async => await Navigator.of(context).maybePop(true),
               buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
             ),
@@ -215,6 +232,7 @@ class MultiEntryActions {
       destinationPath,
     );
     if (result.destinationOk) return true;
+    if (result.errorMessage.isEmpty) return false;
 
     await Dialogs.simpleAlertDialog(
       context,
