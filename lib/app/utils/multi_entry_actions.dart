@@ -160,26 +160,26 @@ class MultiEntryActions {
     switch (actionType) {
       case EntrySelectionActions.download:
         {
-          title = 'Save to device';
-          message = 'Save selection:\n\n\t\t$totalsMessage';
+          title = S.current.titleSaveEntriesToDevice;
+          message = S.current.messageSaveEntriesToDevice(totalsMessage);
           positiveAction = S.current.actionSave;
         }
       case EntrySelectionActions.copy:
         {
-          title = 'Copy entries';
-          message = 'Copy selection here:\n\n\t\t$totalsMessage';
+          title = S.current.titleCopyEntries;
+          message = S.current.messageCopyEntries(totalsMessage);
           positiveAction = S.current.actionCopy;
         }
       case EntrySelectionActions.move:
         {
-          title = 'Move entries';
-          message = 'Move selection here:\n\n\t\t$totalsMessage';
+          title = S.current.titleMoveEntries;
+          message = S.current.messageMoveEntries(totalsMessage);
           positiveAction = S.current.actionMove;
         }
       case EntrySelectionActions.delete:
         {
-          title = 'Delete entries';
-          message = 'Delete selected entries:\n\n\t\t$totalsMessage';
+          title = S.current.titleDeleteEntries;
+          message = S.current.messageDeleteEntries(totalsMessage);
           positiveAction = S.current.actionDelete;
         }
     }
