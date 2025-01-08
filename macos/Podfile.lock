@@ -28,13 +28,13 @@ PODS:
   - path_provider_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
-  - screen_retriever (0.0.1):
+  - screen_retriever_macos (0.0.1):
     - FlutterMacOS
-  - Sentry/HybridSDK (8.36.0)
-  - sentry_flutter (8.9.0):
+  - Sentry/HybridSDK (8.40.1)
+  - sentry_flutter (8.10.1):
     - Flutter
     - FlutterMacOS
-    - Sentry/HybridSDK (= 8.36.0)
+    - Sentry/HybridSDK (= 8.40.1)
   - share_plus (0.0.1):
     - FlutterMacOS
   - shared_preferences_foundation (0.0.1):
@@ -64,7 +64,7 @@ DEPENDENCIES:
   - ouisync (from `Flutter/ephemeral/.symlinks/plugins/ouisync/darwin`)
   - package_info_plus (from `Flutter/ephemeral/.symlinks/plugins/package_info_plus/macos`)
   - path_provider_foundation (from `Flutter/ephemeral/.symlinks/plugins/path_provider_foundation/darwin`)
-  - screen_retriever (from `Flutter/ephemeral/.symlinks/plugins/screen_retriever/macos`)
+  - screen_retriever_macos (from `Flutter/ephemeral/.symlinks/plugins/screen_retriever_macos/macos`)
   - sentry_flutter (from `Flutter/ephemeral/.symlinks/plugins/sentry_flutter/macos`)
   - share_plus (from `Flutter/ephemeral/.symlinks/plugins/share_plus/macos`)
   - shared_preferences_foundation (from `Flutter/ephemeral/.symlinks/plugins/shared_preferences_foundation/darwin`)
@@ -104,8 +104,8 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/package_info_plus/macos
   path_provider_foundation:
     :path: Flutter/ephemeral/.symlinks/plugins/path_provider_foundation/darwin
-  screen_retriever:
-    :path: Flutter/ephemeral/.symlinks/plugins/screen_retriever/macos
+  screen_retriever_macos:
+    :path: Flutter/ephemeral/.symlinks/plugins/screen_retriever_macos/macos
   sentry_flutter:
     :path: Flutter/ephemeral/.symlinks/plugins/sentry_flutter/macos
   share_plus:
@@ -123,7 +123,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   biometric_storage: 43caa6e7ef00e8e19c074216e7e1786dacda9e76
-  connectivity_plus: ddd7f30999e1faaef5967c23d5b6d503d10434db
+  connectivity_plus: 4c41c08fc6d7c91f63bc7aec70ffe3730b04f563
   cryptography_flutter: c9fa581b52e6fe19475432b6f44489c387f61e19
   desktop_drop: 69eeff437544aa619c8db7f4481b3a65f7696898
   device_info_plus: ce1b7762849d3ec103d0e0517299f2db7ad60720
@@ -131,20 +131,20 @@ SPEC CHECKSUMS:
   FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
   local_auth_darwin: 66e40372f1c29f383a314c738c7446e2f7fdadc3
   mobile_scanner: 0a05256215b047af27b9495db3b77640055e8824
-  network_info_plus: aeb9c4ed699cae128bc94b9d0f04f2389a414cbb
+  network_info_plus: 2cb02d8435635eae13b3b79279681985121cf30c
   ouisync: 2620ea99b935c285b7383dd4dbd64d37b0445cef
-  package_info_plus: fa739dd842b393193c5ca93c26798dff6e3d0e0c
+  package_info_plus: 12f1c5c2cfe8727ca46cbd0b26677728972d9a5b
   path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
-  screen_retriever: 59634572a57080243dd1bf715e55b6c54f241a38
-  Sentry: f8374b5415bc38dfb5645941b3ae31230fbeae57
-  sentry_flutter: 0eb93e5279eb41e2392212afe1ccd2fecb4f8cbe
-  share_plus: 36537c04ce0c3e3f5bd297ce4318b6d5ee5fd6cf
+  screen_retriever_macos: 776e0fa5d42c6163d2bf772d22478df4b302b161
+  Sentry: e9215d7b17f7902692b4f8700e061e4f853e3521
+  sentry_flutter: 927eed60d66951d1b0f1db37fe94ff5cb7c80231
+  share_plus: 1fa619de8392a4398bfaf176d441853922614e89
   shared_preferences_foundation: fcdcbc04712aee1108ac7fda236f363274528f78
   system_tray: e53c972838c69589ff2e77d6d3abfd71332f9e5d
-  url_launcher_macos: 5f437abeda8c85500ceb03f5c1938a8c5a705399
+  url_launcher_macos: c82c93949963e55b228a30115bd219499a6fe404
   webview_flutter_wkwebview: 0982481e3d9c78fd5c6f62a002fcd24fc791f1e4
   window_manager: 3a1844359a6295ab1e47659b1a777e36773cd6e8
 
 PODFILE CHECKSUM: 236401fc2c932af29a9fcf0e97baeeb2d750d367
 
-COCOAPODS: 1.15.2
+COCOAPODS: 1.16.2
