@@ -29,6 +29,7 @@ Runner/GeneratedPluginRegistrant.*
 /Build
 
 # Exceptions to above rules.
+!**/*ouisync/
 !default.mode1v3
 !default.mode2v3
 !default.pbxuser

@@ -64,8 +64,6 @@ android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
 android/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml
 android/app/src/main/ic_launcher-playstore.png
 
-ios/Runner/Assets.xcassets/AppIcon.appiconset
-
 # Keystore secrets (we used to have it here, but then moved all the secrets to
 # secrets/). Now it is a symbolic link to secrets/android/key.properties, but
 # we still don't want to commit it.
