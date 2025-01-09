@@ -562,6 +562,7 @@ void main() {
             '/folder1/folder2/file5.txt',
             '/folder1/folder2/file6.txt',
             '/folder1/folder2/file7.txt',
+            '/folder1/folder2/folder3',
             '/folder1/folder2/folder3/file1.txt',
           ];
 
