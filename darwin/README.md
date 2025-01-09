@@ -36,6 +36,8 @@ To build, you must have a mac and:
   the rust library on most suppoerted platforms; you can speed things up by
   editing `config.sh` from the `OuisyncLib` package and disabling un-needed
   platforms or opting for lighter release builds instead of debug
+* Importing and enabling `FileProvider.mobileconfig` will provide you with more
+  Console logs in case something goes wrong
 
 ## Troubleshooting
 * `Module 'biometric_storage' not found`: You can only build from Xcode by
