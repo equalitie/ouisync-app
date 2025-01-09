@@ -287,6 +287,140 @@ void main() {
   );
 
   testWidgets(
+    'Move all entries from one repo to another repo, with two folders selected in root',
+    (tester) => tester.runAsync(
+      () async {
+        await tester.pumpWidget(testApp(deps.createMainPage()));
+        await tester.pumpAndSettle();
+        final BuildContext context = tester.element(find.byType(MainPage));
+
+        final originRepoInfoHash = await originRepo.infoHash;
+
+        //Add one extra folder, /folder1/folder2/folder3, 2 files to new folder
+        {
+          await Directory.create(originRepo, 'folder4');
+
+          for (var i = 4; i < 7; i++) {
+            final filePath = p.join(
+              'folder4',
+              'file$i.txt',
+            );
+            final file = await File.create(originRepo, filePath);
+            await file.write(0, utf8.encode("123$i"));
+            await file.close();
+          }
+        }
+
+        final expectedFolder1SelectedAll =
+            <String, ({bool isDir, bool selected, bool? tristate})>{
+          '/folder1': (isDir: true, selected: true, tristate: true),
+          '/folder1/file0.txt': (isDir: false, selected: true, tristate: true),
+          '/folder1/file1.txt': (isDir: false, selected: true, tristate: true),
+          '/folder1/file2.txt': (isDir: false, selected: true, tristate: true),
+          '/folder1/file3.txt': (isDir: false, selected: true, tristate: true),
+          '/folder1/folder2': (isDir: true, selected: true, tristate: true),
+          '/folder1/folder2/file4.txt': (
+            isDir: false,
+            selected: true,
+            tristate: true
+          ),
+          '/folder1/folder2/file5.txt': (
+            isDir: false,
+            selected: true,
+            tristate: true
+          ),
+          '/folder1/folder2/file6.txt': (
+            isDir: false,
+            selected: true,
+            tristate: true
+          ),
+          '/folder1/folder2/file7.txt': (
+            isDir: false,
+            selected: true,
+            tristate: true
+          ),
+          '/folder4': (isDir: true, selected: true, tristate: true),
+          '/folder4/file4.txt': (isDir: false, selected: true, tristate: true),
+          '/folder4/file5.txt': (isDir: false, selected: true, tristate: true),
+          '/folder4/file6.txt': (isDir: false, selected: true, tristate: true),
+        };
+
+        final expectedDestinationContents = <String>[
+          '/folder1',
+          '/folder1/file0.txt',
+          '/folder1/file1.txt',
+          '/folder1/file2.txt',
+          '/folder1/file3.txt',
+          '/folder1/folder2',
+          '/folder1/folder2/file4.txt',
+          '/folder1/folder2/file5.txt',
+          '/folder1/folder2/file6.txt',
+          '/folder1/folder2/file7.txt',
+          '/folder4',
+          '/folder4/file4.txt',
+          '/folder4/file5.txt',
+          '/folder4/file6.txt',
+        ];
+
+        //Select folder1 selects all its contents
+        {
+          await originRepoCubit.startEntriesSelection();
+
+          await originRepoCubit.entrySelectionCubit.selectEntry(
+            originRepoInfoHash,
+            DirectoryEntry(path: '/folder1'),
+          );
+          await originRepoCubit.entrySelectionCubit.selectEntry(
+            originRepoInfoHash,
+            DirectoryEntry(path: '/folder4'),
+          );
+
+          final selectedEntries =
+              originRepoCubit.entrySelectionCubit.selectedEntries;
+
+          // Expect 10 selected: /folder1, /folder1/file0-3.txt, /folder1/folder2, /folder1/folder2/file4-7.txt
+          expect(selectedEntries, hasLength(14));
+
+          // Expect first entry to be /folder1. isDir: true, selected: true, tristate: true
+          expect(selectedEntries.keys.first, equals('/folder1'));
+          expect(selectedEntries.values.first.isDir, equals(true));
+          expect(selectedEntries.values.first.selected, equals(true));
+          expect(selectedEntries.values.first.tristate, equals(true));
+
+          // Expect all selected: /folder1, /folder1/file0-3.txt, /folder1/folder2, /folder1/folder2/file4-7.txt
+          expect(selectedEntries, equals(expectedFolder1SelectedAll));
+        }
+
+        // Move all entries form origin to destination root
+        {
+          final result =
+              await originRepoCubit.entrySelectionCubit.moveEntriesTo(
+            context,
+            destinationRepoCubit: destinationRepoCubit,
+            destinationPath: '/',
+          );
+          expect(result, equals(true));
+
+          final destinationContents = await _getDestinationContents(
+            destinationRepoCubit,
+            '/',
+            <FileSystemEntry>[],
+          ).then((value) => value.map((e) => e.path).toList());
+          expect(destinationContents, expectedDestinationContents);
+
+          // Expect no entries left in origin after moving to destination
+          final originContents = await _getDestinationContents(
+            originRepoCubit,
+            '/',
+            <FileSystemEntry>[],
+          );
+          expect(originContents.isEmpty, equals(true));
+        }
+      },
+    ),
+  );
+
+  testWidgets(
     'Move one file from one repo to another repo, no folder selected',
     (tester) => tester.runAsync(
       () async {
