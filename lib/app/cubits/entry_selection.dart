@@ -92,20 +92,6 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
   RepoCubit? _originRepoCubit;
   String get _originRepoInfoHash => _originRepoCubit?.state.infoHash ?? '';
 
-  final SplayTreeMap<String, ({String parent, bool isDir, bool tristate})>
-      _entries = SplayTreeMap((key1, key2) {
-    final isKey1Dir = p.extension(key1).isEmpty;
-    final isKey2Dir = p.extension(key2).isEmpty;
-
-    if (!isKey1Dir && !isKey2Dir) {
-      return key1.compareTo(key2);
-    }
-    if (isKey1Dir && isKey2Dir) {
-      return key1.compareTo(key2);
-    }
-    return isKey1Dir ? -1 : 1;
-  });
-
   /// key: Entry path
   /// value: (#1: isDir, #2: state) (directory tristate: null, _, true; file: true, _)
   /// Where tristate == null: at least one child selected; true: all children selected
