@@ -92,6 +92,20 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
   RepoCubit? _originRepoCubit;
   String get _originRepoInfoHash => _originRepoCubit?.state.infoHash ?? '';
 
+  final SplayTreeMap<String, ({String parent, bool isDir, bool tristate})>
+      _entries = SplayTreeMap((key1, key2) {
+    final isKey1Dir = p.extension(key1).isEmpty;
+    final isKey2Dir = p.extension(key2).isEmpty;
+
+    if (!isKey1Dir && !isKey2Dir) {
+      return key1.compareTo(key2);
+    }
+    if (isKey1Dir && isKey2Dir) {
+      return key1.compareTo(key2);
+    }
+    return isKey1Dir ? -1 : 1;
+  });
+
   /// key: Entry path
   /// value: (#1: isDir, #2: state) (directory tristate: null, _, true; file: true, _)
   /// Where tristate == null: at least one child selected; true: all children selected
@@ -315,9 +329,11 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
 
     for (var dir in dirs) {
       final recursive = dir.value.selected && dir.value.tristate == true;
-      final rootPath = discardRoot
-          ? dir.key.replaceAll(rootEntry.key, '').trim()
-          : rootEntry.key;
+      final dirPath = dir.value.selected ? dir.key : '';
+      final rootPath =
+          discardRoot ? dirPath.replaceAll(rootEntry.key, '').trim() : dirPath;
+      // discardRoot ? dir.key.replaceAll(rootEntry.key, '').trim() : dirPath;
+      //: rootEntry.key;
 
       final children = recursive
           ? [dir]
@@ -348,48 +364,533 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
     required RepoCubit destinationRepoCubit,
     required String destinationPath,
   }) async {
+    final separator = repo_path.separator();
+
     final destinationRepoInfoHash = await destinationRepoCubit.infoHash;
+    final toRepoCubit = _originRepoInfoHash != destinationRepoInfoHash
+        ? destinationRepoCubit
+        : null;
 
-    final rootEntry = _entriesPath.entries.first;
-    final isRootSelected = rootEntry.value ==
-        (
-          isDir: true,
-          selected: true,
-          tristate: true,
+    final discardedRoots = _entriesPath.entries
+        .where((e) =>
+            e.value.isDir && p.dirname(e.key) == separator && !e.value.selected)
+        .map((e) => e.key)
+        .toList();
+
+    final copyOfEntriesPath = {..._entriesPath};
+
+    final rootRecursiveDirs = copyOfEntriesPath.entries.where((e) =>
+        e.value.isDir && e.value.selected && p.dirname(e.key) == separator);
+    if (rootRecursiveDirs.isNotEmpty) {
+      for (var dir in rootRecursiveDirs) {
+        await MoveEntry(
+          context,
+          repoCubit: _originRepoCubit!,
+          srcPath: dir.key,
+          dstPath: destinationPath,
+          type: EntryType.directory,
+        ).move(
+          toRepoCubit: toRepoCubit,
+          fromPathSegment: dir.key.removePrefix(separator),
+          navigateToDestination: true,
+          recursive: true,
         );
-    final dirs = isRootSelected
-        ? [rootEntry]
-        : _entriesPath.entries.where((e) => e.value.isDir);
-    final discardRoot = !isRootSelected;
 
-    for (var dir in dirs) {
-      final recursive = dir.value.selected && dir.value.tristate == true;
-      final rootPath = discardRoot
-          ? dir.key.replaceAll(rootEntry.key, '').trim()
-          : rootEntry.key;
+        _entriesPath.removeWhere((key, value) => key.startsWith(dir.key));
+      }
 
-      final children = recursive
-          ? [dir]
-          : _entriesPath.entries
-              .where((e) => !e.value.isDir && p.dirname(e.key) == dir.key);
-
-      if (children.isEmpty) continue;
-
-      final result = await _moveOrCopy(
-        context,
-        entries: children,
-        rootPath: rootPath,
-        action: EntrySelectionActions.move,
-        destinationRepoInfoHash: destinationRepoInfoHash,
-        destinationRepoCubit: destinationRepoCubit,
-        destinationPath: destinationPath,
-        recursive: recursive,
-      );
-
-      if (!result) return false;
+      if (_entriesPath.isEmpty) return true;
     }
 
+    final copyOfEntriesPath2 = {..._entriesPath};
+
+    final otherRecursiveDirs = copyOfEntriesPath2.entries
+        .where((e) => e.value.isDir && e.value.selected);
+    if (otherRecursiveDirs.isNotEmpty) {
+      for (var dir in otherRecursiveDirs) {
+        final path = dir.key;
+
+        String rootPath = '';
+        final parent = p.dirname(path);
+        if (p.dirname(path) != separator) {
+          final segments = p.split(path);
+          final root = '$separator${segments[1]}';
+          rootPath = discardedRoots.contains(root)
+              ? parent.removePrefix(root)
+              : parent.removePrefix(separator);
+        }
+
+        final fileName = p.basename(path);
+        final fromPathSegment = repo_path
+            .join(
+              rootPath,
+              fileName,
+            )
+            .removePrefix(separator);
+
+        await MoveEntry(
+          context,
+          repoCubit: _originRepoCubit!,
+          srcPath: dir.key,
+          dstPath: destinationPath,
+          type: EntryType.directory,
+        ).move(
+          toRepoCubit: toRepoCubit,
+          fromPathSegment: fromPathSegment,
+          navigateToDestination: true,
+          recursive: true,
+        );
+
+        _entriesPath.removeWhere((key, value) => key.startsWith(dir.key));
+      }
+
+      if (_entriesPath.isEmpty) return true;
+    }
+
+    var copyOfEntriesPath3 = {..._entriesPath};
+
+    final result = <String, ({bool isDir, bool selected, bool? tristate})>{};
+    final rest = copyOfEntriesPath3.entries.where((e) => e.value.isDir);
+    for (var entry in rest) {
+      final children = copyOfEntriesPath3.entries
+          .where((e) => !e.value.isDir && p.dirname(e.key) == entry.key);
+
+      if (children.isEmpty) {
+        result[entry.key] = entry.value;
+      }
+      if (result.containsKey(p.dirname(entry.key))) {
+        result[entry.key] = entry.value;
+      }
+    }
+
+    copyOfEntriesPath3.removeWhere((key, value) => result.keys.contains(key));
+
+    // final copyOfEntriesPath3 = {..._entriesPath};
+    final files = copyOfEntriesPath3.entries.where((e) => !e.value.isDir);
+    if (files.isNotEmpty) {
+      for (var file in files) {
+        final path = file.key;
+
+        final parent = p.dirname(path);
+        String rootPath = '';
+
+        final parentEntry =
+            copyOfEntriesPath3.entries.firstWhereOrNull((e) => e.key == parent);
+        if (parentEntry != null) {
+          if (p.dirname(path) != separator) {
+            final segments = p.split(path);
+            final root = '$separator${segments[1]}';
+            rootPath = discardedRoots.contains(root)
+                ? parent.removePrefix(root)
+                : parent.removePrefix(separator);
+          }
+        } else {
+          rootPath = '';
+        }
+
+        final fileName = p.basename(path);
+        final fromPathSegment = repo_path
+            .join(
+              rootPath,
+              fileName,
+            )
+            .removePrefix(separator);
+
+        await MoveEntry(
+          context,
+          repoCubit: _originRepoCubit!,
+          srcPath: path,
+          dstPath: destinationPath,
+          type: EntryType.file,
+        ).move(
+          toRepoCubit: toRepoCubit,
+          fromPathSegment: fromPathSegment,
+          navigateToDestination: true,
+          recursive: false,
+        );
+
+        // final siblings = _entriesPath.entries.where(
+        //     (e) => e.key != path && p.dirname(e.key) == parent && !e.value.isDir);
+        // siblings.isEmpty
+        //     ? _entriesPath.removeWhere((key, value) => key.startsWith(parent))
+        //     : _entriesPath.remove(path);
+      }
+    }
+
+    _entriesPath.clear();
+
     return true;
+
+    // final discardedRoots = _entriesPath.entries
+    //     .where((e) =>
+    //         e.value.isDir && p.dirname(e.key) == separator && !e.value.selected)
+    //     .map((e) => e.key)
+    //     .toList();
+
+    // final entries = _entriesPath.entries.where((e) => e.value.selected);
+    // for (int i = 0; i < entries.length; i++) {
+    //   final entry = entries.elementAt(i);
+    //   final path = entry.key;
+    //   final state = entry.value;
+
+    //   final type = state.isDir ? EntryType.directory : EntryType.file;
+
+    //   final recursive = state.isDir && state.selected;
+
+    //   String rootPath = '';
+    //   if (p.dirname(path) != separator) {
+    //     final segments = p.split(path);
+    //     final root = '$separator${segments[1]}';
+    //     rootPath = discardedRoots.contains(root)
+    //         ? path.removePrefix(root)
+    //         : path.removePrefix(separator);
+    //   }
+    //   final fromPathSegment = repo_path.join(rootPath, p.basename(path));
+    //   await MoveEntry(
+    //     context,
+    //     repoCubit: _originRepoCubit!,
+    //     srcPath: path,
+    //     dstPath: destinationPath,
+    //     type: type,
+    //   ).move(
+    //     toRepoCubit: toRepoCubit,
+    //     fromPathSegment: fromPathSegment,
+    //     navigateToDestination: true,
+    //     recursive: recursive,
+    //   );
+    // }
+
+    // return true;
+
+    // final discardedRoots = _entriesPath.entries
+    //     .where((e) =>
+    //         e.value.isDir && p.dirname(e.key) == separator && !e.value.selected)
+    //     .map((e) => e.key)
+    //     .toList();
+
+    // final rootEntry = _entriesPath.entries.first;
+    // final isRootSelected = rootEntry.value ==
+    //     (
+    //       isDir: true,
+    //       selected: true,
+    //       tristate: true,
+    //     );
+    // final dirs = isRootSelected
+    //     ? [rootEntry]
+    //     : _entriesPath.entries.where((e) => e.value.isDir);
+    // final discardRoot = !isRootSelected;
+
+    // for (var dir in dirs) {
+    //   final recursive = dir.value.selected && dir.value.tristate == true;
+    //   final dirPath = dir.value.selected ? dir.key : '';
+
+    //   final rootPath =
+    //       discardRoot ? dirPath.replaceAll(rootEntry.key, '').trim() : dirPath;
+    //   // discardRoot ? dir.key.replaceAll(rootEntry.key, '').trim() : dirPath;
+    //   //: rootEntry.key;
+
+    //   final children = recursive
+    //       ? [dir]
+    //       : _entriesPath.entries
+    //           .where((e) => !e.value.isDir && p.dirname(e.key) == dir.key);
+
+    //   if (children.isEmpty) continue;
+
+    //   final result = await _moveOrCopy(
+    //     context,
+    //     entries: children,
+    //     rootPath: rootPath,
+    //     action: EntrySelectionActions.move,
+    //     destinationRepoInfoHash: destinationRepoInfoHash,
+    //     destinationRepoCubit: destinationRepoCubit,
+    //     destinationPath: destinationPath,
+    //     recursive: recursive,
+    //   );
+
+    //   if (!result) return false;
+    // }
+
+    // return true;
+
+//--------------------------
+//=========================
+//=========================
+//--------------------------
+
+    // final currentEntries =
+    //     _entriesPath.entries.where((e) => e.value.selected).toList();
+
+    // final recursiveKeys = currentEntries
+    //     .where((ce) =>
+    //         ce.value.isDir && ce.value.selected && p.isWithin(parent, child))
+    //     .map((ce) => ce.key)
+    //     .toList();
+
+    // final recursiveFolders = currentEntries
+    //     .where((ce) => ce.value.isDir && recursiveKeys.contains(ce.key))
+    //     .toList();
+
+    // if (recursiveFolders.isNotEmpty) {
+    //   for (var dir in recursiveFolders) {
+    //     int index = recursiveKeys.indexOf(dir.key);
+    //     if (index > 0) {
+
+    //     }
+
+    //     final dirsRecursiveResult = await _moveOrCopy(
+    //       context,
+    //       entries: [dir],
+    //       rootPath: '',
+    //       action: EntrySelectionActions.move,
+    //       destinationRepoInfoHash: destinationRepoInfoHash,
+    //       destinationRepoCubit: destinationRepoCubit,
+    //       destinationPath: destinationPath,
+    //       recursive: true,
+    //     );
+
+    //     if (!dirsRecursiveResult) return false;
+    //   }
+    // }
+
+    // final rootFiles = currentEntries
+    //     .where((ce) => !ce.value.isDir && p.dirname(ce.key) == separator)
+    //     .toList();
+
+    // if (rootFiles.isNotEmpty) {
+    //   final rootPath = p.dirname(rootFiles.first.key);
+    //   final filesResult = await _moveOrCopy(
+    //     context,
+    //     entries: rootFiles,
+    //     rootPath: rootPath,
+    //     action: EntrySelectionActions.move,
+    //     destinationRepoInfoHash: destinationRepoInfoHash,
+    //     destinationRepoCubit: destinationRepoCubit,
+    //     destinationPath: destinationPath,
+    //     recursive: false,
+    //   );
+
+    //   if (!filesResult) return false;
+    // }
+
+    // final files = currentEntries
+    //     .where((ce) =>
+    //         !ce.value.isDir &&
+    //         p.dirname(ce.key) != separator &&
+    //         !recursiveKeys.contains(ce.key))
+    //     .toList();
+
+    // final segment = p.split(files.first.key)[1];
+    // final rootPath = '$separator$segment';
+
+    // if (files.isNotEmpty) {
+    //   for (var file in files) {
+    //     // parent == prefix ? parent : parent.removePrefix(prefix);
+    //     final filesResult = await _moveOrCopy(
+    //       context,
+    //       entries: [file],
+    //       rootPath: rootPath,
+    //       action: EntrySelectionActions.move,
+    //       destinationRepoInfoHash: destinationRepoInfoHash,
+    //       destinationRepoCubit: destinationRepoCubit,
+    //       destinationPath: destinationPath,
+    //       recursive: false,
+    //     );
+
+    //     if (!filesResult) return false;
+    //   }
+    // }
+
+    // return true;
+
+    //====================******************************
+
+    // final separator = root ?? repo_path.separator();
+
+    // final currentEntries = _entriesPath.entries
+    //     .where((e) => p.dirname(e.key) == separator)
+    //     .toList();
+    // final destinationRepoInfoHash = await destinationRepoCubit.infoHash;
+
+    // final filesOnRoot = currentEntries //_entriesPath.entries
+    //     .where((e) =>
+    //         !e.value.isDir && e.value.selected && p.dirname(e.key) == separator)
+    //     .toList();
+    // if (filesOnRoot.isNotEmpty) {
+    //   final rootPath = p.dirname(filesOnRoot.first.key);
+    //   final filesResult = await _moveOrCopy(
+    //     context,
+    //     entries: filesOnRoot,
+    //     rootPath: rootPath, //'',
+    //     action: EntrySelectionActions.move,
+    //     destinationRepoInfoHash: destinationRepoInfoHash,
+    //     destinationRepoCubit: destinationRepoCubit,
+    //     destinationPath: destinationPath,
+    //     recursive: false,
+    //   );
+
+    //   if (!filesResult) return false;
+    //   // notFirst = true;
+    // }
+
+    // final dirsOnRootRecursive = currentEntries // _entriesPath.entries
+    //     .where((e) =>
+    //         e.value.isDir && e.value.selected && p.dirname(e.key) == separator)
+    //     .toList();
+    // if (dirsOnRootRecursive.isNotEmpty) {
+    //   for (var dir in dirsOnRootRecursive) {
+    //     final dirsRecursiveResult = await _moveOrCopy(
+    //       context,
+    //       entries: dirsOnRootRecursive,
+    //       rootPath: '', // dir.key,
+    //       action: EntrySelectionActions.move,
+    //       destinationRepoInfoHash: destinationRepoInfoHash,
+    //       destinationRepoCubit: destinationRepoCubit,
+    //       destinationPath: destinationPath,
+    //       recursive: true,
+    //     );
+
+    //     if (!dirsRecursiveResult) return false;
+    //     // notFirst = true;
+    //   }
+    // }
+
+    // final dirsOnRoot = currentEntries //_entriesPath.entries
+    //     .where((e) =>
+    //         e.value.isDir && !e.value.selected && p.dirname(e.key) == separator)
+    //     .toList();
+    // if (dirsOnRoot.isEmpty) return true;
+
+    // for (var dir in dirsOnRoot) {
+    //   final files = _entriesPath.entries
+    //       .where((e) => !e.value.isDir && p.dirname(e.key) == dir.key);
+
+    //   bool hadFiles = false;
+
+    //   if (files.isNotEmpty) {
+    //     hadFiles = true;
+
+    //     final rootPath = p.dirname(files.first.key);
+    //     final filesResult = await _moveOrCopy(
+    //       context,
+    //       entries: files,
+    //       rootPath: rootPath, //'',
+    //       action: EntrySelectionActions.move,
+    //       destinationRepoInfoHash: destinationRepoInfoHash,
+    //       destinationRepoCubit: destinationRepoCubit,
+    //       destinationPath: destinationPath,
+    //       recursive: false,
+    //     );
+
+    //     if (!filesResult) return false;
+    //   }
+
+    //   final dirs = _entriesPath.entries
+    //       .where((e) => e.value.isDir && p.dirname(e.key) == dir.key);
+
+    //   if (dirs.isNotEmpty) {
+    //     for (var d in dirs) {
+    //       final rootPath = d.key.removePrefix(dir.key).trim();
+    //       final dirsResult = await _moveOrCopy(
+    //         context,
+    //         entries: [d],
+    //         rootPath: rootPath, //'',
+    //         action: EntrySelectionActions.move,
+    //         destinationRepoInfoHash: destinationRepoInfoHash,
+    //         destinationRepoCubit: destinationRepoCubit,
+    //         destinationPath: destinationPath,
+    //         recursive: false,
+    //       );
+
+    //       if (!dirsResult) return false;
+    //     }
+    //   }
+
+    // ========================================
+
+    // await moveEntriesTo(
+    //       context,
+    //       root: d.key,
+    //       destinationRepoCubit: destinationRepoCubit,
+    //       destinationPath: destinationPath,
+    //     );
+
+    // final children =
+    //     _entriesPath.entries.where((e) => p.isWithin(dir.key, e.key));
+    // // _entriesPath.entries.where((e) => p.dirname(e.key) == dir.key);
+
+    // // final removeRoot = true;
+
+    // final rootPath = dir.key;
+    // // removeRoot ? dir.key.replaceAll(dir.key, '').trim() : dir.key;
+
+    // final result = await _moveOrCopy(
+    //   context,
+    //   entries: children,
+    //   rootPath: rootPath,
+    //   action: EntrySelectionActions.move,
+    //   destinationRepoInfoHash: destinationRepoInfoHash,
+    //   destinationRepoCubit: destinationRepoCubit,
+    //   destinationPath: destinationPath,
+    //   recursive: false,
+    // );
+
+    // if (!result) return false;
+    // }
+
+    // return true;
+
+    // final rootEntry = _entriesPath.entries.first;
+    // final isRootSelected = rootEntry.value ==
+    //     (
+    //       isDir: true,
+    //       selected: true,
+    //       tristate: true,
+    //     );
+    // final dirs = isRootSelected
+    //     ? [rootEntry]
+    //     : _entriesPath.entries
+    //         .where((e) => e.value.isDir && e.value.tristate != false);
+
+    // final discardRoot = !isRootSelected;
+
+    // bool keepDir = false;
+    // for (var dir in dirs) {
+    //   final recursive = dir.value.selected && dir.value.tristate == true;
+    //   final children = recursive
+    //       ? [dir]
+    //       : _entriesPath.entries
+    //           .where((e) => !e.value.isDir && p.dirname(e.key) == dir.key);
+
+    //   if (dir.key == rootEntry.key) {
+    //     keepDir = children.where((e) => e.value.isDir).isNotEmpty;
+    //   }
+    //   if (children.isEmpty && !dir.value.selected) continue;
+
+    //   final dirPath = recursive
+    //       ? dir.key
+    //       : !keepDir
+    //           ? ''
+    //           : dir.value.tristate == true
+    //               ? dir.key
+    //               : '';
+    //   final rootPath =
+    //       discardRoot ? dirPath.replaceAll(rootEntry.key, '').trim() : dirPath;
+
+    //   final result = await _moveOrCopy(
+    //     context,
+    //     entries: children,
+    //     rootPath: rootPath,
+    //     action: EntrySelectionActions.move,
+    //     destinationRepoInfoHash: destinationRepoInfoHash,
+    //     destinationRepoCubit: destinationRepoCubit,
+    //     destinationPath: destinationPath,
+    //     recursive: recursive,
+    //   );
+
+    //   if (!result) return false;
+    // }
+
+    // return true;
   }
 
   Future<bool> _moveOrCopy(
@@ -414,14 +915,15 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
         ? destinationRepoCubit
         : null;
 
+    final separator = repo_path.separator();
+
     try {
       final lastEntryPath = entries.last.key;
       await for (var entry in Stream.fromIterable(entries)) {
         final path = entry.key;
         final state = entry.value;
-
         final type = state.isDir ? EntryType.directory : EntryType.file;
-        final separator = repo_path.separator();
+
         final entryName = p.basename(path);
         final fromPathSegment = recursive
             ? rootPath.replaceFirst(separator, '').trim()
@@ -429,6 +931,9 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
                 .join(rootPath, entryName)
                 .replaceFirst(separator, '')
                 .trim();
+        // final fromPathSegment =
+        //     path.removePrefix(rootPath).replaceFirst(separator, '').trim();
+
         final navigateToDestination = path == lastEntryPath;
         if (action == EntrySelectionActions.copy) {
           await CopyEntry(
@@ -614,6 +1119,12 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
     }
 
     return (destinationOk: validationOk, errorMessage: errorMessage);
+  }
+}
+
+extension on String {
+  removePrefix(String rootPath) {
+    return replaceFirst(rootPath, '').trim();
   }
 }
 
