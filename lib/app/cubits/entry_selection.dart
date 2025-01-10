@@ -357,9 +357,11 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
         ? destinationRepoCubit
         : null;
 
-    // If there are dirs in root that were not selected, but have selected children,
-    // we need to remove this segment from its children paths, to avoid moving
-    // these dirs to the destination.
+    // If there are dirs in root that were not selected, but have selected
+    // children, we need to remove this segment from its children paths, to
+    // avoid moving these dirs to the destination.
+    //
+    // [discardedRoots]: a collection of the dirs on the root not selected.
     final discardedRoots = _entriesPath.entries
         .where(
           (e) =>
@@ -371,6 +373,8 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
 
     // If any root dirs are selected, we can move them recursively.
     // Root dir is any dir that is not a child of another dir.
+    //
+    // [rootRecursiveDirs]: a copy of the root dirs, and are selected.
     //
     // We create a copy of the selected entries because we will update the
     // original, removing the moved entries after each operation. If we don't do
@@ -396,29 +400,23 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
 
     if (_entriesPath.isEmpty) return true;
 
+    // We can also move any other dir that was selected, recursively.
+    //
+    // [noRootRecursiveDirs]: a copy of the dirs that are not root dirs, and are
+    // selected.
     final noRootRecursiveDirs = [
       ..._entriesPath.entries.where((e) => e.value.isDir && e.value.selected),
     ];
     for (var dir in noRootRecursiveDirs) {
       final path = dir.key;
-
-      String rootPath = '';
       final parent = p.dirname(path);
-      if (p.dirname(path) != rootSymbol) {
-        final segments = p.split(path);
-        final root = '$rootSymbol${segments[1]}';
-        rootPath = discardedRoots.contains(root)
-            ? parent.removePrefix(root)
-            : parent.removePrefix(rootSymbol);
-      }
 
-      final fileName = p.basename(path);
-      final fromPathSegment = repo_path
-          .join(
-            rootPath,
-            fileName,
-          )
-          .removePrefix(rootSymbol);
+      final fromPathSegment = getFromPathSegment(
+        rootSymbol,
+        parent,
+        path,
+        discardedRoots,
+      );
 
       await _move(
         context,
@@ -436,8 +434,18 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
 
     if (_entriesPath.isEmpty) return true;
 
-    final unselectedDirs = <String>[];
+    // Any dir that was not selected, and has selected children left,
+    // we need to remove it from entriesPath to avoid moving it to the
+    // destination. We keep its children, this is, files.
+    //
+    // [pendingDirs]: a copy of the dirs still in entriesPath (no selected,
+    // therefore no recursive), for any file left.
+    //
+    // [unselectedDirs]: dirs paths not selected, to be removed.
+    // We don't want to move these to the destination; we only want to move
+    // any files left in these dirs.
     final pendingDirs = [..._entriesPath.entries.where((e) => e.value.isDir)];
+    final unselectedDirs = <String>[];
     for (var dir in pendingDirs) {
       final children = _entriesPath.entries
           .where((e) => !e.value.isDir && p.dirname(e.key) == dir.key);
@@ -445,43 +453,59 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
       if (children.isEmpty) {
         unselectedDirs.add(dir.key);
       }
+
+      // If the parent dir is not selected, we don't want to move it.
+      // This is for those cases in which from one subfolder, only the files are
+      // selected, not the dir.
       if (unselectedDirs.contains(p.dirname(dir.key))) {
         unselectedDirs.add(dir.key);
       }
     }
 
+    // We remove the unselected dirs from entriesPath.
     _entriesPath.removeWhere((key, value) => unselectedDirs.contains(key));
 
+    // Now we can move the files left (from the unselected dirs).
+    //
+    // [pendingFiles]: files left to be moved.
     final pendingFiles = [
       ..._entriesPath.entries.where((e) => !e.value.isDir),
     ];
     for (var file in pendingFiles) {
       final path = file.key;
-
       final parent = p.dirname(path);
-      String rootPath = '';
 
-      final parentEntry =
-          _entriesPath.entries.firstWhereOrNull((e) => e.key == parent);
-      if (parentEntry != null) {
-        if (p.dirname(path) != rootSymbol) {
-          final segments = p.split(path);
-          final root = '$rootSymbol${segments[1]}';
-          rootPath = discardedRoots.contains(root)
-              ? parent.removePrefix(root)
-              : parent.removePrefix(rootSymbol);
-        }
-      } else {
-        rootPath = '';
-      }
+      final parentEntry = _entriesPath.entries.firstWhereOrNull(
+        (e) => e.key == parent,
+      );
+      final isOrphan = parentEntry == null;
+      final fromPathSegment = getFromPathSegment(
+        rootSymbol,
+        parent,
+        path,
+        discardedRoots,
+        isOrphan,
+      );
 
-      final fileName = p.basename(path);
-      final fromPathSegment = repo_path
-          .join(
-            rootPath,
-            fileName,
-          )
-          .removePrefix(rootSymbol);
+      // if (parentEntry != null) {
+      //   if (p.dirname(path) != rootSymbol) {
+      //     final segments = p.split(path);
+      //     final root = '$rootSymbol${segments[1]}';
+      //     rootPath = discardedRoots.contains(root)
+      //         ? parent.removePrefix(root)
+      //         : parent.removePrefix(rootSymbol);
+      //   }
+      // } else {
+      //   rootPath = '';
+      // }
+
+      // final fileName = p.basename(path);
+      // final fromPathSegment = repo_path
+      //     .join(
+      //       rootPath,
+      //       fileName,
+      //     )
+      //     .removePrefix(rootSymbol);
 
       await _move(
         context,
@@ -498,6 +522,42 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
     _entriesPath.clear();
 
     return true;
+  }
+
+  /// Removes any discarded segment of the entry path, and removes the rootSymbol.
+  ///
+  /// [rootSymbol] is the root symbol for a path in Ouisync.
+  /// [parent] the parent path for the entry.
+  /// [path] the full path of the entry.
+  /// [discardedRoots] An iterable collection of strings representing the roots
+  /// to be removed from the [path].
+  /// [isOrphan] if the entry is to be moved without its parent.
+  String getFromPathSegment(
+    String rootSymbol,
+    String parent,
+    String path,
+    Iterable<String> discardedRoots, [
+    bool isOrphan = false,
+  ]) {
+    String newEntryPath = '';
+    if (parent != rootSymbol && !isOrphan) {
+      final segments = p.split(path);
+      final rootSegment = '$rootSymbol${segments[1]}';
+
+      newEntryPath = discardedRoots.contains(rootSegment)
+          ? parent.removePrefix(rootSegment)
+          : parent.removePrefix(rootSymbol);
+    }
+
+    final fileName = p.basename(path);
+    final fromPathSegment = repo_path
+        .join(
+          newEntryPath,
+          fileName,
+        )
+        .removePrefix(rootSymbol);
+
+    return fromPathSegment;
   }
 
   Future<void> _copy(
