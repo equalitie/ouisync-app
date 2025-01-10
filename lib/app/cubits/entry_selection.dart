@@ -294,59 +294,112 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
     return true;
   }
 
+  // Future<bool> copyEntriesTo(
+  //   BuildContext context, {
+  //   required RepoCubit destinationRepoCubit,
+  //   required String destinationPath,
+  // }) async {
+  //   final destinationRepoInfoHash = await destinationRepoCubit.infoHash;
+
+  //   final rootEntry = _entriesPath.entries.first;
+  //   final isRootSelected = rootEntry.value ==
+  //       (
+  //         isDir: true,
+  //         selected: true,
+  //         tristate: true,
+  //       );
+  //   final dirs = isRootSelected
+  //       ? [rootEntry]
+  //       : _entriesPath.entries.where((e) => e.value.isDir);
+  //   final discardRoot = !isRootSelected;
+
+  //   for (var dir in dirs) {
+  //     final recursive = dir.value.selected && dir.value.tristate == true;
+  //     final dirPath = dir.value.selected ? dir.key : '';
+  //     final rootPath =
+  //         discardRoot ? dirPath.replaceAll(rootEntry.key, '').trim() : dirPath;
+
+  //     final children = recursive
+  //         ? [dir]
+  //         : _entriesPath.entries
+  //             .where((e) => !e.value.isDir && p.dirname(e.key) == dir.key);
+
+  //     if (children.isEmpty) continue;
+
+  //     final result = await _moveOrCopy(
+  //       context,
+  //       entries: children,
+  //       rootPath: rootPath,
+  //       action: EntrySelectionActions.copy,
+  //       destinationRepoInfoHash: destinationRepoInfoHash,
+  //       destinationRepoCubit: destinationRepoCubit,
+  //       destinationPath: destinationPath,
+  //       recursive: recursive,
+  //     );
+
+  //     if (!result) return false;
+  //   }
+
+  //   return true;
+  // }
+
+  // Future<bool> _moveOrCopy(
+  //   BuildContext context, {
+  //   required EntrySelectionActions action,
+  //   required RepoCubit originRepoCubit,
+  //   required RepoCubit? toRepoCubit,
+  //   required String destinationPath,
+  //   required String sourcePath,
+  //   required String fromPathSegment,
+  //   required EntryType type,
+  //   required bool recursive,
+  // }) async {
+  //   try {
+  //     await (action == EntrySelectionActions.copy ? _copy : _move)(
+  //       context,
+  //       originRepoCubit: originRepoCubit,
+  //       toRepoCubit: toRepoCubit,
+  //       destinationPath: destinationPath,
+  //       sourcePath: sourcePath,
+  //       fromPathSegment: fromPathSegment,
+  //       type: type,
+  //       recursive: recursive,
+  //     );
+  //   } on Exception catch (e) {
+  //     loggy.debug('Error ${action.name}ing selected entries: ${e.toString()}');
+  //     return false;
+  //   }
+
+  //   return true;
+  // }
+
   Future<bool> copyEntriesTo(
     BuildContext context, {
     required RepoCubit destinationRepoCubit,
     required String destinationPath,
-  }) async {
-    final destinationRepoInfoHash = await destinationRepoCubit.infoHash;
-
-    final rootEntry = _entriesPath.entries.first;
-    final isRootSelected = rootEntry.value ==
-        (
-          isDir: true,
-          selected: true,
-          tristate: true,
-        );
-    final dirs = isRootSelected
-        ? [rootEntry]
-        : _entriesPath.entries.where((e) => e.value.isDir);
-    final discardRoot = !isRootSelected;
-
-    for (var dir in dirs) {
-      final recursive = dir.value.selected && dir.value.tristate == true;
-      final dirPath = dir.value.selected ? dir.key : '';
-      final rootPath =
-          discardRoot ? dirPath.replaceAll(rootEntry.key, '').trim() : dirPath;
-      // discardRoot ? dir.key.replaceAll(rootEntry.key, '').trim() : dirPath;
-      //: rootEntry.key;
-
-      final children = recursive
-          ? [dir]
-          : _entriesPath.entries
-              .where((e) => !e.value.isDir && p.dirname(e.key) == dir.key);
-
-      if (children.isEmpty) continue;
-
-      final result = await _moveOrCopy(
+  }) async =>
+      _moveOrCopySelectedEntries(
         context,
-        entries: children,
-        rootPath: rootPath,
         action: EntrySelectionActions.copy,
-        destinationRepoInfoHash: destinationRepoInfoHash,
         destinationRepoCubit: destinationRepoCubit,
         destinationPath: destinationPath,
-        recursive: recursive,
       );
-
-      if (!result) return false;
-    }
-
-    return true;
-  }
 
   Future<bool> moveEntriesTo(
     BuildContext context, {
+    required RepoCubit destinationRepoCubit,
+    required String destinationPath,
+  }) async =>
+      _moveOrCopySelectedEntries(
+        context,
+        action: EntrySelectionActions.move,
+        destinationRepoCubit: destinationRepoCubit,
+        destinationPath: destinationPath,
+      );
+
+  Future<bool> _moveOrCopySelectedEntries(
+    BuildContext context, {
+    required EntrySelectionActions action,
     required RepoCubit destinationRepoCubit,
     required String destinationPath,
   }) async {
@@ -384,7 +437,7 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
           e.value.isDir && e.value.selected && p.dirname(e.key) == rootSymbol),
     ];
     for (var dir in rootRecursiveDirs) {
-      await _move(
+      await (action == EntrySelectionActions.copy ? _copy : _move)(
         context,
         originRepoCubit: _originRepoCubit!,
         toRepoCubit: toRepoCubit,
@@ -394,6 +447,17 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
         type: EntryType.directory,
         recursive: true,
       );
+
+      // await _move(
+      //   context,
+      //   originRepoCubit: _originRepoCubit!,
+      //   toRepoCubit: toRepoCubit,
+      //   destinationPath: destinationPath,
+      //   sourcePath: dir.key,
+      //   fromPathSegment: dir.key.removePrefix(rootSymbol),
+      //   type: EntryType.directory,
+      //   recursive: true,
+      // );
 
       _entriesPath.removeWhere((key, value) => key.startsWith(dir.key));
     }
@@ -418,7 +482,17 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
         discardedRoots,
       );
 
-      await _move(
+      // await _move(
+      //   context,
+      //   originRepoCubit: _originRepoCubit!,
+      //   toRepoCubit: toRepoCubit,
+      //   destinationPath: destinationPath,
+      //   sourcePath: path,
+      //   fromPathSegment: fromPathSegment,
+      //   type: EntryType.directory,
+      //   recursive: true,
+      // );
+      await (action == EntrySelectionActions.copy ? _copy : _move)(
         context,
         originRepoCubit: _originRepoCubit!,
         toRepoCubit: toRepoCubit,
@@ -487,27 +561,17 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
         isOrphan,
       );
 
-      // if (parentEntry != null) {
-      //   if (p.dirname(path) != rootSymbol) {
-      //     final segments = p.split(path);
-      //     final root = '$rootSymbol${segments[1]}';
-      //     rootPath = discardedRoots.contains(root)
-      //         ? parent.removePrefix(root)
-      //         : parent.removePrefix(rootSymbol);
-      //   }
-      // } else {
-      //   rootPath = '';
-      // }
-
-      // final fileName = p.basename(path);
-      // final fromPathSegment = repo_path
-      //     .join(
-      //       rootPath,
-      //       fileName,
-      //     )
-      //     .removePrefix(rootSymbol);
-
-      await _move(
+      // await _move(
+      //   context,
+      //   originRepoCubit: _originRepoCubit!,
+      //   toRepoCubit: toRepoCubit,
+      //   destinationPath: destinationPath,
+      //   sourcePath: path,
+      //   fromPathSegment: fromPathSegment,
+      //   type: EntryType.file,
+      //   recursive: false,
+      // );
+      await (action == EntrySelectionActions.copy ? _copy : _move)(
         context,
         originRepoCubit: _originRepoCubit!,
         toRepoCubit: toRepoCubit,
@@ -606,85 +670,85 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
         recursive: recursive,
       );
 
-  Future<bool> _moveOrCopy(
-    BuildContext context, {
-    required Iterable<
-            MapEntry<
-                String,
-                ({
-                  bool isDir,
-                  bool selected,
-                  bool? tristate,
-                })>>
-        entries,
-    required String rootPath,
-    required EntrySelectionActions action,
-    required String destinationRepoInfoHash,
-    required RepoCubit destinationRepoCubit,
-    required String destinationPath,
-    required bool recursive,
-  }) async {
-    final toRepoCubit = _originRepoInfoHash != destinationRepoInfoHash
-        ? destinationRepoCubit
-        : null;
+  // Future<bool> _moveOrCopy(
+  //   BuildContext context, {
+  //   required Iterable<
+  //           MapEntry<
+  //               String,
+  //               ({
+  //                 bool isDir,
+  //                 bool selected,
+  //                 bool? tristate,
+  //               })>>
+  //       entries,
+  //   required String rootPath,
+  //   required EntrySelectionActions action,
+  //   required String destinationRepoInfoHash,
+  //   required RepoCubit destinationRepoCubit,
+  //   required String destinationPath,
+  //   required bool recursive,
+  // }) async {
+  //   final toRepoCubit = _originRepoInfoHash != destinationRepoInfoHash
+  //       ? destinationRepoCubit
+  //       : null;
 
-    final separator = repo_path.separator();
+  //   final separator = repo_path.separator();
 
-    try {
-      final lastEntryPath = entries.last.key;
-      await for (var entry in Stream.fromIterable(entries)) {
-        final path = entry.key;
-        final state = entry.value;
-        final type = state.isDir ? EntryType.directory : EntryType.file;
+  //   try {
+  //     final lastEntryPath = entries.last.key;
+  //     await for (var entry in Stream.fromIterable(entries)) {
+  //       final path = entry.key;
+  //       final state = entry.value;
+  //       final type = state.isDir ? EntryType.directory : EntryType.file;
 
-        final entryName = p.basename(path);
-        final fromPathSegment = recursive
-            ? rootPath.replaceFirst(separator, '').trim()
-            : repo_path
-                .join(rootPath, entryName)
-                .replaceFirst(separator, '')
-                .trim();
-        // final fromPathSegment =
-        //     path.removePrefix(rootPath).replaceFirst(separator, '').trim();
+  //       final entryName = p.basename(path);
+  //       final fromPathSegment = recursive
+  //           ? rootPath.replaceFirst(separator, '').trim()
+  //           : repo_path
+  //               .join(rootPath, entryName)
+  //               .replaceFirst(separator, '')
+  //               .trim();
+  //       // final fromPathSegment =
+  //       //     path.removePrefix(rootPath).replaceFirst(separator, '').trim();
 
-        final navigateToDestination = path == lastEntryPath;
-        if (action == EntrySelectionActions.copy) {
-          await CopyEntry(
-            context,
-            repoCubit: _originRepoCubit!,
-            srcPath: path,
-            dstPath: destinationPath,
-            type: type,
-          ).copy(
-            toRepoCubit: toRepoCubit,
-            fromPathSegment: fromPathSegment,
-            recursive: recursive,
-            navigateToDestination: navigateToDestination,
-          );
-          continue;
-        }
-        if (action == EntrySelectionActions.move) {
-          await MoveEntry(
-            context,
-            repoCubit: _originRepoCubit!,
-            srcPath: path,
-            dstPath: destinationPath,
-            type: type,
-          ).move(
-            toRepoCubit: destinationRepoCubit,
-            fromPathSegment: fromPathSegment,
-            navigateToDestination: navigateToDestination,
-            recursive: recursive,
-          );
-        }
-      }
-    } on Exception catch (e) {
-      loggy.debug('Error ${action.name}ing selected entries: ${e.toString()}');
-      return false;
-    }
+  //       final navigateToDestination = path == lastEntryPath;
+  //       if (action == EntrySelectionActions.copy) {
+  //         await CopyEntry(
+  //           context,
+  //           repoCubit: _originRepoCubit!,
+  //           srcPath: path,
+  //           dstPath: destinationPath,
+  //           type: type,
+  //         ).copy(
+  //           toRepoCubit: toRepoCubit,
+  //           fromPathSegment: fromPathSegment,
+  //           recursive: recursive,
+  //           navigateToDestination: navigateToDestination,
+  //         );
+  //         continue;
+  //       }
+  //       if (action == EntrySelectionActions.move) {
+  //         await MoveEntry(
+  //           context,
+  //           repoCubit: _originRepoCubit!,
+  //           srcPath: path,
+  //           dstPath: destinationPath,
+  //           type: type,
+  //         ).move(
+  //           toRepoCubit: destinationRepoCubit,
+  //           fromPathSegment: fromPathSegment,
+  //           navigateToDestination: navigateToDestination,
+  //           recursive: recursive,
+  //         );
+  //       }
+  //     }
+  //   } on Exception catch (e) {
+  //     loggy.debug('Error ${action.name}ing selected entries: ${e.toString()}');
+  //     return false;
+  //   }
 
-    return true;
-  }
+  //   return true;
+  // }
 
   Future<bool> deleteEntries() async {
     try {
