@@ -30,6 +30,10 @@ extension StringExtension on String {
   String capitalize() {
     return '${this[0].toUpperCase()}${substring(1)}';
   }
+
+  String removePrefix(String rootPath) {
+    return replaceFirst(rootPath, '').trim();
+  }
 }
 
 extension ToBoolean on String {

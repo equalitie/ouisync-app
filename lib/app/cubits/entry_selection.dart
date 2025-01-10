@@ -13,7 +13,7 @@ import '../../generated/l10n.dart';
 import '../models/models.dart' show DirectoryEntry, FileEntry, FileSystemEntry;
 import '../utils/repo_path.dart' as repo_path;
 import '../utils/utils.dart'
-    show AppLogger, CopyEntry, FileIO, MoveEntry, showSnackBar;
+    show AppLogger, CopyEntry, FileIO, MoveEntry, StringExtension, showSnackBar;
 import '../widgets/widgets.dart' show SelectionState;
 import 'cubits.dart' show CubitActions, RepoCubit;
 
@@ -772,12 +772,6 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
     }
 
     return (destinationOk: validationOk, errorMessage: errorMessage);
-  }
-}
-
-extension on String {
-  removePrefix(String rootPath) {
-    return replaceFirst(rootPath, '').trim();
   }
 }
 
