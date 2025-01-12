@@ -438,7 +438,7 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
       return _InvalidInputToken.malformed();
     }
 
-    final accessMode = await token.mode;
+    final accessMode = await token.accessMode;
     final infoHash = await token.infoHash;
 
     return _ValidInputToken(token, accessMode, infoHash);

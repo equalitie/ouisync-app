@@ -12,7 +12,7 @@ class PasswordHasher {
     PasswordSalt? salt,
   ]) async {
     salt = salt ?? PasswordSalt.random();
-    final key = await _ouisyncSession.deriveLocalSecretKey(password, salt);
+    final key = await _ouisyncSession.deriveSecretKey(password, salt);
 
     return LocalSecretKeyAndSalt(key, salt);
   }

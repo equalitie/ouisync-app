@@ -103,6 +103,7 @@ class AppLogPrinter extends LoggyPrinter {
     if (Platform.isMacOS || Platform.isIOS) {
       print("$level ${record.loggerName} $message");
     } else {
+      // TODO: this goes via flutter channel
       o.logPrint(level, record.loggerName, message.toString());
     }
   }

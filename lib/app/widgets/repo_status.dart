@@ -99,12 +99,11 @@ class _Error extends StatelessWidget {
         MountStateMounting() ||
         MountStateSuccess() =>
           SizedBox.shrink(),
-        MountStateError(code: final code, message: final message) =>
+        MountStateError(error: final error, stack: _) =>
           GestureDetector(
             onTap: () => _showErrorDialog(
               context,
-              code,
-              message,
+              error.toString(),
             ),
             child: Icon(
               Icons.warning,
@@ -116,7 +115,6 @@ class _Error extends StatelessWidget {
 
   Future<void> _showErrorDialog(
     BuildContext context,
-    ErrorCode code,
     String message,
   ) =>
       Dialogs.simpleAlertDialog(

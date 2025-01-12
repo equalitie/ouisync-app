@@ -260,7 +260,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     emitUnlessClosed(state.copyWith(isCacheServersEnabled: value));
   }
 
-  Future<Directory> openDirectory(String path) => Directory.open(_repo, path);
+  Future<Directory> openDirectory(String path) => Directory.read(_repo, path);
 
   // This operator is required for the DropdownMenuButton to show entries properly.
   @override
@@ -276,9 +276,8 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     AccessMode accessMode, {
     String? password,
   }) async {
-    return await _repo.createShareToken(
+    return await _repo.share(
       accessMode: accessMode,
-      name: name,
       secret: password != null ? LocalPassword(password) : null,
     );
   }
@@ -292,7 +291,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   }
 
   Future<void> resetCredentials(ShareToken token) async {
-    await _repo.resetCredentials(token);
+    await _repo.resetAccess(token);
     final accessMode = await _repo.accessMode;
     emitUnlessClosed(state.copyWith(accessMode: accessMode));
   }
@@ -306,10 +305,8 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     try {
       await _repo.mount();
       emitUnlessClosed(state.copyWith(mountState: const MountStateSuccess()));
-    } on Error catch (error) {
-      emitUnlessClosed(state.copyWith(
-        mountState: MountStateError(error.code, error.message),
-      ));
+    } catch (error, stack) {
+      emitUnlessClosed(state.copyWith(mountState: MountStateError(error, stack)));
     }
   }
 
@@ -334,10 +331,10 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   }
 
   Future<bool> exists(String path) async {
-    return await _repo.exists(path);
+    return await _repo.entryExists(path);
   }
 
-  Future<EntryType?> type(String path) => _repo.type(path);
+  Future<EntryType?> type(String path) => _repo.entryType(path);
 
   Future<Progress> get syncProgress => _repo.syncProgress;
 
@@ -465,7 +462,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     final content = <FileSystemEntry>[];
 
     // If the directory does not exist, the following command will throw.
-    final directory = await Directory.open(_repo, path);
+    final directory = await Directory.read(_repo, path);
 
     try {
       for (final dirEntry in directory) {
@@ -719,7 +716,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     emitUnlessClosed(state.copyWith(isLoading: true));
 
     try {
-      await _repo.move(source, destination);
+      await _repo.moveEntry(source, destination);
       return true;
     } catch (e, st) {
       loggy.app('Move entry from $source to $destination failed', e, st);
@@ -873,13 +870,11 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   }
 
   Future<PasswordSalt?> getCurrentModePasswordSalt() async {
-    switch (accessMode) {
-      case AccessMode.blind:
-        return null;
-      case AccessMode.read:
-        return await _repo.getReadPasswordSalt();
-      case AccessMode.write:
-        return await _repo.getWritePasswordSalt();
+    if (accessMode == AccessMode.read) {
+      return await _repo.getReadPasswordSalt();
+    } else if (accessMode == AccessMode.write) {
+      return await _repo.getWritePasswordSalt();
     }
+    return null;
   }
 }

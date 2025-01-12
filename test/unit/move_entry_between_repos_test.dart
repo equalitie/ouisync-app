@@ -34,24 +34,24 @@ void main() {
     final locationOther =
         RepoLocation.fromDbPath(p.join(dir.path, "store2.db"));
 
-    session = Session.create(configPath: dir.path, kind: SessionKind.unique);
+    session = await Session.create(configPath: dir.path);
 
     originRepo = await Repository.create(
       session,
-      store: locationOrigin.path,
+      path: locationOrigin.path,
       readSecret: null,
       writeSecret: null,
     );
 
     otherRepo = await Repository.create(
       session,
-      store: locationOther.path,
+      path: locationOther.path,
       readSecret: null,
       writeSecret: null,
     );
 
     PathProviderPlatform.instance = FakePathProviderPlatform(dir);
-    nativeChannels = FakeNativeChannels(session);
+    nativeChannels = FakeNativeChannels();
 
     FlutterSecureStorage.setMockInitialValues({});
     SharedPreferences.setMockInitialValues({});
@@ -98,7 +98,7 @@ void main() {
       await file.write(0, utf8.encode("123"));
       await file.close();
 
-      final originContents = await Directory.open(originRepo, '/');
+      final originContents = await Directory.read(originRepo, '/');
       expect(originContents, hasLength(1));
       expect(originContents, dirEntryComparator(expectedFile1));
     }
@@ -114,8 +114,8 @@ void main() {
 
       expect(result, equals(true));
 
-      final originContentsPost = await Directory.open(originRepo, '/');
-      final otherContents = await Directory.open(otherRepo, '/');
+      final originContentsPost = await Directory.read(originRepo, '/');
+      final otherContents = await Directory.read(otherRepo, '/');
       expect(originContentsPost, hasLength(0));
 
       expect(otherContents, hasLength(1));
@@ -132,7 +132,7 @@ void main() {
     {
       await Directory.create(originRepo, '/folder1');
 
-      final originContents = await Directory.open(originRepo, '/');
+      final originContents = await Directory.read(originRepo, '/');
       expect(originContents, hasLength(1));
       expect(originContents, dirEntryComparator(expectedFolder1));
     }
@@ -148,8 +148,8 @@ void main() {
 
       expect(result, equals(true));
 
-      final originContentsPost = await Directory.open(originRepo, '/');
-      final otherContents = await Directory.open(otherRepo, '/');
+      final originContentsPost = await Directory.read(originRepo, '/');
+      final otherContents = await Directory.read(otherRepo, '/');
       expect(originContentsPost, hasLength(0));
 
       expect(otherContents, hasLength(1));
@@ -167,10 +167,10 @@ void main() {
       await file.write(0, utf8.encode("123"));
       await file.close();
 
-      final originContents = await Directory.open(originRepo, '/');
+      final originContents = await Directory.read(originRepo, '/');
       expect(originContents, hasLength(1));
 
-      final folder1Contents = await Directory.open(originRepo, '/folder1');
+      final folder1Contents = await Directory.read(originRepo, '/folder1');
       expect(folder1Contents, hasLength(1));
       expect(folder1Contents, dirEntryComparator(expectedFile1));
     }
@@ -186,8 +186,8 @@ void main() {
 
       expect(result, equals(true));
 
-      final originContentsPost = await Directory.open(originRepo, '/');
-      final otherContents = await Directory.open(otherRepo, '/');
+      final originContentsPost = await Directory.read(originRepo, '/');
+      final otherContents = await Directory.read(otherRepo, '/');
       expect(originContentsPost, hasLength(0));
 
       final expectedFolder1 = <DirEntry>[
@@ -196,7 +196,7 @@ void main() {
       expect(otherContents, hasLength(1));
       expect(otherContents.entries, dirEntryComparator(expectedFolder1));
 
-      final otherFolder1Contents = await Directory.open(otherRepo, '/folder1');
+      final otherFolder1Contents = await Directory.read(otherRepo, '/folder1');
       expect(otherFolder1Contents, hasLength(1));
       expect(otherFolder1Contents, dirEntryComparator(expectedFile1));
     }
@@ -244,7 +244,7 @@ Matcher dirEntryComparator(Iterable<DirEntry> expected) => pairwiseCompare(
     );
 
 class FakeNativeChannels extends NativeChannels {
-  FakeNativeChannels(super.session);
+  FakeNativeChannels();
 }
 
 class FakePathProviderPlatform extends PathProviderPlatform {

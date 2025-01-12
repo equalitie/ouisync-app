@@ -33,12 +33,9 @@ void main() {
       'config',
     );
 
-    session = Session.create(
-      kind: SessionKind.unique,
-      configPath: configPath,
-    );
+    session = await Session.create(configPath: configPath);
 
-    final nativeChannels = NativeChannels(session);
+    final nativeChannels = NativeChannels();
     final settings = await Settings.init(MasterKey.random());
 
     reposCubit = ReposCubit(

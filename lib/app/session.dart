@@ -20,20 +20,11 @@ Future<Session> createSession(
   final configPath = join(appDir.path, Constants.configDirName);
   final logPath = await LogUtils.path;
 
-  final Session session;
-
-  if (Platform.isMacOS || Platform.isIOS) {
-    // On MacOS, later on iOS and possibly other platforms as well, the Ouisync
-    // Rust backend runs in the native code and we communicate with it using
-    // Flutter's `PlatformChannels`.
-    session = await Session.createChanneled(
-        "org.equalitie.ouisync/backend", onConnectionReset);
-  } else {
-    session = Session.create(
-      configPath: configPath,
-      logPath: logPath,
-    );
-  }
+  final session = await Session.create(
+    configPath: configPath,
+    // On darwin, the serveer is started by a background process
+    startServer: !Platform.isMacOS && !Platform.isIOS
+  );
 
   try {
     windowManager?.onClose(session.close);
@@ -78,7 +69,7 @@ Future<void> addCacheServerAsPeer(
     for (final addr in await InternetAddress.lookup(_stripPort(host))) {
       for (final proto in ['quic', 'tcp']) {
         await session
-            .addUserProvidedPeer('$proto/${addr.address}:$_defaultPeerPort');
+            .addUserProvidedPeers(['$proto/${addr.address}:$_defaultPeerPort']);
       }
     }
 

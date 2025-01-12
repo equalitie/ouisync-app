@@ -70,7 +70,7 @@ void main() {
 
     originRepo = await Repository.open(
       deps.session,
-      store: originRepoLocation.path,
+      path: originRepoLocation.path,
     );
 
     final newFile = await File.create(originRepo, '/file.txt');

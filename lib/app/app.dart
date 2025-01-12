@@ -126,10 +126,10 @@ class _AppContainerState extends State<AppContainer> {
             Timer(Duration(seconds: 1), () => unawaited(_restart()));
           });
       final settings = await loadAndMigrateSettings(session);
-      final sessionId = await session.thisRuntimeId;
+      final sessionId = await session.runtimeId;
       setState(() => state = Success(_AppContainerWrappedState(
             session: session,
-            nativeChannels: NativeChannels(session),
+            nativeChannels: NativeChannels(),
             settings: settings,
             sessionId: sessionId,
           )));

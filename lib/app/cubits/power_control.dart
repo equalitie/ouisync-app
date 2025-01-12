@@ -306,26 +306,19 @@ class PowerControl extends Cubit<PowerControlState>
     }
 
     var transition = _Transition.none;
-    String? quicV4;
-    String? quicV6;
+    List<String> addrs = [];
 
     switch (mode) {
       case NetworkModeFull():
-        quicV4 = _unspecifiedV4;
-        quicV6 = _unspecifiedV6;
-        break;
+        addrs.add(_unspecifiedV4);
+        addrs.add(_unspecifiedV6);
       case NetworkModeSaving(hotspotAddr: final hotspotAddr):
-        quicV4 = hotspotAddr;
-        quicV6 = null;
-        break;
+        addrs.add(hotspotAddr!);
       case NetworkModeDisabled():
-        quicV4 = null;
-        quicV6 = null;
-        break;
     }
 
     try {
-      await _session.bindNetwork(quicV4: quicV4, quicV6: quicV6);
+      await _session.bindNetwork(addrs);
     } catch (e) {
       if (!emitUnlessClosed(
           state.copyWith(networkMode: NetworkModeDisabled()))) {

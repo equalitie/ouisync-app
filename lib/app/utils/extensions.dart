@@ -132,24 +132,12 @@ extension RepositoryExtension on Repository {
   Future<void> setAuthMode(AuthMode authMode) async {
     final newValue = json.encode(authMode.toJson());
 
-    while (true) {
-      // Currently we ignore any concurrent changes and always force the new value.
+    // Currently we ignore any concurrent changes and always force the new value.
+    bool changed = false; do {
       final oldValue = await getMetadata(_authModeKey);
-
-      try {
-        await setMetadata({
-          _authModeKey: (oldValue: oldValue, newValue: newValue),
-        });
-
-        break;
-      } on Error catch (e) {
-        if (e.code == ErrorCode.entryChanged) {
-          continue;
-        } else {
-          rethrow;
-        }
-      }
-    }
+      changed = await setMetadata({_authModeKey: (
+        oldValue: oldValue, newValue: newValue)});
+    } while(!changed);
   }
 }
 

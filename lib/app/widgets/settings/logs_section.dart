@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_file_dialog/flutter_file_dialog.dart';
+import 'package:ouisync/exception.dart';
 import 'package:ouisync/ouisync.dart' as oui;
 import 'package:ouisync/state_monitor.dart';
 import 'package:path/path.dart';
@@ -77,8 +78,8 @@ class LogsSection extends SettingsSection with AppLogger {
           }),
       BlocBuilder<MountCubit, MountState>(
           bloc: mount,
-          builder: (context, error) {
-            if (error is! MountStateError) {
+          builder: (context, result) {
+            if (result is! MountStateError) {
               return SizedBox.shrink();
             }
 
@@ -86,7 +87,8 @@ class LogsSection extends SettingsSection with AppLogger {
             Widget? trailing;
             void Function()? onTap;
 
-            if (error.code == oui.ErrorCode.vfsDriverInstall) {
+            final err = result.error;
+            if (err is OuisyncException && err.code == oui.ErrorCode.vfsDriverInstallError) {
               reason = S.current.messageErrorDokanNotInstalled('');
               trailing = Icon(Icons.open_in_browser);
               onTap = () {
@@ -94,7 +96,7 @@ class LogsSection extends SettingsSection with AppLogger {
                 checkForDokan();
               };
             } else {
-              reason = error.message;
+              reason = err.toString();
             }
 
             return _errorTile(context, S.current.messageFailedToMount(reason),

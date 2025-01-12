@@ -32,7 +32,7 @@ void main() {
             .having((t) => t.value, 'value', isNotNull)
             .having((t) => t.error, 'error', isNull));
 
-    final tokenAccessMode = await (token as ShareTokenValid).value.mode;
+    final tokenAccessMode = await (token as ShareTokenValid).value.accessMode;
     expect(tokenAccessMode, equals(AccessMode.blind));
 
     final suggestedRepoName = await token.value.suggestedName;

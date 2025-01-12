@@ -252,7 +252,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
     oui.Repository repo;
 
     try {
-      repo = await oui.Repository.open(_session, store: location.path);
+      repo = await oui.Repository.open(_session, path: location.path);
     } catch (e) {
       loggy.app("Failed to open repository ${location.path}: $e");
       return;
@@ -473,7 +473,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
 
       final repo = await oui.Repository.open(
         _session,
-        store: store,
+        path: store,
         secret: secret,
       );
 
@@ -522,7 +522,7 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
       SetLocalSecret writeSecret;
 
       if (token != null) {
-        switch (await token.mode) {
+        switch (await token.accessMode) {
           case oui.AccessMode.blind:
             readSecret = LocalSecretKeyAndSalt.random();
             writeSecret = LocalSecretKeyAndSalt.random();
@@ -543,10 +543,10 @@ class ReposCubit extends WatchSelf<ReposCubit> with AppLogger {
       // `Repository.create` for details.
       final repo = await oui.Repository.create(
         _session,
-        store: store,
+        path: store,
         readSecret: readSecret,
         writeSecret: writeSecret,
-        shareToken: token,
+        token: token,
       );
 
       await repo.setSyncEnabled(true);

@@ -32,7 +32,7 @@ void main() {
     );
     final repo = await Repository.create(
       deps.session,
-      store: location.path,
+      path: location.path,
       readSecret: null,
       writeSecret: null,
     );

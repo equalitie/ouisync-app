@@ -275,7 +275,7 @@ class AboutSection extends SettingsSection with AppLogger {
   }
 
   Widget _getRuntimeIdForOS() => FutureBuilder(
-      future: reposCubit.session.thisRuntimeId,
+      future: reposCubit.session.runtimeId,
       builder: (context, snapshot) {
         final runtimeId = snapshot.data ?? '';
         final runtimeIdWidget = Text(runtimeId,

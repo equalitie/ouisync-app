@@ -160,7 +160,7 @@ class RepoCreationCubit extends Cubit<RepoCreationState>
     await Dialogs.executeFutureWithLoadingDialog(
       null,
       () async {
-        final accessMode = await token.mode;
+        final accessMode = await token.accessMode;
         final suggestedName = await token.suggestedName;
         final useCacheServers =
             await reposCubit.cacheServers.isEnabledForShareToken(token);

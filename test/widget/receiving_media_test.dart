@@ -212,7 +212,7 @@ void main() {
             join((await getTemporaryDirectory()).path, '$repoName.ouisyncdb');
         final repo = await Repository.create(
           deps.session,
-          store: repoPath,
+          path: repoPath,
           readSecret: null,
           writeSecret: null,
         );
@@ -248,14 +248,11 @@ void main() {
               join((await getTemporaryDirectory()).path, '$repoName.ouisyncdb');
           final repo = await Repository.create(
             deps.session,
-            store: repoPath,
+            path: repoPath,
             readSecret: null,
             writeSecret: null,
           );
-          final token = await repo.createShareToken(
-            accessMode: AccessMode.read,
-            name: repoName,
-          );
+          final token = await repo.share(accessMode: AccessMode.read);
           await repo.close();
 
           final navigationObserver = NavigationObserver();

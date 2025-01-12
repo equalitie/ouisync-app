@@ -54,7 +54,7 @@ class ConnectivityInfoState extends Equatable {
         tcpListenerV4,
         tcpListenerV6,
         quicListenerV4,
-        quicListenerV4,
+        quicListenerV6,
         localAddressV4,
         localAddressV6,
         externalAddressV4,
@@ -66,6 +66,7 @@ class ConnectivityInfoState extends Equatable {
       "tcpListenerV4: $tcpListenerV4, "
       "tcpListenerV6: $tcpListenerV6, "
       "quicListenerV4: $quicListenerV4, "
+      "quicListenerV6: $quicListenerV6, "
       "localAddressV4: $localAddressV4, "
       "localAddressV6: $localAddressV6, "
       "externalAddressV4: $externalAddressV4, "
@@ -81,64 +82,69 @@ class ConnectivityInfo extends Cubit<ConnectivityInfoState>
       : _session = session,
         super(ConnectivityInfoState());
 
+  // refresh network settings
   Future<void> update() async {
-    final tcpListenerV4 = await _session.tcpListenerLocalAddressV4;
-    final tcpListenerV6 = await _session.tcpListenerLocalAddressV6;
-    final quicListenerV4 = await _session.quicListenerLocalAddressV4;
-    final quicListenerV6 = await _session.quicListenerLocalAddressV6;
+    // because these events are idempotent, we can trigger them in any order
+    // we start with getting the routable addresses (without waiting just yet)
+    List<Future> futures = [
+      _session.externalAddressV4.then((externalAddressV4) =>
+        emitUnlessClosed(state.copyWith(externalAddressV4: externalAddressV4 ?? ""))),
+      _session.externalAddressV6.then((externalAddressV6) =>
+        emitUnlessClosed(state.copyWith(externalAddressV6: externalAddressV6 ?? "")))
+    ];
 
-    if (isClosed) {
-      return;
+    // ask the library for bound sockets; we have to block here because we
+    // have a data dependency as fallbacks for local addresses when we're
+    // unable to obtain them via the operating system interface
+    // TODO: change the UI to be more agnostic to what we expose (e.g. support
+    // multiple ports per proto, missing protos, etc); imo, the library is
+    // doing the right thing here by only exposing a list of strings
+    String? tcpListenerV4;
+    String? tcpListenerV6;
+    String? quicListenerV4;
+    String? quicListenerV6;
+    for (final listener in await _session.listenerAddrs) {
+      if (listener.startsWith("tcp/")) {
+        if (listener.contains(".")) {
+          tcpListenerV4 = listener.substring(4);
+        } else {
+          tcpListenerV6 = listener.substring(4);
+        }
+      } else if(listener.startsWith("quic/")) {
+        if (listener.contains(".")) {
+          quicListenerV4 = listener.substring(5);
+        } else {
+          quicListenerV6 = listener.substring(5);
+        }
+      }
     }
-
     emitUnlessClosed(state.copyWith(
-      tcpListenerV4: tcpListenerV4 ?? '',
-      tcpListenerV6: tcpListenerV6 ?? '',
-      quicListenerV4: quicListenerV4 ?? '',
-      quicListenerV6: quicListenerV6 ?? '',
+      tcpListenerV4: tcpListenerV4 ?? "",
+      tcpListenerV6: tcpListenerV6 ?? "",
+      quicListenerV4: quicListenerV4 ?? "",
+      quicListenerV6: quicListenerV6 ?? ""
     ));
 
-    final localIPv4 = await _networkInfo.getWifiIP();
+    // we can now get wifi address since we _probably_ have fallbacks
+    futures.add(_networkInfo.getWifiIP().then((localIPv4) {
+      if (localIPv4 != null) {
+        final port = _extractPort(quicListenerV4 ?? tcpListenerV4 ?? "");
+        emitUnlessClosed(state.copyWith(localAddressV4: "$localIPv4:$port"));
+      } else {
+        emitUnlessClosed(state.copyWith(localAddressV4: ""));
+      }
+    }));
+    futures.add(_networkInfo.getWifiIPv6().then((localIPv6) {
+      if (localIPv6 != null) {
+        final port = _extractPort(quicListenerV6 ?? tcpListenerV6 ?? "");
+        emitUnlessClosed(state.copyWith(localAddressV6: "[$localIPv6]:$port"));
+      } else {
+        emitUnlessClosed(state.copyWith(localAddressV6: ""));
+      }
+    }));
 
-    if (isClosed) {
-      return;
-    }
-
-    if (localIPv4 != null) {
-      final port = _extractPort(quicListenerV4 ?? tcpListenerV4 ?? '');
-      emitUnlessClosed(state.copyWith(localAddressV4: "$localIPv4:$port"));
-    } else {
-      emitUnlessClosed(state.copyWith(localAddressV4: ""));
-    }
-
-    final localIPv6 = await _networkInfo.getWifiIPv6();
-
-    if (isClosed) {
-      return;
-    }
-
-    if (localIPv6 != null) {
-      final port = _extractPort(quicListenerV6 ?? tcpListenerV6 ?? '');
-      emitUnlessClosed(state.copyWith(localAddressV6: "[$localIPv6]:$port"));
-    } else {
-      emitUnlessClosed(state.copyWith(localAddressV6: ""));
-    }
-
-    final externalAddressV4 = await _session.externalAddressV4 ?? "";
-
-    if (isClosed) {
-      return;
-    }
-
-    emitUnlessClosed(state.copyWith(externalAddressV4: externalAddressV4));
-
-    final externalAddressV6 = await _session.externalAddressV6 ?? "";
-
-    if (isClosed) {
-      return;
-    }
-
-    emitUnlessClosed(state.copyWith(externalAddressV6: externalAddressV6));
+    // wait for everything to complete in any order
+    await Future.wait(futures);
   }
 }
 

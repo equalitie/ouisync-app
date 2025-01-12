@@ -56,10 +56,10 @@ Future<List<Repository>> _fetchRepositories(
     Future.wait(
       settings.repos.map((location) async {
         try {
-          final repo = await Repository.open(session, store: location.path);
+          final repo = await Repository.open(session, path: location.path);
           await repo.setSyncEnabled(true);
           return repo;
-        } on Error catch (e) {
+        } catch (e) {
           throw _RepositoryError(e, location.name);
         }
       }).toList(),
@@ -104,7 +104,7 @@ Future<void> _waitForSyncInactivity(Session session) async {
 class _RepositoryError implements Exception {
   _RepositoryError(this.cause, this.name);
 
-  final Error cause;
+  final Object cause;
   final String name;
 
   @override

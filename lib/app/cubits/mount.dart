@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync/ouisync.dart';
 
 import '../utils/log.dart';
 import '../utils/mounter.dart';
@@ -23,10 +22,10 @@ class MountStateSuccess extends MountState {
 }
 
 class MountStateError extends MountState {
-  final ErrorCode code;
-  final String message;
+  final Object error; // any error can be thrown in dart
+  final StackTrace stack;
 
-  const MountStateError(this.code, this.message);
+  const MountStateError(this.error, this.stack);
 }
 
 class MountCubit extends Cubit<MountState> with CubitActions, AppLogger {
@@ -42,8 +41,8 @@ class MountCubit extends Cubit<MountState> with CubitActions, AppLogger {
     try {
       await mounter.init();
       emitUnlessClosed(MountStateSuccess());
-    } on Error catch (error) {
-      emitUnlessClosed(MountStateError(error.code, error.message));
+    } catch (error, stack) {
+      emitUnlessClosed(MountStateError(error, stack));
     }
   }
 

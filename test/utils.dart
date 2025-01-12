@@ -19,7 +19,7 @@ import 'package:ouisync_app/app/utils/platform/platform_window_manager.dart';
 import 'package:ouisync_app/app/utils/settings/settings.dart';
 import 'package:ouisync_app/generated/l10n.dart';
 import 'package:ouisync/native_channels.dart';
-import 'package:ouisync/ouisync.dart' show Session, SessionKind;
+import 'package:ouisync/ouisync.dart' show Session;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -116,13 +116,10 @@ class TestDependencies {
       'config',
     );
 
-    final session = Session.create(
-      kind: SessionKind.unique,
-      configPath: configPath,
-    );
+    final session = await Session.create(configPath: configPath);
 
     final settings = await Settings.init(MasterKey.random());
-    final nativeChannels = NativeChannels(session);
+    final nativeChannels = NativeChannels();
     final powerControl = PowerControl(
       session,
       settings,

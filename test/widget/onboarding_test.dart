@@ -23,10 +23,7 @@ void main() {
       'config',
     );
 
-    session = Session.create(
-      kind: SessionKind.unique,
-      configPath: configPath,
-    );
+    session = await Session.create(configPath: configPath);
 
     settings = await Settings.init(MasterKey.random());
     localeCubit = LocaleCubit(settings);
@@ -44,7 +41,7 @@ void main() {
       session: session,
       settings: settings,
       windowManager: FakeWindowManager(),
-      nativeChannels: NativeChannels(session),
+      nativeChannels: NativeChannels(),
     )));
     await tester.pumpAndSettle();
 
