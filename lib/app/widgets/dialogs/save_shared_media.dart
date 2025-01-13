@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:path/path.dart' as p;
 
 import '../../../generated/l10n.dart';
@@ -130,16 +131,17 @@ class _SaveSharedMediaState extends State<SaveSharedMedia> {
     );
   }
 
-  Widget _buildActions() => widget.reposCubit.builder(
-        (reposCubit) => Fields.dialogActions(
-          buttons: _actions(reposCubit),
+  Widget _buildActions() => BlocBuilder<ReposCubit, ReposState>(
+        bloc: widget.reposCubit,
+        builder: (context, state) => Fields.dialogActions(
+          buttons: _actions(state),
           padding: const EdgeInsetsDirectional.only(top: 20.0),
           mainAxisAlignment: MainAxisAlignment.end,
         ),
       );
 
-  List<Widget> _actions(ReposCubit reposCubit) {
-    final isRepoList = reposCubit.showList;
+  List<Widget> _actions(ReposState reposState) {
+    final isRepoList = reposState.current == null;
 
     return [
       NegativeButton(
@@ -150,25 +152,23 @@ class _SaveSharedMediaState extends State<SaveSharedMedia> {
           widget.reposCubit.bottomSheet.hide();
         },
       ),
-      widget.reposCubit.builder(
-        (rc) => PositiveButton(
-          text: S.current.actionSave,
-          onPressed: isRepoList
-              ? null
-              : () async {
-                  final canSaveMedia = await widget.canSaveMedia();
-                  if (!canSaveMedia) {
-                    return;
-                  }
-                  for (final path in widget.sharedMediaPaths) {
-                    await widget.onSaveFile(path);
-                  }
+      PositiveButton(
+        text: S.current.actionSave,
+        onPressed: isRepoList
+            ? null
+            : () async {
+                final canSaveMedia = await widget.canSaveMedia();
+                if (!canSaveMedia) {
+                  return;
+                }
+                for (final path in widget.sharedMediaPaths) {
+                  await widget.onSaveFile(path);
+                }
 
-                  widget.onUpdateBottomSheet(BottomSheetType.gone, 0.0, '');
-                  widget.reposCubit.bottomSheet.hide();
-                },
-          buttonsAspectRatio: Dimensions.aspectRatioBottomDialogButton,
-        ),
+                widget.onUpdateBottomSheet(BottomSheetType.gone, 0.0, '');
+                widget.reposCubit.bottomSheet.hide();
+              },
+        buttonsAspectRatio: Dimensions.aspectRatioBottomDialogButton,
       ),
     ];
   }

@@ -17,6 +17,7 @@ void main() {
 
   setUp(() async {
     deps = await TestDependencies.create();
+    await deps.reposCubit.waitUntil((state) => !state.isLoading);
   });
 
   tearDown(() async {
@@ -56,7 +57,7 @@ void main() {
         await repoCreationObserver
             .waitUntil((state) => state.substate is RepoCreationSuccess);
 
-        final repoCubit = deps.reposCubit.repos
+        final repoCubit = deps.reposCubit.state.repos.values
             .where((entry) => entry.name == 'my repo')
             .first
             .cubit!;
@@ -120,7 +121,7 @@ void main() {
         final repoCreationObserver = StateObserver.install<RepoCreationState>();
         final repoImportObserver = StateObserver.install<ShareTokenResult?>();
 
-        expect(deps.reposCubit.repos, isEmpty);
+        expect(deps.reposCubit.state.repos, isEmpty);
 
         await tester.pumpWidget(testApp(deps.createMainPage()));
         await tester.pumpAndSettle();
@@ -199,7 +200,7 @@ void main() {
             .waitUntil((state) => state.substate is RepoCreationSuccess);
 
         // The repo got created correctly.
-        final repoCubit = deps.reposCubit.repos.first.cubit!;
+        final repoCubit = deps.reposCubit.state.repos.values.first.cubit!;
         final actualMode = repoCubit.state.accessMode;
         final actualToken = await repoCubit.createShareToken(AccessMode.read);
 
@@ -215,24 +216,18 @@ Future<String> _createShareToken({
   required AccessMode accessMode,
 }) async {
   final dir = await Directory.systemTemp.createTemp();
-  final session = await Session.create(
-    configPath: join(dir.path, 'config'),
-  );
+  final session = await Session.create(configPath: join(dir.path, 'config'));
 
   try {
     final repo = await Repository.create(
       session,
-      path: join(dir.path, 'store', 'repo.ouisyncdb'),
+      path: join(dir.path, 'store', name),
       readSecret: null,
       writeSecret: null,
     );
 
-    try {
-      final token = await repo.share(accessMode: accessMode);
-      return token.toString();
-    } finally {
-      await repo.close();
-    }
+    final token = await repo.share(accessMode: accessMode);
+    return token.toString();
   } finally {
     await session.close();
     await dir.delete(recursive: true);

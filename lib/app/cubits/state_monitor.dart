@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:ouisync/state_monitor.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:stream_transform/stream_transform.dart';
 import 'utils.dart';
 
 class StateMonitorCubit extends Cubit<StateMonitorNode?> with CubitActions {

@@ -22,12 +22,14 @@ class RepositorySettings extends StatefulWidget {
   const RepositorySettings({
     required this.context,
     required this.settings,
+    required this.session,
     required this.repoCubit,
     required this.reposCubit,
   });
 
   final BuildContext context;
   final Settings settings;
+  final Session session;
   final RepoCubit repoCubit;
   final ReposCubit reposCubit;
 
@@ -89,7 +91,6 @@ class _RepositorySettingsState extends State<RepositorySettings>
                         onTap: () async => await renameRepository(
                           context,
                           repoCubit: widget.repoCubit,
-                          reposCubit: widget.reposCubit,
                           popDialog: () => Navigator.of(context).pop(),
                         ),
                       ),
@@ -109,6 +110,7 @@ class _RepositorySettingsState extends State<RepositorySettings>
                           onTap: () async => await navigateToRepositorySecurity(
                                 context,
                                 settings: widget.settings,
+                                session: widget.session,
                                 repoCubit: widget.repoCubit,
                                 passwordHasher:
                                     widget.reposCubit.passwordHasher,

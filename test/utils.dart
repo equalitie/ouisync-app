@@ -2,19 +2,17 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 
-import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:connectivity_plus_platform_interface/connectivity_plus_platform_interface.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ouisync_app/app/cubits/locale.dart';
 import 'package:ouisync_app/app/cubits/mount.dart';
-import 'package:ouisync_app/app/cubits/power_control.dart';
 import 'package:ouisync_app/app/cubits/repos.dart';
 import 'package:ouisync_app/app/pages/main_page.dart';
 import 'package:ouisync_app/app/utils/cache_servers.dart';
 import 'package:ouisync_app/app/utils/master_key.dart';
-import 'package:ouisync_app/app/utils/mounter.dart';
 import 'package:ouisync_app/app/utils/platform/platform_window_manager.dart';
 import 'package:ouisync_app/app/utils/settings/settings.dart';
 import 'package:ouisync_app/generated/l10n.dart';
@@ -54,8 +52,10 @@ Future<void> testEnv(FutureOr<void> Function() callback) async {
     origBlocObserver = Bloc.observer;
 
     tempDir = await Directory.systemTemp.createTemp();
-    final platform = Directory(join(tempDir.path, 'platform')).create();
-    PathProviderPlatform.instance = _FakePathProviderPlatform(await platform);
+
+    final platformDir = Directory(join(tempDir.path, 'platform'));
+    await platformDir.create();
+    PathProviderPlatform.instance = _FakePathProviderPlatform(platformDir);
 
     final shared = Directory(join(tempDir.path, 'shared')).create();
     final mount = Directory(join(tempDir.path, 'mount')).create();
@@ -74,6 +74,8 @@ Future<void> testEnv(FutureOr<void> Function() callback) async {
               message: 'Method "${call.method}" not exported by host');
       }
     });
+
+    ConnectivityPlatform.instance = _FakeConnectivityPlatform();
 
     // TODO: add mock for 'org.equalitie.ouisync/backend' once the tests are updated to use channels
 
@@ -104,43 +106,39 @@ class TestDependencies {
     this.session,
     this.settings,
     this.nativeChannels,
-    this.powerControl,
     this.reposCubit,
     this.mountCubit,
     this.localeCubit,
   );
 
   static Future<TestDependencies> create() async {
-    final configPath = join(
-      (await getApplicationSupportDirectory()).path,
-      'config',
+    final appDir = await getApplicationSupportDirectory();
+    await appDir.create(recursive: true);
+
+    final configPath = join(appDir.path, 'config');
+
+    final session = await Session.create(
+      configPath: configPath,
     );
 
-    final session = await Session.create(configPath: configPath);
+    await session.setStoreDir(join(appDir.path, 'repos'));
 
     final settings = await Settings.init(MasterKey.random());
     final nativeChannels = NativeChannels();
-    final powerControl = PowerControl(
-      session,
-      settings,
-      connectivity: FakeConnectivity(),
-    );
     final reposCubit = ReposCubit(
       cacheServers: CacheServers.disabled,
       nativeChannels: nativeChannels,
       session: session,
       settings: settings,
-      mounter: Mounter(session),
     );
 
-    final mountCubit = MountCubit(reposCubit.mounter);
+    final mountCubit = MountCubit(session);
     final localeCubit = LocaleCubit(settings);
 
     return TestDependencies._(
       session,
       settings,
       nativeChannels,
-      powerControl,
       reposCubit,
       mountCubit,
       localeCubit,
@@ -151,7 +149,6 @@ class TestDependencies {
     await localeCubit.close();
     await mountCubit.close();
     await reposCubit.close();
-    await powerControl.close();
     await session.close();
   }
 
@@ -163,7 +160,6 @@ class TestDependencies {
         mountCubit: mountCubit,
         nativeChannels: nativeChannels,
         packageInfo: fakePackageInfo,
-        powerControl: powerControl,
         receivedMedia: receivedMedia ?? Stream.empty(),
         reposCubit: reposCubit,
         session: session,
@@ -174,10 +170,18 @@ class TestDependencies {
   final Session session;
   final Settings settings;
   final NativeChannels nativeChannels;
-  final PowerControl powerControl;
   final ReposCubit reposCubit;
   final MountCubit mountCubit;
   final LocaleCubit localeCubit;
+}
+
+class _FakeConnectivityPlatform extends ConnectivityPlatform {
+  @override
+  final Stream<List<ConnectivityResult>> onConnectivityChanged = Stream.empty();
+
+  @override
+  Future<List<ConnectivityResult>> checkConnectivity() =>
+      Future.value([ConnectivityResult.none]);
 }
 
 class _FakePathProviderPlatform extends PathProviderPlatform {
@@ -219,16 +223,6 @@ class FakeWindowManager extends PlatformWindowManager {
 
   @override
   Future<void> initSystemTray() => Future.value();
-}
-
-/// Fake Connectivity
-class FakeConnectivity implements Connectivity {
-  @override
-  final Stream<List<ConnectivityResult>> onConnectivityChanged = Stream.empty();
-
-  @override
-  Future<List<ConnectivityResult>> checkConnectivity() =>
-      Future.value([ConnectivityResult.none]);
 }
 
 /// Fake PackageInfo
@@ -325,7 +319,6 @@ extension WidgetTesterExtension on WidgetTester {
       }
 
       final image = await captureImage(element);
-
       final bytes = (await image.toByteData(format: ImageByteFormat.png))!
           .buffer
           .asUint8List();
@@ -333,10 +326,9 @@ extension WidgetTesterExtension on WidgetTester {
       final path = join(_testDirPath, 'screenshots', '$name.png');
 
       await Directory(dirname(path)).create(recursive: true);
+      await File(path).writeAsBytes(bytes);
 
       debugPrint('screenshot saved to $path');
-
-      await File(path).writeAsBytes(bytes);
     } catch (e) {
       debugPrint('Failed to save screenshot: $e');
     }

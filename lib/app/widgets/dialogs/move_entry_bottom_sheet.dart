@@ -74,8 +74,9 @@ class _MoveEntryDialogState extends State<MoveEntryDialog> {
     final parent = repo_path.dirname(widget.entryPath);
     final name = repo_path.basename(widget.entryPath);
 
-    return widget.reposCubit.builder(
-      (cubit) => Container(
+    return BlocBuilder<ReposCubit, ReposState>(
+      bloc: widget.reposCubit,
+      builder: (context, state) => Container(
         key: bodyKey,
         padding: Dimensions.paddingBottomSheet,
         decoration: Dimensions.decorationBottomSheetAlternative,
@@ -97,7 +98,7 @@ class _MoveEntryDialogState extends State<MoveEntryDialog> {
                 softWrap: true,
                 overflow: TextOverflow.ellipsis,
               ),
-              _selectActions(context, cubit.showList),
+              _selectActions(context, state),
             ],
           ),
         ),
@@ -105,13 +106,13 @@ class _MoveEntryDialogState extends State<MoveEntryDialog> {
     );
   }
 
-  _selectActions(context, bool isRepoList) =>
+  Widget _selectActions(context, ReposState reposState) =>
       BlocBuilder<NavigationCubit, NavigationState>(
         bloc: navigationCubit,
         builder: (context, state) {
           final aspectRatio = _getButtonAspectRatio(widgetSize);
           return Fields.dialogActions(
-            buttons: _actions(context, state, isRepoList, aspectRatio),
+            buttons: _actions(context, reposState, state, aspectRatio),
             padding: const EdgeInsetsDirectional.only(top: 20.0),
             mainAxisAlignment: MainAxisAlignment.end,
           );
@@ -120,22 +121,21 @@ class _MoveEntryDialogState extends State<MoveEntryDialog> {
 
   List<Widget> _actions(
     BuildContext context,
-    NavigationState state,
-    bool isRepoList,
+    ReposState reposState,
+    NavigationState navigationState,
     double aspectRatio,
   ) {
-    final currentRepoAccessMode = widget.reposCubit.currentRepo?.accessMode;
+    final currentRepoAccessMode = reposState.currentEntry?.accessMode;
     final isCurrentRepoWriteMode = currentRepoAccessMode == AccessMode.write;
 
-    final canMove = state.isFolder
+    final canMove = navigationState.isFolder
         ? _canMove(
             originRepoLocation: originRepoCubit.location,
             originPath: repo_path.dirname(entryPath),
-            destinationRepoLocation:
-                widget.reposCubit.currentRepo?.cubit?.location ??
-                    state.repoLocation,
-            destinationPath: state.path,
-            isRepoList: isRepoList,
+            destinationRepoLocation: reposState.currentEntry?.cubit?.location ??
+                navigationState.repoLocation,
+            destinationPath: navigationState.path,
+            isRepoList: reposState.current == null,
             isCurrentRepoWriteMode: isCurrentRepoWriteMode,
           )
         : false;

@@ -25,50 +25,53 @@ class OuiSyncBar extends StatelessWidget implements PreferredSizeWidget {
   final ouisyncLogo = const Image(image: AssetImage(Constants.ouisyncLogoFull));
 
   @override
-  Widget build(BuildContext context) => reposCubit.builder((state) {
-        final leadingWidget = state.showList
-            ? Padding(
-                padding: const EdgeInsetsDirectional.only(start: 8.0),
-                child: ouisyncLogo,
-              )
-            : null;
+  Widget build(BuildContext context) => BlocBuilder<ReposCubit, ReposState>(
+        bloc: reposCubit,
+        builder: (context, state) {
+          final leadingWidget = state.current == null
+              ? Padding(
+                  padding: const EdgeInsetsDirectional.only(start: 8.0),
+                  child: ouisyncLogo,
+                )
+              : null;
 
-        final cubit = state.currentRepo?.cubit;
+          final cubit = state.currentEntry?.cubit;
 
-        final titleWidget = cubit != null
-            ? getTitleWidget(
-                cubit,
-                repoPicker,
-              )
-            : const SizedBox.shrink();
+          final titleWidget = cubit != null
+              ? getTitleWidget(
+                  cubit,
+                  repoPicker,
+                )
+              : const SizedBox.shrink();
 
-        final settingsButton = cubit != null
-            ? getSettingsAction(
-                cubit: cubit,
-                appSettingsButton: appSettingsButton,
-                repoSettingsButton: repoSettingsButton,
-              )
-            : appSettingsButton;
+          final settingsButton = cubit != null
+              ? getSettingsAction(
+                  cubit: cubit,
+                  appSettingsButton: appSettingsButton,
+                  repoSettingsButton: repoSettingsButton,
+                )
+              : appSettingsButton;
 
-        final actionsList = <Widget>[];
+          final actionsList = <Widget>[];
 
-        /// TODO: Implement the search before showing the button in the bar
-        // if (reposCubit.repos.isNotEmpty) {
-        //   actionsList.add(searchButton);
-        // }
+          /// TODO: Implement the search before showing the button in the bar
+          // if (reposCubit.repos.isNotEmpty) {
+          //   actionsList.add(searchButton);
+          // }
 
-        actionsList.add(settingsButton);
+          actionsList.add(settingsButton);
 
-        return DirectionalAppBar(
-          leading: leadingWidget,
-          title: titleWidget,
-          automaticallyImplyLeading: true,
-          actions: actionsList,
-          // Make the `repoList` have no spacing on the horizontal axis.
-          titleSpacing: 0.0,
-          leadingWidth: 120.0,
-        );
-      });
+          return DirectionalAppBar(
+            leading: leadingWidget,
+            title: titleWidget,
+            automaticallyImplyLeading: true,
+            actions: actionsList,
+            // Make the `repoList` have no spacing on the horizontal axis.
+            titleSpacing: 0.0,
+            leadingWidth: 120.0,
+          );
+        },
+      );
 
   Widget getTitleWidget(
     RepoCubit cubit,

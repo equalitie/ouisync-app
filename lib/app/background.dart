@@ -27,8 +27,8 @@ Future<void> syncInBackground() async {
   final start = DateTime.now();
 
   try {
-    final settings = await loadAndMigrateSettings(session);
-    final repos = await _fetchRepositories(session, settings);
+    await loadAndMigrateSettings(session);
+    final repos = await Repository.list(session);
 
     final completed = await Future.any([
       _waitForAllSynced(repos).then((_) => true),
@@ -49,36 +49,24 @@ Future<void> syncInBackground() async {
   }
 }
 
-Future<List<Repository>> _fetchRepositories(
-  Session session,
-  Settings settings,
-) =>
-    Future.wait(
-      settings.repos.map((location) async {
-        try {
-          final repo = await Repository.open(session, path: location.path);
-          await repo.setSyncEnabled(true);
-          return repo;
-        } catch (e) {
-          throw _RepositoryError(e, location.name);
-        }
-      }).toList(),
-    );
-
 Future<void> _waitForAllSynced(List<Repository> repos) async {
   await Future.wait(repos.map((repo) => _waitForSynced(repo)));
 }
 
 Future<void> _waitForSynced(Repository repo) async {
+  // This future completes when the repo gets synced after receiving at least one repo
+  // event. This also creates the repo event subscription. Doing this before checking if the
+  // repo is already synced, to prevent race condition.
+  final syncedAfterEvent = repo.events
+      .asyncMap((_) => _isSynced(repo))
+      .where((synced) => synced)
+      .first;
+
   if (await _isSynced(repo)) {
     return;
   }
 
-  await for (final _ in repo.events) {
-    if (await _isSynced(repo)) {
-      return;
-    }
-  }
+  await syncedAfterEvent;
 }
 
 Future<bool> _isSynced(Repository repo) async {

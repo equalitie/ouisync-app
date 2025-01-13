@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:loggy/loggy.dart';
 import 'package:ouisync/ouisync.dart' show Session;
+import 'package:ouisync/server.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart';
 
@@ -11,11 +12,19 @@ import 'utils/log.dart';
 import 'utils/native.dart';
 import 'utils/platform/platform_window_manager.dart';
 
-Future<Session> createSession(
-    {required PackageInfo packageInfo,
-    required Loggy logger,
-    PlatformWindowManager? windowManager,
-    void Function()? onConnectionReset}) async {
+const _defaultPeerPort = 20209;
+
+// Default log tag.
+// HACK: if the tag doesn't start with 'flutter' then the logs won't show up in
+// the app if built in release mode.
+const _defaultLogTag = 'flutter-ouisync';
+
+Future<Session> createSession({
+  required PackageInfo packageInfo,
+  required Loggy logger,
+  PlatformWindowManager? windowManager,
+  void Function()? onConnectionReset,
+}) async {
   final appDir = await Native.getBaseDir();
   final configPath = join(appDir.path, Constants.configDirName);
   final logPath = await LogUtils.path;
@@ -41,7 +50,13 @@ Future<Session> createSession(
     logger.debug('app dir: ${appDir.path}');
     logger.debug('log dir: ${File(logPath).parent.path}');
 
+    final storeDir = await session.storeDir;
+    if (storeDir == null) {
+      await session.setStoreDir(await defaultStoreDir.then((d) => d.path));
+    }
+
     await session.initNetwork(
+      defaultBindAddrs: ['quic/0.0.0.0:0', 'quic/[::]:0'],
       defaultPortForwardingEnabled: true,
       defaultLocalDiscoveryEnabled: true,
     );
@@ -58,7 +73,10 @@ Future<Session> createSession(
   return session;
 }
 
-const _defaultPeerPort = 20209;
+Future<Directory> get defaultStoreDir async {
+  final baseDir = await Native.getBaseDir(removable: true);
+  return Directory(join(baseDir.path, Constants.folderRepositoriesName));
+}
 
 Future<void> addCacheServerAsPeer(
   Session session,
@@ -67,10 +85,10 @@ Future<void> addCacheServerAsPeer(
 }) async {
   try {
     for (final addr in await InternetAddress.lookup(_stripPort(host))) {
-      for (final proto in ['quic', 'tcp']) {
-        await session
-            .addUserProvidedPeers(['$proto/${addr.address}:$_defaultPeerPort']);
-      }
+      await session.addUserProvidedPeers([
+        'quic/${addr.address}:$_defaultPeerPort',
+        'tcp/${addr.address}:$_defaultPeerPort',
+      ]);
     }
 
     logger.debug('cache server $host added');

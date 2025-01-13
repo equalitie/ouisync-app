@@ -63,7 +63,7 @@ Future<ShareTokenResult> parseShareToken(
 
   try {
     final token = await ShareToken.fromString(reposCubit.session, input);
-    final repo = reposCubit.findByInfoHash(await token.infoHash);
+    final repo = reposCubit.state.findByInfoHash(await token.infoHash);
 
     if (repo != null) {
       return ShareTokenInvalid(ShareTokenRepoExists(repo.name));

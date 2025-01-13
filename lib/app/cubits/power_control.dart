@@ -11,9 +11,6 @@ import '../utils/utils.dart'
 import '../utils/watch.dart' as watch;
 import 'cubits.dart' show CubitActions;
 
-const _unspecifiedV4 = "0.0.0.0:0";
-const _unspecifiedV6 = "[::]:0";
-
 class PowerControlState {
   final ConnectivityResult connectivityType;
   // We need the null state to express that we don't yet know what the mode is.
@@ -306,15 +303,18 @@ class PowerControl extends Cubit<PowerControlState>
     }
 
     var transition = _Transition.none;
-    List<String> addrs = [];
+    final List<String> addrs;
 
     switch (mode) {
       case NetworkModeFull():
-        addrs.add(_unspecifiedV4);
-        addrs.add(_unspecifiedV6);
+        addrs = ['quic/0.0.0.0:0', 'quic/[::]:0'];
+        break;
       case NetworkModeSaving(hotspotAddr: final hotspotAddr):
-        addrs.add(hotspotAddr!);
+        addrs = ['quic/$hotspotAddr'];
+        break;
       case NetworkModeDisabled():
+        addrs = [];
+        break;
     }
 
     try {

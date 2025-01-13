@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'navigation.dart';
+import '../navigation.dart';
 import '../utils.dart';
 
 void main() {

@@ -4,7 +4,7 @@ import 'package:ouisync_app/app/utils/utils.dart';
 import 'package:ouisync_app/app/utils/settings/v0/v0.dart' as v0;
 import 'package:ouisync_app/app/utils/settings/v1.dart' as v1;
 import 'package:ouisync_app/app/models/repo_location.dart';
-import 'package:ouisync/ouisync.dart' show Repository, Session;
+import 'package:ouisync/ouisync.dart' show Repository, Session, logInit;
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -12,6 +12,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 // Run with `flutter test test/settings_test.dart`.
 void main() {
+  logInit();
+
   test('settings migration v0 to v1', () async {
     SharedPreferences.setMockInitialValues({});
     FlutterSecureStorage.setMockInitialValues({});
@@ -20,6 +22,7 @@ void main() {
     expect(prefs.getKeys().isEmpty, true);
 
     final baseDir = await getApplicationSupportDirectory();
+    await baseDir.create(recursive: true);
 
     final fooPath = join(baseDir.path, 'foo.db');
     final barPath = join(baseDir.path, 'bar.db');
@@ -81,6 +84,7 @@ void main() {
     expect(prefs.getKeys().isEmpty, true);
 
     final baseDir = await getApplicationSupportDirectory();
+    await baseDir.create(recursive: true);
 
     final fooPath = join(baseDir.path, 'foo.db');
     final barPath = join(baseDir.path, 'bar.db');
@@ -97,9 +101,7 @@ void main() {
     await s1.setRepoLocation(DatabaseId('123'), repoLocation);
     await s1.setDefaultRepo(repoLocation);
 
-    final session = await Session.create(
-      configPath: join(baseDir.path, 'config'),
-    );
+    final session = await Session.create(configPath: join(baseDir.path, 'config'));
 
     await Repository.create(
       session,

@@ -79,7 +79,7 @@ class LogsSection extends SettingsSection with AppLogger {
       BlocBuilder<MountCubit, MountState>(
           bloc: mount,
           builder: (context, result) {
-            if (result is! MountStateError) {
+            if (result is! MountStateFailure) {
               return SizedBox.shrink();
             }
 
@@ -87,8 +87,7 @@ class LogsSection extends SettingsSection with AppLogger {
             Widget? trailing;
             void Function()? onTap;
 
-            final err = result.error;
-            if (err is OuisyncException && err.code == oui.ErrorCode.vfsDriverInstallError) {
+            if (result.error is oui.VFSDriverInstallError) {
               reason = S.current.messageErrorDokanNotInstalled('');
               trailing = Icon(Icons.open_in_browser);
               onTap = () {
@@ -96,7 +95,7 @@ class LogsSection extends SettingsSection with AppLogger {
                 checkForDokan();
               };
             } else {
-              reason = err.toString();
+              reason = result.error.toString();
             }
 
             return _errorTile(context, S.current.messageFailedToMount(reason),
@@ -117,7 +116,7 @@ class LogsSection extends SettingsSection with AppLogger {
 
   @override
   bool containsErrorNotification() =>
-      (panicCounter.state ?? 0) > 0 || mount.state is MountStateError;
+      (panicCounter.state ?? 0) > 0 || mount.state is MountStateFailure;
 
   Future<void> _saveLogs(
       BuildContext context, NatDetection natDetection) async {

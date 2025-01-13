@@ -39,9 +39,10 @@ void main() {
   });
 
   RepoSecurityPage createRepoSecurityPage() => RepoSecurityPage(
+        deps.settings,
+        deps.session,
         repoCubit,
         WriteAccess(localSecret),
-        deps.settings,
         PasswordHasher(deps.session),
       );
 

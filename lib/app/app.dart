@@ -14,7 +14,7 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 
 import '../generated/l10n.dart';
 import 'cubits/cubits.dart'
-    show LocaleCubit, LocaleState, MountCubit, PowerControl, ReposCubit;
+    show LocaleCubit, LocaleState, MountCubit, ReposCubit;
 import 'pages/pages.dart';
 import 'session.dart';
 import 'utils/platform/platform.dart' show PlatformWindowManager;
@@ -27,7 +27,6 @@ import 'utils/utils.dart'
         Constants,
         InvalidSettingsVersion,
         loadAndMigrateSettings,
-        Mounter,
         Settings;
 import 'widgets/flavor_banner.dart';
 import 'widgets/media_receiver.dart';
@@ -169,7 +168,6 @@ class OuisyncApp extends StatefulWidget {
 class _OuisyncAppState extends State<OuisyncApp>
     with AppLogger /*, RouteAware*/ {
   final receivedMediaController = StreamController<List<SharedMediaFile>>();
-  late final powerControl = PowerControl(widget.session, widget.settings);
   late final MountCubit mountCubit;
   late final ReposCubit reposCubit;
 
@@ -177,14 +175,12 @@ class _OuisyncAppState extends State<OuisyncApp>
   void initState() {
     super.initState();
 
-    final mounter = Mounter(widget.session);
-    mountCubit = MountCubit(mounter)..init();
+    mountCubit = MountCubit(widget.session)..init();
     reposCubit = ReposCubit(
       session: widget.session,
       nativeChannels: widget.nativeChannels,
       settings: widget.settings,
       cacheServers: CacheServers(Constants.cacheServers),
-      mounter: mounter,
     );
 
     unawaited(_init());
@@ -200,7 +196,6 @@ class _OuisyncAppState extends State<OuisyncApp>
   void dispose() {
     unawaited(reposCubit.close());
     unawaited(mountCubit.close());
-    unawaited(powerControl.close());
     unawaited(receivedMediaController.close());
     //widget.appRouteObserver.unsubscribe(this);
 
@@ -216,7 +211,6 @@ class _OuisyncAppState extends State<OuisyncApp>
               mountCubit: mountCubit,
               nativeChannels: widget.nativeChannels,
               packageInfo: widget.packageInfo,
-              powerControl: powerControl,
               receivedMedia: receivedMediaController.stream,
               reposCubit: reposCubit,
               session: widget.session,

@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:ouisync/ouisync.dart';
 import 'package:ouisync_app/app/cubits/repo_creation.dart';
 import 'package:ouisync_app/app/models/models.dart';
 import 'package:ouisync_app/app/utils/share_token.dart';
@@ -15,6 +16,8 @@ void main() {
       'https://ouisync.net/r#AwAgTmm8jPQuimEWzqVcM17M2-3GXIULZQ1tbQRVsBgj9PY?name=uno';
 
   setUp(() async {
+    logInit();
+
     deps = await TestDependencies.create();
     repoCreationCubit = RepoCreationCubit(reposCubit: deps.reposCubit);
   });
@@ -59,7 +62,7 @@ void main() {
 
     expect(repoCreationCubit.state.substate, isA<RepoCreationSuccess>());
     expect(
-      deps.reposCubit.repos
+      deps.reposCubit.state.repos.values
           .where((entry) => entry.name == suggestedRepoName)
           .firstOrNull,
       isA<OpenRepoEntry>()

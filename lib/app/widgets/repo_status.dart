@@ -99,7 +99,7 @@ class _Error extends StatelessWidget {
         MountStateMounting() ||
         MountStateSuccess() =>
           SizedBox.shrink(),
-        MountStateError(error: final error, stack: _) =>
+        MountStateFailure(error: final error, stack: _) =>
           GestureDetector(
             onTap: () => _showErrorDialog(
               context,

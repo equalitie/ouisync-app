@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io' as io;
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:ouisync_app/app/models/models.dart';
 import 'package:ouisync/ouisync.dart';
 import 'package:path/path.dart' as p;
 
@@ -14,12 +13,11 @@ void main() {
 
   setUp(() async {
     final dir = await io.Directory.systemTemp.createTemp();
-    final location = RepoLocation.fromDbPath(p.join(dir.path, "store.db"));
     session = await Session.create(configPath: dir.path);
 
     pluginRepo = await Repository.create(
       session,
-      path: location.path,
+      path: p.join(dir.path, 'repo'),
       readSecret: null,
       writeSecret: null,
     );
@@ -141,7 +139,14 @@ void main() {
       ];
       expect(folder1Contents, dirEntryComparator(expectedFolder1Contents));
 
+<<<<<<< HEAD
       final folder2Contents = await Directory.read(pluginRepo, '/folder1/folder2');
+=======
+      final folder2Contents = await Directory.read(
+        pluginRepo,
+        '/folder1/folder2',
+      );
+>>>>>>> service
       expect(folder2Contents, hasLength(1));
 
       final expectedFolder2 = <DirEntry>[DirEntry('file1.txt', EntryType.file)];

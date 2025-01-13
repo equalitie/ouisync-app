@@ -49,10 +49,7 @@ Future<File> dumpAll(
     sink.writeln("externalAddressV4: ${connInfo.externalAddressV4}");
     sink.writeln("externalAddressV6: ${connInfo.externalAddressV6}");
     sink.writeln("NAT type: $natType");
-    sink.writeln("tcpListenerV4:  ${connInfo.tcpListenerV4}");
-    sink.writeln("tcpListenerV6:  ${connInfo.tcpListenerV6}");
-    sink.writeln("quicListenerV4: ${connInfo.quicListenerV4}");
-    sink.writeln("quicListenerV6: ${connInfo.quicListenerV6}");
+    sink.writeln("listenerAddrs:  ${connInfo.listenerAddrs}");
 
     sink.writeln(
         "\n\n------------------------- State Monitor -------------------------\n\n");

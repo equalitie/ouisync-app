@@ -22,11 +22,12 @@ class RepoListState extends StatelessWidget
 
   @override
   Widget build(BuildContext context) {
-    if (reposCubit.currentRepo is LoadingRepoEntry) {
+    if (reposCubit.state.currentEntry is LoadingRepoEntry) {
       return Container();
     }
 
-    final repoList = reposCubit.repos.toList();
+    final repoList = reposCubit.state.repos.values.toList();
+
     return Container(
       color: Colors.white,
       child: Column(
@@ -37,7 +38,7 @@ class RepoListState extends StatelessWidget
             child: _buildRepoList(
               context,
               repoList,
-              reposCubit.currentRepoName,
+              reposCubit.state.current?.name,
             ),
           ),
         ],
@@ -83,7 +84,7 @@ class RepoListState extends StatelessWidget
             return RepoListItem(
               repoCubit: repoCubit,
               isDefault: isDefault,
-              mainAction: () async => await reposCubit.setCurrent(repoEntry),
+              mainAction: () => reposCubit.setCurrent(repoEntry.location),
               verticalDotsAction: () => onShowRepoSettings(
                 parentContext,
                 repoCubit: repoCubit,
