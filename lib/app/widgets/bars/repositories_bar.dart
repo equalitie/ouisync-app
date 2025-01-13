@@ -94,7 +94,7 @@ class RepositoriesBar extends StatelessWidget
   }
 
   Widget _buildLockButtonContent(RepoCubit? repoCubit) => IconButton(
-        key: ValueKey('lock_repo_icon'),
+        key: Key('access-mode-button'),
         icon: Icon(
             Fields.accessModeIcon(repoCubit?.accessMode ?? AccessMode.blind)),
         iconSize: Dimensions.sizeIconSmall,

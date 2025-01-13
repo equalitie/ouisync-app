@@ -9,20 +9,22 @@ import '../../generated/l10n.dart';
 import '../cubits/cubits.dart' show RepoCubit;
 import '../models/models.dart'
     show
-        AuthModeBlindOrManual,
-        AuthModeKeyStoredOnDevice,
-        AuthModePasswordStoredOnDevice,
-        RepoLocation;
+        Access,
+        AccessModeLocalizedExtension,
+        BlindAccess,
+        ReadAccess,
+        RepoLocation,
+        UnlockedAccess,
+        WriteAccess;
 import '../pages/pages.dart' show RepoSecurityPage;
 import '../utils/platform/platform.dart' show PlatformValues;
 import '../utils/utils.dart'
     show
-        AccessModeLocalizedExtension,
         AppThemeExtension,
         Dialogs,
         Dimensions,
+        Fields,
         LocalAuth,
-        MasterKey,
         PasswordHasher,
         Settings,
         ThemeGetter,
@@ -31,11 +33,11 @@ import '../widgets/widgets.dart'
     show
         ActionsDialog,
         DeleteRepoDialog,
+        GetPasswordAccessDialog,
+        NegativeButton,
+        PositiveButton,
         RenameRepository,
-        ShareRepository,
-        UnlockDialog,
-        UnlockRepository,
-        UnlockRepositoryResult;
+        ShareRepository;
 
 mixin RepositoryActionsMixin on LoggyType {
   Future<String> renameRepository(
@@ -110,54 +112,38 @@ mixin RepositoryActionsMixin on LoggyType {
     required PasswordHasher passwordHasher,
     required void Function() popDialog,
   }) async {
-    LocalSecret secret;
+    //LocalSecret secret;
+    final authMode = repoCubit.state.authMode;
+    final encryptedSecret = authMode.storedLocalSecret;
 
-    switch (repoCubit.state.authMode) {
-      case (AuthModeBlindOrManual()):
-        final password = await _getManualPassword(context, repoCubit);
-        if (password.isEmpty) return;
-        secret = LocalPassword(password);
-        break;
-      case (AuthModeKeyStoredOnDevice()):
-      case (AuthModePasswordStoredOnDevice()):
-        if (!await LocalAuth.authenticateIfPossible(
-          context,
-          S.current.messageAccessingSecureStorage,
-        )) return;
+    final Access? access;
 
-        secret = (await repoCubit.getLocalSecret(settings.masterKey))!;
-        break;
+    if (encryptedSecret == null) {
+      // TODO: Check if the repo can be unlocked without a secret and if so,
+      // proceed with `authenticateIfPossible`.
+
+      access = await GetPasswordAccessDialog.show(context, repoCubit, settings);
+    } else {
+      if (!await LocalAuth.authenticateIfPossible(
+        context,
+        S.current.messageAccessingSecureStorage,
+      )) return;
+
+      // TODO: Tell the user when the decryption fails.
+      final secret = (await encryptedSecret.decrypt(settings.masterKey))!;
+      access = await repoCubit.getAccessOf(secret);
     }
 
     popDialog();
 
-    await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => RepoSecurityPage(
-          settings: settings,
-          repo: repoCubit,
-          currentLocalSecret: secret,
-          passwordHasher: passwordHasher,
-        ),
-      ),
-    );
-  }
+    final UnlockedAccess? unlockedAccess = access?.asUnlocked;
 
-  Future<String> _getManualPassword(
-    BuildContext context,
-    RepoCubit repoCubit,
-  ) async {
-    final password = await showDialog<String>(
-          context: context,
-          builder: (BuildContext context) => ActionsDialog(
-            title: S.current.messageValidateLocalPassword,
-            body: UnlockDialog(repoCubit),
-          ),
-        ) ??
-        '';
+    if (unlockedAccess == null) {
+      return;
+    }
 
-    return password;
+    await RepoSecurityPage.show(
+        context, repoCubit, unlockedAccess, settings, passwordHasher);
   }
 
   Future<void> locateRepository(
@@ -221,12 +207,44 @@ mixin RepositoryActionsMixin on LoggyType {
     required String repoName,
     required Future deleteRepoFuture,
   }) async {
-    final delete = await _getDeleteRepoConfirmation(
-      context,
-      repoName: repoName,
+    final deleteRepo = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Flex(direction: Axis.horizontal, children: [
+          Fields.constrainedText(
+            S.current.titleDeleteRepository,
+            style: context.theme.appTextStyle.titleMedium,
+            maxLines: 2,
+          )
+        ]),
+        content: SingleChildScrollView(
+          child: ListBody(
+            children: [
+              Text(
+                S.current.messageConfirmRepositoryDeletion,
+                style: context.theme.appTextStyle.bodyMedium,
+              )
+            ],
+          ),
+        ),
+        actions: [
+          Fields.dialogActions(buttons: [
+            NegativeButton(
+              text: S.current.actionCancelCapital,
+              onPressed: () async =>
+                  await Navigator.of(context).maybePop(false),
+            ),
+            PositiveButton(
+              text: S.current.actionDeleteCapital,
+              onPressed: () async => await Navigator.of(context).maybePop(true),
+              isDangerButton: true,
+            )
+          ])
+        ],
+      ),
     );
 
-    if (delete == true) {
+    if (deleteRepo == true) {
       await Dialogs.executeFutureWithLoadingDialog(
         null,
         deleteRepoFuture,
@@ -256,51 +274,61 @@ mixin RepositoryActionsMixin on LoggyType {
   Future<void> unlockRepository(
     BuildContext context,
     RepoCubit repoCubit,
-    MasterKey masterKey,
     PasswordHasher passwordHasher,
+    Settings settings,
   ) async {
     final authMode = repoCubit.state.authMode;
+    final LocalSecret? secret;
     String? errorMessage;
 
-    switch (authMode) {
-      case (AuthModeBlindOrManual()):
-        // First try to unlock it without a password.
-        await repoCubit.unlock(null);
-        final accessMode = repoCubit.accessMode;
-        if (accessMode != AccessMode.blind) {
-          showSnackBar(S.current.messageUnlockRepoOk(accessMode.localized));
+    final encryptedSecret = authMode.storedLocalSecret;
+
+    if (encryptedSecret == null) {
+      // First try to unlock it without a password.
+      await repoCubit.unlock(null);
+      final accessMode = repoCubit.accessMode;
+      if (accessMode != AccessMode.blind) {
+        showSnackBar(S.current.messageUnlockRepoOk(accessMode.localized));
+        return;
+      }
+
+      // If it didn't work, try to unlock using a password from the user.
+      final access = await GetPasswordAccessDialog.show(
+        context,
+        repoCubit,
+        settings,
+      );
+
+      switch (access) {
+        case null:
+        case BlindAccess():
+          return;
+        case ReadAccess():
+          secret = access.localSecret;
+        case WriteAccess():
+          secret = access.localSecret;
+      }
+    } else {
+      final bio = authMode.isSecuredWithBiometrics;
+
+      errorMessage = bio
+          ? S.current.messageBiometricUnlockRepositoryFailed
+          : S.current.messageAutomaticUnlockRepositoryFailed;
+
+      if (bio) {
+        if (!await LocalAuth.authenticateIfPossible(
+            context, S.current.messageAccessingSecureStorage)) {
           return;
         }
+      }
 
-        // If it didn't work, try to unlock using a password from the user.
-        final unlockResult = await _unlockRepositoryManually(
-          context,
-          repoCubit,
-          masterKey,
-          passwordHasher,
-        );
-        if (unlockResult == null) return;
-
-        showSnackBar(unlockResult.message);
-
-        return;
-      case AuthModeKeyStoredOnDevice(secureWithBiometrics: true):
-      case AuthModePasswordStoredOnDevice(secureWithBiometrics: true):
-        if (!await LocalAuth.authenticateIfPossible(
-          context,
-          S.current.messageAccessingSecureStorage,
-        )) return;
-
-        errorMessage = S.current.messageBiometricUnlockRepositoryFailed;
-      case AuthModeKeyStoredOnDevice():
-      case AuthModePasswordStoredOnDevice():
-        errorMessage = S.current.messageAutomaticUnlockRepositoryFailed;
+      secret = await encryptedSecret.decrypt(settings.masterKey);
     }
 
-    final secret = await repoCubit.getLocalSecret(masterKey);
-
     if (secret == null) {
-      showSnackBar(errorMessage);
+      if (errorMessage != null) {
+        showSnackBar(errorMessage);
+      }
       return;
     }
 
@@ -312,35 +340,6 @@ mixin RepositoryActionsMixin on LoggyType {
         : S.current.messageUnlockRepoFailed;
 
     showSnackBar(message);
-  }
-
-  Future<UnlockRepositoryResult?> _unlockRepositoryManually(
-    BuildContext context,
-    RepoCubit repoCubit,
-    MasterKey masterKey,
-    PasswordHasher passwordHasher,
-  ) async {
-    final isBiometricsAvailable = await LocalAuth.canAuthenticate();
-
-    final result = await showDialog<UnlockRepositoryResult?>(
-      context: context,
-      builder: (BuildContext context) => ScaffoldMessenger(
-        child: Scaffold(
-          backgroundColor: Colors.transparent,
-          body: ActionsDialog(
-            title: S.current.messageUnlockRepository(repoCubit.name),
-            body: UnlockRepository(
-              repoCubit: repoCubit,
-              masterKey: masterKey,
-              passwordHasher: passwordHasher,
-              isBiometricsAvailable: isBiometricsAvailable,
-            ),
-          ),
-        ),
-      ),
-    );
-
-    return result;
   }
 }
 

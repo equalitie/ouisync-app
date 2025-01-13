@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../cubits/repo.dart';
 import '../../utils/utils.dart';
+import '../../models/access_mode.dart';
 import '../widgets.dart';
 
 class RepoDescription extends StatelessWidget with AppLogger {

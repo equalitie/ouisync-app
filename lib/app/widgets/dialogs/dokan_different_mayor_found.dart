@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../generated/l10n.dart';
-import '../../utils/utils.dart'
-    show AppThemeExtension, Dimensions, Fields, ThemeGetter;
+import '../../utils/utils.dart' show AppThemeExtension, Fields, ThemeGetter;
 import '../widgets.dart' show NegativeButton, PositiveButton;
 
 class DokanDifferentMayorFound extends StatelessWidget {
@@ -37,12 +36,10 @@ class DokanDifferentMayorFound extends StatelessWidget {
         NegativeButton(
           text: S.current.actionSkip.toLowerCase(),
           onPressed: () => Navigator.of(context).maybePop(false),
-          buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
         ),
         PositiveButton(
           text: S.current.actionInstallDokan.toUpperCase(),
           onPressed: () => Navigator.of(context).maybePop(true),
-          buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
         ),
       ];
 }

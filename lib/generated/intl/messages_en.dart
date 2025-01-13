@@ -154,6 +154,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionIAgree": MessageLookupByLibrary.simpleMessage("I agree"),
         "actionIDontAgree":
             MessageLookupByLibrary.simpleMessage("I don’t agree"),
+        "actionIDontHaveALocalPassword": MessageLookupByLibrary.simpleMessage(
+            "I don\'t have a local password for this repository"),
         "actionImport": MessageLookupByLibrary.simpleMessage("Import"),
         "actionImportRepo":
             MessageLookupByLibrary.simpleMessage("Import repository"),
@@ -638,6 +640,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Peer removed"),
         "messagePermissionRequired":
             MessageLookupByLibrary.simpleMessage("This permission is required"),
+        "messagePleaseAuthenticate":
+            MessageLookupByLibrary.simpleMessage("Please authenticate"),
         "messagePreviewingFileFailed": m22,
         "messagePrivacyIntro": MessageLookupByLibrary.simpleMessage(
             "This section is used to inform visitors regarding our policies with the collection, use, and disclosure of Personal Information if anyone decides to use our Service"),
@@ -817,6 +821,77 @@ class MessageLookup extends MessageLookupByLibrary {
         "replacementNumber": m40,
         "replacementPath": m41,
         "replacementStatus": m42,
+        "repoResetAccessTypeInfoBlindOrLocked":
+            MessageLookupByLibrary.simpleMessage("Blind or locked"),
+        "repoResetAccessTypeInfoRead":
+            MessageLookupByLibrary.simpleMessage("Read"),
+        "repoResetAccessTypeInfoWrite":
+            MessageLookupByLibrary.simpleMessage("Write"),
+        "repoResetAccessTypeLabel":
+            MessageLookupByLibrary.simpleMessage("Repository access type"),
+        "repoResetActionAnyToWrite": MessageLookupByLibrary.simpleMessage(
+            "The repository will gain write access."),
+        "repoResetActionBlindToBlind": MessageLookupByLibrary.simpleMessage(
+            "The repository will become blind."),
+        "repoResetActionBlindToBlindWarn": MessageLookupByLibrary.simpleMessage(
+            "This repository may have read or write access locked behind a local password. If so, unlocking will not be possible after this action is executed."),
+        "repoResetActionBlindToRead": MessageLookupByLibrary.simpleMessage(
+            "The repository will become read only."),
+        "repoResetActionBlindToReadWarn": MessageLookupByLibrary.simpleMessage(
+            "This repository may have write access locked behind a local password. If so, unlocking for writing will not be possible after this action is executed."),
+        "repoResetActionInfoLabel":
+            MessageLookupByLibrary.simpleMessage("Action to be submitted"),
+        "repoResetActionReadToBlind": MessageLookupByLibrary.simpleMessage(
+            "The repository will lose its read access."),
+        "repoResetActionReadToBlindWarn": MessageLookupByLibrary.simpleMessage(
+            "This action is irreversible without a read or write token link."),
+        "repoResetActionSame": MessageLookupByLibrary.simpleMessage(
+            "No action will be performed because the token and repository access are the same."),
+        "repoResetActionWriteToBlind": MessageLookupByLibrary.simpleMessage(
+            "The repository will lose its read and write access."),
+        "repoResetActionWriteToBlindWarn": MessageLookupByLibrary.simpleMessage(
+            "This action is irreversible without a write token link."),
+        "repoResetActionWriteToRead": MessageLookupByLibrary.simpleMessage(
+            "The repository will lose its write access."),
+        "repoResetActionWriteToReadWarn": MessageLookupByLibrary.simpleMessage(
+            "This action is irreversible without a write token link."),
+        "repoResetAuthInfoBlindOrLocked":
+            MessageLookupByLibrary.simpleMessage("Authentication method"),
+        "repoResetAuthInfoBlindOrLockedWarn":
+            MessageLookupByLibrary.simpleMessage(
+                "The application cannot tell the difference."),
+        "repoResetAuthInfoKeyIsStored": MessageLookupByLibrary.simpleMessage(
+            "Key is stored on this device."),
+        "repoResetAuthInfoKeyIsStoredAndProtected":
+            MessageLookupByLibrary.simpleMessage(
+                "Key is stored on this device and additional verification is needed to open the repository."),
+        "repoResetAuthInfoLabel":
+            MessageLookupByLibrary.simpleMessage("Authentication method"),
+        "repoResetAuthInfoLocked": MessageLookupByLibrary.simpleMessage(
+            "Locked behind a local password."),
+        "repoResetAuthInfoPasswordIsStored":
+            MessageLookupByLibrary.simpleMessage(
+                "Password is stored on this device."),
+        "repoResetConfirmUpdateMessage": MessageLookupByLibrary.simpleMessage(
+            "Are you sure you want to proceed with the Update action?"),
+        "repoResetConfirmUpdateTitle":
+            MessageLookupByLibrary.simpleMessage("Please confirm"),
+        "repoResetRepoNameLabel":
+            MessageLookupByLibrary.simpleMessage("Repository name"),
+        "repoResetTitle":
+            MessageLookupByLibrary.simpleMessage("Reset repository access"),
+        "repoResetTokenAlreadySubmitted": MessageLookupByLibrary.simpleMessage(
+            "No action will be performed because the token has already been submitted."),
+        "repoResetTokenEmptyInfo": MessageLookupByLibrary.simpleMessage(
+            "Please provide a valid token link to determine the action."),
+        "repoResetTokenInvalid":
+            MessageLookupByLibrary.simpleMessage("Invalid"),
+        "repoResetTokenInvalidInfo":
+            MessageLookupByLibrary.simpleMessage("The token link is invalid."),
+        "repoResetTokenNonMatching": MessageLookupByLibrary.simpleMessage(
+            "No action can be performed because the token does not correspond to this repository."),
+        "repoResetTokenTypeLabel":
+            MessageLookupByLibrary.simpleMessage("Token access type"),
         "repositoryIsAlreadyImported": MessageLookupByLibrary.simpleMessage(
             "Repository is already imported"),
         "sortByNameLabel": MessageLookupByLibrary.simpleMessage("Name"),

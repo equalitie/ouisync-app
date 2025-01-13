@@ -33,12 +33,16 @@ import 'package:stack_trace/stack_trace.dart';
 /// This can be applied automatically using `flutter_test_config.dart`.
 Future<void> testEnv(FutureOr<void> Function() callback) async {
   TestWidgetsFlutterBinding.ensureInitialized();
-  
+
   if (Platform.environment.containsKey("DEMANGLE_STACK")) {
     // https://api.flutter.dev/flutter/foundation/FlutterError/demangleStackTrace.html
     FlutterError.demangleStackTrace = (StackTrace stack) {
-      if (stack is Trace) { return stack.vmTrace; }
-      if (stack is Chain) { return stack.toTrace().vmTrace; }
+      if (stack is Trace) {
+        return stack.vmTrace;
+      }
+      if (stack is Chain) {
+        return stack.toTrace().vmTrace;
+      }
       return stack;
     };
   }
@@ -54,14 +58,20 @@ Future<void> testEnv(FutureOr<void> Function() callback) async {
     PathProviderPlatform.instance = _FakePathProviderPlatform(await platform);
 
     final shared = Directory(join(tempDir.path, 'shared')).create();
-    final mount =  Directory(join(tempDir.path, 'mount')).create();
-    final native = TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
-    native.setMockMethodCallHandler(MethodChannel('org.equalitie.ouisync/native'), (call) async {
+    final mount = Directory(join(tempDir.path, 'mount')).create();
+    final native =
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+    native.setMockMethodCallHandler(
+        MethodChannel('org.equalitie.ouisync/native'), (call) async {
       switch (call.method) {
-        case 'getSharedDir': return (await shared).path;
-        case 'getMountRootDirectory': return (await mount).path;
-        default: throw PlatformException(code: 'OS06',
-                                         message: 'Method "${call.method}" not exported by host');
+        case 'getSharedDir':
+          return (await shared).path;
+        case 'getMountRootDirectory':
+          return (await mount).path;
+        default:
+          throw PlatformException(
+              code: 'OS06',
+              message: 'Method "${call.method}" not exported by host');
       }
     });
 
@@ -79,6 +89,9 @@ Future<void> testEnv(FutureOr<void> Function() callback) async {
       // This sometimes happen on the CI on windows. It seems to be caused by another process
       // accessing the temp directory for some reason. It probably doesn't indicate a problem in
       // the code under test so it should be safe to ignore it.
+    } catch (exception) {
+      print("Exception during temporary directory removal: $exception");
+      rethrow;
     }
   });
 
@@ -305,10 +318,17 @@ extension WidgetTesterExtension on WidgetTester {
   /// details.
   ///
   /// This Code is taken from https://github.com/flutter/flutter/issues/129623.
-  Future<void> takeScreenshot([String name = 'screenshot']) async {
+  Future<void> takeScreenshot(
+      {String name = 'screenshot', Element? element}) async {
     try {
-      final finder = find.bySubtype<Widget>().first;
-      final image = await captureImage(finder.evaluate().single);
+      if (element == null) {
+        // If no element is given, take the screenshot of the topmost widget.
+        final finder = find.bySubtype<Widget>().first;
+        element = finder.evaluate().single;
+      }
+
+      final image = await captureImage(element);
+
       final bytes = (await image.toByteData(format: ImageByteFormat.png))!
           .buffer
           .asUint8List();
@@ -323,6 +343,83 @@ extension WidgetTesterExtension on WidgetTester {
     } catch (e) {
       debugPrint('Failed to save screenshot: $e');
     }
+  }
+
+  // This is useful to observe the screen when things are still moving.
+  Future<void> takeNScreenshots(int n, String name) async {
+    assert(n > 0 && n < 1000); // sanity
+    for (int i = 0; i < n; i++) {
+      await takeScreenshot(name: "$name-$i");
+      await pump(Duration(milliseconds: 200));
+      await Future.delayed(Duration(milliseconds: 200));
+    }
+  }
+
+  // Invoke this somewhere at the beginning of a test so that the above
+  // `takeScreenshot` renders normal fonts instead of squares.
+  Future<void> loadFonts() async {
+    // TODO: Path on other platforms.
+    final fontFile = File(
+        '/usr/lib/ouisync/data/flutter_assets/packages/golden_toolkit/fonts/Roboto-Regular.ttf');
+
+    if (!(await fontFile.exists())) {
+      print("Failed to load fonts, the file ${fontFile.path} does not exist");
+      return;
+    }
+
+    final fontData = fontFile
+        .readAsBytes()
+        .then((bytes) => ByteData.view(Uint8List.fromList(bytes).buffer));
+
+    final fontLoader = FontLoader('Roboto')..addFont(fontData);
+    await fontLoader.load();
+  }
+
+  // A workaround for the issue with pumpAndSettle as described here
+  // https://stackoverflow.com/questions/67186472/error-pumpandsettle-timed-out-maybe-due-to-riverpod
+  Future<Finder> pumpUntilFound(Finder finder,
+      {Duration? timeout, Duration? pumpTime}) async {
+    final found = await pumpUntilNonNull(
+        () => finder.tryEvaluate() ? finder : null,
+        timeout: timeout,
+        pumpTime: pumpTime);
+    // Too often when the above first finds a widget it's outside of the screen
+    // area and tapping on it would generate a warning. After this
+    // `pumpAndSettle` the widget finds its place inside the screen.
+    await pumpAndSettle();
+    return found;
+  }
+
+  Future<void> pumpUntil(bool Function() predicate,
+      {Duration? timeout, Duration? pumpTime}) async {
+    await pumpUntilNonNull(() => predicate() ? true : null,
+        timeout: timeout, pumpTime: pumpTime);
+    return;
+  }
+
+  Future<T> pumpUntilNonNull<T>(T? Function() f,
+      {Duration? timeout, Duration? pumpTime}) async {
+    timeout ??= Duration(seconds: 5);
+    pumpTime ??= Duration(milliseconds: 100);
+
+    final stopwatch = Stopwatch();
+    stopwatch.start();
+
+    while (stopwatch.elapsed <= timeout) {
+      // Hack: it seems the `pump` function "pumps" only when something is
+      // moving on the screen, so this delay is needed when we're waiting for
+      // async actions which don't generate any GUI changes.
+      await Future.delayed(pumpTime);
+
+      final retval = f();
+      if (retval != null) {
+        return retval;
+      }
+
+      await pump(pumpTime);
+    }
+
+    throw "pumpUntilNotNull timeout";
   }
 }
 

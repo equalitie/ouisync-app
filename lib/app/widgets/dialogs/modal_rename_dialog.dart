@@ -225,13 +225,11 @@ class RenameEntry extends HookWidget with AppLogger {
   List<Widget> _actions(BuildContext context) => [
         NegativeButton(
             text: S.current.actionCancel,
-            onPressed: () async => await Navigator.of(context).maybePop(''),
-            buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton),
+            onPressed: () async => await Navigator.of(context).maybePop('')),
         PositiveButton(
             text: S.current.actionRename,
             onPressed: () async =>
                 await _onSaved(context, parent, _newNameController.text),
-            buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
             focusNode: _positiveButtonFocus)
       ];
 

@@ -104,7 +104,8 @@ class _AppContainerState extends State<AppContainer> {
                         // we use a custom key tied to the session to force the child
                         // component to drop state whenever the session disconnects
                         key: Key(state.sessionId)),
-                    currentLocale: localeState.currentLocale))),
+                    currentLocale: localeState.currentLocale,
+                    navigatorObservers: [_AppNavigatorObserver(widget.logger)]))),
         Failure(value: final error) => _createInMaterialApp(ErrorScreen(
             message: error is InvalidSettingsVersion
                 ? S.current.messageSettingsVersionNewerThanCurrent
@@ -288,8 +289,8 @@ class ErrorScreen extends StatelessWidget {
 // resulting in black screens. This class should help us find those race conditions.
 class _AppNavigatorObserver extends NavigatorObserver {
   final int _maxHistoryLength = 16;
-  List<_RouteHistoryEntry> _stackHistory = [];
-  Loggy<AppLogger> _logger;
+  final List<_RouteHistoryEntry> _stackHistory = [];
+  final Loggy<AppLogger> _logger;
 
   _AppNavigatorObserver(this._logger);
 

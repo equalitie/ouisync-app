@@ -8,7 +8,6 @@ import '../../utils/utils.dart'
     show
         AppThemeExtension,
         Dialogs,
-        Dimensions,
         Fields,
         Strings,
         TextEditingControllerExtension,
@@ -80,12 +79,10 @@ class _RenameRepository extends State<RenameRepository> {
         NegativeButton(
           text: S.current.actionCancel,
           onPressed: () async => await Navigator.of(context).maybePop(null),
-          buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
         ),
         PositiveButton(
           text: S.current.actionRename,
           onPressed: () => onSubmit(context),
-          buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
         )
       ];
 

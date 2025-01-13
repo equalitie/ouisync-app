@@ -2,6 +2,6 @@
 LOCAL=$(pwd)/$(dirname "$0")
 cd ~/Library/Developer/Xcode/DerivedData
 find . | grep libouisync_ffi.dylib | xargs rm
-rm -Rf ~/Library/Group\ Containers/5SR9R72Z83.org.equalitie.ouisync/logs/
 cd $LOCAL
+./mac-delete-logs
 ./mac-restart-provider

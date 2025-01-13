@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 54;
+	objectVersion = 60;
 	objects = {
 
 /* Begin PBXAggregateTarget section */
@@ -21,84 +21,42 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
-		177064332CBEDB00003FEF6C /* LaunchAtLogin in Frameworks */ = {isa = PBXBuildFile; productRef = 177064322CBEDB00003FEF6C /* LaunchAtLogin */; };
-		1E11B5D92BC00EFA007248F2 /* OuisyncLib in Frameworks */ = {isa = PBXBuildFile; productRef = 1E11B5D82BC00EFA007248F2 /* OuisyncLib */; };
-		1E30CADB2C215BEA00EF65A0 /* Version.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E30CADA2C215BEA00EF65A0 /* Version.swift */; };
-		1E60DA182BD0218C001422A4 /* Extension+Servicing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E60DA172BD0218C001422A4 /* Extension+Servicing.swift */; };
-		1E60DA1C2BD0FBEE001422A4 /* Path.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E60DA1B2BD0FBEE001422A4 /* Path.swift */; };
+		170EAE4A2CEE87CC00468424 /* OuisyncCommon in Frameworks */ = {isa = PBXBuildFile; productRef = 170EAE492CEE87CC00468424 /* OuisyncCommon */; };
+		170EAE4C2CEE87D700468424 /* OuisyncBackend in Frameworks */ = {isa = PBXBuildFile; productRef = 170EAE4B2CEE87D700468424 /* OuisyncBackend */; };
+		170EAE502CEE87E800468424 /* OuisyncBackend in Frameworks */ = {isa = PBXBuildFile; productRef = 170EAE4F2CEE87E800468424 /* OuisyncBackend */; };
+		170EAE532CEE897100468424 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1786CC092CE5D6DE0055B0EE /* SystemConfiguration.framework */; };
+		1749700F2CEF46C90071B32F /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1786CC092CE5D6DE0055B0EE /* SystemConfiguration.framework */; };
+		175AEAC52CE47EF700472952 /* EntryPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 175AEAC22CE47CBC00472952 /* EntryPoint.swift */; };
+		175AEAE32CE4850100472952 /* Shutdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = 175AEAE22CE4850100472952 /* Shutdown.swift */; };
+		1780336E2CE492C100291248 /* OuisyncFileProvider.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 1EC102BD2BAC66050026BD42 /* OuisyncFileProvider.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		17DC402B2CEA92E0009C21A0 /* LaunchAtLogin in Frameworks */ = {isa = PBXBuildFile; productRef = 17DC402A2CEA92E0009C21A0 /* LaunchAtLogin */; };
+		17FED8DD2D026D3F00F136DC /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 179DC58B2D0257DF007B4647 /* MainMenu.xib */; };
 		1E6D33D22BBD4E8A00AFB60E /* FileProviderProxy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E6D33D12BBD4E8A00AFB60E /* FileProviderProxy.swift */; };
-		1E76A0412BB3028600CB6BBE /* FileProviderServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E76A0402BB3028600CB6BBE /* FileProviderServiceProtocol.swift */; };
-		1E81CEB12C1C679D00C90095 /* Hash.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E81CEB02C1C679D00C90095 /* Hash.swift */; };
-		1E86CDB62BFE4BF6003A67A0 /* ItemIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E86CDB52BFE4BF6003A67A0 /* ItemIdentifier.swift */; };
-		1EBC4D4A2BB1B5A50053E2F3 /* ExtError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EBC4D492BB1B5A50053E2F3 /* ExtError.swift */; };
-		1EBC4D542BB1B6840053E2F3 /* Common.docc in Sources */ = {isa = PBXBuildFile; fileRef = 1EBC4D532BB1B6840053E2F3 /* Common.docc */; };
-		1EBC4D5A2BB1B6850053E2F3 /* Common.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1EBC4D502BB1B6840053E2F3 /* Common.framework */; };
-		1EBC4D612BB1B6850053E2F3 /* CommonTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EBC4D602BB1B6850053E2F3 /* CommonTests.swift */; };
-		1EBC4D622BB1B6850053E2F3 /* Common.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EBC4D522BB1B6840053E2F3 /* Common.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		1EBC4D652BB1B6850053E2F3 /* Common.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1EBC4D502BB1B6840053E2F3 /* Common.framework */; };
-		1EBC4D662BB1B6850053E2F3 /* Common.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1EBC4D502BB1B6840053E2F3 /* Common.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		1EBC4D722BB1B70D0053E2F3 /* Common.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1EBC4D502BB1B6840053E2F3 /* Common.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		1EC102BE2BAC66050026BD42 /* UniformTypeIdentifiers.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E640B172BA44F3500FF6B18 /* UniformTypeIdentifiers.framework */; };
-		1EC102C12BAC66050026BD42 /* Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EC102C02BAC66050026BD42 /* Extension.swift */; };
-		1EC102C32BAC66050026BD42 /* Item.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EC102C22BAC66050026BD42 /* Item.swift */; };
-		1EC102C52BAC66050026BD42 /* Enumerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EC102C42BAC66050026BD42 /* Enumerator.swift */; };
-		1EC102CA2BAC66050026BD42 /* OuisyncFileProvider.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 1EC102BD2BAC66050026BD42 /* OuisyncFileProvider.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		1ECD78522C00DA62005D7636 /* Anchor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1ECD78512C00DA62005D7636 /* Anchor.swift */; };
-		1ECD78572C0DBAE5005D7636 /* Common.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1EBC4D502BB1B6840053E2F3 /* Common.framework */; };
-		1ECD785B2C0DC0DF005D7636 /* SuccessfulTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1ECD78552C0DAD46005D7636 /* SuccessfulTask.swift */; };
-		1ECD785C2C0DCF24005D7636 /* SuccessfulTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1ECD78552C0DAD46005D7636 /* SuccessfulTask.swift */; };
-		1ECD785E2C0F2806005D7636 /* Log.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1ECD785D2C0F2806005D7636 /* Log.swift */; };
-		1ECD785F2C0F2C53005D7636 /* Log.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1ECD785D2C0F2806005D7636 /* Log.swift */; };
-		1ECD78612C0F40A0005D7636 /* Debug.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1ECD78602C0F40A0005D7636 /* Debug.swift */; };
-		1EE0483C2C4A6CD900A653F2 /* OuisyncLib in Frameworks */ = {isa = PBXBuildFile; productRef = 1EE0483B2C4A6CD900A653F2 /* OuisyncLib */; };
-		1EE048512C4FB4BC00A653F2 /* Directories.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EE048502C4FB4BC00A653F2 /* Directories.swift */; };
-		331C80D8294CF71000263BE5 /* RunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331C80D7294CF71000263BE5 /* RunnerTests.swift */; };
+		331C80D8294CF71000263BE5 /* Environment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331C80D7294CF71000263BE5 /* Environment.swift */; };
 		335BBD1B22A9A15E00E9071D /* GeneratedPluginRegistrant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 335BBD1A22A9A15E00E9071D /* GeneratedPluginRegistrant.swift */; };
 		33CC10F12044A3C60003C045 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33CC10F02044A3C60003C045 /* AppDelegate.swift */; };
 		33CC10F32044A3C60003C045 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 33CC10F22044A3C60003C045 /* Assets.xcassets */; };
-		33CC10F62044A3C60003C045 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 33CC10F42044A3C60003C045 /* MainMenu.xib */; };
 		33CC11132044BFA00003C045 /* MainFlutterWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33CC11122044BFA00003C045 /* MainFlutterWindow.swift */; };
 		834BDDB917752395531F009D /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7A93B26F8F192724B261AEB0 /* Pods_Runner.framework */; };
 		EA1E56409A2392D3D6400A25 /* Pods_RunnerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E12D5CBA9317F3CD740717A /* Pods_RunnerTests.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		1EBC4D5B2BB1B6850053E2F3 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 33CC10E52044A3C60003C045 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 1EBC4D4F2BB1B6840053E2F3;
-			remoteInfo = Common;
-		};
-		1EBC4D5D2BB1B6850053E2F3 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 33CC10E52044A3C60003C045 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 33CC10EC2044A3C60003C045;
-			remoteInfo = Runner;
-		};
-		1EBC4D632BB1B6850053E2F3 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 33CC10E52044A3C60003C045 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 1EBC4D4F2BB1B6840053E2F3;
-			remoteInfo = Common;
-		};
-		1EBC4D732BB1B70D0053E2F3 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 33CC10E52044A3C60003C045 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 1EBC4D4F2BB1B6840053E2F3;
-			remoteInfo = Common;
-		};
-		1EC102C82BAC66050026BD42 /* PBXContainerItemProxy */ = {
+		1780336F2CE492C100291248 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 33CC10E52044A3C60003C045 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 1EC102BC2BAC66050026BD42;
 			remoteInfo = OuisyncFileProvider;
 		};
-		331C80D9294CF71000263BE5 /* PBXContainerItemProxy */ = {
+		17D8E5B92CE40C00005D70BC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 33CC10E52044A3C60003C045 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1EC102BC2BAC66050026BD42;
+			remoteInfo = OuisyncFileProvider;
+		};
+		17D8E5BB2CE40C00005D70BC /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 33CC10E52044A3C60003C045 /* Project object */;
 			proxyType = 1;
@@ -115,85 +73,45 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		1E640B252BA44F3500FF6B18 /* Embed Foundation Extensions */ = {
+		178033712CE492C100291248 /* Embed Foundation Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				1EC102CA2BAC66050026BD42 /* OuisyncFileProvider.appex in Embed Foundation Extensions */,
+				1780336E2CE492C100291248 /* OuisyncFileProvider.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		1EBC4D6B2BB1B6850053E2F3 /* Embed Frameworks */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				1EBC4D662BB1B6850053E2F3 /* Common.framework in Embed Frameworks */,
-			);
-			name = "Embed Frameworks";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		1EBC4D752BB1B70D0053E2F3 /* Embed Frameworks */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				1EBC4D722BB1B70D0053E2F3 /* Common.framework in Embed Frameworks */,
-			);
-			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		175AEAC22CE47CBC00472952 /* EntryPoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntryPoint.swift; sourceTree = "<group>"; };
+		175AEAE22CE4850100472952 /* Shutdown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shutdown.swift; sourceTree = "<group>"; };
+		1786CC092CE5D6DE0055B0EE /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
+		179DC58C2D0257DF007B4647 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Runner/Base.lproj/MainMenu.xib; sourceTree = SOURCE_ROOT; };
 		1E12D5CBA9317F3CD740717A /* Pods_RunnerTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_RunnerTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		1E30CADA2C215BEA00EF65A0 /* Version.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Version.swift; sourceTree = "<group>"; };
-		1E60DA172BD0218C001422A4 /* Extension+Servicing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Extension+Servicing.swift"; sourceTree = "<group>"; };
-		1E60DA1B2BD0FBEE001422A4 /* Path.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Path.swift; sourceTree = "<group>"; };
 		1E640B172BA44F3500FF6B18 /* UniformTypeIdentifiers.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UniformTypeIdentifiers.framework; path = System/Library/Frameworks/UniformTypeIdentifiers.framework; sourceTree = SDKROOT; };
 		1E6D33D12BBD4E8A00AFB60E /* FileProviderProxy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileProviderProxy.swift; sourceTree = "<group>"; };
-		1E76A0402BB3028600CB6BBE /* FileProviderServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileProviderServiceProtocol.swift; sourceTree = "<group>"; };
-		1E81CEB02C1C679D00C90095 /* Hash.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Hash.swift; sourceTree = "<group>"; };
-		1E86CDB52BFE4BF6003A67A0 /* ItemIdentifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemIdentifier.swift; sourceTree = "<group>"; };
-		1EBC4D492BB1B5A50053E2F3 /* ExtError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExtError.swift; sourceTree = "<group>"; };
-		1EBC4D502BB1B6840053E2F3 /* Common.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Common.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		1EBC4D522BB1B6840053E2F3 /* Common.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Common.h; sourceTree = "<group>"; };
-		1EBC4D532BB1B6840053E2F3 /* Common.docc */ = {isa = PBXFileReference; lastKnownFileType = folder.documentationcatalog; path = Common.docc; sourceTree = "<group>"; };
-		1EBC4D592BB1B6850053E2F3 /* CommonTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CommonTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		1EBC4D602BB1B6850053E2F3 /* CommonTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommonTests.swift; sourceTree = "<group>"; };
 		1EC102BD2BAC66050026BD42 /* OuisyncFileProvider.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = OuisyncFileProvider.appex; sourceTree = BUILT_PRODUCTS_DIR; };
-		1EC102C02BAC66050026BD42 /* Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extension.swift; sourceTree = "<group>"; };
-		1EC102C22BAC66050026BD42 /* Item.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Item.swift; sourceTree = "<group>"; };
-		1EC102C42BAC66050026BD42 /* Enumerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Enumerator.swift; sourceTree = "<group>"; };
 		1EC102C62BAC66050026BD42 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		1EC102C72BAC66050026BD42 /* OuisyncFileProvider.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = OuisyncFileProvider.entitlements; sourceTree = "<group>"; };
-		1ECD78512C00DA62005D7636 /* Anchor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Anchor.swift; sourceTree = "<group>"; };
-		1ECD78552C0DAD46005D7636 /* SuccessfulTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuccessfulTask.swift; sourceTree = "<group>"; };
-		1ECD785D2C0F2806005D7636 /* Log.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Log.swift; sourceTree = "<group>"; };
-		1ECD78602C0F40A0005D7636 /* Debug.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Debug.swift; sourceTree = "<group>"; };
-		1EE048502C4FB4BC00A653F2 /* Directories.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Directories.swift; sourceTree = "<group>"; };
+		1EC102C72BAC66050026BD42 /* Entitlements.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Entitlements.entitlements; sourceTree = "<group>"; };
 		25420BEC609102AA8183D515 /* Pods-RunnerTests.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.profile.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.profile.xcconfig"; sourceTree = "<group>"; };
 		30CDA840AD45D32461319ABD /* Pods-Runner.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"; sourceTree = "<group>"; };
 		331C80D5294CF71000263BE5 /* RunnerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RunnerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		331C80D7294CF71000263BE5 /* RunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunnerTests.swift; sourceTree = "<group>"; };
+		331C80D7294CF71000263BE5 /* Environment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Environment.swift; sourceTree = "<group>"; };
 		333000ED22D3DE5D00554162 /* Warnings.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Warnings.xcconfig; sourceTree = "<group>"; };
 		335BBD1A22A9A15E00E9071D /* GeneratedPluginRegistrant.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GeneratedPluginRegistrant.swift; sourceTree = "<group>"; };
 		33CC10ED2044A3C60003C045 /* Ouisync.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Ouisync.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		33CC10F02044A3C60003C045 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		33CC10F22044A3C60003C045 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = Runner/Assets.xcassets; sourceTree = "<group>"; };
-		33CC10F52044A3C60003C045 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
-		33CC10F72044A3C60003C045 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = Runner/Info.plist; sourceTree = "<group>"; };
+		33CC10F22044A3C60003C045 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		33CC10F72044A3C60003C045 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		33CC11122044BFA00003C045 /* MainFlutterWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainFlutterWindow.swift; sourceTree = "<group>"; };
 		33CEB47222A05771004F2AC0 /* Flutter-Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "Flutter-Debug.xcconfig"; sourceTree = "<group>"; };
 		33CEB47422A05771004F2AC0 /* Flutter-Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "Flutter-Release.xcconfig"; sourceTree = "<group>"; };
 		33CEB47722A0578A004F2AC0 /* Flutter-Generated.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = "Flutter-Generated.xcconfig"; path = "ephemeral/Flutter-Generated.xcconfig"; sourceTree = "<group>"; };
-		33E51913231747F40026EE4D /* DebugProfile.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DebugProfile.entitlements; sourceTree = "<group>"; };
-		33E51914231749380026EE4D /* Release.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = Release.entitlements; sourceTree = "<group>"; };
+		33E51914231749380026EE4D /* Entitlements.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = Entitlements.entitlements; sourceTree = "<group>"; };
 		33E5194F232828860026EE4D /* AppInfo.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = AppInfo.xcconfig; sourceTree = "<group>"; };
 		35817D32FD9886829B961FA9 /* Pods-Runner.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.profile.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig"; sourceTree = "<group>"; };
 		4685941C6AA05137ED0AEA01 /* Pods-Runner.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.debug.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"; sourceTree = "<group>"; };
@@ -205,28 +123,12 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		1EBC4D4D2BB1B6840053E2F3 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		1EBC4D562BB1B6850053E2F3 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				1EBC4D5A2BB1B6850053E2F3 /* Common.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		1EC102BA2BAC66050026BD42 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1E11B5D92BC00EFA007248F2 /* OuisyncLib in Frameworks */,
-				1ECD78572C0DBAE5005D7636 /* Common.framework in Frameworks */,
-				1EC102BE2BAC66050026BD42 /* UniformTypeIdentifiers.framework in Frameworks */,
+				170EAE532CEE897100468424 /* SystemConfiguration.framework in Frameworks */,
+				170EAE502CEE87E800468424 /* OuisyncBackend in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -234,6 +136,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				170EAE4C2CEE87D700468424 /* OuisyncBackend in Frameworks */,
+				1749700F2CEF46C90071B32F /* SystemConfiguration.framework in Frameworks */,
 				EA1E56409A2392D3D6400A25 /* Pods_RunnerTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -242,9 +146,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1EE0483C2C4A6CD900A653F2 /* OuisyncLib in Frameworks */,
-				1EBC4D652BB1B6850053E2F3 /* Common.framework in Frameworks */,
-				177064332CBEDB00003FEF6C /* LaunchAtLogin in Frameworks */,
+				17DC402B2CEA92E0009C21A0 /* LaunchAtLogin in Frameworks */,
+				170EAE4A2CEE87CC00468424 /* OuisyncCommon in Frameworks */,
 				834BDDB917752395531F009D /* Pods_Runner.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -252,45 +155,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		1EBC4D512BB1B6840053E2F3 /* Common */ = {
+		1EC102BF2BAC66050026BD42 /* Extension */ = {
 			isa = PBXGroup;
 			children = (
-				1EBC4D522BB1B6840053E2F3 /* Common.h */,
-				1EBC4D532BB1B6840053E2F3 /* Common.docc */,
-				1E76A0402BB3028600CB6BBE /* FileProviderServiceProtocol.swift */,
-				1ECD78552C0DAD46005D7636 /* SuccessfulTask.swift */,
-				1ECD785D2C0F2806005D7636 /* Log.swift */,
-				1EE048502C4FB4BC00A653F2 /* Directories.swift */,
-			);
-			path = Common;
-			sourceTree = "<group>";
-		};
-		1EBC4D5F2BB1B6850053E2F3 /* CommonTests */ = {
-			isa = PBXGroup;
-			children = (
-				1EBC4D602BB1B6850053E2F3 /* CommonTests.swift */,
-			);
-			path = CommonTests;
-			sourceTree = "<group>";
-		};
-		1EC102BF2BAC66050026BD42 /* OuisyncFileProvider */ = {
-			isa = PBXGroup;
-			children = (
-				1EC102C02BAC66050026BD42 /* Extension.swift */,
-				1E60DA172BD0218C001422A4 /* Extension+Servicing.swift */,
-				1EC102C42BAC66050026BD42 /* Enumerator.swift */,
-				1EC102C22BAC66050026BD42 /* Item.swift */,
 				1EC102C62BAC66050026BD42 /* Info.plist */,
-				1EC102C72BAC66050026BD42 /* OuisyncFileProvider.entitlements */,
-				1EBC4D492BB1B5A50053E2F3 /* ExtError.swift */,
-				1E60DA1B2BD0FBEE001422A4 /* Path.swift */,
-				1E86CDB52BFE4BF6003A67A0 /* ItemIdentifier.swift */,
-				1ECD78512C00DA62005D7636 /* Anchor.swift */,
-				1ECD78602C0F40A0005D7636 /* Debug.swift */,
-				1E81CEB02C1C679D00C90095 /* Hash.swift */,
-				1E30CADA2C215BEA00EF65A0 /* Version.swift */,
+				1EC102C72BAC66050026BD42 /* Entitlements.entitlements */,
+				175AEAC22CE47CBC00472952 /* EntryPoint.swift */,
 			);
-			path = OuisyncFileProvider;
+			path = Extension;
 			sourceTree = "<group>";
 		};
 		267564F1B9680359EEA21D4B /* Pods */ = {
@@ -306,12 +178,13 @@
 			path = Pods;
 			sourceTree = "<group>";
 		};
-		331C80D6294CF71000263BE5 /* RunnerTests */ = {
+		331C80D6294CF71000263BE5 /* Tests */ = {
 			isa = PBXGroup;
 			children = (
-				331C80D7294CF71000263BE5 /* RunnerTests.swift */,
+				331C80D7294CF71000263BE5 /* Environment.swift */,
+				175AEAE22CE4850100472952 /* Shutdown.swift */,
 			);
-			path = RunnerTests;
+			path = Tests;
 			sourceTree = "<group>";
 		};
 		33BA886A226E78AF003329D5 /* Configs */ = {
@@ -328,14 +201,12 @@
 		33CC10E42044A3C60003C045 = {
 			isa = PBXGroup;
 			children = (
-				33FAB671232836740065AC1E /* Runner */,
 				33CEB47122A05771004F2AC0 /* Flutter */,
-				331C80D6294CF71000263BE5 /* RunnerTests */,
-				1EC102BF2BAC66050026BD42 /* OuisyncFileProvider */,
-				1EBC4D512BB1B6840053E2F3 /* Common */,
-				1EBC4D5F2BB1B6850053E2F3 /* CommonTests */,
+				33FAB671232836740065AC1E /* Runner */,
+				331C80D6294CF71000263BE5 /* Tests */,
 				33CC10EE2044A3C60003C045 /* Products */,
 				267564F1B9680359EEA21D4B /* Pods */,
+				1EC102BF2BAC66050026BD42 /* Extension */,
 				D09E101972792C677877D348 /* Frameworks */,
 			);
 			sourceTree = "<group>";
@@ -346,21 +217,8 @@
 				33CC10ED2044A3C60003C045 /* Ouisync.app */,
 				331C80D5294CF71000263BE5 /* RunnerTests.xctest */,
 				1EC102BD2BAC66050026BD42 /* OuisyncFileProvider.appex */,
-				1EBC4D502BB1B6840053E2F3 /* Common.framework */,
-				1EBC4D592BB1B6850053E2F3 /* CommonTests.xctest */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		33CC11242044D66E0003C045 /* Resources */ = {
-			isa = PBXGroup;
-			children = (
-				33CC10F22044A3C60003C045 /* Assets.xcassets */,
-				33CC10F42044A3C60003C045 /* MainMenu.xib */,
-				33CC10F72044A3C60003C045 /* Info.plist */,
-			);
-			name = Resources;
-			path = ..;
 			sourceTree = "<group>";
 		};
 		33CEB47122A05771004F2AC0 /* Flutter */ = {
@@ -377,12 +235,13 @@
 		33FAB671232836740065AC1E /* Runner */ = {
 			isa = PBXGroup;
 			children = (
+				33CC10F22044A3C60003C045 /* Assets.xcassets */,
+				33CC10F72044A3C60003C045 /* Info.plist */,
+				33E51914231749380026EE4D /* Entitlements.entitlements */,
+				179DC58B2D0257DF007B4647 /* MainMenu.xib */,
 				33CC10F02044A3C60003C045 /* AppDelegate.swift */,
 				33CC11122044BFA00003C045 /* MainFlutterWindow.swift */,
 				1E6D33D12BBD4E8A00AFB60E /* FileProviderProxy.swift */,
-				33E51913231747F40026EE4D /* DebugProfile.entitlements */,
-				33E51914231749380026EE4D /* Release.entitlements */,
-				33CC11242044D66E0003C045 /* Resources */,
 				33BA886A226E78AF003329D5 /* Configs */,
 			);
 			path = Runner;
@@ -391,6 +250,7 @@
 		D09E101972792C677877D348 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				1786CC092CE5D6DE0055B0EE /* SystemConfiguration.framework */,
 				1E640B172BA44F3500FF6B18 /* UniformTypeIdentifiers.framework */,
 				7A93B26F8F192724B261AEB0 /* Pods_Runner.framework */,
 				1E12D5CBA9317F3CD740717A /* Pods_RunnerTests.framework */,
@@ -400,55 +260,7 @@
 		};
 /* End PBXGroup section */
 
-/* Begin PBXHeadersBuildPhase section */
-		1EBC4D4B2BB1B6840053E2F3 /* Headers */ = {
-			isa = PBXHeadersBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				1EBC4D622BB1B6850053E2F3 /* Common.h in Headers */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXHeadersBuildPhase section */
-
 /* Begin PBXNativeTarget section */
-		1EBC4D4F2BB1B6840053E2F3 /* Common */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 1EBC4D672BB1B6850053E2F3 /* Build configuration list for PBXNativeTarget "Common" */;
-			buildPhases = (
-				1EBC4D4B2BB1B6840053E2F3 /* Headers */,
-				1EBC4D4C2BB1B6840053E2F3 /* Sources */,
-				1EBC4D4D2BB1B6840053E2F3 /* Frameworks */,
-				1EBC4D4E2BB1B6840053E2F3 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = Common;
-			productName = Common;
-			productReference = 1EBC4D502BB1B6840053E2F3 /* Common.framework */;
-			productType = "com.apple.product-type.framework";
-		};
-		1EBC4D582BB1B6850053E2F3 /* CommonTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 1EBC4D6C2BB1B6850053E2F3 /* Build configuration list for PBXNativeTarget "CommonTests" */;
-			buildPhases = (
-				1EBC4D552BB1B6850053E2F3 /* Sources */,
-				1EBC4D562BB1B6850053E2F3 /* Frameworks */,
-				1EBC4D572BB1B6850053E2F3 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				1EBC4D5C2BB1B6850053E2F3 /* PBXTargetDependency */,
-				1EBC4D5E2BB1B6850053E2F3 /* PBXTargetDependency */,
-			);
-			name = CommonTests;
-			productName = CommonTests;
-			productReference = 1EBC4D592BB1B6850053E2F3 /* CommonTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
 		1EC102BC2BAC66050026BD42 /* OuisyncFileProvider */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 1EC102CB2BAC66050026BD42 /* Build configuration list for PBXNativeTarget "OuisyncFileProvider" */;
@@ -456,16 +268,14 @@
 				1EC102B92BAC66050026BD42 /* Sources */,
 				1EC102BA2BAC66050026BD42 /* Frameworks */,
 				1EC102BB2BAC66050026BD42 /* Resources */,
-				1EBC4D752BB1B70D0053E2F3 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				1EBC4D742BB1B70D0053E2F3 /* PBXTargetDependency */,
 			);
 			name = OuisyncFileProvider;
 			packageProductDependencies = (
-				1E11B5D82BC00EFA007248F2 /* OuisyncLib */,
+				170EAE4F2CEE87E800468424 /* OuisyncBackend */,
 			);
 			productName = OuisyncFileProvider;
 			productReference = 1EC102BD2BAC66050026BD42 /* OuisyncFileProvider.appex */;
@@ -483,9 +293,13 @@
 			buildRules = (
 			);
 			dependencies = (
-				331C80DA294CF71000263BE5 /* PBXTargetDependency */,
+				17D8E5BA2CE40C00005D70BC /* PBXTargetDependency */,
+				17D8E5BC2CE40C00005D70BC /* PBXTargetDependency */,
 			);
 			name = RunnerTests;
+			packageProductDependencies = (
+				170EAE4B2CEE87D700468424 /* OuisyncBackend */,
+			);
 			productName = RunnerTests;
 			productReference = 331C80D5294CF71000263BE5 /* RunnerTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -496,24 +310,22 @@
 			buildPhases = (
 				82F0B81C14E3F68A07D82AEC /* [CP] Check Pods Manifest.lock */,
 				33CC10E92044A3C60003C045 /* Sources */,
-				33CC10EA2044A3C60003C045 /* Frameworks */,
-				33CC10EB2044A3C60003C045 /* Resources */,
-				3399D490228B24CF009A79C7 /* ShellScript */,
-				1E640B252BA44F3500FF6B18 /* Embed Foundation Extensions */,
-				1EBC4D6B2BB1B6850053E2F3 /* Embed Frameworks */,
 				96B17C14719DCB83218A0FC2 /* [CP] Embed Pods Frameworks */,
+				33CC10EA2044A3C60003C045 /* Frameworks */,
+				3399D490228B24CF009A79C7 /* ShellScript */,
+				33CC10EB2044A3C60003C045 /* Resources */,
+				178033712CE492C100291248 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 				33CC11202044C79F0003C045 /* PBXTargetDependency */,
-				1EC102C92BAC66050026BD42 /* PBXTargetDependency */,
-				1EBC4D642BB1B6850053E2F3 /* PBXTargetDependency */,
+				178033702CE492C100291248 /* PBXTargetDependency */,
 			);
 			name = Runner;
 			packageProductDependencies = (
-				1EE0483B2C4A6CD900A653F2 /* OuisyncLib */,
-				177064322CBEDB00003FEF6C /* LaunchAtLogin */,
+				17DC402A2CEA92E0009C21A0 /* LaunchAtLogin */,
+				170EAE492CEE87CC00468424 /* OuisyncCommon */,
 			);
 			productName = Runner;
 			productReference = 33CC10ED2044A3C60003C045 /* Ouisync.app */;
@@ -530,13 +342,6 @@
 				LastUpgradeCheck = 1510;
 				ORGANIZATIONNAME = "";
 				TargetAttributes = {
-					1EBC4D4F2BB1B6840053E2F3 = {
-						CreatedOnToolsVersion = 15.3;
-					};
-					1EBC4D582BB1B6850053E2F3 = {
-						CreatedOnToolsVersion = 15.3;
-						TestTargetID = 33CC10EC2044A3C60003C045;
-					};
 					1EC102BC2BAC66050026BD42 = {
 						CreatedOnToolsVersion = 15.3;
 					};
@@ -547,7 +352,6 @@
 					33CC10EC2044A3C60003C045 = {
 						CreatedOnToolsVersion = 9.2;
 						LastSwiftMigration = 1100;
-						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
 							com.apple.Sandbox = {
 								enabled = 1;
@@ -572,6 +376,8 @@
 			packageReferences = (
 				76A41C0C2C9D7C3C004D5A58 /* XCLocalSwiftPackageReference "../ouisync/bindings/swift/OuisyncLib" */,
 				177064312CBEDB00003FEF6C /* XCRemoteSwiftPackageReference "LaunchAtLogin" */,
+				1746A9522CEE35BC00C5E5E7 /* XCLocalSwiftPackageReference "../darwin/OuisyncCommon" */,
+				175A7AFB2CEE82CA001E7ECE /* XCLocalSwiftPackageReference "../darwin/OuisyncBackend" */,
 			);
 			productRefGroup = 33CC10EE2044A3C60003C045 /* Products */;
 			projectDirPath = "";
@@ -581,27 +387,11 @@
 				331C80D4294CF70F00263BE5 /* RunnerTests */,
 				33CC111A2044C6BA0003C045 /* Flutter Assemble */,
 				1EC102BC2BAC66050026BD42 /* OuisyncFileProvider */,
-				1EBC4D4F2BB1B6840053E2F3 /* Common */,
-				1EBC4D582BB1B6850053E2F3 /* CommonTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		1EBC4D4E2BB1B6840053E2F3 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		1EBC4D572BB1B6850053E2F3 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		1EC102BB2BAC66050026BD42 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -621,7 +411,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				33CC10F32044A3C60003C045 /* Assets.xcassets in Resources */,
-				33CC10F62044A3C60003C045 /* MainMenu.xib in Resources */,
+				17FED8DD2D026D3F00F136DC /* MainMenu.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -664,7 +454,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"$FLUTTER_ROOT\"/packages/flutter_tools/bin/macos_assemble.sh && touch Flutter/ephemeral/tripwire";
+			shellScript = "\"$FLUTTER_ROOT\"/packages/flutter_tools/bin/macos_assemble.sh && touch Flutter/ephemeral/tripwire\n";
 		};
 		50ED327060E569CA2EC416FC /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -730,43 +520,11 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		1EBC4D4C2BB1B6840053E2F3 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				1EBC4D542BB1B6840053E2F3 /* Common.docc in Sources */,
-				1EE048512C4FB4BC00A653F2 /* Directories.swift in Sources */,
-				1E76A0412BB3028600CB6BBE /* FileProviderServiceProtocol.swift in Sources */,
-				1ECD785B2C0DC0DF005D7636 /* SuccessfulTask.swift in Sources */,
-				1ECD785E2C0F2806005D7636 /* Log.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		1EBC4D552BB1B6850053E2F3 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				1EBC4D612BB1B6850053E2F3 /* CommonTests.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		1EC102B92BAC66050026BD42 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1E60DA1C2BD0FBEE001422A4 /* Path.swift in Sources */,
-				1E81CEB12C1C679D00C90095 /* Hash.swift in Sources */,
-				1ECD78612C0F40A0005D7636 /* Debug.swift in Sources */,
-				1EC102C12BAC66050026BD42 /* Extension.swift in Sources */,
-				1ECD785F2C0F2C53005D7636 /* Log.swift in Sources */,
-				1E30CADB2C215BEA00EF65A0 /* Version.swift in Sources */,
-				1ECD78522C00DA62005D7636 /* Anchor.swift in Sources */,
-				1EC102C32BAC66050026BD42 /* Item.swift in Sources */,
-				1EBC4D4A2BB1B5A50053E2F3 /* ExtError.swift in Sources */,
-				1EC102C52BAC66050026BD42 /* Enumerator.swift in Sources */,
-				1E60DA182BD0218C001422A4 /* Extension+Servicing.swift in Sources */,
-				1ECD785C2C0DCF24005D7636 /* SuccessfulTask.swift in Sources */,
-				1E86CDB62BFE4BF6003A67A0 /* ItemIdentifier.swift in Sources */,
+				175AEAC52CE47EF700472952 /* EntryPoint.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -774,7 +532,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				331C80D8294CF71000263BE5 /* RunnerTests.swift in Sources */,
+				331C80D8294CF71000263BE5 /* Environment.swift in Sources */,
+				175AEAE32CE4850100472952 /* Shutdown.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -792,35 +551,20 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		1EBC4D5C2BB1B6850053E2F3 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 1EBC4D4F2BB1B6840053E2F3 /* Common */;
-			targetProxy = 1EBC4D5B2BB1B6850053E2F3 /* PBXContainerItemProxy */;
-		};
-		1EBC4D5E2BB1B6850053E2F3 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 33CC10EC2044A3C60003C045 /* Runner */;
-			targetProxy = 1EBC4D5D2BB1B6850053E2F3 /* PBXContainerItemProxy */;
-		};
-		1EBC4D642BB1B6850053E2F3 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 1EBC4D4F2BB1B6840053E2F3 /* Common */;
-			targetProxy = 1EBC4D632BB1B6850053E2F3 /* PBXContainerItemProxy */;
-		};
-		1EBC4D742BB1B70D0053E2F3 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 1EBC4D4F2BB1B6840053E2F3 /* Common */;
-			targetProxy = 1EBC4D732BB1B70D0053E2F3 /* PBXContainerItemProxy */;
-		};
-		1EC102C92BAC66050026BD42 /* PBXTargetDependency */ = {
+		178033702CE492C100291248 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 1EC102BC2BAC66050026BD42 /* OuisyncFileProvider */;
-			targetProxy = 1EC102C82BAC66050026BD42 /* PBXContainerItemProxy */;
+			targetProxy = 1780336F2CE492C100291248 /* PBXContainerItemProxy */;
 		};
-		331C80DA294CF71000263BE5 /* PBXTargetDependency */ = {
+		17D8E5BA2CE40C00005D70BC /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1EC102BC2BAC66050026BD42 /* OuisyncFileProvider */;
+			targetProxy = 17D8E5B92CE40C00005D70BC /* PBXContainerItemProxy */;
+		};
+		17D8E5BC2CE40C00005D70BC /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 33CC10EC2044A3C60003C045 /* Runner */;
-			targetProxy = 331C80D9294CF71000263BE5 /* PBXContainerItemProxy */;
+			targetProxy = 17D8E5BB2CE40C00005D70BC /* PBXContainerItemProxy */;
 		};
 		33CC11202044C79F0003C045 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -830,313 +574,17 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
-		33CC10F42044A3C60003C045 /* MainMenu.xib */ = {
+		179DC58B2D0257DF007B4647 /* MainMenu.xib */ = {
 			isa = PBXVariantGroup;
 			children = (
-				33CC10F52044A3C60003C045 /* Base */,
+				179DC58C2D0257DF007B4647 /* Base */,
 			);
 			name = MainMenu.xib;
-			path = Runner;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
-		1EBC4D682BB1B6850053E2F3 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALLOW_TARGET_PLATFORM_SPECIALIZATION = YES;
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
-				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_COMMA = YES;
-				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
-				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEAD_CODE_STRIPPING = YES;
-				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = 5SR9R72Z83;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				ENABLE_MODULE_VERIFIER = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu17;
-				GCC_WARN_UNDECLARED_SELECTOR = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = (
-					"@executable_path/../Frameworks",
-					"@loader_path/Frameworks",
-				);
-				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 1.0;
-				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
-				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
-				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
-				MTL_FAST_MATH = YES;
-				OTHER_LDFLAGS = "";
-				PRODUCT_BUNDLE_IDENTIFIER = org.equalitie.ouisyncApp.Common;
-				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
-				SDKROOT = auto;
-				SKIP_INSTALL = YES;
-				SUPPORTED_PLATFORMS = macosx;
-				SUPPORTS_MACCATALYST = NO;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_INSTALL_OBJC_HEADER = NO;
-				SWIFT_VERSION = 5.0;
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
-			};
-			name = Debug;
-		};
-		1EBC4D692BB1B6850053E2F3 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALLOW_TARGET_PLATFORM_SPECIALIZATION = YES;
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
-				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_COMMA = YES;
-				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
-				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEAD_CODE_STRIPPING = YES;
-				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = 5SR9R72Z83;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				ENABLE_MODULE_VERIFIER = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu17;
-				GCC_WARN_UNDECLARED_SELECTOR = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = (
-					"@executable_path/../Frameworks",
-					"@loader_path/Frameworks",
-				);
-				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 1.0;
-				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
-				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
-				MTL_FAST_MATH = YES;
-				OTHER_LDFLAGS = "";
-				PRODUCT_BUNDLE_IDENTIFIER = org.equalitie.ouisyncApp.Common;
-				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
-				SDKROOT = auto;
-				SKIP_INSTALL = YES;
-				SUPPORTED_PLATFORMS = macosx;
-				SUPPORTS_MACCATALYST = NO;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_INSTALL_OBJC_HEADER = NO;
-				SWIFT_VERSION = 5.0;
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
-			};
-			name = Release;
-		};
-		1EBC4D6A2BB1B6850053E2F3 /* Profile */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALLOW_TARGET_PLATFORM_SPECIALIZATION = YES;
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
-				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_COMMA = YES;
-				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
-				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEAD_CODE_STRIPPING = YES;
-				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = 5SR9R72Z83;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				ENABLE_MODULE_VERIFIER = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu17;
-				GCC_WARN_UNDECLARED_SELECTOR = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = (
-					"@executable_path/../Frameworks",
-					"@loader_path/Frameworks",
-				);
-				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 1.0;
-				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
-				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
-				MTL_FAST_MATH = YES;
-				OTHER_LDFLAGS = "";
-				PRODUCT_BUNDLE_IDENTIFIER = org.equalitie.ouisyncApp.Common;
-				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
-				SDKROOT = auto;
-				SKIP_INSTALL = YES;
-				SUPPORTED_PLATFORMS = macosx;
-				SUPPORTS_MACCATALYST = NO;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_INSTALL_OBJC_HEADER = NO;
-				SWIFT_VERSION = 5.0;
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
-			};
-			name = Profile;
-		};
-		1EBC4D6D2BB1B6850053E2F3 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALLOW_TARGET_PLATFORM_SPECIALIZATION = YES;
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_COMMA = YES;
-				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
-				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = 5SR9R72Z83;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu17;
-				GCC_WARN_UNDECLARED_SELECTOR = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 1.0;
-				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
-				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = org.equalitie.ouisyncApp.CommonTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = auto;
-				SUPPORTED_PLATFORMS = macosx;
-				SUPPORTS_MACCATALYST = NO;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Ouisync.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Ouisync";
-			};
-			name = Debug;
-		};
-		1EBC4D6E2BB1B6850053E2F3 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALLOW_TARGET_PLATFORM_SPECIALIZATION = YES;
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_COMMA = YES;
-				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
-				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = 5SR9R72Z83;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu17;
-				GCC_WARN_UNDECLARED_SELECTOR = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 1.0;
-				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = org.equalitie.ouisyncApp.CommonTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = auto;
-				SUPPORTED_PLATFORMS = macosx;
-				SUPPORTS_MACCATALYST = NO;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Ouisync.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Ouisync";
-			};
-			name = Release;
-		};
-		1EBC4D6F2BB1B6850053E2F3 /* Profile */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALLOW_TARGET_PLATFORM_SPECIALIZATION = YES;
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_COMMA = YES;
-				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
-				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = 5SR9R72Z83;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu17;
-				GCC_WARN_UNDECLARED_SELECTOR = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 1.0;
-				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = org.equalitie.ouisyncApp.CommonTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = auto;
-				SUPPORTED_PLATFORMS = macosx;
-				SUPPORTS_MACCATALYST = NO;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Ouisync.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Ouisync";
-			};
-			name = Profile;
-		};
 		1EC102CC2BAC66050026BD42 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1150,20 +598,20 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_ENTITLEMENTS = OuisyncFileProvider/OuisyncFileProvider.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Extension/Entitlements.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 64;
 				DEAD_CODE_STRIPPING = YES;
+				DEFINES_MODULE = NO;
 				DEVELOPMENT_TEAM = 5SR9R72Z83;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = OuisyncFileProvider/Info.plist;
+				INFOPLIST_FILE = Extension/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = OuisyncFileProvider;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -1176,12 +624,12 @@
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 0.8.1;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				OTHER_LDFLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = org.equalitie.ouisync.OuisyncFileProvider;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -1202,20 +650,20 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_ENTITLEMENTS = OuisyncFileProvider/OuisyncFileProvider.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Extension/Entitlements.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 64;
 				DEAD_CODE_STRIPPING = YES;
+				DEFINES_MODULE = NO;
 				DEVELOPMENT_TEAM = 5SR9R72Z83;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = OuisyncFileProvider/Info.plist;
+				INFOPLIST_FILE = Extension/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = OuisyncFileProvider;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -1228,11 +676,11 @@
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 0.8.1;
 				MTL_FAST_MATH = YES;
 				OTHER_LDFLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = org.equalitie.ouisync.OuisyncFileProvider;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -1252,20 +700,20 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_ENTITLEMENTS = OuisyncFileProvider/OuisyncFileProvider.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Extension/Entitlements.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 64;
 				DEAD_CODE_STRIPPING = YES;
+				DEFINES_MODULE = NO;
 				DEVELOPMENT_TEAM = 5SR9R72Z83;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = OuisyncFileProvider/Info.plist;
+				INFOPLIST_FILE = Extension/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = OuisyncFileProvider;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -1278,11 +726,11 @@
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 0.8.1;
 				MTL_FAST_MATH = YES;
 				OTHER_LDFLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = org.equalitie.ouisync.OuisyncFileProvider;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -1294,15 +742,19 @@
 			baseConfigurationReference = 6268A4AB5F2F8FC80AB1C74F /* Pods-RunnerTests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = 5SR9R72Z83;
 				GENERATE_INFOPLIST_FILE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = org.equalitie.ouisyncApp.RunnerTests;
+				PRODUCT_BUNDLE_IDENTIFIER = org.equalitie.ouisync.Tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ouisync_app.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ouisync_app";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Ouisync.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Ouisync";
 			};
 			name = Debug;
 		};
@@ -1311,15 +763,19 @@
 			baseConfigurationReference = B8366DAD4EC8D33CA612DFA6 /* Pods-RunnerTests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = 5SR9R72Z83;
 				GENERATE_INFOPLIST_FILE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = org.equalitie.ouisyncApp.RunnerTests;
+				PRODUCT_BUNDLE_IDENTIFIER = org.equalitie.ouisync.Tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ouisync_app.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ouisync_app";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Ouisync.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Ouisync";
 			};
 			name = Release;
 		};
@@ -1328,15 +784,19 @@
 			baseConfigurationReference = 25420BEC609102AA8183D515 /* Pods-RunnerTests.profile.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = 5SR9R72Z83;
 				GENERATE_INFOPLIST_FILE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = org.equalitie.ouisyncApp.RunnerTests;
+				PRODUCT_BUNDLE_IDENTIFIER = org.equalitie.ouisync.Tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ouisync_app.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ouisync_app";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Ouisync.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Ouisync";
 			};
 			name = Profile;
 		};
@@ -1368,10 +828,12 @@
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CODE_SIGN_IDENTITY = "-";
 				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -1380,6 +842,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = macosx;
 				SWIFT_COMPILATION_MODE = wholemodule;
@@ -1391,16 +854,18 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 33E5194F232828860026EE4D /* AppInfo.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_ENTITLEMENTS = Runner/DebugProfile.entitlements;
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_ENTITLEMENTS = Runner/Entitlements.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 5SR9R72Z83;
+				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = Runner/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Ouisync;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -1408,7 +873,6 @@
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				PRODUCT_BUNDLE_IDENTIFIER = org.equalitie.ouisync;
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				SWIFT_OBJC_BRIDGING_HEADER = Runner/FileProviderProxy.h;
 				SWIFT_PRECOMPILE_BRIDGING_HEADER = YES;
 				SWIFT_VERSION = 5.0;
 			};
@@ -1452,6 +916,7 @@
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CODE_SIGN_IDENTITY = "-";
 				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -1470,6 +935,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
@@ -1506,10 +972,12 @@
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CODE_SIGN_IDENTITY = "-";
 				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -1518,6 +986,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = macosx;
 				SWIFT_COMPILATION_MODE = wholemodule;
@@ -1529,16 +998,18 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 33E5194F232828860026EE4D /* AppInfo.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_ENTITLEMENTS = Runner/DebugProfile.entitlements;
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_ENTITLEMENTS = Runner/Entitlements.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 5SR9R72Z83;
+				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = Runner/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Ouisync;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -1546,7 +1017,6 @@
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				PRODUCT_BUNDLE_IDENTIFIER = org.equalitie.ouisync;
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				SWIFT_OBJC_BRIDGING_HEADER = Runner/FileProviderProxy.h;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_PRECOMPILE_BRIDGING_HEADER = YES;
 				SWIFT_VERSION = 5.0;
@@ -1557,16 +1027,18 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 33E5194F232828860026EE4D /* AppInfo.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_ENTITLEMENTS = Runner/Release.entitlements;
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_ENTITLEMENTS = Runner/Entitlements.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 5SR9R72Z83;
+				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = Runner/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Ouisync;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -1574,7 +1046,6 @@
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				PRODUCT_BUNDLE_IDENTIFIER = org.equalitie.ouisync;
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				SWIFT_OBJC_BRIDGING_HEADER = Runner/FileProviderProxy.h;
 				SWIFT_PRECOMPILE_BRIDGING_HEADER = YES;
 				SWIFT_VERSION = 5.0;
 			};
@@ -1603,26 +1074,6 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		1EBC4D672BB1B6850053E2F3 /* Build configuration list for PBXNativeTarget "Common" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				1EBC4D682BB1B6850053E2F3 /* Debug */,
-				1EBC4D692BB1B6850053E2F3 /* Release */,
-				1EBC4D6A2BB1B6850053E2F3 /* Profile */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		1EBC4D6C2BB1B6850053E2F3 /* Build configuration list for PBXNativeTarget "CommonTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				1EBC4D6D2BB1B6850053E2F3 /* Debug */,
-				1EBC4D6E2BB1B6850053E2F3 /* Release */,
-				1EBC4D6F2BB1B6850053E2F3 /* Profile */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		1EC102CB2BAC66050026BD42 /* Build configuration list for PBXNativeTarget "OuisyncFileProvider" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -1676,6 +1127,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
+		1746A9522CEE35BC00C5E5E7 /* XCLocalSwiftPackageReference "../darwin/OuisyncCommon" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../darwin/OuisyncCommon;
+		};
+		175A7AFB2CEE82CA001E7ECE /* XCLocalSwiftPackageReference "../darwin/OuisyncBackend" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../darwin/OuisyncBackend;
+		};
 		76A41C0C2C9D7C3C004D5A58 /* XCLocalSwiftPackageReference "../ouisync/bindings/swift/OuisyncLib" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = ../ouisync/bindings/swift/OuisyncLib;
@@ -1694,18 +1153,25 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		177064322CBEDB00003FEF6C /* LaunchAtLogin */ = {
+		170EAE492CEE87CC00468424 /* OuisyncCommon */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1746A9522CEE35BC00C5E5E7 /* XCLocalSwiftPackageReference "../darwin/OuisyncCommon" */;
+			productName = OuisyncCommon;
+		};
+		170EAE4B2CEE87D700468424 /* OuisyncBackend */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 175A7AFB2CEE82CA001E7ECE /* XCLocalSwiftPackageReference "../darwin/OuisyncBackend" */;
+			productName = OuisyncBackend;
+		};
+		170EAE4F2CEE87E800468424 /* OuisyncBackend */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 175A7AFB2CEE82CA001E7ECE /* XCLocalSwiftPackageReference "../darwin/OuisyncBackend" */;
+			productName = OuisyncBackend;
+		};
+		17DC402A2CEA92E0009C21A0 /* LaunchAtLogin */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 177064312CBEDB00003FEF6C /* XCRemoteSwiftPackageReference "LaunchAtLogin" */;
 			productName = LaunchAtLogin;
-		};
-		1E11B5D82BC00EFA007248F2 /* OuisyncLib */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = OuisyncLib;
-		};
-		1EE0483B2C4A6CD900A653F2 /* OuisyncLib */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = OuisyncLib;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

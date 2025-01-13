@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ouisync_app/app/cubits/repo.dart';
 import 'package:ouisync_app/app/models/auth_mode.dart';
+import 'package:ouisync_app/app/models/access_mode.dart';
 import 'package:ouisync_app/app/models/repo_location.dart';
 import 'package:ouisync_app/app/pages/repo_security_page.dart';
 import 'package:ouisync_app/app/utils/utils.dart';
@@ -27,7 +28,10 @@ void main() {
     );
     repoCubit = repoEntry.cubit!;
 
-    localSecret = (await repoCubit.getLocalSecret(deps.settings.masterKey))!;
+    final authMode = repoCubit.state.authMode;
+
+    localSecret =
+        (await authMode.storedLocalSecret!.decrypt(deps.settings.masterKey))!;
   });
 
   tearDown(() async {
@@ -35,10 +39,10 @@ void main() {
   });
 
   RepoSecurityPage createRepoSecurityPage() => RepoSecurityPage(
-        settings: deps.settings,
-        repo: repoCubit,
-        currentLocalSecret: localSecret,
-        passwordHasher: PasswordHasher(deps.session),
+        repoCubit,
+        WriteAccess(localSecret),
+        deps.settings,
+        PasswordHasher(deps.session),
       );
 
   testWidgets(
@@ -53,8 +57,8 @@ void main() {
         await tester.tap(find.text('Use local password'));
         await tester.pumpAndSettle();
 
-        final passwordField = find.byKey(ValueKey('password'));
-        final retypePasswordField = find.byKey(ValueKey('retype-password'));
+        final passwordField = find.byKey(Key('password'));
+        final retypePasswordField = find.byKey(Key('retype-password'));
 
         final passwordError = find.text('Please enter a password.');
         final retypePasswordError = find.text('The passwords do not match.');
@@ -98,7 +102,12 @@ void main() {
         // Fill both fields with the same password
         await tester.enterText(passwordField, 'admin123');
         await tester.enterText(retypePasswordField, 'admin123');
-        await tester.pump();
+        await tester.pumpAndSettle();
+
+        // Tap that we don't want the password to be stored.
+        await tester.tap(find.descendant(
+            of: find.byKey(Key('store-on-device')),
+            matching: find.byType(Switch)));
 
         // No errors
         expect(passwordError, findsNothing);
@@ -113,8 +122,9 @@ void main() {
             findsOne);
 
         await tester.tap(find.text('Accept'));
-        await repoCubit
-            .waitUntil((state) => state.authMode is AuthModeBlindOrManual);
+        await repoCubit.waitUntil((state) {
+          return state.authMode is AuthModeBlindOrManual;
+        });
 
         // HACK: The repo state doesn't change when the local secret changes so we can't wait
         // for it directly. But the `isLoading` switches to true before the local secret begins

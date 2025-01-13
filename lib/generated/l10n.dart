@@ -2760,6 +2760,16 @@ class S {
     );
   }
 
+  /// `Please authenticate`
+  String get messagePleaseAuthenticate {
+    return Intl.message(
+      'Please authenticate',
+      name: 'messagePleaseAuthenticate',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Accessing secure storage`
   String get messageAccessingSecureStorage {
     return Intl.message(
@@ -4030,6 +4040,346 @@ class S {
     );
   }
 
+  /// `Reset repository access`
+  String get repoResetTitle {
+    return Intl.message(
+      'Reset repository access',
+      name: 'repoResetTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Repository name`
+  String get repoResetRepoNameLabel {
+    return Intl.message(
+      'Repository name',
+      name: 'repoResetRepoNameLabel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Repository access type`
+  String get repoResetAccessTypeLabel {
+    return Intl.message(
+      'Repository access type',
+      name: 'repoResetAccessTypeLabel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Blind or locked`
+  String get repoResetAccessTypeInfoBlindOrLocked {
+    return Intl.message(
+      'Blind or locked',
+      name: 'repoResetAccessTypeInfoBlindOrLocked',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Read`
+  String get repoResetAccessTypeInfoRead {
+    return Intl.message(
+      'Read',
+      name: 'repoResetAccessTypeInfoRead',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Write`
+  String get repoResetAccessTypeInfoWrite {
+    return Intl.message(
+      'Write',
+      name: 'repoResetAccessTypeInfoWrite',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Token access type`
+  String get repoResetTokenTypeLabel {
+    return Intl.message(
+      'Token access type',
+      name: 'repoResetTokenTypeLabel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Action to be submitted`
+  String get repoResetActionInfoLabel {
+    return Intl.message(
+      'Action to be submitted',
+      name: 'repoResetActionInfoLabel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Authentication method`
+  String get repoResetAuthInfoLabel {
+    return Intl.message(
+      'Authentication method',
+      name: 'repoResetAuthInfoLabel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Authentication method`
+  String get repoResetAuthInfoBlindOrLocked {
+    return Intl.message(
+      'Authentication method',
+      name: 'repoResetAuthInfoBlindOrLocked',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The application cannot tell the difference.`
+  String get repoResetAuthInfoBlindOrLockedWarn {
+    return Intl.message(
+      'The application cannot tell the difference.',
+      name: 'repoResetAuthInfoBlindOrLockedWarn',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Locked behind a local password.`
+  String get repoResetAuthInfoLocked {
+    return Intl.message(
+      'Locked behind a local password.',
+      name: 'repoResetAuthInfoLocked',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Password is stored on this device.`
+  String get repoResetAuthInfoPasswordIsStored {
+    return Intl.message(
+      'Password is stored on this device.',
+      name: 'repoResetAuthInfoPasswordIsStored',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Key is stored on this device.`
+  String get repoResetAuthInfoKeyIsStored {
+    return Intl.message(
+      'Key is stored on this device.',
+      name: 'repoResetAuthInfoKeyIsStored',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Key is stored on this device and additional verification is needed to open the repository.`
+  String get repoResetAuthInfoKeyIsStoredAndProtected {
+    return Intl.message(
+      'Key is stored on this device and additional verification is needed to open the repository.',
+      name: 'repoResetAuthInfoKeyIsStoredAndProtected',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please provide a valid token link to determine the action.`
+  String get repoResetTokenEmptyInfo {
+    return Intl.message(
+      'Please provide a valid token link to determine the action.',
+      name: 'repoResetTokenEmptyInfo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Invalid`
+  String get repoResetTokenInvalid {
+    return Intl.message(
+      'Invalid',
+      name: 'repoResetTokenInvalid',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The token link is invalid.`
+  String get repoResetTokenInvalidInfo {
+    return Intl.message(
+      'The token link is invalid.',
+      name: 'repoResetTokenInvalidInfo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No action can be performed because the token does not correspond to this repository.`
+  String get repoResetTokenNonMatching {
+    return Intl.message(
+      'No action can be performed because the token does not correspond to this repository.',
+      name: 'repoResetTokenNonMatching',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No action will be performed because the token has already been submitted.`
+  String get repoResetTokenAlreadySubmitted {
+    return Intl.message(
+      'No action will be performed because the token has already been submitted.',
+      name: 'repoResetTokenAlreadySubmitted',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The repository will become blind.`
+  String get repoResetActionBlindToBlind {
+    return Intl.message(
+      'The repository will become blind.',
+      name: 'repoResetActionBlindToBlind',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This repository may have read or write access locked behind a local password. If so, unlocking will not be possible after this action is executed.`
+  String get repoResetActionBlindToBlindWarn {
+    return Intl.message(
+      'This repository may have read or write access locked behind a local password. If so, unlocking will not be possible after this action is executed.',
+      name: 'repoResetActionBlindToBlindWarn',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No action will be performed because the token and repository access are the same.`
+  String get repoResetActionSame {
+    return Intl.message(
+      'No action will be performed because the token and repository access are the same.',
+      name: 'repoResetActionSame',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The repository will become read only.`
+  String get repoResetActionBlindToRead {
+    return Intl.message(
+      'The repository will become read only.',
+      name: 'repoResetActionBlindToRead',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This repository may have write access locked behind a local password. If so, unlocking for writing will not be possible after this action is executed.`
+  String get repoResetActionBlindToReadWarn {
+    return Intl.message(
+      'This repository may have write access locked behind a local password. If so, unlocking for writing will not be possible after this action is executed.',
+      name: 'repoResetActionBlindToReadWarn',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The repository will gain write access.`
+  String get repoResetActionAnyToWrite {
+    return Intl.message(
+      'The repository will gain write access.',
+      name: 'repoResetActionAnyToWrite',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The repository will lose its read access.`
+  String get repoResetActionReadToBlind {
+    return Intl.message(
+      'The repository will lose its read access.',
+      name: 'repoResetActionReadToBlind',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This action is irreversible without a read or write token link.`
+  String get repoResetActionReadToBlindWarn {
+    return Intl.message(
+      'This action is irreversible without a read or write token link.',
+      name: 'repoResetActionReadToBlindWarn',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The repository will lose its write access.`
+  String get repoResetActionWriteToRead {
+    return Intl.message(
+      'The repository will lose its write access.',
+      name: 'repoResetActionWriteToRead',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This action is irreversible without a write token link.`
+  String get repoResetActionWriteToReadWarn {
+    return Intl.message(
+      'This action is irreversible without a write token link.',
+      name: 'repoResetActionWriteToReadWarn',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The repository will lose its read and write access.`
+  String get repoResetActionWriteToBlind {
+    return Intl.message(
+      'The repository will lose its read and write access.',
+      name: 'repoResetActionWriteToBlind',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This action is irreversible without a write token link.`
+  String get repoResetActionWriteToBlindWarn {
+    return Intl.message(
+      'This action is irreversible without a write token link.',
+      name: 'repoResetActionWriteToBlindWarn',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please confirm`
+  String get repoResetConfirmUpdateTitle {
+    return Intl.message(
+      'Please confirm',
+      name: 'repoResetConfirmUpdateTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Are you sure you want to proceed with the Update action?`
+  String get repoResetConfirmUpdateMessage {
+    return Intl.message(
+      'Are you sure you want to proceed with the Update action?',
+      name: 'repoResetConfirmUpdateMessage',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Repository`
   String get menuItemRepository {
     return Intl.message(
@@ -4325,6 +4675,16 @@ class S {
     return Intl.message(
       'Create repository',
       name: 'actionNewRepo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `I don't have a local password for this repository`
+  String get actionIDontHaveALocalPassword {
+    return Intl.message(
+      'I don\'t have a local password for this repository',
+      name: 'actionIDontHaveALocalPassword',
       desc: '',
       args: [],
     );

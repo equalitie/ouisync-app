@@ -4,7 +4,6 @@ import 'package:introduction_screen/introduction_screen.dart';
 import 'language_picker_page.dart';
 import 'accept_eq_values_terms_privacy_page.dart';
 import '../../generated/l10n.dart';
-import '../utils/click_counter.dart';
 import '../cubits/locale.dart';
 import '../utils/utils.dart';
 
@@ -186,14 +185,6 @@ class _OnboardingPageState extends State<OnboardingPage> {
   Widget _buildImage(String assetName) => Image.asset(
         'assets/$assetName',
         width: _imageWidth * 0.6,
-      );
-
-  Widget _buildButton(String text) => Fields.inPageButton(
-        text: text,
-        size: Dimensions.sizeInPageButtonMicro,
-        backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
-        foregroundColor: Theme.of(context).colorScheme.surfaceTint,
-        onPressed: null,
       );
 
   // For debugging

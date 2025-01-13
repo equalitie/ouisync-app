@@ -10,7 +10,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../models/models.dart';
 import '../files.dart';
-import '../master_key.dart';
 import '../utils.dart';
 import 'atomic_shared_prefs_settings_key.dart';
 import 'v0/v0.dart' as v0;

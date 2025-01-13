@@ -139,8 +139,7 @@ class FolderCreation extends HookWidget {
       [
         NegativeButton(
             text: S.current.actionCancel,
-            onPressed: () async => await Navigator.of(context).maybePop(''),
-            buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton),
+            onPressed: () async => await Navigator.of(context).maybePop('')),
         PositiveButton(
           text: S.current.actionCreate,
           onPressed: () async => await _onCreateButtonPress(
@@ -148,7 +147,6 @@ class FolderCreation extends HookWidget {
             parent: parent,
             newFolderName: nameController.text,
           ),
-          buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
           focusNode: positiveButtonFocus,
         )
       ];
