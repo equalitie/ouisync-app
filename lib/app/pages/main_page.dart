@@ -82,6 +82,7 @@ class _MainPageState extends State<MainPage>
     neededPadding: 0.0,
     entry: '',
   ));
+  bool _isBottomSheetInfoDisposed = false;
 
   final exitClickCounter = ClickCounter(timeoutMs: 3000);
 
@@ -127,6 +128,8 @@ class _MainPageState extends State<MainPage>
   @override
   void dispose() {
     _bottomSheetInfo.dispose();
+    _isBottomSheetInfoDisposed = true;
+
     _appSettingsIconFocus.dispose();
     _fabFocus.dispose();
     _receivedMediaSubscription?.cancel();
@@ -785,8 +788,11 @@ class _MainPageState extends State<MainPage>
       neededPadding: padding,
       entry: entry,
     );
-    WidgetsBinding.instance
-        .addPostFrameCallback((_) => _bottomSheetInfo.value = newInfo);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_isBottomSheetInfoDisposed == false) {
+        _bottomSheetInfo.value = newInfo;
+      }
+    });
   }
 
   Future<void> trySaveFile(String sourcePath) async {
