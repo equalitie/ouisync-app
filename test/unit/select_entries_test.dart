@@ -57,6 +57,7 @@ void main() {
     repoCubit = await RepoCubit.create(
       nativeChannels: nativeChannels,
       repo: repo,
+      session: session,
       location: locationOrigin,
       navigation: navigationCubit,
       entrySelection: entrySelectionCubit,
@@ -103,13 +104,30 @@ void main() {
       () async {
     final repoInfoHash = await repo.infoHash;
 
-    final expectedFolder2SelectedAll = <String, ({bool isDir, bool selected, bool? tristate})>{
+    final expectedFolder2SelectedAll =
+        <String, ({bool isDir, bool selected, bool? tristate})>{
       '/folder1': (isDir: true, selected: false, tristate: null),
       '/folder1/folder2': (isDir: true, selected: true, tristate: true),
-      '/folder1/folder2/file4.txt': (isDir: false, selected: true, tristate: true),
-      '/folder1/folder2/file5.txt': (isDir: false, selected: true, tristate: true),
-      '/folder1/folder2/file6.txt': (isDir: false, selected: true, tristate: true),
-      '/folder1/folder2/file7.txt': (isDir: false, selected: true, tristate: true)
+      '/folder1/folder2/file4.txt': (
+        isDir: false,
+        selected: true,
+        tristate: true
+      ),
+      '/folder1/folder2/file5.txt': (
+        isDir: false,
+        selected: true,
+        tristate: true
+      ),
+      '/folder1/folder2/file6.txt': (
+        isDir: false,
+        selected: true,
+        tristate: true
+      ),
+      '/folder1/folder2/file7.txt': (
+        isDir: false,
+        selected: true,
+        tristate: true
+      )
     };
 
     // Select folder2 selects all its contents, and folder1 tristate
@@ -139,17 +157,34 @@ void main() {
       expect(noSelectedEntries, hasLength(0));
     }
 
-    final expectedFolder1SelectedAll = <String, ({bool isDir, bool selected, bool? tristate})>{
+    final expectedFolder1SelectedAll =
+        <String, ({bool isDir, bool selected, bool? tristate})>{
       '/folder1': (isDir: true, selected: true, tristate: true),
       '/folder1/file0.txt': (isDir: false, selected: true, tristate: true),
       '/folder1/file1.txt': (isDir: false, selected: true, tristate: true),
       '/folder1/file2.txt': (isDir: false, selected: true, tristate: true),
       '/folder1/file3.txt': (isDir: false, selected: true, tristate: true),
       '/folder1/folder2': (isDir: true, selected: true, tristate: true),
-      '/folder1/folder2/file4.txt': (isDir: false, selected: true, tristate: true),
-      '/folder1/folder2/file5.txt': (isDir: false, selected: true, tristate: true),
-      '/folder1/folder2/file6.txt': (isDir: false, selected: true, tristate: true),
-      '/folder1/folder2/file7.txt': (isDir: false, selected: true, tristate: true)
+      '/folder1/folder2/file4.txt': (
+        isDir: false,
+        selected: true,
+        tristate: true
+      ),
+      '/folder1/folder2/file5.txt': (
+        isDir: false,
+        selected: true,
+        tristate: true
+      ),
+      '/folder1/folder2/file6.txt': (
+        isDir: false,
+        selected: true,
+        tristate: true
+      ),
+      '/folder1/folder2/file7.txt': (
+        isDir: false,
+        selected: true,
+        tristate: true
+      )
     };
 
     //Select folder1 selects all its contents
@@ -188,7 +223,11 @@ void main() {
         <String, ({bool isDir, bool selected, bool? tristate})>{
       '/folder1': (isDir: true, selected: false, tristate: null),
       '/folder1/folder2': (isDir: true, selected: false, tristate: null),
-      '/folder1/folder2/file6.txt': (isDir: false, selected: true, tristate: true)
+      '/folder1/folder2/file6.txt': (
+        isDir: false,
+        selected: true,
+        tristate: true
+      )
     };
 
     // Select folder2 child updates folder1/folder2 and folder1, tristates

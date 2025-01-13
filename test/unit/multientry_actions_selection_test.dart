@@ -57,6 +57,7 @@ void main() {
     repoCubit = await RepoCubit.create(
       nativeChannels: nativeChannels,
       repo: repo,
+      session: session,
       location: locationOrigin,
       navigation: navigationCubit,
       entrySelection: entrySelectionCubit,

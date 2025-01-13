@@ -130,6 +130,7 @@ void main() {
     originRepoCubit = await RepoCubit.create(
       nativeChannels: nativeChannels,
       repo: originRepo,
+      session: session,
       location: locationOrigin,
       navigation: NavigationCubit(),
       entrySelection: EntrySelectionCubit(),
@@ -141,6 +142,7 @@ void main() {
     destinationRepoCubit = await RepoCubit.create(
       nativeChannels: nativeChannels,
       repo: destinationRepo,
+      session: session,
       location: locationDestination,
       navigation: NavigationCubit(),
       entrySelection: EntrySelectionCubit(),
