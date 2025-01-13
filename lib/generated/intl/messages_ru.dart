@@ -23,80 +23,80 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m0(access) =>
       "Уровень доступа не может быть выше того, что уже установлен для данного хранилища: ${access}";
 
-  static String m2(name) => "${name} - загрузка отменена";
+  static String m4(name) => "${name} - загрузка отменена";
 
-  static String m3(name) => "${name} - ошибка скачивания";
+  static String m5(name) => "${name} - ошибка скачивания";
 
-  static String m4(entry) => "${entry} уже существует.";
+  static String m6(entry) => "${entry} уже существует.";
 
-  static String m6(path) =>
+  static String m8(path) =>
       "Текущая папка отсутствует, переходим в вышестоящую: ${path}";
 
-  static String m8(dokanUrl) =>
+  static String m10(dokanUrl) =>
       "Dokan не установлен. Пожалуйста, установите его с ${dokanUrl}";
 
-  static String m9(name) => "Ошибка инициализации хранилища ${name}";
+  static String m11(name) => "Ошибка инициализации хранилища ${name}";
 
-  static String m10(path) => "${path} не пустой";
+  static String m12(path) => "${path} не пустой";
 
-  static String m11(name) => "Ошибка импортирования хранилища ${name}";
+  static String m13(name) => "Ошибка импортирования хранилища ${name}";
 
-  static String m12(name) => "Ошибка создания хранилища ${name}";
+  static String m14(name) => "Ошибка создания хранилища ${name}";
 
-  static String m13(reason) => "Не удалось смонтировать: ${reason}";
+  static String m15(reason) => "Не удалось смонтировать: ${reason}";
 
-  static String m14(name) =>
+  static String m16(name) =>
       "${name} уже существует в этой локации\n\nЧто вы хотите делать?";
 
-  static String m16(name) => "Папка успешно удалена: ${name}";
+  static String m18(name) => "Папка успешно удалена: ${name}";
 
-  static String m18(number) =>
+  static String m20(number) =>
       "Хотите закрыть все открытые хранилища?\n\n(${number}открыто)";
 
-  static String m19(path) => "от ${path}";
+  static String m22(path) => "от ${path}";
 
-  static String m20(name) => "Ошибка при создании файла ${name}";
+  static String m23(name) => "Ошибка при создании файла ${name}";
 
-  static String m21(name) => "Ошибка при открытии файла ${name}";
+  static String m24(name) => "Ошибка при открытии файла ${name}";
 
-  static String m22(path) => "Ошибка предварительного просмотра файла ${path}";
+  static String m25(path) => "Ошибка предварительного просмотра файла ${path}";
 
-  static String m23(name) => "Мы не смогли удалить хранилище \"${name}\"";
+  static String m26(name) => "Мы не смогли удалить хранилище \"${name}\"";
 
-  static String m24(name) =>
+  static String m27(name) =>
       "Хранилище \"${name}\" не найдено в привычной локации";
 
-  static String m25(access) => "Доступ дан: ${access}";
-
-  static String m26(name) =>
-      "Это хранилище уже существует в приложеним под именем \"${name}\".";
+  static String m28(access) => "Доступ дан: ${access}";
 
   static String m29(name) =>
+      "Это хранилище уже существует в приложеним под именем \"${name}\".";
+
+  static String m32(name) =>
       "Рекомендация: ${name}\n(нажмите сюда чтобы использовать это имя)";
 
-  static String m31(access) => "Открыт в качестве ${access} копии";
+  static String m35(access) => "Открыт в качестве ${access} копии";
 
-  static String m32(name) => "Введите пароль чтобы разблокировать";
+  static String m36(name) => "Введите пароль чтобы разблокировать";
 
-  static String m33(name) => "Запись ${name} отменена";
+  static String m37(name) => "Запись ${name} отменена";
 
-  static String m34(name) => "${name} - ошибка записи";
+  static String m38(name) => "${name} - ошибка записи";
 
-  static String m35(access) => "${access}";
+  static String m39(access) => "${access}";
 
-  static String m36(changes) => "${changes}";
+  static String m40(changes) => "${changes}";
 
-  static String m37(entry) => "${entry}";
+  static String m41(entry) => "${entry}";
 
-  static String m39(name) => "${name}";
+  static String m43(name) => "${name}";
 
-  static String m40(number) => "${number}";
+  static String m44(number) => "${number}";
 
-  static String m41(path) => "${path}";
+  static String m45(path) => "${path}";
 
-  static String m42(status) => "${status}";
+  static String m46(status) => "${status}";
 
-  static String m43(name) => "Поделиться хранилищем \"${name}\"";
+  static String m47(name) => "Поделиться хранилищем \"${name}\"";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -345,15 +345,15 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Распределенные хэш-таблицы"),
         "messageDownloadFileCanceled":
             MessageLookupByLibrary.simpleMessage("Скачивание файла отменено"),
-        "messageDownloadingFileCanceled": m2,
-        "messageDownloadingFileError": m3,
+        "messageDownloadingFileCanceled": m4,
+        "messageDownloadingFileError": m5,
         "messageEmptyFolder": MessageLookupByLibrary.simpleMessage(
             "Эта <bold>папка</bold> пуста"),
         "messageEmptyRepo": MessageLookupByLibrary.simpleMessage(
             "Это <bold>хранилище</bold> пусто"),
         "messageEnterDifferentName": MessageLookupByLibrary.simpleMessage(
             "Пожалуйста, введите другое имя"),
-        "messageEntryAlreadyExist": m4,
+        "messageEntryAlreadyExist": m6,
         "messageEntryTypeDefault":
             MessageLookupByLibrary.simpleMessage("Запись"),
         "messageEntryTypeFile": MessageLookupByLibrary.simpleMessage("Файл"),
@@ -401,12 +401,12 @@ class MessageLookup extends MessageLookupByLibrary {
             "Ошибка при создании хранилища"),
         "messageErrorCreatingToken": MessageLookupByLibrary.simpleMessage(
             "Ошибка при генерации токена для раздачи."),
-        "messageErrorCurrentPathMissing": m6,
+        "messageErrorCurrentPathMissing": m8,
         "messageErrorDefault": MessageLookupByLibrary.simpleMessage(
             "Что-то пошло не так. Пожалуйста, повторите попытку."),
         "messageErrorDefaultShort":
             MessageLookupByLibrary.simpleMessage("Ошибка."),
-        "messageErrorDokanNotInstalled": m8,
+        "messageErrorDokanNotInstalled": m10,
         "messageErrorEntryNotFound":
             MessageLookupByLibrary.simpleMessage("запись не найдена"),
         "messageErrorFormValidatorNameDefault":
@@ -418,8 +418,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Новый пароль такой же как старый"),
         "messageErrorOpeningRepo": MessageLookupByLibrary.simpleMessage(
             "Ошибка при открытии хранилища"),
-        "messageErrorOpeningRepoDescription": m9,
-        "messageErrorPathNotEmpty": m10,
+        "messageErrorOpeningRepoDescription": m11,
+        "messageErrorPathNotEmpty": m12,
         "messageErrorRepositoryNameExist": MessageLookupByLibrary.simpleMessage(
             "Хранилище с таким именем уже существует"),
         "messageErrorRepositoryPasswordValidation":
@@ -438,11 +438,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageExitOuiSync":
             MessageLookupByLibrary.simpleMessage("Нажмите снова чтобы выйти."),
         "messageFAQ": MessageLookupByLibrary.simpleMessage("FAQ"),
-        "messageFailedAddRepository": m11,
-        "messageFailedCreateRepository": m12,
-        "messageFailedToMount": m13,
+        "messageFailedAddRepository": m13,
+        "messageFailedCreateRepository": m14,
+        "messageFailedToMount": m15,
         "messageFile": MessageLookupByLibrary.simpleMessage("файл"),
-        "messageFileAlreadyExist": m14,
+        "messageFileAlreadyExist": m16,
         "messageFileIsDownloading": MessageLookupByLibrary.simpleMessage(
             "Файл уже в процессе загрузки"),
         "messageFileName": MessageLookupByLibrary.simpleMessage("Имя файла"),
@@ -451,7 +451,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageFilePreviewNotAvailable": MessageLookupByLibrary.simpleMessage(
             "Предпросмотр файла ещё не доступен"),
         "messageFiles": MessageLookupByLibrary.simpleMessage("файлы"),
-        "messageFolderDeleted": m16,
+        "messageFolderDeleted": m18,
         "messageFolderName": MessageLookupByLibrary.simpleMessage("Имя папки"),
         "messageGeneratePassword":
             MessageLookupByLibrary.simpleMessage("Сгенерировать пароль"),
@@ -499,7 +499,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Загрузка…"),
         "messageLocalDiscovery": MessageLookupByLibrary.simpleMessage(
             "Обнаружение по локальной сети"),
-        "messageLockOpenRepos": m18,
+        "messageLockOpenRepos": m20,
         "messageLockedRepository": MessageLookupByLibrary.simpleMessage(
             "Это <bold>хранилище</bold> заблокировано."),
         "messageLockingAllRepos": MessageLookupByLibrary.simpleMessage(
@@ -533,7 +533,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "Ouisync не имеет авторизации на работу в фоновом режиме, если вы запустите другое приложение, это может помешать синхронизации"),
         "messageMobile": MessageLookupByLibrary.simpleMessage("Мобильный"),
-        "messageMoveEntryOrigin": m19,
+        "messageMoveEntryOrigin": m22,
         "messageMovingEntry": MessageLookupByLibrary.simpleMessage(
             "Эта функция недоступна при перемещении файла."),
         "messageNATOnWikipedia":
@@ -541,7 +541,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageNATType": MessageLookupByLibrary.simpleMessage("Тип NAT"),
         "messageNetworkIsUnavailable":
             MessageLookupByLibrary.simpleMessage("Сеть недоступна"),
-        "messageNewFileError": m20,
+        "messageNewFileError": m23,
         "messageNewPasswordCopiedClipboard":
             MessageLookupByLibrary.simpleMessage(
                 "Новый пароль сохранен в буфер обмена"),
@@ -567,7 +567,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Репозиториями можно делится как на чтение-запись, только чтения, или слепо (вы можете добавить файлы для других, но не можете их просматривать)"),
         "messageOnboardingShare": MessageLookupByLibrary.simpleMessage(
             "Все файлы и папки, добавленные в Ouisync, зашифрованны по умолчанию - и при передаче, и при хранении."),
-        "messageOpenFileError": m21,
+        "messageOpenFileError": m24,
         "messageOr": MessageLookupByLibrary.simpleMessage("Или"),
         "messageOuiSyncDesktopTitle":
             MessageLookupByLibrary.simpleMessage("Ouisync"),
@@ -583,7 +583,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Пиринговый обмен в Википедии"),
         "messagePermissionRequired":
             MessageLookupByLibrary.simpleMessage("Это разрешение необходимо"),
-        "messagePreviewingFileFailed": m22,
+        "messagePreviewingFileFailed": m25,
         "messagePrivacyIntro": MessageLookupByLibrary.simpleMessage(
             "Этот раздел используется для информирования посетителей о нашей политике в отношении сбора, использования и раскрытия личной информации, если кто-либо решит использовать наш Сервис"),
         "messageQuoteMainIsFree": MessageLookupByLibrary.simpleMessage(
@@ -616,14 +616,14 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Заменить существующий файл"),
         "messageRepoAuthFailed":
             MessageLookupByLibrary.simpleMessage("Ошибка входа в хранилище"),
-        "messageRepoDeletionErrorDescription": m23,
+        "messageRepoDeletionErrorDescription": m26,
         "messageRepoDeletionFailed":
             MessageLookupByLibrary.simpleMessage("Ошибка удаления хранилища"),
         "messageRepoMissing": MessageLookupByLibrary.simpleMessage(
             "Хранилище тут больше не находится"),
-        "messageRepoMissingErrorDescription": m24,
-        "messageRepositoryAccessMode": m25,
-        "messageRepositoryAlreadyExist": m26,
+        "messageRepoMissingErrorDescription": m27,
+        "messageRepositoryAccessMode": m28,
+        "messageRepositoryAlreadyExist": m29,
         "messageRepositoryCurrentPassword":
             MessageLookupByLibrary.simpleMessage("Текущий пароль"),
         "messageRepositoryIsNotOpen":
@@ -638,7 +638,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Хранилище не смонтировано "),
         "messageRepositoryPassword":
             MessageLookupByLibrary.simpleMessage("Пароль"),
-        "messageRepositorySuggestedName": m29,
+        "messageRepositorySuggestedName": m32,
         "messageRepositoryToken":
             MessageLookupByLibrary.simpleMessage("Скопируйте ссылку сюда"),
         "messageRousseau":
@@ -708,8 +708,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Неизвестное расширение файла"),
         "messageUnlockRepoFailed":
             MessageLookupByLibrary.simpleMessage("Пароль не открыл хранилище"),
-        "messageUnlockRepoOk": m31,
-        "messageUnlockRepository": m32,
+        "messageUnlockRepoOk": m35,
+        "messageUnlockRepository": m36,
         "messageUnlockUsingBiometrics":
             MessageLookupByLibrary.simpleMessage("Открыть с помощью биометрии"),
         "messageUnsavedChanges": MessageLookupByLibrary.simpleMessage(
@@ -727,19 +727,19 @@ class MessageLookup extends MessageLookupByLibrary {
         "messageWiFi": MessageLookupByLibrary.simpleMessage("Wi-Fi"),
         "messageWriteReplicaExplanation": MessageLookupByLibrary.simpleMessage(
             "Полный доступ. Вашр пиры могут и просматривать, и изменять содержимое"),
-        "messageWritingFileCanceled": m33,
-        "messageWritingFileError": m34,
+        "messageWritingFileCanceled": m37,
+        "messageWritingFileError": m38,
         "popupMenuItemChangePassword":
             MessageLookupByLibrary.simpleMessage("Изменить пароль"),
         "popupMenuItemCopyPassword":
             MessageLookupByLibrary.simpleMessage("Скопировать пароль"),
-        "replacementAccess": m35,
-        "replacementChanges": m36,
-        "replacementEntry": m37,
-        "replacementName": m39,
-        "replacementNumber": m40,
-        "replacementPath": m41,
-        "replacementStatus": m42,
+        "replacementAccess": m39,
+        "replacementChanges": m40,
+        "replacementEntry": m41,
+        "replacementName": m43,
+        "replacementNumber": m44,
+        "replacementPath": m45,
+        "replacementStatus": m46,
         "repositoryIsAlreadyImported":
             MessageLookupByLibrary.simpleMessage("Хранилище уже импортируется"),
         "statusSync": MessageLookupByLibrary.simpleMessage("СИНХРОНИЗИРОВАНО"),
@@ -860,7 +860,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "titleSetPasswordFor":
             MessageLookupByLibrary.simpleMessage("Поставить пароль для"),
         "titleSettings": MessageLookupByLibrary.simpleMessage("Настройки"),
-        "titleShareRepository": m43,
+        "titleShareRepository": m47,
         "titleSortBy": MessageLookupByLibrary.simpleMessage("Отсортировать по"),
         "titleStateMonitor":
             MessageLookupByLibrary.simpleMessage("Анализ состояния"),

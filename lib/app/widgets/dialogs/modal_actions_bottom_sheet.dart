@@ -143,7 +143,7 @@ class DirectoryActions extends StatelessWidget with AppLogger {
 
   Future<void> _showNotAvailableAlertDialog(BuildContext context) =>
       Dialogs.simpleAlertDialog(
-        context: context,
+        context,
         title: S.current.titleMovingEntry,
         message: S.current.messageMovingEntry,
       );

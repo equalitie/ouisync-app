@@ -1,9 +1,9 @@
 import 'package:async/async.dart';
 import 'package:flutter/material.dart';
 
-import '../../utils/utils.dart';
+import '../../utils/utils.dart' show Constants, AppTypography;
 
-enum EntryAction { delete, download, move, preview, rename, share }
+enum EntryAction { delete, download, copy, move, preview, rename, share }
 
 class EntryActionItem extends StatefulWidget {
   const EntryActionItem({

@@ -1,10 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../cubits/cubits.dart';
-import '../../models/models.dart';
-import '../../utils/utils.dart';
-import '../widgets.dart';
+import '../../cubits/cubits.dart'
+    show EntrySelectionCubit, EntrySelectionState, Job, RepoCubit, RepoState;
+import '../../models/models.dart'
+    show DirectoryEntry, FileEntry, FileSystemEntry, RepoLocation;
+import '../../utils/utils.dart'
+    show Constants, Dialogs, Dimensions, Fields, ThemeGetter;
+import '../widgets.dart'
+    show
+        FileDescription,
+        FileIconAnimated,
+        MissingRepoDescription,
+        RepoDescription,
+        RepoStatus,
+        ScrollableTextWidget,
+        SelectionState;
 
 class FileListItem extends StatelessWidget {
   FileListItem({
@@ -20,27 +31,74 @@ class FileListItem extends StatelessWidget {
   final void Function() mainAction;
   final void Function() verticalDotsAction;
 
+  final ValueNotifier<bool> _isSelecting = ValueNotifier<bool>(false);
+  final ValueNotifier<bool?> _selected = ValueNotifier<bool?>(false);
+  final ValueNotifier<Color?> _backgroundColor = ValueNotifier<Color?>(null);
+
   @override
   Widget build(BuildContext context) {
     // TODO: should this be inside of a BlockBuilder of fileItem.repoCubit?
+    final repoInfoHash = repoCubit.state.infoHash;
+
+    final entrySelectionCubit = repoCubit.entrySelectionCubit;
+    final entrySelectionState = entrySelectionCubit.state;
+
+    final isSelecting =
+        entrySelectionState.originRepoInfoHash == repoInfoHash &&
+            entrySelectionState.selectionState == SelectionState.on;
+    _isSelecting.value = isSelecting;
+
+    final isSelected = entrySelectionState.isEntrySelected(
+      repoInfoHash,
+      entry.path,
+    );
+
+    final onSelectEntry = repoCubit.entrySelectionCubit.selectEntry;
+    final onClearEntry = repoCubit.entrySelectionCubit.clearEntry;
+
+    _updateSelection(
+      context,
+      isSelected,
+      repoInfoHash: repoInfoHash,
+      entry: entry,
+      valueNotifier: _selected,
+      colorNotifier: _backgroundColor,
+      onSelectEntry: onSelectEntry,
+      onClearEntry: onClearEntry,
+    );
 
     final uploadJob = repoCubit.state.uploads[entry.path];
     final downloadJob = repoCubit.state.downloads[entry.path];
 
-    return _ListItemContainer(
-      mainAction: mainAction,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
-          FileIconAnimated(downloadJob),
-          Expanded(
-            child: Container(
-              padding: Dimensions.paddingItem,
-              child: FileDescription(repoCubit, entry, uploadJob),
+    return ValueListenableBuilder(
+      valueListenable: _backgroundColor,
+      builder: (context, stateColor, child) => _ListItemContainer(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            FileIconAnimated(downloadJob),
+            Expanded(
+              child: Container(
+                padding: Dimensions.paddingItem,
+                child: FileDescription(repoCubit, entry, uploadJob),
+              ),
             ),
-          ),
-          _VerticalDotsButton(uploadJob == null ? verticalDotsAction : null),
-        ],
+            TrailAction(
+              repoInfoHash,
+              entry,
+              entrySelectionCubit: entrySelectionCubit,
+              isSelectingNotifier: _isSelecting,
+              selectedNotifier: _selected,
+              backgroundColorNotifier: _backgroundColor,
+              onSelectEntry: onSelectEntry,
+              onClearEntry: onClearEntry,
+              uploadJob: uploadJob,
+              verticalDotsAction: verticalDotsAction,
+            ),
+          ],
+        ),
+        mainAction: mainAction,
+        backgroundColor: stateColor,
       ),
     );
   }
@@ -50,17 +108,57 @@ class DirectoryListItem extends StatelessWidget {
   DirectoryListItem({
     super.key,
     required this.entry,
+    required this.repoCubit,
     required this.mainAction,
     required this.verticalDotsAction,
   });
 
   final DirectoryEntry entry;
+  final RepoCubit repoCubit;
   final void Function() mainAction;
   final void Function() verticalDotsAction;
 
+  final ValueNotifier<bool> _isSelecting = ValueNotifier<bool>(false);
+  final ValueNotifier<bool?> _selected = ValueNotifier<bool?>(false);
+  final ValueNotifier<Color?> _backgroundColor = ValueNotifier<Color?>(null);
+
   @override
-  Widget build(BuildContext context) => _ListItemContainer(
-        mainAction: mainAction,
+  Widget build(BuildContext context) {
+    final repoInfoHash = repoCubit.state.infoHash;
+
+    final entrySelectionCubit = repoCubit.entrySelectionCubit;
+    final entrySelectionState = entrySelectionCubit.state;
+
+    final isSelecting =
+        entrySelectionState.originRepoInfoHash == repoInfoHash &&
+            entrySelectionState.selectionState == SelectionState.on;
+    _isSelecting.value = isSelecting;
+
+    final isSelected = entrySelectionState.isEntrySelected(
+      repoInfoHash,
+      entry.path,
+    );
+    final tristate = isSelected
+        ? entrySelectionState.selectedEntriesPath[entry.path]?.tristate
+        : false;
+
+    final onSelectEntry = repoCubit.entrySelectionCubit.selectEntry;
+    final onClearEntry = repoCubit.entrySelectionCubit.clearEntry;
+
+    _updateSelection(
+      context,
+      tristate,
+      repoInfoHash: repoInfoHash,
+      entry: entry,
+      valueNotifier: _selected,
+      colorNotifier: _backgroundColor,
+      onSelectEntry: onSelectEntry,
+      onClearEntry: onClearEntry,
+    );
+
+    return ValueListenableBuilder(
+      valueListenable: _backgroundColor,
+      builder: (context, stateColor, child) => _ListItemContainer(
         child: Row(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -76,10 +174,25 @@ class DirectoryListItem extends StatelessWidget {
                 child: ScrollableTextWidget(child: Text(entry.name)),
               ),
             ),
-            _VerticalDotsButton(verticalDotsAction),
+            TrailAction(
+              repoInfoHash,
+              entry,
+              entrySelectionCubit: entrySelectionCubit,
+              isSelectingNotifier: _isSelecting,
+              selectedNotifier: _selected,
+              backgroundColorNotifier: _backgroundColor,
+              onSelectEntry: onSelectEntry,
+              onClearEntry: onClearEntry,
+              uploadJob: null,
+              verticalDotsAction: verticalDotsAction,
+            ),
           ],
         ),
-      );
+        mainAction: mainAction,
+        backgroundColor: stateColor,
+      ),
+    );
+  }
 }
 
 class RepoListItem extends StatelessWidget {
@@ -98,7 +211,6 @@ class RepoListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => _ListItemContainer(
-        mainAction: mainAction,
         child: BlocBuilder<RepoCubit, RepoState>(
           bloc: repoCubit,
           builder: (context, state) => Row(
@@ -128,6 +240,7 @@ class RepoListItem extends StatelessWidget {
             ],
           ),
         ),
+        mainAction: mainAction,
       );
 }
 
@@ -181,23 +294,157 @@ class _ListItemContainer extends StatelessWidget {
   _ListItemContainer({
     required this.child,
     required this.mainAction,
+    this.backgroundColor,
   });
 
   final Widget child;
   final Function mainAction;
+  final Color? backgroundColor;
 
   @override
   Widget build(BuildContext context) => Material(
+        color: backgroundColor ?? Colors.white,
         child: InkWell(
-            onTap: () => mainAction.call(),
-            splashColor: Colors.blue,
-            child: Container(
-              padding: Dimensions.paddingListItem,
-              child: child,
-            )),
-        color: Colors.white,
+          onTap: () => mainAction.call(),
+          splashColor: Colors.blue,
+          child: Container(
+            padding: Dimensions.paddingListItem,
+            child: child,
+          ),
+        ),
       );
 }
+
+class TrailAction extends StatelessWidget {
+  const TrailAction(
+    this.repoInfoHash,
+    this.entry, {
+    required this.entrySelectionCubit,
+    required ValueNotifier<bool> isSelectingNotifier,
+    required ValueNotifier<bool?> selectedNotifier,
+    required ValueNotifier<Color?> backgroundColorNotifier,
+    required this.onSelectEntry,
+    required this.onClearEntry,
+    required this.uploadJob,
+    required this.verticalDotsAction,
+    super.key,
+  })  : _isSelectingNotifier = isSelectingNotifier,
+        _selectedNotifier = selectedNotifier,
+        _backgroundColorNotifier = backgroundColorNotifier;
+
+  final String repoInfoHash;
+  final FileSystemEntry entry;
+
+  final EntrySelectionCubit entrySelectionCubit;
+
+  final ValueNotifier<bool> _isSelectingNotifier;
+  final ValueNotifier<bool?> _selectedNotifier;
+  final ValueNotifier<Color?> _backgroundColorNotifier;
+
+  final Future<void> Function(String, FileSystemEntry) onSelectEntry;
+  final Future<void> Function(String, FileSystemEntry) onClearEntry;
+
+  final Job? uploadJob;
+  final void Function() verticalDotsAction;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocListener<EntrySelectionCubit, EntrySelectionState>(
+      bloc: entrySelectionCubit,
+      listener: (context, state) async {
+        if (repoInfoHash != state.originRepoInfoHash) return;
+
+        final selectionState = state.selectionState;
+        _isSelectingNotifier.value = selectionState == SelectionState.on;
+
+        if (selectionState == SelectionState.off) {
+          await _updateSelection(
+            context,
+            false,
+            repoInfoHash: repoInfoHash,
+            entry: entry,
+            valueNotifier: _selectedNotifier,
+            colorNotifier: _backgroundColorNotifier,
+            onSelectEntry: onSelectEntry,
+            onClearEntry: onClearEntry,
+          );
+        }
+      },
+      child: ValueListenableBuilder(
+        valueListenable: _isSelectingNotifier,
+        builder: (context, isSelecting, child) {
+          return isSelecting
+              ? ValueListenableBuilder(
+                  valueListenable: _selectedNotifier,
+                  builder: (
+                    BuildContext context,
+                    bool? value,
+                    Widget? child,
+                  ) =>
+                      Checkbox.adaptive(
+                    visualDensity: VisualDensity.adaptivePlatformDensity,
+                    tristate: true,
+                    value: value,
+                    onChanged: (value) async => await _updateSelection(
+                      context,
+                      value ?? false,
+                      repoInfoHash: repoInfoHash,
+                      entry: entry,
+                      valueNotifier: _selectedNotifier,
+                      colorNotifier: _backgroundColorNotifier,
+                      onSelectEntry: onSelectEntry,
+                      onClearEntry: onClearEntry,
+                    ),
+                  ),
+                )
+              : _VerticalDotsButton(
+                  uploadJob == null ? verticalDotsAction : null,
+                );
+        },
+      ),
+    );
+  }
+}
+
+Future<void> _updateSelection(
+  BuildContext context,
+  bool? value, {
+  required String repoInfoHash,
+  required FileSystemEntry entry,
+  required ValueNotifier<bool?> valueNotifier,
+  required ValueNotifier<Color?> colorNotifier,
+  required Future<void> Function(String, FileSystemEntry) onSelectEntry,
+  required Future<void> Function(String, FileSystemEntry) onClearEntry,
+}) async {
+  if (valueNotifier.value == value) return;
+
+  valueNotifier.value = value;
+
+  if (value == null) return;
+
+  await Dialogs.executeFutureWithLoadingDialog(
+    null,
+    value
+        ? onSelectEntry(repoInfoHash, entry)
+        : onClearEntry(repoInfoHash, entry),
+  );
+
+  _getBackgroundColor(
+    context,
+    notifier: colorNotifier,
+    value: value,
+  );
+}
+
+void _getBackgroundColor(
+  BuildContext context, {
+  required ValueNotifier<Color?> notifier,
+  required bool value,
+}) =>
+    notifier.value = switch (value) {
+      true => context.theme.highlightColor,
+      false => Colors.white,
+    };
 
 class _VerticalDotsButton extends StatelessWidget {
   _VerticalDotsButton(this.action);

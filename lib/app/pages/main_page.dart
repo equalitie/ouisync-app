@@ -82,6 +82,7 @@ class _MainPageState extends State<MainPage>
     neededPadding: 0.0,
     entry: '',
   ));
+  bool _isBottomSheetInfoDisposed = false;
 
   final exitClickCounter = ClickCounter(timeoutMs: 3000);
 
@@ -127,6 +128,8 @@ class _MainPageState extends State<MainPage>
   @override
   void dispose() {
     _bottomSheetInfo.dispose();
+    _isBottomSheetInfoDisposed = true;
+
     _appSettingsIconFocus.dispose();
     _fabFocus.dispose();
     _receivedMediaSubscription?.cancel();
@@ -148,7 +151,7 @@ class _MainPageState extends State<MainPage>
   void checkForDokan() {
     installationOk() => widget.mountCubit.init();
     Future<bool?> installationFailed() => Dialogs.simpleAlertDialog(
-          context: context,
+          context,
           title: S.current.titleDokanInstallation,
           message: S.current.messageDokanInstallationFailed,
         );
@@ -493,11 +496,13 @@ class _MainPageState extends State<MainPage>
           children: <Widget>[
             // TODO: A shadow would be nicer.
             const Divider(height: 1),
-            if (folder.content.isNotEmpty)
-              SortContentsBar(
-                sortListCubit: sortListCubit,
-                reposCubit: widget.reposCubit,
-              ),
+            FolderContentsBar(
+              reposCubit: widget.reposCubit,
+              repoCubit: repo,
+              hasContents: folder.content.isNotEmpty,
+              sortListCubit: sortListCubit,
+              entrySelectionCubit: repo.entrySelectionCubit,
+            ),
             Expanded(child: child),
           ],
         ),
@@ -640,6 +645,7 @@ class _MainPageState extends State<MainPage>
                   DirectoryEntry entry => DirectoryListItem(
                       key: key,
                       entry: entry,
+                      repoCubit: currentRepoCubit,
                       mainAction: () {
                         if (_bottomSheetInfo.value.entry != entry.path) {
                           currentRepoCubit.navigateTo(entry.path);
@@ -670,7 +676,7 @@ class _MainPageState extends State<MainPage>
 
   Future<void> _showMovingEntryAlertDialog(BuildContext context) =>
       Dialogs.simpleAlertDialog(
-        context: context,
+        context,
         title: S.current.titleMovingEntry,
         message: S.current.messageMovingEntry,
       );
@@ -721,6 +727,7 @@ class _MainPageState extends State<MainPage>
 
     final readDisabledActions = [
       EntryAction.delete,
+      EntryAction.copy,
       EntryAction.move,
       EntryAction.rename,
     ];
@@ -731,75 +738,43 @@ class _MainPageState extends State<MainPage>
   Widget modalBottomSheet() =>
       BlocBuilder<EntryBottomSheetCubit, EntryBottomSheetState>(
         bloc: widget.reposCubit.bottomSheet,
-        builder: (context, state) {
-          Widget? sheet;
-
-          if (state is MoveEntrySheetState) {
-            sheet = _moveEntryState(
-              repoCubit: state.repoCubit,
-              navigationCubit: state.navigationCubit,
-              entryPath: state.entryPath,
-              entryType: state.entryType,
-            );
-          }
-
-          if (state is SaveMediaSheetState) {
-            sheet = _uploadFileState(
-              reposCubit: state.reposCubit,
-              paths: state.sharedMediaPaths,
-            );
-          }
-
-          return sheet ?? SizedBox.shrink();
+        builder: (context, state) => switch (state) {
+          MoveEntrySheetState() => _moveSingleEntryState(state),
+          MoveSelectedEntriesSheetState() => _moveMultipleEntriesState(state),
+          SaveMediaSheetState() => _saveSharedMediaState(state),
+          HideSheetState() => SizedBox.shrink(),
         },
       );
 
-  Widget _moveEntryState({
-    required RepoCubit repoCubit,
-    required NavigationCubit navigationCubit,
-    required String entryPath,
-    required EntryType entryType,
-  }) =>
-      MoveEntryDialog(
+  EntriesActionsDialog _moveSingleEntryState(MoveEntrySheetState state) =>
+      EntriesActionsDialog.single(
+        context,
         reposCubit: widget.reposCubit,
-        originRepoCubit: repoCubit,
-        entryPath: entryPath,
+        originRepoCubit: state.repoCubit,
+        navigationCubit: widget.reposCubit.navigation,
+        entryPath: state.entryPath,
+        entryType: state.entryType,
+        sheetType: state.type,
         onUpdateBottomSheet: updateBottomSheetInfo,
-        onMoveEntry: () async => await moveEntry(
-          repoCubit,
-          entryPath,
-          entryType,
-        ),
-        onCancel: widget.reposCubit.bottomSheet.hide,
       );
 
-  Future<void> moveEntry(
-    RepoCubit originRepoCubit,
-    String entryPath,
-    EntryType entryType,
-  ) async {
-    if (_currentRepo == null) return;
+  EntriesActionsDialog _moveMultipleEntriesState(
+    MoveSelectedEntriesSheetState state,
+  ) =>
+      EntriesActionsDialog.multiple(
+        context,
+        reposCubit: widget.reposCubit,
+        originRepoCubit: state.repoCubit,
+        navigationCubit: widget.reposCubit.navigation,
+        entrySelectionCubit: state.repoCubit.entrySelectionCubit,
+        sheetType: state.type,
+        onUpdateBottomSheet: updateBottomSheetInfo,
+      );
 
-    final toRepoCubit =
-        originRepoCubit.location.compareTo(_currentRepo!.location) != 0
-            ? _currentRepo!.cubit
-            : null;
-
-    await MoveEntry(
-      context,
-      repoCubit: originRepoCubit,
-      srcPath: entryPath,
-      type: entryType,
-    ).move(toRepoCubit: toRepoCubit);
-  }
-
-  Widget _uploadFileState({
-    required ReposCubit reposCubit,
-    required List<String> paths,
-  }) =>
+  SaveSharedMedia _saveSharedMediaState(SaveMediaSheetState state) =>
       SaveSharedMedia(
-        reposCubit,
-        sharedMediaPaths: paths,
+        state.reposCubit,
+        sharedMediaPaths: state.sharedMediaPaths,
         onUpdateBottomSheet: updateBottomSheetInfo,
         onSaveFile: trySaveFile,
         canSaveMedia: canSaveFiles,
@@ -812,7 +787,11 @@ class _MainPageState extends State<MainPage>
       neededPadding: padding,
       entry: entry,
     );
-    _bottomSheetInfo.value = newInfo;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_isBottomSheetInfoDisposed == false) {
+        _bottomSheetInfo.value = newInfo;
+      }
+    });
   }
 
   Future<void> trySaveFile(String sourcePath) async {
@@ -834,9 +813,10 @@ class _MainPageState extends State<MainPage>
     final currentRepo = _currentRepo;
     if (currentRepo is! OpenRepoEntry) {
       await Dialogs.simpleAlertDialog(
-          context: context,
-          title: S.current.titleAddFile,
-          message: S.current.messageNoRepo);
+        context,
+        title: S.current.titleAddFile,
+        message: S.current.messageNoRepo,
+      );
 
       return false;
     }
