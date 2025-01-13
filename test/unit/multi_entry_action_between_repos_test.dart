@@ -266,9 +266,9 @@ void main() {
           tristate: true
         ),
         '/folder4': (isDir: true, selected: true, tristate: true),
-        '/folder4/file4.txt': (isDir: false, selected: true, tristate: true),
-        '/folder4/file5.txt': (isDir: false, selected: true, tristate: true),
-        '/folder4/file6.txt': (isDir: false, selected: true, tristate: true),
+        '/folder4/file0.txt': (isDir: false, selected: true, tristate: true),
+        '/folder4/file1.txt': (isDir: false, selected: true, tristate: true),
+        '/folder4/file2.txt': (isDir: false, selected: true, tristate: true),
       };
 
       expected2RootFoldersDestinationContents = <String>[
@@ -283,9 +283,9 @@ void main() {
         '/folder1/folder2/file6.txt',
         '/folder1/folder2/file7.txt',
         '/folder4',
-        '/folder4/file4.txt',
-        '/folder4/file5.txt',
-        '/folder4/file6.txt',
+        '/folder4/file0.txt',
+        '/folder4/file1.txt',
+        '/folder4/file2.txt',
       ];
     }
 
@@ -537,16 +537,11 @@ void main() {
         await tester.pumpAndSettle();
         final BuildContext context = tester.element(find.byType(MainPage));
 
-        final originRepoInfoHash = await originRepo.infoHash;
-
         //Select folder1 selects all its contents
         {
-          await originRepoCubit.startEntriesSelection();
-
-          final dirEntry = DirectoryEntry(path: '/folder1');
-          await originRepoCubit.entrySelectionCubit.selectEntry(
-            originRepoInfoHash,
-            dirEntry,
+          await _selectEntries(
+            originRepoCubit,
+            [DirectoryEntry(path: '/folder1')],
           );
 
           final selectedEntries =
@@ -575,7 +570,7 @@ void main() {
           );
           expect(result, equals(true));
 
-          final destinationContents = await _getDestinationContents(
+          final destinationContents = await _getPathContents(
             destinationRepoCubit,
             '/',
             <FileSystemEntry>[],
@@ -584,7 +579,7 @@ void main() {
           // Expect all the contents copied to destination root
           expect(destinationContents, expectedFolder1DestinationContents);
 
-          final originContents = await _getDestinationContents(
+          final originContents = await _getPathContents(
             originRepoCubit,
             '/',
             <FileSystemEntry>[],
@@ -605,17 +600,11 @@ void main() {
         await tester.pumpAndSettle();
         final BuildContext context = tester.element(find.byType(MainPage));
 
-        final originRepoInfoHash = await originRepo.infoHash;
-        final destinationRepoInfoHash = await destinationRepo.infoHash;
-
         //Select folder1 selects all its contents
         {
-          await originRepoCubit.startEntriesSelection();
-
-          final dirEntry = DirectoryEntry(path: '/folder1');
-          await originRepoCubit.entrySelectionCubit.selectEntry(
-            originRepoInfoHash,
-            dirEntry,
+          await _selectEntries(
+            originRepoCubit,
+            [DirectoryEntry(path: '/folder1')],
           );
 
           final selectedEntries =
@@ -644,7 +633,7 @@ void main() {
           );
           expect(result, equals(true));
 
-          final destinationContents = await _getDestinationContents(
+          final destinationContents = await _getPathContents(
             destinationRepoCubit,
             '/',
             <FileSystemEntry>[],
@@ -653,7 +642,7 @@ void main() {
           // Expect all the contents moved to destination root
           expect(destinationContents, expectedFolder1DestinationContents);
 
-          final originContents = await _getDestinationContents(
+          final originContents = await _getPathContents(
             originRepoCubit,
             '/',
             <FileSystemEntry>[],
@@ -665,12 +654,9 @@ void main() {
 
         // Select all the entries in the destination
         {
-          await destinationRepoCubit.startEntriesSelection();
-
-          final dirEntry = DirectoryEntry(path: '/folder1');
-          await destinationRepoCubit.entrySelectionCubit.selectEntry(
-            destinationRepoInfoHash,
-            dirEntry,
+          await _selectEntries(
+            destinationRepoCubit,
+            [DirectoryEntry(path: '/folder1')],
           );
 
           final selectedEntries =
@@ -699,7 +685,7 @@ void main() {
           );
           expect(result, equals(true));
 
-          final destinationContents = await _getDestinationContents(
+          final destinationContents = await _getPathContents(
             originRepoCubit,
             '/',
             <FileSystemEntry>[],
@@ -708,7 +694,7 @@ void main() {
           // Expect all the contents copied back to origin root
           expect(destinationContents, expectedFolder1DestinationContents);
 
-          final originContents = await _getDestinationContents(
+          final originContents = await _getPathContents(
             destinationRepoCubit,
             '/',
             <FileSystemEntry>[],
@@ -729,34 +715,21 @@ void main() {
         await tester.pumpAndSettle();
         final BuildContext context = tester.element(find.byType(MainPage));
 
-        final originRepoInfoHash = await originRepo.infoHash;
-
         //Add one extra folder, /folder1/folder2/folder3, 2 files to new folder
+        await _addFolderWithFiles(
+          originRepo,
+          newDirPath: '/folder4',
+          files: 3,
+        );
+
+        // Select folder1, folder4, selects all its contents
         {
-          await Directory.create(originRepo, 'folder4');
-
-          for (var i = 4; i < 7; i++) {
-            final filePath = p.join(
-              'folder4',
-              'file$i.txt',
-            );
-            final file = await File.create(originRepo, filePath);
-            await file.write(0, utf8.encode("123$i"));
-            await file.close();
-          }
-        }
-
-        //Select folder1, folder4, selects all its contents
-        {
-          await originRepoCubit.startEntriesSelection();
-
-          await originRepoCubit.entrySelectionCubit.selectEntry(
-            originRepoInfoHash,
-            DirectoryEntry(path: '/folder1'),
-          );
-          await originRepoCubit.entrySelectionCubit.selectEntry(
-            originRepoInfoHash,
-            DirectoryEntry(path: '/folder4'),
+          await _selectEntries(
+            originRepoCubit,
+            [
+              DirectoryEntry(path: '/folder1'),
+              DirectoryEntry(path: '/folder4'),
+            ],
           );
 
           final selectedEntries =
@@ -785,7 +758,7 @@ void main() {
           );
           expect(result, equals(true));
 
-          final destinationContents = await _getDestinationContents(
+          final destinationContents = await _getPathContents(
             destinationRepoCubit,
             '/',
             <FileSystemEntry>[],
@@ -794,7 +767,7 @@ void main() {
           // Expect all the contents copied to destination root, /folder1, /folder4
           expect(destinationContents, expected2RootFoldersDestinationContents);
 
-          final originContents = await _getDestinationContents(
+          final originContents = await _getPathContents(
             originRepoCubit,
             '/',
             <FileSystemEntry>[],
@@ -815,34 +788,21 @@ void main() {
         await tester.pumpAndSettle();
         final BuildContext context = tester.element(find.byType(MainPage));
 
-        final originRepoInfoHash = await originRepo.infoHash;
+        // Add one extra root folder, /folder4, 3 files to new folder: /folder4/file4-6.txt
+        await _addFolderWithFiles(
+          originRepo,
+          newDirPath: '/folder4',
+          files: 3,
+        );
 
-        //Add one extra folder, /folder1/folder2/folder3, 2 files to new folder
+        // Select folder1 selects all its contents
         {
-          await Directory.create(originRepo, 'folder4');
-
-          for (var i = 4; i < 7; i++) {
-            final filePath = p.join(
-              'folder4',
-              'file$i.txt',
-            );
-            final file = await File.create(originRepo, filePath);
-            await file.write(0, utf8.encode("123$i"));
-            await file.close();
-          }
-        }
-
-        //Select folder1 selects all its contents
-        {
-          await originRepoCubit.startEntriesSelection();
-
-          await originRepoCubit.entrySelectionCubit.selectEntry(
-            originRepoInfoHash,
-            DirectoryEntry(path: '/folder1'),
-          );
-          await originRepoCubit.entrySelectionCubit.selectEntry(
-            originRepoInfoHash,
-            DirectoryEntry(path: '/folder4'),
+          await _selectEntries(
+            originRepoCubit,
+            [
+              DirectoryEntry(path: '/folder1'),
+              DirectoryEntry(path: '/folder4'),
+            ],
           );
 
           final selectedEntries =
@@ -871,7 +831,7 @@ void main() {
           );
           expect(result, equals(true));
 
-          final destinationContents = await _getDestinationContents(
+          final destinationContents = await _getPathContents(
             destinationRepoCubit,
             '/',
             <FileSystemEntry>[],
@@ -880,7 +840,7 @@ void main() {
           // Expect all the contents moved to destination root, /folder1, /folder4
           expect(destinationContents, expected2RootFoldersDestinationContents);
 
-          final originContents = await _getDestinationContents(
+          final originContents = await _getPathContents(
             originRepoCubit,
             '/',
             <FileSystemEntry>[],
@@ -901,15 +861,11 @@ void main() {
         await tester.pumpAndSettle();
         final BuildContext context = tester.element(find.byType(MainPage));
 
-        final repoInfoHash = await originRepo.infoHash;
-
         // Select just file1.txt, selects /folder1, /folder1/file1.txt
         {
-          await originRepoCubit.startEntriesSelection();
-
-          await originRepoCubit.entrySelectionCubit.selectEntry(
-            repoInfoHash,
-            FileEntry(path: '/folder1/file1.txt', size: 0),
+          await _selectEntries(
+            originRepoCubit,
+            [FileEntry(path: '/folder1/file1.txt', size: 0)],
           );
 
           final selectedEntries =
@@ -932,7 +888,7 @@ void main() {
           );
           expect(result, equals(true));
 
-          final destinationContents = await _getDestinationContents(
+          final destinationContents = await _getPathContents(
             destinationRepoCubit,
             '/',
             <FileSystemEntry>[],
@@ -944,7 +900,7 @@ void main() {
             expectedOneFileOnyFolder1DestinationContents,
           );
 
-          final originContents = await _getDestinationContents(
+          final originContents = await _getPathContents(
             originRepoCubit,
             '/',
             <FileSystemEntry>[],
@@ -965,15 +921,11 @@ void main() {
         await tester.pumpAndSettle();
         final BuildContext context = tester.element(find.byType(MainPage));
 
-        final repoInfoHash = await originRepo.infoHash;
-
         // Select just file1.txt, selects /folder1, /folder1/file1.txt
         {
-          await originRepoCubit.startEntriesSelection();
-
-          await originRepoCubit.entrySelectionCubit.selectEntry(
-            repoInfoHash,
-            FileEntry(path: '/folder1/file1.txt', size: 0),
+          await _selectEntries(
+            originRepoCubit,
+            [FileEntry(path: '/folder1/file1.txt', size: 0)],
           );
 
           final selectedEntries =
@@ -996,7 +948,7 @@ void main() {
           );
           expect(result, equals(true));
 
-          final destinationContents = await _getDestinationContents(
+          final destinationContents = await _getPathContents(
             destinationRepoCubit,
             '/',
             <FileSystemEntry>[],
@@ -1008,7 +960,7 @@ void main() {
             expectedOneFileOnyFolder1DestinationContents,
           );
 
-          final originContents = await _getDestinationContents(
+          final originContents = await _getPathContents(
             originRepoCubit,
             '/',
             <FileSystemEntry>[],
@@ -1029,23 +981,15 @@ void main() {
         await tester.pumpAndSettle();
         final BuildContext context = tester.element(find.byType(MainPage));
 
-        final repoInfoHash = await originRepo.infoHash;
-
         //Select 3 files /folder1/file1.txt, /folder1/folder2/file6,7.txt, subfolder /folder1/folder2 selected
         {
-          await originRepoCubit.startEntriesSelection();
-
-          await originRepoCubit.entrySelectionCubit.selectEntry(
-            repoInfoHash,
-            FileEntry(path: '/folder1/file1.txt', size: 0),
-          );
-          await originRepoCubit.entrySelectionCubit.selectEntry(
-            repoInfoHash,
-            FileEntry(path: '/folder1/folder2/file6.txt', size: 0),
-          );
-          await originRepoCubit.entrySelectionCubit.selectEntry(
-            repoInfoHash,
-            FileEntry(path: '/folder1/folder2/file7.txt', size: 0),
+          await _selectEntries(
+            originRepoCubit,
+            [
+              FileEntry(path: '/folder1/file1.txt', size: 0),
+              FileEntry(path: '/folder1/folder2/file6.txt', size: 0),
+              FileEntry(path: '/folder1/folder2/file7.txt', size: 0),
+            ],
           );
 
           final selectedEntries =
@@ -1068,7 +1012,7 @@ void main() {
           );
           expect(result, equals(true));
 
-          final destinationContents = await _getDestinationContents(
+          final destinationContents = await _getPathContents(
             destinationRepoCubit,
             '/',
             <FileSystemEntry>[],
@@ -1077,7 +1021,7 @@ void main() {
           // Expect only selected files copied to destination root: /folder1/file1.txt, /folder1/folder2/file6,.txt ; one parent folder /folder1/folder2
           expect(destinationContents, expecte3FilesdDestinationContents);
 
-          final originContents = await _getDestinationContents(
+          final originContents = await _getPathContents(
             originRepoCubit,
             '/',
             <FileSystemEntry>[],
@@ -1098,23 +1042,15 @@ void main() {
         await tester.pumpAndSettle();
         final BuildContext context = tester.element(find.byType(MainPage));
 
-        final repoInfoHash = await originRepo.infoHash;
-
         //Select 3 files /folder1/file1.txt, /folder1/folder2/file6,7.txt, subfolder /folder1/folder2 selected
         {
-          await originRepoCubit.startEntriesSelection();
-
-          await originRepoCubit.entrySelectionCubit.selectEntry(
-            repoInfoHash,
-            FileEntry(path: '/folder1/file1.txt', size: 0),
-          );
-          await originRepoCubit.entrySelectionCubit.selectEntry(
-            repoInfoHash,
-            FileEntry(path: '/folder1/folder2/file6.txt', size: 0),
-          );
-          await originRepoCubit.entrySelectionCubit.selectEntry(
-            repoInfoHash,
-            FileEntry(path: '/folder1/folder2/file7.txt', size: 0),
+          await _selectEntries(
+            originRepoCubit,
+            [
+              FileEntry(path: '/folder1/file1.txt', size: 0),
+              FileEntry(path: '/folder1/folder2/file6.txt', size: 0),
+              FileEntry(path: '/folder1/folder2/file7.txt', size: 0),
+            ],
           );
 
           final selectedEntries =
@@ -1137,7 +1073,7 @@ void main() {
           );
           expect(result, equals(true));
 
-          final destinationContents = await _getDestinationContents(
+          final destinationContents = await _getPathContents(
             destinationRepoCubit,
             '/',
             <FileSystemEntry>[],
@@ -1146,7 +1082,7 @@ void main() {
           // Expect only selected files moved to destination root: /folder1/file1.txt, /folder1/folder2/file6,.txt ; one parent folder /folder1/folder2
           expect(destinationContents, expecte3FilesdDestinationContents);
 
-          final originContents = await _getDestinationContents(
+          final originContents = await _getPathContents(
             originRepoCubit,
             '/',
             <FileSystemEntry>[],
@@ -1167,32 +1103,18 @@ void main() {
         await tester.pumpAndSettle();
         final BuildContext context = tester.element(find.byType(MainPage));
 
-        final repoInfoHash = await originRepo.infoHash;
-
         //Add one extra folder, /folder1/folder2/folder3, 2 files to new folder
-        {
-          await Directory.create(originRepo, 'folder1/folder2/folder3');
-
-          for (var i = 0; i < 2; i++) {
-            final filePath = p.join(
-              'folder1',
-              'folder2',
-              'folder3',
-              'file$i.txt',
-            );
-            final file = await File.create(originRepo, filePath);
-            await file.write(0, utf8.encode("123$i"));
-            await file.close();
-          }
-        }
+        await _addFolderWithFiles(
+          originRepo,
+          newDirPath: 'folder1/folder2/folder3',
+          files: 2,
+        );
 
         // Select /folder1/folder2/folder3/file0.txt
         {
-          await originRepoCubit.startEntriesSelection();
-
-          await originRepoCubit.entrySelectionCubit.selectEntry(
-            repoInfoHash,
-            FileEntry(path: '/folder1/folder2/folder3/file0.txt', size: 0),
+          await _selectEntries(
+            originRepoCubit,
+            [FileEntry(path: '/folder1/folder2/folder3/file0.txt', size: 0)],
           );
 
           final selectedEntries =
@@ -1215,7 +1137,7 @@ void main() {
           );
           expect(result, equals(true));
 
-          final destinationContents = await _getDestinationContents(
+          final destinationContents = await _getPathContents(
             destinationRepoCubit,
             '/',
             <FileSystemEntry>[],
@@ -1224,7 +1146,7 @@ void main() {
           // Expect only selected file copied to destination root
           expect(destinationContents, expected1NewFileDestinationContents);
 
-          final originContents = await _getDestinationContents(
+          final originContents = await _getPathContents(
             originRepoCubit,
             '/',
             <FileSystemEntry>[],
@@ -1245,32 +1167,18 @@ void main() {
         await tester.pumpAndSettle();
         final BuildContext context = tester.element(find.byType(MainPage));
 
-        final repoInfoHash = await originRepo.infoHash;
-
         //Add one extra folder, /folder1/folder2/folder3, 2 files to new folder
-        {
-          await Directory.create(originRepo, 'folder1/folder2/folder3');
-
-          for (var i = 0; i < 2; i++) {
-            final filePath = p.join(
-              'folder1',
-              'folder2',
-              'folder3',
-              'file$i.txt',
-            );
-            final file = await File.create(originRepo, filePath);
-            await file.write(0, utf8.encode("123$i"));
-            await file.close();
-          }
-        }
+        await _addFolderWithFiles(
+          originRepo,
+          newDirPath: 'folder1/folder2/folder3',
+          files: 2,
+        );
 
         // Select /folder1/folder2/folder3/file0.txt
         {
-          await originRepoCubit.startEntriesSelection();
-
-          await originRepoCubit.entrySelectionCubit.selectEntry(
-            repoInfoHash,
-            FileEntry(path: '/folder1/folder2/folder3/file0.txt', size: 0),
+          await _selectEntries(
+            originRepoCubit,
+            [FileEntry(path: '/folder1/folder2/folder3/file0.txt', size: 0)],
           );
 
           final selectedEntries =
@@ -1293,7 +1201,7 @@ void main() {
           );
           expect(result, equals(true));
 
-          final destinationContents = await _getDestinationContents(
+          final destinationContents = await _getPathContents(
             destinationRepoCubit,
             '/',
             <FileSystemEntry>[],
@@ -1302,7 +1210,7 @@ void main() {
           // Expect only selected file moved to destination root
           expect(destinationContents, expected1NewFileDestinationContents);
 
-          final originContents = await _getDestinationContents(
+          final originContents = await _getPathContents(
             originRepoCubit,
             '/',
             <FileSystemEntry>[],
@@ -1323,51 +1231,26 @@ void main() {
         await tester.pumpAndSettle();
         final BuildContext context = tester.element(find.byType(MainPage));
 
-        final repoInfoHash = await originRepo.infoHash;
-
         //Add one extra subfolder, /folder1/folder3, add 2 files to new folder
-        {
-          await Directory.create(originRepo, 'folder1/folder3');
-
-          for (var i = 0; i < 2; i++) {
-            final filePath = p.join('folder1', 'folder3', 'file$i.txt');
-            final file = await File.create(originRepo, filePath);
-            await file.write(0, utf8.encode("123$i"));
-            await file.close();
-          }
-        }
+        await _addFolderWithFiles(
+          originRepo,
+          newDirPath: '/folder1/folder3',
+          files: 2,
+        );
 
         //Select all files in /folder1/folder2; select /folder1/folder3/, selects all its contents
         {
-          await originRepoCubit.startEntriesSelection();
-
-          await originRepoCubit.entrySelectionCubit.selectEntry(
-            repoInfoHash,
-            FileEntry(path: '/folder1/file1.txt', size: 0),
-          );
-          await originRepoCubit.entrySelectionCubit.selectEntry(
-            repoInfoHash,
-            FileEntry(path: '/folder1/file3.txt', size: 0),
-          );
-          await originRepoCubit.entrySelectionCubit.selectEntry(
-            repoInfoHash,
-            FileEntry(path: '/folder1/folder2/file4.txt', size: 0),
-          );
-          await originRepoCubit.entrySelectionCubit.selectEntry(
-            repoInfoHash,
-            FileEntry(path: '/folder1/folder2/file5.txt', size: 0),
-          );
-          await originRepoCubit.entrySelectionCubit.selectEntry(
-            repoInfoHash,
-            FileEntry(path: '/folder1/folder2/file6.txt', size: 0),
-          );
-          await originRepoCubit.entrySelectionCubit.selectEntry(
-            repoInfoHash,
-            FileEntry(path: '/folder1/folder2/file7.txt', size: 0),
-          );
-          await originRepoCubit.entrySelectionCubit.selectEntry(
-            repoInfoHash,
-            DirectoryEntry(path: '/folder1/folder3'),
+          await _selectEntries(
+            originRepoCubit,
+            [
+              FileEntry(path: '/folder1/file1.txt', size: 0),
+              FileEntry(path: '/folder1/file3.txt', size: 0),
+              FileEntry(path: '/folder1/folder2/file4.txt', size: 0),
+              FileEntry(path: '/folder1/folder2/file5.txt', size: 0),
+              FileEntry(path: '/folder1/folder2/file6.txt', size: 0),
+              FileEntry(path: '/folder1/folder2/file7.txt', size: 0),
+              DirectoryEntry(path: '/folder1/folder3'),
+            ],
           );
 
           final selectedEntries =
@@ -1390,7 +1273,7 @@ void main() {
           );
           expect(result, equals(true));
 
-          final destinationContents = await _getDestinationContents(
+          final destinationContents = await _getPathContents(
             destinationRepoCubit,
             '/',
             <FileSystemEntry>[],
@@ -1399,7 +1282,7 @@ void main() {
           // Expect file1,3.txt, /folder2, /folder2/4,7.txt, /folder3, /folder3/file0,1.txt moved to destination root
           expect(destinationContents, expectedFolder3DestinationContents);
 
-          final originContents = await _getDestinationContents(
+          final originContents = await _getPathContents(
             originRepoCubit,
             '/',
             <FileSystemEntry>[],
@@ -1420,51 +1303,26 @@ void main() {
         await tester.pumpAndSettle();
         final BuildContext context = tester.element(find.byType(MainPage));
 
-        final repoInfoHash = await originRepo.infoHash;
-
         //Add one extra subfolder, /folder1/folder3, add 2 files to new folder
-        {
-          await Directory.create(originRepo, 'folder1/folder3');
-
-          for (var i = 0; i < 2; i++) {
-            final filePath = p.join('folder1', 'folder3', 'file$i.txt');
-            final file = await File.create(originRepo, filePath);
-            await file.write(0, utf8.encode("123$i"));
-            await file.close();
-          }
-        }
+        await _addFolderWithFiles(
+          originRepo,
+          newDirPath: '/folder1/folder3',
+          files: 2,
+        );
 
         //Select all files in /folder1/folder2; select /folder1/folder3/, selects all its contents
         {
-          await originRepoCubit.startEntriesSelection();
-
-          await originRepoCubit.entrySelectionCubit.selectEntry(
-            repoInfoHash,
-            FileEntry(path: '/folder1/file1.txt', size: 0),
-          );
-          await originRepoCubit.entrySelectionCubit.selectEntry(
-            repoInfoHash,
-            FileEntry(path: '/folder1/file3.txt', size: 0),
-          );
-          await originRepoCubit.entrySelectionCubit.selectEntry(
-            repoInfoHash,
-            FileEntry(path: '/folder1/folder2/file4.txt', size: 0),
-          );
-          await originRepoCubit.entrySelectionCubit.selectEntry(
-            repoInfoHash,
-            FileEntry(path: '/folder1/folder2/file5.txt', size: 0),
-          );
-          await originRepoCubit.entrySelectionCubit.selectEntry(
-            repoInfoHash,
-            FileEntry(path: '/folder1/folder2/file6.txt', size: 0),
-          );
-          await originRepoCubit.entrySelectionCubit.selectEntry(
-            repoInfoHash,
-            FileEntry(path: '/folder1/folder2/file7.txt', size: 0),
-          );
-          await originRepoCubit.entrySelectionCubit.selectEntry(
-            repoInfoHash,
-            DirectoryEntry(path: '/folder1/folder3'),
+          await _selectEntries(
+            originRepoCubit,
+            [
+              FileEntry(path: '/folder1/file1.txt', size: 0),
+              FileEntry(path: '/folder1/file3.txt', size: 0),
+              FileEntry(path: '/folder1/folder2/file4.txt', size: 0),
+              FileEntry(path: '/folder1/folder2/file5.txt', size: 0),
+              FileEntry(path: '/folder1/folder2/file6.txt', size: 0),
+              FileEntry(path: '/folder1/folder2/file7.txt', size: 0),
+              DirectoryEntry(path: '/folder1/folder3'),
+            ],
           );
 
           final selectedEntries =
@@ -1487,7 +1345,7 @@ void main() {
           );
           expect(result, equals(true));
 
-          final destinationContents = await _getDestinationContents(
+          final destinationContents = await _getPathContents(
             destinationRepoCubit,
             '/',
             <FileSystemEntry>[],
@@ -1496,7 +1354,7 @@ void main() {
           // Expect file1,3.txt, /folder2, /folder2/4,7.txt, /folder3, /folder3/file0,1.txt moved to destination root
           expect(destinationContents, expectedFolder3DestinationContents);
 
-          final originContents = await _getDestinationContents(
+          final originContents = await _getPathContents(
             originRepoCubit,
             '/',
             <FileSystemEntry>[],
@@ -1510,7 +1368,38 @@ void main() {
   );
 }
 
-Future<List<FileSystemEntry>> _getDestinationContents(
+Future<void> _selectEntries(
+  RepoCubit cubit,
+  List<FileSystemEntry> entries,
+) async {
+  final repoInfoHash = await cubit.infoHash;
+  await cubit.startEntriesSelection();
+  for (var entry in entries) {
+    await cubit.entrySelectionCubit.selectEntry(repoInfoHash, entry);
+  }
+}
+
+Future<void> _addFolderWithFiles(
+  Repository cubit, {
+  required String newDirPath,
+  required int files,
+}) async {
+  {
+    await Directory.create(cubit, newDirPath);
+
+    for (var i = 0; i < files; i++) {
+      final filePath = p.join(
+        newDirPath,
+        'file$i.txt',
+      );
+      final file = await File.create(cubit, filePath);
+      await file.write(0, utf8.encode("123$i"));
+      await file.close();
+    }
+  }
+}
+
+Future<List<FileSystemEntry>> _getPathContents(
   RepoCubit cubit,
   String path,
   List<FileSystemEntry> entries,
@@ -1519,7 +1408,7 @@ Future<List<FileSystemEntry>> _getDestinationContents(
   for (var c in contents) {
     entries.add(c);
     if (c is DirectoryEntry) {
-      await _getDestinationContents(cubit, c.path, entries);
+      await _getPathContents(cubit, c.path, entries);
     }
   }
 
