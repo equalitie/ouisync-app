@@ -139,14 +139,7 @@ void main() {
       ];
       expect(folder1Contents, dirEntryComparator(expectedFolder1Contents));
 
-<<<<<<< HEAD
       final folder2Contents = await Directory.read(pluginRepo, '/folder1/folder2');
-=======
-      final folder2Contents = await Directory.read(
-        pluginRepo,
-        '/folder1/folder2',
-      );
->>>>>>> service
       expect(folder2Contents, hasLength(1));
 
       final expectedFolder2 = <DirEntry>[DirEntry('file1.txt', EntryType.file)];

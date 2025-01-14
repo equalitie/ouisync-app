@@ -11,10 +11,8 @@ import 'package:ouisync_app/app/cubits/locale.dart';
 import 'package:ouisync_app/app/cubits/mount.dart';
 import 'package:ouisync_app/app/cubits/repos.dart';
 import 'package:ouisync_app/app/pages/main_page.dart';
-import 'package:ouisync_app/app/utils/cache_servers.dart';
-import 'package:ouisync_app/app/utils/master_key.dart';
 import 'package:ouisync_app/app/utils/platform/platform_window_manager.dart';
-import 'package:ouisync_app/app/utils/settings/settings.dart';
+import 'package:ouisync_app/app/utils/utils.dart';
 import 'package:ouisync_app/generated/l10n.dart';
 import 'package:ouisync/native_channels.dart';
 import 'package:ouisync/ouisync.dart' show Session;
@@ -25,6 +23,9 @@ import 'package:path_provider_platform_interface/path_provider_platform_interfac
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stack_trace/stack_trace.dart';
+export 'package:flutter/foundation.dart' show debugPrint;
+
+final _loggy = appLogger("TestHelper");
 
 /// Setup the test environment and run `callback` inside it.
 ///
@@ -92,7 +93,7 @@ Future<void> testEnv(FutureOr<void> Function() callback) async {
       // accessing the temp directory for some reason. It probably doesn't indicate a problem in
       // the code under test so it should be safe to ignore it.
     } catch (exception) {
-      print("Exception during temporary directory removal: $exception");
+      _loggy.error("Exception during temporary directory removal: $exception");
       rethrow;
     }
   });
@@ -328,9 +329,9 @@ extension WidgetTesterExtension on WidgetTester {
       await Directory(dirname(path)).create(recursive: true);
       await File(path).writeAsBytes(bytes);
 
-      debugPrint('screenshot saved to $path');
+      _loggy.info('screenshot saved to $path');
     } catch (e) {
-      debugPrint('Failed to save screenshot: $e');
+      _loggy.error('Failed to save screenshot: $e');
     }
   }
 
@@ -352,7 +353,7 @@ extension WidgetTesterExtension on WidgetTester {
         '/usr/lib/ouisync/data/flutter_assets/packages/golden_toolkit/fonts/Roboto-Regular.ttf');
 
     if (!(await fontFile.exists())) {
-      print("Failed to load fonts, the file ${fontFile.path} does not exist");
+      _loggy.error("Failed to load fonts, the file ${fontFile.path} does not exist");
       return;
     }
 

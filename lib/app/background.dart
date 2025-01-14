@@ -17,10 +17,7 @@ Future<void> syncInBackground() async {
   final packageInfo = await PackageInfo.fromPlatform();
   final logger = Loggy<AppLogger>('background');
 
-  final session = await createSession(
-    packageInfo: packageInfo,
-    logger: logger,
-  );
+  final session = await createSession(packageInfo: packageInfo);
 
   logger.info('sync started');
 
@@ -87,14 +84,4 @@ Future<void> _waitForSyncInactivity(Session session) async {
       prev = next;
     }
   }
-}
-
-class _RepositoryError implements Exception {
-  _RepositoryError(this.cause, this.name);
-
-  final Object cause;
-  final String name;
-
-  @override
-  String toString() => "error in repository '$name': $cause";
 }

@@ -168,12 +168,12 @@ class _MainPageState extends State<MainPage>
 
         case DokanResult.sameVersion:
         case DokanResult.newerVersionMayor:
-          loggy.app('The Dokan version installed is supported: '
+          loggy.debug('The Dokan version installed is supported: '
               '${dokanCheckResult.result!.name}');
           break;
 
         case null:
-          loggy.app('Check Dokan installation status failed: '
+          loggy.debug('Check Dokan installation status failed: '
               '${dokanCheckResult.error}');
           break;
       }
@@ -576,7 +576,7 @@ class _MainPageState extends State<MainPage>
           previewOk = await launchUrl(url);
         }
       } on PlatformException catch (e, st) {
-        loggy.app(
+        loggy.debug(
           'Preview file (desktop): Error previewing file ${entry.path}:',
           e,
           st,
@@ -600,7 +600,7 @@ class _MainPageState extends State<MainPage>
 
         await launchUrl(url);
       } on PlatformException catch (e, st) {
-        loggy.app(
+        loggy.debug(
           '(FileServer) Error previewing file ${entry.path}:',
           e,
           st,

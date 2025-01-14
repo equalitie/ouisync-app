@@ -53,7 +53,7 @@ Future<void> _migratePaths() async {
     return;
   }
 
-  final logger = staticLogger<Settings>();
+  final logger = appLogger("Settings");
 
   logger.info(
     'migrating app support directory ${oldDir.path} -> ${newDir.path}',

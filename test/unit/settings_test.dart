@@ -166,10 +166,10 @@ void main() {
     ////Use this commented code if you need to generate new values.
     //{
     //  final rawKey = MasterKey.generateKey();
-    //  print("key: $rawKey");
+    //  debugPrint("key: $rawKey");
     //  final key = MasterKey.initWithKey(rawKey);
     //  final encrypted = await key.encrypt(teststring);
-    //  print("encrypted: $encrypted");
+    //  debugPrint("encrypted: $encrypted");
     //}
 
     final key =

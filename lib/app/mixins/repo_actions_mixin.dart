@@ -96,7 +96,7 @@ mixin RepositoryActionsMixin on LoggyType {
       if (!await LocalAuth.authenticateIfPossible(
         context,
         S.current.messageAccessingSecureStorage,
-      )) return;
+      )) { return; }
 
       // TODO: Tell the user when the decryption fails.
       final secret = (await encryptedSecret.decrypt(settings.masterKey))!;

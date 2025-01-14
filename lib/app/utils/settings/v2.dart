@@ -290,12 +290,12 @@ class Settings with AppLogger {
 
   //------------------------------------------------------------------
 
-  void debugPrint() {
-    print("============== Settings ===============");
+  void debugSettings() {
+    loggy.debug("============== Settings ===============");
     for (final kv in _root.repos.entries) {
-      print("=== ${kv.key}");
+      loggy.debug("=== ${kv.key}");
     }
-    print("=======================================");
+    loggy.debug("=======================================");
   }
 }
 

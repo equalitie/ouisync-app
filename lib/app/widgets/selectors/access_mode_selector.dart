@@ -67,7 +67,7 @@ class _AccessModeSelectorState extends State<AccessModeSelector>
                 groupValue: _selectedMode,
                 toggleable: true,
                 onChanged: (current) async {
-                  loggy.app('Access mode: $current');
+                  loggy.debug('Access mode: $current');
 
                   if (!widget.availableAccessMode.contains(mode)) {
                     final message = S.current.messageAccessModeDisabled(

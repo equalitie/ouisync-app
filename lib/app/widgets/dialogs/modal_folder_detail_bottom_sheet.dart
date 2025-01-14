@@ -13,7 +13,6 @@ import '../../utils/utils.dart'
         Dialogs,
         Dimensions,
         Fields,
-        AppLoggy,
         showSnackBar,
         ThemeGetter;
 import '../widgets.dart'
@@ -128,7 +127,7 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
   Future<void> _deleteFolderWithValidation(RepoCubit repo, String path) async {
     final isDirectory = await _isDirectory(repo, path);
     if (!isDirectory) {
-      loggy.app('Entry $path is not a directory.');
+      loggy.debug('Entry $path is not a directory.');
       return;
     }
 
@@ -169,7 +168,7 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
   ) async {
     final empty = await repo.isFolderEmpty(path);
     if (!empty) {
-      loggy.app('Directory $path is not empty');
+      loggy.debug('Directory $path is not empty');
       return false;
     }
 

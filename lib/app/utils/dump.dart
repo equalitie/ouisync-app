@@ -85,10 +85,6 @@ Future<void> _dumpStateMonitor(
   final node = await monitor.load();
 
   final pad = '  ' * depth;
-  if (node == null) {
-    sink.writeln("${pad}null");
-    return;
-  }
 
   for (MapEntry e in node.values.entries) {
     sink.writeln("$pad${e.key}: ${e.value}");

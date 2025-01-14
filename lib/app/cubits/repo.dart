@@ -335,7 +335,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
         content.add(entry);
       }
     } catch (e, st) {
-      loggy.app('Traversing directory $path exception', e, st);
+      loggy.debug('Traversing directory $path exception', e, st);
       error = e.toString();
     }
 
@@ -359,7 +359,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
       _currentFolder.goTo(folderPath);
       return true;
     } catch (e, st) {
-      loggy.app('Directory $folderPath creation failed', e, st);
+      loggy.debug('Directory $folderPath creation failed', e, st);
       return false;
     } finally {
       await refresh();
@@ -373,7 +373,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
       await Directory.remove(_repo, path, recursive: recursive);
       return true;
     } catch (e, st) {
-      loggy.app('Directory $path deletion failed', e, st);
+      loggy.debug('Directory $path deletion failed', e, st);
       return false;
     } finally {
       await refresh();
@@ -619,7 +619,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     final server = await serve(handler, Constants.fileServerAuthority, 0);
     final authority = '${server.address.host}:${server.port}';
 
-    print('Serving file at http://$authority');
+    loggy.debug('Serving file at http://$authority');
 
     final url = Uri.http(
       authority,
@@ -676,7 +676,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
         job.update(offset);
       }
     } catch (e, st) {
-      loggy.app('Download file $sourcePath exception', e, st);
+      loggy.debug('Download file $sourcePath exception', e, st);
       showSnackBar(S.current.messageDownloadingFileError(sourcePath));
     } finally {
       showSnackBar(S.current.messageDownloadFileLocation(parentPath));
@@ -698,7 +698,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
       await _repo.moveEntry(source, destination);
       return true;
     } catch (e, st) {
-      loggy.app('Move entry from $source to $destination failed', e, st);
+      loggy.debug('Move entry from $source to $destination failed', e, st);
       return false;
     } finally {
       await refresh();
@@ -727,7 +727,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
 
       return result;
     } catch (e, st) {
-      loggy.app('Move entry from $source to $destination failed', e, st);
+      loggy.debug('Move entry from $source to $destination failed', e, st);
       return false;
     } finally {
       await destinationRepoCubit.refresh();
@@ -783,7 +783,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
       await File.remove(_repo, filePath);
       return true;
     } catch (e, st) {
-      loggy.app('Delete file $filePath failed', e, st);
+      loggy.debug('Delete file $filePath failed', e, st);
       return false;
     } finally {
       await refresh();
@@ -831,20 +831,11 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     try {
       newFile = await File.create(_repo, newFilePath);
     } catch (e, st) {
-      loggy.app('File creation $newFilePath failed', e, st);
+      loggy.debug('File creation $newFilePath failed', e, st);
     }
 
     return newFile;
   }
 
   Future<File> openFile(String path) => File.open(_repo, path);
-
-  Future<PasswordSalt?> getCurrentModePasswordSalt() async {
-    if (accessMode == AccessMode.read) {
-      return await _repo.getReadPasswordSalt();
-    } else if (accessMode == AccessMode.write) {
-      return await _repo.getWritePasswordSalt();
-    }
-    return null;
-  }
 }

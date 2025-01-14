@@ -7,7 +7,7 @@ import 'package:ouisync/ouisync.dart' as oui;
 
 import '../../generated/l10n.dart';
 import '../utils/utils.dart'
-    show AppLogger, LocalInterfaceAddr, LocalInterfaceWatch, AppLoggy, Settings;
+    show AppLogger, LocalInterfaceAddr, LocalInterfaceWatch, Settings;
 import '../utils/watch.dart' as watch;
 import 'cubits.dart' show CubitActions;
 
@@ -232,12 +232,12 @@ class PowerControl extends Cubit<PowerControlState>
       // connectivity type does not change. (Although with recent patches
       // `_session.bindNetwork` should be idempotent if local endpoints don't
       // change).
-      loggy.app(
+      loggy.debug(
           'Network mode event: ${oldState.networkMode} -> ${newState.networkMode} (ignored, same as previous)');
       return;
     }
 
-    loggy.app(
+    loggy.debug(
         'NetworkMode event: ${oldState.networkMode} -> ${newState.networkMode}');
 
     await _setNetworkMode(newState.networkMode);
@@ -290,7 +290,7 @@ class PowerControl extends Cubit<PowerControlState>
       return;
     }
 
-    loggy.app('Setting network mode: $mode');
+    loggy.debug('Setting network mode: $mode');
 
     switch (_networkModeTransition) {
       case _Transition.none:

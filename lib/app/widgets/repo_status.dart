@@ -10,7 +10,7 @@ import '../utils/utils.dart';
 
 const _iconSize = 20.0;
 const _iconPadding = 2.0;
-final _color = Colors.black.withOpacity(0.25);
+final _color = Colors.black.withAlpha(64);
 
 /// Widget that displays repository error and sync progress.
 class RepoStatus extends StatelessWidget {
