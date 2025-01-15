@@ -326,14 +326,16 @@ class _MainPageState extends State<MainPage>
       return;
     }
 
-    int clickCount = exitClickCounter.registerClick();
+    if (!io.Platform.isAndroid) return;
 
+    int clickCount = exitClickCounter.registerClick();
     if (clickCount <= 1) {
       showSnackBar(S.current.messageExitOuiSync, context: context);
-    } else {
-      exitClickCounter.reset();
-      await MoveToBackground.moveTaskToBack();
+      return;
     }
+    
+    exitClickCounter.reset();
+    await MoveToBackground.moveTaskToBack();
   }
 
   _buildOuiSyncBar() => OuiSyncBar(
