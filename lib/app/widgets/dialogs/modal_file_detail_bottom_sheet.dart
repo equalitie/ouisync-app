@@ -225,18 +225,25 @@ class _FileDetailState extends State<FileDetail> {
                 isDanger: true,
                 dense: true,
                 onTap: () async {
-                  final fileName = repo_path.basename(widget.entry.path);
-                  final parent = repo_path.dirname(widget.entry.path);
+                  final deleteFile = await Dialogs.deleteEntry(
+                    context,
+                    repoCubit: widget.repoCubit,
+                    entry: widget.entry,
+                  );
+                  if (deleteFile == false) return;
 
-                  final deletedFileName = await Dialogs.deleteFileAlertDialog(
-                      widget.repoCubit,
-                      widget.entry.path,
-                      context,
-                      fileName,
-                      parent);
+                  final filePath = widget.entry.path;
+                  final deleteFileOk =
+                      await Dialogs.executeFutureWithLoadingDialog<bool>(
+                    null,
+                    widget.repoCubit.deleteFile(filePath),
+                  );
 
-                  if (deletedFileName != null && deletedFileName.isNotEmpty) {
-                    await Navigator.of(context).maybePop();
+                  if (deleteFileOk) {
+                    final fileName = repo_path.basename(filePath);
+
+                    Navigator.of(context).pop(deleteFileOk);
+                    showSnackBar(S.current.messageFileDeleted(fileName));
                   }
                 },
                 enabledValidation: () => widget.isActionAvailableValidator(

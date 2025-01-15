@@ -140,7 +140,7 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
               dense: true,
               onTap: () => _deleteFolderWithValidation(
                 widget.repoCubit,
-                widget.entry.path,
+                widget.entry,
               ),
               enabledValidation: () => widget.isActionAvailableValidator(
                 widget.repoCubit.state.accessMode,
@@ -166,45 +166,37 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
         ),
       );
 
-  Future<void> _deleteFolderWithValidation(RepoCubit repo, String path) async {
-    final isDirectory = await _isDirectory(repo, path);
-    if (!isDirectory) {
-      loggy.app('Entry $path is not a directory.');
-      return;
-    }
-
+  Future<void> _deleteFolderWithValidation(
+    RepoCubit repo,
+    DirectoryEntry entry,
+  ) async {
+    final path = entry.path;
     final isEmpty = await _isEmpty(repo, path, context);
-    final validationMessage = isEmpty
-        ? S.current.messageConfirmFolderDeletion
-        : S.current.messageConfirmNotEmptyFolderDeletion;
-
-    final deleteFolder = await Dialogs.deleteFolderAlertDialog(
-      widget.context,
-      widget.repoCubit,
-      widget.entry.path,
-      validationMessage,
+    final deleteFolder = await Dialogs.deleteEntry(
+      context,
+      repoCubit: repo,
+      entry: widget.entry,
+      isDirEmpty: isEmpty,
     );
-    if (deleteFolder != true) return;
+    if (deleteFolder == false) return;
 
     final recursive = !isEmpty;
-    final deleteFolderOk = await Dialogs.executeFutureWithLoadingDialog(
+    final deleteFolderOk = await Dialogs.executeFutureWithLoadingDialog<bool>(
       null,
       repo.deleteFolder(path, recursive),
     );
     if (deleteFolderOk) {
-      Navigator.of(context).pop(deleteFolder);
+      Navigator.of(context).pop(deleteFolderOk);
 
       showSnackBar(S.current.messageFolderDeleted(widget.entry.name));
     }
   }
 
-  Future<bool> _isDirectory(RepoCubit repo, String path) async {
-    final type = await repo.type(path);
-    return type == EntryType.directory;
-  }
-
   Future<bool> _isEmpty(
-      RepoCubit repo, String path, BuildContext context) async {
+    RepoCubit repo,
+    String path,
+    BuildContext context,
+  ) async {
     final Directory directory = await repo.openDirectory(path);
     if (directory.isNotEmpty) {
       loggy.app('Directory $path is not empty');

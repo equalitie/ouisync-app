@@ -5,9 +5,11 @@ import 'package:flutter/material.dart';
 
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart' show RepoCubit;
-import '../widgets/widgets.dart'
-    show ActionsDialog, NegativeButton, PositiveButton;
-import 'utils.dart' show AppThemeExtension, Fields, Strings, ThemeGetter;
+import '../models/models.dart' show FileSystemEntry, FileEntry;
+import '../utils/repo_path.dart' as repo_path;
+import '../widgets/widgets.dart' show NegativeButton, PositiveButton;
+import 'utils.dart'
+    show AppThemeExtension, Dimensions, Fields, Strings, ThemeGetter;
 
 abstract class Dialogs {
   static int _loadingInvocations = 0;
@@ -62,18 +64,22 @@ abstract class Dialogs {
   static void _popDialog(BuildContext context) =>
       Navigator.of(context, rootNavigator: true).pop();
 
-  static Future<bool?> alertDialogWithActions(
+  static Future<bool?> alertDialogWithActions<bool>(
     BuildContext context, {
     required String title,
     required List<Widget> body,
     required List<Widget> actions,
   }) =>
-      showDialog<bool?>(
-          context: context,
-          barrierDismissible: false,
-          builder: (BuildContext context) {
-            return _alertDialog(context, title, body, actions);
-          });
+      showDialog<bool>(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) => _alertDialog(
+          context,
+          title,
+          body,
+          actions,
+        ),
+      );
 
   static Future<bool?> simpleAlertDialog(
     BuildContext context, {
@@ -124,76 +130,72 @@ abstract class Dialogs {
         actions: actions,
       );
 
-  static Future<String?> deleteFileAlertDialog(RepoCubit repo, String path,
-      BuildContext context, String fileName, String parent) async {
+  static Future<bool> deleteEntry(
+    BuildContext context, {
+    required RepoCubit repoCubit,
+    required FileSystemEntry entry,
+    bool? isDirEmpty,
+  }) async {
     final bodyStyle = context.theme.appTextStyle.bodyMedium
         .copyWith(fontWeight: FontWeight.bold);
 
-    return showDialog<String?>(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) => ActionsDialog(
-            title: S.current.titleDeleteFile,
-            body: ListBody(children: <Widget>[
-              Text(fileName, style: bodyStyle),
-              Row(children: [
-                Text(Strings.atSymbol, style: bodyStyle),
-                Text(parent, style: bodyStyle)
-              ]),
-              const SizedBox(height: 20.0),
-              Text(S.current.messageConfirmFileDeletion),
-              Fields.dialogActions(buttons: [
-                NegativeButton(
-                    text: S.current.actionCancel,
-                    onPressed: () async =>
-                        await Navigator.of(context, rootNavigator: true)
-                            .maybePop()),
-                PositiveButton(
-                    text: S.current.actionDelete,
-                    isDangerButton: true,
-                    onPressed: () async {
-                      await repo.deleteFile(path);
-                      await Navigator.of(context).maybePop(fileName);
-                    })
-              ])
-            ])));
-  }
+    final validationMessage = entry is FileEntry
+        ? S.current.messageConfirmFileDeletion
+        : (isDirEmpty ?? false)
+            ? S.current.messageConfirmFolderDeletion
+            : S.current.messageConfirmNotEmptyFolderDeletion;
 
-  static Future<bool?> deleteFolderAlertDialog(BuildContext context,
-          RepoCubit repo, String path, String validationMessage) async =>
-      showDialog<bool?>(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) => ActionsDialog(
-          title: S.current.titleDeleteFolder,
-          body: ListBody(
-            children: <Widget>[
-              Text(
-                path,
-                style: context.theme.appTextStyle.bodyMedium
-                    .copyWith(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 20.0),
-              Text(validationMessage),
-              Fields.dialogActions(
-                buttons: [
-                  NegativeButton(
-                    text: S.current.actionCancel,
-                    onPressed: () async =>
-                        await Navigator.of(context, rootNavigator: true)
-                            .maybePop(false),
-                  ),
-                  PositiveButton(
-                    text: S.current.actionDelete,
-                    isDangerButton: true,
-                    onPressed: () async =>
-                        await Navigator.of(context, rootNavigator: true)
-                            .maybePop(true),
-                  ),
-                ],
-              ),
-            ],
-          ),
+    final fileParentPath = entry is FileEntry
+        ? repo_path.dirname(
+            entry.path,
+          )
+        : '';
+
+    final title = entry is FileEntry
+        ? S.current.titleDeleteFile
+        : S.current.titleDeleteFolder;
+
+    final body = entry is FileEntry
+        ? [
+            Text(entry.name, style: bodyStyle),
+            Text('${Strings.atSymbol} $fileParentPath', style: bodyStyle),
+            Dimensions.spacingVerticalDouble,
+            Text(validationMessage),
+          ]
+        : [
+            Text(entry.path, style: bodyStyle),
+            Dimensions.spacingVerticalDouble,
+            Text(validationMessage),
+          ];
+
+    final actions = [
+      Row(children: [
+        NegativeButton(
+          text: S.current.actionCancel,
+          onPressed: () async => await Navigator.of(
+            context,
+            rootNavigator: true,
+          ).maybePop(false),
         ),
-      );
+        PositiveButton(
+          text: S.current.actionDelete,
+          isDangerButton: true,
+          onPressed: () async => await Navigator.of(
+            context,
+            rootNavigator: true,
+          ).maybePop(true),
+        ),
+      ])
+    ];
+
+    final result = await alertDialogWithActions<bool>(
+          context,
+          title: title,
+          body: body,
+          actions: actions,
+        ) ??
+        false;
+
+    return result;
+  }
 }

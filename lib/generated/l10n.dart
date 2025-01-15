@@ -2090,6 +2090,16 @@ class S {
     );
   }
 
+  /// `File deleted successfully: {name}`
+  String messageFileDeleted(Object name) {
+    return Intl.message(
+      'File deleted successfully: $name',
+      name: 'messageFileDeleted',
+      desc: '',
+      args: [name],
+    );
+  }
+
   /// `Press back again to exit.`
   String get messageExitOuiSync {
     return Intl.message(

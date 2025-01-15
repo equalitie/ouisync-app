@@ -346,6 +346,8 @@
   "@messageEntryAlreadyExist": {},
   "messageFolderDeleted": "Folder deleted successfully: {name}",
   "@messageFolderDeleted": {},
+  "messageFileDeleted": "File deleted successfully: {name}",
+  "@messageFileDeleted": {},
   "messageExitOuiSync": "Press back again to exit.",
   "@messageExitOuiSync": {},
   "messageInitializing": "Initializing…",
