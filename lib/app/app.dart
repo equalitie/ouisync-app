@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:ouisync/errors.dart';
 import 'package:ouisync/native_channels.dart';
 import 'package:ouisync/ouisync.dart' show Session;
 import 'package:package_info_plus/package_info_plus.dart';
@@ -123,7 +122,8 @@ class _AppContainerState extends State<AppContainer> with AppLogger {
             settings: settings,
             sessionId: sessionId,
           )));
-    } on ProviderUnavailable catch (error) {
+    // FIXME: convert this into the network error thrown by session on reset
+    } on UnimplementedError catch (error) {
       // this error is considered transient, retry after a short delay
       loggy.warning('Unable to acquire session:', error);
       Timer(Duration(seconds: 1), () => unawaited(_restart()));
