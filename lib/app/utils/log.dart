@@ -20,10 +20,10 @@ class LogUtils extends LoggyPrinter {
   static Future<void> dump(IOSink sink) async {
     final main = File(await _current);
     final all = await main.parent
-      .list()
-      .map((entry) => entry.absolute.path)
-      .where((path) => path.startsWith(main.path))
-      .toList();
+        .list()
+        .map((entry) => entry.absolute.path)
+        .where((path) => path.startsWith(main.path))
+        .toList();
 
     // The logs files are named 'ouisync.log', 'ouisync.log.1', 'ouisync.log.2',
     // etc. so sorting them in reverse lexigographical order yields them from
@@ -32,8 +32,8 @@ class LogUtils extends LoggyPrinter {
 
     for (final path in all) {
       await sink.addStream(File(path)
-        .openRead()
-        .map((chunk) => utf8.encode(removeAnsi(utf8.decode(chunk)))));
+          .openRead()
+          .map((chunk) => utf8.encode(removeAnsi(utf8.decode(chunk)))));
     }
   }
 
@@ -48,17 +48,19 @@ class LogUtils extends LoggyPrinter {
     // TODO: the correct solution is to just not do this and otherwise defer to
     // native to supply the path to all the (ideally compressed) logs to share
     Stream<List<int>> tail() => file.openRead(offset).map((chunk) {
-      offset += chunk.length;
-      return chunk;
-    });
+          offset += chunk.length;
+          return chunk;
+        });
 
-    yield* tail();  // first yield the whole file as is right now then...
-    await for (final _ in FileWatcher(file.path).events) { // watch for changes
+    yield* tail(); // first yield the whole file as is right now then...
+    await for (final _ in FileWatcher(file.path).events) {
+      // watch for changes
       yield* tail(); // ...and yield them as they come
     }
   }
 
   static RandomAccessFile? _fd;
+
   static Future<void> init() async {
     // our logs can contain data from multiple invocations, so to differentiate
     // we write this header every time the app starts
@@ -69,17 +71,19 @@ class LogUtils extends LoggyPrinter {
  version: ${package.version} (build ${package.buildNumber})
  started: ${DateTime.now().toUtc().toIso8601String()}
 platform: ${Platform.operatingSystemVersion}
- baseDir: $baseDir
+ baseDir: ${baseDir.path}
 ${'-' * (48 + package.appName.length)}
 ''';
     // Sets up logging, either via a flutter channel (if implemented on the
     // native side) or directly to a file local to the baseDir exposed by native
     try {
       await Native.log(ouisync.LogLevel.info, header);
-      _fd = null;
     } on MissingPluginException {
-      _fd = await File(await _current).open(mode: FileMode.writeOnlyAppend);
-      await _writeLocked(_fd!, header);
+      final path = await _current;
+      final fd = await File(path).open(mode: FileMode.writeOnlyAppend);
+      await _writeLocked(fd, header);
+
+      _fd = fd;
     }
 
     // configure our loggy handler to use the newly configured custom printer
@@ -87,8 +91,10 @@ ${'-' * (48 + package.appName.length)}
 
     // replacing this is sufficient to log FlutterError.onError messages because
     // it internally defers to this function
-    debugPrint = (String? message, { int? wrapWidth }) {
-      if (message == null) { return; }
+    debugPrint = (String? message, {int? wrapWidth}) {
+      if (message == null) {
+        return;
+      }
       log(ouisync.LogLevel.error, '$message\n');
     };
 
@@ -108,35 +114,35 @@ ${'-' * (48 + package.appName.length)}
   // native channel (if implemented) or a file that we lock manually
   static void log(ouisync.LogLevel level, String message) {
     final fd = _fd;
+
     if (fd == null) {
       Native.log(level, message);
     } else {
-      final buffer = StringBuffer();
-      buffer.write(level.name);
-      buffer.write(' ');
-      buffer.write(message);
-
-      // TODO: queue ourselves to control the max length and force flush on exit
-      unawaited(_writeLocked(fd, buffer.toString()));
+      unawaited(
+        Future(
+          () => _writeLocked(
+            fd,
+            '${DateTime.now()} ${level.name.toUpperCase()} $message',
+          ),
+        ),
+      );
     }
   }
 
-  // lock and write logs to fd
-  static Future<void> _writeLocked(RandomAccessFile fd, String data) async {
-    await fd.lock();
-    await fd.writeString(data);
-    await fd.unlock();
-  }
-
   // LoggyPrinter implementation
-  @override void onLog(LogRecord record) {
+  @override
+  void onLog(LogRecord record) {
     // map loggy level to ouisync level (rust)
     final prio = record.level.priority;
-    final level = prio < LogLevel.debug.priority   ? ouisync.LogLevel.trace
-                : prio < LogLevel.info.priority    ? ouisync.LogLevel.debug
-                : prio < LogLevel.warning.priority ? ouisync.LogLevel.info
-                : prio < LogLevel.error.priority   ? ouisync.LogLevel.warn
-                :                                    ouisync.LogLevel.error;
+    final level = prio < LogLevel.debug.priority
+        ? ouisync.LogLevel.trace
+        : prio < LogLevel.info.priority
+            ? ouisync.LogLevel.debug
+            : prio < LogLevel.warning.priority
+                ? ouisync.LogLevel.info
+                : prio < LogLevel.error.priority
+                    ? ouisync.LogLevel.warn
+                    : ouisync.LogLevel.error;
 
     // prepend logger name to message
     final message = StringBuffer();
@@ -145,8 +151,12 @@ ${'-' * (48 + package.appName.length)}
     message.writeln(record.message);
 
     // if present, include error and stack trace in final message
-    if (record.error != null) { message.writeln(record.error); }
-    if (record.stackTrace != null) { message.writeln(record.stackTrace); }
+    if (record.error != null) {
+      message.writeln(record.error);
+    }
+    if (record.stackTrace != null) {
+      message.writeln(record.stackTrace);
+    }
 
     log(level, message.toString());
   }
@@ -154,7 +164,10 @@ ${'-' * (48 + package.appName.length)}
   /// Path to the active log file; older logs are named $path.1, $path.2, etc.
   static Future<String> get _current async {
     final appDir = await Native.getBaseDir();
-    return join(appDir.path, "logs", Constants.logFileName);
+    final logDir = Directory(join(appDir.path, 'logs'));
+    await logDir.create(recursive: true);
+
+    return join(logDir.path, Constants.logFileName);
   }
 }
 
@@ -167,3 +180,9 @@ mixin AppLogger implements LoggyType {
 
 /// Returns logger tagged with the given name. Useful for logging from static methods.
 Loggy appLogger(String name) => Loggy(name);
+
+Future<void> _writeLocked(RandomAccessFile fd, String data) async {
+  await fd.lock();
+  await fd.writeString(data);
+  await fd.unlock();
+}
