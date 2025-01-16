@@ -84,6 +84,10 @@ Future<void> _dumpStateMonitor(
 ) async {
   final node = await monitor.load();
 
+  if (node == null) {
+    return;
+  }
+
   final pad = '  ' * depth;
 
   for (MapEntry e in node.values.entries) {

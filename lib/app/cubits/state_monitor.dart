@@ -7,8 +7,7 @@ import 'utils.dart';
 class StateMonitorCubit extends Cubit<StateMonitorNode?> with CubitActions {
   final StateMonitor _monitor;
 
-  StateMonitorCubit(this._monitor)
-      : super(null) {
+  StateMonitorCubit(this._monitor) : super(null) {
     unawaited(_init());
   }
 
@@ -33,8 +32,7 @@ class StateMonitorIntCubit extends Cubit<int?> with CubitActions {
   final StateMonitor _monitor;
   final String _name;
 
-  StateMonitorIntCubit(this._monitor, this._name)
-      : super(null) {
+  StateMonitorIntCubit(this._monitor, this._name) : super(null) {
     unawaited(_init());
   }
 
@@ -48,6 +46,6 @@ class StateMonitorIntCubit extends Cubit<int?> with CubitActions {
 
   Future<void> _load() async {
     final node = await _monitor.load();
-    emitUnlessClosed(node.parseIntValue(_name));
+    emitUnlessClosed(node?.parseIntValue(_name));
   }
 }

@@ -22,11 +22,12 @@ class Native {
   /// [call] is the object sent from the native platform with the function name ([call.method])
   /// and any arguments included ([call.arguments])
   static Future<dynamic> _methodHandler(MethodCall call) async {
-    throw PlatformException(code: '0', message: 'No such method: "${call.method}"');
+    throw PlatformException(
+        code: '0', message: 'No such method: "${call.method}"');
   }
 
   static Future<void> log(LogLevel level, String message) =>
-    _channel.invokeMethod('log', [level, message]);
+      _channel.invokeMethod('log', [level.encode(), message]);
 
   /// In Android, it retrieves the legacy path to the Download directory
   static Future<String> getDownloadPathForAndroid() async {
@@ -46,7 +47,7 @@ class Native {
   /// Similar to getApplicationSupportDirectory() but allows customization.
   /// The `removable` parameter controls whether removable locations such as SD
   /// cards may be returned.
-  static Future<io.Directory> getBaseDir({bool removable=false}) async {
+  static Future<io.Directory> getBaseDir({bool removable = false}) async {
     if (io.Platform.isAndroid) {
       // on Android we support SD cards where permitted (e.g. for repositories)
       final extStorage = removable ? await getExternalStorageDirectory() : null;

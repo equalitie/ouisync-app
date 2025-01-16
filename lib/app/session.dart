@@ -12,16 +12,20 @@ const _defaultPeerPort = 20209;
 
 final _loggy = appLogger("Session");
 
-Future<Session> createSession(
-    {required PackageInfo packageInfo,
-    PlatformWindowManager? windowManager,
-    void Function()? onConnectionReset}
-) async {
+Future<Session> createSession({
+  required PackageInfo packageInfo,
+  PlatformWindowManager? windowManager,
+  void Function()? onConnectionReset,
+}) async {
+  final configPath = join(
+    await Native.getBaseDir().then((dir) => dir.path),
+    Constants.configDirName,
+  );
   final session = await Session.create(
-    configPath: join((await Native.getBaseDir()).path, Constants.configDirName),
+    configPath: configPath,
     // On darwin, the server is started by a background process
     startServer: !Platform.isMacOS && !Platform.isIOS,
-    logger: LogUtils.log
+    logger: LogUtils.log,
   );
 
   try {
@@ -43,11 +47,6 @@ Future<Session> createSession(
   }
 
   return session;
-}
-
-Future<Directory> get defaultStoreDir async {
-  final baseDir = await Native.getBaseDir(removable: true);
-  return Directory(join(baseDir.path, Constants.folderRepositoriesName));
 }
 
 Future<void> addCacheServerAsPeer(Session session, String host) async {

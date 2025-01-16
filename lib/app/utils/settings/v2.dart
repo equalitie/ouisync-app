@@ -1,8 +1,6 @@
 import 'dart:convert';
-import 'dart:io' as io;
 import 'dart:ui' show Locale;
 
-import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../models/models.dart';
@@ -268,12 +266,6 @@ class Settings with AppLogger {
     }
 
     await _storeRoot();
-  }
-
-  //------------------------------------------------------------------
-  Future<io.Directory> getDefaultRepositoriesDir() async {
-    final baseDir = await Native.getBaseDir(removable: true);
-    return io.Directory(join(baseDir.path, Constants.folderRepositoriesName));
   }
 
   //------------------------------------------------------------------

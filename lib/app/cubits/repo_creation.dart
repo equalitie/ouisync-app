@@ -19,6 +19,7 @@ import '../models/models.dart'
         OpenRepoEntry,
         RepoLocation,
         SetLocalSecret;
+import '../utils/settings/settings.dart';
 import '../utils/utils.dart' show AppLogger, Dialogs, Strings;
 import 'cubits.dart' show CubitActions, ReposCubit;
 
@@ -290,7 +291,7 @@ class RepoCreationCubit extends Cubit<RepoCreationState>
     }
 
     final location = RepoLocation.fromParts(
-      dir: await reposCubit.settings.getDefaultRepositoriesDir(),
+      dir: await defaultStoreDir,
       name: name,
     );
 

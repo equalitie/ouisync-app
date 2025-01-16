@@ -290,7 +290,7 @@ class Settings with AppLogger {
               join((await getApplicationDocumentsDirectory()).path, 'Ouisync')),
         ];
 
-        final newDir = await getDefaultRepositoriesDir();
+        final newDir = await defaultStoreDir;
 
         for (final oldDir in oldDirs) {
           if (!(await oldDir.exists())) {
@@ -429,14 +429,9 @@ class Settings with AppLogger {
   }
 
   //------------------------------------------------------------------
-  Future<io.Directory> getDefaultRepositoriesDir() async {
-    final baseDir = await Native.getBaseDir(removable: true);
-    return io.Directory(join(baseDir.path, Constants.folderRepositoriesName));
-  }
 
-  //------------------------------------------------------------------
-
-  void debugSettings() { // debugPrint is flutter's "default" print function
+  void debugSettings() {
+    // debugPrint is flutter's "default" print function
     loggy.debug("============== Settings ===============");
     for (final kv in _root.repos.entries) {
       loggy.debug("=== ${kv.key}");

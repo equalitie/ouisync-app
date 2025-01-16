@@ -371,9 +371,12 @@ class Settings with AppLogger {
     // We used to have all the repositories in a single place in the internal
     // memory. The disadvantage was that the user had no access to them and
     // thus couldn't back them up or put them on an SD card.
-    final dir = Directory(p.join(
+    final dir = Directory(
+      p.join(
         (await path_provider.getApplicationSupportDirectory()).path,
-        Constants.folderRepositoriesName));
+        Constants.storeDirName,
+      ),
+    );
 
     if (!await dir.exists()) {
       return false;
