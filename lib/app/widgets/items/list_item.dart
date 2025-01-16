@@ -382,6 +382,9 @@ class TrailAction extends StatelessWidget {
                     Widget? child,
                   ) =>
                       Checkbox.adaptive(
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(6.0)),
+                    ),
                     visualDensity: VisualDensity.adaptivePlatformDensity,
                     tristate: true,
                     value: value,
