@@ -78,7 +78,7 @@ class SettingsRepoEntry {
   RepoLocation info;
 
   String get name => info.name;
-  Directory get dir => info.dir;
+  String get dir => info.dir;
 
   SettingsRepoEntry(this.databaseId, this.info);
 }
@@ -135,7 +135,7 @@ class Settings with AppLogger {
     if (repoPaths != null) {
       for (var path in repoPaths) {
         final repo = RepoLocation.fromDbPath(osPathConverter.convertPath(path));
-        repos[repo.name] = repo.dir.path;
+        repos[repo.name] = repo.dir;
       }
     }
 
@@ -244,10 +244,10 @@ class Settings with AppLogger {
   RepoLocation? repoLocation(String repoName) {
     final dir = _repos[repoName];
     if (dir == null) return null;
-    return RepoLocation.fromParts(
-      dir: Directory(dir),
+    return RepoLocation(
+      dir: dir,
       name: repoName,
-      extension: RepoLocation.legacyExtension,
+      ext: RepoLocation.legacyExtension,
     );
   }
 
@@ -270,7 +270,7 @@ class Settings with AppLogger {
       return null;
     }
 
-    _repos[info.name] = info.dir.path;
+    _repos[info.name] = info.dir;
     await _setDatabaseId(info.name, databaseId);
     await _storeRepos(_prefs, _repos);
     await setAuthenticationMode(info.name, authenticationMode);
@@ -389,7 +389,7 @@ class Settings with AppLogger {
 
       assert(p.isAbsolute(file.path));
       final info = RepoLocation.fromDbPath(file.path);
-      repos[info.name] = info.dir.path;
+      repos[info.name] = info.dir;
     }
 
     await prefs.setBool(_legacyReposIncluded, true);

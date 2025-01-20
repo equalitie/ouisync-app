@@ -31,6 +31,11 @@ Future<Session> createSession({
   try {
     windowManager?.onClose(session.close);
 
+    if (await session.storeDir == null) {
+      final dir = await defaultStoreDir;
+      await session.setStoreDir(dir.path);
+    }
+
     await session.initNetwork(
       defaultBindAddrs: ['quic/0.0.0.0:0', 'quic/[::]:0'],
       defaultPortForwardingEnabled: true,

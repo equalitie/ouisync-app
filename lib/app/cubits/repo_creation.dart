@@ -19,7 +19,6 @@ import '../models/models.dart'
         OpenRepoEntry,
         RepoLocation,
         SetLocalSecret;
-import '../utils/settings/settings.dart';
 import '../utils/utils.dart' show AppLogger, Dialogs, Strings;
 import 'cubits.dart' show CubitActions, ReposCubit;
 
@@ -290,10 +289,9 @@ class RepoCreationCubit extends Cubit<RepoCreationState>
       return;
     }
 
-    final location = RepoLocation.fromParts(
-      dir: await defaultStoreDir,
-      name: name,
-    );
+    // `storeDir` should be not-null at this point.
+    final storeDir = await reposCubit.session.storeDir;
+    final location = RepoLocation(dir: storeDir!, name: name);
 
     final exists = await File(location.path).exists();
 

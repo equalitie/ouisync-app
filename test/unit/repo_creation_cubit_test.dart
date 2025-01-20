@@ -31,6 +31,8 @@ void main() {
     await appDir.create(recursive: true);
 
     session = await Session.create(configPath: p.join(appDir.path, 'config'));
+    await session.setStoreDir(p.join(appDir.path, 'store'));
+
     final settings = await Settings.init(MasterKey.random());
 
     reposCubit = ReposCubit(
@@ -85,8 +87,8 @@ void main() {
 
     final name = 'my repo';
     await reposCubit.createRepository(
-      location: RepoLocation.fromParts(
-        dir: await reposCubit.settings.getDefaultRepositoriesDir(),
+      location: RepoLocation(
+        dir: (await session.storeDir)!,
         name: name,
       ),
       setLocalSecret: LocalSecretKeyAndSalt.random(),

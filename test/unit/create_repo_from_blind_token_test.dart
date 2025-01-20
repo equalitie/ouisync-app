@@ -16,7 +16,7 @@ void main() {
       'https://ouisync.net/r#AwAgTmm8jPQuimEWzqVcM17M2-3GXIULZQ1tbQRVsBgj9PY?name=uno';
 
   setUp(() async {
-    logInit();
+    initLog();
 
     deps = await TestDependencies.create();
     repoCreationCubit = RepoCreationCubit(reposCubit: deps.reposCubit);

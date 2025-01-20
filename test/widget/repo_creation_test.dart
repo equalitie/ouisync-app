@@ -77,8 +77,8 @@ void main() {
         final repoCreationObserver = StateObserver.install<RepoCreationState>();
 
         await deps.reposCubit.createRepository(
-          location: RepoLocation.fromParts(
-            dir: await deps.reposCubit.settings.getDefaultRepositoriesDir(),
+          location: RepoLocation(
+            dir: (await deps.session.storeDir)!,
             name: name,
           ),
           setLocalSecret: LocalSecretKeyAndSalt.random(),

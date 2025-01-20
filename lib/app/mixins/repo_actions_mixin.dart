@@ -96,7 +96,9 @@ mixin RepositoryActionsMixin on LoggyType {
       if (!await LocalAuth.authenticateIfPossible(
         context,
         S.current.messageAccessingSecureStorage,
-      )) { return; }
+      )) {
+        return;
+      }
 
       // TODO: Tell the user when the decryption fails.
       final secret = (await encryptedSecret.decrypt(settings.masterKey))!;
@@ -126,7 +128,7 @@ mixin RepositoryActionsMixin on LoggyType {
     required RepoLocation repoLocation,
     required bool windows,
   }) async {
-    final uri = Uri.directory(repoLocation.dir.path, windows: windows);
+    final uri = Uri.directory(repoLocation.dir, windows: windows);
     if (PlatformValues.isDesktopDevice) {
       await launcher.launchUrl(uri);
       return;
@@ -140,7 +142,7 @@ mixin RepositoryActionsMixin on LoggyType {
     RepoLocation repoLocation,
   ) async {
     final dbFile = p.basename(repoLocation.path);
-    final segments = p.split(repoLocation.dir.path);
+    final segments = p.split(repoLocation.dir);
 
     final breadcrumbs = BreadCrumb.builder(
       itemCount: segments.length,

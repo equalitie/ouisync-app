@@ -105,8 +105,8 @@ void main() {
 
         final repoName = 'my repo';
         final repoEntry = await deps.reposCubit.createRepository(
-          location: RepoLocation.fromParts(
-            dir: await deps.reposCubit.settings.getDefaultRepositoriesDir(),
+          location: RepoLocation(
+            dir: (await deps.session.storeDir)!,
             name: repoName,
           ),
           setLocalSecret: LocalSecretKeyAndSalt.random(),
@@ -159,8 +159,8 @@ void main() {
 
         final repoName = 'my repo';
         final repoEntry = await deps.reposCubit.createRepository(
-          location: RepoLocation.fromParts(
-            dir: await deps.reposCubit.settings.getDefaultRepositoriesDir(),
+          location: RepoLocation(
+            dir: (await deps.session.storeDir)!,
             name: repoName,
           ),
           setLocalSecret: LocalSecretKeyAndSalt.random(),

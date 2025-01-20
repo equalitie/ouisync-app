@@ -447,7 +447,7 @@ class Settings with AppLogger {
         acceptedEqualitieValues: _root.acceptedEqualitieValues,
         showOnboarding: _root.showOnboarding,
         highestSeenProtocolNumber: _root.highestSeenProtocolNumber,
-        defaultRepo: _root.defaultRepo?.clone(),
+        defaultRepo: _root.defaultRepo,
         repos: Map.from(_root.repos),
         defaultRepositoriesDirVersion: _root.defaultRepositoriesDirVersion,
         sharedPreferences: _prefs,

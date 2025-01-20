@@ -26,8 +26,8 @@ void main() {
   Future<RepoLocation> createExportedRepo([
     String name = 'exported-repo',
   ]) async {
-    final location = RepoLocation.fromParts(
-      dir: await getTemporaryDirectory(),
+    final location = RepoLocation(
+      dir: (await getTemporaryDirectory()).path,
       name: name,
     );
     final repo = await Repository.create(
@@ -78,9 +78,10 @@ void main() {
     (tester) => tester.runAsync(
       () async {
         // Create existing repo
-        final existingLocation = RepoLocation.fromParts(
-            dir: await deps.settings.getDefaultRepositoriesDir(),
-            name: 'some repo');
+        final existingLocation = RepoLocation(
+          dir: (await deps.session.storeDir)!,
+          name: 'some repo',
+        );
         await deps.reposCubit.createRepository(
           location: existingLocation,
           setLocalSecret: LocalSecretKeyAndSalt.random(),

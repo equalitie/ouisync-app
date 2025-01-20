@@ -1,5 +1,3 @@
-import 'dart:io' show Directory;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
@@ -27,19 +25,19 @@ void main() {
   setUp(() async {
     deps = await TestDependencies.create();
 
-    final reposDir = Directory((await deps.session.storeDir)!);
+    final reposDir = (await deps.session.storeDir)!;
 
-    final originRepoLocation = RepoLocation.fromParts(
+    final originRepoLocation = RepoLocation(
       dir: reposDir,
       name: originRepoName,
     );
 
-    final lockedRepoLocation = RepoLocation.fromParts(
+    final lockedRepoLocation = RepoLocation(
       dir: reposDir,
       name: lockedRepoName,
     );
 
-    final readRepoLocation = RepoLocation.fromParts(
+    final readRepoLocation = RepoLocation(
       dir: reposDir,
       name: readRepoName,
     );

@@ -145,7 +145,7 @@ class AboutSection extends SettingsSection with AppLogger {
         onTap: () => unawaited(launchUrl(Uri.parse(Constants.issueTrackerUrl))),
       ),
       AppVersionTile(
-        session: reposCubit.session,
+        session: session,
         upgradeExists: upgradeExists,
         leading: Icon(Icons.info_rounded),
         title: Text(S.current.labelAppVersion, style: bodyStyle),
@@ -275,12 +275,14 @@ class AboutSection extends SettingsSection with AppLogger {
   }
 
   Widget _getRuntimeIdForOS() => FutureBuilder(
-      future: reposCubit.session.runtimeId,
+      future: session.runtimeId,
       builder: (context, snapshot) {
         final runtimeId = snapshot.data ?? '';
-        final runtimeIdWidget = Text(runtimeId,
-            overflow: TextOverflow.ellipsis,
-            style: context.theme.appTextStyle.bodySmall);
+        final runtimeIdWidget = Text(
+          runtimeId,
+          overflow: TextOverflow.ellipsis,
+          style: context.theme.appTextStyle.bodySmall,
+        );
 
         if (io.Platform.isIOS) {
           return Expanded(
