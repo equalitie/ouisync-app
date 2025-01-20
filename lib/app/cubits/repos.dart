@@ -71,8 +71,6 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
     unawaited(_init());
   }
 
-  Settings get settings => _settings;
-
   Future<void> _init() async {
     emitUnlessClosed(state.copyWith(isLoading: true));
 

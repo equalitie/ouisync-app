@@ -33,7 +33,6 @@ import '../../utils/utils.dart'
         dumpAll,
         Fields,
         formatSize,
-        Settings,
         ThemeGetter;
 import '../widgets.dart' show InfoBuble, NegativeButton, PositiveButton;
 import 'app_version_tile.dart';
@@ -94,14 +93,12 @@ class AboutSection extends SettingsSection with AppLogger {
           ),
         ),
       NavigationTile(
-          title: Text(S.current.titleApplicationLanguage, style: bodyStyle),
-          leading: Icon(Icons.language_rounded),
-          value: Text(currentLanguage.toString(),
-              style: context.theme.appTextStyle.bodySmall),
-          onTap: () async => await _navigateToLanguagePicker(
-                context,
-                reposCubit.settings,
-              )),
+        title: Text(S.current.titleApplicationLanguage, style: bodyStyle),
+        leading: Icon(Icons.language_rounded),
+        value: Text(currentLanguage.toString(),
+            style: context.theme.appTextStyle.bodySmall),
+        onTap: () => _navigateToLanguagePicker(context),
+      ),
       NavigationTile(
           title: Text(S.current.titleFAQShort, style: bodyStyle),
           leading: Icon(Icons.question_answer_rounded),
@@ -173,10 +170,7 @@ class AboutSection extends SettingsSection with AppLogger {
   @override
   bool containsErrorNotification() => upgradeExists.state;
 
-  Future<void> _navigateToLanguagePicker(
-    BuildContext context,
-    Settings settings,
-  ) async {
+  Future<void> _navigateToLanguagePicker(BuildContext context) async {
     await Navigator.of(context).push<Locale>(
       MaterialPageRoute(
         builder: (_) => LanguagePicker(
