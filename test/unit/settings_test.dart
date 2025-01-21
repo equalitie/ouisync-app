@@ -12,8 +12,6 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 // Run with `flutter test test/settings_test.dart`.
 void main() {
-  initLog();
-
   test('settings migration v0 to v1', () async {
     SharedPreferences.setMockInitialValues({});
     FlutterSecureStorage.setMockInitialValues({});

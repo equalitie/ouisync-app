@@ -15,7 +15,7 @@ import 'package:ouisync_app/app/utils/platform/platform_window_manager.dart';
 import 'package:ouisync_app/app/utils/utils.dart';
 import 'package:ouisync_app/generated/l10n.dart';
 import 'package:ouisync/native_channels.dart';
-import 'package:ouisync/ouisync.dart' show Session;
+import 'package:ouisync/ouisync.dart' show Session, initLog;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -45,6 +45,11 @@ Future<void> testEnv(FutureOr<void> Function() callback) async {
       return stack;
     };
   }
+
+  initLog(
+    callback: (level, message) => debugPrint(
+        '${DateTime.now()} ${level.name.toUpperCase().padRight(5)} $message'),
+  );
 
   late Directory tempDir;
   late BlocObserver origBlocObserver;
@@ -356,7 +361,8 @@ extension WidgetTesterExtension on WidgetTester {
         '/usr/lib/ouisync/data/flutter_assets/packages/golden_toolkit/fonts/Roboto-Regular.ttf');
 
     if (!(await fontFile.exists())) {
-      _loggy.error("Failed to load fonts, the file ${fontFile.path} does not exist");
+      _loggy.error(
+          "Failed to load fonts, the file ${fontFile.path} does not exist");
       return;
     }
 

@@ -129,7 +129,7 @@ void main() {
 
     // Create 2 folders, 1 nested, in originRepo
     {
-      await Directory.create(originRepo, '/folder1');
+      await Directory.create(originRepo, 'folder1');
       await Directory.create(originRepo, 'folder1/folder2');
     }
 
