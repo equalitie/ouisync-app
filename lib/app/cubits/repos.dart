@@ -183,7 +183,6 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
         nativeChannels: _nativeChannels,
         repo: repo,
         session: _session,
-        location: RepoLocation.fromDbPath(repo.path),
         navigation: navigation,
         entrySelection: entriesSelection,
         bottomSheet: bottomSheet,

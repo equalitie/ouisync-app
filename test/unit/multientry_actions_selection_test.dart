@@ -8,7 +8,6 @@ import 'package:ouisync/ouisync.dart';
 import 'package:ouisync_app/app/utils/repo_path.dart' as p;
 import 'package:ouisync_app/app/cubits/cubits.dart'
     show EntryBottomSheetCubit, EntrySelectionCubit, NavigationCubit, RepoCubit;
-import 'package:ouisync_app/app/models/models.dart' show RepoLocation;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../utils.dart';
@@ -35,7 +34,6 @@ void main() {
       readSecret: null,
       writeSecret: null,
     );
-    final location = RepoLocation.fromDbPath(repo.path);
 
     FlutterSecureStorage.setMockInitialValues({});
     SharedPreferences.setMockInitialValues({});
@@ -47,7 +45,6 @@ void main() {
       nativeChannels: deps.nativeChannels,
       repo: repo,
       session: deps.session,
-      location: location,
       navigation: navigationCubit,
       entrySelection: entrySelectionCubit,
       bottomSheet: bottomSheetCubit,
@@ -83,7 +80,6 @@ void main() {
   });
 
   tearDown(() async {
-    await repo.close();
     await deps.dispose();
   });
 

@@ -128,8 +128,6 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     required NativeChannels nativeChannels,
     required Repository repo,
     required Session session,
-    // FIXME: unnecessary. Can be obtained with `repo.path`
-    required RepoLocation location,
     required NavigationCubit navigation,
     required EntrySelectionCubit entrySelection,
     required EntryBottomSheetCubit bottomSheet,
@@ -138,7 +136,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     final authMode = await repo.getAuthMode();
 
     var state = RepoState(
-      location: location,
+      location: RepoLocation.fromDbPath(repo.path),
       authMode: authMode,
     );
 

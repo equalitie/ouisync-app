@@ -4,7 +4,6 @@ import 'dart:io' as io;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ouisync_app/app/cubits/cubits.dart';
-import 'package:ouisync_app/app/models/repo_location.dart';
 import 'package:ouisync_app/app/utils/cache_servers.dart';
 import 'package:ouisync/native_channels.dart';
 import 'package:ouisync/ouisync.dart';
@@ -12,46 +11,38 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../utils.dart';
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  late Session session;
+  late TestDependencies deps;
   late Repository originRepo;
   late Repository otherRepo;
 
   late RepoCubit originRepoCubit;
   late RepoCubit otherRepoCubit;
 
-  late NativeChannels nativeChannels;
   late NavigationCubit navigationCubit;
   late EntrySelectionCubit entrySelectionCubit;
   late EntryBottomSheetCubit bottomSheetCubit;
 
   setUp(() async {
-    final dir = await io.Directory.systemTemp.createTemp();
-    final locationOrigin =
-        RepoLocation.fromDbPath(p.join(dir.path, "store.db"));
-    final locationOther =
-        RepoLocation.fromDbPath(p.join(dir.path, "store2.db"));
-
-    session = await Session.create(configPath: dir.path);
+    deps = await TestDependencies.create();
 
     originRepo = await Repository.create(
-      session,
-      path: locationOrigin.path,
+      deps.session,
+      path: 'origin',
       readSecret: null,
       writeSecret: null,
     );
 
     otherRepo = await Repository.create(
-      session,
-      path: locationOther.path,
+      deps.session,
+      path: 'other',
       readSecret: null,
       writeSecret: null,
     );
-
-    PathProviderPlatform.instance = FakePathProviderPlatform(dir);
-    nativeChannels = NativeChannels();
 
     FlutterSecureStorage.setMockInitialValues({});
     SharedPreferences.setMockInitialValues({});
@@ -60,32 +51,28 @@ void main() {
     bottomSheetCubit = EntryBottomSheetCubit();
 
     originRepoCubit = await RepoCubit.create(
-      nativeChannels: nativeChannels,
+      nativeChannels: deps.nativeChannels,
       repo: originRepo,
-      location: locationOrigin,
       navigation: navigationCubit,
       entrySelection: entrySelectionCubit,
       bottomSheet: bottomSheetCubit,
       cacheServers: CacheServers.disabled,
-      session: session,
+      session: deps.session,
     );
 
     otherRepoCubit = await RepoCubit.create(
-      nativeChannels: nativeChannels,
+      nativeChannels: deps.nativeChannels,
       repo: otherRepo,
-      location: locationOther,
       navigation: navigationCubit,
       entrySelection: entrySelectionCubit,
       bottomSheet: bottomSheetCubit,
       cacheServers: CacheServers.disabled,
-      session: session,
+      session: deps.session,
     );
   });
 
   tearDown(() async {
-    await otherRepo.close();
-    await originRepo.close();
-    await session.close();
+    await deps.dispose();
   });
 
   test('Move file to other repo', () async {
@@ -179,12 +166,11 @@ void main() {
     // Move folder worth one file to other repo
     {
       final result = await originRepoCubit.moveEntryToRepo(
-        destinationRepoCubit: otherRepoCubit,
-        type: EntryType.directory,
-        source: '/folder1',
-        destination: '/folder1',
-        recursive: true
-      );
+          destinationRepoCubit: otherRepoCubit,
+          type: EntryType.directory,
+          source: '/folder1',
+          destination: '/folder1',
+          recursive: true);
 
       expect(result, equals(true));
 

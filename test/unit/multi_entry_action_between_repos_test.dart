@@ -11,7 +11,6 @@ import 'package:ouisync_app/app/utils/repo_path.dart' as repo_path;
 import 'package:path/path.dart' as p;
 import 'package:ouisync_app/app/cubits/cubits.dart'
     show EntryBottomSheetCubit, EntrySelectionCubit, NavigationCubit, RepoCubit;
-import 'package:ouisync_app/app/models/models.dart' show RepoLocation;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../utils.dart';
@@ -93,19 +92,17 @@ void main() {
 
     originRepo = await Repository.create(
       deps.session,
-      path: 'repo1',
+      path: 'origin',
       readSecret: null,
       writeSecret: null,
     );
-    final originLocation = RepoLocation.fromDbPath(originRepo.path);
 
     destinationRepo = await Repository.create(
       deps.session,
-      path: 'repo2',
+      path: 'destination',
       readSecret: null,
       writeSecret: null,
     );
-    final destinationLocation = RepoLocation.fromDbPath(destinationRepo.path);
 
     FlutterSecureStorage.setMockInitialValues({});
     SharedPreferences.setMockInitialValues({});
@@ -114,7 +111,6 @@ void main() {
       nativeChannels: deps.nativeChannels,
       repo: originRepo,
       session: deps.session,
-      location: originLocation,
       navigation: NavigationCubit(),
       entrySelection: EntrySelectionCubit(),
       bottomSheet: EntryBottomSheetCubit(),
@@ -125,7 +121,6 @@ void main() {
       nativeChannels: deps.nativeChannels,
       repo: destinationRepo,
       session: deps.session,
-      location: destinationLocation,
       navigation: NavigationCubit(),
       entrySelection: EntrySelectionCubit(),
       bottomSheet: EntryBottomSheetCubit(),
