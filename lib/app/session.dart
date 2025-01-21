@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:ouisync/ouisync.dart' show Session;
+import 'package:ouisync/ouisync.dart' show Session, initLog;
 import 'package:ouisync_app/app/utils/utils.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart';
@@ -10,7 +10,8 @@ import 'utils/platform/platform_window_manager.dart';
 
 const _defaultPeerPort = 20209;
 
-final _loggy = appLogger("Session");
+final _sessionLoggy = appLogger('Session');
+final _serviceLoggy = appLogger('');
 
 Future<Session> createSession({
   required PackageInfo packageInfo,
@@ -21,11 +22,15 @@ Future<Session> createSession({
     await Native.getBaseDir().then((dir) => dir.path),
     Constants.configDirName,
   );
+
+  initLog(
+    callback: (level, message) => _serviceLoggy.log(level.toLoggy(), message),
+  );
+
   final session = await Session.create(
     configPath: configPath,
     // On darwin, the server is started by a background process
     startServer: !Platform.isMacOS && !Platform.isIOS,
-    logger: LogUtils.log,
   );
 
   try {
@@ -63,9 +68,9 @@ Future<void> addCacheServerAsPeer(Session session, String host) async {
       ]);
     }
 
-    _loggy.debug('cache server $host added');
+    _sessionLoggy.debug('cache server $host added');
   } catch (e, st) {
-    _loggy.error('failed to add cache server $host:', e, st);
+    _sessionLoggy.error('failed to add cache server $host:', e, st);
   }
 }
 

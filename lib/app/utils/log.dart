@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 import 'package:loggy/loggy.dart';
 import 'package:ouisync/ouisync.dart' as ouisync;
 import 'package:package_info_plus/package_info_plus.dart';
@@ -15,7 +15,7 @@ import 'constants.dart';
 import 'native.dart';
 
 // a singleton class that deals with logs (currently without rotation)
-class LogUtils extends LoggyPrinter {
+class LogUtils {
   /// Dump all logs from the log folder to the given sink
   static Future<void> dump(IOSink sink) async {
     final main = File(await _current);
@@ -59,8 +59,6 @@ class LogUtils extends LoggyPrinter {
     }
   }
 
-  static RandomAccessFile? _fd;
-
   static Future<void> init() async {
     // our logs can contain data from multiple invocations, so to differentiate
     // we write this header every time the app starts
@@ -68,106 +66,47 @@ class LogUtils extends LoggyPrinter {
     final baseDir = await Native.getBaseDir();
     final header = '''
 -------------------- ${package.appName} Start --------------------
- version: ${package.version} (build ${package.buildNumber})
- started: ${DateTime.now().toUtc().toIso8601String()}
+version:  ${package.version} (build ${package.buildNumber})
+started:  ${_formatTimestamp(DateTime.now())}
 platform: ${Platform.operatingSystemVersion}
- baseDir: ${baseDir.path}
-${'-' * (48 + package.appName.length)}
-''';
-    // Sets up logging, either via a flutter channel (if implemented on the
-    // native side) or directly to a file local to the baseDir exposed by native
-    try {
-      await Native.log(ouisync.LogLevel.info, header);
-    } on MissingPluginException {
-      final path = await _current;
-      final fd = await File(path).open(mode: FileMode.writeOnlyAppend);
-      await _writeLocked(fd, header);
+baseDir:  ${baseDir.path}
+${'-' * (48 + package.appName.length)}''';
 
-      _fd = fd;
+    LoggyPrinter defaultPrinter;
+
+    // Log to platform's default logging facility
+    if (Platform.isAndroid || Platform.isIOS || Platform.isMacOS) {
+      defaultPrinter = _NativePrinter();
+    } else {
+      defaultPrinter = _ConsolePrinter();
     }
 
-    // configure our loggy handler to use the newly configured custom printer
-    Loggy.initLoggy(logPrinter: LogUtils());
+    // Log also to file
+    final filePrinter = _FilePrinter(await _current);
 
-    // replacing this is sufficient to log FlutterError.onError messages because
-    // it internally defers to this function
-    debugPrint = (String? message, {int? wrapWidth}) {
-      if (message == null) {
-        return;
-      }
-      log(ouisync.LogLevel.error, '$message\n');
+    // configure our loggy handler to use the newly configured custom printer
+    Loggy.initLoggy(logPrinter: _FanoutPrinter(defaultPrinter, filePrinter));
+
+    final logger = appLogger('');
+
+    FlutterError.onError = (details) {
+      logger.error(
+        'Unhandled flutter exception: ',
+        details.exception,
+        details.stack,
+      );
+
+      FlutterError.presentError(details);
     };
 
     // NOTE: if sentry is used, it will override these methods but still call
     // them after processing the events, so they are not lost
     PlatformDispatcher.instance.onError = (exception, stack) {
-      final message = StringBuffer();
-      message.writeln('Unhandled platform exception: ');
-      message.writeln(exception);
-      message.writeln(stack);
-      log(ouisync.LogLevel.error, message.toString());
+      logger.error('Unhandled platform exception: ', exception, stack);
       return true;
     };
-  }
 
-  // write an atomic log entry to the default log target; this is either the
-  // native channel (if implemented) or a file that we lock manually
-  static void log(ouisync.LogLevel level, String message) {
-    final fd = _fd;
-
-    if (fd == null) {
-      Native.log(level, message);
-    } else {
-      unawaited(
-        Future(
-          () => _writeLocked(
-            fd,
-            '${DateTime.now()} ${level.name.toUpperCase()} $message',
-          ),
-        ),
-      );
-    }
-  }
-
-  // LoggyPrinter implementation
-  @override
-  void onLog(LogRecord record) {
-    // map loggy level to ouisync level (rust)
-    final prio = record.level.priority;
-    final level = prio < LogLevel.debug.priority
-        ? ouisync.LogLevel.trace
-        : prio < LogLevel.info.priority
-            ? ouisync.LogLevel.debug
-            : prio < LogLevel.warning.priority
-                ? ouisync.LogLevel.info
-                : prio < LogLevel.error.priority
-                    ? ouisync.LogLevel.warn
-                    : ouisync.LogLevel.error;
-
-    // prepend logger name to message
-    final message = StringBuffer();
-    message.write(record.loggerName);
-    message.write(' ');
-    message.writeln(record.message);
-
-    // if present, include error and stack trace in final message
-    if (record.error != null) {
-      message.writeln(record.error);
-    }
-    if (record.stackTrace != null) {
-      message.writeln(record.stackTrace);
-    }
-
-    log(level, message.toString());
-  }
-
-  /// Path to the active log file; older logs are named $path.1, $path.2, etc.
-  static Future<String> get _current async {
-    final appDir = await Native.getBaseDir();
-    final logDir = Directory(join(appDir.path, 'logs'));
-    await logDir.create(recursive: true);
-
-    return join(logDir.path, Constants.logFileName);
+    logger.info(header);
   }
 }
 
@@ -181,8 +120,113 @@ mixin AppLogger implements LoggyType {
 /// Returns logger tagged with the given name. Useful for logging from static methods.
 Loggy appLogger(String name) => Loggy(name);
 
-Future<void> _writeLocked(RandomAccessFile fd, String data) async {
-  await fd.lock();
-  await fd.writeString(data);
-  await fd.unlock();
+/// Path to the active log file; older logs are named $path.1, $path.2, etc.
+Future<String> get _current async {
+  final appDir = await Native.getBaseDir();
+  final logDir = Directory(join(appDir.path, 'logs'));
+  await logDir.create(recursive: true);
+
+  return join(logDir.path, Constants.logFileName);
+}
+
+class _FilePrinter extends LoggyPrinter {
+  final IOSink _sink;
+
+  _FilePrinter(String path)
+      : _sink = File(path).openWrite(mode: FileMode.append);
+
+  @override
+  void onLog(LogRecord record) {
+    _sink.writeln(_formatRecord(record));
+  }
+}
+
+class _NativePrinter extends LoggyPrinter {
+  @override
+  void onLog(LogRecord record) {
+    final level = record.level.toOuisync();
+    final message = _formatMessage(record);
+
+    Native.log(level, message);
+  }
+}
+
+class _ConsolePrinter extends LoggyPrinter {
+  @override
+  void onLog(LogRecord record) {
+    stdout.writeln(_formatRecord(record));
+  }
+}
+
+// Printer that forwards the log records to two other printers.
+class _FanoutPrinter extends LoggyPrinter {
+  final LoggyPrinter a;
+  final LoggyPrinter b;
+
+  _FanoutPrinter(this.a, this.b);
+
+  @override
+  void onLog(LogRecord record) {
+    a.onLog(record);
+    b.onLog(record);
+  }
+}
+
+final _levelPad =
+    ouisync.LogLevel.values.map((level) => level.name.length).reduce(max);
+
+String _formatRecord(LogRecord record) {
+  final level = record.level.toOuisync();
+  final message = _formatMessage(record);
+  return '${_formatTimestamp(DateTime.now())} ${level.name.toUpperCase().padRight(_levelPad)} $message';
+}
+
+String _formatMessage(LogRecord record) {
+  // prepend logger name to message
+  final buffer = StringBuffer();
+
+  if (record.loggerName.isNotEmpty) {
+    buffer.write(record.loggerName);
+    buffer.write(' ');
+  }
+
+  buffer.write(record.message);
+
+  // if present, include error and stack trace in final message
+  if (record.error != null) {
+    buffer.write(record.error);
+  }
+
+  if (record.stackTrace != null && record.stackTrace != StackTrace.empty) {
+    buffer.writeln();
+    buffer.write(record.stackTrace);
+  }
+
+  return buffer.toString();
+}
+
+String _formatTimestamp(DateTime timestamp) =>
+    timestamp.toUtc().toIso8601String();
+
+const trace = LogLevel('Trace', 1);
+
+extension LoggyLogLevelExtension on LogLevel {
+  ouisync.LogLevel toOuisync() => switch (this) {
+        LogLevel.error => ouisync.LogLevel.error,
+        LogLevel.warning => ouisync.LogLevel.warn,
+        LogLevel.info => ouisync.LogLevel.info,
+        LogLevel.debug => ouisync.LogLevel.debug,
+        trace => ouisync.LogLevel.trace,
+        _ => ouisync.LogLevel.trace,
+      };
+}
+
+extension OuisyncLogLevelExtension on ouisync.LogLevel {
+  LogLevel toLoggy() => switch (this) {
+        ouisync.LogLevel.error => LogLevel.error,
+        ouisync.LogLevel.warn => LogLevel.warning,
+        ouisync.LogLevel.info => LogLevel.info,
+        ouisync.LogLevel.debug => LogLevel.debug,
+        ouisync.LogLevel.trace => trace,
+      };
 }

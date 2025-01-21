@@ -7,6 +7,7 @@ plugins {
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id "dev.flutter.flutter-gradle-plugin"
     id "com.starter.easylauncher" version "6.4.0"
+    id "com.diffplug.spotless" version "7.0.2"
 }
 
 def localProperties = new Properties()
@@ -145,6 +146,14 @@ easylauncher {
                 customRibbon(position: "topRight", ribbonColor: "#FF0D47A1")
             ]
         }
+    }
+}
+
+spotless {
+    kotlin {
+        target("**/*.kt")
+        ktfmt()
+        ktlint()
     }
 }
 
