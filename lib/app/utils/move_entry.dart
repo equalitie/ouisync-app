@@ -34,7 +34,7 @@ class MoveEntry with EntryOps, AppLogger {
     final dstRepo = (toRepoCubit ?? _repoCubit);
     final dstFolderPath = repo_path.join(_dstPath, fromPathSegment);
 
-    final exist = await dstRepo.entryExists(_dstPath);
+    final exist = await dstRepo.entryExists(dstFolderPath);
     if (!exist) {
       await _pickModeAndMoveEntry(
         toRepoCubit,

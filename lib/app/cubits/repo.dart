@@ -128,6 +128,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     required NativeChannels nativeChannels,
     required Repository repo,
     required Session session,
+    // FIXME: unnecessary. Can be obtained with `repo.path`
     required RepoLocation location,
     required NavigationCubit navigation,
     required EntrySelectionCubit entrySelection,
