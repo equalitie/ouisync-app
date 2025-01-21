@@ -110,6 +110,22 @@
   "titleDokanInstallation":"Dokan installation",
   "titleDokanMissing":"Dokan is missing",
   "titleDokanInstallationFound":"Dokan installation found",
+  "titleCopyEntries":"Copy",
+  "@titleCopyEntries":{
+    "description": "Title for the confirmation dialog when copying entries"
+  },
+  "titleMoveEntries":"Move",
+  "@titleMoveEntries":{
+    "description": "Title for the confirmation dialog when moving entries"
+  },
+  "titleSaveEntriesToDevice":"Save to device",
+  "@titleSaveEntriesToDevice":{
+    "description": "Title for the confirmation dialog when saving entries to device"	
+  },
+  "titleDeleteEntries":"Delete",
+  "@titleDeleteEntries":{
+    "description": "Title for the confirmation dialog when deleting entries"	
+  },
   "typeFolder": "Folder",
   "@typeFolder": {},
   "typeFile": "File",
@@ -553,6 +569,46 @@
   "messageDokanDifferentMayorP2":"is out of date. Please update it to the latest version.", 
   "messageDokanOlderVersionP2":"is out of date.\n\nPlease uninstall the existing version of Dokan, reboot the system and run Ouisync again.",
   "messageDokanInstallationFailed":"The Dokan installation failed.",
+  "messageCopyEntries":"Copy selection here:\n\n\t\t{totals}",
+  "@messageCopyEntries": {
+    "description": "Message displayed in a confirmation dialog when copying entries",
+    "placeholders": {
+        "totals": {
+          "type": "String",
+          "example": "2 files, 1 folder"
+        }
+    }
+  },
+  "messageMoveEntries":"Move selection here:\n\n\t\t{totals}",
+  "@messageMoveEntries": {
+    "description": "Message displayed in a confirmation dialog when moving entries",
+    "placeholders": {
+        "totals": {
+          "type": "String",
+          "example": "2 files, 1 folder"
+        }
+    }
+  },
+  "messageSaveEntriesToDevice":"Save selection:\n\n\t\t{totals}",
+  "@messageSaveEntriesToDevice": {
+    "description": "Message displayed in a confirmation dialog when saving entries to the device",
+    "placeholders": {
+        "totals": {
+          "type": "String",
+          "example": "2 files, 1 folder"
+        }
+    }
+  },
+  "messageDeleteEntries":"Delete selection:\n\n\t\t{totals}",
+  "@messageDeleteEntries": {
+    "description": "Message displayed in a confirmation dialog when deleting entries",
+    "placeholders": {
+        "totals": {
+          "type": "String",
+          "example": "2 files, 1 folder"
+        }
+    }
+  },
   "popupMenuItemCopyPassword":"Copy password",
   "popupMenuItemChangePassword":"Change password",
   "repoResetTitle": "Reset repository access",
@@ -633,6 +689,8 @@
   "@iconAccessMode": {},
   "iconShareTokenWithPeer": "Share this with your peer",
   "@iconShareTokenWithPeer": {},
+  "iconCopy":"Copy",
+  "@iconCopy": {},
   "actionCreateRepository": "Create Repository",
   "@actionCreateRepository": {},
   "actionAddRepository": "Import a Repository",
@@ -728,6 +786,9 @@
   "actionInstallDokan":"Install Dokan",
   "actionUpdateDokan":"Update Dokan",
   "actionLocateRepo":"Locate repository",
+  "actionSelect":"Select",
+  "actionDownload":"Download",
+  "actionCopy":"Copy",
   "titleApplicationLanguage": "App language",
   "languageOfTheDevice": "device's language",
   "languageIsNotAvailable": "not available",
@@ -750,5 +811,10 @@
   "accessModeBlindLabel":"blind",
   "accessModeReadLabel":"read",
   "accessModeWriteLabel":"write",
-  "labelSynced":"Synced"
+  "labelSynced":"Synced",
+  "messageRepositoryDeleted":"Repository {name} deleted",
+  "messageRepositoryRenamed":"Repository renamed as {name}",
+  "messageFileRenamed":"File renamed as {name}",
+  "messageErrorCreatingFolder":"Error creating folder {name}",
+  "messageFolderRenamed":"Folder renamed as {name}"
 }

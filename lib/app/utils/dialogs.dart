@@ -62,8 +62,8 @@ abstract class Dialogs {
   static void _popDialog(BuildContext context) =>
       Navigator.of(context, rootNavigator: true).pop();
 
-  static Future<bool?> alertDialogWithActions({
-    required BuildContext context,
+  static Future<bool?> alertDialogWithActions(
+    BuildContext context, {
     required String title,
     required List<Widget> body,
     required List<Widget> actions,
@@ -75,8 +75,8 @@ abstract class Dialogs {
             return _alertDialog(context, title, body, actions);
           });
 
-  static Future<bool?> simpleAlertDialog({
-    required BuildContext context,
+  static Future<bool?> simpleAlertDialog(
+    BuildContext context, {
     required String title,
     required String message,
     List<Widget>? actions,
@@ -103,27 +103,26 @@ abstract class Dialogs {
         },
       );
 
-  static actionDialog(
-          BuildContext context, String dialogTitle, Widget? actionBody) =>
-      showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (BuildContext context) {
-            return ActionsDialog(
-              title: dialogTitle,
-              body: actionBody,
-            );
-          });
-
-  static AlertDialog _alertDialog(BuildContext context, String title,
-          List<Widget> body, List<Widget> actions) =>
+  static AlertDialog _alertDialog(
+    BuildContext context,
+    String title,
+    List<Widget> body,
+    List<Widget> actions,
+  ) =>
       AlertDialog(
-          title: Flex(direction: Axis.horizontal, children: [
-            Fields.constrainedText(title,
-                style: context.theme.appTextStyle.titleMedium, maxLines: 2)
-          ]),
-          content: SingleChildScrollView(child: ListBody(children: body)),
-          actions: actions);
+        title: Flex(
+          direction: Axis.horizontal,
+          children: [
+            Fields.constrainedText(
+              title,
+              style: context.theme.appTextStyle.titleMedium,
+              maxLines: 2,
+            )
+          ],
+        ),
+        content: SingleChildScrollView(child: ListBody(children: body)),
+        actions: actions,
+      );
 
   static Future<String?> deleteFileAlertDialog(RepoCubit repo, String path,
       BuildContext context, String fileName, String parent) async {

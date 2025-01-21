@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:ouisync/ouisync.dart';
 
 import '../../generated/l10n.dart';
-import '../cubits/cubits.dart' show SortBy;
-import '../models/auth_mode.dart';
+import '../cubits/cubits.dart' show EntrySelectionActions, SortBy;
+import '../models/models.dart' show AuthMode, AuthModeBlindOrManual;
 import 'utils.dart';
 
 extension AnyExtension<T> on T {
@@ -29,6 +29,10 @@ extension AnyExtension<T> on T {
 extension StringExtension on String {
   String capitalize() {
     return '${this[0].toUpperCase()}${substring(1)}';
+  }
+
+  String removePrefix(String rootPath) {
+    return replaceFirst(rootPath, '').trim();
   }
 }
 
@@ -156,6 +160,21 @@ extension SortByLocalizedExtension on SortBy {
         return S.current.sortBySizeLabel;
       case SortBy.type:
         return S.current.sortByTypeLabel;
+    }
+  }
+}
+
+extension EntrySelectionActionsExtension on EntrySelectionActions {
+  String get localized {
+    switch (this) {
+      case EntrySelectionActions.download:
+        return S.current.actionDownload;
+      case EntrySelectionActions.copy:
+        return S.current.actionCopy;
+      case EntrySelectionActions.move:
+        return S.current.actionMove;
+      case EntrySelectionActions.delete:
+        return S.current.actionDelete;
     }
   }
 }

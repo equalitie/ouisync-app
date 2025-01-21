@@ -6,8 +6,8 @@ import '../widgets/widgets.dart' show FileAction;
 import 'repo_path.dart' as repo_path;
 import 'utils.dart' show AppLogger, EntryOps;
 
-class MoveEntry with EntryOps, AppLogger {
-  MoveEntry(
+class CopyEntry with EntryOps, AppLogger {
+  CopyEntry(
     BuildContext context, {
     required RepoCubit repoCubit,
     required String srcPath,
@@ -25,24 +25,24 @@ class MoveEntry with EntryOps, AppLogger {
   final String _dstPath;
   final EntryType _type;
 
-  Future<void> move({
+  Future<void> copy({
     required RepoCubit? toRepoCubit,
     required String fromPathSegment,
-    required bool navigateToDestination,
     required bool recursive,
+    required bool navigateToDestination,
   }) async {
     final dstRepo = (toRepoCubit ?? _repoCubit);
     final dstFolderPath = repo_path.join(_dstPath, fromPathSegment);
 
-    final exist = await dstRepo.entryExists(_dstPath);
+    final exist = await dstRepo.entryExists(dstFolderPath);
     if (!exist) {
-      await _pickModeAndMoveEntry(
+      await _pickModeAndCopyEntry(
         toRepoCubit,
         _srcPath,
         dstFolderPath,
         _type,
-        navigateToDestination,
         recursive,
+        navigateToDestination,
       );
       return;
     }
@@ -57,7 +57,7 @@ class MoveEntry with EntryOps, AppLogger {
     if (fileAction == null) return;
 
     if (fileAction == FileAction.replace) {
-      await _moveAndReplace(
+      await _copyAndReplace(
         toRepoCubit,
         _srcPath,
         dstFolderPath,
@@ -66,22 +66,22 @@ class MoveEntry with EntryOps, AppLogger {
     }
 
     if (fileAction == FileAction.keep) {
-      await _renameAndMove(
+      await _renameAndCopy(
         toRepoCubit,
         _srcPath,
         dstFolderPath,
         _type,
-        navigateToDestination,
         recursive,
+        navigateToDestination,
       );
     }
   }
 
-  Future<void> _moveAndReplace(
+  Future<void> _copyAndReplace(
     RepoCubit? toRepoCubit,
     String srcPath,
     String dstPath,
-    bool navigateToDestination, //NEEDED?
+    bool navigateToDestination, //NEDED?
   ) async {
     try {
       final file = await _repoCubit.openFile(srcPath);
@@ -99,53 +99,43 @@ class MoveEntry with EntryOps, AppLogger {
     }
   }
 
-  Future<void> _renameAndMove(
+  Future<void> _renameAndCopy(
     RepoCubit? toRepoCubit,
     String srcPath,
     String dstPath,
     EntryType type,
-    bool navigateToDestination,
     bool recursive,
+    bool navigateToDestination,
   ) async {
     final newPath = await disambiguateEntryName(
       repoCubit: (toRepoCubit ?? _repoCubit),
       path: dstPath,
     );
 
-    await _pickModeAndMoveEntry(
+    await _pickModeAndCopyEntry(
       toRepoCubit,
       srcPath,
       newPath,
       type,
-      navigateToDestination,
       recursive,
+      navigateToDestination,
     );
   }
 
-  Future<void> _pickModeAndMoveEntry(
+  Future<void> _pickModeAndCopyEntry(
     RepoCubit? toRepoCubit,
     String srcPath,
     String dstPath,
     EntryType type,
-    bool navigateToDestination,
     bool recursive,
-  ) async {
-    if (toRepoCubit == null) {
-      await _repoCubit.moveEntry(
+    bool navigateToDestination,
+  ) async =>
+      _repoCubit.copyEntry(
         source: srcPath,
         destination: dstPath,
+        type: type,
+        destinationRepoCubit: toRepoCubit,
+        recursive: recursive,
+        navigateToDestination: navigateToDestination,
       );
-
-      return;
-    }
-
-    await _repoCubit.moveEntryToRepo(
-      destinationRepoCubit: toRepoCubit,
-      type: type,
-      source: srcPath,
-      destination: dstPath,
-      recursive: recursive,
-      navigateToDestination: navigateToDestination,
-    );
-  }
 }

@@ -820,6 +820,46 @@ class S {
     );
   }
 
+  /// `Copy`
+  String get titleCopyEntries {
+    return Intl.message(
+      'Copy',
+      name: 'titleCopyEntries',
+      desc: 'Title for the confirmation dialog when copying entries',
+      args: [],
+    );
+  }
+
+  /// `Move`
+  String get titleMoveEntries {
+    return Intl.message(
+      'Move',
+      name: 'titleMoveEntries',
+      desc: 'Title for the confirmation dialog when moving entries',
+      args: [],
+    );
+  }
+
+  /// `Save to device`
+  String get titleSaveEntriesToDevice {
+    return Intl.message(
+      'Save to device',
+      name: 'titleSaveEntriesToDevice',
+      desc: 'Title for the confirmation dialog when saving entries to device',
+      args: [],
+    );
+  }
+
+  /// `Delete`
+  String get titleDeleteEntries {
+    return Intl.message(
+      'Delete',
+      name: 'titleDeleteEntries',
+      desc: 'Title for the confirmation dialog when deleting entries',
+      args: [],
+    );
+  }
+
   /// `Folder`
   String get typeFolder {
     return Intl.message(
@@ -4020,6 +4060,47 @@ class S {
     );
   }
 
+  /// `Copy selection here:\n\n\t\t{totals}`
+  String messageCopyEntries(String totals) {
+    return Intl.message(
+      'Copy selection here:\n\n\t\t$totals',
+      name: 'messageCopyEntries',
+      desc: 'Message displayed in a confirmation dialog when copying entries',
+      args: [totals],
+    );
+  }
+
+  /// `Move selection here:\n\n\t\t{totals}`
+  String messageMoveEntries(String totals) {
+    return Intl.message(
+      'Move selection here:\n\n\t\t$totals',
+      name: 'messageMoveEntries',
+      desc: 'Message displayed in a confirmation dialog when moving entries',
+      args: [totals],
+    );
+  }
+
+  /// `Save selection:\n\n\t\t{totals}`
+  String messageSaveEntriesToDevice(String totals) {
+    return Intl.message(
+      'Save selection:\n\n\t\t$totals',
+      name: 'messageSaveEntriesToDevice',
+      desc:
+          'Message displayed in a confirmation dialog when saving entries to the device',
+      args: [totals],
+    );
+  }
+
+  /// `Delete selection:\n\n\t\t{totals}`
+  String messageDeleteEntries(String totals) {
+    return Intl.message(
+      'Delete selection:\n\n\t\t$totals',
+      name: 'messageDeleteEntries',
+      desc: 'Message displayed in a confirmation dialog when deleting entries',
+      args: [totals],
+    );
+  }
+
   /// `Copy password`
   String get popupMenuItemCopyPassword {
     return Intl.message(
@@ -4630,6 +4711,16 @@ class S {
     );
   }
 
+  /// `Copy`
+  String get iconCopy {
+    return Intl.message(
+      'Copy',
+      name: 'iconCopy',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Create Repository`
   String get actionCreateRepository {
     return Intl.message(
@@ -5230,6 +5321,36 @@ class S {
     );
   }
 
+  /// `Select`
+  String get actionSelect {
+    return Intl.message(
+      'Select',
+      name: 'actionSelect',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Download`
+  String get actionDownload {
+    return Intl.message(
+      'Download',
+      name: 'actionDownload',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Copy`
+  String get actionCopy {
+    return Intl.message(
+      'Copy',
+      name: 'actionCopy',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `App language`
   String get titleApplicationLanguage {
     return Intl.message(
@@ -5357,6 +5478,56 @@ class S {
       name: 'labelSynced',
       desc: '',
       args: [],
+    );
+  }
+
+  /// `Repository {name} deleted`
+  String messageRepositoryDeleted(Object name) {
+    return Intl.message(
+      'Repository $name deleted',
+      name: 'messageRepositoryDeleted',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Repository renamed as {name}`
+  String messageRepositoryRenamed(Object name) {
+    return Intl.message(
+      'Repository renamed as $name',
+      name: 'messageRepositoryRenamed',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `File renamed as {name}`
+  String messageFileRenamed(Object name) {
+    return Intl.message(
+      'File renamed as $name',
+      name: 'messageFileRenamed',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Error creating folder {name}`
+  String messageErrorCreatingFolder(Object name) {
+    return Intl.message(
+      'Error creating folder $name',
+      name: 'messageErrorCreatingFolder',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Folder renamed as {name}`
+  String messageFolderRenamed(Object name) {
+    return Intl.message(
+      'Folder renamed as $name',
+      name: 'messageFolderRenamed',
+      desc: '',
+      args: [name],
     );
   }
 }

@@ -12,3 +12,4 @@ String basenameWithoutExtension(String path) =>
 String dirname(String path) => _context.dirname(path);
 String extension(String path) => _context.extension(path);
 String join(String a, String b) => _context.join(a, b);
+String separator() => _context.separator;

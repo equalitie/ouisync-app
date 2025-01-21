@@ -159,7 +159,7 @@ class _State extends State<RepoSecurityPage> {
     }
 
     Dialogs.alertDialogWithActions(
-      context: context,
+      context,
       title: S.current.titleUnsavedChanges,
       body: [Text(S.current.messageUnsavedChanges)],
       actions: [
@@ -198,7 +198,7 @@ class _State extends State<RepoSecurityPage> {
     final message = S.current.messageConfirmIrreversibleChange;
 
     final saveChanges = await Dialogs.alertDialogWithActions(
-      context: context,
+      context,
       title: S.current.titleSaveChanges,
       body: [Text(message, style: context.theme.appTextStyle.bodyMedium)],
       actions: [

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ouisync/ouisync.dart';
+import 'package:ouisync/ouisync.dart' show AccessMode, EntryType;
 import 'package:path/path.dart' as p;
 
 import '../../../generated/l10n.dart';
@@ -58,7 +58,24 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
               iconData: Icons.edit_outlined,
               title: S.current.iconRename,
               dense: true,
-              onTap: () async => _showRenameDialog(widget.entry),
+              onTap: () async {
+                final entry = widget.entry;
+                final newName = await _getNewFolderName(entry);
+
+                if (newName.isEmpty) return;
+
+                // The new name provided by the user.
+                final parent = p.dirname(entry.path);
+                final newEntryPath = p.join(parent, newName);
+
+                await widget.repoCubit.moveEntry(
+                  source: entry.path,
+                  destination: newEntryPath,
+                );
+
+                await Navigator.of(context).maybePop();
+                showSnackBar(S.current.messageFolderRenamed(newName));
+              },
               enabledValidation: () => widget.isActionAvailableValidator(
                 widget.repoCubit.state.accessMode,
                 EntryAction.rename,
@@ -86,6 +103,30 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
               enabledValidation: () => widget.isActionAvailableValidator(
                 widget.repoCubit.state.accessMode,
                 EntryAction.move,
+              ),
+              disabledMessage: S.current.messageActionNotAvailable,
+              disabledMessageDuration:
+                  Constants.notAvailableActionMessageDuration,
+            ),
+            EntryActionItem(
+              iconData: Icons.copy_outlined,
+              title: S.current.iconCopy,
+              dense: true,
+              onTap: () async {
+                await Navigator.of(context).maybePop();
+
+                final entryPath = widget.entry.path;
+                final entryType = EntryType.directory;
+
+                widget.repoCubit.showMoveEntryBottomSheet(
+                  sheetType: BottomSheetType.copy,
+                  entryPath: entryPath,
+                  entryType: entryType,
+                );
+              },
+              enabledValidation: () => widget.isActionAvailableValidator(
+                widget.repoCubit.state.accessMode,
+                EntryAction.copy,
               ),
               disabledMessage: S.current.messageActionNotAvailable,
               disabledMessageDuration:
@@ -175,40 +216,30 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
     return true;
   }
 
-  void _showRenameDialog(DirectoryEntry entry) async => await showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          final parent = p.dirname(entry.path);
-          final oldName = p.basename(entry.path);
-
-          return ActionsDialog(
-            title: S.current.messageRenameFolder,
-            body: RenameEntry(
-              parentContext: context,
-              repoCubit: widget.repoCubit,
-              parent: parent,
-              oldName: oldName,
-              originalExtension: '',
-              isFile: false,
-              hint: S.current.messageFolderName,
-            ),
-          );
-        },
-      ).then(
-        (newName) async {
-          if (newName.isNotEmpty) {
-            // The new name provided by the user.
+  Future<String> _getNewFolderName(DirectoryEntry entry) async {
+    final newName = await showDialog<String>(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) {
             final parent = p.dirname(entry.path);
-            final newEntryPath = p.join(parent, newName);
+            final oldName = p.basename(entry.path);
 
-            await widget.repoCubit.moveEntry(
-              source: entry.path,
-              destination: newEntryPath,
+            return ActionsDialog(
+              title: S.current.messageRenameFolder,
+              body: RenameEntry(
+                parentContext: context,
+                repoCubit: widget.repoCubit,
+                parent: parent,
+                oldName: oldName,
+                originalExtension: '',
+                isFile: false,
+                hint: S.current.messageFolderName,
+              ),
             );
+          },
+        ) ??
+        '';
 
-            await Navigator.of(context).maybePop();
-          }
-        },
-      );
+    return newName;
+  }
 }

@@ -118,7 +118,7 @@ class _Error extends StatelessWidget {
     String message,
   ) =>
       Dialogs.simpleAlertDialog(
-        context: context,
+        context,
         title: 'Failed to mount the repository',
         message: 'Error: $message',
       );

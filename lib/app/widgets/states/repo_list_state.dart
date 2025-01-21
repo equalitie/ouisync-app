@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../mixins/mixins.dart';
 import '../../models/models.dart';
@@ -71,14 +72,29 @@ class RepoListState extends StatelessWidget
 
             if (repoCubit == null) {
               return MissingRepoListItem(
-                location: repoEntry.location,
-                mainAction: () {},
-                verticalDotsAction: () => deleteRepository(
-                  parentContext,
-                  reposCubit: reposCubit,
-                  repoLocation: repoEntry.location,
-                ),
-              );
+                  location: repoEntry.location,
+                  mainAction: () {},
+                  verticalDotsAction: () async {
+                    final currentRepo = reposCubit.state.currentEntry;
+                    if (currentRepo == null) return;
+
+                    final repoName = currentRepo.name;
+                    final location = currentRepo.location;
+                    final deleteRepoFuture =
+                        reposCubit.deleteRepository(location);
+
+                    final deleted = await deleteRepository(
+                      context,
+                      repoName: repoName,
+                      deleteRepoFuture: deleteRepoFuture,
+                    );
+
+                    if (deleted == true) {
+                      Navigator.of(context).pop();
+                      showSnackBar(
+                          S.current.messageRepositoryDeleted(repoName));
+                    }
+                  });
             }
 
             return RepoListItem(

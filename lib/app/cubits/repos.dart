@@ -52,6 +52,7 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
   final EntryBottomSheetCubit bottomSheet;
   final CacheServers cacheServers;
   final NavigationCubit navigation;
+  final EntrySelectionCubit entriesSelection;
   final PasswordHasher passwordHasher;
 
   ReposCubit({
@@ -61,11 +62,13 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
     required this.cacheServers,
     EntryBottomSheetCubit? bottomSheet,
     NavigationCubit? navigation,
+    EntrySelectionCubit? entriesSelection,
   })  : _session = session,
         _nativeChannels = nativeChannels,
         _settings = settings,
         bottomSheet = bottomSheet ?? EntryBottomSheetCubit(),
         navigation = navigation ?? NavigationCubit(),
+        entriesSelection = entriesSelection ?? EntrySelectionCubit(),
         passwordHasher = PasswordHasher(session),
         super(ReposState()) {
     unawaited(_init());
@@ -178,27 +181,14 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
 
   Future<RepoCubit> _createRepoCubit(oui.Repository repo) => RepoCubit.create(
         nativeChannels: _nativeChannels,
-        navigation: navigation,
-        bottomSheet: bottomSheet,
         repo: repo,
         session: _session,
         location: RepoLocation.fromDbPath(repo.path),
+        navigation: navigation,
+        entrySelection: entriesSelection,
+        bottomSheet: bottomSheet,
         cacheServers: cacheServers,
       );
-
-  Future<String?> _forget(RepoLocation location) async {
-    if (state.current == location) {
-      await setCurrent(null);
-    }
-
-    final repo = state.repos[location];
-    await repo?.close();
-    final infoHash = repo?.infoHash;
-
-    emitUnlessClosed(state.copyWith(repos: state.repos.withRemoved(location)));
-
-    return infoHash;
-  }
 
   @override
   Future<void> close() async {
@@ -348,24 +338,5 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
     ));
 
     await entry.cubit?.delete();
-  }
-
-  Future<void> ejectRepository(RepoLocation location) async {
-    final entry = state.repos[location];
-    if (entry == null) {
-      return;
-    }
-
-    emitUnlessClosed(state.copyWith(
-      repos: state.repos.withRemoved(location),
-      current: state.current == location ? None() : null,
-    ));
-
-    await _forget(location);
-
-    final databaseId = _settings.findRepoByLocation(location);
-    if (databaseId != null) {
-      await _settings.forgetRepo(databaseId);
-    }
   }
 }

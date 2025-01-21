@@ -143,7 +143,7 @@ class DirectoryActions extends StatelessWidget with AppLogger {
 
   Future<void> _showNotAvailableAlertDialog(BuildContext context) =>
       Dialogs.simpleAlertDialog(
-        context: context,
+        context,
         title: S.current.titleMovingEntry,
         message: S.current.messageMovingEntry,
       );
@@ -152,17 +152,16 @@ class DirectoryActions extends StatelessWidget with AppLogger {
     final parent = cubit.state.currentFolder.path;
 
     final newFolderPath = await showDialog<String>(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) => ActionsDialog(
-        title: S.current.titleCreateFolder,
-        body: FolderCreation(cubit: cubit, parent: parent),
-      ),
-    );
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) => ActionsDialog(
+            title: S.current.titleCreateFolder,
+            body: FolderCreation(cubit: cubit, parent: parent),
+          ),
+        ) ??
+        '';
 
-    if (newFolderPath == null || newFolderPath.isEmpty) {
-      return;
-    }
+    if (newFolderPath.isEmpty) return;
 
     final result = await Dialogs.executeWithLoadingDialog(
       null,
@@ -170,7 +169,7 @@ class DirectoryActions extends StatelessWidget with AppLogger {
     );
 
     if (!result) {
-      showSnackBar('Error creating folder $newFolderPath');
+      showSnackBar(S.current.messageErrorCreatingFolder(newFolderPath));
       return;
     }
 

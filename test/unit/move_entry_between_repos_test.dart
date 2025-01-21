@@ -24,6 +24,7 @@ void main() {
 
   late NativeChannels nativeChannels;
   late NavigationCubit navigationCubit;
+  late EntrySelectionCubit entrySelectionCubit;
   late EntryBottomSheetCubit bottomSheetCubit;
 
   setUp(() async {
@@ -55,6 +56,7 @@ void main() {
     FlutterSecureStorage.setMockInitialValues({});
     SharedPreferences.setMockInitialValues({});
     navigationCubit = NavigationCubit();
+    entrySelectionCubit = EntrySelectionCubit();
     bottomSheetCubit = EntryBottomSheetCubit();
 
     originRepoCubit = await RepoCubit.create(
@@ -62,6 +64,7 @@ void main() {
       repo: originRepo,
       location: locationOrigin,
       navigation: navigationCubit,
+      entrySelection: entrySelectionCubit,
       bottomSheet: bottomSheetCubit,
       cacheServers: CacheServers.disabled,
       session: session,
@@ -72,6 +75,7 @@ void main() {
       repo: otherRepo,
       location: locationOther,
       navigation: navigationCubit,
+      entrySelection: entrySelectionCubit,
       bottomSheet: bottomSheetCubit,
       cacheServers: CacheServers.disabled,
       session: session,
@@ -105,6 +109,7 @@ void main() {
         type: EntryType.file,
         source: '/file1.txt',
         destination: 'file1.txt',
+        recursive: true,
       );
 
       expect(result, equals(true));
@@ -139,6 +144,7 @@ void main() {
         type: EntryType.directory,
         source: '/folder1',
         destination: '/folder1',
+        recursive: true,
       );
 
       expect(result, equals(true));
@@ -177,6 +183,7 @@ void main() {
         type: EntryType.directory,
         source: '/folder1',
         destination: '/folder1',
+        recursive: true
       );
 
       expect(result, equals(true));

@@ -6,40 +6,75 @@ import 'package:path/path.dart' as p;
 import 'package:url_launcher/url_launcher.dart' as launcher;
 
 import '../../generated/l10n.dart';
-import '../cubits/cubits.dart';
-import '../models/models.dart';
-import '../pages/pages.dart';
-import '../utils/platform/platform.dart';
-import '../utils/utils.dart';
-import '../widgets/widgets.dart';
+import '../cubits/cubits.dart' show RepoCubit;
+import '../models/models.dart'
+    show
+        Access,
+        AccessModeLocalizedExtension,
+        BlindAccess,
+        ReadAccess,
+        RepoLocation,
+        UnlockedAccess,
+        WriteAccess;
+import '../pages/pages.dart' show RepoSecurityPage;
+import '../utils/platform/platform.dart' show PlatformValues;
+import '../utils/utils.dart'
+    show
+        AppThemeExtension,
+        Dialogs,
+        Dimensions,
+        Fields,
+        LocalAuth,
+        PasswordHasher,
+        Settings,
+        ThemeGetter,
+        showSnackBar;
+import '../widgets/widgets.dart'
+    show
+        ActionsDialog,
+        GetPasswordAccessDialog,
+        NegativeButton,
+        PositiveButton,
+        RenameRepository,
+        ShareRepository;
 
 mixin RepositoryActionsMixin on LoggyType {
-  /// rename => ReposCubit.renameRepository
-  Future<void> renameRepository(
+  Future<String> renameRepository(
     BuildContext context, {
     required RepoCubit repoCubit,
-    void Function()? popDialog,
+  }) async {
+    final newName = await _getRepositoryNewName(
+      context,
+      repoCubit: repoCubit,
+    );
+    final newLocation = repoCubit.location.rename(newName);
+
+    if (newName.isNotEmpty) {
+      await Dialogs.executeFutureWithLoadingDialog(
+        null,
+        repoCubit.move(newLocation.path),
+      );
+
+      return newName;
+    }
+
+    return '';
+  }
+
+  Future<String> _getRepositoryNewName(
+    BuildContext context, {
+    required RepoCubit repoCubit,
   }) async {
     final newName = await showDialog<String>(
-      context: context,
-      builder: (BuildContext context) => ActionsDialog(
-        title: S.current.messageRenameRepository,
-        body: RenameRepository(repoCubit),
-      ),
-    );
+          context: context,
+          builder: (BuildContext context) => ActionsDialog(
+            title: S.current.messageRenameRepository,
+            body: RenameRepository(repoCubit),
+          ),
+        ) ??
+        '';
 
-    if (newName == null || newName.isEmpty) {
-      return;
-    }
-
-    await Dialogs.executeFutureWithLoadingDialog(
-      null,
-      repoCubit.move(newName),
-    );
-
-    if (popDialog != null) {
-      popDialog();
-    }
+    return newName;
   }
 
   Future<dynamic> shareRepository(BuildContext context,
@@ -134,13 +169,6 @@ mixin RepositoryActionsMixin on LoggyType {
       return;
     }
 
-    await _showRepoLocationDialog(context, repoLocation);
-  }
-
-  Future<void> _showRepoLocationDialog(
-    BuildContext context,
-    RepoLocation repoLocation,
-  ) async {
     final dbFile = p.basename(repoLocation.path);
     final segments = p.split(repoLocation.dir);
 
@@ -153,33 +181,43 @@ mixin RepositoryActionsMixin on LoggyType {
       },
     );
 
-    await Dialogs.alertDialogWithActions(
-      context: context,
-      title: S.current.actionLocateRepo,
-      body: [
-        Text(
-          dbFile,
-          style: context.theme.appTextStyle.bodyMedium
-              .copyWith(fontWeight: FontWeight.w400),
-        ),
-        Dimensions.spacingVerticalDouble,
-        breadcrumbs,
-      ],
-      actions: [
-        TextButton(
-          child: Text(S.current.actionCloseCapital),
-          onPressed: () async => await Navigator.of(context).maybePop(false),
-        ),
-      ],
+    await _showRepoLocationDialog(
+      context,
+      dbFile: dbFile,
+      breadcrumbs: breadcrumbs,
     );
   }
 
-  /// delete => ReposCubit.deleteRepository
-  Future<void> deleteRepository(
+  Future<void> _showRepoLocationDialog(
     BuildContext context, {
-    required ReposCubit reposCubit,
-    required RepoLocation repoLocation,
-    void Function()? popDialog,
+    required String dbFile,
+    required BreadCrumb breadcrumbs,
+  }) async =>
+      Dialogs.alertDialogWithActions(
+        context,
+        title: S.current.actionLocateRepo,
+        body: [
+          Text(
+            dbFile,
+            style: context.theme.appTextStyle.bodyMedium
+                .copyWith(fontWeight: FontWeight.w400),
+          ),
+          Dimensions.spacingVerticalDouble,
+          breadcrumbs,
+        ],
+        actions: [
+          TextButton(
+            child: Text(S.current.actionCloseCapital),
+            onPressed: () async => await Navigator.of(context).maybePop(false),
+          ),
+        ],
+      );
+
+  /// delete => ReposCubit.deleteRepository
+  Future<bool> deleteRepository(
+    BuildContext context, {
+    required String repoName,
+    required Future deleteRepoFuture,
   }) async {
     final deleteRepo = await showDialog<bool>(
       context: context,
@@ -218,16 +256,16 @@ mixin RepositoryActionsMixin on LoggyType {
       ),
     );
 
-    if (deleteRepo ?? false) {
+    if (deleteRepo == true) {
       await Dialogs.executeFutureWithLoadingDialog(
         null,
-        reposCubit.deleteRepository(repoLocation),
+        deleteRepoFuture,
       );
 
-      if (popDialog != null) {
-        popDialog();
-      }
+      return true;
     }
+
+    return false;
   }
 
   Future<void> unlockRepository(
