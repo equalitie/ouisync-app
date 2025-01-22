@@ -3,15 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart'
-    show
-        BottomSheetType,
-        EntrySelectionActions,
-        EntrySelectionCubit,
-        EntrySelectionState,
-        RepoCubit,
-        ReposCubit;
-import '../../utils/utils.dart'
-    show AppLogger, Dimensions, EntrySelectionActionsExtension, Fields;
+    show EntrySelectionCubit, EntrySelectionState, RepoCubit, ReposCubit;
+import '../../utils/utils.dart' show Dimensions;
+import '../widgets.dart' show EntryDetail;
 
 class SelectEntriesButton extends StatefulWidget {
   const SelectEntriesButton({
@@ -65,19 +59,12 @@ class DoneState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => TextButton.icon(
-        onPressed: () async => repoCubit.entrySelectionCubit.entries.isEmpty
-            ? await repoCubit.endEntriesSelection()
-            : await showModalBottomSheet(
-                isScrollControlled: true,
-                context: context,
-                shape: Dimensions.borderBottomSheetTop,
-                builder: (context) => _EntrySelectionActionsList(
-                  reposCubit,
-                  repoCubit,
-                ),
-              ),
-        label: Text(S.current.actionDone),
-        icon: const Icon(Icons.arrow_drop_down_outlined),
+        onPressed: () async {
+          reposCubit.bottomSheet.hide();
+          await repoCubit.endEntriesSelection();
+        },
+        label: Text(S.current.actionCancel),
+        icon: const Icon(Icons.close),
         iconAlignment: IconAlignment.end,
       );
 }
@@ -89,7 +76,12 @@ class EditState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => TextButton.icon(
-        onPressed: () async => await repoCubit.startEntriesSelection(),
+        onPressed: () async => await showModalBottomSheet(
+          isScrollControlled: true,
+          context: context,
+          shape: Dimensions.borderBottomSheetTop,
+          builder: (context) => EntryDetail(repoCubit: repoCubit),
+        ),
         label: Text(S.current.actionSelect),
         icon: const Icon(Icons.check),
         iconAlignment: IconAlignment.end,
@@ -97,99 +89,3 @@ class EditState extends StatelessWidget {
 }
 
 enum SelectionStatus { off, on }
-
-class _EntrySelectionActionsList extends StatelessWidget with AppLogger {
-  _EntrySelectionActionsList(ReposCubit reposCubit, RepoCubit repoCubit)
-      : _reposCubit = reposCubit,
-        _repoCubit = repoCubit;
-
-  final ReposCubit _reposCubit;
-  final RepoCubit _repoCubit;
-
-  @override
-  Widget build(BuildContext context) =>
-      BlocBuilder<EntrySelectionCubit, EntrySelectionState>(
-        bloc: _repoCubit.entrySelectionCubit,
-        builder: (context, state) {
-          return Container(
-            padding: Dimensions.paddingBottomSheet,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  children: [
-                    Expanded(child: Fields.bottomSheetHandle(context)),
-                    TextButton(
-                      child: Text('Cancel'),
-                      onPressed: () async {
-                        await _repoCubit.endEntriesSelection();
-
-                        Navigator.of(context).pop();
-                      },
-                    ),
-                  ],
-                ),
-                _buildSelectedEntriesActionList(
-                  context,
-                  reposCubit: _reposCubit,
-                  repoCubit: _repoCubit,
-                  cubit: _repoCubit.entrySelectionCubit,
-                ),
-              ],
-            ),
-          );
-        },
-      );
-
-  Widget _buildSelectedEntriesActionList(
-    BuildContext context, {
-    required ReposCubit reposCubit,
-    required RepoCubit repoCubit,
-    required EntrySelectionCubit cubit,
-  }) =>
-      ListView.separated(
-        shrinkWrap: true,
-        separatorBuilder: (BuildContext context, int index) => Divider(
-          height: 1,
-          color: Colors.black12,
-        ),
-        itemCount: EntrySelectionActions.values.length,
-        itemBuilder: (context, index) {
-          final actionItem = EntrySelectionActions.values[index];
-
-          return Row(
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              Expanded(
-                child: Fields.actionListTile(
-                  actionItem.localized,
-                  textOverflow: TextOverflow.ellipsis,
-                  textSoftWrap: false,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  onTap: () async {
-                    final type = switch (actionItem) {
-                      EntrySelectionActions.download =>
-                        BottomSheetType.download,
-                      EntrySelectionActions.copy => BottomSheetType.copy,
-                      EntrySelectionActions.move => BottomSheetType.move,
-                      EntrySelectionActions.delete => BottomSheetType.delete,
-                    };
-
-                    Navigator.of(context).pop();
-                    repoCubit.showMoveSelectedEntriesBottomSheet(
-                      sheetType: type,
-                    );
-
-                    return;
-                  },
-                  dense: true,
-                  visualDensity: VisualDensity.compact,
-                ),
-              ),
-            ],
-          );
-        },
-      );
-}

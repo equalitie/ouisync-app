@@ -157,9 +157,7 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
       BlocBuilder<EntrySelectionCubit, EntrySelectionState>(
         bloc: entrySelectionCubit,
         builder: (context, state) => Text(
-          S.current.messageMoveEntryOrigin(
-            repo_path.dirname(state.selectedEntries.first.path),
-          ),
+          S.current.messageMoveEntryOrigin(state.selectionOriginPath),
           style: Theme.of(context)
               .textTheme
               .bodyMedium
