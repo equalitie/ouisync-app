@@ -235,10 +235,9 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
 
     final sortedEntries = [..._entries];
     sortedEntries.sort((a, b) {
-      final aPath = a.path;
-      final bPath = b.path;
-
-      return aPath.compareTo(bPath);
+      if (a is DirectoryEntry && b is FileEntry) return -1;
+      if (a is FileEntry && b is DirectoryEntry) return 1;
+      return a.path.compareTo(b.path);
     });
 
     for (var entry in sortedEntries) {
