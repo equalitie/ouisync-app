@@ -4,7 +4,7 @@ import 'package:path/path.dart' as p;
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart' show BottomSheetType, RepoCubit;
-import '../../models/models.dart' show DirectoryEntry;
+import '../../models/models.dart' show DirectoryEntry, FileSystemEntry;
 import '../../utils/utils.dart'
     show
         AppLogger,
@@ -56,6 +56,50 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
               style: context.theme.appTextStyle.titleMedium,
             ),
             EntryActionItem(
+              iconData: Icons.copy_outlined,
+              title: S.current.iconCopy,
+              dense: true,
+              onTap: () async {
+                await Navigator.of(context).maybePop();
+
+                await _copyOrMoveEntry(
+                  context,
+                  widget.repoCubit,
+                  widget.entry,
+                  BottomSheetType.copy,
+                );
+              },
+              enabledValidation: () => widget.isActionAvailableValidator(
+                widget.repoCubit.state.accessMode,
+                EntryAction.copy,
+              ),
+              disabledMessage: S.current.messageActionNotAvailable,
+              disabledMessageDuration:
+                  Constants.notAvailableActionMessageDuration,
+            ),
+            EntryActionItem(
+              iconData: Icons.drive_file_move_outlined,
+              title: S.current.iconMove,
+              dense: true,
+              onTap: () async {
+                await Navigator.of(context).maybePop();
+
+                await _copyOrMoveEntry(
+                  context,
+                  widget.repoCubit,
+                  widget.entry,
+                  BottomSheetType.move,
+                );
+              },
+              enabledValidation: () => widget.isActionAvailableValidator(
+                widget.repoCubit.state.accessMode,
+                EntryAction.move,
+              ),
+              disabledMessage: S.current.messageActionNotAvailable,
+              disabledMessageDuration:
+                  Constants.notAvailableActionMessageDuration,
+            ),
+            EntryActionItem(
               iconData: Icons.edit_outlined,
               title: S.current.iconRename,
               dense: true,
@@ -80,46 +124,6 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
               enabledValidation: () => widget.isActionAvailableValidator(
                 widget.repoCubit.state.accessMode,
                 EntryAction.rename,
-              ),
-              disabledMessage: S.current.messageActionNotAvailable,
-              disabledMessageDuration:
-                  Constants.notAvailableActionMessageDuration,
-            ),
-            EntryActionItem(
-              iconData: Icons.drive_file_move_outlined,
-              title: S.current.iconMove,
-              dense: true,
-              onTap: () async {
-                await Navigator.of(context).maybePop();
-
-                widget.repoCubit.showMoveEntryBottomSheet(
-                  sheetType: BottomSheetType.move,
-                  entry: widget.entry,
-                );
-              },
-              enabledValidation: () => widget.isActionAvailableValidator(
-                widget.repoCubit.state.accessMode,
-                EntryAction.move,
-              ),
-              disabledMessage: S.current.messageActionNotAvailable,
-              disabledMessageDuration:
-                  Constants.notAvailableActionMessageDuration,
-            ),
-            EntryActionItem(
-              iconData: Icons.copy_outlined,
-              title: S.current.iconCopy,
-              dense: true,
-              onTap: () async {
-                await Navigator.of(context).maybePop();
-
-                widget.repoCubit.showMoveEntryBottomSheet(
-                  sheetType: BottomSheetType.copy,
-                  entry: widget.entry,
-                );
-              },
-              enabledValidation: () => widget.isActionAvailableValidator(
-                widget.repoCubit.state.accessMode,
-                EntryAction.copy,
               ),
               disabledMessage: S.current.messageActionNotAvailable,
               disabledMessageDuration:
@@ -157,6 +161,18 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
           ],
         ),
       );
+
+  Future<void> _copyOrMoveEntry(
+    BuildContext context,
+    RepoCubit originRepoCubit,
+    FileSystemEntry entry,
+    BottomSheetType type,
+  ) async {
+    final isSingleSelection = true;
+
+    await originRepoCubit.startEntriesSelection(isSingleSelection, entry);
+    originRepoCubit.showMoveEntryBottomSheet(sheetType: type, entry: entry);
+  }
 
   Future<void> _deleteFolderWithValidation(
     RepoCubit repo,

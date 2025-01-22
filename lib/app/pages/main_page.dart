@@ -609,9 +609,6 @@ class _MainPageState extends State<MainPage>
           final contents = currentRepoCubit.state.currentFolder.content;
           final totalEntries = contents.length;
 
-          final currentRepoInfoHash = currentRepoCubit.state.infoHash;
-          final currentPath = currentRepoCubit.state.currentFolder.path;
-
           return RefreshIndicator(
             onRefresh: () async => getContent(),
             child: Container(
@@ -653,6 +650,8 @@ class _MainPageState extends State<MainPage>
                             entry: entry,
                             repoCubit: currentRepoCubit,
                             mainAction: () async {
+                              final currentRepoInfoHash =
+                                  currentRepoCubit.state.infoHash;
                               if (selectionState.isEntrySelected(
                                 currentRepoInfoHash,
                                 entry,
@@ -759,7 +758,7 @@ class _MainPageState extends State<MainPage>
           MoveEntrySheetState() => _moveSingleEntryState(state),
           MoveSelectedEntriesSheetState() => _moveMultipleEntriesState(state),
           SaveMediaSheetState() => _saveSharedMediaState(state),
-          HideSheetState() => SizedBox.shrink(),
+          HideSheetState() => _hideBottomSheet(),
         },
       );
 
@@ -768,7 +767,6 @@ class _MainPageState extends State<MainPage>
         context,
         reposCubit: widget.reposCubit,
         originRepoCubit: state.repoCubit,
-        navigationCubit: widget.reposCubit.navigation,
         entry: state.entry,
         sheetType: state.type,
         onUpdateBottomSheet: updateBottomSheetInfo,
@@ -781,8 +779,6 @@ class _MainPageState extends State<MainPage>
         context,
         reposCubit: widget.reposCubit,
         originRepoCubit: state.repoCubit,
-        navigationCubit: widget.reposCubit.navigation,
-        entrySelectionCubit: state.repoCubit.entrySelectionCubit,
         sheetType: state.type,
         onUpdateBottomSheet: updateBottomSheetInfo,
       );
@@ -796,18 +792,32 @@ class _MainPageState extends State<MainPage>
         canSaveMedia: canSaveFiles,
       );
 
-  void updateBottomSheetInfo(
-      BottomSheetType type, double padding, String entry) {
-    final newInfo = _bottomSheetInfo.value.copyWith(
-      type: type,
-      neededPadding: padding,
-      entry: entry,
-    );
+  Widget _hideBottomSheet() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_isBottomSheetInfoDisposed == false) {
-        _bottomSheetInfo.value = newInfo;
+        _bottomSheetInfo.value = BottomSheetInfo(
+          type: BottomSheetType.gone,
+          neededPadding: 0.0,
+          entry: '',
+        );
       }
     });
+
+    return SizedBox.shrink();
+  }
+
+  void updateBottomSheetInfo(
+      BottomSheetType type, double padding, String entry) {
+    // final newInfo = _bottomSheetInfo.value.copyWith(
+    //   type: type,
+    //   neededPadding: padding,
+    //   entry: entry,
+    // );
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   if (_isBottomSheetInfoDisposed == false) {
+    //     _bottomSheetInfo.value = newInfo;
+    //   }
+    // });
   }
 
   Future<void> trySaveFile(String sourcePath) async {

@@ -11,7 +11,7 @@ import '../../generated/l10n.dart';
 import '../models/models.dart' show DirectoryEntry, FileEntry, FileSystemEntry;
 import '../utils/repo_path.dart' as repo_path;
 import '../utils/utils.dart'
-    show AppLogger, CopyEntry, FileIO, MoveEntry, StringExtension, showSnackBar;
+    show AppLogger, CopyEntry, FileIO, MoveEntry, showSnackBar;
 import '../widgets/widgets.dart' show SelectionStatus;
 import 'cubits.dart' show CubitActions, RepoCubit;
 
@@ -20,24 +20,28 @@ class EntrySelectionState extends Equatable {
     this.originRepoInfoHash = '',
     this.status = SelectionStatus.off,
     this.selectedEntries = const <FileSystemEntry>[],
+    this.singleEntry = const DirectoryEntry(path: ''),
     this.updating = false,
   });
 
   final String originRepoInfoHash;
   final SelectionStatus status;
   final List<FileSystemEntry> selectedEntries;
+  final FileSystemEntry singleEntry;
   final bool updating;
 
   EntrySelectionState copyWith({
     String? originRepoInfoHash,
     SelectionStatus? selectionState,
     List<FileSystemEntry>? selectedEntries,
+    FileSystemEntry? singleEntry,
     bool? updating,
   }) =>
       EntrySelectionState(
         originRepoInfoHash: originRepoInfoHash ?? this.originRepoInfoHash,
         status: selectionState ?? this.status,
         selectedEntries: selectedEntries ?? this.selectedEntries,
+        singleEntry: singleEntry ?? this.singleEntry,
         updating: updating ?? false,
       );
 
@@ -46,11 +50,15 @@ class EntrySelectionState extends Equatable {
         originRepoInfoHash,
         status,
         selectedEntries,
+        singleEntry,
         updating,
       ];
 
-  String get selectionOriginPath =>
-      selectedEntries.isNotEmpty ? p.dirname(selectedEntries.first.path) : '';
+  String get selectionOriginPath => singleEntry.path.isNotEmpty
+      ? p.dirname(singleEntry.path)
+      : selectedEntries.isNotEmpty
+          ? p.dirname(selectedEntries.first.path)
+          : '';
 
   bool isSelectable(String currentRepoInfoHash, String path) {
     if (status == SelectionStatus.off ||
@@ -64,6 +72,10 @@ class EntrySelectionState extends Equatable {
 
   bool isEntrySelected(String repoInfoHash, FileSystemEntry entry) {
     if (originRepoInfoHash != repoInfoHash) return false;
+
+    if (singleEntry != DirectoryEntry(path: '')) {
+      return singleEntry == entry;
+    }
 
     return selectedEntries.contains(entry);
   }
@@ -79,20 +91,32 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
 
   String get _originRepoInfoHash => _originRepoCubit?.state.infoHash ?? '';
 
+  bool _isSingleSelection = false;
+  bool get isSingleSelection => _isSingleSelection;
+
+  FileSystemEntry? _singleEntry;
+  FileSystemEntry? get singleEntry => _singleEntry;
+
   final _entries = <FileSystemEntry>[];
   List<FileSystemEntry> get entries => _entries;
 
   Future<void> startSelectionForRepo(
     RepoCubit originRepoCubit,
-    String currentPath,
-  ) async {
+    String currentPath, [
+    bool isSingleSelection = false,
+    FileSystemEntry? singleEntry,
+  ]) async {
     _originRepoCubit = originRepoCubit;
     _originPath = currentPath;
+
+    _isSingleSelection = isSingleSelection;
+    _singleEntry = singleEntry;
 
     emitUnlessClosed(state.copyWith(
       originRepoInfoHash: _originRepoInfoHash,
       selectionState: SelectionStatus.on,
       selectedEntries: _entries,
+      singleEntry: _singleEntry,
     ));
   }
 
@@ -100,11 +124,15 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
     _originRepoCubit = null;
     _originPath = '';
 
+    _isSingleSelection = false;
+    _singleEntry = null;
+
     _entries.clear();
 
     emitUnlessClosed(state.copyWith(
       selectionState: SelectionStatus.off,
       selectedEntries: <FileSystemEntry>[],
+      singleEntry: const DirectoryEntry(path: ''),
     ));
   }
 

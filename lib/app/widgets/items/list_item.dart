@@ -331,37 +331,45 @@ class TrailAction extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocConsumer<EntrySelectionCubit, EntrySelectionState>(
       bloc: entrySelectionCubit,
-      builder: (context, state) => state.isSelectable(
-        repoInfoHash,
-        p.dirname(entry.path),
-      )
-          ? ValueListenableBuilder(
-              valueListenable: _selectedNotifier,
-              builder: (BuildContext context, bool? value, Widget? child) =>
-                  Checkbox.adaptive(
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(6.0),
+      builder: (context, state) {
+        final isSingleEntry = state.singleEntry != DirectoryEntry(path: '');
+        if (isSingleEntry) {
+          return state.singleEntry.path == entry.path
+              ? IconButton(onPressed: () {}, icon: const Icon(Icons.check))
+              : _VerticalDotsButton(disable: true, action: verticalDotsAction);
+        }
+
+        final parent = p.dirname(entry.path);
+        final isSelectable = state.isSelectable(repoInfoHash, parent);
+        return isSelectable
+            ? ValueListenableBuilder(
+                valueListenable: _selectedNotifier,
+                builder: (BuildContext context, bool? value, Widget? child) =>
+                    Checkbox.adaptive(
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(6.0),
+                    ),
+                  ),
+                  visualDensity: VisualDensity.adaptivePlatformDensity,
+                  value: value,
+                  onChanged: (value) async => await _updateSelection(
+                    context,
+                    value ?? false,
+                    repoInfoHash: repoInfoHash,
+                    entry: entry,
+                    valueNotifier: _selectedNotifier,
+                    colorNotifier: _backgroundColorNotifier,
+                    onSelectEntry: onSelectEntry,
+                    onClearEntry: onClearEntry,
                   ),
                 ),
-                visualDensity: VisualDensity.adaptivePlatformDensity,
-                value: value,
-                onChanged: (value) async => await _updateSelection(
-                  context,
-                  value ?? false,
-                  repoInfoHash: repoInfoHash,
-                  entry: entry,
-                  valueNotifier: _selectedNotifier,
-                  colorNotifier: _backgroundColorNotifier,
-                  onSelectEntry: onSelectEntry,
-                  onClearEntry: onClearEntry,
-                ),
-              ),
-            )
-          : _VerticalDotsButton(
-              disable: state.status == SelectionStatus.on,
-              action: uploadJob == null ? verticalDotsAction : null,
-            ),
+              )
+            : _VerticalDotsButton(
+                disable: state.status == SelectionStatus.on,
+                action: uploadJob == null ? verticalDotsAction : null,
+              );
+      },
       listener: (context, state) async {
         if (repoInfoHash != state.originRepoInfoHash) return;
 

@@ -68,40 +68,6 @@ class _FileDetailState extends State<FileDetail> {
                 style: context.theme.appTextStyle.titleMedium,
               ),
               EntryActionItem(
-                iconData: Icons.download_outlined,
-                title: S.current.iconDownload,
-                dense: true,
-                onTap: () async {
-                  String? defaultDirectoryPath;
-                  if (io.Platform.isAndroid) {
-                    defaultDirectoryPath =
-                        await Native.getDownloadPathForAndroid();
-                  } else {
-                    final defaultDirectory = io.Platform.isIOS
-                        ? await getApplicationDocumentsDirectory()
-                        : await getDownloadsDirectory();
-
-                    defaultDirectoryPath = defaultDirectory?.path;
-                  }
-
-                  if (defaultDirectoryPath == null) return;
-
-                  await FileIO(
-                    context: context,
-                    repoCubit: widget.repoCubit,
-                  ).saveFileToDevice(widget.entry, defaultDirectoryPath);
-
-                  await Navigator.of(context, rootNavigator: false).maybePop();
-                },
-                enabledValidation: () => widget.isActionAvailableValidator(
-                  widget.repoCubit.state.accessMode,
-                  EntryAction.download,
-                ),
-                disabledMessage: S.current.messageActionNotAvailable,
-                disabledMessageDuration:
-                    Constants.notAvailableActionMessageDuration,
-              ),
-              EntryActionItem(
                 iconData: Icons.preview_outlined,
                 title: S.current.iconPreview,
                 dense: true,
@@ -117,55 +83,6 @@ class _FileDetailState extends State<FileDetail> {
                 enabledValidation: () => widget.isActionAvailableValidator(
                   widget.repoCubit.state.accessMode,
                   EntryAction.preview,
-                ),
-                disabledMessage: S.current.messageActionNotAvailable,
-                disabledMessageDuration:
-                    Constants.notAvailableActionMessageDuration,
-              ),
-              if (io.Platform.isAndroid)
-                EntryActionItem(
-                  iconData: Icons.share_outlined,
-                  title: S.current.iconShare,
-                  dense: true,
-                  onTap: () async =>
-                      await widget.nativeChannels.shareOuiSyncFile(
-                    widget.packageInfo.packageName,
-                    widget.entry.path,
-                    widget.entry.size ?? 0,
-                  ),
-                  enabledValidation: () => widget.isActionAvailableValidator(
-                    widget.repoCubit.state.accessMode,
-                    EntryAction.share,
-                  ),
-                  disabledMessage: S.current.messageActionNotAvailable,
-                  disabledMessageDuration:
-                      Constants.notAvailableActionMessageDuration,
-                ),
-              EntryActionItem(
-                iconData: Icons.edit_outlined,
-                title: S.current.iconRename,
-                dense: true,
-                onTap: () async {
-                  final entry = widget.entry;
-                  final newName = await _getNewFileName(entry);
-
-                  if (newName.isEmpty) return;
-
-                  // The new name provided by the user.
-                  final parent = repo_path.dirname(entry.path);
-                  final newEntryPath = repo_path.join(parent, newName);
-
-                  await widget.repoCubit.moveEntry(
-                    source: entry.path,
-                    destination: newEntryPath,
-                  );
-
-                  await Navigator.of(context).maybePop();
-                  showSnackBar(S.current.messageFileRenamed(newName));
-                },
-                enabledValidation: () => widget.isActionAvailableValidator(
-                  widget.repoCubit.state.accessMode,
-                  EntryAction.rename,
                 ),
                 disabledMessage: S.current.messageActionNotAvailable,
                 disabledMessageDuration:
@@ -211,6 +128,89 @@ class _FileDetailState extends State<FileDetail> {
                 disabledMessageDuration:
                     Constants.notAvailableActionMessageDuration,
               ),
+              EntryActionItem(
+                iconData: Icons.edit_outlined,
+                title: S.current.iconRename,
+                dense: true,
+                onTap: () async {
+                  final entry = widget.entry;
+                  final newName = await _getNewFileName(entry);
+
+                  if (newName.isEmpty) return;
+
+                  // The new name provided by the user.
+                  final parent = repo_path.dirname(entry.path);
+                  final newEntryPath = repo_path.join(parent, newName);
+
+                  await widget.repoCubit.moveEntry(
+                    source: entry.path,
+                    destination: newEntryPath,
+                  );
+
+                  await Navigator.of(context).maybePop();
+                  showSnackBar(S.current.messageFileRenamed(newName));
+                },
+                enabledValidation: () => widget.isActionAvailableValidator(
+                  widget.repoCubit.state.accessMode,
+                  EntryAction.rename,
+                ),
+                disabledMessage: S.current.messageActionNotAvailable,
+                disabledMessageDuration:
+                    Constants.notAvailableActionMessageDuration,
+              ),
+              EntryActionItem(
+                iconData: Icons.download_outlined,
+                title: S.current.iconDownload,
+                dense: true,
+                onTap: () async {
+                  String? defaultDirectoryPath;
+                  if (io.Platform.isAndroid) {
+                    defaultDirectoryPath =
+                        await Native.getDownloadPathForAndroid();
+                  } else {
+                    final defaultDirectory = io.Platform.isIOS
+                        ? await getApplicationDocumentsDirectory()
+                        : await getDownloadsDirectory();
+
+                    defaultDirectoryPath = defaultDirectory?.path;
+                  }
+
+                  if (defaultDirectoryPath == null) return;
+
+                  await FileIO(
+                    context: context,
+                    repoCubit: widget.repoCubit,
+                  ).saveFileToDevice(widget.entry, defaultDirectoryPath);
+
+                  await Navigator.of(context, rootNavigator: false).maybePop();
+                },
+                enabledValidation: () => widget.isActionAvailableValidator(
+                  widget.repoCubit.state.accessMode,
+                  EntryAction.download,
+                ),
+                disabledMessage: S.current.messageActionNotAvailable,
+                disabledMessageDuration:
+                    Constants.notAvailableActionMessageDuration,
+              ),
+              if (io.Platform.isAndroid)
+                EntryActionItem(
+                  iconData: Icons.share_outlined,
+                  title: S.current.iconShare,
+                  dense: true,
+                  onTap: () async =>
+                      await widget.nativeChannels.shareOuiSyncFile(
+                    widget.packageInfo.packageName,
+                    widget.entry.path,
+                    widget.entry.size ?? 0,
+                  ),
+                  enabledValidation: () => widget.isActionAvailableValidator(
+                    widget.repoCubit.state.accessMode,
+                    EntryAction.share,
+                  ),
+                  disabledMessage: S.current.messageActionNotAvailable,
+                  disabledMessageDuration:
+                      Constants.notAvailableActionMessageDuration,
+                ),
               EntryActionItem(
                 iconData: Icons.delete_outlined,
                 title: S.current.iconDelete,
