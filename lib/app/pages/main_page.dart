@@ -333,7 +333,7 @@ class _MainPageState extends State<MainPage>
       showSnackBar(S.current.messageExitOuiSync, context: context);
       return;
     }
-    
+
     exitClickCounter.reset();
     await MoveToBackground.moveTaskToBack();
   }
@@ -602,79 +602,100 @@ class _MainPageState extends State<MainPage>
     }
   }
 
-  Widget _contentsList(RepoCubit currentRepoCubit) {
-    final contents = currentRepoCubit.state.currentFolder.content;
-    final totalEntries = contents.length;
+  Widget _contentsList(RepoCubit currentRepoCubit) =>
+      BlocBuilder<EntrySelectionCubit, EntrySelectionState>(
+        bloc: currentRepoCubit.entrySelectionCubit,
+        builder: (context, selectionState) {
+          final contents = currentRepoCubit.state.currentFolder.content;
+          final totalEntries = contents.length;
 
-    return RefreshIndicator(
-      onRefresh: () async => getContent(),
-      child: Container(
-        child: ListView.separated(
-          separatorBuilder: (context, index) => const Divider(
-            height: 1,
-            color: Colors.transparent,
-          ),
-          itemCount: totalEntries,
-          itemBuilder: (context, index) {
-            final entry = contents[index];
-            final key = ValueKey(entry.name);
+          final currentRepoInfoHash = currentRepoCubit.state.infoHash;
+          final currentPath = currentRepoCubit.state.currentFolder.path;
 
-            return Column(
-              children: [
-                switch (entry) {
-                  FileEntry entry => FileListItem(
-                      key: key,
-                      entry: entry,
-                      repoCubit: currentRepoCubit,
-                      mainAction: () async {
-                        if (_bottomSheetInfo.value.type ==
-                            BottomSheetType.gone) {
-                          await _previewFile(currentRepoCubit, entry, true);
-                          return;
-                        }
+          return RefreshIndicator(
+            onRefresh: () async => getContent(),
+            child: Container(
+              child: ListView.separated(
+                separatorBuilder: (context, index) => const Divider(
+                  height: 1,
+                  color: Colors.transparent,
+                ),
+                itemCount: totalEntries,
+                itemBuilder: (context, index) {
+                  final entry = contents[index];
+                  final key = ValueKey(entry.name);
 
-                        await _showMovingEntryAlertDialog(context);
+                  return Column(
+                    children: [
+                      switch (entry) {
+                        FileEntry entry => FileListItem(
+                            key: key,
+                            entry: entry,
+                            repoCubit: currentRepoCubit,
+                            mainAction: () async => await _previewFile(
+                                  currentRepoCubit,
+                                  entry,
+                                  true,
+                                ),
+                            verticalDotsAction: () async {
+                              if (!selectionState.canSelect(
+                                currentRepoInfoHash,
+                                currentPath,
+                              )) {
+                                await _showMovingEntryAlertDialog(context);
+                                return;
+                              }
+
+                              if (_bottomSheetInfo.value.type ==
+                                  BottomSheetType.gone) {
+                                await _showFileDetails(currentRepoCubit, entry);
+                              }
+                            }),
+                        DirectoryEntry entry => DirectoryListItem(
+                            key: key,
+                            entry: entry,
+                            repoCubit: currentRepoCubit,
+                            mainAction: () async {
+                              if (selectionState.isEntrySelected(
+                                currentRepoInfoHash,
+                                entry,
+                              )) {
+                                await _showMovingEntryAlertDialog(context);
+                                return;
+                              }
+
+                              if (_bottomSheetInfo.value.entry != entry.path) {
+                                await currentRepoCubit.navigateTo(entry.path);
+                              }
+                            },
+                            verticalDotsAction: () async {
+                              if (!selectionState.canSelect(
+                                currentRepoInfoHash,
+                                currentPath,
+                              )) {
+                                await _showMovingEntryAlertDialog(context);
+                                return;
+                              }
+
+                              if (_bottomSheetInfo.value.type ==
+                                  BottomSheetType.gone) {
+                                await _showFolderDetails(
+                                  currentRepoCubit,
+                                  entry,
+                                );
+                              }
+                            },
+                          ),
                       },
-                      verticalDotsAction: () async {
-                        if (_bottomSheetInfo.value.type ==
-                            BottomSheetType.gone) {
-                          await _showFileDetails(currentRepoCubit, entry);
-                          return;
-                        }
-
-                        await _showMovingEntryAlertDialog(context);
-                      }),
-                  DirectoryEntry entry => DirectoryListItem(
-                      key: key,
-                      entry: entry,
-                      repoCubit: currentRepoCubit,
-                      mainAction: () {
-                        if (_bottomSheetInfo.value.entry != entry.path) {
-                          currentRepoCubit.navigateTo(entry.path);
-                          return;
-                        }
-
-                        // TODO: Show toast with explanation
-                      },
-                      verticalDotsAction: () async {
-                        if (_bottomSheetInfo.value.type ==
-                            BottomSheetType.gone) {
-                          await _showFolderDetails(currentRepoCubit, entry);
-                          return;
-                        }
-
-                        await _showMovingEntryAlertDialog(context);
-                      },
-                    ),
+                      if (index == (totalEntries - 1)) SizedBox(height: 56)
+                    ],
+                  );
                 },
-                if (index == (totalEntries - 1)) SizedBox(height: 56)
-              ],
-            );
-          },
-        ),
-      ),
-    );
-  }
+              ),
+            ),
+          );
+        },
+      );
 
   Future<void> _showMovingEntryAlertDialog(BuildContext context) =>
       Dialogs.simpleAlertDialog(

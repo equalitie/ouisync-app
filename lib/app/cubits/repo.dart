@@ -207,7 +207,8 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   }
 
   Future<void> startEntriesSelection() async {
-    await _entrySelection.startSelectionForRepo(this);
+    final currentPath = _currentFolder.state.path;
+    await _entrySelection.startSelectionForRepo(this, currentPath);
   }
 
   Future<void> endEntriesSelection() async {

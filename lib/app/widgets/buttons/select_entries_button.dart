@@ -66,7 +66,7 @@ class DoneState extends StatelessWidget {
   @override
   Widget build(BuildContext context) => TextButton.icon(
         onPressed: () async =>
-            repoCubit.entrySelectionCubit.selectedEntries.isEmpty
+            repoCubit.entrySelectionCubit.entries.isEmpty
                 ? await repoCubit.endEntriesSelection()
                 : await showModalBottomSheet(
                     isScrollControlled: true,

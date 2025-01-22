@@ -2,7 +2,9 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync/ouisync.dart' show AccessMode, EntryType;
+import 'package:ouisync/ouisync.dart' show AccessMode;
+import 'package:ouisync_app/app/models/models.dart'
+    show DirectoryEntry, FileEntry, FileSystemEntry;
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart'
@@ -143,12 +145,11 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
       BlocBuilder<EntrySelectionCubit, EntrySelectionState>(
         bloc: entrySelectionCubit,
         builder: (context, state) {
-          final totalDirs = state.selectedEntriesPath.entries
-              .where((e) => e.value.isDir && e.value.selected)
-              .length;
-          final totalFiles = state.selectedEntriesPath.entries
-              .where((e) => !e.value.isDir)
-              .length;
+          final totalDirs =
+              state.selectedEntries.whereType<DirectoryEntry>().length;
+          final totalFiles =
+              state.selectedEntries.whereType<FileEntry>().length;
+
           return Fields.iconLabel(
             icon: Icons.folder_copy,
             text: 'Folders: $totalDirs, Files: $totalFiles',
@@ -160,7 +161,9 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
       BlocBuilder<EntrySelectionCubit, EntrySelectionState>(
         bloc: entrySelectionCubit,
         builder: (context, state) => Text(
-          S.current.messageMoveEntryOrigin(state.originPath ?? ''),
+          S.current.messageMoveEntryOrigin(
+            repo_path.dirname(state.selectedEntries.first.path),
+          ),
           style: Theme.of(context)
               .textTheme
               .bodyMedium
