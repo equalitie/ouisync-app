@@ -8,7 +8,7 @@ import 'package:path_provider/path_provider.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart' show BottomSheetType, RepoCubit;
-import '../../models/models.dart' show FileEntry;
+import '../../models/models.dart' show FileEntry, FileSystemEntry;
 import '../../pages/pages.dart' show PreviewFileCallback;
 import '../../utils/repo_path.dart' as repo_path;
 import '../../utils/utils.dart'
@@ -95,9 +95,11 @@ class _FileDetailState extends State<FileDetail> {
                 onTap: () async {
                   await Navigator.of(context).maybePop();
 
-                  widget.repoCubit.showMoveEntryBottomSheet(
-                    sheetType: BottomSheetType.copy,
-                    entry: widget.entry,
+                  await _copyOrMoveEntry(
+                    context,
+                    widget.repoCubit,
+                    widget.entry,
+                    BottomSheetType.copy,
                   );
                 },
                 enabledValidation: () => widget.isActionAvailableValidator(
@@ -115,9 +117,11 @@ class _FileDetailState extends State<FileDetail> {
                 onTap: () async {
                   await Navigator.of(context).maybePop();
 
-                  widget.repoCubit.showMoveEntryBottomSheet(
-                    sheetType: BottomSheetType.move,
-                    entry: widget.entry,
+                  await _copyOrMoveEntry(
+                    context,
+                    widget.repoCubit,
+                    widget.entry,
+                    BottomSheetType.move,
                   );
                 },
                 enabledValidation: () => widget.isActionAvailableValidator(
@@ -263,6 +267,18 @@ class _FileDetailState extends State<FileDetail> {
           ),
         ),
       );
+
+  Future<void> _copyOrMoveEntry(
+    BuildContext context,
+    RepoCubit originRepoCubit,
+    FileSystemEntry entry,
+    BottomSheetType type,
+  ) async {
+    final isSingleSelection = true;
+
+    await originRepoCubit.startEntriesSelection(isSingleSelection, entry);
+    originRepoCubit.showMoveEntryBottomSheet(sheetType: type, entry: entry);
+  }
 
   Future<String> _getNewFileName(FileEntry entry) async {
     final newName = await showDialog<String>(
