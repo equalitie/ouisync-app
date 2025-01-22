@@ -332,17 +332,14 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
       return (destinationOk: false, errorMessage: '');
     }
 
-    bool validationOk = true;
-    String errorMessage = '';
+    if (destinationPath == _originPath) {
+      final validationOk = false;
+      final errorMessage = 'The destination is the same as the source';
 
-    final isSameParent = destinationPath == p.dirname(_originPath);
-    if (isSameParent) {
-      validationOk = false;
-      errorMessage = 'The destination is the same as the '
-          'source';
+      return (destinationOk: validationOk, errorMessage: errorMessage);
     }
 
-    return (destinationOk: validationOk, errorMessage: errorMessage);
+    return (destinationOk: true, errorMessage: '');
   }
 }
 
