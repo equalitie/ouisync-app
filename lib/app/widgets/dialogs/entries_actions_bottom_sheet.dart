@@ -395,8 +395,6 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
     MoveEntriesActions moveEntriesActions,
     RepoCubit originRepoCubit,
   ) {
-    // widget.onUpdateBottomSheet(BottomSheetType.gone, 0.0, '');
-
     moveEntriesActions.cancel();
     originRepoCubit.endEntriesSelection();
   }

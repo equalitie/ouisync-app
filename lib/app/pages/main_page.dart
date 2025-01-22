@@ -808,16 +808,16 @@ class _MainPageState extends State<MainPage>
 
   void updateBottomSheetInfo(
       BottomSheetType type, double padding, String entry) {
-    // final newInfo = _bottomSheetInfo.value.copyWith(
-    //   type: type,
-    //   neededPadding: padding,
-    //   entry: entry,
-    // );
-    // WidgetsBinding.instance.addPostFrameCallback((_) {
-    //   if (_isBottomSheetInfoDisposed == false) {
-    //     _bottomSheetInfo.value = newInfo;
-    //   }
-    // });
+    final newInfo = _bottomSheetInfo.value.copyWith(
+      type: type,
+      neededPadding: padding,
+      entry: entry,
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_isBottomSheetInfoDisposed == false) {
+        _bottomSheetInfo.value = newInfo;
+      }
+    });
   }
 
   Future<void> trySaveFile(String sourcePath) async {
