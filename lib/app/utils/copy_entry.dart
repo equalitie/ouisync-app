@@ -2,140 +2,143 @@ import 'package:flutter/material.dart';
 import 'package:ouisync/ouisync.dart' show EntryType;
 
 import '../cubits/cubits.dart' show RepoCubit;
-import '../widgets/widgets.dart' show FileAction;
+import '../models/models.dart' show FileSystemEntry, Folder;
+import '../widgets/widgets.dart' show DisambiguationAction;
 import 'repo_path.dart' as repo_path;
 import 'utils.dart' show AppLogger, EntryOps;
 
 class CopyEntry with EntryOps, AppLogger {
   CopyEntry(
     BuildContext context, {
-    required RepoCubit repoCubit,
-    required String srcPath,
-    required String dstPath,
-    required EntryType type,
+    required RepoCubit originRepoCubit,
+    required FileSystemEntry entry,
+    required String destinationPath,
   })  : _context = context,
-        _repoCubit = repoCubit,
-        _srcPath = srcPath,
-        _dstPath = dstPath,
-        _type = type;
+        _originRepoCubit = originRepoCubit,
+        _entry = entry,
+        _destinationPath = destinationPath;
 
   final BuildContext _context;
-  final RepoCubit _repoCubit;
-  final String _srcPath;
-  final String _dstPath;
-  final EntryType _type;
+  final RepoCubit _originRepoCubit;
+  final FileSystemEntry _entry;
+  final String _destinationPath;
 
+  /// Copy an entry to the destination path.
+  ///
+  /// If [currentRepoCubit] is not null, the cubit is used to copy the entry;
+  /// otherwise [originRepoCubit] will be used.
+  ///
+  /// [fromPathSegment] is the segment of [sourcePath] without the entry's
+  /// parent folder, including root (/). This is used to create the new path for
+  /// the entry to copy, by joining it with the [destinationPath].
+  ///
+  /// [recursive] is used if the entry is a folder.
   Future<void> copy({
-    required RepoCubit? toRepoCubit,
+    required RepoCubit? currentRepoCubit,
     required String fromPathSegment,
     required bool recursive,
-    required bool navigateToDestination,
   }) async {
-    final dstRepo = (toRepoCubit ?? _repoCubit);
-    final dstFolderPath = repo_path.join(_dstPath, fromPathSegment);
+    final path = _entry.path;
+    final type = _entry is Folder ? EntryType.directory : EntryType.file;
 
-    final exist = await dstRepo.exists(dstFolderPath);
-    if (!exist) {
-      await _pickModeAndCopyEntry(
-        toRepoCubit,
-        _srcPath,
-        dstFolderPath,
-        _type,
+    final destinationRepoCubit = (currentRepoCubit ?? _originRepoCubit);
+    final newPath = repo_path.join(_destinationPath, fromPathSegment);
+
+    final exist = await destinationRepoCubit.exists(newPath);
+    if (exist == false) {
+      await _copyEntry(
+        currentRepoCubit,
+        path,
+        newPath,
+        type,
         recursive,
-        navigateToDestination,
       );
+
       return;
     }
 
-    final fileAction = await getFileActionType(
+    final disambiguationAction = await pickEntryDisambiguationAction(
       _context,
-      _srcPath,
-      dstFolderPath,
-      _type,
+      newPath,
+      type,
     );
-
-    if (fileAction == null) return;
-
-    if (fileAction == FileAction.replace) {
-      await _copyAndReplace(
-        toRepoCubit,
-        _srcPath,
-        dstFolderPath,
-        navigateToDestination,
-      );
-    }
-
-    if (fileAction == FileAction.keep) {
-      await _renameAndCopy(
-        toRepoCubit,
-        _srcPath,
-        dstFolderPath,
-        _type,
-        recursive,
-        navigateToDestination,
-      );
+    switch (disambiguationAction) {
+      case DisambiguationAction.replace:
+        await _copyAndReplaceFile(currentRepoCubit, path, newPath);
+        break;
+      case DisambiguationAction.keep:
+        await _renameAndCopy(currentRepoCubit, path, newPath, type, recursive);
+        break;
+      default:
+        break;
     }
   }
 
-  Future<void> _copyAndReplace(
-    RepoCubit? toRepoCubit,
-    String srcPath,
-    String dstPath,
-    bool navigateToDestination, //NEDED?
+  /// Replaces the file at [destinationPath] with the file at [sourcePath].
+  ///
+  /// This action is only available for files. If the entry is a folder, this
+  /// option will appear disabled to the user.
+  Future<void> _copyAndReplaceFile(
+    RepoCubit? destinationRepoCubit,
+    String sourcePath,
+    String destinationPath,
   ) async {
     try {
-      final file = await _repoCubit.openFile(srcPath);
+      final file = await _originRepoCubit.openFile(sourcePath);
       final fileLength = await file.length;
 
-      await (toRepoCubit ?? _repoCubit).replaceFile(
-        filePath: dstPath,
+      await (destinationRepoCubit ?? _originRepoCubit).replaceFile(
+        filePath: destinationPath,
         length: fileLength,
         fileByteStream: file.read(0, fileLength).asStream(),
       );
 
-      await _repoCubit.deleteFile(srcPath);
+      await _originRepoCubit.deleteFile(sourcePath);
     } catch (e, st) {
       loggy.debug(e, st);
     }
   }
 
+  /// Disambiguates the entry name by appending a numeric value to [sourcePath]
+  /// and creates [newPath] using the disambiguated name, and the original
+  /// [destinationPath].
   Future<void> _renameAndCopy(
-    RepoCubit? toRepoCubit,
-    String srcPath,
-    String dstPath,
+    RepoCubit? destinationRepoCubit,
+    String sourcePath,
+    String destinationPath,
     EntryType type,
     bool recursive,
-    bool navigateToDestination,
   ) async {
     final newPath = await disambiguateEntryName(
-      repoCubit: (toRepoCubit ?? _repoCubit),
-      path: dstPath,
+      repoCubit: (destinationRepoCubit ?? _originRepoCubit),
+      path: destinationPath,
     );
 
-    await _pickModeAndCopyEntry(
-      toRepoCubit,
-      srcPath,
+    await _copyEntry(
+      destinationRepoCubit,
+      sourcePath,
       newPath,
       type,
       recursive,
-      navigateToDestination,
     );
   }
 
-  Future<void> _pickModeAndCopyEntry(
-    RepoCubit? toRepoCubit,
-    String srcPath,
-    String dstPath,
+  /// Copies the entry at [sourcePath] to [destinationPath].
+  ///
+  /// If [destinationRepoCubit] is not null, the entry will be copied using the
+  /// [destinationRepoCubit].
+  Future<void> _copyEntry(
+    RepoCubit? destinationRepoCubit,
+    String sourcePath,
+    String destinationPath,
     EntryType type,
     bool recursive,
-    bool navigateToDestination,
   ) async =>
-      _repoCubit.copyEntry(
-        source: srcPath,
-        destination: dstPath,
+      _originRepoCubit.copyEntry(
+        source: sourcePath,
+        destination: destinationPath,
         type: type,
-        destinationRepoCubit: toRepoCubit,
+        destinationRepoCubit: destinationRepoCubit,
         recursive: recursive,
-        navigateToDestination: navigateToDestination,
       );
 }

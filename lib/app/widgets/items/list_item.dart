@@ -50,7 +50,7 @@ class FileListItem extends StatelessWidget {
 
     final isSelected = entrySelectionState.isEntrySelected(
       repoInfoHash,
-      entry.path,
+      entry,
     );
 
     final onSelectEntry = repoCubit.entrySelectionCubit.selectEntry;
@@ -136,7 +136,7 @@ class DirectoryListItem extends StatelessWidget {
 
     final isSelected = entrySelectionState.isEntrySelected(
       repoInfoHash,
-      entry.path,
+      entry,
     );
     final tristate = isSelected
         ? entrySelectionState.selectedEntriesPath[entry.path]?.tristate

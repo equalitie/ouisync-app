@@ -1,8 +1,8 @@
 import 'dart:io' as io;
 
 import 'package:flutter/material.dart';
-import 'package:ouisync/native_channels.dart';
-import 'package:ouisync/ouisync.dart' show AccessMode, EntryType;
+import 'package:ouisync/native_channels.dart' show NativeChannels;
+import 'package:ouisync/ouisync.dart' show AccessMode;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -178,13 +178,9 @@ class _FileDetailState extends State<FileDetail> {
                 onTap: () async {
                   await Navigator.of(context).maybePop();
 
-                  final entryPath = widget.entry.path;
-                  final entryType = EntryType.file;
-
                   widget.repoCubit.showMoveEntryBottomSheet(
                     sheetType: BottomSheetType.copy,
-                    entryPath: entryPath,
-                    entryType: entryType,
+                    entry: widget.entry,
                   );
                 },
                 enabledValidation: () => widget.isActionAvailableValidator(
@@ -202,13 +198,9 @@ class _FileDetailState extends State<FileDetail> {
                 onTap: () async {
                   await Navigator.of(context).maybePop();
 
-                  final entryPath = widget.entry.path;
-                  final entryType = EntryType.file;
-
                   widget.repoCubit.showMoveEntryBottomSheet(
                     sheetType: BottomSheetType.move,
-                    entryPath: entryPath,
-                    entryType: entryType,
+                    entry: widget.entry,
                   );
                 },
                 enabledValidation: () => widget.isActionAvailableValidator(

@@ -4,14 +4,14 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart'
     show AlertDialog, Axis, BuildContext, Flex, showDialog;
-import 'package:ouisync/ouisync.dart';
+import 'package:ouisync/ouisync.dart' show EntryType;
 import 'package:path/path.dart' as p;
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart' show RepoCubit;
 import '../models/models.dart' show FileEntry;
-import '../widgets/widgets.dart' show FileAction, ReplaceKeepEntry;
+import '../widgets/widgets.dart' show DisambiguationAction, ReplaceKeepEntry;
 import 'platform/platform.dart' show PlatformValues;
 import 'utils.dart'
     show
@@ -80,7 +80,7 @@ class FileIO with AppLogger {
           continue;
         }
 
-        if (replaceOrKeepEntry == FileAction.replace) {
+        if (replaceOrKeepEntry == DisambiguationAction.replace) {
           await repoCubit.replaceFile(
             filePath: destinationFilePath,
             length: srcFile.size,
@@ -90,7 +90,7 @@ class FileIO with AppLogger {
           continue;
         }
 
-        if (replaceOrKeepEntry == FileAction.keep) {
+        if (replaceOrKeepEntry == DisambiguationAction.keep) {
           final newPath = await _renameFileWithVersion(
             fileName,
             parentPath,
@@ -107,11 +107,11 @@ class FileIO with AppLogger {
     }
   }
 
-  Future<FileAction?> _confirmKeepOrReplaceEntry(
+  Future<DisambiguationAction?> _confirmKeepOrReplaceEntry(
     BuildContext context, {
     required String fileName,
   }) async =>
-      showDialog<FileAction>(
+      showDialog<DisambiguationAction>(
         context: context,
         builder: (BuildContext context) => AlertDialog(
           title: Flex(

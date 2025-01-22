@@ -754,8 +754,7 @@ class _MainPageState extends State<MainPage>
         reposCubit: widget.reposCubit,
         originRepoCubit: state.repoCubit,
         navigationCubit: widget.reposCubit.navigation,
-        entryPath: state.entryPath,
-        entryType: state.entryType,
+        entry: state.entry,
         sheetType: state.type,
         onUpdateBottomSheet: updateBottomSheetInfo,
       );

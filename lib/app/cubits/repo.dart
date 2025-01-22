@@ -5,7 +5,7 @@ import 'dart:typed_data';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mime/mime.dart';
-import 'package:ouisync/native_channels.dart';
+import 'package:ouisync/native_channels.dart' show NativeChannels;
 import 'package:ouisync/ouisync.dart';
 import 'package:ouisync/state_monitor.dart';
 import 'package:shelf/shelf_io.dart';
@@ -216,28 +216,24 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
 
   void showMoveEntryBottomSheet({
     required BottomSheetType sheetType,
-    required String entryPath,
-    required EntryType entryType,
+    required FileSystemEntry entry,
   }) {
     _bottomSheet.showMoveEntry(
       repoCubit: this,
       navigationCubit: _navigation,
       type: sheetType,
-      entryPath: entryPath,
-      entryType: entryType,
+      entry: entry,
     );
   }
 
   void showMoveSelectedEntriesBottomSheet({
     required BottomSheetType sheetType,
-    String? entryPath,
-    EntryType? entryType,
+    FileSystemEntry? entry,
   }) {
     _bottomSheet.showMoveSelectedEntries(
       repoCubit: this,
       type: sheetType,
-      entryPath: entryPath,
-      entryType: entryType,
+      entry: entry,
     );
   }
 
@@ -746,7 +742,6 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     required EntryType type,
     RepoCubit? destinationRepoCubit,
     required bool recursive,
-    bool navigateToDestination = true,
   }) async {
     emitUnlessClosed(state.copyWith(isLoading: true));
     try {
@@ -764,9 +759,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
       loggy.app('Move entry from $source to $destination failed', e, st);
       return false;
     } finally {
-      if (navigateToDestination) {
-        await refresh();
-      }
+      await refresh();
     }
   }
 
@@ -844,7 +837,6 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     required String source,
     required String destination,
     required bool recursive,
-    bool navigateToDestination = true,
   }) async {
     emitUnlessClosed(state.copyWith(isLoading: true));
     try {
@@ -870,10 +862,8 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
       loggy.app('Move entry from $source to $destination failed', e, st);
       return false;
     } finally {
-      if (navigateToDestination) {
-        await destinationRepoCubit.refresh();
-        await refresh();
-      }
+      await destinationRepoCubit.refresh();
+      await refresh();
     }
   }
 

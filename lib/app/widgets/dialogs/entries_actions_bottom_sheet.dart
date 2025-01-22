@@ -31,8 +31,7 @@ class EntriesActionsDialog extends StatefulWidget {
     required this.reposCubit,
     required this.originRepoCubit,
     required this.navigationCubit,
-    required this.entryPath,
-    required this.entryType,
+    required this.entry,
     required this.sheetType,
     required this.onUpdateBottomSheet,
   }) : entrySelectionCubit = null;
@@ -45,8 +44,7 @@ class EntriesActionsDialog extends StatefulWidget {
     required this.entrySelectionCubit,
     required this.sheetType,
     required this.onUpdateBottomSheet,
-  })  : entryPath = '',
-        entryType = null;
+  }) : entry = null;
 
   final BuildContext parentContext;
   final ReposCubit reposCubit;
@@ -54,8 +52,7 @@ class EntriesActionsDialog extends StatefulWidget {
   final NavigationCubit navigationCubit;
   final EntrySelectionCubit? entrySelectionCubit;
 
-  final String entryPath;
-  final EntryType? entryType;
+  final FileSystemEntry? entry;
 
   final BottomSheetType sheetType;
   final void Function(
@@ -109,8 +106,7 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
                   widget.originRepoCubit,
                   widget.navigationCubit,
                   widget.entrySelectionCubit,
-                  widget.entryPath,
-                  widget.entryType,
+                  widget.entry,
                   widget.sheetType,
                 ),
               ],
@@ -119,7 +115,7 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
         ),
       );
 
-  List<Widget> _getLayout() => widget.entryPath.isEmpty
+  List<Widget> _getLayout() => widget.entry == null
       ? [
           _entriesCountLabel(widget.entrySelectionCubit!),
           _sourceLabel(widget.entrySelectionCubit!),
@@ -127,11 +123,12 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
       : [
           Fields.iconLabel(
             icon: Icons.drive_file_move_outlined,
-            text: repo_path.basename(widget.entryPath),
+            text: repo_path.basename(widget.entry!.path),
           ),
           Text(
-            S.current
-                .messageMoveEntryOrigin(repo_path.dirname(widget.entryPath)),
+            S.current.messageMoveEntryOrigin(
+              repo_path.dirname(widget.entry!.path),
+            ),
             style: Theme.of(context)
                 .textTheme
                 .bodyMedium
@@ -180,8 +177,7 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
     RepoCubit originRepoCubit,
     NavigationCubit navigationCubit,
     EntrySelectionCubit? entrySelectionCubit,
-    String entryPath,
-    EntryType? entryType,
+    FileSystemEntry? entry,
     BottomSheetType sheetType,
   ) =>
       BlocBuilder<NavigationCubit, NavigationState>(
@@ -191,10 +187,10 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
             context,
             reposCubit: reposCubit,
             originRepoCubit: originRepoCubit,
-            type: sheetType,
+            sheetType: sheetType,
           );
 
-          return widget.entryPath.isEmpty
+          return entry == null
               ? _multipleEntriesActions(
                   context,
                   entrySelectionCubit!,
@@ -208,8 +204,7 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
                   reposCubit,
                   moveEntriesActions,
                   sheetType,
-                  entryPath,
-                  entryType!,
+                  entry,
                 );
         },
       );
@@ -220,24 +215,18 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
     ReposCubit reposCubit,
     MoveEntriesActions moveEntriesActions,
     BottomSheetType sheetType,
-    String entryPath,
-    EntryType entryType,
+    FileSystemEntry entry,
   ) {
     bool canMove = false;
 
     final currentRepo = reposCubit.currentRepo;
     if (currentRepo != null) {
-      final originPath = repo_path.dirname(entryPath);
-      final destinationRepoLocation = currentRepo.location;
-
-      final accessMode = currentRepo.accessMode;
-      final isCurrentRepoWriteMode = accessMode == AccessMode.write;
-
+      final isCurrentRepoWriteMode = currentRepo.accessMode == AccessMode.write;
       canMove = state.isFolder
           ? moveEntriesActions.canMove(
-              originPath: originPath,
-              destinationRepoLocation: destinationRepoLocation,
+              entry: entry,
               destinationPath: state.path,
+              destinationRepoLocation: currentRepo.location,
               isCurrentRepoWriteMode: isCurrentRepoWriteMode,
             )
           : false;
@@ -253,8 +242,7 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
         null,
         moveEntriesActions.copyOrMoveSingleEntry(
           destinationRepoCubit: currentRepo!.cubit!,
-          entryPath: entryPath,
-          entryType: entryType,
+          entry: entry,
         ),
       );
     }

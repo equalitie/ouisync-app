@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ouisync/ouisync.dart' show AccessMode, Directory, EntryType;
+import 'package:ouisync/ouisync.dart' show AccessMode, Directory;
 import 'package:path/path.dart' as p;
 
 import '../../../generated/l10n.dart';
@@ -92,13 +92,9 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
               onTap: () async {
                 await Navigator.of(context).maybePop();
 
-                final entryPath = widget.entry.path;
-                final entryType = EntryType.directory;
-
                 widget.repoCubit.showMoveEntryBottomSheet(
                   sheetType: BottomSheetType.move,
-                  entryPath: entryPath,
-                  entryType: entryType,
+                  entry: widget.entry,
                 );
               },
               enabledValidation: () => widget.isActionAvailableValidator(
@@ -116,13 +112,9 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
               onTap: () async {
                 await Navigator.of(context).maybePop();
 
-                final entryPath = widget.entry.path;
-                final entryType = EntryType.directory;
-
                 widget.repoCubit.showMoveEntryBottomSheet(
                   sheetType: BottomSheetType.copy,
-                  entryPath: entryPath,
-                  entryType: entryType,
+                  entry: widget.entry,
                 );
               },
               enabledValidation: () => widget.isActionAvailableValidator(

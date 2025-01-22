@@ -1,21 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:ouisync_app/app/utils/utils.dart';
 import 'package:ouisync/ouisync.dart';
-
+import 'package:ouisync_app/app/widgets/widgets.dart'
+    show DisambiguationAction, ReplaceKeepEntry;
 import 'package:path/path.dart' as p;
 
 import '../../generated/l10n.dart';
-import '../cubits/cubits.dart';
-import '../widgets/dialogs/modal_replace_keep_entry_dialog.dart';
+import '../cubits/cubits.dart' show RepoCubit;
+import 'utils.dart' show AppThemeExtension, Fields, ThemeGetter;
 
 mixin EntryOps {
-  Future<FileAction?> getFileActionType(
+  Future<DisambiguationAction?> pickEntryDisambiguationAction(
     BuildContext context,
     String entryName,
-    String entryPath,
     EntryType entryType,
   ) async =>
-      await showDialog<FileAction?>(
+      await showDialog<DisambiguationAction?>(
         context: context,
         builder: (BuildContext context) => AlertDialog(
           title: Flex(

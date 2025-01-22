@@ -6,23 +6,23 @@ import 'package:path/path.dart' as p;
 
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart' show BottomSheetType, RepoCubit, ReposCubit;
-import '../models/models.dart' show RepoLocation;
+import '../models/models.dart' show FileEntry, FileSystemEntry, RepoLocation;
 
 class MoveEntriesActions {
   MoveEntriesActions(
     BuildContext context, {
     required ReposCubit reposCubit,
     required RepoCubit originRepoCubit,
-    required BottomSheetType type,
+    required BottomSheetType sheetType,
   })  : _context = context,
         _reposCubit = reposCubit,
         _originRepoCubit = originRepoCubit,
-        _type = type;
+        _sheetType = sheetType;
 
   final BuildContext _context;
   final ReposCubit _reposCubit;
   final RepoCubit _originRepoCubit;
-  final BottomSheetType _type;
+  final BottomSheetType _sheetType;
 
   String getActionText(BottomSheetType type) => switch (type) {
         BottomSheetType.copy => S.current.actionCopy,
@@ -37,7 +37,7 @@ class MoveEntriesActions {
     RepoCubit destinationRepoCubit,
     MultiEntryActions multiEntryActions,
   ) =>
-      switch (_type) {
+      switch (_sheetType) {
         BottomSheetType.copy =>
           multiEntryActions.copyEntriesTo(destinationRepoCubit),
         BottomSheetType.delete => multiEntryActions.deleteSelectedEntries(),
@@ -50,32 +50,28 @@ class MoveEntriesActions {
 
   Future<void> copyOrMoveSingleEntry({
     required RepoCubit destinationRepoCubit,
-    required String entryPath,
-    required EntryType entryType,
+    required FileSystemEntry entry,
   }) async {
     final currentFolderPath = destinationRepoCubit.state.currentFolder.path;
     if (currentFolderPath.isEmpty) return;
 
-    final entryBaseName = p.basename(entryPath);
-
+    final entryBaseName = p.basename(entry.path);
     final toRepoCubit =
         _originRepoCubit.location.compareTo(destinationRepoCubit.location) != 0
             ? destinationRepoCubit
             : null;
 
-    final action = switch (_type) {
+    final action = switch (_sheetType) {
       BottomSheetType.copy => copySingleEntry(
           currentFolderPath,
           entryBaseName,
-          entryPath,
-          entryType,
+          entry,
           toRepoCubit,
         ),
       BottomSheetType.move => moveSingleEntry(
           currentFolderPath,
           entryBaseName,
-          entryPath,
-          entryType,
+          entry,
           toRepoCubit,
         ),
       _ => null,
@@ -87,47 +83,41 @@ class MoveEntriesActions {
   Future<void> copySingleEntry(
     String currentFolderPath,
     String entryBaseName,
-    String entryPath,
-    EntryType entryType,
+    FileSystemEntry entry,
     RepoCubit? toRepoCubit,
   ) async =>
       CopyEntry(
         _context,
-        repoCubit: _originRepoCubit,
-        srcPath: entryPath,
-        dstPath: currentFolderPath,
-        type: entryType,
+        originRepoCubit: _originRepoCubit,
+        entry: entry,
+        destinationPath: currentFolderPath,
       ).copy(
-        toRepoCubit: toRepoCubit,
+        currentRepoCubit: toRepoCubit,
         fromPathSegment: entryBaseName,
-        navigateToDestination: true,
         recursive: true,
       );
 
   Future<void> moveSingleEntry(
     String currentFolderPath,
     String entryBaseName,
-    String entryPath,
-    EntryType entryType,
+    FileSystemEntry entry,
     RepoCubit? toRepoCubit,
   ) async =>
       MoveEntry(
         _context,
-        repoCubit: _originRepoCubit,
-        srcPath: entryPath,
-        dstPath: currentFolderPath,
-        type: entryType,
+        originRepoCubit: _originRepoCubit,
+        entry: entry,
+        destinationPath: currentFolderPath,
       ).move(
-        toRepoCubit: toRepoCubit,
+        currentRepoCubit: toRepoCubit,
         fromPathSegment: entryBaseName,
-        navigateToDestination: true,
         recursive: true,
       );
 
   bool canMove({
-    required String originPath,
-    required RepoLocation? destinationRepoLocation,
+    required FileSystemEntry entry,
     required String destinationPath,
+    required RepoLocation? destinationRepoLocation,
     required bool isCurrentRepoWriteMode,
   }) {
     if (_reposCubit.showList) return false;
@@ -138,10 +128,18 @@ class MoveEntriesActions {
         _originRepoCubit.location.compareTo(destinationRepoLocation) == 0
             ? true
             : false;
-    final isSamePath =
-        originPath.compareTo(destinationPath) == 0 ? true : false;
 
+    final path = entry.path;
+    final parent = p.dirname(path);
+    final type = entry is FileEntry ? EntryType.file : EntryType.directory;
+
+    final isSamePath = parent.compareTo(destinationPath) == 0 ? true : false;
     if (isSameRepo && isSamePath) return false;
+
+    if (type == EntryType.directory) {
+      final isWithinDestination = p.isWithin(path, destinationPath);
+      if (isSameRepo && isWithinDestination) return false;
+    }
 
     return true;
   }
