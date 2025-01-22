@@ -304,6 +304,8 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     try {
       await _repo.mount();
       emitUnlessClosed(state.copyWith(mountState: const MountStateSuccess()));
+    } on Unsupported {
+      emitUnlessClosed(state.copyWith(mountState: const MountStateDisabled()));
     } catch (error, stack) {
       emitUnlessClosed(
           state.copyWith(mountState: MountStateFailure(error, stack)));
