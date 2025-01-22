@@ -638,10 +638,7 @@ class _MainPageState extends State<MainPage>
                                   true,
                                 ),
                             verticalDotsAction: () async {
-                              if (!selectionState.canSelect(
-                                currentRepoInfoHash,
-                                currentPath,
-                              )) {
+                              if (selectionState.status == SelectionStatus.on) {
                                 await _showMovingEntryAlertDialog(context);
                                 return;
                               }
@@ -669,10 +666,7 @@ class _MainPageState extends State<MainPage>
                               }
                             },
                             verticalDotsAction: () async {
-                              if (!selectionState.canSelect(
-                                currentRepoInfoHash,
-                                currentPath,
-                              )) {
+                              if (selectionState.status == SelectionStatus.on) {
                                 await _showMovingEntryAlertDialog(context);
                                 return;
                               }

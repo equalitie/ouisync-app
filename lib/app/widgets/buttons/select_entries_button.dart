@@ -37,7 +37,7 @@ class _SelectEntriesButtonState extends State<SelectEntriesButton> {
           child: _selectState(
             widget.reposCubit,
             widget.repoCubit,
-            state.selectionState == SelectionState.on,
+            state.status == SelectionStatus.on,
           ),
         ),
       );
@@ -65,18 +65,17 @@ class DoneState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => TextButton.icon(
-        onPressed: () async =>
-            repoCubit.entrySelectionCubit.entries.isEmpty
-                ? await repoCubit.endEntriesSelection()
-                : await showModalBottomSheet(
-                    isScrollControlled: true,
-                    context: context,
-                    shape: Dimensions.borderBottomSheetTop,
-                    builder: (context) => _EntrySelectionActionsList(
-                      reposCubit,
-                      repoCubit,
-                    ),
-                  ),
+        onPressed: () async => repoCubit.entrySelectionCubit.entries.isEmpty
+            ? await repoCubit.endEntriesSelection()
+            : await showModalBottomSheet(
+                isScrollControlled: true,
+                context: context,
+                shape: Dimensions.borderBottomSheetTop,
+                builder: (context) => _EntrySelectionActionsList(
+                  reposCubit,
+                  repoCubit,
+                ),
+              ),
         label: Text(S.current.actionDone),
         icon: const Icon(Icons.arrow_drop_down_outlined),
         iconAlignment: IconAlignment.end,
@@ -97,7 +96,7 @@ class EditState extends StatelessWidget {
       );
 }
 
-enum SelectionState { off, on }
+enum SelectionStatus { off, on }
 
 class _EntrySelectionActionsList extends StatelessWidget with AppLogger {
   _EntrySelectionActionsList(ReposCubit reposCubit, RepoCubit repoCubit)

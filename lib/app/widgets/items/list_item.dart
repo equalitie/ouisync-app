@@ -16,7 +16,7 @@ import '../widgets.dart'
         RepoDescription,
         RepoStatus,
         ScrollableTextWidget,
-        SelectionState;
+        SelectionStatus;
 
 class FileListItem extends StatelessWidget {
   FileListItem({
@@ -217,7 +217,7 @@ class RepoListItem extends StatelessWidget {
               ),
               RepoStatus(repoCubit),
               _VerticalDotsButton(
-                isAvailable: true,
+                disable: false,
                 action: verticalDotsAction,
               ),
             ],
@@ -331,46 +331,41 @@ class TrailAction extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocConsumer<EntrySelectionCubit, EntrySelectionState>(
       bloc: entrySelectionCubit,
-      builder: (context, state) {
-        final isSelecting = state.canSelect(
-          repoInfoHash,
-          p.dirname(entry.path),
-        );
-        return isSelecting
-            ? ValueListenableBuilder(
-                valueListenable: _selectedNotifier,
-                builder: (
-                  BuildContext context,
-                  bool? value,
-                  Widget? child,
-                ) =>
-                    Checkbox.adaptive(
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(6.0)),
-                  ),
-                  visualDensity: VisualDensity.adaptivePlatformDensity,
-                  value: value,
-                  onChanged: (value) async => await _updateSelection(
-                    context,
-                    value ?? false,
-                    repoInfoHash: repoInfoHash,
-                    entry: entry,
-                    valueNotifier: _selectedNotifier,
-                    colorNotifier: _backgroundColorNotifier,
-                    onSelectEntry: onSelectEntry,
-                    onClearEntry: onClearEntry,
+      builder: (context, state) => state.isSelectable(
+        repoInfoHash,
+        p.dirname(entry.path),
+      )
+          ? ValueListenableBuilder(
+              valueListenable: _selectedNotifier,
+              builder: (BuildContext context, bool? value, Widget? child) =>
+                  Checkbox.adaptive(
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(6.0),
                   ),
                 ),
-              )
-            : _VerticalDotsButton(
-                isAvailable: isSelecting,
-                action: uploadJob == null ? verticalDotsAction : null,
-              );
-      },
+                visualDensity: VisualDensity.adaptivePlatformDensity,
+                value: value,
+                onChanged: (value) async => await _updateSelection(
+                  context,
+                  value ?? false,
+                  repoInfoHash: repoInfoHash,
+                  entry: entry,
+                  valueNotifier: _selectedNotifier,
+                  colorNotifier: _backgroundColorNotifier,
+                  onSelectEntry: onSelectEntry,
+                  onClearEntry: onClearEntry,
+                ),
+              ),
+            )
+          : _VerticalDotsButton(
+              disable: state.status == SelectionStatus.on,
+              action: uploadJob == null ? verticalDotsAction : null,
+            ),
       listener: (context, state) async {
         if (repoInfoHash != state.originRepoInfoHash) return;
 
-        if (state.selectionState == SelectionState.off) {
+        if (state.status == SelectionStatus.off) {
           await _updateSelection(
             context,
             false,
@@ -426,17 +421,17 @@ void _getBackgroundColor(
     };
 
 class _VerticalDotsButton extends StatelessWidget {
-  _VerticalDotsButton({required this.isAvailable, required this.action});
+  _VerticalDotsButton({required this.disable, required this.action});
 
-  final bool isAvailable;
+  final bool disable;
   final void Function()? action;
 
   @override
   Widget build(BuildContext context) => IconButton(
         key: ValueKey('file_vert'),
-        color: !isAvailable ? Colors.grey : null,
-        icon: const Icon(
-          Icons.more_vert_rounded,
+        color: disable ? Colors.grey : null,
+        icon: Icon(
+          disable ? Icons.info_outline_rounded : Icons.more_vert_rounded,
           size: Dimensions.sizeIconSmall,
         ),
         onPressed: action,

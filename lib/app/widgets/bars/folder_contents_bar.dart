@@ -9,7 +9,7 @@ import 'package:ouisync_app/app/cubits/cubits.dart'
         SortListCubit;
 import 'package:ouisync_app/app/utils/utils.dart' show ThemeGetter;
 import 'package:ouisync_app/app/widgets/widgets.dart'
-    show SelectEntriesButton, SelectionState, SortContentsBar;
+    show SelectEntriesButton, SelectionStatus, SortContentsBar;
 
 class FolderContentsBar extends StatefulWidget {
   const FolderContentsBar({
@@ -53,7 +53,7 @@ class _FolderContentsBarState extends State<FolderContentsBar> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     if (widget.hasContents ||
-                        state.selectionState == SelectionState.on)
+                        state.status == SelectionStatus.on)
                       SelectEntriesButton(
                         reposCubit: widget.reposCubit,
                         repoCubit: widget.repoCubit,
@@ -71,7 +71,7 @@ class _FolderContentsBarState extends State<FolderContentsBar> {
           bottomLeft: Radius.circular(8.0),
           bottomRight: Radius.circular(8.0),
         ),
-        border: state.selectionState == SelectionState.on
+        border: state.status == SelectionStatus.on
             ? Border(
                 bottom: BorderSide(
                   color: Colors.black26,
@@ -79,7 +79,7 @@ class _FolderContentsBarState extends State<FolderContentsBar> {
                 ),
               )
             : null,
-        color: state.selectionState == SelectionState.on
+        color: state.status == SelectionStatus.on
             ? context.theme.secondaryHeaderColor
             : null,
       );

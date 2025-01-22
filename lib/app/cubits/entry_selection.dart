@@ -12,31 +12,31 @@ import '../models/models.dart' show DirectoryEntry, FileEntry, FileSystemEntry;
 import '../utils/repo_path.dart' as repo_path;
 import '../utils/utils.dart'
     show AppLogger, CopyEntry, FileIO, MoveEntry, StringExtension, showSnackBar;
-import '../widgets/widgets.dart' show SelectionState;
+import '../widgets/widgets.dart' show SelectionStatus;
 import 'cubits.dart' show CubitActions, RepoCubit;
 
 class EntrySelectionState extends Equatable {
   const EntrySelectionState({
     this.originRepoInfoHash = '',
-    this.selectionState = SelectionState.off,
+    this.status = SelectionStatus.off,
     this.selectedEntries = const <FileSystemEntry>[],
     this.updating = false,
   });
 
   final String originRepoInfoHash;
-  final SelectionState selectionState;
+  final SelectionStatus status;
   final List<FileSystemEntry> selectedEntries;
   final bool updating;
 
   EntrySelectionState copyWith({
     String? originRepoInfoHash,
-    SelectionState? selectionState,
+    SelectionStatus? selectionState,
     List<FileSystemEntry>? selectedEntries,
     bool? updating,
   }) =>
       EntrySelectionState(
         originRepoInfoHash: originRepoInfoHash ?? this.originRepoInfoHash,
-        selectionState: selectionState ?? this.selectionState,
+        status: selectionState ?? this.status,
         selectedEntries: selectedEntries ?? this.selectedEntries,
         updating: updating ?? false,
       );
@@ -44,7 +44,7 @@ class EntrySelectionState extends Equatable {
   @override
   List<Object?> get props => [
         originRepoInfoHash,
-        selectionState,
+        status,
         selectedEntries,
         updating,
       ];
@@ -52,8 +52,8 @@ class EntrySelectionState extends Equatable {
   String get selectionOriginPath =>
       selectedEntries.isNotEmpty ? p.dirname(selectedEntries.first.path) : '';
 
-  bool canSelect(String currentRepoInfoHash, String path) {
-    if (selectionState == SelectionState.off ||
+  bool isSelectable(String currentRepoInfoHash, String path) {
+    if (status == SelectionStatus.off ||
         originRepoInfoHash != currentRepoInfoHash ||
         (selectionOriginPath.isNotEmpty && selectionOriginPath != path)) {
       return false;
@@ -91,7 +91,7 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
 
     emitUnlessClosed(state.copyWith(
       originRepoInfoHash: _originRepoInfoHash,
-      selectionState: SelectionState.on,
+      selectionState: SelectionStatus.on,
       selectedEntries: _entries,
     ));
   }
@@ -103,7 +103,7 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
     _entries.clear();
 
     emitUnlessClosed(state.copyWith(
-      selectionState: SelectionState.off,
+      selectionState: SelectionStatus.off,
       selectedEntries: <FileSystemEntry>[],
     ));
   }
