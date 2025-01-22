@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:ouisync/ouisync.dart' show EntryType;
 
 import '../cubits/cubits.dart' show RepoCubit;
-import '../models/models.dart' show FileSystemEntry, Folder;
+import '../models/models.dart' show DirectoryEntry, FileSystemEntry, Folder;
 import '../widgets/widgets.dart' show DisambiguationAction;
 import 'repo_path.dart' as repo_path;
-import 'utils.dart' show AppLogger, EntryOps;
+import 'utils.dart' show AppLogger, EntryOps, StringExtension;
 
 class CopyEntry with EntryOps, AppLogger {
   CopyEntry(
@@ -35,14 +35,22 @@ class CopyEntry with EntryOps, AppLogger {
   /// [recursive] is used if the entry is a folder.
   Future<void> copy({
     required RepoCubit? currentRepoCubit,
-    required String fromPathSegment,
     required bool recursive,
   }) async {
     final path = _entry.path;
-    final type = _entry is Folder ? EntryType.directory : EntryType.file;
+    final type =
+        _entry is DirectoryEntry ? EntryType.directory : EntryType.file;
+
+    final fromPathSegment = repo_path
+        .basename(
+          path,
+        )
+        .removePrefix(
+          repo_path.separator(),
+        );
+    final newPath = repo_path.join(_destinationPath, fromPathSegment);
 
     final destinationRepoCubit = (currentRepoCubit ?? _originRepoCubit);
-    final newPath = repo_path.join(_destinationPath, fromPathSegment);
 
     final exist = await destinationRepoCubit.exists(newPath);
     if (exist == false) {

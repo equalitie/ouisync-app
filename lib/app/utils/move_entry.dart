@@ -6,7 +6,7 @@ import 'package:ouisync_app/app/models/models.dart'
 import '../cubits/cubits.dart' show RepoCubit;
 import '../widgets/widgets.dart' show DisambiguationAction;
 import 'repo_path.dart' as repo_path;
-import 'utils.dart' show AppLogger, EntryOps;
+import 'utils.dart' show AppLogger, EntryOps, StringExtension;
 
 class MoveEntry with EntryOps, AppLogger {
   MoveEntry(
@@ -26,14 +26,21 @@ class MoveEntry with EntryOps, AppLogger {
 
   Future<void> move({
     required RepoCubit? currentRepoCubit,
-    required String fromPathSegment,
     required bool recursive,
   }) async {
     final path = _entry.path;
     final type = _entry is Folder ? EntryType.directory : EntryType.file;
 
-    final destinationRepoCubit = (currentRepoCubit ?? _originRepoCubit);
+    final fromPathSegment = repo_path
+        .basename(
+          path,
+        )
+        .removePrefix(
+          repo_path.separator(),
+        );
     final newPath = repo_path.join(_destinationPath, fromPathSegment);
+
+    final destinationRepoCubit = (currentRepoCubit ?? _originRepoCubit);
 
     final exist = await destinationRepoCubit.exists(newPath);
     if (!exist) {

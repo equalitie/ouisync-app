@@ -267,11 +267,7 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
         originRepoCubit: originRepoCubit,
         entry: entry,
         destinationPath: destinationPath,
-      ).copy(
-        currentRepoCubit: toRepoCubit,
-        fromPathSegment: entry.path.removePrefix(repo_path.separator()),
-        recursive: true,
-      );
+      ).copy(currentRepoCubit: toRepoCubit, recursive: true);
 
   Future<void> _move(
     BuildContext context, {
@@ -285,11 +281,7 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
         originRepoCubit: originRepoCubit,
         entry: entry,
         destinationPath: destinationPath,
-      ).move(
-        currentRepoCubit: toRepoCubit,
-        fromPathSegment: entry.path.removePrefix(repo_path.separator()),
-        recursive: true,
-      );
+      ).move(currentRepoCubit: toRepoCubit, recursive: true);
 
   Future<bool> deleteEntries() async {
     try {

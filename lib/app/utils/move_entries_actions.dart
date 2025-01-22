@@ -55,7 +55,6 @@ class MoveEntriesActions {
     final currentFolderPath = destinationRepoCubit.state.currentFolder.path;
     if (currentFolderPath.isEmpty) return;
 
-    final entryBaseName = p.basename(entry.path);
     final toRepoCubit =
         _originRepoCubit.location.compareTo(destinationRepoCubit.location) != 0
             ? destinationRepoCubit
@@ -64,13 +63,11 @@ class MoveEntriesActions {
     final action = switch (_sheetType) {
       BottomSheetType.copy => copySingleEntry(
           currentFolderPath,
-          entryBaseName,
           entry,
           toRepoCubit,
         ),
       BottomSheetType.move => moveSingleEntry(
           currentFolderPath,
-          entryBaseName,
           entry,
           toRepoCubit,
         ),
@@ -82,7 +79,6 @@ class MoveEntriesActions {
 
   Future<void> copySingleEntry(
     String currentFolderPath,
-    String entryBaseName,
     FileSystemEntry entry,
     RepoCubit? toRepoCubit,
   ) async =>
@@ -91,15 +87,10 @@ class MoveEntriesActions {
         originRepoCubit: _originRepoCubit,
         entry: entry,
         destinationPath: currentFolderPath,
-      ).copy(
-        currentRepoCubit: toRepoCubit,
-        fromPathSegment: entryBaseName,
-        recursive: true,
-      );
+      ).copy(currentRepoCubit: toRepoCubit, recursive: true);
 
   Future<void> moveSingleEntry(
     String currentFolderPath,
-    String entryBaseName,
     FileSystemEntry entry,
     RepoCubit? toRepoCubit,
   ) async =>
@@ -108,11 +99,7 @@ class MoveEntriesActions {
         originRepoCubit: _originRepoCubit,
         entry: entry,
         destinationPath: currentFolderPath,
-      ).move(
-        currentRepoCubit: toRepoCubit,
-        fromPathSegment: entryBaseName,
-        recursive: true,
-      );
+      ).move(currentRepoCubit: toRepoCubit, recursive: true);
 
   bool canMove({
     required FileSystemEntry entry,
