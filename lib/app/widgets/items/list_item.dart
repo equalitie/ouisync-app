@@ -431,7 +431,7 @@ class _VerticalDotsButton extends StatelessWidget {
         key: ValueKey('file_vert'),
         color: disable ? Colors.grey : null,
         icon: Icon(
-          disable ? Icons.info_outline_rounded : Icons.more_vert_rounded,
+          disable ? Icons.more_horiz_rounded : Icons.more_vert_rounded,
           size: Dimensions.sizeIconSmall,
         ),
         onPressed: action,
