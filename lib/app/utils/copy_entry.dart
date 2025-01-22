@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ouisync/ouisync.dart' show EntryType;
 
 import '../cubits/cubits.dart' show RepoCubit;
-import '../models/models.dart' show DirectoryEntry, FileSystemEntry, Folder;
+import '../models/models.dart' show FileEntry, FileSystemEntry;
 import '../widgets/widgets.dart' show DisambiguationAction;
 import 'repo_path.dart' as repo_path;
 import 'utils.dart' show AppLogger, EntryOps, StringExtension;
@@ -38,8 +38,7 @@ class CopyEntry with EntryOps, AppLogger {
     required bool recursive,
   }) async {
     final path = _entry.path;
-    final type =
-        _entry is DirectoryEntry ? EntryType.directory : EntryType.file;
+    final type = _entry is FileEntry ? EntryType.file : EntryType.directory;
 
     final fromPathSegment = repo_path
         .basename(
