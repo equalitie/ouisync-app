@@ -137,7 +137,12 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
   }
 
   Future<void> selectEntry(String repoInfoHash, FileSystemEntry entry) async {
-    if (_originRepoInfoHash != repoInfoHash) {
+    if (_originRepoInfoHash.isEmpty || _originRepoInfoHash != repoInfoHash) {
+      emitUnlessClosed(state);
+      return;
+    }
+
+    if (p.dirname(entry.path) != _originPath) {
       emitUnlessClosed(state);
       return;
     }
