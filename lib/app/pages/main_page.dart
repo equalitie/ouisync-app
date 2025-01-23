@@ -697,42 +697,31 @@ class _MainPageState extends State<MainPage>
         message: S.current.messageMovingEntry,
       );
 
-  Future<dynamic> _showFileDetails(
-    RepoCubit repoCubit,
-    FileEntry entry,
-  ) =>
+  Future<void> _showEntryDetails(RepoCubit repoCubit, FileSystemEntry entry) =>
       showModalBottomSheet(
         isScrollControlled: true,
         context: context,
         shape: Dimensions.borderBottomSheetTop,
-        builder: (context) => FileDetail(
-          repoCubit: repoCubit,
-          entry: entry,
-          onPreviewFile: (cubit, data, useDefaultApp) => _previewFile(
-            cubit,
-            data,
-            useDefaultApp,
-          ),
-          isActionAvailableValidator: _isEntryActionAvailable,
-          packageInfo: widget.packageInfo,
-          nativeChannels: widget.nativeChannels,
-        ),
-      );
-
-  Future<dynamic> _showFolderDetails(
-    RepoCubit repoCubit,
-    DirectoryEntry entry,
-  ) =>
-      showModalBottomSheet(
-        isScrollControlled: true,
-        context: context,
-        shape: Dimensions.borderBottomSheetTop,
-        builder: (context) => FolderDetail(
-          context: context,
-          repoCubit: repoCubit,
-          entry: entry,
-          isActionAvailableValidator: _isEntryActionAvailable,
-        ),
+        builder: (context) => entry is FileEntry
+            ? EntryDetails.file(
+                context,
+                repoCubit: repoCubit,
+                entry: entry,
+                onPreviewFile: (cubit, data, useDefaultApp) => _previewFile(
+                  cubit,
+                  data,
+                  useDefaultApp,
+                ),
+                isActionAvailableValidator: _isEntryActionAvailable,
+                packageInfo: widget.packageInfo,
+                nativeChannels: widget.nativeChannels,
+              )
+            : EntryDetails.folder(
+                context,
+                repoCubit: repoCubit,
+                entry: entry,
+                isActionAvailableValidator: _isEntryActionAvailable,
+              ),
       );
 
   bool _isEntryActionAvailable(
