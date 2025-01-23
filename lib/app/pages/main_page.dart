@@ -624,62 +624,15 @@ class _MainPageState extends State<MainPage>
 
                   return Column(
                     children: [
-                      switch (entry) {
-                        FileEntry entry => FileListItem(
-                            key: key,
-                            entry: entry,
-                            repoCubit: currentRepoCubit,
-                            mainAction: () async => await _previewFile(
-                                  currentRepoCubit,
-                                  entry,
-                                  true,
-                                ),
-                            verticalDotsAction: () async {
-                              if (selectionState.status == SelectionStatus.on) {
-                                await _showMovingEntryAlertDialog(context);
-                                return;
-                              }
-
-                              if (_bottomSheetInfo.value.type ==
-                                  BottomSheetType.gone) {
-                                await _showFileDetails(currentRepoCubit, entry);
-                              }
-                            }),
-                        DirectoryEntry entry => DirectoryListItem(
-                            key: key,
-                            entry: entry,
-                            repoCubit: currentRepoCubit,
-                            mainAction: () async {
-                              final currentRepoInfoHash =
-                                  currentRepoCubit.state.infoHash;
-                              if (selectionState.isEntrySelected(
-                                currentRepoInfoHash,
-                                entry,
-                              )) {
-                                await _showMovingEntryAlertDialog(context);
-                                return;
-                              }
-
-                              if (_bottomSheetInfo.value.entry != entry.path) {
-                                await currentRepoCubit.navigateTo(entry.path);
-                              }
-                            },
-                            verticalDotsAction: () async {
-                              if (selectionState.status == SelectionStatus.on) {
-                                await _showMovingEntryAlertDialog(context);
-                                return;
-                              }
-
-                              if (_bottomSheetInfo.value.type ==
-                                  BottomSheetType.gone) {
-                                await _showFolderDetails(
-                                  currentRepoCubit,
-                                  entry,
-                                );
-                              }
-                            },
-                          ),
-                      },
+                      (entry is FileEntry
+                          ? _builFileListItem
+                          : _buildDirectoryListItem)(
+                        context,
+                        key,
+                        currentRepoCubit,
+                        selectionState,
+                        entry,
+                      ),
                       if (index == (totalEntries - 1)) SizedBox(height: 56)
                     ],
                   );
@@ -687,6 +640,64 @@ class _MainPageState extends State<MainPage>
               ),
             ),
           );
+        },
+      );
+
+  FileListItem _builFileListItem(
+    BuildContext context,
+    ValueKey<String> key,
+    RepoCubit currentRepoCubit,
+    EntrySelectionState selectionState,
+    FileSystemEntry entry,
+  ) =>
+      FileListItem(
+          key: key,
+          entry: entry as FileEntry,
+          repoCubit: currentRepoCubit,
+          mainAction: () async =>
+              await _previewFile(currentRepoCubit, entry, true),
+          verticalDotsAction: () async {
+            if (selectionState.status == SelectionStatus.on) {
+              await _showMovingEntryAlertDialog(context);
+              return;
+            }
+
+            if (_bottomSheetInfo.value.type == BottomSheetType.gone) {
+              await _showEntryDetails(currentRepoCubit, entry);
+            }
+          });
+
+  DirectoryListItem _buildDirectoryListItem(
+    BuildContext context,
+    ValueKey<String> key,
+    RepoCubit currentRepoCubit,
+    EntrySelectionState selectionState,
+    FileSystemEntry entry,
+  ) =>
+      DirectoryListItem(
+        key: key,
+        entry: entry as DirectoryEntry,
+        repoCubit: currentRepoCubit,
+        mainAction: () async {
+          final currentRepoInfoHash = currentRepoCubit.state.infoHash;
+          if (selectionState.isEntrySelected(currentRepoInfoHash, entry)) {
+            await _showMovingEntryAlertDialog(context);
+            return;
+          }
+
+          if (_bottomSheetInfo.value.entry != entry.path) {
+            await currentRepoCubit.navigateTo(entry.path);
+          }
+        },
+        verticalDotsAction: () async {
+          if (selectionState.status == SelectionStatus.on) {
+            await _showMovingEntryAlertDialog(context);
+            return;
+          }
+
+          if (_bottomSheetInfo.value.type == BottomSheetType.gone) {
+            await _showEntryDetails(currentRepoCubit, entry);
+          }
         },
       );
 
