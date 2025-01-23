@@ -5,7 +5,7 @@ import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart'
     show EntrySelectionCubit, EntrySelectionState, RepoCubit, ReposCubit;
 import '../../utils/utils.dart' show Dimensions;
-import '../widgets.dart' show EntryDetail;
+import '../widgets.dart' show EntryActions;
 
 class SelectEntriesButton extends StatefulWidget {
   const SelectEntriesButton({
@@ -80,7 +80,7 @@ class EditState extends StatelessWidget {
           isScrollControlled: true,
           context: context,
           shape: Dimensions.borderBottomSheetTop,
-          builder: (context) => EntryDetail(repoCubit: repoCubit),
+          builder: (context) => EntryActions(repoCubit: repoCubit),
         ),
         label: Text(S.current.actionSelect),
         icon: const Icon(Icons.check),

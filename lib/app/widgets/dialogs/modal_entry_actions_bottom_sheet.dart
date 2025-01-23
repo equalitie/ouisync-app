@@ -6,16 +6,16 @@ import '../../utils/utils.dart'
     show AppThemeExtension, Constants, Dimensions, Fields, ThemeGetter;
 import '../widgets.dart' show EntryActionItem;
 
-class EntryDetail extends StatefulWidget {
-  const EntryDetail({required this.repoCubit});
+class EntryActions extends StatefulWidget {
+  const EntryActions({required this.repoCubit});
 
   final RepoCubit repoCubit;
 
   @override
-  State<EntryDetail> createState() => _EntryDetailState();
+  State<EntryActions> createState() => _EntryActionsState();
 }
 
-class _EntryDetailState extends State<EntryDetail> {
+class _EntryActionsState extends State<EntryActions> {
   @override
   Widget build(BuildContext context) => SingleChildScrollView(
         child: Container(

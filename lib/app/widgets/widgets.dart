@@ -25,7 +25,7 @@ export 'dialogs/dokan_older_mayor_found.dart';
 export 'dialogs/dokan_validation.dart';
 export 'dialogs/info_bubble.dart';
 export 'dialogs/modal_actions_bottom_sheet.dart';
-export 'dialogs/modal_entry_detail_bottom_sheet.dart';
+export 'dialogs/modal_entry_actions_bottom_sheet.dart';
 export 'dialogs/modal_file_detail_bottom_sheet.dart';
 export 'dialogs/modal_folder_creation_dialog.dart';
 export 'dialogs/modal_folder_detail_bottom_sheet.dart';
