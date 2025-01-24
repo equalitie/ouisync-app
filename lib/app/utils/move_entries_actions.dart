@@ -1,14 +1,13 @@
 import 'package:flutter/widgets.dart';
-import 'package:ouisync/ouisync.dart' show EntryType;
+import 'package:ouisync/ouisync.dart' show AccessMode;
 import 'package:ouisync_app/app/utils/utils.dart'
-    show CopyEntry, MoveEntry, MultiEntryActions;
-import 'package:path/path.dart' as p;
+    show AppLogger, CopyEntry, MoveEntry, MultiEntryActions;
 
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart' show BottomSheetType, RepoCubit, ReposCubit;
-import '../models/models.dart' show FileEntry, FileSystemEntry, RepoLocation;
+import '../models/models.dart' show FileSystemEntry, RepoEntry;
 
-class MoveEntriesActions {
+class MoveEntriesActions with AppLogger {
   MoveEntriesActions(
     BuildContext context, {
     required ReposCubit reposCubit,
@@ -101,34 +100,34 @@ class MoveEntriesActions {
         destinationPath: currentFolderPath,
       ).move(currentRepoCubit: toRepoCubit, recursive: true);
 
-  bool canMove({
-    required FileSystemEntry entry,
-    required String destinationPath,
-    required RepoLocation? destinationRepoLocation,
-    required bool isCurrentRepoWriteMode,
-  }) {
-    if (_reposCubit.state.current != null) return false;
-    if (destinationRepoLocation == null) return false;
-    if (!isCurrentRepoWriteMode) return false;
+  bool enableAction(
+    ({bool destinationOk, String errorMessage}) Function(
+      RepoCubit destinationRepoCubit,
+      String destinationPath,
+    ) validation,
+    RepoEntry? currentRepo,
+  ) {
+    if (currentRepo == null) return false;
 
-    bool isSameRepo =
-        _originRepoCubit.location.compareTo(destinationRepoLocation) == 0
-            ? true
-            : false;
+    final currentRepoCubit = currentRepo.cubit;
+    if (currentRepoCubit != null) {
+      final currentPath = currentRepoCubit.currentFolder;
 
-    final path = entry.path;
-    final parent = p.dirname(path);
-    final type = entry is FileEntry ? EntryType.file : EntryType.directory;
+      final accessMode = currentRepo.accessMode;
+      final isCurrentRepoWriteMode = accessMode == AccessMode.write;
 
-    final isSamePath = parent.compareTo(destinationPath) == 0 ? true : false;
-    if (isSameRepo && isSamePath) return false;
+      final validationOk = validation(currentRepoCubit, currentPath);
 
-    if (type == EntryType.directory) {
-      final isWithinDestination = p.isWithin(path, destinationPath);
-      if (isSameRepo && isWithinDestination) return false;
+      if (!validationOk.destinationOk) {
+        loggy.debug(
+          'Error validating multi entry destination: ${validationOk.errorMessage}',
+        );
+      }
+
+      return isCurrentRepoWriteMode && validationOk.destinationOk;
     }
 
-    return true;
+    return false;
   }
 
   void cancel() => _reposCubit.bottomSheet.hide();

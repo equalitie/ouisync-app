@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync/ouisync.dart' show AccessMode;
 import 'package:ouisync_app/app/models/models.dart'
     show DirectoryEntry, FileEntry, FileSystemEntry;
 
@@ -204,6 +203,7 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
               : _singleEntryActions(
                   context,
                   state,
+                  entrySelectionCubit!,
                   reposCubit,
                   originRepoCubit,
                   reposState,
@@ -217,6 +217,7 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
   Widget _singleEntryActions(
     BuildContext parentContext,
     NavigationState state,
+    EntrySelectionCubit entrySelectionCubit,
     ReposCubit reposCubit,
     RepoCubit originRepoCubit,
     ReposState reposState,
@@ -224,20 +225,10 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
     BottomSheetType sheetType,
     FileSystemEntry entry,
   ) {
-    bool canMove = false;
-
-    final currentRepo = reposState.currentEntry;
-    if (currentRepo != null) {
-      final isCurrentRepoWriteMode = currentRepo.accessMode == AccessMode.write;
-      canMove = state.isFolder
-          ? moveEntriesActions.canMove(
-              entry: entry,
-              destinationPath: state.path,
-              destinationRepoLocation: currentRepo.location,
-              isCurrentRepoWriteMode: isCurrentRepoWriteMode,
-            )
-          : false;
-    }
+    final enableAction = moveEntriesActions.enableAction(
+      entrySelectionCubit.validateDestination,
+      reposState.currentEntry,
+    );
 
     negativeAction() => cancelAndDismiss(moveEntriesActions, originRepoCubit);
     final negativeText = S.current.actionCancel;
@@ -248,7 +239,7 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
       await Dialogs.executeFutureWithLoadingDialog(
         null,
         moveEntriesActions.copyOrMoveSingleEntry(
-          destinationRepoCubit: currentRepo!.cubit!,
+          destinationRepoCubit: reposState.currentEntry!.cubit!,
           entry: entry,
         ),
       );
@@ -260,7 +251,7 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
     final isDangerButton = sheetType == BottomSheetType.delete;
 
     final actions = _actions(
-      canMove,
+      enableAction,
       aspectRatio,
       positiveAction,
       positiveText,
@@ -293,29 +284,9 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
               .contains(sheetType)) {
             enableAction = true;
           } else {
-            final currentRepo = reposState.currentEntry;
-            final currentRepoCubit = currentRepo?.cubit;
-
-            if (currentRepo != null && currentRepoCubit != null) {
-              final currentPath = currentRepoCubit.currentFolder;
-
-              final accessMode = currentRepo.accessMode;
-              final isCurrentRepoWriteMode = accessMode == AccessMode.write;
-
-              final validationOk = entrySelectionCubit.validateDestination(
-                currentRepoCubit,
-                currentPath,
-              );
-
-              if (!validationOk.destinationOk) {
-                loggy.debug(
-                  'Error validating multi entry destination: ${validationOk.errorMessage}',
-                );
-              }
-
-              enableAction =
-                  isCurrentRepoWriteMode && validationOk.destinationOk;
-            }
+            final validation = entrySelectionCubit.validateDestination;
+            enableAction = moveEntriesActions.enableAction(
+                validation, reposState.currentEntry);
           }
 
           negativeAction() => cancelAndDismiss(
@@ -369,7 +340,7 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
       );
 
   List<Widget> _actions(
-    bool canMove,
+    bool enableAction,
     double aspectRatio,
     void Function()? positiveAction,
     String positiveText,
@@ -390,7 +361,7 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
           isDangerButton: isDangerButton,
           buttonConstrains: Dimensions.sizeConstrainsBottomDialogAction,
           text: positiveText,
-          onPressed: canMove ? positiveAction : null,
+          onPressed: enableAction ? positiveAction : null,
         )
 
         /// If the entry can't be moved (the user selected the same entry/path, for example)
