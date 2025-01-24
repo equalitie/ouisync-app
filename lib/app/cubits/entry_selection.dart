@@ -357,11 +357,14 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
       return (destinationOk: false, errorMessage: '');
     }
 
-    if (destinationPath == _originPath) {
-      final validationOk = false;
-      final errorMessage = 'The destination is the same as the source';
+    if (destinationPath.isEmpty) {
+      final errorMessage = 'The destination path is empty';
+      return (destinationOk: false, errorMessage: errorMessage);
+    }
 
-      return (destinationOk: validationOk, errorMessage: errorMessage);
+    if (destinationPath == _originPath) {
+      final errorMessage = 'The destination is the same as the source';
+      return (destinationOk: false, errorMessage: errorMessage);
     }
 
     return (destinationOk: true, errorMessage: '');
