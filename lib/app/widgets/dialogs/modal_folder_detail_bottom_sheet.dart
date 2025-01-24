@@ -1,12 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:ouisync/ouisync.dart' show AccessMode, Directory, EntryType;
+import 'package:ouisync/ouisync.dart' show AccessMode, EntryType;
 import 'package:path/path.dart' as p;
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart' show BottomSheetType, RepoCubit;
 import '../../models/models.dart' show DirectoryEntry;
 import '../../utils/utils.dart'
-    show AppLogger, AppLoggy, AppThemeExtension, Constants, Dialogs, Dimensions, Fields, ThemeGetter, showSnackBar;
+    show
+        AppLogger,
+        AppThemeExtension,
+        Constants,
+        Dialogs,
+        Dimensions,
+        Fields,
+        ThemeGetter,
+        showSnackBar;
 import '../widgets.dart'
     show
         ActionsDialog,
@@ -162,7 +170,7 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
     DirectoryEntry entry,
   ) async {
     final path = entry.path;
-    final isEmpty = await _isEmpty(repo, path, context);
+    final isEmpty = await repo.isFolderEmpty(path);
     final deleteFolder = await Dialogs.deleteEntry(
       context,
       repoCubit: repo,
@@ -181,20 +189,6 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
 
       showSnackBar(S.current.messageFolderDeleted(widget.entry.name));
     }
-  }
-
-  Future<bool> _isEmpty(
-    RepoCubit repo,
-    String path,
-    BuildContext context,
-  ) async {
-    final Directory directory = await repo.openDirectory(path);
-    if (directory.isNotEmpty) {
-      loggy.debug('Directory $path is not empty');
-      return false;
-    }
-
-    return true;
   }
 
   Future<String> _getNewFolderName(DirectoryEntry entry) async {
