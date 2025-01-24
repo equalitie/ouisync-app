@@ -8,8 +8,13 @@ import '../../utils/utils.dart' show Dimensions;
 import '../widgets.dart' show EntryActions;
 
 class SelectEntriesButton extends StatefulWidget {
-  const SelectEntriesButton({required this.repoCubit, super.key});
+  const SelectEntriesButton({
+    required this.reposCubit,
+    required this.repoCubit,
+    super.key,
+  });
 
+  final ReposCubit reposCubit;
   final RepoCubit repoCubit;
 
   @override
@@ -24,25 +29,32 @@ class _SelectEntriesButtonState extends State<SelectEntriesButton> {
         builder: (context, state) => Container(
           padding: EdgeInsetsDirectional.only(start: 6.0, end: 2.0),
           child: _selectState(
+            widget.reposCubit,
             widget.repoCubit,
             state.status == SelectionStatus.on,
           ),
         ),
       );
 
-  Widget _selectState(RepoCubit repoCubit, bool selecting) =>
+  Widget _selectState(
+    ReposCubit reposCubit,
+    RepoCubit repoCubit,
+    bool selecting,
+  ) =>
       switch (selecting) {
-        true => DoneState(repoCubit: repoCubit),
+        true => DoneState(reposCubit: reposCubit, repoCubit: repoCubit),
         false => EditState(repoCubit: repoCubit),
       };
 }
 
 class DoneState extends StatelessWidget {
   const DoneState({
+    required this.reposCubit,
     required this.repoCubit,
     super.key,
   });
 
+  final ReposCubit reposCubit;
   final RepoCubit repoCubit;
 
   @override

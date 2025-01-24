@@ -103,6 +103,7 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
                   widget.parentContext,
                   widget.reposCubit,
                   widget.originRepoCubit,
+                  reposState,
                   widget.reposCubit.navigation,
                   widget.originRepoCubit.entrySelectionCubit,
                   widget.entry,
@@ -174,6 +175,7 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
     BuildContext context,
     ReposCubit reposCubit,
     RepoCubit originRepoCubit,
+    ReposState reposState,
     NavigationCubit navigationCubit,
     EntrySelectionCubit? entrySelectionCubit,
     FileSystemEntry? entry,
@@ -195,6 +197,7 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
                   entrySelectionCubit!,
                   reposCubit,
                   originRepoCubit,
+                  reposState,
                   moveEntriesActions,
                   sheetType,
                 )
@@ -203,6 +206,7 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
                   state,
                   reposCubit,
                   originRepoCubit,
+                  reposState,
                   moveEntriesActions,
                   sheetType,
                   entry,
@@ -215,6 +219,7 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
     NavigationState state,
     ReposCubit reposCubit,
     RepoCubit originRepoCubit,
+    ReposState reposState,
     MoveEntriesActions moveEntriesActions,
     BottomSheetType sheetType,
     FileSystemEntry entry,
@@ -275,6 +280,8 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
     BuildContext parentContext,
     EntrySelectionCubit entrySelectionCubit,
     ReposCubit reposCubit,
+    RepoCubit originRepoCubit,
+    ReposState reposState,
     MoveEntriesActions moveEntriesActions,
     BottomSheetType sheetType,
   ) =>
@@ -286,7 +293,7 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
               .contains(sheetType)) {
             enableAction = true;
           } else {
-            final currentRepo = reposCubit.current;
+            final currentRepo = reposState.currentEntry;
             final currentRepoCubit = currentRepo?.cubit;
 
             if (currentRepo != null && currentRepoCubit != null) {

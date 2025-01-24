@@ -56,6 +56,7 @@ class _FolderContentsBarState extends State<FolderContentsBar> {
                         state.status == SelectionStatus.on)
                       SelectEntriesButton(
                         repoCubit: widget.repoCubit,
+                        reposCubit: widget.reposCubit,
                       ),
                   ],
                 ),

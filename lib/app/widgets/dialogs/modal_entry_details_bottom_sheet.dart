@@ -2,7 +2,7 @@ import 'dart:io' as io;
 
 import 'package:flutter/material.dart';
 import 'package:ouisync/native_channels.dart' show NativeChannels;
-import 'package:ouisync/ouisync.dart' show AccessMode, Directory;
+import 'package:ouisync/ouisync.dart' show AccessMode;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -15,8 +15,6 @@ import '../../pages/pages.dart' show PreviewFileCallback;
 import '../../utils/repo_path.dart' as repo_path;
 import '../../utils/utils.dart'
     show
-        AppLogger,
-        AppLoggy,
         AppThemeExtension,
         Constants,
         Dialogs,
@@ -68,7 +66,7 @@ class EntryDetails extends StatefulWidget {
   State<EntryDetails> createState() => _EntryDetailsState();
 }
 
-class _EntryDetailsState extends State<EntryDetails> with AppLogger {
+class _EntryDetailsState extends State<EntryDetails> {
   late final bool isFile = widget.entry is FileEntry;
 
   @override
@@ -292,7 +290,7 @@ extension on _EntryDetailsState {
     FileSystemEntry entry,
   ) async {
     final path = entry.path;
-    final isEmpty = isFile ? true : await _isEmpty(repo, path);
+    final isEmpty = isFile ? true : await repo.isFolderEmpty(path);
     final recursive = !isEmpty;
     final deleteEntry = await Dialogs.deleteEntry(
       context,
@@ -313,15 +311,5 @@ extension on _EntryDetailsState {
           ? S.current.messageFileDeleted(repo_path.basename(path))
           : S.current.messageFolderDeleted(entry.name));
     }
-  }
-
-  Future<bool> _isEmpty(RepoCubit repo, String path) async {
-    final Directory directory = await repo.openDirectory(path);
-    if (directory.isNotEmpty) {
-      loggy.app('Directory $path is not empty');
-      return false;
-    }
-
-    return true;
   }
 }
