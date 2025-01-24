@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ouisync/ouisync.dart';
+import 'package:ouisync/ouisync.dart' show EntryType;
 
 import '../../../generated/l10n.dart';
 import '../../utils/utils.dart'
@@ -12,7 +12,8 @@ class ReplaceKeepEntry extends StatelessWidget {
   final String name;
   final EntryType type;
 
-  final _fileAction = ValueNotifier<FileAction>(FileAction.replace);
+  final _fileAction =
+      ValueNotifier<DisambiguationAction>(DisambiguationAction.replace);
 
   @override
   Widget build(BuildContext context) {
@@ -26,8 +27,9 @@ class ReplaceKeepEntry extends StatelessWidget {
         ? S.current.messageKeepBothFiles
         : S.current.messageKeepBothFolders;
 
-    _fileAction.value =
-        type == EntryType.file ? FileAction.replace : FileAction.keep;
+    _fileAction.value = type == EntryType.file
+        ? DisambiguationAction.replace
+        : DisambiguationAction.keep;
 
     return Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -47,21 +49,21 @@ class ReplaceKeepEntry extends StatelessWidget {
                       showSnackBar(S.current.messageOnlyAvailableFiles);
                     }
                   },
-                  child: RadioListTile<FileAction>(
+                  child: RadioListTile<DisambiguationAction>(
                     dense: true,
                     contentPadding: EdgeInsetsDirectional.zero,
                     title: Text(replaceMessage, style: bodyStyle),
-                    value: FileAction.replace,
+                    value: DisambiguationAction.replace,
                     groupValue: value,
                     onChanged:
                         type == EntryType.file ? _onFileActionChanged : null,
                   ),
                 ),
-                RadioListTile<FileAction>(
+                RadioListTile<DisambiguationAction>(
                   dense: true,
                   contentPadding: EdgeInsetsDirectional.zero,
                   title: Text(keepMessage, style: bodyStyle),
-                  value: FileAction.keep,
+                  value: DisambiguationAction.keep,
                   groupValue: value,
                   onChanged: _onFileActionChanged,
                 ),
@@ -83,8 +85,8 @@ class ReplaceKeepEntry extends StatelessWidget {
                 await Navigator.of(context).maybePop(_fileAction.value)),
       ];
 
-  void _onFileActionChanged(FileAction? value) =>
-      _fileAction.value = value ?? FileAction.replace;
+  void _onFileActionChanged(DisambiguationAction? value) =>
+      _fileAction.value = value ?? DisambiguationAction.replace;
 }
 
-enum FileAction { replace, keep }
+enum DisambiguationAction { replace, keep }

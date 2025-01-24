@@ -334,7 +334,7 @@ class _MainPageState extends State<MainPage>
       showSnackBar(S.current.messageExitOuiSync, context: context);
       return;
     }
-    
+
     exitClickCounter.reset();
     await MoveToBackground.moveTaskToBack();
   }
@@ -616,9 +616,12 @@ class _MainPageState extends State<MainPage>
     }
   }
 
-  Widget _contentsList(ReposState reposState, RepoCubit currentRepoCubit) {
-    final contents = currentRepoCubit.state.currentFolder.content;
-    final totalEntries = contents.length;
+  Widget _contentsList(ReposState reposState, RepoCubit currentRepoCubit) =>
+      BlocBuilder<EntrySelectionCubit, EntrySelectionState>(
+        bloc: currentRepoCubit.entrySelectionCubit,
+        builder: (context, selectionState) {
+          final contents = currentRepoCubit.state.currentFolder.content;
+          final totalEntries = contents.length;
 
     return RefreshIndicator(
       onRefresh: () async {
@@ -635,107 +638,165 @@ class _MainPageState extends State<MainPage>
             final entry = contents[index];
             final key = ValueKey(entry.name);
 
-            return Column(
-              children: [
-                switch (entry) {
-                  FileEntry entry => FileListItem(
-                      key: key,
-                      entry: entry,
-                      repoCubit: currentRepoCubit,
-                      mainAction: () async {
-                        if (_bottomSheetInfo.value.type ==
-                            BottomSheetType.gone) {
-                          await _previewFile(currentRepoCubit, entry, true);
-                          return;
-                        }
-
-                        await _showMovingEntryAlertDialog(context);
-                      },
-                      verticalDotsAction: () async {
-                        if (_bottomSheetInfo.value.type ==
-                            BottomSheetType.gone) {
-                          await _showFileDetails(currentRepoCubit, entry);
-                          return;
-                        }
-
-                        await _showMovingEntryAlertDialog(context);
-                      }),
-                  DirectoryEntry entry => DirectoryListItem(
-                      key: key,
-                      entry: entry,
-                      repoCubit: currentRepoCubit,
-                      mainAction: () {
-                        if (_bottomSheetInfo.value.entry != entry.path) {
-                          currentRepoCubit.navigateTo(entry.path);
-                          return;
-                        }
-
-                        // TODO: Show toast with explanation
-                      },
-                      verticalDotsAction: () async {
-                        if (_bottomSheetInfo.value.type ==
-                            BottomSheetType.gone) {
-                          await _showFolderDetails(currentRepoCubit, entry);
-                          return;
-                        }
-
-                        await _showMovingEntryAlertDialog(context);
-                      },
-                    ),
+                  return Column(
+                    children: [
+                      (entry is FileEntry
+                          ? _builFileListItem
+                          : _buildDirectoryListItem)(
+                        context,
+                        key,
+                        currentRepoCubit,
+                        selectionState,
+                        entry,
+                      ),
+                      if (index == (totalEntries - 1)) SizedBox(height: 56)
+                    ],
+                  );
                 },
-                if (index == (totalEntries - 1)) SizedBox(height: 56)
-              ],
-            );
-          },
+              ),
+            ),
+          );
+        },
+      );
+
+  FileListItem _builFileListItem(
+    BuildContext context,
+    ValueKey<String> key,
+    RepoCubit currentRepoCubit,
+    EntrySelectionState selectionState,
+    FileSystemEntry entry,
+  ) =>
+      FileListItem(
+        key: key,
+        entry: entry as FileEntry,
+        repoCubit: currentRepoCubit,
+        mainAction: () async => await _entryMainAction(currentRepoCubit, entry),
+        verticalDotsAction: () async => await _entryDotsMenuAction(
+          currentRepoCubit,
+          entry,
+          selectionState.status == SelectionStatus.on,
         ),
-      ),
-    );
+      );
+
+  DirectoryListItem _buildDirectoryListItem(
+    BuildContext context,
+    ValueKey<String> key,
+    RepoCubit currentRepoCubit,
+    EntrySelectionState selectionState,
+    FileSystemEntry entry,
+  ) =>
+      DirectoryListItem(
+        key: key,
+        entry: entry as DirectoryEntry,
+        repoCubit: currentRepoCubit,
+        mainAction: () async => await _entryMainAction(
+          currentRepoCubit,
+          entry,
+          selectionState.isEntrySelected(
+            currentRepoCubit.state.infoHash,
+            entry,
+          ),
+        ),
+        verticalDotsAction: () async => await _entryDotsMenuAction(
+          currentRepoCubit,
+          entry,
+          selectionState.status == SelectionStatus.on,
+        ),
+      );
+
+  Future<void> _entryMainAction(
+    RepoCubit currentRepoCubit,
+    FileSystemEntry entry, [
+    bool isSelected = false,
+  ]) async {
+    if (entry is FileEntry) {
+      return _previewFile(currentRepoCubit, entry, true);
+    }
+
+    if (isSelected) {
+      await _showNotAvailableMessage();
+      return;
+    }
+
+    final path = entry.path;
+    if (_bottomSheetInfo.value.entry != path) {
+      return currentRepoCubit.navigateTo(path);
+    }
   }
 
-  Future<void> _showMovingEntryAlertDialog(BuildContext context) =>
-      Dialogs.simpleAlertDialog(
+  Future<void> _entryDotsMenuAction(
+    RepoCubit currentRepoCubit,
+    FileSystemEntry entry,
+    bool isSelecting,
+  ) async {
+    if (isSelecting) {
+      await _showNotAvailableMessage();
+      return;
+    }
+
+    if (_bottomSheetInfo.value.type == BottomSheetType.gone) {
+      await _showEntryDetails(currentRepoCubit, entry);
+    }
+  }
+
+  // void _showNotAvailableMessage() => showSnackBar(S.current.messageMovingEntry);
+  Future<void> _showNotAvailableMessage() => Dialogs.simpleAlertDialog(
         context,
         title: S.current.titleMovingEntry,
         message: S.current.messageMovingEntry,
       );
 
-  Future<dynamic> _showFileDetails(
-    RepoCubit repoCubit,
-    FileEntry entry,
-  ) =>
+  Future<void> _showEntryDetails(RepoCubit repoCubit, FileSystemEntry entry) =>
       showModalBottomSheet(
-        isScrollControlled: true,
-        context: context,
-        shape: Dimensions.borderBottomSheetTop,
-        builder: (context) => FileDetail(
-          repoCubit: repoCubit,
-          entry: entry,
-          onPreviewFile: (cubit, data, useDefaultApp) => _previewFile(
-            cubit,
-            data,
-            useDefaultApp,
-          ),
-          isActionAvailableValidator: _isEntryActionAvailable,
-          packageInfo: widget.packageInfo,
-          nativeChannels: widget.nativeChannels,
-        ),
-      );
-
-  Future<dynamic> _showFolderDetails(
-    RepoCubit repoCubit,
-    DirectoryEntry entry,
-  ) =>
-      showModalBottomSheet(
-        isScrollControlled: true,
-        context: context,
-        shape: Dimensions.borderBottomSheetTop,
-        builder: (context) => FolderDetail(
+          isScrollControlled: true,
           context: context,
-          repoCubit: repoCubit,
-          entry: entry,
-          isActionAvailableValidator: _isEntryActionAvailable,
-        ),
-      );
+          shape: Dimensions.borderBottomSheetTop,
+          builder: (_) => entry is FileEntry
+              ? EntryDetails.file(
+                  context,
+                  repoCubit: repoCubit,
+                  entry: entry,
+                  onPreviewFile: (cubit, data, useDefaultApp) => _previewFile(
+                    cubit,
+                    data,
+                    useDefaultApp,
+                  ),
+                  isActionAvailableValidator: _isEntryActionAvailable,
+                  packageInfo: widget.packageInfo,
+                  nativeChannels: widget.nativeChannels,
+                )
+              : EntryDetails.folder(
+                  context,
+                  repoCubit: repoCubit,
+                  entry: entry,
+                  isActionAvailableValidator: _isEntryActionAvailable,
+                )
+          // TODO: Find out how to get this to work, so we can use the snackbar on the bottom sheet.
+          //  ScaffoldMessenger(
+          //   child: Scaffold(
+          //     bottomSheet: entry is FileEntry
+          //         ? EntryDetails.file(
+          //             context,
+          //             repoCubit: repoCubit,
+          //             entry: entry,
+          //             onPreviewFile: (cubit, data, useDefaultApp) => _previewFile(
+          //               cubit,
+          //               data,
+          //               useDefaultApp,
+          //             ),
+          //             isActionAvailableValidator: _isEntryActionAvailable,
+          //             packageInfo: widget.packageInfo,
+          //             nativeChannels: widget.nativeChannels,
+          //           )
+          //         : EntryDetails.folder(
+          //             context,
+          //             repoCubit: repoCubit,
+          //             entry: entry,
+          //             isActionAvailableValidator: _isEntryActionAvailable,
+          //           ),
+          //   ),
+          // ),
+          );
 
   bool _isEntryActionAvailable(
     AccessMode accessMode,
@@ -760,7 +821,7 @@ class _MainPageState extends State<MainPage>
           MoveEntrySheetState() => _moveSingleEntryState(state),
           MoveSelectedEntriesSheetState() => _moveMultipleEntriesState(state),
           SaveMediaSheetState() => _saveSharedMediaState(state),
-          HideSheetState() => SizedBox.shrink(),
+          HideSheetState() => _hideBottomSheet(),
         },
       );
 
@@ -769,9 +830,7 @@ class _MainPageState extends State<MainPage>
         context,
         reposCubit: widget.reposCubit,
         originRepoCubit: state.repoCubit,
-        navigationCubit: widget.reposCubit.navigation,
-        entryPath: state.entryPath,
-        entryType: state.entryType,
+        entry: state.entry,
         sheetType: state.type,
         onUpdateBottomSheet: updateBottomSheetInfo,
       );
@@ -783,8 +842,6 @@ class _MainPageState extends State<MainPage>
         context,
         reposCubit: widget.reposCubit,
         originRepoCubit: state.repoCubit,
-        navigationCubit: widget.reposCubit.navigation,
-        entrySelectionCubit: state.repoCubit.entrySelectionCubit,
         sheetType: state.type,
         onUpdateBottomSheet: updateBottomSheetInfo,
       );
@@ -797,6 +854,20 @@ class _MainPageState extends State<MainPage>
         onSaveFile: trySaveFile,
         canSaveMedia: canSaveFiles,
       );
+
+  Widget _hideBottomSheet() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_isBottomSheetInfoDisposed == false) {
+        _bottomSheetInfo.value = BottomSheetInfo(
+          type: BottomSheetType.gone,
+          neededPadding: 0.0,
+          entry: '',
+        );
+      }
+    });
+
+    return SizedBox.shrink();
+  }
 
   void updateBottomSheetInfo(
       BottomSheetType type, double padding, String entry) {

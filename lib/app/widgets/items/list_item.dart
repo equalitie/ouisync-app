@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:path/path.dart' as p;
 
 import '../../cubits/cubits.dart'
     show EntrySelectionCubit, EntrySelectionState, Job, RepoCubit, RepoState;
@@ -15,7 +16,7 @@ import '../widgets.dart'
         RepoDescription,
         RepoStatus,
         ScrollableTextWidget,
-        SelectionState;
+        SelectionStatus;
 
 class FileListItem extends StatelessWidget {
   FileListItem({
@@ -31,7 +32,6 @@ class FileListItem extends StatelessWidget {
   final void Function() mainAction;
   final void Function() verticalDotsAction;
 
-  final ValueNotifier<bool> _isSelecting = ValueNotifier<bool>(false);
   final ValueNotifier<bool?> _selected = ValueNotifier<bool?>(false);
   final ValueNotifier<Color?> _backgroundColor = ValueNotifier<Color?>(null);
 
@@ -41,16 +41,9 @@ class FileListItem extends StatelessWidget {
     final repoInfoHash = repoCubit.state.infoHash;
 
     final entrySelectionCubit = repoCubit.entrySelectionCubit;
-    final entrySelectionState = entrySelectionCubit.state;
-
-    final isSelecting =
-        entrySelectionState.originRepoInfoHash == repoInfoHash &&
-            entrySelectionState.selectionState == SelectionState.on;
-    _isSelecting.value = isSelecting;
-
-    final isSelected = entrySelectionState.isEntrySelected(
+    final isSelected = entrySelectionCubit.state.isEntrySelected(
       repoInfoHash,
-      entry.path,
+      entry,
     );
 
     final onSelectEntry = repoCubit.entrySelectionCubit.selectEntry;
@@ -87,7 +80,6 @@ class FileListItem extends StatelessWidget {
               repoInfoHash,
               entry,
               entrySelectionCubit: entrySelectionCubit,
-              isSelectingNotifier: _isSelecting,
               selectedNotifier: _selected,
               backgroundColorNotifier: _backgroundColor,
               onSelectEntry: onSelectEntry,
@@ -118,7 +110,6 @@ class DirectoryListItem extends StatelessWidget {
   final void Function() mainAction;
   final void Function() verticalDotsAction;
 
-  final ValueNotifier<bool> _isSelecting = ValueNotifier<bool>(false);
   final ValueNotifier<bool?> _selected = ValueNotifier<bool?>(false);
   final ValueNotifier<Color?> _backgroundColor = ValueNotifier<Color?>(null);
 
@@ -127,27 +118,17 @@ class DirectoryListItem extends StatelessWidget {
     final repoInfoHash = repoCubit.state.infoHash;
 
     final entrySelectionCubit = repoCubit.entrySelectionCubit;
-    final entrySelectionState = entrySelectionCubit.state;
-
-    final isSelecting =
-        entrySelectionState.originRepoInfoHash == repoInfoHash &&
-            entrySelectionState.selectionState == SelectionState.on;
-    _isSelecting.value = isSelecting;
-
-    final isSelected = entrySelectionState.isEntrySelected(
+    final isSelected = entrySelectionCubit.state.isEntrySelected(
       repoInfoHash,
-      entry.path,
+      entry,
     );
-    final tristate = isSelected
-        ? entrySelectionState.selectedEntriesPath[entry.path]?.tristate
-        : false;
 
     final onSelectEntry = repoCubit.entrySelectionCubit.selectEntry;
     final onClearEntry = repoCubit.entrySelectionCubit.clearEntry;
 
     _updateSelection(
       context,
-      tristate,
+      isSelected,
       repoInfoHash: repoInfoHash,
       entry: entry,
       valueNotifier: _selected,
@@ -178,7 +159,6 @@ class DirectoryListItem extends StatelessWidget {
               repoInfoHash,
               entry,
               entrySelectionCubit: entrySelectionCubit,
-              isSelectingNotifier: _isSelecting,
               selectedNotifier: _selected,
               backgroundColorNotifier: _backgroundColor,
               onSelectEntry: onSelectEntry,
@@ -236,7 +216,10 @@ class RepoListItem extends StatelessWidget {
                 ),
               ),
               RepoStatus(repoCubit),
-              _VerticalDotsButton(verticalDotsAction),
+              _VerticalDotsButton(
+                disable: false,
+                action: verticalDotsAction,
+              ),
             ],
           ),
         ),
@@ -320,7 +303,6 @@ class TrailAction extends StatelessWidget {
     this.repoInfoHash,
     this.entry, {
     required this.entrySelectionCubit,
-    required ValueNotifier<bool> isSelectingNotifier,
     required ValueNotifier<bool?> selectedNotifier,
     required ValueNotifier<Color?> backgroundColorNotifier,
     required this.onSelectEntry,
@@ -328,8 +310,7 @@ class TrailAction extends StatelessWidget {
     required this.uploadJob,
     required this.verticalDotsAction,
     super.key,
-  })  : _isSelectingNotifier = isSelectingNotifier,
-        _selectedNotifier = selectedNotifier,
+  })  : _selectedNotifier = selectedNotifier,
         _backgroundColorNotifier = backgroundColorNotifier;
 
   final String repoInfoHash;
@@ -337,7 +318,6 @@ class TrailAction extends StatelessWidget {
 
   final EntrySelectionCubit entrySelectionCubit;
 
-  final ValueNotifier<bool> _isSelectingNotifier;
   final ValueNotifier<bool?> _selectedNotifier;
   final ValueNotifier<Color?> _backgroundColorNotifier;
 
@@ -349,15 +329,51 @@ class TrailAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<EntrySelectionCubit, EntrySelectionState>(
+    return BlocConsumer<EntrySelectionCubit, EntrySelectionState>(
       bloc: entrySelectionCubit,
+      builder: (context, state) {
+        final isSingleEntry = state.singleEntry != DirectoryEntry(path: '');
+        if (isSingleEntry) {
+          return state.singleEntry.path == entry.path
+              ? IconButton(onPressed: () {}, icon: const Icon(Icons.check))
+              : _VerticalDotsButton(disable: true, action: verticalDotsAction);
+        }
+
+        final parent = p.dirname(entry.path);
+        final isSelectable = state.isSelectable(repoInfoHash, parent);
+        return isSelectable
+            ? ValueListenableBuilder(
+                valueListenable: _selectedNotifier,
+                builder: (BuildContext context, bool? value, Widget? child) =>
+                    Checkbox.adaptive(
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(6.0),
+                    ),
+                  ),
+                  visualDensity: VisualDensity.adaptivePlatformDensity,
+                  value: value,
+                  onChanged: (value) async => await _updateSelection(
+                    context,
+                    value ?? false,
+                    repoInfoHash: repoInfoHash,
+                    entry: entry,
+                    valueNotifier: _selectedNotifier,
+                    colorNotifier: _backgroundColorNotifier,
+                    onSelectEntry: onSelectEntry,
+                    onClearEntry: onClearEntry,
+                  ),
+                ),
+              )
+            : _VerticalDotsButton(
+                disable: state.status == SelectionStatus.on,
+                action: uploadJob == null ? verticalDotsAction : null,
+              );
+      },
       listener: (context, state) async {
         if (repoInfoHash != state.originRepoInfoHash) return;
 
-        final selectionState = state.selectionState;
-        _isSelectingNotifier.value = selectionState == SelectionState.on;
-
-        if (selectionState == SelectionState.off) {
+        if (state.status == SelectionStatus.off) {
           await _updateSelection(
             context,
             false,
@@ -370,48 +386,13 @@ class TrailAction extends StatelessWidget {
           );
         }
       },
-      child: ValueListenableBuilder(
-        valueListenable: _isSelectingNotifier,
-        builder: (context, isSelecting, child) {
-          return isSelecting
-              ? ValueListenableBuilder(
-                  valueListenable: _selectedNotifier,
-                  builder: (
-                    BuildContext context,
-                    bool? value,
-                    Widget? child,
-                  ) =>
-                      Checkbox.adaptive(
-                    shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(6.0)),
-                    ),
-                    visualDensity: VisualDensity.adaptivePlatformDensity,
-                    tristate: true,
-                    value: value,
-                    onChanged: (value) async => await _updateSelection(
-                      context,
-                      value ?? false,
-                      repoInfoHash: repoInfoHash,
-                      entry: entry,
-                      valueNotifier: _selectedNotifier,
-                      colorNotifier: _backgroundColorNotifier,
-                      onSelectEntry: onSelectEntry,
-                      onClearEntry: onClearEntry,
-                    ),
-                  ),
-                )
-              : _VerticalDotsButton(
-                  uploadJob == null ? verticalDotsAction : null,
-                );
-        },
-      ),
     );
   }
 }
 
 Future<void> _updateSelection(
   BuildContext context,
-  bool? value, {
+  bool value, {
   required String repoInfoHash,
   required FileSystemEntry entry,
   required ValueNotifier<bool?> valueNotifier,
@@ -422,8 +403,6 @@ Future<void> _updateSelection(
   if (valueNotifier.value == value) return;
 
   valueNotifier.value = value;
-
-  if (value == null) return;
 
   await Dialogs.executeFutureWithLoadingDialog(
     null,
@@ -450,15 +429,17 @@ void _getBackgroundColor(
     };
 
 class _VerticalDotsButton extends StatelessWidget {
-  _VerticalDotsButton(this.action);
+  _VerticalDotsButton({required this.disable, required this.action});
 
+  final bool disable;
   final void Function()? action;
 
   @override
   Widget build(BuildContext context) => IconButton(
         key: ValueKey('file_vert'),
-        icon: const Icon(
-          Icons.more_vert_rounded,
+        color: disable ? Colors.grey : null,
+        icon: Icon(
+          disable ? Icons.more_horiz_rounded : Icons.more_vert_rounded,
           size: Dimensions.sizeIconSmall,
         ),
         onPressed: action,

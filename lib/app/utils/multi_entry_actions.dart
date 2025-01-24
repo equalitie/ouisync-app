@@ -1,6 +1,8 @@
 import 'dart:io' as io;
 
 import 'package:flutter/material.dart';
+import 'package:ouisync_app/app/models/models.dart'
+    show DirectoryEntry, FileEntry;
 import 'package:ouisync_app/app/utils/utils.dart'
     show Dialogs, Dimensions, Native;
 import 'package:path_provider/path_provider.dart';
@@ -20,13 +22,11 @@ class MultiEntryActions {
   final BuildContext _context;
   final EntrySelectionCubit _entrySelectionCubit;
 
-  int get totalSelectedDirs => _entrySelectionCubit.selectedEntries.entries
-      .where((e) => e.value.isDir && e.value.selected)
-      .length;
+  int get totalSelectedDirs =>
+      _entrySelectionCubit.entries.whereType<DirectoryEntry>().length;
 
-  int get totalSelectedFiles => _entrySelectionCubit.selectedEntries.entries
-      .where((e) => !e.value.isDir)
-      .length;
+  int get totalSelectedFiles =>
+      _entrySelectionCubit.entries.whereType<FileEntry>().length;
 
   Future<bool> saveEntriesToDevice() async {
     String? defaultDirectoryPath = await _getDefaultPathForPlatform();

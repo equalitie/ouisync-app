@@ -1,87 +1,84 @@
 import 'dart:async';
-import 'dart:collection';
 import 'dart:io' as io;
 
-import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync/ouisync.dart';
+import 'package:ouisync/ouisync.dart' show EntryType;
 import 'package:path/path.dart' as p;
 
 import '../../generated/l10n.dart';
 import '../models/models.dart' show DirectoryEntry, FileEntry, FileSystemEntry;
 import '../utils/repo_path.dart' as repo_path;
 import '../utils/utils.dart'
-    show AppLogger, CopyEntry, FileIO, MoveEntry, StringExtension, showSnackBar;
-import '../widgets/widgets.dart' show SelectionState;
+    show AppLogger, CopyEntry, FileIO, MoveEntry, showSnackBar;
+import '../widgets/widgets.dart' show SelectionStatus;
 import 'cubits.dart' show CubitActions, RepoCubit;
 
 class EntrySelectionState extends Equatable {
   const EntrySelectionState({
     this.originRepoInfoHash = '',
-    this.selectionState = SelectionState.off,
-    this.selectedEntriesPath = const <String,
-        ({
-      bool isDir,
-      bool selected,
-      bool? tristate,
-    })>{},
+    this.status = SelectionStatus.off,
+    this.selectedEntries = const <FileSystemEntry>[],
+    this.singleEntry = const DirectoryEntry(path: ''),
     this.updating = false,
   });
 
   final String originRepoInfoHash;
-  final SelectionState selectionState;
-  final Map<
-      String,
-      ({
-        bool isDir,
-        bool selected,
-        bool? tristate,
-      })> selectedEntriesPath;
+  final SelectionStatus status;
+  final List<FileSystemEntry> selectedEntries;
+  final FileSystemEntry singleEntry;
   final bool updating;
-
-  bool isEntrySelected(String repoInfoHash, String path) =>
-      selectedEntriesPath.entries.firstWhereOrNull(
-          (p) => originRepoInfoHash == repoInfoHash && p.key == path) !=
-      null;
-
-  String? get originPath {
-    if (selectedEntriesPath.entries.isEmpty) return null;
-
-    final entry = selectedEntriesPath.entries.first;
-    final info = entry.value;
-    final path = entry.key;
-    return (!info.isDir || info.selected) ? p.dirname(path) : path;
-  }
 
   EntrySelectionState copyWith({
     String? originRepoInfoHash,
-    SelectionState? selectionState,
-    Map<
-            String,
-            ({
-              bool isDir,
-              bool selected,
-              bool? tristate,
-            })>?
-        selectedEntriesPath,
+    SelectionStatus? selectionState,
+    List<FileSystemEntry>? selectedEntries,
+    FileSystemEntry? singleEntry,
     bool? updating,
   }) =>
       EntrySelectionState(
         originRepoInfoHash: originRepoInfoHash ?? this.originRepoInfoHash,
-        selectionState: selectionState ?? this.selectionState,
-        selectedEntriesPath: selectedEntriesPath ?? this.selectedEntriesPath,
+        status: selectionState ?? this.status,
+        selectedEntries: selectedEntries ?? this.selectedEntries,
+        singleEntry: singleEntry ?? this.singleEntry,
         updating: updating ?? false,
       );
 
   @override
   List<Object?> get props => [
         originRepoInfoHash,
-        selectionState,
-        selectedEntriesPath,
+        status,
+        selectedEntries,
+        singleEntry,
         updating,
       ];
+
+  String get selectionOriginPath => singleEntry.path.isNotEmpty
+      ? p.dirname(singleEntry.path)
+      : selectedEntries.isNotEmpty
+          ? p.dirname(selectedEntries.first.path)
+          : '';
+
+  bool isSelectable(String currentRepoInfoHash, String path) {
+    if (status == SelectionStatus.off ||
+        originRepoInfoHash != currentRepoInfoHash ||
+        (selectionOriginPath.isNotEmpty && selectionOriginPath != path)) {
+      return false;
+    }
+
+    return true;
+  }
+
+  bool isEntrySelected(String repoInfoHash, FileSystemEntry entry) {
+    if (originRepoInfoHash != repoInfoHash) return false;
+
+    if (singleEntry != DirectoryEntry(path: '')) {
+      return singleEntry == entry;
+    }
+
+    return selectedEntries.contains(entry);
+  }
 }
 
 /// Cubit for selecting multiple files or folders for copy, moving, delete, or download.
@@ -90,106 +87,74 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
   EntrySelectionCubit() : super(const EntrySelectionState());
 
   RepoCubit? _originRepoCubit;
+  String _originPath = '';
+
   String get _originRepoInfoHash => _originRepoCubit?.state.infoHash ?? '';
 
-  /// key: Entry path
-  /// value: (#1: isDir, #2: state) (directory tristate: null, _, true; file: true, _)
-  /// Where tristate == null: at least one child selected; true: all children selected
-  final SplayTreeMap<String, ({bool isDir, bool selected, bool? tristate})>
-      _entriesPath = SplayTreeMap((key1, key2) {
-    final isKey1Dir = p.extension(key1).isEmpty;
-    final isKey2Dir = p.extension(key2).isEmpty;
+  bool _isSingleSelection = false;
+  bool get isSingleSelection => _isSingleSelection;
 
-    if (!isKey1Dir && !isKey2Dir) {
-      return key1.compareTo(key2);
-    }
-    if (isKey1Dir && isKey2Dir) {
-      return key1.compareTo(key2);
-    }
-    return isKey1Dir ? -1 : 1;
-  });
-  Map<String, ({bool isDir, bool selected, bool? tristate})>
-      get selectedEntries => _entriesPath;
+  FileSystemEntry? _singleEntry;
+  FileSystemEntry? get singleEntry => _singleEntry;
 
-  String? get pathSegmentToRemove {
-    final dirEntries = _entriesPath.entries.where((e) => e.value.isDir);
+  final _entries = <FileSystemEntry>[];
+  List<FileSystemEntry> get entries => _entries;
 
-    String segments = '';
-    for (var dir in dirEntries) {
-      if (!dir.value.selected) {
-        segments = p.join(segments, dir.key);
-      }
-    }
-
-    return segments;
-  }
-
-  Future<void> startSelectionForRepo(RepoCubit originRepoCubit) async {
+  Future<void> startSelectionForRepo(
+    RepoCubit originRepoCubit,
+    String currentPath, [
+    bool isSingleSelection = false,
+    FileSystemEntry? singleEntry,
+  ]) async {
     _originRepoCubit = originRepoCubit;
+    _originPath = currentPath;
+
+    _isSingleSelection = isSingleSelection;
+    _singleEntry = singleEntry;
 
     emitUnlessClosed(state.copyWith(
       originRepoInfoHash: _originRepoInfoHash,
-      selectionState: SelectionState.on,
-      selectedEntriesPath: _entriesPath,
+      selectionState: SelectionStatus.on,
+      selectedEntries: _entries,
+      singleEntry: _singleEntry,
     ));
   }
 
   Future<void> endSelection() async {
     _originRepoCubit = null;
-    _entriesPath.clear();
+    _originPath = '';
+
+    _isSingleSelection = false;
+    _singleEntry = null;
+
+    _entries.clear();
 
     emitUnlessClosed(state.copyWith(
-      selectionState: SelectionState.off,
-      selectedEntriesPath: <String,
-          ({
-        bool isDir,
-        bool selected,
-        bool? tristate,
-      })>{},
+      selectionState: SelectionStatus.off,
+      selectedEntries: <FileSystemEntry>[],
+      singleEntry: const DirectoryEntry(path: ''),
     ));
   }
 
   Future<void> selectEntry(String repoInfoHash, FileSystemEntry entry) async {
-    if (_originRepoInfoHash != repoInfoHash) {
+    if (_originRepoInfoHash.isEmpty || _originRepoInfoHash != repoInfoHash) {
       emitUnlessClosed(state);
       return;
     }
 
-    final path = entry.path;
-    if (_entriesPath.containsKey(path)) {
+    if (p.dirname(entry.path) != _originPath) {
+      emitUnlessClosed(state);
       return;
     }
 
+    if (_entries.contains(entry)) return;
+
     emitUnlessClosed(state.copyWith(updating: true));
 
-    if (entry is FileEntry) {
-      _entriesPath.update(
-        path,
-        (value) => (isDir: false, selected: true, tristate: true),
-        ifAbsent: () => (isDir: false, selected: true, tristate: true),
-      );
-      await _selectOrUpdateParent(path);
-    }
-
-    if (entry is DirectoryEntry) {
-      final contents = await _getContents(path);
-
-      if (contents != null && contents.isNotEmpty) {
-        await for (var item in Stream.fromIterable(contents)) {
-          await selectEntry(repoInfoHash, item);
-        }
-      }
-      _entriesPath.update(
-        path,
-        (value) => (isDir: true, selected: true, tristate: true),
-        ifAbsent: () => (isDir: true, selected: true, tristate: true),
-      );
-
-      await _selectOrUpdateParent(path);
-    }
+    _entries.add(entry);
 
     emitUnlessClosed(state.copyWith(
-      selectedEntriesPath: _entriesPath,
+      selectedEntries: _entries,
       updating: false,
     ));
   }
@@ -197,40 +162,15 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
   Future<void> clearEntry(String repoInfoHash, FileSystemEntry entry) async {
     if (_originRepoInfoHash != repoInfoHash) {
       emitUnlessClosed(state);
+      return;
     }
 
     emitUnlessClosed(state.copyWith(updating: true));
 
-    final path = entry.path;
-
-    if (entry is FileEntry) {
-      _entriesPath.remove(path);
-      await _clearOrUpdateParent(path);
-    }
-
-    if (entry is DirectoryEntry) {
-      final contents = await _getContents(path);
-      if (contents == null || contents.isEmpty) {
-        _entriesPath.remove(path);
-        await _clearOrUpdateParent(path);
-
-        emitUnlessClosed(state.copyWith(
-          selectedEntriesPath: _entriesPath,
-          updating: false,
-        ));
-        return;
-      }
-
-      await for (var item in Stream.fromIterable(contents)) {
-        await clearEntry(repoInfoHash, item);
-      }
-
-      _entriesPath.remove(path);
-      await _clearOrUpdateParent(path);
-    }
+    _entries.remove(entry);
 
     emitUnlessClosed(state.copyWith(
-      selectedEntriesPath: _entriesPath,
+      selectedEntries: _entries,
       updating: false,
     ));
   }
@@ -256,29 +196,26 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
       return false;
     }
 
-    final separator = p.split(_entriesPath.keys.first).first;
+    final libraryRootSymbol = repo_path.separator();
+    final deviceRootSymbol = p.separator;
+
     String devicePath = destinationPaths.destinationPath;
 
     try {
-      await for (var entry in Stream.fromIterable(_entriesPath.entries)) {
-        final path = entry.key
-            .replaceAll('$pathSegmentToRemove', '')
-            .trim()
-            .replaceAll(separator, p.separator);
-        final state = entry.value;
+      await for (var entry in Stream.fromIterable(_entries)) {
+        final type =
+            entry is DirectoryEntry ? EntryType.directory : EntryType.file;
 
-        final destinationPath = '$devicePath$path';
-        final type = state.isDir ? EntryType.directory : EntryType.file;
+        final path = entry.path.replaceAll(libraryRootSymbol, deviceRootSymbol);
+        final destinationPath = p.join(devicePath, path);
         if (type == EntryType.directory) {
-          if (state.selected) {
-            await io.Directory(destinationPath).create(recursive: true);
-          }
+          await io.Directory(destinationPath).create(recursive: true);
+
           continue;
         }
 
-        final fileEntry = FileEntry(path: entry.key, size: 0);
         await fileIO.saveFileToDevice(
-          fileEntry,
+          entry as FileEntry,
           null,
           (
             parentPath: destinationPaths.parentPath,
@@ -324,194 +261,31 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
     required RepoCubit destinationRepoCubit,
     required String destinationPath,
   }) async {
-    final rootSymbol = repo_path.separator();
-
     final destinationRepoInfoHash = await destinationRepoCubit.infoHash;
     final toRepoCubit = _originRepoInfoHash != destinationRepoInfoHash
         ? destinationRepoCubit
         : null;
 
-    // If there are dirs in root that were not selected, but have selected
-    // children, we need to remove this segment from its children paths, to
-    // avoid moving these dirs to the destination.
-    //
-    // [discardedRoots]: a collection of the dirs on the root not selected.
-    final discardedRoots = _entriesPath.entries
-        .where(
-          (e) =>
-              e.value.isDir &&
-              p.dirname(e.key) == rootSymbol &&
-              !e.value.selected,
-        )
-        .map((e) => e.key);
+    final sortedEntries = [..._entries];
+    sortedEntries.sort((a, b) {
+      if (a is DirectoryEntry && b is FileEntry) return -1;
+      if (a is FileEntry && b is DirectoryEntry) return 1;
+      return a.path.compareTo(b.path);
+    });
 
-    // If any root dirs are selected, we can move them recursively.
-    // Root dir is any dir that is not a child of another dir.
-    //
-    // [rootRecursiveDirs]: a copy of the root dirs, and are selected.
-    //
-    // We create a copy of the selected entries because we will update the
-    // original, removing the moved entries after each operation. If we don't do
-    // this, we will have a "concurrency modifycation during iteration" exception.
-    final rootRecursiveDirs = [
-      ..._entriesPath.entries.where((e) =>
-          e.value.isDir && e.value.selected && p.dirname(e.key) == rootSymbol),
-    ];
-    for (var dir in rootRecursiveDirs) {
+    for (var entry in sortedEntries) {
       await (action == EntrySelectionActions.copy ? _copy : _move)(
         context,
         originRepoCubit: _originRepoCubit!,
         toRepoCubit: toRepoCubit,
         destinationPath: destinationPath,
-        sourcePath: dir.key,
-        fromPathSegment: dir.key.removePrefix(rootSymbol),
-        type: EntryType.directory,
-        recursive: true,
+        entry: entry,
       );
 
-      _entriesPath.removeWhere((key, value) => key.startsWith(dir.key));
+      _entries.remove(entry);
     }
-
-    if (_entriesPath.isEmpty) return true;
-
-    // We can also move any other dir that was selected, recursively.
-    //
-    // [noRootRecursiveDirs]: a copy of the dirs that are not root dirs, and are
-    // selected.
-    final noRootRecursiveDirs = [
-      ..._entriesPath.entries.where((e) => e.value.isDir && e.value.selected),
-    ];
-    for (var dir in noRootRecursiveDirs) {
-      final path = dir.key;
-      final parent = p.dirname(path);
-
-      final fromPathSegment = getFromPathSegment(
-        rootSymbol,
-        parent,
-        path,
-        discardedRoots,
-      );
-
-      await (action == EntrySelectionActions.copy ? _copy : _move)(
-        context,
-        originRepoCubit: _originRepoCubit!,
-        toRepoCubit: toRepoCubit,
-        destinationPath: destinationPath,
-        sourcePath: path,
-        fromPathSegment: fromPathSegment,
-        type: EntryType.directory,
-        recursive: true,
-      );
-
-      _entriesPath.removeWhere((key, value) => key.startsWith(dir.key));
-    }
-
-    if (_entriesPath.isEmpty) return true;
-
-    // Any dir that was not selected, and has selected children left,
-    // we need to remove it from entriesPath to avoid moving it to the
-    // destination. We keep its children, this is, files.
-    //
-    // [pendingDirs]: a copy of the dirs still in entriesPath (no selected,
-    // therefore no recursive), for any file left.
-    //
-    // [unselectedDirs]: dirs paths not selected, to be removed.
-    // We don't want to move these to the destination; we only want to move
-    // any files left in these dirs.
-    final pendingDirs = [..._entriesPath.entries.where((e) => e.value.isDir)];
-    final unselectedDirs = <String>[];
-    for (var dir in pendingDirs) {
-      final children = _entriesPath.entries
-          .where((e) => !e.value.isDir && p.dirname(e.key) == dir.key);
-
-      if (children.isEmpty) {
-        unselectedDirs.add(dir.key);
-      }
-
-      // If the parent dir is not selected, we don't want to move it.
-      // This is for those cases in which from one subfolder, only the files are
-      // selected, not the dir.
-      if (unselectedDirs.contains(p.dirname(dir.key))) {
-        unselectedDirs.add(dir.key);
-      }
-    }
-
-    // We remove the unselected dirs from entriesPath.
-    _entriesPath.removeWhere((key, value) => unselectedDirs.contains(key));
-
-    // Now we can move the files left (from the unselected dirs).
-    //
-    // [pendingFiles]: files left to be moved.
-    final pendingFiles = [
-      ..._entriesPath.entries.where((e) => !e.value.isDir),
-    ];
-    for (var file in pendingFiles) {
-      final path = file.key;
-      final parent = p.dirname(path);
-
-      final parentEntry = _entriesPath.entries.firstWhereOrNull(
-        (e) => e.key == parent,
-      );
-      final isOrphan = parentEntry == null;
-      final fromPathSegment = getFromPathSegment(
-        rootSymbol,
-        parent,
-        path,
-        discardedRoots,
-        isOrphan,
-      );
-
-      await (action == EntrySelectionActions.copy ? _copy : _move)(
-        context,
-        originRepoCubit: _originRepoCubit!,
-        toRepoCubit: toRepoCubit,
-        destinationPath: destinationPath,
-        sourcePath: path,
-        fromPathSegment: fromPathSegment,
-        type: EntryType.file,
-        recursive: false,
-      );
-    }
-
-    _entriesPath.clear();
 
     return true;
-  }
-
-  /// Removes any discarded segment of the entry path, and removes the rootSymbol.
-  ///
-  /// [rootSymbol] is the root symbol for a path in Ouisync.
-  /// [parent] the parent path for the entry.
-  /// [path] the full path of the entry.
-  /// [discardedRoots] An iterable collection of strings representing the roots
-  /// to be removed from the [path].
-  /// [isOrphan] if the entry is to be moved without its parent.
-  String getFromPathSegment(
-    String rootSymbol,
-    String parent,
-    String path,
-    Iterable<String> discardedRoots, [
-    bool isOrphan = false,
-  ]) {
-    String newEntryPath = '';
-    if (parent != rootSymbol && !isOrphan) {
-      final segments = p.split(path);
-      final rootSegment = '$rootSymbol${segments[1]}';
-
-      newEntryPath = discardedRoots.contains(rootSegment)
-          ? parent.removePrefix(rootSegment)
-          : parent.removePrefix(rootSymbol);
-    }
-
-    final fileName = p.basename(path);
-    final fromPathSegment = repo_path
-        .join(
-          newEntryPath,
-          fileName,
-        )
-        .removePrefix(rootSymbol);
-
-    return fromPathSegment;
   }
 
   Future<void> _copy(
@@ -519,54 +293,33 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
     required RepoCubit originRepoCubit,
     required RepoCubit? toRepoCubit,
     required String destinationPath,
-    required String sourcePath,
-    required String fromPathSegment,
-    required EntryType type,
-    required bool recursive,
+    required FileSystemEntry entry,
   }) async =>
       CopyEntry(
         context,
-        repoCubit: originRepoCubit,
-        srcPath: sourcePath,
-        dstPath: destinationPath,
-        type: type,
-      ).copy(
-        toRepoCubit: toRepoCubit,
-        fromPathSegment: fromPathSegment,
-        recursive: recursive,
-        navigateToDestination: true,
-      );
+        originRepoCubit: originRepoCubit,
+        entry: entry,
+        destinationPath: destinationPath,
+      ).copy(currentRepoCubit: toRepoCubit, recursive: true);
 
   Future<void> _move(
     BuildContext context, {
     required RepoCubit originRepoCubit,
     required RepoCubit? toRepoCubit,
     required String destinationPath,
-    required String sourcePath,
-    required String fromPathSegment,
-    required EntryType type,
-    required bool recursive,
+    required FileSystemEntry entry,
   }) async =>
       MoveEntry(
         context,
-        repoCubit: originRepoCubit,
-        srcPath: sourcePath,
-        dstPath: destinationPath,
-        type: type,
-      ).move(
-        toRepoCubit: toRepoCubit,
-        fromPathSegment: fromPathSegment,
-        navigateToDestination: true,
-        recursive: recursive,
-      );
+        originRepoCubit: originRepoCubit,
+        entry: entry,
+        destinationPath: destinationPath,
+      ).move(currentRepoCubit: toRepoCubit, recursive: true);
 
   Future<bool> deleteEntries() async {
     try {
-      final fileEntriesPath = _entriesPath.entries
-          .where((e) => !e.value.isDir)
-          .map((e) => e.key)
-          .toList()
-          .reversed;
+      final fileEntriesPath =
+          _entries.whereType<FileEntry>().map((e) => e.path);
       await for (var path in Stream.fromIterable(fileEntriesPath)) {
         await _originRepoCubit!.deleteFile(path);
       }
@@ -576,13 +329,11 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
     }
 
     try {
-      final dirEntriesPath = _entriesPath.entries
-          .where((e) => e.value.isDir && e.value.selected)
-          .map((e) => e.key)
-          .toList()
-          .reversed;
+      final dirEntriesPath = _entries.whereType<DirectoryEntry>().map(
+            (e) => e.path,
+          );
       await for (var path in Stream.fromIterable(dirEntriesPath)) {
-        await _originRepoCubit!.deleteFolder(path, false);
+        await _originRepoCubit!.deleteFolder(path, true);
       }
     } on Exception catch (e) {
       loggy.debug('Error deleting selected dirs: ${e.toString()}');
@@ -594,77 +345,6 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
 
   //===================== Helper functions =====================================
 
-  Future<void> _selectOrUpdateParent(String path) async {
-    final parentPath = p.dirname(path);
-    if (parentPath == '/') return;
-
-    final parentContents = await _getContents(parentPath);
-    final unselected = parentContents?.where((e) {
-      // if (e.path == path) return false;
-
-      if (_entriesPath.containsKey(e.path)) {
-        final value = _entriesPath[e.path];
-        return value?.tristate == null ? true : false;
-      }
-
-      return true;
-    }).toList();
-
-    final parentTristate =
-        (unselected == null || unselected.isEmpty) ? true : null;
-
-    parentTristate == true
-        ? _entriesPath.update(
-            parentPath,
-            (value) => (isDir: true, selected: false, tristate: true),
-            ifAbsent: () => (isDir: true, selected: false, tristate: true),
-          )
-        : _entriesPath[parentPath] = (
-            isDir: true,
-            selected: false,
-            tristate: null,
-          );
-
-    if (parentPath == '/') return;
-    await _selectOrUpdateParent(parentPath);
-  }
-
-  Future<void> _clearOrUpdateParent(String path) async {
-    final parentPath = p.dirname(path);
-
-    final parentContents = await _getContents(parentPath);
-    final selected = parentContents
-        ?.where((e) => e.path != path && _entriesPath.containsKey(e.path))
-        .toList();
-
-    final parentTristate =
-        (selected == null || selected.isEmpty) ? false : null;
-
-    parentTristate == false
-        ? _entriesPath.remove(parentPath)
-        : _entriesPath[parentPath] = (
-            isDir: true,
-            selected: false,
-            tristate: null,
-          );
-
-    var grandparentPath = p.dirname(parentPath);
-    while (grandparentPath != '/') {
-      parentTristate == false
-          ? await _clearOrUpdateParent(parentPath)
-          : _entriesPath[grandparentPath] = (
-              isDir: true,
-              selected: false,
-              tristate: null,
-            );
-
-      grandparentPath = p.dirname(grandparentPath);
-    }
-  }
-
-  Future<List<FileSystemEntry>?> _getContents(String path) async =>
-      await _originRepoCubit?.getFolderContents(path);
-
   ({bool destinationOk, String errorMessage}) validateDestination(
     RepoCubit destinationRepoCubit,
     String destinationPath,
@@ -673,39 +353,18 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
       return (destinationOk: true, errorMessage: '');
     }
 
-    if (selectedEntries.isEmpty) {
+    if (_entries.isEmpty) {
       return (destinationOk: false, errorMessage: '');
     }
 
-    bool validationOk = true;
-    String errorMessage = '';
+    if (destinationPath == _originPath) {
+      final validationOk = false;
+      final errorMessage = 'The destination is the same as the source';
 
-    final rootEntry = selectedEntries.entries
-        .firstWhereOrNull((e) => e.value.tristate == true);
-    final startingPath = rootEntry?.value.isDir == true
-        ? rootEntry?.key ?? ''
-        : p.dirname(rootEntry?.key ?? '');
-
-    if (startingPath.isEmpty) {
-      return (destinationOk: false, errorMessage: '');
+      return (destinationOk: validationOk, errorMessage: errorMessage);
     }
 
-    final isSameParent = destinationPath == p.dirname(startingPath);
-    if (isSameParent) {
-      validationOk = false;
-      errorMessage = 'The destination is the same as the '
-          'source';
-    }
-
-    final isSamePath = startingPath == destinationPath;
-    final isWithin = p.isWithin(startingPath, destinationPath);
-    if (isSamePath || isWithin) {
-      validationOk = false;
-      errorMessage = 'The destination folder is a subfolder of the '
-          'source folder';
-    }
-
-    return (destinationOk: validationOk, errorMessage: errorMessage);
+    return (destinationOk: true, errorMessage: '');
   }
 }
 

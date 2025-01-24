@@ -4,7 +4,7 @@ import 'dart:io' as io;
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mime/mime.dart';
-import 'package:ouisync/native_channels.dart';
+import 'package:ouisync/native_channels.dart' show NativeChannels;
 import 'package:ouisync/ouisync.dart';
 import 'package:ouisync/state_monitor.dart';
 import 'package:shelf/shelf_io.dart';
@@ -198,8 +198,17 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     _navigation.current(location, currentFolder, isFolder);
   }
 
-  Future<void> startEntriesSelection() async {
-    await _entrySelection.startSelectionForRepo(this);
+  Future<void> startEntriesSelection([
+    bool isSingleSelection = false,
+    FileSystemEntry? singleEntry,
+  ]) async {
+    final currentPath = _currentFolder.state.path;
+    await _entrySelection.startSelectionForRepo(
+      this,
+      currentPath,
+      isSingleSelection,
+      singleEntry,
+    );
   }
 
   Future<void> endEntriesSelection() async {
@@ -208,28 +217,24 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
 
   void showMoveEntryBottomSheet({
     required BottomSheetType sheetType,
-    required String entryPath,
-    required EntryType entryType,
+    required FileSystemEntry entry,
   }) {
     _bottomSheet.showMoveEntry(
       repoCubit: this,
       navigationCubit: _navigation,
       type: sheetType,
-      entryPath: entryPath,
-      entryType: entryType,
+      entry: entry,
     );
   }
 
   void showMoveSelectedEntriesBottomSheet({
     required BottomSheetType sheetType,
-    String? entryPath,
-    EntryType? entryType,
+    FileSystemEntry? entry,
   }) {
     _bottomSheet.showMoveSelectedEntries(
       repoCubit: this,
       type: sheetType,
-      entryPath: entryPath,
-      entryType: entryType,
+      entry: entry,
     );
   }
 
@@ -724,7 +729,6 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     required EntryType type,
     RepoCubit? destinationRepoCubit,
     required bool recursive,
-    bool navigateToDestination = true,
   }) async {
     emitUnlessClosed(state.copyWith(isLoading: true));
     try {
@@ -742,9 +746,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
       loggy.error('Move entry from $source to $destination failed', e, st);
       return false;
     } finally {
-      if (navigateToDestination) {
-        await refresh();
-      }
+      await refresh();
     }
   }
 
@@ -820,7 +822,6 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     required String source,
     required String destination,
     required bool recursive,
-    bool navigateToDestination = true,
   }) async {
     emitUnlessClosed(state.copyWith(isLoading: true));
     try {
@@ -846,10 +847,8 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
       loggy.debug('Move entry from $source to $destination failed', e, st);
       return false;
     } finally {
-      if (navigateToDestination) {
-        await destinationRepoCubit.refresh();
-        await refresh();
-      }
+      await destinationRepoCubit.refresh();
+      await refresh();
     }
   }
 

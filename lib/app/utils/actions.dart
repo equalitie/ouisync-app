@@ -42,31 +42,29 @@ showSnackBar(
   BuildContext? context,
   SnackBarAction? action,
   bool showCloseIcon = true,
+  SnackBarBehavior? behavior = SnackBarBehavior.floating,
 }) =>
     context != null
-        ? _showSnackBar(
-            context,
-            message,
-            action: action,
-            showCloseIcon: showCloseIcon,
-          )
+        ? _showSnackBar(context, message, action, showCloseIcon, behavior!)
         : WidgetsBinding.instance.addPostFrameCallback(
             (_) => BuildContextProvider().call(
               (context) => _showSnackBar(
                 context,
                 message,
-                action: action,
-                showCloseIcon: showCloseIcon,
+                action,
+                showCloseIcon,
+                behavior!,
               ),
             ),
           );
 
 _showSnackBar(
   BuildContext context,
-  String message, {
+  String message,
   SnackBarAction? action,
-  bool showCloseIcon = true,
-}) {
+  bool showCloseIcon,
+  SnackBarBehavior behavior,
+) {
   final messenger = ScaffoldMessenger.of(context);
 
   if (_snackbars.contains(message)) {
@@ -80,7 +78,7 @@ _showSnackBar(
       content: _SnackBarWrap(message),
       action: action,
       showCloseIcon: showCloseIcon,
-      behavior: SnackBarBehavior.fixed,
+      behavior: behavior,
     ),
   );
 }
