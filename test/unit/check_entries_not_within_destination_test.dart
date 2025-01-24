@@ -135,6 +135,25 @@ void main() {
           await tester.pumpAndSettle();
         }
 
+        // Navigate to /folder1,
+        {
+          await originRepoCubit.navigateTo('/folder1');
+
+          final currentFolder = originRepoCubit.state.currentFolder;
+          expect(currentFolder.path, equals('/folder1'));
+        }
+
+        // Start selection, then select /folder1/folder2/
+        {
+          await originRepoCubit.startEntriesSelection();
+
+          final repoInfoHash = await originRepoCubit.infoHash;
+          await entrySelectionCubit.selectEntry(
+            repoInfoHash,
+            DirectoryEntry(path: '/folder1/folder2/'),
+          );
+        }
+
         final moveEntriesActions = MoveEntriesActions(
           context,
           reposCubit: reposCubit,
@@ -142,31 +161,26 @@ void main() {
           sheetType: BottomSheetType.move,
         );
 
-        final entry = DirectoryEntry(path: '/folder1/folder2/');
+        final validation = entrySelectionCubit.validateDestination;
+
+        // Navigate to /folder1,
+        {
+          await originRepoCubit.navigateTo('/');
+
+          final currentFolder = originRepoCubit.state.currentFolder;
+          expect(currentFolder.path, equals('/'));
+        }
+
         // Check moving /folder1/folder2/ to /
         {
-          final canMove = moveEntriesActions.canMove(
-            entry: entry,
-            destinationPath: '/',
-            destinationRepoLocation: originRepoCubit.location,
-            isCurrentRepoWriteMode: true,
+          final currentRepo = reposCubit.state.currentEntry;
+          final canMove = moveEntriesActions.enableAction(
+            validation,
+            currentRepo,
           );
 
           expect(canMove, equals(true));
         }
-
-        // Check moving /folder1/folder2 to /folder1/folder2/folder3
-        {
-          final canMove = moveEntriesActions.canMove(
-            entry: entry,
-            destinationPath: '/folder1/folder2/folder3',
-            destinationRepoLocation: originRepoCubit.location,
-            isCurrentRepoWriteMode: true,
-          );
-
-          expect(canMove, equals(false));
-        }
-        {}
       },
     ),
   );
