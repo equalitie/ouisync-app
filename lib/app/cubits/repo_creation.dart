@@ -157,10 +157,11 @@ class RepoCreationCubit extends Cubit<RepoCreationState>
       return;
     }
 
+    // TODO: Cubits should not do UI
     await Dialogs.executeFutureWithLoadingDialog(
       null,
       () async {
-        final accessMode = await token.mode;
+        final accessMode = await token.accessMode;
         final suggestedName = await token.suggestedName;
         final useCacheServers =
             await reposCubit.cacheServers.isEnabledForShareToken(token);
@@ -288,10 +289,9 @@ class RepoCreationCubit extends Cubit<RepoCreationState>
       return;
     }
 
-    final location = RepoLocation.fromParts(
-      dir: await reposCubit.settings.getDefaultRepositoriesDir(),
-      name: name,
-    );
+    // `storeDir` should be not-null at this point.
+    final storeDir = await reposCubit.session.storeDir;
+    final location = RepoLocation(dir: storeDir!, name: name);
 
     final exists = await File(location.path).exists();
 
@@ -347,6 +347,6 @@ class RepoCreationCubit extends Cubit<RepoCreationState>
   //@override
   //void onChange(Change<RepoCreationState> change) {
   //  super.onChange(change);
-  //  print(change.nextState);
+  //  loggy.debug(change.nextState);
   //}
 }

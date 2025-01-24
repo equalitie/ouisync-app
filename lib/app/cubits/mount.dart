@@ -1,9 +1,10 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync/ouisync.dart';
 
 import '../utils/log.dart';
-import '../utils/mounter.dart';
+import '../utils/native.dart';
 import 'utils.dart';
 
 sealed class MountState {
@@ -22,17 +23,17 @@ class MountStateSuccess extends MountState {
   const MountStateSuccess();
 }
 
-class MountStateError extends MountState {
-  final ErrorCode code;
-  final String message;
+class MountStateFailure extends MountState {
+  final Object error; // any error can be thrown in dart
+  final StackTrace stack;
 
-  const MountStateError(this.code, this.message);
+  const MountStateFailure(this.error, this.stack);
 }
 
 class MountCubit extends Cubit<MountState> with CubitActions, AppLogger {
-  final Mounter mounter;
+  final Session session;
 
-  MountCubit(this.mounter) : super(MountStateDisabled());
+  MountCubit(this.session) : super(MountStateDisabled());
 
   void init() => unawaited(_init());
 
@@ -40,10 +41,16 @@ class MountCubit extends Cubit<MountState> with CubitActions, AppLogger {
     emitUnlessClosed(MountStateMounting());
 
     try {
-      await mounter.init();
-      emitUnlessClosed(MountStateSuccess());
-    } on Error catch (error) {
-      emitUnlessClosed(MountStateError(error.code, error.message));
+      final mountRoot = await _defaultMountRoot;
+      await session.setMountRoot(mountRoot);
+
+      emitUnlessClosed(
+        mountRoot != null ? MountStateSuccess() : MountStateDisabled(),
+      );
+    } catch (error, stack) {
+      loggy.error('MOUNTTTT', error, stack);
+
+      emitUnlessClosed(MountStateFailure(error, stack));
     }
   }
 
@@ -54,5 +61,25 @@ class MountCubit extends Cubit<MountState> with CubitActions, AppLogger {
     }
 
     await super.close();
+  }
+}
+
+Future<String?> get _defaultMountRoot async {
+  if (Platform.isMacOS) {
+    return await Native.getMountRootDirectory();
+  }
+
+  if (Platform.isLinux) {
+    final home = Platform.environment['HOME'];
+
+    if (home == null) {
+      return null;
+    }
+
+    return '$home/Ouisync';
+  } else if (Platform.isWindows) {
+    return 'O:';
+  } else {
+    return null;
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:ouisync/ouisync.dart';
 import 'package:ouisync_app/app/cubits/repo_creation.dart';
 import 'package:ouisync_app/app/models/models.dart';
 import 'package:ouisync_app/app/utils/share_token.dart';
@@ -32,7 +33,7 @@ void main() {
             .having((t) => t.value, 'value', isNotNull)
             .having((t) => t.error, 'error', isNull));
 
-    final tokenAccessMode = await (token as ShareTokenValid).value.mode;
+    final tokenAccessMode = await (token as ShareTokenValid).value.accessMode;
     expect(tokenAccessMode, equals(AccessMode.blind));
 
     final suggestedRepoName = await token.value.suggestedName;
@@ -59,7 +60,7 @@ void main() {
 
     expect(repoCreationCubit.state.substate, isA<RepoCreationSuccess>());
     expect(
-      deps.reposCubit.repos
+      deps.reposCubit.state.repos.values
           .where((entry) => entry.name == suggestedRepoName)
           .firstOrNull,
       isA<OpenRepoEntry>()

@@ -48,7 +48,6 @@ class MainPage extends StatefulWidget {
     required this.mountCubit,
     required this.nativeChannels,
     required this.packageInfo,
-    required this.powerControl,
     required this.receivedMedia,
     required this.reposCubit,
     required this.session,
@@ -61,7 +60,6 @@ class MainPage extends StatefulWidget {
   final NativeChannels nativeChannels;
   final Settings settings;
   final PackageInfo packageInfo;
-  final PowerControl powerControl;
   final Stream<List<SharedMediaFile>> receivedMedia;
   final ReposCubit reposCubit;
   final MountCubit mountCubit;
@@ -74,6 +72,8 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage>
     with TickerProviderStateMixin, AppLogger {
   late final StateMonitorIntCubit panicCounter;
+  late final PowerControl powerControl =
+      PowerControl(widget.session, widget.settings);
   late final SortListCubit sortListCubit;
   late final UpgradeExistsCubit upgradeExists;
 
@@ -93,15 +93,13 @@ class _MainPageState extends State<MainPage>
 
   StreamSubscription? _receivedMediaSubscription;
 
-  RepoEntry? get _currentRepo => widget.reposCubit.currentRepo;
-
   @override
   void initState() {
     super.initState();
 
     panicCounter = StateMonitorIntCubit(
       widget.reposCubit.rootStateMonitor.child(
-        oui.MonitorId.expectUnique("Session"),
+        oui.MonitorId.expectUnique("Service"),
       ),
       "panic_counter",
     );
@@ -136,16 +134,10 @@ class _MainPageState extends State<MainPage>
 
     unawaited(upgradeExists.close());
     unawaited(sortListCubit.close());
+    unawaited(powerControl.close());
     unawaited(panicCounter.close());
 
     super.dispose();
-  }
-
-  getContent() {
-    final current = _currentRepo;
-    if (current is OpenRepoEntry) {
-      current.cubit.refresh();
-    }
   }
 
   void checkForDokan() {
@@ -179,98 +171,105 @@ class _MainPageState extends State<MainPage>
 
         case DokanResult.sameVersion:
         case DokanResult.newerVersionMayor:
-          loggy.app('The Dokan version installed is supported: '
+          loggy.debug('The Dokan version installed is supported: '
               '${dokanCheckResult.result!.name}');
           break;
 
         case null:
-          loggy.app('Check Dokan installation status failed: '
+          loggy.debug('Check Dokan installation status failed: '
               '${dokanCheckResult.error}');
           break;
       }
     });
   }
 
-  Widget buildMainWidget(TextDirection directionality) {
-    return widget.reposCubit.builder((repos) {
-      final currentRepo = repos.currentRepo;
-      final currentRepoCubit = currentRepo?.cubit;
+  Widget buildMainWidget(TextDirection directionality) =>
+      BlocBuilder<ReposCubit, ReposState>(
+        bloc: widget.reposCubit,
+        builder: (context, state) {
+          final currentRepo = state.currentEntry;
+          final currentRepoCubit = currentRepo?.cubit;
 
-      if (currentRepoCubit != null) {
-        final isFolder = !repos.showList;
-        currentRepoCubit.updateNavigation(isFolder: isFolder);
-      }
+          if (currentRepoCubit != null) {
+            final isFolder = state.current != null;
+            currentRepoCubit.updateNavigation(isFolder: isFolder);
+          }
 
-      if (repos.repos.isNotEmpty && repos.showList) {
-        /// This needs to be structured better
-        /// TODO: Add sorting to repo list
-        // _sortListCubit?.sortBy(SortBy.name);
+          if (state.repos.isNotEmpty && state.current == null) {
+            /// This needs to be structured better
+            /// TODO: Add sorting to repo list
+            // _sortListCubit?.sortBy(SortBy.name);
 
-        // final sortBy = SortBy.name;
-        // final sortDirection =
-        //     _sortListCubit?.state.direction ?? SortDirection.asc;
+            // final sortBy = SortBy.name;
+            // final sortDirection =
+            //     _sortListCubit?.state.direction ?? SortDirection.asc;
 
-        /// Using the "back" arrow causes the app settings icon (gear) to get
-        /// the focus, even if we explicitly ask for it to losse it.
-        /// So for now we request focus for the FAB, then unfocused it.
-        _fabFocus.requestFocus();
-        _fabFocus.unfocus();
+            /// Using the "back" arrow causes the app settings icon (gear) to get
+            /// the focus, even if we explicitly ask for it to losse it.
+            /// So for now we request focus for the FAB, then unfocused it.
+            _fabFocus.requestFocus();
+            _fabFocus.unfocus();
 
-        return RepoListState(
-          reposCubit: repos,
-          bottomSheetInfo: _bottomSheetInfo,
-          onShowRepoSettings: _showRepoSettings,
-        );
-      }
+            return RepoListState(
+              reposCubit: widget.reposCubit,
+              bottomSheetInfo: _bottomSheetInfo,
+              onShowRepoSettings: _showRepoSettings,
+            );
+          }
 
-      if (repos.isLoading || currentRepo is LoadingRepoEntry) {
-        // This one is mainly for when we're unlocking the repository,
-        // because during that time the current repository is destroyed so we
-        // can't show it's content.
-        return const Center(child: CircularProgressIndicator());
-      }
+          if (state.isLoading || currentRepo is LoadingRepoEntry) {
+            // This one is mainly for when we're unlocking the repository,
+            // because during that time the current repository is destroyed so we
+            // can't show it's content.
+            return const Center(child: CircularProgressIndicator());
+          }
 
-      if (currentRepo is OpenRepoEntry) {
-        final navigationPath = currentRepo.cubit.state.currentFolder.path;
-        currentRepo.cubit.navigateTo(navigationPath);
+          if (currentRepo is OpenRepoEntry) {
+            final navigationPath = currentRepo.cubit.state.currentFolder.path;
+            currentRepo.cubit.navigateTo(navigationPath);
 
-        return _repositoryContentBuilder(currentRepo, directionality);
-      }
+            return _repositoryContentBuilder(
+              state,
+              currentRepo,
+              directionality,
+            );
+          }
 
-      if (currentRepo is MissingRepoEntry) {
-        return MissingRepositoryState(
-            directionality: directionality,
-            repositoryLocation: currentRepo.location,
-            errorMessage: currentRepo.error,
-            errorDescription: currentRepo.errorDescription,
-            onBackToList: () => repos.setCurrent(null),
-            reposCubit: repos);
-      }
+          if (currentRepo is MissingRepoEntry) {
+            return MissingRepositoryState(
+              directionality: directionality,
+              repositoryLocation: currentRepo.location,
+              errorMessage: currentRepo.error,
+              errorDescription: currentRepo.errorDescription,
+              onBackToList: () => widget.reposCubit.setCurrent(null),
+              reposCubit: widget.reposCubit,
+            );
+          }
 
-      if (currentRepo is ErrorRepoEntry) {
-        // This is a general purpose error state.
-        // errorDescription is required, but nullable.
-        return ErrorState(
-          directionality: directionality,
-          errorMessage: currentRepo.error,
-          errorDescription: currentRepo.errorDescription,
-          onBackToList: () => repos.setCurrent(null),
-        );
-      }
+          if (currentRepo is ErrorRepoEntry) {
+            // This is a general purpose error state.
+            // errorDescription is required, but nullable.
+            return ErrorState(
+              directionality: directionality,
+              errorMessage: currentRepo.error,
+              errorDescription: currentRepo.errorDescription,
+              onBackToList: () => widget.reposCubit.setCurrent(null),
+            );
+          }
 
-      if (currentRepo == null) {
-        return repos.repos.isNotEmpty
-            ? SizedBox.shrink()
-            : NoRepositoriesState(
-                directionality: directionality,
-                onCreateRepoPressed: _createRepo,
-                onImportRepoPressed: _importRepo,
-              );
-      }
+          if (currentRepo == null) {
+            return state.repos.isNotEmpty
+                ? SizedBox.shrink()
+                : NoRepositoriesState(
+                    directionality: directionality,
+                    onCreateRepoPressed: _createRepo,
+                    onImportRepoPressed: _importRepo,
+                  );
+          }
 
-      return Center(child: Text(S.current.messageErrorUnhandledState));
-    });
-  }
+          return Center(child: Text(S.current.messageErrorUnhandledState));
+        },
+      );
 
   @override
   Widget build(BuildContext context) => Directionality(
@@ -304,14 +303,16 @@ class _MainPageState extends State<MainPage>
           ),
           floatingActionButtonLocation:
               FloatingActionButtonLocation.miniEndFloat,
-          floatingActionButton: widget.reposCubit
-              .builder((repos) => _buildFAB(context, repos.currentRepo)),
+          floatingActionButton: BlocBuilder<ReposCubit, ReposState>(
+            bloc: widget.reposCubit,
+            builder: _buildFAB,
+          ),
           bottomSheet: modalBottomSheet(),
         ),
       );
 
   Future<void> _onBackPressed(bool didPop, Object? result) async {
-    final currentRepo = _currentRepo;
+    final currentRepo = widget.reposCubit.state.currentEntry;
 
     if (currentRepo != null) {
       if (currentRepo is OpenRepoEntry) {
@@ -338,12 +339,12 @@ class _MainPageState extends State<MainPage>
     await MoveToBackground.moveTaskToBack();
   }
 
-  _buildOuiSyncBar() => OuiSyncBar(
+  PreferredSizeWidget _buildOuiSyncBar() => OuiSyncBar(
         reposCubit: widget.reposCubit,
         repoPicker: RepositoriesBar(
           mount: widget.mountCubit,
           panicCounter: panicCounter,
-          powerControl: widget.powerControl,
+          powerControl: powerControl,
           reposCubit: widget.reposCubit,
           upgradeExists: upgradeExists,
         ),
@@ -355,7 +356,7 @@ class _MainPageState extends State<MainPage>
   Widget _buildAppSettingsIcon() => NotificationBadge(
         mount: widget.mountCubit,
         panicCounter: panicCounter,
-        powerControl: widget.powerControl,
+        powerControl: powerControl,
         upgradeExists: upgradeExists,
         moveDownwards: 5,
         moveRight: 3,
@@ -366,16 +367,18 @@ class _MainPageState extends State<MainPage>
         ),
       );
 
-  Widget _buildRepoSettingsIcon() =>
-      Fields.actionIcon(const Icon(Icons.more_vert_rounded),
-          onPressed: () async {
-        final cubit = _currentRepo?.cubit;
-        if (cubit == null) {
-          return;
-        }
+  Widget _buildRepoSettingsIcon() => Fields.actionIcon(
+        const Icon(Icons.more_vert_rounded),
+        onPressed: () async {
+          final repoCubit = widget.reposCubit.state.currentEntry?.cubit;
+          if (repoCubit == null) {
+            return;
+          }
 
-        await _showRepoSettings(context, repoCubit: cubit);
-      }, size: Dimensions.sizeIconSmall);
+          await _showRepoSettings(context, repoCubit: repoCubit);
+        },
+        size: Dimensions.sizeIconSmall,
+      );
 
   Widget _buildSearchIcon() => Fields.actionIcon(
         const Icon(Icons.search_rounded),
@@ -385,11 +388,12 @@ class _MainPageState extends State<MainPage>
         size: Dimensions.sizeIconSmall,
       );
 
-  Widget _buildFAB(BuildContext context, RepoEntry? current) {
+  Widget _buildFAB(BuildContext context, ReposState reposState) {
     final icon = const Icon(Icons.add_rounded);
+    final current = reposState.currentEntry;
 
-    if (widget.reposCubit.showList) {
-      if (widget.reposCubit.repos.isNotEmpty) {
+    if (current == null) {
+      if (reposState.repos.isNotEmpty) {
         return FloatingActionButton(
           mini: true,
           focusNode: _fabFocus,
@@ -421,16 +425,21 @@ class _MainPageState extends State<MainPage>
   }
 
   Widget _repositoryContentBuilder(
+    ReposState reposState,
     OpenRepoEntry repo,
     TextDirection directionality,
   ) =>
       BlocBuilder<RepoCubit, RepoState>(
         bloc: repo.cubit,
-        builder: (context, state) => _selectLayoutWidget(directionality),
+        builder: (context, state) =>
+            _selectLayoutWidget(reposState, directionality),
       );
 
-  Widget _selectLayoutWidget(TextDirection directionality) {
-    final current = _currentRepo;
+  Widget _selectLayoutWidget(
+    ReposState reposState,
+    TextDirection directionality,
+  ) {
+    final current = reposState.currentEntry;
 
     if (current == null || current is LoadingRepoEntry) {
       return NoRepositoriesState(
@@ -443,18 +452,19 @@ class _MainPageState extends State<MainPage>
     if (current is OpenRepoEntry) {
       if (!current.cubit.state.canRead) {
         return LockedRepositoryState(
-          parentContext: context,
           directionality: directionality,
           repoCubit: current.cubit,
           // TODO: masterKey is not needed when passing settings.
           masterKey: widget.settings.masterKey,
           settings: widget.settings,
+          session: widget.session,
           passwordHasher: PasswordHasher(widget.session),
         );
       }
 
       _appSettingsIconFocus.unfocus();
-      return _contentBrowser(current.cubit, directionality);
+
+      return _contentBrowser(reposState, current.cubit, directionality);
     }
 
     return Center(
@@ -465,7 +475,11 @@ class _MainPageState extends State<MainPage>
     );
   }
 
-  Widget _contentBrowser(RepoCubit repo, TextDirection directionality) {
+  Widget _contentBrowser(
+    ReposState reposState,
+    RepoCubit repo,
+    TextDirection directionality,
+  ) {
     Widget child;
     final folder = repo.state.currentFolder;
 
@@ -481,7 +495,7 @@ class _MainPageState extends State<MainPage>
         );
       }
     } else {
-      child = _contentsList(repo);
+      child = _contentsList(reposState, repo);
     }
 
     return ValueListenableBuilder(
@@ -539,7 +553,7 @@ class _MainPageState extends State<MainPage>
     } else if (io.Platform.isWindows ||
         io.Platform.isLinux ||
         io.Platform.isMacOS) {
-      final mountPoint = repo.mountPoint;
+      final mountPoint = await repo.mountPoint;
       if (mountPoint == null) {
         showSnackBar(S.current.messageRepositoryNotMounted);
         return;
@@ -569,7 +583,7 @@ class _MainPageState extends State<MainPage>
           previewOk = await launchUrl(url);
         }
       } on PlatformException catch (e, st) {
-        loggy.app(
+        loggy.debug(
           'Preview file (desktop): Error previewing file ${entry.path}:',
           e,
           st,
@@ -593,7 +607,7 @@ class _MainPageState extends State<MainPage>
 
         await launchUrl(url);
       } on PlatformException catch (e, st) {
-        loggy.app(
+        loggy.debug(
           '(FileServer) Error previewing file ${entry.path}:',
           e,
           st,
@@ -602,12 +616,14 @@ class _MainPageState extends State<MainPage>
     }
   }
 
-  Widget _contentsList(RepoCubit currentRepoCubit) {
+  Widget _contentsList(ReposState reposState, RepoCubit currentRepoCubit) {
     final contents = currentRepoCubit.state.currentFolder.content;
     final totalEntries = contents.length;
 
     return RefreshIndicator(
-      onRefresh: () async => getContent(),
+      onRefresh: () async {
+        await reposState.currentEntry?.cubit?.refresh();
+      },
       child: Container(
         child: ListView.separated(
           separatorBuilder: (context, index) => const Divider(
@@ -797,23 +813,24 @@ class _MainPageState extends State<MainPage>
   }
 
   Future<void> trySaveFile(String sourcePath) async {
-    if (_currentRepo is! OpenRepoEntry) {
+    final current = widget.reposCubit.state.currentEntry;
+
+    if (current is! OpenRepoEntry) {
       return;
     }
 
-    if (_currentRepo?.cubit == null) return;
-
     await SaveMedia(
       context,
-      repoCubit: _currentRepo!.cubit!,
+      repoCubit: current.cubit,
       sourcePath: sourcePath,
       type: EntryType.file,
     ).save();
   }
 
   Future<bool> canSaveFiles() async {
-    final currentRepo = _currentRepo;
-    if (currentRepo is! OpenRepoEntry) {
+    final current = widget.reposCubit.state.currentEntry;
+
+    if (current is! OpenRepoEntry) {
       await Dialogs.simpleAlertDialog(
         context,
         title: S.current.titleAddFile,
@@ -823,9 +840,9 @@ class _MainPageState extends State<MainPage>
       return false;
     }
 
-    final accessModeMessage = currentRepo.cubit.state.canWrite
+    final accessModeMessage = current.cubit.state.canWrite
         ? null
-        : currentRepo.cubit.state.canRead
+        : current.cubit.state.canRead
             ? S.current.messageAddingFileToReadRepository
             : S.current.messageAddingFileToLockedRepository;
 
@@ -867,7 +884,7 @@ class _MainPageState extends State<MainPage>
     for (final medium in media) {
       switch (medium.type) {
         case SharedMediaType.file
-            when (widget.reposCubit.showList ||
+            when (widget.reposCubit.state.current == null ||
                     !PlatformValues.isDesktopDevice) &&
                 system_path.extension(medium.path) ==
                     ".${RepoLocation.defaultExtension}":
@@ -942,7 +959,7 @@ class _MainPageState extends State<MainPage>
     final location = await createRepoDialog(context);
 
     if (location != null) {
-      await setCurrent(location);
+      await widget.reposCubit.setCurrent(location);
     }
 
     return location;
@@ -953,15 +970,10 @@ class _MainPageState extends State<MainPage>
     final location = locations.singleOrNull;
 
     if (location != null) {
-      await setCurrent(location);
+      await widget.reposCubit.setCurrent(location);
     }
 
     return locations;
-  }
-
-  Future<void> setCurrent(RepoLocation location) async {
-    final repo = widget.reposCubit.get(location);
-    await widget.reposCubit.setCurrent(repo);
   }
 
   Future<RepoLocation?> createRepoDialog(BuildContext parentContext) async =>
@@ -1029,7 +1041,7 @@ class _MainPageState extends State<MainPage>
             localeCubit: widget.localeCubit,
             mount: widget.mountCubit,
             panicCounter: panicCounter,
-            powerControl: widget.powerControl,
+            powerControl: powerControl,
             reposCubit: widget.reposCubit,
             upgradeExists: upgradeExists,
             checkForDokan: checkForDokan,
@@ -1048,6 +1060,7 @@ class _MainPageState extends State<MainPage>
         builder: (context) {
           return RepositorySettings(
             settings: widget.settings,
+            session: widget.session,
             repoCubit: repoCubit,
             reposCubit: widget.reposCubit,
           );

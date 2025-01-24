@@ -2,24 +2,20 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 
-import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:connectivity_plus_platform_interface/connectivity_plus_platform_interface.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ouisync_app/app/cubits/locale.dart';
 import 'package:ouisync_app/app/cubits/mount.dart';
-import 'package:ouisync_app/app/cubits/power_control.dart';
 import 'package:ouisync_app/app/cubits/repos.dart';
 import 'package:ouisync_app/app/pages/main_page.dart';
-import 'package:ouisync_app/app/utils/cache_servers.dart';
-import 'package:ouisync_app/app/utils/master_key.dart';
-import 'package:ouisync_app/app/utils/mounter.dart';
 import 'package:ouisync_app/app/utils/platform/platform_window_manager.dart';
-import 'package:ouisync_app/app/utils/settings/settings.dart';
+import 'package:ouisync_app/app/utils/utils.dart';
 import 'package:ouisync_app/generated/l10n.dart';
 import 'package:ouisync/native_channels.dart';
-import 'package:ouisync/ouisync.dart' show Session, SessionKind;
+import 'package:ouisync/ouisync.dart' show Session, initLog;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -27,6 +23,9 @@ import 'package:path_provider_platform_interface/path_provider_platform_interfac
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stack_trace/stack_trace.dart';
+export 'package:flutter/foundation.dart' show debugPrint;
+
+final _loggy = appLogger("TestHelper");
 
 /// Setup the test environment and run `callback` inside it.
 ///
@@ -47,6 +46,11 @@ Future<void> testEnv(FutureOr<void> Function() callback) async {
     };
   }
 
+  initLog(
+    callback: (level, message) => debugPrint(
+        '${DateTime.now()} ${level.name.toUpperCase().padRight(5)} $message'),
+  );
+
   late Directory tempDir;
   late BlocObserver origBlocObserver;
 
@@ -54,8 +58,10 @@ Future<void> testEnv(FutureOr<void> Function() callback) async {
     origBlocObserver = Bloc.observer;
 
     tempDir = await Directory.systemTemp.createTemp();
-    final platform = Directory(join(tempDir.path, 'platform')).create();
-    PathProviderPlatform.instance = _FakePathProviderPlatform(await platform);
+
+    final platformDir = Directory(join(tempDir.path, 'platform'));
+    await platformDir.create();
+    PathProviderPlatform.instance = _FakePathProviderPlatform(platformDir);
 
     final shared = Directory(join(tempDir.path, 'shared')).create();
     final mount = Directory(join(tempDir.path, 'mount')).create();
@@ -75,6 +81,8 @@ Future<void> testEnv(FutureOr<void> Function() callback) async {
       }
     });
 
+    ConnectivityPlatform.instance = _FakeConnectivityPlatform();
+
     // TODO: add mock for 'org.equalitie.ouisync/backend' once the tests are updated to use channels
 
     SharedPreferences.setMockInitialValues({});
@@ -85,12 +93,15 @@ Future<void> testEnv(FutureOr<void> Function() callback) async {
 
     try {
       await tempDir.delete(recursive: true);
-    } on PathAccessException catch (_) {
-      // This sometimes happen on the CI on windows. It seems to be caused by another process
+    } on PathAccessException {
+      // This sometimes happens on the CI on windows. It seems to be caused by another process
       // accessing the temp directory for some reason. It probably doesn't indicate a problem in
       // the code under test so it should be safe to ignore it.
+    } on PathNotFoundException {
+      // This shouldn't happen but it still sometimes does. Unknown why. It doesn't really affect
+      // the tests so we ignore it.
     } catch (exception) {
-      print("Exception during temporary directory removal: $exception");
+      _loggy.error("Exception during temporary directory removal: $exception");
       rethrow;
     }
   });
@@ -104,46 +115,39 @@ class TestDependencies {
     this.session,
     this.settings,
     this.nativeChannels,
-    this.powerControl,
     this.reposCubit,
     this.mountCubit,
     this.localeCubit,
   );
 
   static Future<TestDependencies> create() async {
-    final configPath = join(
-      (await getApplicationSupportDirectory()).path,
-      'config',
-    );
+    final appDir = await getApplicationSupportDirectory();
+    await appDir.create(recursive: true);
 
-    final session = Session.create(
-      kind: SessionKind.unique,
+    final configPath = join(appDir.path, 'config');
+
+    final session = await Session.create(
       configPath: configPath,
     );
 
+    await session.setStoreDir(join(appDir.path, 'repos'));
+
     final settings = await Settings.init(MasterKey.random());
-    final nativeChannels = NativeChannels(session);
-    final powerControl = PowerControl(
-      session,
-      settings,
-      connectivity: FakeConnectivity(),
-    );
+    final nativeChannels = NativeChannels();
     final reposCubit = ReposCubit(
       cacheServers: CacheServers.disabled,
       nativeChannels: nativeChannels,
       session: session,
       settings: settings,
-      mounter: Mounter(session),
     );
 
-    final mountCubit = MountCubit(reposCubit.mounter);
+    final mountCubit = MountCubit(session);
     final localeCubit = LocaleCubit(settings);
 
     return TestDependencies._(
       session,
       settings,
       nativeChannels,
-      powerControl,
       reposCubit,
       mountCubit,
       localeCubit,
@@ -154,7 +158,6 @@ class TestDependencies {
     await localeCubit.close();
     await mountCubit.close();
     await reposCubit.close();
-    await powerControl.close();
     await session.close();
   }
 
@@ -166,7 +169,6 @@ class TestDependencies {
         mountCubit: mountCubit,
         nativeChannels: nativeChannels,
         packageInfo: fakePackageInfo,
-        powerControl: powerControl,
         receivedMedia: receivedMedia ?? Stream.empty(),
         reposCubit: reposCubit,
         session: session,
@@ -177,10 +179,18 @@ class TestDependencies {
   final Session session;
   final Settings settings;
   final NativeChannels nativeChannels;
-  final PowerControl powerControl;
   final ReposCubit reposCubit;
   final MountCubit mountCubit;
   final LocaleCubit localeCubit;
+}
+
+class _FakeConnectivityPlatform extends ConnectivityPlatform {
+  @override
+  final Stream<List<ConnectivityResult>> onConnectivityChanged = Stream.empty();
+
+  @override
+  Future<List<ConnectivityResult>> checkConnectivity() =>
+      Future.value([ConnectivityResult.none]);
 }
 
 class _FakePathProviderPlatform extends PathProviderPlatform {
@@ -222,16 +232,6 @@ class FakeWindowManager extends PlatformWindowManager {
 
   @override
   Future<void> initSystemTray() => Future.value();
-}
-
-/// Fake Connectivity
-class FakeConnectivity implements Connectivity {
-  @override
-  final Stream<List<ConnectivityResult>> onConnectivityChanged = Stream.empty();
-
-  @override
-  Future<List<ConnectivityResult>> checkConnectivity() =>
-      Future.value([ConnectivityResult.none]);
 }
 
 /// Fake PackageInfo
@@ -328,7 +328,6 @@ extension WidgetTesterExtension on WidgetTester {
       }
 
       final image = await captureImage(element);
-
       final bytes = (await image.toByteData(format: ImageByteFormat.png))!
           .buffer
           .asUint8List();
@@ -336,12 +335,11 @@ extension WidgetTesterExtension on WidgetTester {
       final path = join(_testDirPath, 'screenshots', '$name.png');
 
       await Directory(dirname(path)).create(recursive: true);
-
-      debugPrint('screenshot saved to $path');
-
       await File(path).writeAsBytes(bytes);
+
+      _loggy.info('screenshot saved to $path');
     } catch (e) {
-      debugPrint('Failed to save screenshot: $e');
+      _loggy.error('Failed to save screenshot: $e');
     }
   }
 
@@ -363,7 +361,8 @@ extension WidgetTesterExtension on WidgetTester {
         '/usr/lib/ouisync/data/flutter_assets/packages/golden_toolkit/fonts/Roboto-Regular.ttf');
 
     if (!(await fontFile.exists())) {
-      print("Failed to load fonts, the file ${fontFile.path} does not exist");
+      _loggy.error(
+          "Failed to load fonts, the file ${fontFile.path} does not exist");
       return;
     }
 

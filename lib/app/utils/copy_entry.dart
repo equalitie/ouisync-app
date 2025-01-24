@@ -34,7 +34,7 @@ class CopyEntry with EntryOps, AppLogger {
     final dstRepo = (toRepoCubit ?? _repoCubit);
     final dstFolderPath = repo_path.join(_dstPath, fromPathSegment);
 
-    final exist = await dstRepo.exists(dstFolderPath);
+    final exist = await dstRepo.entryExists(dstFolderPath);
     if (!exist) {
       await _pickModeAndCopyEntry(
         toRepoCubit,

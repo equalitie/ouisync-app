@@ -4,55 +4,45 @@ import 'dart:io' as io;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ouisync_app/app/cubits/cubits.dart';
-import 'package:ouisync_app/app/models/repo_location.dart';
 import 'package:ouisync_app/app/utils/cache_servers.dart';
-import 'package:ouisync_app/app/utils/mounter.dart';
 import 'package:ouisync/native_channels.dart';
 import 'package:ouisync/ouisync.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../utils.dart';
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  late Session session;
+  late TestDependencies deps;
   late Repository originRepo;
   late Repository otherRepo;
 
   late RepoCubit originRepoCubit;
   late RepoCubit otherRepoCubit;
 
-  late NativeChannels nativeChannels;
   late NavigationCubit navigationCubit;
   late EntrySelectionCubit entrySelectionCubit;
   late EntryBottomSheetCubit bottomSheetCubit;
 
   setUp(() async {
-    final dir = await io.Directory.systemTemp.createTemp();
-    final locationOrigin =
-        RepoLocation.fromDbPath(p.join(dir.path, "store.db"));
-    final locationOther =
-        RepoLocation.fromDbPath(p.join(dir.path, "store2.db"));
-
-    session = Session.create(configPath: dir.path, kind: SessionKind.unique);
+    deps = await TestDependencies.create();
 
     originRepo = await Repository.create(
-      session,
-      store: locationOrigin.path,
+      deps.session,
+      path: 'origin',
       readSecret: null,
       writeSecret: null,
     );
 
     otherRepo = await Repository.create(
-      session,
-      store: locationOther.path,
+      deps.session,
+      path: 'other',
       readSecret: null,
       writeSecret: null,
     );
-
-    PathProviderPlatform.instance = FakePathProviderPlatform(dir);
-    nativeChannels = FakeNativeChannels(session);
 
     FlutterSecureStorage.setMockInitialValues({});
     SharedPreferences.setMockInitialValues({});
@@ -60,37 +50,29 @@ void main() {
     entrySelectionCubit = EntrySelectionCubit();
     bottomSheetCubit = EntryBottomSheetCubit();
 
-    final mounter = Mounter(session);
-
     originRepoCubit = await RepoCubit.create(
-      nativeChannels: nativeChannels,
+      nativeChannels: deps.nativeChannels,
       repo: originRepo,
-      location: locationOrigin,
       navigation: navigationCubit,
       entrySelection: entrySelectionCubit,
       bottomSheet: bottomSheetCubit,
       cacheServers: CacheServers.disabled,
-      mounter: mounter,
-      session: session,
+      session: deps.session,
     );
 
     otherRepoCubit = await RepoCubit.create(
-      nativeChannels: nativeChannels,
+      nativeChannels: deps.nativeChannels,
       repo: otherRepo,
-      location: locationOther,
       navigation: navigationCubit,
       entrySelection: entrySelectionCubit,
       bottomSheet: bottomSheetCubit,
       cacheServers: CacheServers.disabled,
-      mounter: mounter,
-      session: session,
+      session: deps.session,
     );
   });
 
   tearDown(() async {
-    await otherRepo.close();
-    await originRepo.close();
-    await session.close();
+    await deps.dispose();
   });
 
   test('Move file to other repo', () async {
@@ -102,7 +84,7 @@ void main() {
       await file.write(0, utf8.encode("123"));
       await file.close();
 
-      final originContents = await Directory.open(originRepo, '/');
+      final originContents = await Directory.read(originRepo, '/');
       expect(originContents, hasLength(1));
       expect(originContents, dirEntryComparator(expectedFile1));
     }
@@ -119,8 +101,8 @@ void main() {
 
       expect(result, equals(true));
 
-      final originContentsPost = await Directory.open(originRepo, '/');
-      final otherContents = await Directory.open(otherRepo, '/');
+      final originContentsPost = await Directory.read(originRepo, '/');
+      final otherContents = await Directory.read(otherRepo, '/');
       expect(originContentsPost, hasLength(0));
 
       expect(otherContents, hasLength(1));
@@ -137,7 +119,7 @@ void main() {
     {
       await Directory.create(originRepo, '/folder1');
 
-      final originContents = await Directory.open(originRepo, '/');
+      final originContents = await Directory.read(originRepo, '/');
       expect(originContents, hasLength(1));
       expect(originContents, dirEntryComparator(expectedFolder1));
     }
@@ -154,8 +136,8 @@ void main() {
 
       expect(result, equals(true));
 
-      final originContentsPost = await Directory.open(originRepo, '/');
-      final otherContents = await Directory.open(otherRepo, '/');
+      final originContentsPost = await Directory.read(originRepo, '/');
+      final otherContents = await Directory.read(otherRepo, '/');
       expect(originContentsPost, hasLength(0));
 
       expect(otherContents, hasLength(1));
@@ -173,10 +155,10 @@ void main() {
       await file.write(0, utf8.encode("123"));
       await file.close();
 
-      final originContents = await Directory.open(originRepo, '/');
+      final originContents = await Directory.read(originRepo, '/');
       expect(originContents, hasLength(1));
 
-      final folder1Contents = await Directory.open(originRepo, '/folder1');
+      final folder1Contents = await Directory.read(originRepo, '/folder1');
       expect(folder1Contents, hasLength(1));
       expect(folder1Contents, dirEntryComparator(expectedFile1));
     }
@@ -184,17 +166,16 @@ void main() {
     // Move folder worth one file to other repo
     {
       final result = await originRepoCubit.moveEntryToRepo(
-        destinationRepoCubit: otherRepoCubit,
-        type: EntryType.directory,
-        source: '/folder1',
-        destination: '/folder1',
-        recursive: true
-      );
+          destinationRepoCubit: otherRepoCubit,
+          type: EntryType.directory,
+          source: '/folder1',
+          destination: '/folder1',
+          recursive: true);
 
       expect(result, equals(true));
 
-      final originContentsPost = await Directory.open(originRepo, '/');
-      final otherContents = await Directory.open(otherRepo, '/');
+      final originContentsPost = await Directory.read(originRepo, '/');
+      final otherContents = await Directory.read(otherRepo, '/');
       expect(originContentsPost, hasLength(0));
 
       final expectedFolder1 = <DirEntry>[
@@ -203,7 +184,7 @@ void main() {
       expect(otherContents, hasLength(1));
       expect(otherContents.entries, dirEntryComparator(expectedFolder1));
 
-      final otherFolder1Contents = await Directory.open(otherRepo, '/folder1');
+      final otherFolder1Contents = await Directory.read(otherRepo, '/folder1');
       expect(otherFolder1Contents, hasLength(1));
       expect(otherFolder1Contents, dirEntryComparator(expectedFile1));
     }
@@ -251,7 +232,7 @@ Matcher dirEntryComparator(Iterable<DirEntry> expected) => pairwiseCompare(
     );
 
 class FakeNativeChannels extends NativeChannels {
-  FakeNativeChannels(super.session);
+  FakeNativeChannels();
 }
 
 class FakePathProviderPlatform extends PathProviderPlatform {

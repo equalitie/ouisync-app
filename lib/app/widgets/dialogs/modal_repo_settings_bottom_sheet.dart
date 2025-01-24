@@ -22,11 +22,13 @@ import '../widgets.dart' show EntryActionItem, RepoProgressBuilder;
 class RepositorySettings extends StatefulWidget {
   const RepositorySettings({
     required this.settings,
+    required this.session,
     required this.repoCubit,
     required this.reposCubit,
   });
 
   final Settings settings;
+  final Session session;
   final RepoCubit repoCubit;
   final ReposCubit reposCubit;
 
@@ -86,14 +88,10 @@ class _RepositorySettingsState extends State<RepositorySettings>
                         title: S.current.actionRename,
                         dense: true,
                         onTap: () async {
-                          final location = widget.repoCubit.location;
-                          final renameRepoFuture =
-                              widget.reposCubit.renameRepository;
-
-                          final newName = await renameRepository(context,
-                              repoCubit: widget.repoCubit,
-                              location: location,
-                              renameRepoFuture: renameRepoFuture);
+                          final newName = await renameRepository(
+                            context,
+                            repoCubit: widget.repoCubit,
+                          );
 
                           if (newName.isNotEmpty) {
                             Navigator.of(context).pop();
@@ -118,6 +116,7 @@ class _RepositorySettingsState extends State<RepositorySettings>
                           onTap: () async => await navigateToRepositorySecurity(
                                 context,
                                 settings: widget.settings,
+                                session: widget.session,
                                 repoCubit: widget.repoCubit,
                                 passwordHasher:
                                     widget.reposCubit.passwordHasher,

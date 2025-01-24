@@ -36,7 +36,7 @@ class DokanScripts with AppLogger {
     final exitCode = resultCheckDokanInstallation.exitCode;
     if (exitCode != 0) {
       final error = resultCheckDokanInstallation.stderr;
-      loggy.app('Checking Dokan installation failed: $error');
+      loggy.debug('Checking Dokan installation failed: $error');
 
       return DokanCheckResult(result: null, error: error);
     }
@@ -62,19 +62,19 @@ class DokanScripts with AppLogger {
     switch (exitCode) {
       case 0:
         {
-          loggy.app('Dokan MSI installation successful');
+          loggy.debug('Dokan MSI installation successful');
           return true;
         }
       case 1602:
         {
-          loggy.app(
+          loggy.debug(
               'The user canceled the Dokan MSI execution before it was done\n'
               'stdout:\n$stdOut\n');
           return null;
         }
       case 1603:
         {
-          loggy.app(
+          loggy.debug(
             'The Dokan MSI installation failed because there is a '
             'Windows reboot still pending after a Dokan driver uninstall, or'
             ' it is already installed\n'
@@ -84,7 +84,7 @@ class DokanScripts with AppLogger {
         }
       default:
         {
-          loggy.app(
+          loggy.debug(
             'There was an error trying to install the Dokan MSI.\n'
             'stderr:\n$stdError\n'
             'stdout:\n$stdOut\n',

@@ -6,16 +6,7 @@ import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart' show BottomSheetType, RepoCubit;
 import '../../models/models.dart' show DirectoryEntry;
 import '../../utils/utils.dart'
-    show
-        AppLogger,
-        AppThemeExtension,
-        Constants,
-        Dialogs,
-        Dimensions,
-        Fields,
-        AppLoggy,
-        showSnackBar,
-        ThemeGetter;
+    show AppLogger, AppLoggy, AppThemeExtension, Constants, Dialogs, Dimensions, Fields, ThemeGetter, showSnackBar;
 import '../widgets.dart'
     show
         ActionsDialog,
@@ -199,7 +190,7 @@ class _FolderDetailState extends State<FolderDetail> with AppLogger {
   ) async {
     final Directory directory = await repo.openDirectory(path);
     if (directory.isNotEmpty) {
-      loggy.app('Directory $path is not empty');
+      loggy.debug('Directory $path is not empty');
       return false;
     }
 

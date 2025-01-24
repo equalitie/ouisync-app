@@ -29,7 +29,7 @@ class SaveMedia with EntryOps, AppLogger {
       newFileName,
     );
 
-    final exist = await _repoCubit.exists(newFilePath);
+    final exist = await _repoCubit.entryExists(newFilePath);
     if (!exist) {
       await _saveFile(
         devicePath: sourcePath,

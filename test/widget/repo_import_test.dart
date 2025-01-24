@@ -26,13 +26,13 @@ void main() {
   Future<RepoLocation> createExportedRepo([
     String name = 'exported-repo',
   ]) async {
-    final location = RepoLocation.fromParts(
-      dir: await getTemporaryDirectory(),
+    final location = RepoLocation(
+      dir: (await getTemporaryDirectory()).path,
       name: name,
     );
     final repo = await Repository.create(
       deps.session,
-      store: location.path,
+      path: location.path,
       readSecret: null,
       writeSecret: null,
     );
@@ -60,10 +60,8 @@ void main() {
         final locateButton = find.text('LOCATE');
         await tester.ensureVisible(locateButton);
         await tester.tap(locateButton);
-        await deps.reposCubit
-            .waitUntil((_) => deps.reposCubit.repos.isNotEmpty);
-        await deps.reposCubit.waitUntil(
-            (_) => deps.reposCubit.currentRepo?.location == location);
+        await deps.reposCubit.waitUntil((state) => state.repos.isNotEmpty);
+        await deps.reposCubit.waitUntil((state) => state.current == location);
 
         // TODO: Test that the bottom sheet is closed and the repo list now contains the imported
         // repo. Problem is that calling `pumpAndSettle` here throws timeout exception and calling
@@ -80,9 +78,10 @@ void main() {
     (tester) => tester.runAsync(
       () async {
         // Create existing repo
-        final existingLocation = RepoLocation.fromParts(
-            dir: await deps.settings.getDefaultRepositoriesDir(),
-            name: 'some repo');
+        final existingLocation = RepoLocation(
+          dir: (await deps.session.storeDir)!,
+          name: 'some repo',
+        );
         await deps.reposCubit.createRepository(
           location: existingLocation,
           setLocalSecret: LocalSecretKeyAndSalt.random(),
@@ -92,7 +91,7 @@ void main() {
         // Create repo to be imported
         final exportedLocation = await createExportedRepo();
 
-        expect(deps.reposCubit.repos, hasLength(1));
+        expect(deps.reposCubit.state.repos, hasLength(1));
 
         await tester.pumpWidget(testApp(deps.createMainPage()));
         await tester.pumpAndSettle();
@@ -112,10 +111,9 @@ void main() {
         await tester.ensureVisible(locateButton);
         await tester.tap(locateButton);
 
+        await deps.reposCubit.waitUntil((state) => state.repos.length == 2);
         await deps.reposCubit
-            .waitUntil((_) => deps.reposCubit.repos.length == 2);
-        await deps.reposCubit.waitUntil(
-            (_) => deps.reposCubit.currentRepo?.location == exportedLocation);
+            .waitUntil((state) => state.current == exportedLocation);
 
         // TODO: Test that the bottom sheet is closed and the repo list now contains both repos.
         // Problem is that calling `pumpAndSettle` here throws timeout exception and calling just
@@ -131,15 +129,15 @@ void main() {
       () async {
         final location = await createExportedRepo();
 
-        await deps.reposCubit.waitUntil((_) => !deps.reposCubit.isLoading);
+        await deps.reposCubit.waitUntil((state) => !state.isLoading);
         await deps.reposCubit.importRepoFromLocation(location);
 
-        final repoEntry = deps.reposCubit.get(location);
+        final repoEntry = deps.reposCubit.state.repos[location];
         final repoCubit = repoEntry!.cubit!;
 
         await tester.pumpWidget(testApp(deps.createMainPage()));
         await tester.pumpAndSettle();
-        await deps.reposCubit.waitUntil((_) => !deps.reposCubit.isLoading);
+        await deps.reposCubit.waitUntil((state) => !state.isLoading);
 
         final repoItem = find.widgetWithText(InkWell, location.name);
         final readIcon = find.descendant(
@@ -165,7 +163,7 @@ void main() {
         // Tap the repo to go to the unlock page.
         await tester.tap(repoItem);
         await deps.reposCubit
-            .waitUntil((_) => deps.reposCubit.currentRepo == repoEntry);
+            .waitUntil((state) => state.currentEntry == repoEntry);
         await repoCubit.waitUntil((state) => !state.isLoading);
         await tester.pumpAndSettle();
 

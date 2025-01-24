@@ -19,8 +19,8 @@ void main() {
     deps = await TestDependencies.create();
 
     final repoEntry = await deps.reposCubit.createRepository(
-      location: RepoLocation.fromParts(
-        dir: await deps.reposCubit.settings.getDefaultRepositoriesDir(),
+      location: RepoLocation(
+        dir: (await deps.session.storeDir)!,
         name: 'my repo',
       ),
       setLocalSecret: LocalSecretKeyAndSalt.random(),
@@ -39,9 +39,10 @@ void main() {
   });
 
   RepoSecurityPage createRepoSecurityPage() => RepoSecurityPage(
+        deps.settings,
+        deps.session,
         repoCubit,
         WriteAccess(localSecret),
-        deps.settings,
         PasswordHasher(deps.session),
       );
 

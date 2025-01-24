@@ -15,7 +15,7 @@ class UpgradeExistsCubit extends Cubit<bool> with CubitActions, AppLogger {
       : _session = session,
         _settings = settings,
         super(false) {
-    unawaited(_init().catchError(print));
+    unawaited(_init().catchError((e, st) => loggy.error('During _init():', e, st)));
   }
 
   @override

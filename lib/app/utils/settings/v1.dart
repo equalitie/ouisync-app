@@ -200,14 +200,15 @@ class Settings with AppLogger {
 
       // Try to write the auth mode to the repo metadata
       try {
-        final repo = await Repository.open(session, store: location.path);
+        final repo = await Repository.open(session, path: location.path);
         await repo.setAuthMode(authMode);
         await repo.close();
       } catch (e, st) {
         loggy.error(
-            'failed to migrate auth mode for repository ${location.path}:',
-            e,
-            st);
+          'failed to migrate auth mode for repository ${location.path}:',
+          e,
+          st,
+        );
         continue;
       }
 
@@ -289,7 +290,7 @@ class Settings with AppLogger {
               join((await getApplicationDocumentsDirectory()).path, 'Ouisync')),
         ];
 
-        final newDir = await getDefaultRepositoriesDir();
+        final newDir = await defaultStoreDir;
 
         for (final oldDir in oldDirs) {
           if (!(await oldDir.exists())) {
@@ -428,19 +429,14 @@ class Settings with AppLogger {
   }
 
   //------------------------------------------------------------------
-  Future<io.Directory> getDefaultRepositoriesDir() async {
-    final baseDir = await Native.getBaseDir(removable: true);
-    return io.Directory(join(baseDir.path, Constants.folderRepositoriesName));
-  }
 
-  //------------------------------------------------------------------
-
-  void debugPrint() {
-    print("============== Settings ===============");
+  void debugSettings() {
+    // debugPrint is flutter's "default" print function
+    loggy.debug("============== Settings ===============");
     for (final kv in _root.repos.entries) {
-      print("=== ${kv.key}");
+      loggy.debug("=== ${kv.key}");
     }
-    print("=======================================");
+    loggy.debug("=======================================");
   }
 
   //------------------------------------------------------------------
@@ -451,7 +447,7 @@ class Settings with AppLogger {
         acceptedEqualitieValues: _root.acceptedEqualitieValues,
         showOnboarding: _root.showOnboarding,
         highestSeenProtocolNumber: _root.highestSeenProtocolNumber,
-        defaultRepo: _root.defaultRepo?.clone(),
+        defaultRepo: _root.defaultRepo,
         repos: Map.from(_root.repos),
         defaultRepositoriesDirVersion: _root.defaultRepositoriesDirVersion,
         sharedPreferences: _prefs,

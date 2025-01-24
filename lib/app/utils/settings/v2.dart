@@ -1,8 +1,6 @@
 import 'dart:convert';
-import 'dart:io' as io;
 import 'dart:ui' show Locale;
 
-import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../models/models.dart';
@@ -131,9 +129,7 @@ class Settings with AppLogger {
         atomicSharedPrefsSettingsKey, json.encode(_root.toJson()));
   }
 
-  static Future<Settings> init(
-    MasterKey masterKey,
-  ) async {
+  static Future<Settings> init(MasterKey masterKey) async {
     final prefs = await SharedPreferences.getInstance();
 
     final json = prefs.getString(atomicSharedPrefsSettingsKey);
@@ -273,12 +269,6 @@ class Settings with AppLogger {
   }
 
   //------------------------------------------------------------------
-  Future<io.Directory> getDefaultRepositoriesDir() async {
-    final baseDir = await Native.getBaseDir(removable: true);
-    return io.Directory(join(baseDir.path, Constants.folderRepositoriesName));
-  }
-
-  //------------------------------------------------------------------
 
   SettingsLocale? getLocale() => _root.locale;
 
@@ -292,12 +282,12 @@ class Settings with AppLogger {
 
   //------------------------------------------------------------------
 
-  void debugPrint() {
-    print("============== Settings ===============");
+  void debugSettings() {
+    loggy.debug("============== Settings ===============");
     for (final kv in _root.repos.entries) {
-      print("=== ${kv.key}");
+      loggy.debug("=== ${kv.key}");
     }
-    print("=======================================");
+    loggy.debug("=======================================");
   }
 }
 

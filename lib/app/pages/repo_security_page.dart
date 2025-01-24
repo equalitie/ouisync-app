@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ouisync/ouisync.dart' show Session;
 
 import '../../generated/l10n.dart';
 import '../pages/repo_reset_access.dart';
@@ -31,32 +32,36 @@ import '../models/models.dart' show SecretKeyOrigin;
 
 class RepoSecurityPage extends StatefulWidget {
   static Future<void> show(
-      BuildContext context,
-      RepoCubit repo,
-      UnlockedAccess originalAccess,
-      Settings settings,
-      PasswordHasher passwordHasher) async {
-    await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => RepoSecurityPage(
-          repo,
-          originalAccess,
-          settings,
-          passwordHasher,
+    BuildContext context,
+    Settings settings,
+    Session session,
+    RepoCubit repo,
+    UnlockedAccess originalAccess,
+    PasswordHasher passwordHasher,
+  ) =>
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => RepoSecurityPage(
+            settings,
+            session,
+            repo,
+            originalAccess,
+            passwordHasher,
+          ),
         ),
-      ),
-    );
-  }
+      );
 
   const RepoSecurityPage(
+    this.settings,
+    this.session,
     this.repo,
     this.originalAccess,
-    this.settings,
     this.passwordHasher,
   );
 
   final Settings settings;
+  final Session session;
   final RepoCubit repo;
   final UnlockedAccess originalAccess;
   final PasswordHasher passwordHasher;
@@ -119,7 +124,12 @@ class _State extends State<RepoSecurityPage> {
         text: "Reset repository access using a share token",
         onTap: () async {
           final newAccess = await RepoResetAccessPage.show(
-              access, context, widget.repo, widget.settings);
+            context: context,
+            session: widget.session,
+            settings: widget.settings,
+            repo: widget.repo,
+            startAccess: access,
+          );
 
           final unlockedAccess = newAccess.asUnlocked;
 

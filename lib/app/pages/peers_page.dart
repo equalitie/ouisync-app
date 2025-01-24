@@ -122,7 +122,7 @@ class _PeersPageState extends State<PeersPage> {
         decoration: BoxDecoration(
           border: BorderDirectional(
             top: BorderSide(
-              color: context.theme.dividerColor.withOpacity(0.5),
+              color: context.theme.dividerColor.withAlpha(128),
             ),
           ),
         ),

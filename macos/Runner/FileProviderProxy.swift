@@ -61,7 +61,7 @@ class FileProviderProxy: FromFileProviderToAppProtocol {
             // the following two concurrency warnings can be ignored because they're just transferring
             // ownership of instances created in a different actor; it's better to see them than
             // declaring unchecked Sendable conformance because they should be isolated otherwise
-            service = try await manager.service(named: ouisyncFileProviderServiceName,
+            service = try? await manager.service(named: ouisyncFileProviderServiceName,
                                                 for: NSFileProviderItemIdentifier.rootContainer)
             if service == nil { throw FlutterError(code: "OS02",
                                                    message: "Unable to obtain File Provider service",

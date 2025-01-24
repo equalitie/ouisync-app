@@ -46,19 +46,19 @@ If you choose `android` above, also use the `--flavor <production|nightly|unofic
 On Linux:
 
 ```bash
-# Build Ouisync library
-cargo build -p ouisync-ffi --manifest-path=ouisync/Cargo.toml
+# Build Ouisync service library
+cargo build -p ouisync-service --manifest-path=ouisync/Cargo.toml
 # Run tests
-OUISYNC_LIB=ouisync/target/debug/libouisync_ffi.so flutter test
+OUISYNC_LIB=ouisync/target/debug/libouisync_service.so flutter test
 ```
 
 On Windows
 
 ```bat
-rem Build Ouisync library
-cargo build -p ouisync-ffi --manifest-path=ouisync/Cargo.toml
-rem Set environment variable to point to ouisync_ffi.dll
-set OUISYNC_LIB=ouisync/target/debug/ouisync_ffi.dll
+rem Build Ouisync service library
+cargo build -p ouisync-service --manifest-path=ouisync/Cargo.toml
+rem Set environment variable to point to ouisync_service.dll
+set OUISYNC_LIB=ouisync/target/debug/ouisync_service.dll
 rem Run tests
 flutter test
 ```

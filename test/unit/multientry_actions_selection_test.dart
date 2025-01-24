@@ -1,50 +1,39 @@
 import 'dart:convert';
-import 'dart:io' as io;
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:ouisync/native_channels.dart';
 import 'package:ouisync_app/app/models/folder.dart';
-import 'package:ouisync_app/app/utils/utils.dart' show CacheServers, Mounter;
+import 'package:ouisync_app/app/utils/utils.dart' show CacheServers;
 import 'package:ouisync/ouisync.dart';
 import 'package:ouisync_app/app/utils/repo_path.dart' as p;
 import 'package:ouisync_app/app/cubits/cubits.dart'
     show EntryBottomSheetCubit, EntrySelectionCubit, NavigationCubit, RepoCubit;
-import 'package:ouisync_app/app/models/models.dart' show RepoLocation;
-import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'move_entry_between_repos_test.dart';
+import '../utils.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  late Session session;
+  late TestDependencies deps;
+
   late Repository repo;
 
   late RepoCubit repoCubit;
 
-  late NativeChannels nativeChannels;
   late NavigationCubit navigationCubit;
   late EntrySelectionCubit entrySelectionCubit;
   late EntryBottomSheetCubit bottomSheetCubit;
 
   setUp(() async {
-    final dir = await io.Directory.systemTemp.createTemp();
-    final locationOrigin =
-        RepoLocation.fromDbPath(p.join(dir.path, "store.db"));
-
-    session = Session.create(configPath: dir.path, kind: SessionKind.unique);
+    deps = await TestDependencies.create();
 
     repo = await Repository.create(
-      session,
-      store: locationOrigin.path,
+      deps.session,
+      path: 'repo',
       readSecret: null,
       writeSecret: null,
     );
-
-    PathProviderPlatform.instance = FakePathProviderPlatform(dir);
-    nativeChannels = FakeNativeChannels(session);
 
     FlutterSecureStorage.setMockInitialValues({});
     SharedPreferences.setMockInitialValues({});
@@ -52,18 +41,14 @@ void main() {
     entrySelectionCubit = EntrySelectionCubit();
     bottomSheetCubit = EntryBottomSheetCubit();
 
-    final mounter = Mounter(session);
-
     repoCubit = await RepoCubit.create(
-      nativeChannels: nativeChannels,
+      nativeChannels: deps.nativeChannels,
       repo: repo,
-      session: session,
-      location: locationOrigin,
+      session: deps.session,
       navigation: navigationCubit,
       entrySelection: entrySelectionCubit,
       bottomSheet: bottomSheetCubit,
       cacheServers: CacheServers.disabled,
-      mounter: mounter,
     );
 
     // Create 2 nested folders
@@ -83,20 +68,19 @@ void main() {
         await file.close();
       }
 
-      final rootContents = await Directory.open(repo, '/');
+      final rootContents = await Directory.read(repo, '/');
       expect(rootContents, hasLength(1));
 
-      final folder1Contents = await Directory.open(repo, 'folder1');
+      final folder1Contents = await Directory.read(repo, 'folder1');
       expect(folder1Contents, hasLength(5));
 
-      final folder2Contents = await Directory.open(repo, 'folder1/folder2');
+      final folder2Contents = await Directory.read(repo, 'folder1/folder2');
       expect(folder2Contents, hasLength(4));
     }
   });
 
   tearDown(() async {
-    await repo.close();
-    await session.close();
+    await deps.dispose();
   });
 
   test(
@@ -326,11 +310,6 @@ void main() {
       expect(selectedEntries, equals(expectedFolder1SelectedAll));
 
       // Move all selected entries form repo
-
-
-
-
-
 
       await repoCubit.entrySelectionCubit.endSelection();
 

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io' as io;
-import 'dart:typed_data';
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -109,10 +108,8 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   final EntrySelectionCubit _entrySelection;
   final EntryBottomSheetCubit _bottomSheet;
   final Repository _repo;
-  final Session _session;
   final Cipher _pathCipher;
   final CacheServers _cacheServers;
-  final Mounter _mounter;
 
   RepoCubit._(
     this._nativeChannels,
@@ -120,10 +117,8 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     this._entrySelection,
     this._bottomSheet,
     this._repo,
-    this._session,
     this._pathCipher,
     this._cacheServers,
-    this._mounter,
     super.state,
   ) {
     _currentFolder.repo = this;
@@ -133,17 +128,15 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     required NativeChannels nativeChannels,
     required Repository repo,
     required Session session,
-    required RepoLocation location,
     required NavigationCubit navigation,
     required EntrySelectionCubit entrySelection,
     required EntryBottomSheetCubit bottomSheet,
     required CacheServers cacheServers,
-    required Mounter mounter,
   }) async {
     final authMode = await repo.getAuthMode();
 
     var state = RepoState(
-      location: location,
+      location: RepoLocation.fromDbPath(repo.path),
       authMode: authMode,
     );
 
@@ -173,10 +166,8 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
       entrySelection,
       bottomSheet,
       repo,
-      session,
       pathCipher,
       cacheServers,
-      mounter,
       state,
     );
 
@@ -189,7 +180,6 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     return cubit;
   }
 
-  Session get session => _session;
   Future<String> get infoHash async => await _repo.infoHash;
   RepoLocation get location => state.location;
   String get name => state.location.name;
@@ -197,6 +187,8 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   String get currentFolder => _currentFolder.state.path;
   Stream<void> get events => _repo.events;
   EntrySelectionCubit get entrySelectionCubit => _entrySelection;
+
+  Future<void> delete() => _repo.delete();
 
   void setCurrent() {
     _nativeChannels.repository = _repo;
@@ -288,8 +280,6 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     emitUnlessClosed(state.copyWith(isCacheServersEnabled: value));
   }
 
-  Future<Directory> openDirectory(String path) => Directory.open(_repo, path);
-
   // This operator is required for the DropdownMenuButton to show entries properly.
   @override
   bool operator ==(Object other) {
@@ -304,40 +294,21 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     AccessMode accessMode, {
     String? password,
   }) async {
-    return await _repo.createShareToken(
+    return await _repo.share(
       accessMode: accessMode,
-      name: name,
       secret: password != null ? LocalPassword(password) : null,
     );
   }
 
-  Future<Uint8List> get credentials => _repo.credentials;
-
-  Future<void> setCredentials(Uint8List credentials) async {
-    await _repo.setCredentials(credentials);
-    final accessMode = await _repo.accessMode;
-    emitUnlessClosed(state.copyWith(accessMode: accessMode));
-  }
-
-  Future<void> resetCredentials(ShareToken token) async {
-    await _repo.resetCredentials(token);
-    final accessMode = await _repo.accessMode;
-    emitUnlessClosed(state.copyWith(accessMode: accessMode));
-  }
-
   Future<void> mount() async {
-    if (_mounter.mountPoint == null) {
-      // Mounting not supported.
-      return;
-    }
-
     try {
       await _repo.mount();
       emitUnlessClosed(state.copyWith(mountState: const MountStateSuccess()));
-    } on Error catch (error) {
-      emitUnlessClosed(state.copyWith(
-        mountState: MountStateError(error.code, error.message),
-      ));
+    } on Unsupported {
+      emitUnlessClosed(state.copyWith(mountState: const MountStateDisabled()));
+    } catch (error, stack) {
+      emitUnlessClosed(
+          state.copyWith(mountState: MountStateFailure(error, stack)));
     }
   }
 
@@ -348,24 +319,11 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     } catch (_) {}
   }
 
-  String? get mountPoint {
-    if (state.mountState is! MountStateSuccess) {
-      return null;
-    }
+  Future<String?> get mountPoint => _repo.mountPoint;
 
-    final mountPoint = _mounter.mountPoint;
-    if (mountPoint == null) {
-      return null;
-    }
+  Future<bool> entryExists(String path) => _repo.entryExists(path);
 
-    return "$mountPoint/$name";
-  }
-
-  Future<bool> exists(String path) async {
-    return await _repo.exists(path);
-  }
-
-  Future<EntryType?> type(String path) => _repo.type(path);
+  Future<EntryType?> entryType(String path) => _repo.entryType(path);
 
   Future<Progress> get syncProgress => _repo.syncProgress;
 
@@ -384,6 +342,45 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     emitUnlessClosed(state.copyWith(isLoading: false));
   }
 
+  Future<List<FileSystemEntry>> getFolderContents(String path) async {
+    String? error;
+
+    final content = <FileSystemEntry>[];
+
+    // If the directory does not exist, the following command will throw.
+    final directory = await Directory.read(_repo, path);
+
+    try {
+      for (final dirEntry in directory) {
+        final entryPath = repo_path.join(path, dirEntry.name);
+
+        final entry = switch (dirEntry.entryType) {
+          EntryType.file => FileEntry(
+              path: entryPath,
+              size: await _getFileSize(entryPath),
+            ),
+          EntryType.directory => DirectoryEntry(path: entryPath),
+        };
+
+        content.add(entry);
+      }
+    } catch (e, st) {
+      loggy.debug('Traversing directory $path exception', e, st);
+      error = e.toString();
+    }
+
+    if (error != null) {
+      throw error;
+    }
+
+    return content;
+  }
+
+  Future<bool> isFolderEmpty(String path) async {
+    final directory = await Directory.read(_repo, path);
+    return directory.isEmpty;
+  }
+
   Future<bool> createFolder(String folderPath) async {
     emitUnlessClosed(state.copyWith(isLoading: true));
 
@@ -392,7 +389,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
       _currentFolder.goTo(folderPath);
       return true;
     } catch (e, st) {
-      loggy.app('Directory $folderPath creation failed', e, st);
+      loggy.debug('Directory $folderPath creation failed', e, st);
       return false;
     } finally {
       await refresh();
@@ -406,7 +403,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
       await Directory.remove(_repo, path, recursive: recursive);
       return true;
     } catch (e, st) {
-      loggy.app('Directory $path deletion failed', e, st);
+      loggy.debug('Directory $path deletion failed', e, st);
       return false;
     } finally {
       await refresh();
@@ -485,40 +482,6 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
       length: length,
       fileByteStream: fileByteStream,
     );
-  }
-
-  Future<List<FileSystemEntry>> getFolderContents(String path) async {
-    String? error;
-
-    final content = <FileSystemEntry>[];
-
-    // If the directory does not exist, the following command will throw.
-    final directory = await Directory.open(_repo, path);
-
-    try {
-      for (final dirEntry in directory) {
-        final entryPath = repo_path.join(path, dirEntry.name);
-
-        final entry = switch (dirEntry.entryType) {
-          EntryType.file => FileEntry(
-              path: entryPath,
-              size: await _getFileSize(entryPath),
-            ),
-          EntryType.directory => DirectoryEntry(path: entryPath),
-        };
-
-        content.add(entry);
-      }
-    } catch (e, st) {
-      loggy.app('Traversing directory $path exception', e, st);
-      error = e.toString();
-    }
-
-    if (error != null) {
-      throw error;
-    }
-
-    return content;
   }
 
   /// Returns which access mode does the given secret provide.
@@ -621,6 +584,12 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     emitUnlessClosed(state.copyWith(accessMode: newAccessMode));
   }
 
+  Future<void> resetAccess(ShareToken token) async {
+    await _repo.resetAccess(token);
+    final accessMode = await _repo.accessMode;
+    emitUnlessClosed(state.copyWith(accessMode: accessMode));
+  }
+
   /// Unlocks the repository using the secret. The access mode the repository ends up in depends on
   /// what access mode the secret unlock (read or write).
   Future<void> unlock(LocalSecret? secret) async {
@@ -638,6 +607,15 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     await _repo.setAccessMode(AccessMode.blind);
     final accessMode = await _repo.accessMode;
     emitUnlessClosed(state.copyWith(accessMode: accessMode));
+  }
+
+  /// Move this repo to another location on the filesystem.
+  Future<void> move(String to) async {
+    await _repo.move(to);
+
+    emitUnlessClosed(
+      state.copyWith(location: RepoLocation.fromDbPath(_repo.path)),
+    );
   }
 
   Future<int?> _getFileSize(String path) async {
@@ -671,7 +649,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     final server = await serve(handler, Constants.fileServerAuthority, 0);
     final authority = '${server.address.host}:${server.port}';
 
-    print('Serving file at http://$authority');
+    loggy.debug('Serving file at http://$authority');
 
     final url = Uri.http(
       authority,
@@ -728,7 +706,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
         job.update(offset);
       }
     } catch (e, st) {
-      loggy.app('Download file $sourcePath exception', e, st);
+      loggy.debug('Download file $sourcePath exception', e, st);
       showSnackBar(S.current.messageDownloadingFileError(sourcePath));
     } finally {
       showSnackBar(S.current.messageDownloadFileLocation(parentPath));
@@ -761,7 +739,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
 
       return result;
     } catch (e, st) {
-      loggy.app('Move entry from $source to $destination failed', e, st);
+      loggy.error('Move entry from $source to $destination failed', e, st);
       return false;
     } finally {
       if (navigateToDestination) {
@@ -798,24 +776,22 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     );
 
     if (createFolderOk && recursive) {
-      await openDirectory(source).then(
-        (contents) async {
-          for (var entry in contents) {
-            final from = repo_path.join(source, entry.name);
-            final to = repo_path.join(destination, entry.name);
-            final copyOk = entry.entryType == EntryType.file
-                ? await _copyFile(from, to, destinationRepoCubit)
-                : await _copyFolder(
-                    from,
-                    to,
-                    destinationRepoCubit,
-                    recursive,
-                  );
+      final contents = await Directory.read(_repo, source);
 
-            if (!copyOk) return false;
-          }
-        },
-      );
+      for (var entry in contents) {
+        final from = repo_path.join(source, entry.name);
+        final to = repo_path.join(destination, entry.name);
+        final copyOk = entry.entryType == EntryType.file
+            ? await _copyFile(from, to, destinationRepoCubit)
+            : await _copyFolder(
+                from,
+                to,
+                destinationRepoCubit,
+                recursive,
+              );
+
+        if (!copyOk) return false;
+      }
     }
 
     return createFolderOk;
@@ -828,10 +804,10 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     emitUnlessClosed(state.copyWith(isLoading: true));
 
     try {
-      await _repo.move(source, destination);
+      await _repo.moveEntry(source, destination);
       return true;
     } catch (e, st) {
-      loggy.app('Move entry from $source to $destination failed', e, st);
+      loggy.debug('Move entry from $source to $destination failed', e, st);
       return false;
     } finally {
       await refresh();
@@ -867,7 +843,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
 
       return moveFolderResult;
     } catch (e, st) {
-      loggy.app('Move entry from $source to $destination failed', e, st);
+      loggy.debug('Move entry from $source to $destination failed', e, st);
       return false;
     } finally {
       if (navigateToDestination) {
@@ -922,7 +898,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
       await File.remove(_repo, filePath);
       return true;
     } catch (e, st) {
-      loggy.app('Delete file $filePath failed', e, st);
+      loggy.debug('Delete file $filePath failed', e, st);
       return false;
     } finally {
       await refresh();
@@ -970,28 +946,11 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     try {
       newFile = await File.create(_repo, newFilePath);
     } catch (e, st) {
-      loggy.app('File creation $newFilePath failed', e, st);
+      loggy.debug('File creation $newFilePath failed', e, st);
     }
 
     return newFile;
   }
 
   Future<File> openFile(String path) => File.open(_repo, path);
-
-  @override
-  Future<void> close() async {
-    await _repo.close();
-    await super.close();
-  }
-
-  Future<PasswordSalt?> getCurrentModePasswordSalt() async {
-    switch (accessMode) {
-      case AccessMode.blind:
-        return null;
-      case AccessMode.read:
-        return await _repo.getReadPasswordSalt();
-      case AccessMode.write:
-        return await _repo.getWritePasswordSalt();
-    }
-  }
 }

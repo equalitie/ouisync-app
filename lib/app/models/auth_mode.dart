@@ -331,7 +331,7 @@ class AuthModeDecryptFailed extends AuthModeException {
 }
 
 AuthMode _decodeError(Object? data) {
-  staticLogger<AuthMode>().error('invalid auth mode data: `$data`');
+  appLogger("AuthMode").error('invalid auth mode data: `$data`');
   throw AuthModeParseFailed();
 }
 

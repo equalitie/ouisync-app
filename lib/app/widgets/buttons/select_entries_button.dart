@@ -8,19 +8,13 @@ import '../../cubits/cubits.dart'
         EntrySelectionActions,
         EntrySelectionCubit,
         EntrySelectionState,
-        RepoCubit,
-        ReposCubit;
+        RepoCubit;
 import '../../utils/utils.dart'
     show AppLogger, Dimensions, EntrySelectionActionsExtension, Fields;
 
 class SelectEntriesButton extends StatefulWidget {
-  const SelectEntriesButton({
-    required this.reposCubit,
-    required this.repoCubit,
-    super.key,
-  });
+  const SelectEntriesButton({required this.repoCubit, super.key});
 
-  final ReposCubit reposCubit;
   final RepoCubit repoCubit;
 
   @override
@@ -35,32 +29,25 @@ class _SelectEntriesButtonState extends State<SelectEntriesButton> {
         builder: (context, state) => Container(
           padding: EdgeInsetsDirectional.only(start: 6.0, end: 2.0),
           child: _selectState(
-            widget.reposCubit,
             widget.repoCubit,
             state.selectionState == SelectionState.on,
           ),
         ),
       );
 
-  Widget _selectState(
-    ReposCubit reposCubit,
-    RepoCubit repoCubit,
-    bool selecting,
-  ) =>
+  Widget _selectState(RepoCubit repoCubit, bool selecting) =>
       switch (selecting) {
-        true => DoneState(reposCubit: reposCubit, repoCubit: repoCubit),
+        true => DoneState(repoCubit: repoCubit),
         false => EditState(repoCubit: repoCubit),
       };
 }
 
 class DoneState extends StatelessWidget {
   const DoneState({
-    required this.reposCubit,
     required this.repoCubit,
     super.key,
   });
 
-  final ReposCubit reposCubit;
   final RepoCubit repoCubit;
 
   @override
@@ -72,10 +59,7 @@ class DoneState extends StatelessWidget {
                     isScrollControlled: true,
                     context: context,
                     shape: Dimensions.borderBottomSheetTop,
-                    builder: (context) => _EntrySelectionActionsList(
-                      reposCubit,
-                      repoCubit,
-                    ),
+                    builder: (context) => _EntrySelectionActionsList(repoCubit),
                   ),
         label: Text(S.current.actionDone),
         icon: const Icon(Icons.arrow_drop_down_outlined),
@@ -100,17 +84,14 @@ class EditState extends StatelessWidget {
 enum SelectionState { off, on }
 
 class _EntrySelectionActionsList extends StatelessWidget with AppLogger {
-  _EntrySelectionActionsList(ReposCubit reposCubit, RepoCubit repoCubit)
-      : _reposCubit = reposCubit,
-        _repoCubit = repoCubit;
+  _EntrySelectionActionsList(this.repoCubit);
 
-  final ReposCubit _reposCubit;
-  final RepoCubit _repoCubit;
+  final RepoCubit repoCubit;
 
   @override
   Widget build(BuildContext context) =>
       BlocBuilder<EntrySelectionCubit, EntrySelectionState>(
-        bloc: _repoCubit.entrySelectionCubit,
+        bloc: repoCubit.entrySelectionCubit,
         builder: (context, state) {
           return Container(
             padding: Dimensions.paddingBottomSheet,
@@ -125,31 +106,20 @@ class _EntrySelectionActionsList extends StatelessWidget with AppLogger {
                     TextButton(
                       child: Text('Cancel'),
                       onPressed: () async {
-                        await _repoCubit.endEntriesSelection();
-
+                        await repoCubit.endEntriesSelection();
                         Navigator.of(context).pop();
                       },
                     ),
                   ],
                 ),
-                _buildSelectedEntriesActionList(
-                  context,
-                  reposCubit: _reposCubit,
-                  repoCubit: _repoCubit,
-                  cubit: _repoCubit.entrySelectionCubit,
-                ),
+                _buildSelectedEntriesActionList(context),
               ],
             ),
           );
         },
       );
 
-  Widget _buildSelectedEntriesActionList(
-    BuildContext context, {
-    required ReposCubit reposCubit,
-    required RepoCubit repoCubit,
-    required EntrySelectionCubit cubit,
-  }) =>
+  Widget _buildSelectedEntriesActionList(BuildContext context) =>
       ListView.separated(
         shrinkWrap: true,
         separatorBuilder: (BuildContext context, int index) => Divider(

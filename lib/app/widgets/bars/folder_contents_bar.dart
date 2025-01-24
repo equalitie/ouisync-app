@@ -46,7 +46,7 @@ class _FolderContentsBarState extends State<FolderContentsBar> {
               if (widget.hasContents)
                 SortContentsBar(
                   sortListCubit: widget.sortListCubit,
-                  reposCubit: widget.reposCubit,
+                  reposState: widget.reposCubit.state,
                 ),
               Expanded(
                 child: Row(
@@ -55,7 +55,6 @@ class _FolderContentsBarState extends State<FolderContentsBar> {
                     if (widget.hasContents ||
                         state.selectionState == SelectionState.on)
                       SelectEntriesButton(
-                        reposCubit: widget.reposCubit,
                         repoCubit: widget.repoCubit,
                       ),
                   ],

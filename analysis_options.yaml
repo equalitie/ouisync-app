@@ -3,6 +3,7 @@ include: package:lints/recommended.yaml
 linter:
   rules:
     - unawaited_futures
+    - avoid_print
 
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options

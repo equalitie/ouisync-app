@@ -130,7 +130,7 @@ class MoveEntriesActions {
     required String destinationPath,
     required bool isCurrentRepoWriteMode,
   }) {
-    if (_reposCubit.showList) return false;
+    if (_reposCubit.state.current != null) return false;
     if (destinationRepoLocation == null) return false;
     if (!isCurrentRepoWriteMode) return false;
 

@@ -32,7 +32,6 @@ import '../utils/utils.dart'
 import '../widgets/widgets.dart'
     show
         ActionsDialog,
-        DeleteRepoDialog,
         GetPasswordAccessDialog,
         NegativeButton,
         PositiveButton,
@@ -43,18 +42,17 @@ mixin RepositoryActionsMixin on LoggyType {
   Future<String> renameRepository(
     BuildContext context, {
     required RepoCubit repoCubit,
-    required RepoLocation location,
-    required Future<void> Function(RepoLocation, String) renameRepoFuture,
   }) async {
     final newName = await _getRepositoryNewName(
       context,
       repoCubit: repoCubit,
     );
+    final newLocation = repoCubit.location.rename(newName);
 
     if (newName.isNotEmpty) {
       await Dialogs.executeFutureWithLoadingDialog(
         null,
-        renameRepoFuture(location, newName),
+        repoCubit.move(newLocation.path),
       );
 
       return newName;
@@ -108,6 +106,7 @@ mixin RepositoryActionsMixin on LoggyType {
   Future<void> navigateToRepositorySecurity(
     BuildContext context, {
     required Settings settings,
+    required Session session,
     required RepoCubit repoCubit,
     required PasswordHasher passwordHasher,
     required void Function() popDialog,
@@ -122,12 +121,19 @@ mixin RepositoryActionsMixin on LoggyType {
       // TODO: Check if the repo can be unlocked without a secret and if so,
       // proceed with `authenticateIfPossible`.
 
-      access = await GetPasswordAccessDialog.show(context, repoCubit, settings);
+      access = await GetPasswordAccessDialog.show(
+        context,
+        settings,
+        session,
+        repoCubit,
+      );
     } else {
       if (!await LocalAuth.authenticateIfPossible(
         context,
         S.current.messageAccessingSecureStorage,
-      )) return;
+      )) {
+        return;
+      }
 
       // TODO: Tell the user when the decryption fails.
       final secret = (await encryptedSecret.decrypt(settings.masterKey))!;
@@ -143,7 +149,13 @@ mixin RepositoryActionsMixin on LoggyType {
     }
 
     await RepoSecurityPage.show(
-        context, repoCubit, unlockedAccess, settings, passwordHasher);
+      context,
+      settings,
+      session,
+      repoCubit,
+      unlockedAccess,
+      passwordHasher,
+    );
   }
 
   Future<void> locateRepository(
@@ -151,14 +163,14 @@ mixin RepositoryActionsMixin on LoggyType {
     required RepoLocation repoLocation,
     required bool windows,
   }) async {
-    final uri = Uri.directory(repoLocation.dir.path, windows: windows);
+    final uri = Uri.directory(repoLocation.dir, windows: windows);
     if (PlatformValues.isDesktopDevice) {
       await launcher.launchUrl(uri);
       return;
     }
 
     final dbFile = p.basename(repoLocation.path);
-    final segments = p.split(repoLocation.dir.path);
+    final segments = p.split(repoLocation.dir);
 
     final breadcrumbs = BreadCrumb.builder(
       itemCount: segments.length,
@@ -256,26 +268,12 @@ mixin RepositoryActionsMixin on LoggyType {
     return false;
   }
 
-  Future<bool> _getDeleteRepoConfirmation(
-    BuildContext context, {
-    required String repoName,
-  }) async {
-    final delete = await showDialog<bool>(
-          context: context,
-          builder: (BuildContext context) => ActionsDialog(
-              title: S.current.messageRenameRepository,
-              body: DeleteRepoDialog(repoName: repoName)),
-        ) ??
-        false;
-
-    return delete;
-  }
-
   Future<void> unlockRepository(
     BuildContext context,
+    Settings settings,
+    Session session,
     RepoCubit repoCubit,
     PasswordHasher passwordHasher,
-    Settings settings,
   ) async {
     final authMode = repoCubit.state.authMode;
     final LocalSecret? secret;
@@ -295,8 +293,9 @@ mixin RepositoryActionsMixin on LoggyType {
       // If it didn't work, try to unlock using a password from the user.
       final access = await GetPasswordAccessDialog.show(
         context,
-        repoCubit,
         settings,
+        session,
+        repoCubit,
       );
 
       switch (access) {

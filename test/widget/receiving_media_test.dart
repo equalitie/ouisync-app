@@ -105,8 +105,8 @@ void main() {
 
         final repoName = 'my repo';
         final repoEntry = await deps.reposCubit.createRepository(
-          location: RepoLocation.fromParts(
-            dir: await deps.reposCubit.settings.getDefaultRepositoriesDir(),
+          location: RepoLocation(
+            dir: (await deps.session.storeDir)!,
             name: repoName,
           ),
           setLocalSecret: LocalSecretKeyAndSalt.random(),
@@ -126,9 +126,9 @@ void main() {
         await tester.pumpAndSettle();
 
         await tester.tap(find.text(repoName));
-        await deps.reposCubit.waitUntil((_) =>
-            !deps.reposCubit.isLoading &&
-            deps.reposCubit.currentRepo == repoEntry);
+        await deps.reposCubit.waitUntil(
+          (state) => !state.isLoading && state.currentEntry == repoEntry,
+        );
         await tester.pump();
 
         expect(find.widgetWithText(AppBar, repoName), findsOne);
@@ -159,8 +159,8 @@ void main() {
 
         final repoName = 'my repo';
         final repoEntry = await deps.reposCubit.createRepository(
-          location: RepoLocation.fromParts(
-            dir: await deps.reposCubit.settings.getDefaultRepositoriesDir(),
+          location: RepoLocation(
+            dir: (await deps.session.storeDir)!,
             name: repoName,
           ),
           setLocalSecret: LocalSecretKeyAndSalt.random(),
@@ -171,9 +171,9 @@ void main() {
         final repoCubit = repoEntry.cubit!;
 
         await tester.pumpWidget(testApp(createMainPage()));
-        await deps.reposCubit.waitUntil((_) =>
-            !deps.reposCubit.isLoading &&
-            deps.reposCubit.currentRepo == repoEntry);
+        await deps.reposCubit.waitUntil(
+          (state) => !state.isLoading && state.currentEntry == repoEntry,
+        );
         await tester.pump();
 
         // Verify we are in the single repo screen
@@ -212,7 +212,7 @@ void main() {
             join((await getTemporaryDirectory()).path, '$repoName.ouisyncdb');
         final repo = await Repository.create(
           deps.session,
-          store: repoPath,
+          path: repoPath,
           readSecret: null,
           writeSecret: null,
         );
@@ -229,8 +229,7 @@ void main() {
             type: SharedMediaType.file,
           ),
         ]);
-        await deps.reposCubit
-            .waitUntil((_) => deps.reposCubit.repos.isNotEmpty);
+        await deps.reposCubit.waitUntil((state) => state.repos.isNotEmpty);
         await tester.pumpAndSettle();
 
         expect(find.text(repoName), findsOne);
@@ -248,14 +247,11 @@ void main() {
               join((await getTemporaryDirectory()).path, '$repoName.ouisyncdb');
           final repo = await Repository.create(
             deps.session,
-            store: repoPath,
+            path: repoPath,
             readSecret: null,
             writeSecret: null,
           );
-          final token = await repo.createShareToken(
-            accessMode: AccessMode.read,
-            name: repoName,
-          );
+          final token = await repo.share(accessMode: AccessMode.read);
           await repo.close();
 
           final navigationObserver = NavigationObserver();
@@ -294,7 +290,8 @@ void main() {
               .waitUntil((state) => state.substate is RepoCreationSuccess);
 
           expect(
-            deps.reposCubit.repos.where((entry) => entry.name == repoName),
+            deps.reposCubit.state.repos.values
+                .where((entry) => entry.name == repoName),
             isNotEmpty,
           );
         },

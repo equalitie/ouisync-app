@@ -14,6 +14,7 @@ import '../../cubits/cubits.dart'
         NavigationState,
         RepoCubit,
         ReposCubit;
+import '../../cubits/repos.dart';
 import '../../utils/repo_path.dart' as repo_path;
 import '../../utils/utils.dart'
     show
@@ -90,8 +91,9 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
   }
 
   @override
-  Widget build(BuildContext context) => widget.reposCubit.builder(
-        (reposCubit) => Container(
+  Widget build(BuildContext context) => BlocBuilder<ReposCubit, ReposState>(
+        bloc: widget.reposCubit,
+        builder: (context, reposState) => Container(
           key: bodyKey,
           padding: Dimensions.paddingBottomSheet,
           decoration: Dimensions.decorationBottomSheetAlternative,
@@ -105,7 +107,7 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
                 ..._getLayout(),
                 _selectActions(
                   widget.parentContext,
-                  reposCubit,
+                  widget.reposCubit,
                   widget.originRepoCubit,
                   widget.navigationCubit,
                   widget.entrySelectionCubit,
@@ -198,14 +200,14 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
               ? _multipleEntriesActions(
                   context,
                   entrySelectionCubit!,
-                  reposCubit,
+                  reposCubit.state,
                   moveEntriesActions,
                   sheetType,
                 )
               : _singleEntryActions(
                   context,
                   state,
-                  reposCubit,
+                  reposCubit.state,
                   moveEntriesActions,
                   sheetType,
                   entryPath,
@@ -216,8 +218,8 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
 
   Widget _singleEntryActions(
     BuildContext parentContext,
-    NavigationState state,
-    ReposCubit reposCubit,
+    NavigationState navigationState,
+    ReposState reposState,
     MoveEntriesActions moveEntriesActions,
     BottomSheetType sheetType,
     String entryPath,
@@ -225,7 +227,7 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
   ) {
     bool canMove = false;
 
-    final currentRepo = reposCubit.currentRepo;
+    final currentRepo = reposState.currentEntry;
     if (currentRepo != null) {
       final originPath = repo_path.dirname(entryPath);
       final destinationRepoLocation = currentRepo.location;
@@ -233,11 +235,11 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
       final accessMode = currentRepo.accessMode;
       final isCurrentRepoWriteMode = accessMode == AccessMode.write;
 
-      canMove = state.isFolder
+      canMove = navigationState.isFolder
           ? moveEntriesActions.canMove(
               originPath: originPath,
               destinationRepoLocation: destinationRepoLocation,
-              destinationPath: state.path,
+              destinationPath: navigationState.path,
               isCurrentRepoWriteMode: isCurrentRepoWriteMode,
             )
           : false;
@@ -284,7 +286,7 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
   Widget _multipleEntriesActions(
     BuildContext parentContext,
     EntrySelectionCubit entrySelectionCubit,
-    ReposCubit reposCubit,
+    ReposState reposState,
     MoveEntriesActions moveEntriesActions,
     BottomSheetType sheetType,
   ) =>
@@ -296,7 +298,7 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
               .contains(sheetType)) {
             enableAction = true;
           } else {
-            final currentRepo = reposCubit.currentRepo;
+            final currentRepo = reposState.currentEntry;
             final currentRepoCubit = currentRepo?.cubit;
             if (currentRepo != null && currentRepoCubit != null) {
               final currentPath = currentRepoCubit.currentFolder;
@@ -324,7 +326,7 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
           final negativeText = S.current.actionCancel;
 
           Future<void> positiveAction() async {
-            final currentRepoCubit = reposCubit.currentRepo?.cubit;
+            final currentRepoCubit = reposState.currentEntry?.cubit;
             if (currentRepoCubit == null) return;
 
             final multiEntryActions = MultiEntryActions(

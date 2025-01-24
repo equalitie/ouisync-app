@@ -1,9 +1,12 @@
 import 'dart:io' as io;
 import 'package:flutter/services.dart';
+import 'package:ouisync/ouisync.dart';
 import 'package:path_provider/path_provider.dart';
 
-/// MethodChannel handler for calling functions
-/// implemented natively, and viceversa.
+/// One of the MethodChannel handlers used for calling functions implemented
+/// natively, and viceversa. See also ouisync/bindings/dart/native_channels and
+/// TODO: merge them into a single ouisync channel, some time around when we
+/// finally rename the bindings to libouisync and the UI to ouisync proper
 class Native {
   static const MethodChannel _channel =
       MethodChannel('org.equalitie.ouisync/native');
@@ -18,7 +21,13 @@ class Native {
   ///
   /// [call] is the object sent from the native platform with the function name ([call.method])
   /// and any arguments included ([call.arguments])
-  static Future<dynamic> _methodHandler(MethodCall call) async {}
+  static Future<dynamic> _methodHandler(MethodCall call) async {
+    throw PlatformException(
+        code: '0', message: 'No such method: "${call.method}"');
+  }
+
+  static Future<void> log(LogLevel level, String message) =>
+      _channel.invokeMethod('log', [level.encode(), message]);
 
   /// In Android, it retrieves the legacy path to the Download directory
   static Future<String> getDownloadPathForAndroid() async {
@@ -38,7 +47,7 @@ class Native {
   /// Similar to getApplicationSupportDirectory() but allows customization.
   /// The `removable` parameter controls whether removable locations such as SD
   /// cards may be returned.
-  static Future<io.Directory> getBaseDir({bool removable=false}) async {
+  static Future<io.Directory> getBaseDir({bool removable = false}) async {
     if (io.Platform.isAndroid) {
       // on Android we support SD cards where permitted (e.g. for repositories)
       final extStorage = removable ? await getExternalStorageDirectory() : null;

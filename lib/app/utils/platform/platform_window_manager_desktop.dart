@@ -178,7 +178,7 @@ class PlatformWindowManagerDesktop
 
     await WindowsSingleInstance.ensureSingleInstance(args, pipeName,
         onSecondWindow: (args) {
-      print(args);
+      loggy.debug(args);
     });
   }
 

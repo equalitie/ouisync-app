@@ -20,4 +20,3 @@ export 'state_monitor.dart';
 export 'upgrade_exists.dart';
 export 'utils.dart';
 export 'value.dart';
-export 'watch.dart';

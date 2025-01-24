@@ -49,7 +49,7 @@ class RepoSecurityCurrentState {
 
 //--------------------------------------------------------------------
 
-class RepoSecurityState {
+class RepoSecurityState with AppLogger {
   final RepoSecurityCurrentState current;
 
   final SecretKeyOrigin plannedOrigin;
@@ -130,16 +130,15 @@ class RepoSecurityState {
   }
 
   // DEBUG
-  //void debugPrint() {
-  //  print("RepoSecurityState:");
-  //  print("  current.localSecretMode: ${current.localSecretMode}");
-  //  print("  current.access: ${current.access}");
-  //  print("  current.localPassword: ${current.localPassword}");
-  //  print("  plannedOrigin: $plannedOrigin");
-  //  print("  plannedStoreSecret: $plannedStoreSecret");
-  //  print("  plannedWithBiometrics: $plannedWithBiometrics");
-  //  print("  plannedPassword: $localPassword");
-  //  print("  isBiometricsAvailable: $isBiometricsAvailable");
+  //void printSecurityState() {
+  //  loggy.debug("  current.localSecretMode: ${current.localSecretMode}");
+  //  loggy.debug("  current.access: ${current.access}");
+  //  loggy.debug("  current.localPassword: ${current.localPassword}");
+  //  loggy.debug("  plannedOrigin: $plannedOrigin");
+  //  loggy.debug("  plannedStoreSecret: $plannedStoreSecret");
+  //  loggy.debug("  plannedWithBiometrics: $plannedWithBiometrics");
+  //  loggy.debug("  plannedPassword: $current.localPassword");
+  //  loggy.debug("  isBiometricsAvailable: $isBiometricsAvailable");
   //}
 
   LocalSecretInput? get newLocalSecretInput {
@@ -318,7 +317,7 @@ class RepoSecurityCubit extends Cubit<RepoSecurityState>
   //@override
   //void onChange(Change<RepoSecurityState> change) {
   //  super.onChange(change);
-  //  print('${change.currentState} -> ${change.nextState}');
+  //  loggy.debug('${change.currentState} -> ${change.nextState}');
   //}
 }
 

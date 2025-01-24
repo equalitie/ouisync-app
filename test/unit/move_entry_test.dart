@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io' as io;
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:ouisync_app/app/models/models.dart';
 import 'package:ouisync/ouisync.dart';
 import 'package:path/path.dart' as p;
 
@@ -14,12 +13,11 @@ void main() {
 
   setUp(() async {
     final dir = await io.Directory.systemTemp.createTemp();
-    final location = RepoLocation.fromDbPath(p.join(dir.path, "store.db"));
-    session = Session.create(configPath: dir.path);
+    session = await Session.create(configPath: dir.path);
 
     pluginRepo = await Repository.create(
       session,
-      store: location.path,
+      path: p.join(dir.path, 'repo'),
       readSecret: null,
       writeSecret: null,
     );
@@ -39,7 +37,7 @@ void main() {
       await file.write(0, utf8.encode("123"));
       await file.close();
 
-      final rootContents = await Directory.open(pluginRepo, '/');
+      final rootContents = await Directory.read(pluginRepo, '/');
       expect(rootContents, hasLength(2));
 
       final expectedRoot = <DirEntry>[
@@ -51,12 +49,12 @@ void main() {
 
     // Move file (/file1.txt) to folder (/folder2/file1.txt)
     {
-      await pluginRepo.move('/file1.txt', '/folder1/file1.txt');
+      await pluginRepo.moveEntry('/file1.txt', '/folder1/file1.txt');
 
-      final rootContents = await Directory.open(pluginRepo, '/');
+      final rootContents = await Directory.read(pluginRepo, '/');
       expect(rootContents, hasLength(1));
 
-      final folder1Contents = await Directory.open(pluginRepo, '/folder1');
+      final folder1Contents = await Directory.read(pluginRepo, '/folder1');
       expect(folder1Contents, hasLength(1));
 
       final expectedFolder1Contents = <DirEntry>[
@@ -72,7 +70,7 @@ void main() {
       await Directory.create(pluginRepo, '/folder1');
       await Directory.create(pluginRepo, '/folder2');
 
-      final rootContents = await Directory.open(pluginRepo, '/');
+      final rootContents = await Directory.read(pluginRepo, '/');
       expect(rootContents, hasLength(2));
 
       final expectedRoot = <DirEntry>[
@@ -84,12 +82,12 @@ void main() {
 
     // Move empty folder to other repo
     {
-      await pluginRepo.move('/folder2', '/folder1/folder2');
+      await pluginRepo.moveEntry('/folder2', '/folder1/folder2');
 
-      final rootContents = await Directory.open(pluginRepo, '/');
+      final rootContents = await Directory.read(pluginRepo, '/');
       expect(rootContents, hasLength(1));
 
-      final folder1Contents = await Directory.open(pluginRepo, '/folder1');
+      final folder1Contents = await Directory.read(pluginRepo, '/folder1');
       expect(folder1Contents, hasLength(1));
 
       final expectedFolder1Contents = <DirEntry>[
@@ -109,10 +107,10 @@ void main() {
       await file.write(0, utf8.encode("123"));
       await file.close();
 
-      final rootContents = await Directory.open(pluginRepo, '/');
+      final rootContents = await Directory.read(pluginRepo, '/');
       expect(rootContents, hasLength(2));
 
-      final folder2Contents = await Directory.open(pluginRepo, '/folder2');
+      final folder2Contents = await Directory.read(pluginRepo, '/folder2');
       expect(folder2Contents, hasLength(1));
 
       final expectedRoot = <DirEntry>[
@@ -128,12 +126,12 @@ void main() {
     // Move folder2 (/folder2) to folder1 (/folder1/folder2) containing
     // file1.txt (/folder2/file1.txt)
     {
-      await pluginRepo.move('/folder2', '/folder1/folder2');
+      await pluginRepo.moveEntry('/folder2', '/folder1/folder2');
 
-      final rootContents = await Directory.open(pluginRepo, '/');
+      final rootContents = await Directory.read(pluginRepo, '/');
       expect(rootContents, hasLength(1));
 
-      final folder1Contents = await Directory.open(pluginRepo, '/folder1');
+      final folder1Contents = await Directory.read(pluginRepo, '/folder1');
       expect(folder1Contents, hasLength(1));
 
       final expectedFolder1Contents = <DirEntry>[
@@ -141,10 +139,7 @@ void main() {
       ];
       expect(folder1Contents, dirEntryComparator(expectedFolder1Contents));
 
-      final folder2Contents = await Directory.open(
-        pluginRepo,
-        '/folder1/folder2',
-      );
+      final folder2Contents = await Directory.read(pluginRepo, '/folder1/folder2');
       expect(folder2Contents, hasLength(1));
 
       final expectedFolder2 = <DirEntry>[DirEntry('file1.txt', EntryType.file)];

@@ -44,7 +44,7 @@ mixin EntryOps {
     final newFileName = '$name (${versions += 1})$extension';
     final newPath = p.join(parent, newFileName);
 
-    if (await repoCubit.exists(newPath)) {
+    if (await repoCubit.entryExists(newPath)) {
       return await disambiguateEntryName(
         repoCubit: repoCubit,
         path: path,

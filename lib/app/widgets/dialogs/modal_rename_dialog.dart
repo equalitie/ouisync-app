@@ -211,7 +211,7 @@ class RenameEntry extends HookWidget with AppLogger {
     String newName,
   ) async {
     final newPath = p.join(parent, newName);
-    final exist = await repoCubit.exists(newPath);
+    final exist = await repoCubit.entryExists(newPath);
     if (exist) {
       _errorMessage.value = S.current.messageEntryAlreadyExist(newName);
       return false;

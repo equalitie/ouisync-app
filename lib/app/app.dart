@@ -3,8 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:loggy/loggy.dart';
-import 'package:ouisync/errors.dart';
 import 'package:ouisync/native_channels.dart';
 import 'package:ouisync/ouisync.dart' show Session;
 import 'package:package_info_plus/package_info_plus.dart';
@@ -14,7 +12,7 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 
 import '../generated/l10n.dart';
 import 'cubits/cubits.dart'
-    show LocaleCubit, LocaleState, MountCubit, PowerControl, ReposCubit;
+    show LocaleCubit, LocaleState, MountCubit, ReposCubit;
 import 'pages/pages.dart';
 import 'session.dart';
 import 'utils/platform/platform.dart' show PlatformWindowManager;
@@ -27,17 +25,12 @@ import 'utils/utils.dart'
         Constants,
         InvalidSettingsVersion,
         loadAndMigrateSettings,
-        Mounter,
         Settings;
 import 'widgets/flavor_banner.dart';
 import 'widgets/media_receiver.dart';
 
 Future<Widget> initOuiSyncApp(List<String> args) async {
   final packageInfo = await PackageInfo.fromPlatform();
-  print(packageInfo);
-
-  final foregroundLogger = Loggy<AppLogger>('foreground');
-
   final windowManager = await PlatformWindowManager.create(
     args,
     packageInfo.appName,
@@ -46,7 +39,6 @@ Future<Widget> initOuiSyncApp(List<String> args) async {
   return AppContainer(
     packageInfo: packageInfo,
     windowManager: windowManager,
-    logger: foregroundLogger,
   );
 }
 
@@ -56,11 +48,9 @@ class AppContainer extends StatefulWidget {
 
   final PackageInfo packageInfo;
   final PlatformWindowManager windowManager;
-  final Loggy<AppLogger> logger;
   AppContainer({
     required this.packageInfo,
     required this.windowManager,
-    required this.logger,
   });
 }
 
@@ -78,7 +68,7 @@ class _AppContainerWrappedState {
   });
 }
 
-class _AppContainerState extends State<AppContainer> {
+class _AppContainerState extends State<AppContainer> with AppLogger {
   Result<_AppContainerWrappedState, Exception>? state;
 
   @override
@@ -105,7 +95,7 @@ class _AppContainerState extends State<AppContainer> {
                         // component to drop state whenever the session disconnects
                         key: Key(state.sessionId)),
                     currentLocale: localeState.currentLocale,
-                    navigatorObservers: [_AppNavigatorObserver(widget.logger)]))),
+                    navigatorObservers: [_AppNavigatorObserver()]))),
         Failure(value: final error) => _createInMaterialApp(ErrorScreen(
             message: error is InvalidSettingsVersion
                 ? S.current.messageSettingsVersionNewerThanCurrent
@@ -117,7 +107,6 @@ class _AppContainerState extends State<AppContainer> {
     try {
       final session = await createSession(
           packageInfo: widget.packageInfo,
-          logger: widget.logger,
           windowManager: widget.windowManager,
           onConnectionReset: () {
             // the session is now defunct: switch to the loading screen
@@ -126,17 +115,17 @@ class _AppContainerState extends State<AppContainer> {
             Timer(Duration(seconds: 1), () => unawaited(_restart()));
           });
       final settings = await loadAndMigrateSettings(session);
-      final sessionId = await session.thisRuntimeId;
+      final sessionId = await session.runtimeId;
       setState(() => state = Success(_AppContainerWrappedState(
             session: session,
-            nativeChannels: NativeChannels(session),
+            nativeChannels: NativeChannels(),
             settings: settings,
             sessionId: sessionId,
           )));
-    } on ProviderUnavailable catch (error) {
+    // FIXME: convert this into the network error thrown by session on reset
+    } on UnimplementedError catch (error) {
       // this error is considered transient, retry after a short delay
-      print('Unable to acquire session:');
-      print(error);
+      loggy.warning('Unable to acquire session:', error);
       Timer(Duration(seconds: 1), () => unawaited(_restart()));
     } on Exception catch (error) {
       setState(() => state = Failure(error));
@@ -169,7 +158,6 @@ class OuisyncApp extends StatefulWidget {
 class _OuisyncAppState extends State<OuisyncApp>
     with AppLogger /*, RouteAware*/ {
   final receivedMediaController = StreamController<List<SharedMediaFile>>();
-  late final powerControl = PowerControl(widget.session, widget.settings);
   late final MountCubit mountCubit;
   late final ReposCubit reposCubit;
 
@@ -177,14 +165,12 @@ class _OuisyncAppState extends State<OuisyncApp>
   void initState() {
     super.initState();
 
-    final mounter = Mounter(widget.session);
-    mountCubit = MountCubit(mounter)..init();
+    mountCubit = MountCubit(widget.session)..init();
     reposCubit = ReposCubit(
       session: widget.session,
       nativeChannels: widget.nativeChannels,
       settings: widget.settings,
       cacheServers: CacheServers(Constants.cacheServers),
-      mounter: mounter,
     );
 
     unawaited(_init());
@@ -200,7 +186,6 @@ class _OuisyncAppState extends State<OuisyncApp>
   void dispose() {
     unawaited(reposCubit.close());
     unawaited(mountCubit.close());
-    unawaited(powerControl.close());
     unawaited(receivedMediaController.close());
     //widget.appRouteObserver.unsubscribe(this);
 
@@ -216,7 +201,6 @@ class _OuisyncAppState extends State<OuisyncApp>
               mountCubit: mountCubit,
               nativeChannels: widget.nativeChannels,
               packageInfo: widget.packageInfo,
-              powerControl: powerControl,
               receivedMedia: receivedMediaController.stream,
               reposCubit: reposCubit,
               session: widget.session,
@@ -287,12 +271,11 @@ class ErrorScreen extends StatelessWidget {
 
 // Due to race conditions the app sometimes `pop`s more from the stack than have been pushed
 // resulting in black screens. This class should help us find those race conditions.
-class _AppNavigatorObserver extends NavigatorObserver {
+class _AppNavigatorObserver extends NavigatorObserver with AppLogger {
   final int _maxHistoryLength = 16;
   final List<_RouteHistoryEntry> _stackHistory = [];
-  final Loggy<AppLogger> _logger;
 
-  _AppNavigatorObserver(this._logger);
+  _AppNavigatorObserver();
 
   @override
   void didPush(Route route, Route? previousRoute) {
@@ -340,7 +323,7 @@ class _AppNavigatorObserver extends NavigatorObserver {
       buffer.write(":::: ${e.action}\n");
       buffer.write(e.stackTrace);
     }
-    _logger.error(buffer);
+    loggy.error(buffer);
     unawaited(Sentry.captureMessage(buffer.toString()));
   }
 }

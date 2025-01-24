@@ -109,7 +109,7 @@ class _ScrollableTextWidgetState extends State<ScrollableTextWidget> {
                       end: Alignment.bottomRight,
                       colors: [
                         _parentColor,
-                        _parentColor.withOpacity(0.1),
+                        _parentColor.withAlpha(25),
                       ],
                     ),
                   ),

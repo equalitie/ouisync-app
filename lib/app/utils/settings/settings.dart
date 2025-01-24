@@ -3,6 +3,7 @@ import 'dart:io' as io;
 import 'package:ouisync/ouisync.dart';
 import 'package:path/path.dart';
 
+import '../constants.dart';
 import 'v1.dart' as v1;
 import 'v2.dart' as v2;
 import '../files.dart';
@@ -38,6 +39,11 @@ Future<Settings> loadAndMigrateSettings(Session session) async {
   }
 }
 
+Future<io.Directory> get defaultStoreDir async {
+  final baseDir = await Native.getBaseDir(removable: true);
+  return io.Directory(join(baseDir.path, Constants.storeDirName));
+}
+
 Future<void> _migratePaths() async {
   final newDir = await Native.getBaseDir();
   final oldDir = io.Directory(newDir.path
@@ -53,7 +59,7 @@ Future<void> _migratePaths() async {
     return;
   }
 
-  final logger = staticLogger<Settings>();
+  final logger = appLogger("Settings");
 
   logger.info(
     'migrating app support directory ${oldDir.path} -> ${newDir.path}',
