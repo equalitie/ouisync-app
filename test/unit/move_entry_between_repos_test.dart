@@ -50,13 +50,15 @@ void main() {
     entrySelectionCubit = EntrySelectionCubit();
     bottomSheetCubit = EntryBottomSheetCubit();
 
+    final cacheServers = CacheServers(deps.session);
+
     originRepoCubit = await RepoCubit.create(
       nativeChannels: deps.nativeChannels,
       repo: originRepo,
       navigation: navigationCubit,
       entrySelection: entrySelectionCubit,
       bottomSheet: bottomSheetCubit,
-      cacheServers: CacheServers.disabled,
+      cacheServers: cacheServers,
       session: deps.session,
     );
 
@@ -66,7 +68,7 @@ void main() {
       navigation: navigationCubit,
       entrySelection: entrySelectionCubit,
       bottomSheet: bottomSheetCubit,
-      cacheServers: CacheServers.disabled,
+      cacheServers: cacheServers,
       session: deps.session,
     );
   });

@@ -135,7 +135,7 @@ class TestDependencies {
     final settings = await Settings.init(MasterKey.random());
     final nativeChannels = NativeChannels();
     final reposCubit = ReposCubit(
-      cacheServers: CacheServers.disabled,
+      cacheServers: CacheServers(session),
       nativeChannels: nativeChannels,
       session: session,
       settings: settings,

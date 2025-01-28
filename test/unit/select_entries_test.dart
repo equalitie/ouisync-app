@@ -5,7 +5,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:ouisync_app/app/models/folder.dart';
 import 'package:ouisync_app/app/utils/utils.dart' show CacheServers;
 import 'package:ouisync/ouisync.dart';
-import 'package:ouisync_app/app/utils/repo_path.dart' as p;
 import 'package:ouisync_app/app/cubits/cubits.dart'
     show EntryBottomSheetCubit, EntrySelectionCubit, NavigationCubit, RepoCubit;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -47,7 +46,7 @@ void main() {
       navigation: navigationCubit,
       entrySelection: entrySelectionCubit,
       bottomSheet: bottomSheetCubit,
-      cacheServers: CacheServers.disabled,
+      cacheServers: CacheServers(deps.session),
     );
 
     // Create 1 nested folder

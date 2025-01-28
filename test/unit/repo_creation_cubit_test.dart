@@ -41,7 +41,7 @@ void main() {
       settings: settings,
       navigation: NavigationCubit(),
       bottomSheet: EntryBottomSheetCubit(),
-      cacheServers: CacheServers.disabled,
+      cacheServers: CacheServers(session),
     );
 
     repoCreationCubit = RepoCreationCubit(reposCubit: reposCubit);

@@ -32,14 +32,14 @@ class EntrySelectionState extends Equatable {
 
   EntrySelectionState copyWith({
     String? originRepoInfoHash,
-    SelectionStatus? selectionState,
+    SelectionStatus? selectionStatus,
     List<FileSystemEntry>? selectedEntries,
     FileSystemEntry? singleEntry,
     bool? updating,
   }) =>
       EntrySelectionState(
         originRepoInfoHash: originRepoInfoHash ?? this.originRepoInfoHash,
-        status: selectionState ?? this.status,
+        status: selectionStatus ?? status,
         selectedEntries: selectedEntries ?? this.selectedEntries,
         singleEntry: singleEntry ?? this.singleEntry,
         updating: updating ?? false,
@@ -114,7 +114,7 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
 
     emitUnlessClosed(state.copyWith(
       originRepoInfoHash: _originRepoInfoHash,
-      selectionState: SelectionStatus.on,
+      selectionStatus: SelectionStatus.on,
       selectedEntries: _entries,
       singleEntry: _singleEntry,
     ));
@@ -130,7 +130,7 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
     _entries.clear();
 
     emitUnlessClosed(state.copyWith(
-      selectionState: SelectionStatus.off,
+      selectionStatus: SelectionStatus.off,
       selectedEntries: <FileSystemEntry>[],
       singleEntry: const DirectoryEntry(path: ''),
     ));

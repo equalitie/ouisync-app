@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:ouisync/native_channels.dart';
 import 'package:ouisync_app/app/models/folder.dart';
 import 'package:ouisync_app/app/pages/main_page.dart';
 import 'package:ouisync_app/app/utils/utils.dart' show CacheServers;
@@ -25,8 +24,6 @@ void main() {
 
   late RepoCubit originRepoCubit;
   late RepoCubit destinationRepoCubit;
-
-  late NativeChannels nativeChannels;
 
   late FileEntry file0;
   late FileEntry file1;
@@ -66,6 +63,8 @@ void main() {
     FlutterSecureStorage.setMockInitialValues({});
     SharedPreferences.setMockInitialValues({});
 
+    final cacheServers = CacheServers(deps.session);
+
     originRepoCubit = await RepoCubit.create(
       nativeChannels: deps.nativeChannels,
       repo: originRepo,
@@ -73,7 +72,7 @@ void main() {
       navigation: NavigationCubit(),
       entrySelection: EntrySelectionCubit(),
       bottomSheet: EntryBottomSheetCubit(),
-      cacheServers: CacheServers.disabled,
+      cacheServers: cacheServers,
     );
 
     destinationRepoCubit = await RepoCubit.create(
@@ -83,7 +82,7 @@ void main() {
       navigation: NavigationCubit(),
       entrySelection: EntrySelectionCubit(),
       bottomSheet: EntryBottomSheetCubit(),
-      cacheServers: CacheServers.disabled,
+      cacheServers: cacheServers,
     );
 
     // Create 1 folder in originRepo
