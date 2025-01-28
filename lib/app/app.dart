@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:ouisync/native_channels.dart';
@@ -122,7 +123,7 @@ class _AppContainerState extends State<AppContainer> with AppLogger {
             settings: settings,
             sessionId: sessionId,
           )));
-    // FIXME: convert this into the network error thrown by session on reset
+      // FIXME: convert this into the network error thrown by session on reset
     } on UnimplementedError catch (error) {
       // this error is considered transient, retry after a short delay
       loggy.warning('Unable to acquire session:', error);
@@ -165,12 +166,15 @@ class _OuisyncAppState extends State<OuisyncApp>
   void initState() {
     super.initState();
 
+    final cacheServers = CacheServers(widget.session);
+    unawaited(cacheServers.addAll(Constants.cacheServers));
+
     mountCubit = MountCubit(widget.session)..init();
     reposCubit = ReposCubit(
       session: widget.session,
       nativeChannels: widget.nativeChannels,
       settings: widget.settings,
-      cacheServers: CacheServers(Constants.cacheServers),
+      cacheServers: cacheServers,
     );
 
     unawaited(_init());

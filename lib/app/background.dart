@@ -1,8 +1,10 @@
 import 'package:loggy/loggy.dart';
 import 'package:ouisync/ouisync.dart' show Repository, Session;
+import 'package:ouisync_app/app/utils/cache_servers.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import 'session.dart';
+import 'utils/constants.dart';
 import 'utils/log.dart';
 import 'utils/settings/settings.dart';
 
@@ -18,6 +20,9 @@ Future<void> syncInBackground() async {
   final logger = Loggy<AppLogger>('background');
 
   final session = await createSession(packageInfo: packageInfo);
+
+  final cacheServers = CacheServers(session);
+  await cacheServers.addAll(Constants.cacheServers);
 
   logger.info('sync started');
 
