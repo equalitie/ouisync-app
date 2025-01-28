@@ -8,11 +8,6 @@ import 'package:path/path.dart';
 
 import 'utils/platform/platform_window_manager.dart';
 
-const _defaultPeerPort = 20209;
-
-final _sessionLoggy = appLogger('Session');
-final _serviceLoggy = appLogger('');
-
 Future<Session> createSession({
   required PackageInfo packageInfo,
   PlatformWindowManager? windowManager,
@@ -23,8 +18,10 @@ Future<Session> createSession({
     Constants.configDirName,
   );
 
+  final logger = appLogger('');
+
   initLog(
-    callback: (level, message) => _serviceLoggy.log(level.toLoggy(), message),
+    callback: (level, message) => logger.log(level.toLoggy(), message),
   );
 
   final session = await Session.create(
@@ -46,40 +43,10 @@ Future<Session> createSession({
       defaultPortForwardingEnabled: true,
       defaultLocalDiscoveryEnabled: true,
     );
-
-    // Add cache servers as user defined peers so we immediately connect to them.
-    for (final host in Constants.cacheServers) {
-      unawaited(addCacheServerAsPeer(session, host));
-    }
   } catch (e) {
     await session.close();
     rethrow;
   }
 
   return session;
-}
-
-Future<void> addCacheServerAsPeer(Session session, String host) async {
-  try {
-    for (final addr in await InternetAddress.lookup(_stripPort(host))) {
-      await session.addUserProvidedPeers([
-        'quic/${addr.address}:$_defaultPeerPort',
-        'tcp/${addr.address}:$_defaultPeerPort',
-      ]);
-    }
-
-    _sessionLoggy.debug('cache server $host added');
-  } catch (e, st) {
-    _sessionLoggy.error('failed to add cache server $host:', e, st);
-  }
-}
-
-String _stripPort(String addr) {
-  final index = addr.lastIndexOf(':');
-
-  if (index >= 0) {
-    return addr.substring(0, index);
-  } else {
-    return addr;
-  }
 }

@@ -70,17 +70,17 @@ class ConnectivityInfo extends Cubit<ConnectivityInfoState>
     // because these events are idempotent, we can trigger them in any order
     // we start with getting the routable addresses (without waiting just yet)
     List<Future> futures = [
-      _session.externalAddressV4.then((externalAddressV4) =>
-        emitUnlessClosed(state.copyWith(externalAddressV4: externalAddressV4 ?? ""))),
-      _session.externalAddressV6.then((externalAddressV6) =>
-        emitUnlessClosed(state.copyWith(externalAddressV6: externalAddressV6 ?? "")))
+      _session.externalAddressV4.then((externalAddressV4) => emitUnlessClosed(
+          state.copyWith(externalAddressV4: externalAddressV4 ?? ""))),
+      _session.externalAddressV6.then((externalAddressV6) => emitUnlessClosed(
+          state.copyWith(externalAddressV6: externalAddressV6 ?? "")))
     ];
 
     // ask the library for bound sockets; we have to block here because we
     // have a data dependency as fallbacks for local addresses when we're
     // unable to obtain them via the operating system interface
-    final listenerAddrs = await _session.listenerAddrs.then(
-      (addrs) => addrs.map(PeerAddr.parse).whereType<PeerAddr>().toList());
+    final listenerAddrs = await _session.localListenerAddrs.then(
+        (addrs) => addrs.map(PeerAddr.parse).whereType<PeerAddr>().toList());
 
     emitUnlessClosed(state.copyWith(listenerAddrs: listenerAddrs));
 
@@ -88,9 +88,10 @@ class ConnectivityInfo extends Cubit<ConnectivityInfoState>
     futures.add(_networkInfo.getWifiIP().then((localIPv4) {
       if (localIPv4 != null) {
         final port = listenerAddrs
-          .where((addr) => addr.isIPv4)
-          .map((addr) => addr.port.toString())
-          .firstOrNull ?? "";
+                .where((addr) => addr.isIPv4)
+                .map((addr) => addr.port.toString())
+                .firstOrNull ??
+            "";
         emitUnlessClosed(state.copyWith(localAddressV4: "$localIPv4:$port"));
       } else {
         emitUnlessClosed(state.copyWith(localAddressV4: ""));
@@ -99,9 +100,10 @@ class ConnectivityInfo extends Cubit<ConnectivityInfoState>
     futures.add(_networkInfo.getWifiIPv6().then((localIPv6) {
       if (localIPv6 != null) {
         final port = listenerAddrs
-          .where((addr) => addr.isIPv6)
-          .map((addr) => addr.port.toString())
-          .firstOrNull ?? "";
+                .where((addr) => addr.isIPv6)
+                .map((addr) => addr.port.toString())
+                .firstOrNull ??
+            "";
         emitUnlessClosed(state.copyWith(localAddressV6: "[$localIPv6]:$port"));
       } else {
         emitUnlessClosed(state.copyWith(localAddressV6: ""));
