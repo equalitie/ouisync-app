@@ -6,7 +6,7 @@ import 'package:ouisync/ouisync.dart';
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart' show EntrySelectionActions, SortBy;
 import '../models/models.dart' show AuthMode, AuthModeBlindOrManual;
-import 'utils.dart';
+import 'utils.dart' show AppTextThemeExtension, AppTypography;
 
 extension AnyExtension<T> on T {
   /// This is inspired by
@@ -137,11 +137,13 @@ extension RepositoryExtension on Repository {
     final newValue = json.encode(authMode.toJson());
 
     // Currently we ignore any concurrent changes and always force the new value.
-    bool changed = false; do {
+    bool changed = false;
+    do {
       final oldValue = await getMetadata(_authModeKey);
-      changed = await setMetadata({_authModeKey: (
-        oldValue: oldValue, newValue: newValue)});
-    } while(!changed);
+      changed = await setMetadata(
+        {_authModeKey: (oldValue: oldValue, newValue: newValue)},
+      );
+    } while (!changed);
   }
 }
 
@@ -175,6 +177,21 @@ extension EntrySelectionActionsExtension on EntrySelectionActions {
         return S.current.actionMove;
       case EntrySelectionActions.delete:
         return S.current.actionDelete;
+    }
+  }
+}
+
+extension FileReadStream on File {
+  Stream<List<int>> readStream({int offset = 0, int chunkSize = 1024}) async* {
+    while (true) {
+      final chunk = await read(offset, chunkSize);
+      offset += chunk.length;
+
+      if (chunk.isEmpty) {
+        break;
+      }
+
+      yield chunk;
     }
   }
 }

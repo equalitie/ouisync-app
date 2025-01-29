@@ -5,7 +5,7 @@ import '../cubits/cubits.dart' show RepoCubit;
 import '../models/models.dart' show FileEntry, FileSystemEntry;
 import '../widgets/widgets.dart' show DisambiguationAction;
 import 'repo_path.dart' as repo_path;
-import 'utils.dart' show AppLogger, EntryOps, StringExtension;
+import 'utils.dart' show AppLogger, EntryOps, FileReadStream, StringExtension;
 
 class CopyEntry with EntryOps, AppLogger {
   CopyEntry(
@@ -97,7 +97,7 @@ class CopyEntry with EntryOps, AppLogger {
       await (destinationRepoCubit ?? _originRepoCubit).replaceFile(
         filePath: destinationPath,
         length: fileLength,
-        fileByteStream: file.read(0, fileLength).asStream(),
+        fileByteStream: file.readStream(),
       );
 
       await _originRepoCubit.deleteFile(sourcePath);

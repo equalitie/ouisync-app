@@ -761,7 +761,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     await (destinationRepoCubit ?? this).saveFile(
       filePath: destination,
       length: originFileLength,
-      fileByteStream: originFile.read(0, originFileLength).asStream(),
+      fileByteStream: originFile.readStream(),
     );
 
     return true;
