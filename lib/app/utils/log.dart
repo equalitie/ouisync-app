@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:loggy/loggy.dart';
 import 'package:ouisync/ouisync.dart' as ouisync;
 import 'package:package_info_plus/package_info_plus.dart';
@@ -66,7 +67,7 @@ class LogUtils {
     final baseDir = await Native.getBaseDir();
     final header = '''
 -------------------- ${package.appName} Start --------------------
-version:  ${package.version} (build ${package.buildNumber})
+version:  ${package.version} $appFlavor (build ${package.buildNumber})
 started:  ${_formatTimestamp(DateTime.now())}
 platform: ${Platform.operatingSystemVersion}
 baseDir:  ${baseDir.path}
