@@ -15,6 +15,7 @@ import 'cubits/cubits.dart'
     show LocaleCubit, LocaleState, MountCubit, ReposCubit;
 import 'pages/pages.dart';
 import 'session.dart';
+import 'utils/dirs.dart';
 import 'utils/platform/platform.dart' show PlatformWindowManager;
 import 'utils/utils.dart'
     show
@@ -29,16 +30,22 @@ import 'utils/utils.dart'
 import 'widgets/flavor_banner.dart';
 import 'widgets/media_receiver.dart';
 
-Future<Widget> initOuiSyncApp(List<String> args) async {
+Future<Widget> initOuiSyncApp({
+  String? rootDir,
+  List<String> args = const [],
+}) async {
   final packageInfo = await PackageInfo.fromPlatform();
   final windowManager = await PlatformWindowManager.create(
     args,
     packageInfo.appName,
   );
 
+  final dirs = await Dirs.init(root: rootDir);
+
   return AppContainer(
     packageInfo: packageInfo,
     windowManager: windowManager,
+    dirs: dirs,
   );
 }
 
@@ -48,9 +55,12 @@ class AppContainer extends StatefulWidget {
 
   final PackageInfo packageInfo;
   final PlatformWindowManager windowManager;
+  final Dirs dirs;
+
   AppContainer({
     required this.packageInfo,
     required this.windowManager,
+    required this.dirs,
   });
 }
 
@@ -85,6 +95,7 @@ class _AppContainerState extends State<AppContainer> with AppLogger {
             child: BlocBuilder<LocaleCubit, LocaleState>(
                 builder: (context, localeState) => _createInMaterialApp(
                     OuisyncApp(
+                        dirs: widget.dirs,
                         session: state.session,
                         windowManager: widget.windowManager,
                         settings: state.settings,
@@ -108,6 +119,7 @@ class _AppContainerState extends State<AppContainer> with AppLogger {
       final session = await createSession(
           packageInfo: widget.packageInfo,
           windowManager: widget.windowManager,
+          dirs: widget.dirs,
           onConnectionReset: () {
             // the session is now defunct: switch to the loading screen
             setState(() => state = null);
@@ -136,6 +148,7 @@ class _AppContainerState extends State<AppContainer> with AppLogger {
 class OuisyncApp extends StatefulWidget {
   OuisyncApp({
     required this.windowManager,
+    required this.dirs,
     required this.session,
     required this.settings,
     required this.packageInfo,
@@ -145,6 +158,7 @@ class OuisyncApp extends StatefulWidget {
   });
 
   final PlatformWindowManager windowManager;
+  final Dirs dirs;
   final Session session;
   final NativeChannels nativeChannels;
   final Settings settings;
@@ -168,7 +182,7 @@ class _OuisyncAppState extends State<OuisyncApp>
     final cacheServers = CacheServers(widget.session);
     unawaited(cacheServers.addAll(Constants.cacheServers));
 
-    mountCubit = MountCubit(widget.session)..init();
+    mountCubit = MountCubit(widget.session, widget.dirs)..init();
     reposCubit = ReposCubit(
       session: widget.session,
       nativeChannels: widget.nativeChannels,
@@ -209,6 +223,7 @@ class _OuisyncAppState extends State<OuisyncApp>
               session: widget.session,
               settings: widget.settings,
               windowManager: widget.windowManager,
+              dirs: widget.dirs,
             )),
       );
 

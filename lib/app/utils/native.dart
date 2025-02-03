@@ -43,16 +43,8 @@ class Native {
 
   /// Path to a directory where the application may place application support
   /// files. If this directory does not exist, it is created automatically.
-  ///
-  /// Similar to getApplicationSupportDirectory() but allows customization.
-  /// The `removable` parameter controls whether removable locations such as SD
-  /// cards may be returned.
-  static Future<io.Directory> getBaseDir({bool removable = false}) async {
-    if (io.Platform.isAndroid) {
-      // on Android we support SD cards where permitted (e.g. for repositories)
-      final extStorage = removable ? await getExternalStorageDirectory() : null;
-      return extStorage ?? getApplicationSupportDirectory();
-    } else if (io.Platform.isIOS || io.Platform.isMacOS) {
+  static Future<io.Directory> getBaseDir() async {
+    if (io.Platform.isIOS || io.Platform.isMacOS) {
       // on Darwin, we can't use the default implementation because the UI and
       // backend run in different address spaces and file sandboxes, so we defer
       // this decision to the host to allow for maximum customizability

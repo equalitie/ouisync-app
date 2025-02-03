@@ -18,6 +18,7 @@ import 'package:url_launcher/url_launcher_string.dart';
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
 import '../models/models.dart';
+import '../utils/dirs.dart';
 import '../utils/platform/platform.dart';
 import '../utils/utils.dart';
 import '../widgets/notification_badge.dart';
@@ -53,6 +54,7 @@ class MainPage extends StatefulWidget {
     required this.session,
     required this.settings,
     required this.windowManager,
+    required this.dirs,
   });
 
   final PlatformWindowManager windowManager;
@@ -64,6 +66,7 @@ class MainPage extends StatefulWidget {
   final ReposCubit reposCubit;
   final MountCubit mountCubit;
   final LocaleCubit localeCubit;
+  final Dirs dirs;
 
   @override
   State<StatefulWidget> createState() => _MainPageState();
@@ -623,20 +626,20 @@ class _MainPageState extends State<MainPage>
           final contents = currentRepoCubit.state.currentFolder.content;
           final totalEntries = contents.length;
 
-    return RefreshIndicator(
-      onRefresh: () async {
-        await reposState.currentEntry?.cubit?.refresh();
-      },
-      child: Container(
-        child: ListView.separated(
-          separatorBuilder: (context, index) => const Divider(
-            height: 1,
-            color: Colors.transparent,
-          ),
-          itemCount: totalEntries,
-          itemBuilder: (context, index) {
-            final entry = contents[index];
-            final key = ValueKey(entry.name);
+          return RefreshIndicator(
+            onRefresh: () async {
+              await reposState.currentEntry?.cubit?.refresh();
+            },
+            child: Container(
+              child: ListView.separated(
+                separatorBuilder: (context, index) => const Divider(
+                  height: 1,
+                  color: Colors.transparent,
+                ),
+                itemCount: totalEntries,
+                itemBuilder: (context, index) {
+                  final entry = contents[index];
+                  final key = ValueKey(entry.name);
 
                   return Column(
                     children: [
@@ -764,12 +767,14 @@ class _MainPageState extends State<MainPage>
                   isActionAvailableValidator: _isEntryActionAvailable,
                   packageInfo: widget.packageInfo,
                   nativeChannels: widget.nativeChannels,
+                  dirs: widget.dirs,
                 )
               : EntryDetails.folder(
                   context,
                   repoCubit: repoCubit,
                   entry: entry,
                   isActionAvailableValidator: _isEntryActionAvailable,
+                  dirs: widget.dirs,
                 )
           // TODO: Find out how to get this to work, so we can use the snackbar on the bottom sheet.
           //  ScaffoldMessenger(
@@ -833,6 +838,7 @@ class _MainPageState extends State<MainPage>
         entry: state.entry,
         sheetType: state.type,
         onUpdateBottomSheet: updateBottomSheetInfo,
+        dirs: widget.dirs,
       );
 
   EntriesActionsDialog _moveMultipleEntriesState(
@@ -844,6 +850,7 @@ class _MainPageState extends State<MainPage>
         originRepoCubit: state.repoCubit,
         sheetType: state.type,
         onUpdateBottomSheet: updateBottomSheetInfo,
+        dirs: widget.dirs,
       );
 
   SaveSharedMedia _saveSharedMediaState(SaveMediaSheetState state) =>
@@ -1116,6 +1123,7 @@ class _MainPageState extends State<MainPage>
             reposCubit: widget.reposCubit,
             upgradeExists: upgradeExists,
             checkForDokan: checkForDokan,
+            dirs: widget.dirs,
           ),
         ),
       );

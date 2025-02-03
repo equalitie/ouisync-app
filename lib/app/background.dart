@@ -5,6 +5,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 
 import 'session.dart';
 import 'utils/constants.dart';
+import 'utils/dirs.dart';
 import 'utils/log.dart';
 import 'utils/settings/settings.dart';
 
@@ -17,9 +18,10 @@ const _syncInactivityPeriod = Duration(seconds: 30);
 @pragma('vm:entry-point')
 Future<void> syncInBackground() async {
   final packageInfo = await PackageInfo.fromPlatform();
+  final dirs = await Dirs.init();
   final logger = Loggy<AppLogger>('background');
 
-  final session = await createSession(packageInfo: packageInfo);
+  final session = await createSession(packageInfo: packageInfo, dirs: dirs);
 
   final cacheServers = CacheServers(session);
   await cacheServers.addAll(Constants.cacheServers);

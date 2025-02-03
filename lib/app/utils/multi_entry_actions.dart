@@ -1,26 +1,26 @@
-import 'dart:io' as io;
-
 import 'package:flutter/material.dart';
 import 'package:ouisync_app/app/models/models.dart'
     show DirectoryEntry, FileEntry;
-import 'package:ouisync_app/app/utils/utils.dart'
-    show Dialogs, Dimensions, Native;
-import 'package:path_provider/path_provider.dart';
+import 'package:ouisync_app/app/utils/utils.dart' show Dialogs, Dimensions;
 
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart'
     show EntrySelectionCubit, EntrySelectionActions, RepoCubit;
 import '../widgets/widgets.dart' show NegativeButton, PositiveButton;
+import 'dirs.dart';
 
 class MultiEntryActions {
   const MultiEntryActions(
     BuildContext context, {
+    required Dirs dirs,
     required EntrySelectionCubit entrySelectionCubit,
   })  : _context = context,
-        _entrySelectionCubit = entrySelectionCubit;
+        _entrySelectionCubit = entrySelectionCubit,
+        _dirs = dirs;
 
   final BuildContext _context;
   final EntrySelectionCubit _entrySelectionCubit;
+  final Dirs _dirs;
 
   int get totalSelectedDirs =>
       _entrySelectionCubit.entries.whereType<DirectoryEntry>().length;
@@ -29,7 +29,7 @@ class MultiEntryActions {
       _entrySelectionCubit.entries.whereType<FileEntry>().length;
 
   Future<bool> saveEntriesToDevice() async {
-    String? defaultDirectoryPath = await _getDefaultPathForPlatform();
+    String? defaultDirectoryPath = _dirs.download;
     if (defaultDirectoryPath == null) return false;
 
     final result = await _confirmActionAndExecute(
@@ -107,18 +107,6 @@ class MultiEntryActions {
   }
 
   //======================= Helper Functions ===================================
-
-  Future<String?> _getDefaultPathForPlatform() async {
-    if (io.Platform.isAndroid) {
-      return await Native.getDownloadPathForAndroid();
-    }
-
-    final defaultDirectory = io.Platform.isIOS
-        ? await getApplicationDocumentsDirectory()
-        : await getDownloadsDirectory();
-
-    return defaultDirectory?.path;
-  }
 
   Future<bool> _confirmActionAndExecute(
     BuildContext context,

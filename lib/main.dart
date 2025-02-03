@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
+import 'package:args/args.dart';
 import 'package:flutter/material.dart';
 import 'package:ouisync_app/app/utils/utils.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
@@ -20,6 +21,33 @@ const _syncInBackgroundPeriod = Duration(minutes: 5);
 const _sentryDSN = String.fromEnvironment('SENTRY_DSN');
 
 Future<void> main(List<String> args) async {
+  var parser = ArgParser();
+  parser.addOption(
+    'root-dir',
+    help: 'Root data directory',
+    valueHelp: 'path',
+  );
+  parser.addFlag(
+    'help',
+    abbr: 'h',
+    help: 'Print help',
+    negatable: false,
+  );
+
+  var options = parser.parse(args);
+
+  if (options.flag('help')) {
+    stdout.writeln('Secure P2P file sharing app');
+    stdout.writeln();
+    stdout.writeln('Usage: ${Platform.executable} [OPTIONS]');
+    stdout.writeln();
+    stdout.writeln(parser.usage);
+
+    exit(0);
+  }
+
+  var rootDir = options.option('root-dir');
+
   WidgetsFlutterBinding.ensureInitialized();
   await LogUtils.init();
 
@@ -37,10 +65,10 @@ Future<void> main(List<String> args) async {
   }
 
   // start app, possibly proxied via sentry if configured
-  Future<void> start() async => runApp(await initOuiSyncApp(args));
-  await (_sentryDSN != ""
-    ? setupSentry(start, _sentryDSN)
-    : start());
+  Future<void> start() async => runApp(
+        await initOuiSyncApp(rootDir: rootDir, args: args),
+      );
+  await (_sentryDSN != "" ? setupSentry(start, _sentryDSN) : start());
 }
 
 Future<void> setupSentry(

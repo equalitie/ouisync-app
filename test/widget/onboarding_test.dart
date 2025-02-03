@@ -5,15 +5,16 @@ import 'package:ouisync_app/app/app.dart';
 import 'package:ouisync_app/app/cubits/locale.dart';
 import 'package:ouisync_app/app/cubits/repos.dart';
 import 'package:ouisync_app/app/pages/main_page.dart';
+import 'package:ouisync_app/app/utils/dirs.dart';
 import 'package:ouisync_app/app/utils/master_key.dart';
 import 'package:ouisync_app/app/utils/settings/settings.dart';
 import 'package:ouisync/ouisync.dart';
-import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../utils.dart';
 
 void main() {
+  late Dirs dirs;
   late Session session;
   late Settings settings;
   late LocaleCubit localeCubit;
@@ -22,7 +23,8 @@ void main() {
     final appDir = await getApplicationSupportDirectory();
     await appDir.create(recursive: true);
 
-    session = await Session.create(configPath: join(appDir.path, 'config'));
+    dirs = Dirs(root: appDir.path);
+    session = await Session.create(configPath: dirs.config);
     settings = await Settings.init(MasterKey.random());
     localeCubit = LocaleCubit(settings);
   });
@@ -44,6 +46,7 @@ void main() {
         settings: settings,
         windowManager: FakeWindowManager(),
         nativeChannels: NativeChannels(),
+        dirs: dirs,
       )));
       await tester.pumpAndSettle();
 

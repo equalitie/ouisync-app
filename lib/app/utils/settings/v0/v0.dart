@@ -374,7 +374,7 @@ class Settings with AppLogger {
     final dir = Directory(
       p.join(
         (await path_provider.getApplicationSupportDirectory()).path,
-        Constants.storeDirName,
+        'repositories',
       ),
     );
 

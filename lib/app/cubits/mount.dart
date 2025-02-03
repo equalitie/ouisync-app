@@ -1,10 +1,9 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync/ouisync.dart';
 
+import '../utils/dirs.dart';
 import '../utils/log.dart';
-import '../utils/native.dart';
 import 'utils.dart';
 
 sealed class MountState {
@@ -32,8 +31,9 @@ class MountStateFailure extends MountState {
 
 class MountCubit extends Cubit<MountState> with CubitActions, AppLogger {
   final Session session;
+  final Dirs dirs;
 
-  MountCubit(this.session) : super(MountStateDisabled());
+  MountCubit(this.session, this.dirs) : super(MountStateDisabled());
 
   void init() => unawaited(_init());
 
@@ -41,15 +41,13 @@ class MountCubit extends Cubit<MountState> with CubitActions, AppLogger {
     emitUnlessClosed(MountStateMounting());
 
     try {
-      final mountRoot = await _defaultMountRoot;
+      final mountRoot = dirs.defaultMount;
       await session.setMountRoot(mountRoot);
 
       emitUnlessClosed(
         mountRoot != null ? MountStateSuccess() : MountStateDisabled(),
       );
     } catch (error, stack) {
-      loggy.error('MOUNTTTT', error, stack);
-
       emitUnlessClosed(MountStateFailure(error, stack));
     }
   }
@@ -61,25 +59,5 @@ class MountCubit extends Cubit<MountState> with CubitActions, AppLogger {
     }
 
     await super.close();
-  }
-}
-
-Future<String?> get _defaultMountRoot async {
-  if (Platform.isMacOS) {
-    return await Native.getMountRootDirectory();
-  }
-
-  if (Platform.isLinux) {
-    final home = Platform.environment['HOME'];
-
-    if (home == null) {
-      return null;
-    }
-
-    return '$home/Ouisync';
-  } else if (Platform.isWindows) {
-    return 'O:';
-  } else {
-    return null;
   }
 }

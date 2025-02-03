@@ -16,6 +16,7 @@ import '../../cubits/cubits.dart'
         RepoCubit,
         ReposCubit;
 import '../../cubits/repos.dart';
+import '../../utils/dirs.dart';
 import '../../utils/repo_path.dart' as repo_path;
 import '../../utils/utils.dart'
     show
@@ -35,6 +36,7 @@ class EntriesActionsDialog extends StatefulWidget {
     required this.entry,
     required this.sheetType,
     required this.onUpdateBottomSheet,
+    required this.dirs,
   });
 
   const EntriesActionsDialog.multiple(
@@ -43,11 +45,13 @@ class EntriesActionsDialog extends StatefulWidget {
     required this.originRepoCubit,
     required this.sheetType,
     required this.onUpdateBottomSheet,
+    required this.dirs,
   }) : entry = null;
 
   final BuildContext parentContext;
   final ReposCubit reposCubit;
   final RepoCubit originRepoCubit;
+  final Dirs dirs;
 
   final FileSystemEntry? entry;
 
@@ -107,6 +111,7 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
                   widget.originRepoCubit.entrySelectionCubit,
                   widget.entry,
                   widget.sheetType,
+                  widget.dirs,
                 ),
               ],
             ),
@@ -179,6 +184,7 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
     EntrySelectionCubit? entrySelectionCubit,
     FileSystemEntry? entry,
     BottomSheetType sheetType,
+    Dirs dirs,
   ) =>
       BlocBuilder<NavigationCubit, NavigationState>(
         bloc: navigationCubit,
@@ -199,6 +205,7 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
                   reposState,
                   moveEntriesActions,
                   sheetType,
+                  dirs,
                 )
               : _singleEntryActions(
                   context,
@@ -275,6 +282,7 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
     ReposState reposState,
     MoveEntriesActions moveEntriesActions,
     BottomSheetType sheetType,
+    Dirs dirs,
   ) =>
       BlocBuilder<EntrySelectionCubit, EntrySelectionState>(
         bloc: entrySelectionCubit,
@@ -302,6 +310,7 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
             final multiEntryActions = MultiEntryActions(
               parentContext,
               entrySelectionCubit: entrySelectionCubit,
+              dirs: dirs,
             );
 
             final action = moveEntriesActions.getAction(

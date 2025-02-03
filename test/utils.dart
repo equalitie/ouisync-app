@@ -11,6 +11,7 @@ import 'package:ouisync_app/app/cubits/locale.dart';
 import 'package:ouisync_app/app/cubits/mount.dart';
 import 'package:ouisync_app/app/cubits/repos.dart';
 import 'package:ouisync_app/app/pages/main_page.dart';
+import 'package:ouisync_app/app/utils/dirs.dart';
 import 'package:ouisync_app/app/utils/platform/platform_window_manager.dart';
 import 'package:ouisync_app/app/utils/utils.dart';
 import 'package:ouisync_app/generated/l10n.dart';
@@ -118,19 +119,18 @@ class TestDependencies {
     this.reposCubit,
     this.mountCubit,
     this.localeCubit,
+    this.dirs,
   );
 
   static Future<TestDependencies> create() async {
     final appDir = await getApplicationSupportDirectory();
     await appDir.create(recursive: true);
 
-    final configPath = join(appDir.path, 'config');
+    final dirs = Dirs(root: appDir.path);
 
-    final session = await Session.create(
-      configPath: configPath,
-    );
+    final session = await Session.create(configPath: dirs.config);
 
-    await session.setStoreDir(join(appDir.path, 'repos'));
+    await session.setStoreDir(dirs.defaultStore);
 
     final settings = await Settings.init(MasterKey.random());
     final nativeChannels = NativeChannels();
@@ -141,7 +141,7 @@ class TestDependencies {
       settings: settings,
     );
 
-    final mountCubit = MountCubit(session);
+    final mountCubit = MountCubit(session, dirs);
     final localeCubit = LocaleCubit(settings);
 
     return TestDependencies._(
@@ -151,6 +151,7 @@ class TestDependencies {
       reposCubit,
       mountCubit,
       localeCubit,
+      dirs,
     );
   }
 
@@ -174,6 +175,7 @@ class TestDependencies {
         session: session,
         settings: settings,
         windowManager: FakeWindowManager(),
+        dirs: dirs,
       );
 
   final Session session;
@@ -182,6 +184,7 @@ class TestDependencies {
   final ReposCubit reposCubit;
   final MountCubit mountCubit;
   final LocaleCubit localeCubit;
+  final Dirs dirs;
 }
 
 class _FakeConnectivityPlatform extends ConnectivityPlatform {

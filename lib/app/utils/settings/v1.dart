@@ -290,7 +290,8 @@ class Settings with AppLogger {
               join((await getApplicationDocumentsDirectory()).path, 'Ouisync')),
         ];
 
-        final newDir = await defaultStoreDir;
+        final newDir = await Native.getBaseDir().then(
+            (baseDir) => io.Directory(join(baseDir.path, 'repositories')));
 
         for (final oldDir in oldDirs) {
           if (!(await oldDir.exists())) {

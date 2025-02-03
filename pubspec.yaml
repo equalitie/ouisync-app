@@ -24,6 +24,7 @@ environment:
 dependencies:
   android_alarm_manager_plus: ^4.0.3
   archive: ^3.3.7
+  args: ^2.6.0
   async: ^2.11.0
   auto_size_text: ^3.0.0
   badges: ^3.1.2
@@ -105,7 +106,6 @@ dependencies:
   windows_single_instance: ^1.0.1
 
 dev_dependencies:
-  args: ^2.4.2
   build_runner: ^2.4.11
   connectivity_plus_platform_interface: ^2.0.1
   date_format: ^2.0.9

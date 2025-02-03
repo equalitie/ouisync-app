@@ -8,12 +8,12 @@ import 'package:flutter_file_dialog/flutter_file_dialog.dart';
 import 'package:ouisync/ouisync.dart' as oui;
 import 'package:ouisync/state_monitor.dart';
 import 'package:path/path.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../pages/log_view_page.dart';
+import '../../utils/dirs.dart';
 import '../../utils/platform/platform.dart';
 import '../../utils/utils.dart';
 import 'settings_section.dart';
@@ -28,6 +28,7 @@ class LogsSection extends SettingsSection with AppLogger {
   final ConnectivityInfo connectivityInfo;
   final NatDetection natDetection;
   final void Function() checkForDokan;
+  final Dirs dirs;
 
   LogsSection({
     required this.mount,
@@ -37,6 +38,7 @@ class LogsSection extends SettingsSection with AppLogger {
     required this.connectivityInfo,
     required this.natDetection,
     required this.checkForDokan,
+    required this.dirs,
   })  : stateMonitor = reposCubit.rootStateMonitor,
         super(
           key: GlobalKey(debugLabel: 'key_logs_section'),
@@ -132,10 +134,10 @@ class LogsSection extends SettingsSection with AppLogger {
           loggy.debug('Logs saved to $outputPath');
         }
       } else if (Platform.isLinux || Platform.isMacOS || Platform.isWindows) {
-        final initialDir = await getDownloadsDirectory();
         final outputPath = await FilePicker.platform.saveFile(
-            fileName: basename(tempFile.path),
-            initialDirectory: initialDir?.path);
+          fileName: basename(tempFile.path),
+          initialDirectory: dirs.download,
+        );
 
         if (outputPath != null) {
           await tempFile.copy(outputPath);

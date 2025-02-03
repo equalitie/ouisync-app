@@ -5,13 +5,13 @@ import 'package:ouisync/native_channels.dart' show NativeChannels;
 import 'package:ouisync/ouisync.dart' show AccessMode;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart' show BottomSheetType, RepoCubit;
 import '../../models/models.dart'
     show DirectoryEntry, FileEntry, FileSystemEntry;
 import '../../pages/pages.dart' show PreviewFileCallback;
+import '../../utils/dirs.dart';
 import '../../utils/repo_path.dart' as repo_path;
 import '../../utils/utils.dart'
     show
@@ -21,7 +21,6 @@ import '../../utils/utils.dart'
         Dimensions,
         Fields,
         FileIO,
-        Native,
         ThemeGetter,
         formatSize,
         showSnackBar;
@@ -42,6 +41,7 @@ class EntryDetails extends StatefulWidget {
     required this.onPreviewFile,
     required this.packageInfo,
     required this.nativeChannels,
+    required this.dirs,
   }) : assert(entry is FileEntry);
 
   const EntryDetails.folder(
@@ -49,6 +49,7 @@ class EntryDetails extends StatefulWidget {
     required this.repoCubit,
     required this.entry,
     required this.isActionAvailableValidator,
+    required this.dirs,
   })  : assert(entry is DirectoryEntry),
         onPreviewFile = null,
         packageInfo = null,
@@ -61,6 +62,7 @@ class EntryDetails extends StatefulWidget {
   final PreviewFileCallback? onPreviewFile;
   final PackageInfo? packageInfo;
   final NativeChannels? nativeChannels;
+  final Dirs dirs;
 
   @override
   State<EntryDetails> createState() => _EntryDetailsState();
@@ -253,17 +255,7 @@ extension on _EntryDetailsState {
   }
 
   Future<void> _onDownloadTap() async {
-    String? defaultDirectoryPath;
-    if (io.Platform.isAndroid) {
-      defaultDirectoryPath = await Native.getDownloadPathForAndroid();
-    } else {
-      final defaultDirectory = io.Platform.isIOS
-          ? await getApplicationDocumentsDirectory()
-          : await getDownloadsDirectory();
-
-      defaultDirectoryPath = defaultDirectory?.path;
-    }
-
+    final defaultDirectoryPath = widget.dirs.download;
     if (defaultDirectoryPath == null) return;
 
     await Navigator.of(context, rootNavigator: false).maybePop();

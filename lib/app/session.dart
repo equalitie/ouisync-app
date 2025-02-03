@@ -4,20 +4,16 @@ import 'dart:io';
 import 'package:ouisync/ouisync.dart' show Session, initLog;
 import 'package:ouisync_app/app/utils/utils.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:path/path.dart';
 
+import 'utils/dirs.dart';
 import 'utils/platform/platform_window_manager.dart';
 
 Future<Session> createSession({
   required PackageInfo packageInfo,
+  required Dirs dirs,
   PlatformWindowManager? windowManager,
   void Function()? onConnectionReset,
 }) async {
-  final configPath = join(
-    await Native.getBaseDir().then((dir) => dir.path),
-    Constants.configDirName,
-  );
-
   final logger = appLogger('');
 
   initLog(
@@ -25,7 +21,7 @@ Future<Session> createSession({
   );
 
   final session = await Session.create(
-    configPath: configPath,
+    configPath: dirs.config,
     // On darwin, the server is started by a background process
     startServer: !Platform.isMacOS && !Platform.isIOS,
   );
@@ -34,8 +30,7 @@ Future<Session> createSession({
     windowManager?.onClose(session.close);
 
     if (await session.storeDir == null) {
-      final dir = await defaultStoreDir;
-      await session.setStoreDir(dir.path);
+      await session.setStoreDir(dirs.defaultStore);
     }
 
     await session.initNetwork(

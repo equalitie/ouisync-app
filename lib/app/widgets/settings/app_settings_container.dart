@@ -5,6 +5,7 @@ import 'package:ouisync/ouisync.dart';
 import 'package:settings_ui/settings_ui.dart' as s;
 
 import '../../cubits/cubits.dart';
+import '../../utils/dirs.dart';
 import '../../utils/platform/platform.dart';
 import '../../utils/utils.dart';
 import 'about_section.dart';
@@ -17,6 +18,7 @@ class AppSettingsContainer extends StatefulHookWidget {
     Session session, {
     required void Function() checkForDokan,
     required ConnectivityInfo connectivityInfo,
+    required Dirs dirs,
     required LaunchAtStartupCubit launchAtStartup,
     required this.localeCubit,
     required this.mount,
@@ -42,6 +44,7 @@ class AppSettingsContainer extends StatefulHookWidget {
             connectivityInfo: connectivityInfo,
             natDetection: natDetection,
             checkForDokan: checkForDokan,
+            dirs: dirs,
           ),
           AboutSection(
             session,

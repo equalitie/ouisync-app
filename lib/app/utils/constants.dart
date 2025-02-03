@@ -44,8 +44,6 @@ class Constants {
   static const Color warningColor = Colors.orange;
   static const Color dangerColor = Colors.red;
 
-  static const String storeDirName = 'repositories';
-  static const String configDirName = 'configs';
   static const String logFileName = 'ouisync.log';
 
   static const int bufferSize = 64000;
