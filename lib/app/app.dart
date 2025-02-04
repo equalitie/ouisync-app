@@ -31,7 +31,7 @@ import 'widgets/flavor_banner.dart';
 import 'widgets/media_receiver.dart';
 
 Future<Widget> initOuiSyncApp({
-  String? rootDir,
+  required Dirs dirs,
   List<String> args = const [],
 }) async {
   final packageInfo = await PackageInfo.fromPlatform();
@@ -39,8 +39,6 @@ Future<Widget> initOuiSyncApp({
     args,
     packageInfo.appName,
   );
-
-  final dirs = await Dirs.init(root: rootDir);
 
   return AppContainer(
     packageInfo: packageInfo,

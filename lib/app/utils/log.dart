@@ -13,6 +13,7 @@ import 'package:watcher/watcher.dart';
 
 import 'ansi_parser.dart';
 import 'constants.dart';
+import 'dirs.dart';
 import 'native.dart';
 
 // a singleton class that deals with logs (currently without rotation)
@@ -60,17 +61,16 @@ class LogUtils {
     }
   }
 
-  static Future<void> init() async {
+  static Future<void> init(Dirs dirs) async {
     // our logs can contain data from multiple invocations, so to differentiate
     // we write this header every time the app starts
     final package = await PackageInfo.fromPlatform();
-    final baseDir = await Native.getBaseDir();
     final header = '''
 -------------------- ${package.appName} Start --------------------
 version:  ${package.version} $appFlavor (build ${package.buildNumber})
 started:  ${_formatTimestamp(DateTime.now())}
 platform: ${Platform.operatingSystemVersion}
-baseDir:  ${baseDir.path}
+rootDir:  ${dirs.root}
 ${'-' * (48 + package.appName.length)}''';
 
     LoggyPrinter defaultPrinter;

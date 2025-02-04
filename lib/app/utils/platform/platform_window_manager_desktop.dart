@@ -37,6 +37,11 @@ class PlatformWindowManagerDesktop
 
   @override
   Future<void> setTitle(String title) async {
+    final debugLabel = Platform.environment['OUISYNC_DEBUG_LABEL'];
+    if (debugLabel != null) {
+      title = '$title ($debugLabel)';
+    }
+
     WindowOptions windowOptions = WindowOptions(title: title);
     return windowManager.waitUntilReadyToShow(windowOptions, () {});
   }

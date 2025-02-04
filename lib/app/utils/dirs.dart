@@ -1,6 +1,6 @@
 import 'dart:io' show Platform;
 
-import 'package:path/path.dart' show join;
+import 'package:path/path.dart' show canonicalize, join;
 import 'package:path_provider/path_provider.dart';
 
 import 'native.dart';
@@ -11,10 +11,10 @@ class Dirs {
   final String root;
 
   /// Ouisync config directory (subdirectory of `root`).
-  final String config;
+  String get config => join(root, 'configs');
 
   /// Default directory for storing repositories (subdirectory of `root`).
-  final String defaultStore;
+  String get defaultStore => join(root, 'repositories');
 
   /// Default directory for mounting repositories (if mounting is supported on the platform)
   final String? defaultMount;
@@ -23,17 +23,18 @@ class Dirs {
   final String? download;
 
   Dirs({
-    required this.root,
+    required String root,
     this.defaultMount,
     this.download,
-  })  : config = join(root, 'configs'),
-        defaultStore = join(root, 'repositories');
+  }) : root = canonicalize(root);
 
   /// Initialize the `Dirs` with default directories. Specify `root` to override the default data
-  /// root directory.
+  /// root directory. `root` can also be overriden using the `OUISYNC_ROOT_DIR` env variable.
   static Future<Dirs> init({String? root}) async {
     return Dirs(
-      root: root ?? await Native.getBaseDir().then((dir) => dir.path),
+      root: root ??
+          Platform.environment['OUISYNC_ROOT_DIR'] ??
+          await Native.getBaseDir().then((dir) => dir.path),
       defaultMount: await _getDefaultMountDir(),
       download: await _getDownloadDir(),
     );

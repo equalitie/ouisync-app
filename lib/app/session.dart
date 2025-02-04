@@ -24,6 +24,7 @@ Future<Session> createSession({
     configPath: dirs.config,
     // On darwin, the server is started by a background process
     startServer: !Platform.isMacOS && !Platform.isIOS,
+    debugLabel: Platform.environment['OUISYNC_DEBUG_LABEL'],
   );
 
   try {
