@@ -41,8 +41,11 @@ class MountCubit extends Cubit<MountState> with CubitActions, AppLogger {
     emitUnlessClosed(MountStateMounting());
 
     try {
-      final mountRoot = dirs.defaultMount;
-      await session.setMountRoot(mountRoot);
+      if (await session.mountRoot == null) {
+        await session.setMountRoot(dirs.defaultMount);
+      }
+
+      final mountRoot = await session.mountRoot;
 
       emitUnlessClosed(
         mountRoot != null ? MountStateSuccess() : MountStateDisabled(),
