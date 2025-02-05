@@ -127,7 +127,7 @@ void main() {
 
         await tester.tap(find.text(repoName));
         await deps.reposCubit.waitUntil(
-          (state) => !state.isLoading && state.currentEntry == repoEntry,
+          (state) => !state.isLoading && state.current == repoEntry,
         );
         await tester.pump();
 
@@ -172,7 +172,7 @@ void main() {
 
         await tester.pumpWidget(testApp(createMainPage()));
         await deps.reposCubit.waitUntil(
-          (state) => !state.isLoading && state.currentEntry == repoEntry,
+          (state) => !state.isLoading && state.current == repoEntry,
         );
         await tester.pump();
 

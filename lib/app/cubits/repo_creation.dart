@@ -62,9 +62,9 @@ class RepoCreationState {
   RepoLocation? get location => switch (substate) {
         RepoCreationPending(location: final location) => location,
         RepoCreationValid(location: final location) ||
-        RepoCreationSuccess(location: final location) ||
         RepoCreationFailure(location: final location) =>
           location,
+        RepoCreationSuccess(entry: final entry) => entry.location,
       };
 
   String? get name => location?.name;
@@ -115,10 +115,10 @@ class RepoCreationValid extends RepoCreationSubstate {
 
 class RepoCreationSuccess extends RepoCreationSubstate {
   const RepoCreationSuccess({
-    required this.location,
+    required this.entry,
   });
 
-  final RepoLocation location;
+  final OpenRepoEntry entry;
 }
 
 class RepoCreationFailure extends RepoCreationSubstate {
@@ -210,11 +210,15 @@ class RepoCreationCubit extends Cubit<RepoCreationState>
           nameError: nameError,
           setLocalSecret: setLocalSecret,
         ),
-      RepoCreationValid(location: final location) =>
-        RepoCreationValid(location: location, setLocalSecret: setLocalSecret),
-      RepoCreationSuccess(location: final location) ||
-      RepoCreationFailure(location: final location) =>
-        RepoCreationValid(
+      RepoCreationValid(location: final location) => RepoCreationValid(
+          location: location,
+          setLocalSecret: setLocalSecret,
+        ),
+      RepoCreationSuccess(entry: final entry) => RepoCreationValid(
+          location: entry.location,
+          setLocalSecret: setLocalSecret,
+        ),
+      RepoCreationFailure(location: final location) => RepoCreationValid(
           location: location,
           setLocalSecret: setLocalSecret,
         ),
@@ -254,7 +258,7 @@ class RepoCreationCubit extends Cubit<RepoCreationState>
     switch (repoEntry) {
       case OpenRepoEntry():
         emitUnlessClosed(state.copyWith(
-          substate: RepoCreationSuccess(location: substate.location),
+          substate: RepoCreationSuccess(entry: repoEntry),
         ));
       case ErrorRepoEntry():
         emitUnlessClosed(state.copyWith(

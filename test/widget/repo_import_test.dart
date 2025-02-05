@@ -61,7 +61,8 @@ void main() {
         await tester.ensureVisible(locateButton);
         await tester.tap(locateButton);
         await deps.reposCubit.waitUntil((state) => state.repos.isNotEmpty);
-        await deps.reposCubit.waitUntil((state) => state.current == location);
+        await deps.reposCubit
+            .waitUntil((state) => state.current?.location == location);
 
         // TODO: Test that the bottom sheet is closed and the repo list now contains the imported
         // repo. Problem is that calling `pumpAndSettle` here throws timeout exception and calling
@@ -113,7 +114,7 @@ void main() {
 
         await deps.reposCubit.waitUntil((state) => state.repos.length == 2);
         await deps.reposCubit
-            .waitUntil((state) => state.current == exportedLocation);
+            .waitUntil((state) => state.current?.location == exportedLocation);
 
         // TODO: Test that the bottom sheet is closed and the repo list now contains both repos.
         // Problem is that calling `pumpAndSettle` here throws timeout exception and calling just
@@ -162,8 +163,7 @@ void main() {
 
         // Tap the repo to go to the unlock page.
         await tester.tap(repoItem);
-        await deps.reposCubit
-            .waitUntil((state) => state.currentEntry == repoEntry);
+        await deps.reposCubit.waitUntil((state) => state.current == repoEntry);
         await repoCubit.waitUntil((state) => !state.isLoading);
         await tester.pumpAndSettle();
 

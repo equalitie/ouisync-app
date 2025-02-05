@@ -234,7 +234,7 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
   ) {
     final enableAction = moveEntriesActions.enableAction(
       entrySelectionCubit.validateDestination,
-      reposState.currentEntry,
+      reposState.current,
     );
 
     negativeAction() => cancelAndDismiss(moveEntriesActions, originRepoCubit);
@@ -246,7 +246,7 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
       await Dialogs.executeFutureWithLoadingDialog(
         null,
         moveEntriesActions.copyOrMoveSingleEntry(
-          destinationRepoCubit: reposState.currentEntry!.cubit!,
+          destinationRepoCubit: reposState.current!.cubit!,
           entry: entry,
         ),
       );
@@ -293,8 +293,8 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
             enableAction = true;
           } else {
             final validation = entrySelectionCubit.validateDestination;
-            enableAction = moveEntriesActions.enableAction(
-                validation, reposState.currentEntry);
+            enableAction =
+                moveEntriesActions.enableAction(validation, reposState.current);
           }
 
           negativeAction() => cancelAndDismiss(
@@ -304,7 +304,7 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
           final negativeText = S.current.actionCancel;
 
           Future<void> positiveAction() async {
-            final currentRepoCubit = reposState.currentEntry?.cubit;
+            final currentRepoCubit = reposState.current?.cubit;
             if (currentRepoCubit == null) return;
 
             final multiEntryActions = MultiEntryActions(

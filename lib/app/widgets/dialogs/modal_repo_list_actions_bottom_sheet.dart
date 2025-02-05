@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart' show ReposCubit;
-import '../../models/models.dart' show RepoLocation;
+import '../../models/repo_entry.dart';
 import '../../utils/utils.dart' show AppLogger, Dimensions, Fields;
 
 class RepoListActions extends StatelessWidget with AppLogger {
@@ -16,8 +16,8 @@ class RepoListActions extends StatelessWidget with AppLogger {
   final BuildContext context;
   final ReposCubit reposCubit;
 
-  final Future<RepoLocation?> Function() onCreateRepoPressed;
-  final Future<List<RepoLocation>> Function() onImportRepoPressed;
+  final Future<RepoEntry?> Function() onCreateRepoPressed;
+  final Future<List<RepoEntry>> Function() onImportRepoPressed;
 
   @override
   Widget build(BuildContext context) => Column(

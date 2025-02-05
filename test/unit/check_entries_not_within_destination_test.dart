@@ -133,7 +133,7 @@ void main() {
         // Set originRepoCubit as current repo
         {
           final originRepoEntry = OpenRepoEntry(originRepoCubit);
-          await reposCubit.setCurrent(originRepoEntry.location);
+          await reposCubit.setCurrent(originRepoEntry);
           await tester.pumpAndSettle();
         }
 
@@ -175,7 +175,7 @@ void main() {
 
         // Check moving /folder1/folder2/ to /
         {
-          final currentRepo = reposCubit.state.currentEntry;
+          final currentRepo = reposCubit.state.current;
           final canMove = moveEntriesActions.enableAction(
             validation,
             currentRepo,

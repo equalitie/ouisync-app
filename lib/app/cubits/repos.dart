@@ -14,7 +14,7 @@ import 'cubits.dart';
 
 class ReposState {
   final Map<RepoLocation, RepoEntry> repos;
-  final RepoLocation? current;
+  final RepoEntry? current;
   final bool isLoading;
 
   ReposState({
@@ -25,7 +25,7 @@ class ReposState {
 
   ReposState copyWith({
     Map<RepoLocation, RepoEntry>? repos,
-    Option<RepoLocation>? current,
+    Option<RepoEntry>? current,
     bool? isLoading,
   }) =>
       ReposState(
@@ -36,8 +36,6 @@ class ReposState {
 
   Iterable<RepoLocation> get locations => repos.keys;
   Iterable<String> get names => locations.map((location) => location.name);
-
-  RepoEntry? get currentEntry => current?.let((current) => repos[current]);
 
   RepoEntry? findByInfoHash(String infoHash) =>
       repos.values.firstWhereOrNull((repo) => repo.infoHash == infoHash);
@@ -83,7 +81,9 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
       await _addRepo(repo);
     }
 
-    await setCurrent(_settings.defaultRepo);
+    final current =
+        _settings.defaultRepo?.let((location) => state.repos[location]);
+    await setCurrent(current);
 
     emitUnlessClosed(state.copyWith(isLoading: false));
   }
@@ -95,12 +95,10 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
   Future<oui.ShareToken> createToken(String tokenString) =>
       oui.ShareToken.fromString(session, tokenString);
 
-  Future<void> setCurrent(RepoLocation? location) async {
-    if (state.current == location) {
+  Future<void> setCurrent(RepoEntry? entry) async {
+    if (state.current == entry) {
       return;
     }
-
-    final entry = location != null ? state.repos[location] : null;
 
     entry?.cubit?.setCurrent();
 
@@ -121,10 +119,10 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
     };
 
     if (setDefault) {
-      await _settings.setDefaultRepo(location);
+      await _settings.setDefaultRepo(entry?.location);
     }
 
-    emitUnlessClosed(state.copyWith(current: Option.from(location)));
+    emitUnlessClosed(state.copyWith(current: Option.from(entry)));
   }
 
   void showRepoList() {
@@ -239,10 +237,11 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
     bool useCacheServers = false,
     bool setCurrent = false,
   }) async {
-    await _addRepoEntry(LoadingRepoEntry(location));
+    final entry = LoadingRepoEntry(location);
+    await _addRepoEntry(entry);
 
     if (setCurrent) {
-      await this.setCurrent(location);
+      await this.setCurrent(entry);
     }
 
     final localSecret = switch (setLocalSecret) {
@@ -322,6 +321,10 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
     final repoEntry = OpenRepoEntry(cubit);
     await _addRepoEntry(repoEntry);
 
+    if (setCurrent) {
+      await this.setCurrent(repoEntry);
+    }
+
     return repoEntry;
   }
 
@@ -333,7 +336,7 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
 
     emitUnlessClosed(state.copyWith(
       repos: state.repos.withRemoved(location),
-      current: state.current == location ? None() : null,
+      current: state.current == entry ? None() : null,
     ));
 
     await entry.cubit?.delete();

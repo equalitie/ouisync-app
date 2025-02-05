@@ -188,8 +188,8 @@ class RepoCreation extends StatelessWidget {
       case RepoCreationPending():
       case RepoCreationValid():
         break;
-      case RepoCreationSuccess(location: final location):
-        Navigator.of(context).pop(location);
+      case RepoCreationSuccess(entry: final entry):
+        Navigator.of(context).pop(entry);
       case RepoCreationFailure(location: final location, error: final error):
         await Dialogs.simpleAlertDialog(
           context,

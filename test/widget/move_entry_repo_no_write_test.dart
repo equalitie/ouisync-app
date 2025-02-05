@@ -134,7 +134,7 @@ void main() {
           lockedRepoCubit,
         );
 
-        final currentRepoEntry = deps.reposCubit.state.currentEntry;
+        final currentRepoEntry = deps.reposCubit.state.current;
         expect(currentRepoEntry?.accessMode, equals(AccessMode.blind));
 
         final moveButton = find.descendant(
@@ -201,7 +201,7 @@ void main() {
           readRepoCubit,
         );
 
-        final currentRepoEntry = deps.reposCubit.state.currentEntry;
+        final currentRepoEntry = deps.reposCubit.state.current;
         expect(currentRepoEntry?.accessMode, equals(AccessMode.read));
 
         final moveButton = find.descendant(
@@ -227,7 +227,7 @@ Future<void> _waitForNavigationIntoRepoToEnd(
   );
   await tester.pump();
 
-  await deps.reposCubit.state.currentEntry?.cubit
+  await deps.reposCubit.state.current?.cubit
       ?.waitUntil((state) => !state.isLoading);
   await tester.pumpAndSettle();
   await tester.pump(Duration(seconds: 1));

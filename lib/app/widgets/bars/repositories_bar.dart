@@ -36,7 +36,7 @@ class RepositoriesBar extends StatelessWidget
             return SizedBox.shrink();
           }
 
-          final current = state.currentEntry;
+          final current = state.current;
 
           return Row(
             children: [

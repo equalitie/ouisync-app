@@ -54,7 +54,7 @@ class _SortContentsBarState extends State<SortContentsBar> {
 
     widget.sortListCubit.switchSortDirection(newDirection);
 
-    final current = widget.reposState.currentEntry;
+    final current = widget.reposState.current;
 
     if (current is OpenRepoEntry) {
       Dialogs.executeFutureWithLoadingDialog(
@@ -152,7 +152,7 @@ class _SortByList extends StatelessWidget with AppLogger {
                   onTap: () async {
                     _sortCubit.sortBy(sortByItem);
 
-                    final current = _reposState.currentEntry;
+                    final current = _reposState.current;
 
                     if (current == null) {
                       if (sortByItem.name != sortBy.name) return;

@@ -194,8 +194,8 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     _nativeChannels.repository = _repo;
   }
 
-  void updateNavigation({required bool isFolder}) {
-    _navigation.current(location, currentFolder, isFolder);
+  void updateNavigation() {
+    _navigation.current(location, currentFolder);
   }
 
   Future<void> startEntriesSelection([

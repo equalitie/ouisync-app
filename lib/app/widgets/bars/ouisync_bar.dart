@@ -35,7 +35,7 @@ class OuiSyncBar extends StatelessWidget implements PreferredSizeWidget {
                 )
               : null;
 
-          final cubit = state.currentEntry?.cubit;
+          final cubit = state.current?.cubit;
 
           final titleWidget = cubit != null
               ? getTitleWidget(

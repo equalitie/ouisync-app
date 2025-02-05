@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io' as io;
 
 import 'package:build_context_provider/build_context_provider.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -190,15 +191,14 @@ class _MainPageState extends State<MainPage>
       BlocBuilder<ReposCubit, ReposState>(
         bloc: widget.reposCubit,
         builder: (context, state) {
-          final currentRepo = state.currentEntry;
-          final currentRepoCubit = currentRepo?.cubit;
+          final currentRepoEntry = state.current;
+          final currentRepoCubit = currentRepoEntry?.cubit;
 
           if (currentRepoCubit != null) {
-            final isFolder = state.current != null;
-            currentRepoCubit.updateNavigation(isFolder: isFolder);
+            currentRepoCubit.updateNavigation();
           }
 
-          if (state.repos.isNotEmpty && state.current == null) {
+          if (state.repos.isNotEmpty && currentRepoCubit == null) {
             /// This needs to be structured better
             /// TODO: Add sorting to repo list
             // _sortListCubit?.sortBy(SortBy.name);
@@ -220,47 +220,47 @@ class _MainPageState extends State<MainPage>
             );
           }
 
-          if (state.isLoading || currentRepo is LoadingRepoEntry) {
+          if (state.isLoading || currentRepoEntry is LoadingRepoEntry) {
             // This one is mainly for when we're unlocking the repository,
             // because during that time the current repository is destroyed so we
             // can't show it's content.
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (currentRepo is OpenRepoEntry) {
-            final navigationPath = currentRepo.cubit.state.currentFolder.path;
-            currentRepo.cubit.navigateTo(navigationPath);
+          if (currentRepoCubit != null) {
+            final navigationPath = currentRepoCubit.state.currentFolder.path;
+            currentRepoCubit.navigateTo(navigationPath);
 
             return _repositoryContentBuilder(
               state,
-              currentRepo,
+              currentRepoCubit,
               directionality,
             );
           }
 
-          if (currentRepo is MissingRepoEntry) {
+          if (currentRepoEntry is MissingRepoEntry) {
             return MissingRepositoryState(
               directionality: directionality,
-              repositoryLocation: currentRepo.location,
-              errorMessage: currentRepo.error,
-              errorDescription: currentRepo.errorDescription,
+              repositoryLocation: currentRepoEntry.location,
+              errorMessage: currentRepoEntry.error,
+              errorDescription: currentRepoEntry.errorDescription,
               onBackToList: () => widget.reposCubit.setCurrent(null),
               reposCubit: widget.reposCubit,
             );
           }
 
-          if (currentRepo is ErrorRepoEntry) {
+          if (currentRepoEntry is ErrorRepoEntry) {
             // This is a general purpose error state.
             // errorDescription is required, but nullable.
             return ErrorState(
               directionality: directionality,
-              errorMessage: currentRepo.error,
-              errorDescription: currentRepo.errorDescription,
+              errorMessage: currentRepoEntry.error,
+              errorDescription: currentRepoEntry.errorDescription,
               onBackToList: () => widget.reposCubit.setCurrent(null),
             );
           }
 
-          if (currentRepo == null) {
+          if (currentRepoEntry == null) {
             return state.repos.isNotEmpty
                 ? SizedBox.shrink()
                 : NoRepositoriesState(
@@ -315,13 +315,13 @@ class _MainPageState extends State<MainPage>
       );
 
   Future<void> _onBackPressed(bool didPop, Object? result) async {
-    final currentRepo = widget.reposCubit.state.currentEntry;
+    final currentRepoEntry = widget.reposCubit.state.current;
 
-    if (currentRepo != null) {
-      if (currentRepo is OpenRepoEntry) {
-        final currentFolder = currentRepo.cubit.state.currentFolder;
+    if (currentRepoEntry != null) {
+      if (currentRepoEntry is OpenRepoEntry) {
+        final currentFolder = currentRepoEntry.cubit.state.currentFolder;
         if (!currentFolder.isRoot) {
-          await currentRepo.cubit.navigateTo(currentFolder.parent);
+          await currentRepoEntry.cubit.navigateTo(currentFolder.parent);
           return;
         }
       }
@@ -373,7 +373,7 @@ class _MainPageState extends State<MainPage>
   Widget _buildRepoSettingsIcon() => Fields.actionIcon(
         const Icon(Icons.more_vert_rounded),
         onPressed: () async {
-          final repoCubit = widget.reposCubit.state.currentEntry?.cubit;
+          final repoCubit = widget.reposCubit.state.current?.cubit;
           if (repoCubit == null) {
             return;
           }
@@ -393,7 +393,7 @@ class _MainPageState extends State<MainPage>
 
   Widget _buildFAB(BuildContext context, ReposState reposState) {
     final icon = const Icon(Icons.add_rounded);
-    final current = reposState.currentEntry;
+    final current = reposState.current;
 
     if (current == null) {
       if (reposState.repos.isNotEmpty) {
@@ -429,11 +429,11 @@ class _MainPageState extends State<MainPage>
 
   Widget _repositoryContentBuilder(
     ReposState reposState,
-    OpenRepoEntry repo,
+    RepoCubit repoCubit,
     TextDirection directionality,
   ) =>
       BlocBuilder<RepoCubit, RepoState>(
-        bloc: repo.cubit,
+        bloc: repoCubit,
         builder: (context, state) =>
             _selectLayoutWidget(reposState, directionality),
       );
@@ -442,7 +442,7 @@ class _MainPageState extends State<MainPage>
     ReposState reposState,
     TextDirection directionality,
   ) {
-    final current = reposState.currentEntry;
+    final current = reposState.current;
 
     if (current == null || current is LoadingRepoEntry) {
       return NoRepositoriesState(
@@ -628,7 +628,7 @@ class _MainPageState extends State<MainPage>
 
           return RefreshIndicator(
             onRefresh: () async {
-              await reposState.currentEntry?.cubit?.refresh();
+              await reposState.current?.cubit?.refresh();
             },
             child: Container(
               child: ListView.separated(
@@ -891,7 +891,7 @@ class _MainPageState extends State<MainPage>
   }
 
   Future<void> trySaveFile(String sourcePath) async {
-    final current = widget.reposCubit.state.currentEntry;
+    final current = widget.reposCubit.state.current;
 
     if (current is! OpenRepoEntry) {
       return;
@@ -906,7 +906,7 @@ class _MainPageState extends State<MainPage>
   }
 
   Future<bool> canSaveFiles() async {
-    final current = widget.reposCubit.state.currentEntry;
+    final current = widget.reposCubit.state.current;
 
     if (current is! OpenRepoEntry) {
       await Dialogs.simpleAlertDialog(
@@ -1033,29 +1033,29 @@ class _MainPageState extends State<MainPage>
         },
       );
 
-  Future<RepoLocation?> _createRepo() async {
-    final location = await createRepoDialog(context);
+  Future<RepoEntry?> _createRepo() async {
+    final repoEntry = await createRepoDialog(context);
 
-    if (location != null) {
-      await widget.reposCubit.setCurrent(location);
+    if (repoEntry != null) {
+      await widget.reposCubit.setCurrent(repoEntry);
     }
 
-    return location;
+    return repoEntry;
   }
 
-  Future<List<RepoLocation>> _importRepo() async {
-    final locations = await importRepoDialog(context);
-    final location = locations.singleOrNull;
+  Future<List<RepoEntry>> _importRepo() async {
+    final repoEntries = await importRepoDialog(context);
+    final repoEntry = repoEntries.singleOrNull;
 
-    if (location != null) {
-      await widget.reposCubit.setCurrent(location);
+    if (repoEntry != null) {
+      await widget.reposCubit.setCurrent(repoEntry);
     }
 
-    return locations;
+    return repoEntries;
   }
 
-  Future<RepoLocation?> createRepoDialog(BuildContext parentContext) async =>
-      Navigator.push<RepoLocation?>(
+  Future<RepoEntry?> createRepoDialog(BuildContext parentContext) async =>
+      Navigator.push<RepoEntry?>(
         context,
         MaterialPageRoute(
           builder: (context) => RepoCreationPage(
@@ -1064,7 +1064,7 @@ class _MainPageState extends State<MainPage>
         ),
       );
 
-  Future<List<RepoLocation>> importRepoDialog(
+  Future<List<RepoEntry>> importRepoDialog(
     BuildContext parentContext, {
     String? initialTokenValue,
   }) async {
@@ -1091,7 +1091,7 @@ class _MainPageState extends State<MainPage>
 
     switch (result) {
       case RepoImportFromToken(token: final token):
-        final location = await Navigator.push<RepoLocation>(
+        final repoEntry = await Navigator.push<RepoEntry?>(
           context,
           MaterialPageRoute(
             builder: (context) => RepoCreationPage(
@@ -1101,10 +1101,13 @@ class _MainPageState extends State<MainPage>
           ),
         );
 
-        return location != null ? [location] : [];
+        return repoEntry != null ? [repoEntry] : [];
 
       case RepoImportFromFiles():
-        return result.locations;
+        return result.locations
+            .map((location) => widget.reposCubit.state.repos[location])
+            .whereNotNull()
+            .toList();
 
       case null:
         return [];
