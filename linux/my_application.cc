@@ -125,7 +125,7 @@ MyApplication* my_application_new() {
   MyApplication* self = MY_APPLICATION(g_object_new(
     my_application_get_type(),
     "application-id", APPLICATION_ID,
-    "flags", unique ? G_APPLICATION_DEFAULT_FLAGS : G_APPLICATION_NON_UNIQUE,
+    "flags", unique ? 0 : G_APPLICATION_NON_UNIQUE,
     nullptr
   ));
 
