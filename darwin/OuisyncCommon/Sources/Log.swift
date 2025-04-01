@@ -1,118 +1,42 @@
-//
-//  Logger.swift
-//  Common
-//
-//  Created by Peter Jankuliak on 04/06/2024.
-//
-import Foundation
+import OSLog
 
-
-public class Log {
-    public enum Level: UInt8 {
-        case trace = 0
-        case info
-        case error
+/* A version of `OSLog.Logger` that is available on all supported platforms */
+public struct Log {
+    @usableFromInline let handle: OSLog
+    public init(subsystem: String = Bundle.main.bundleIdentifier ?? Constants.baseBundle,
+                _ category: String) {
+        handle = OSLog(subsystem: subsystem, category: category)
     }
+}
 
-    fileprivate static var nextRootId: UInt64 = 0
+public extension Log {
+    /** The system only captures debug-level messages in memory when you enable debug logging
+     * through a configuration change, and purges them in accordance with the configuration’s
+     * persistence setting. */
+    @inlinable func debug(_ message: String) { os_log(.debug, log: handle, "%s", message) }
 
-    fileprivate let parent: Log?
-    fileprivate var label: String
-    fileprivate var id: UInt64
-    fileprivate var nextChildId: UInt64 = 0
-    var selfLevel: Level? = nil
+    /** The system stores info-level messages in memory buffers and, without a configuration change,
+     * purges the oldest messages as those buffers fill up. However, the system writes the messages
+     * to the data store when faults and, optionally, errors occur. Info-level messages remain in
+     * the data store until the store’s size exceeds its storage quota, at which point, the system
+     * purges the oldest messages in the data store to free up space. */
+    @inlinable func info(_ message: String) { os_log(.info, log: handle, "%s", message) }
 
-    public init(_ label: String) {
-        self.parent = nil
-        self.label = label
-        self.id = Self.nextRootId
-        Self.nextRootId += 1
-    }
+    /** The system stores default-level messages in memory buffers and, without a configuration
+     * change, compresses the messages and writes them to the data store as those buffers fill up.
+     * They remain in the data store until the store’s size exceeds its storage quota, at which
+     * point, the system purges the oldest messages in the store to free up space. */
+    @inlinable func callAsFunction(_ message: String) { os_log(.default, log: handle, "%s", message) }
 
-    fileprivate init(_ label: String, _ parent: Log, _ level: Level?) {
-        self.parent = parent
-        self.label = label
-        self.id = parent.nextChildId
-        self.selfLevel = level
-        parent.nextChildId += 1
-    }
+    /** The system always writes error-level messages to the data store. They remain in the store
+     * until its size exceeds its storage quota, at which point, the system purges the oldest
+     * messages in the store to free up space. If an activity object exists, logging at this level
+     * captures information for the entire process chain. */
+    @inlinable func error(_ message: String) { os_log(.error, log: handle, "%s", message) }
 
-    public func child(_ label: String) -> Log {
-        Log(label, self, selfLevel)
-    }
-
-    @discardableResult
-    public func trace(_ msg: String) -> Log {
-        print(.trace, msg)
-    }
-
-    @discardableResult
-    public func info(_ msg: String) -> Log {
-        print(.info, msg)
-    }
-
-    @discardableResult
-    public func error(_ msg: String) -> Log {
-        print(.error, msg)
-    }
-
-    @discardableResult
-    fileprivate func print(_ level: Level, _ msg: String) -> Log {
-        if !shouldPrint(level) { return self }
-        let path = self.path()
-        NSLog("\(levelBadge(level)) \(labels(path)): \(msg)")
-        return self
-    }
-
-    public func level(_ l: Level) -> Log {
-        self.selfLevel = l
-        return self
-    }
-
-    fileprivate func levelBadge(_ level: Level) -> String {
-        switch level {
-        case .trace: return "🧩"
-        case .info: return "👉"
-        case .error: return "😡"
-        }
-    }
-    fileprivate func labels(_ path: [Log]) -> String {
-        return path.map({ "\($0.label):\($0.id)" }).joined(separator: "/")
-    }
-
-    fileprivate func shouldPrint(_ level: Level) -> Bool {
-        var cur = self
-        while true {
-            if let curSelfLevel = cur.selfLevel {
-                return level.rawValue >= curSelfLevel.rawValue
-            }
-            if let parent = cur.parent { cur = parent } else { break }
-        }
-
-        return true
-    }
-
-    func path() -> [Log] {
-        var current: Log? = self
-        var ret: [Log] = []
-
-        while let c = current {
-            ret.append(c)
-            current = c.parent
-        }
-
-        return ret.reversed()
-    }
-
-    func pathFromSelf() -> [Log] {
-        var current: Log? = self
-        var ret: [Log] = []
-
-        while let c = current {
-            ret.append(c)
-            current = c.parent
-        }
-
-        return ret
-    }
+    /** The system always writes fault-level messages to the data store. They remain in the store
+     * until its size exceeds its storage quota, at which point, the system purges the oldest
+     * messages in the store to free up space. If an activity object exists, logging at this level
+     * captures information for the entire process chain. */
+    @inlinable func fault(_ message: String) { os_log(.debug, log: handle, "%s", message) }
 }

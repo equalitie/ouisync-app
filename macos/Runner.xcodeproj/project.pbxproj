@@ -24,14 +24,11 @@
 		170EAE4A2CEE87CC00468424 /* OuisyncCommon in Frameworks */ = {isa = PBXBuildFile; productRef = 170EAE492CEE87CC00468424 /* OuisyncCommon */; };
 		170EAE4C2CEE87D700468424 /* OuisyncBackend in Frameworks */ = {isa = PBXBuildFile; productRef = 170EAE4B2CEE87D700468424 /* OuisyncBackend */; };
 		170EAE502CEE87E800468424 /* OuisyncBackend in Frameworks */ = {isa = PBXBuildFile; productRef = 170EAE4F2CEE87E800468424 /* OuisyncBackend */; };
-		170EAE532CEE897100468424 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1786CC092CE5D6DE0055B0EE /* SystemConfiguration.framework */; };
 		1749700F2CEF46C90071B32F /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1786CC092CE5D6DE0055B0EE /* SystemConfiguration.framework */; };
-		175AEAC52CE47EF700472952 /* EntryPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 175AEAC22CE47CBC00472952 /* EntryPoint.swift */; };
 		175AEAE32CE4850100472952 /* Shutdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = 175AEAE22CE4850100472952 /* Shutdown.swift */; };
 		1780336E2CE492C100291248 /* OuisyncFileProvider.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 1EC102BD2BAC66050026BD42 /* OuisyncFileProvider.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		17DC402B2CEA92E0009C21A0 /* LaunchAtLogin in Frameworks */ = {isa = PBXBuildFile; productRef = 17DC402A2CEA92E0009C21A0 /* LaunchAtLogin */; };
 		17FED8DD2D026D3F00F136DC /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 179DC58B2D0257DF007B4647 /* MainMenu.xib */; };
-		1E6D33D22BBD4E8A00AFB60E /* FileProviderProxy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E6D33D12BBD4E8A00AFB60E /* FileProviderProxy.swift */; };
 		331C80D8294CF71000263BE5 /* Environment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331C80D7294CF71000263BE5 /* Environment.swift */; };
 		335BBD1B22A9A15E00E9071D /* GeneratedPluginRegistrant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 335BBD1A22A9A15E00E9071D /* GeneratedPluginRegistrant.swift */; };
 		33CC10F12044A3C60003C045 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33CC10F02044A3C60003C045 /* AppDelegate.swift */; };
@@ -87,13 +84,11 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		175AEAC22CE47CBC00472952 /* EntryPoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntryPoint.swift; sourceTree = "<group>"; };
 		175AEAE22CE4850100472952 /* Shutdown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shutdown.swift; sourceTree = "<group>"; };
 		1786CC092CE5D6DE0055B0EE /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		179DC58C2D0257DF007B4647 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Runner/Base.lproj/MainMenu.xib; sourceTree = SOURCE_ROOT; };
 		1E12D5CBA9317F3CD740717A /* Pods_RunnerTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_RunnerTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		1E640B172BA44F3500FF6B18 /* UniformTypeIdentifiers.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UniformTypeIdentifiers.framework; path = System/Library/Frameworks/UniformTypeIdentifiers.framework; sourceTree = SDKROOT; };
-		1E6D33D12BBD4E8A00AFB60E /* FileProviderProxy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileProviderProxy.swift; sourceTree = "<group>"; };
 		1EC102BD2BAC66050026BD42 /* OuisyncFileProvider.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = OuisyncFileProvider.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		1EC102C62BAC66050026BD42 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1EC102C72BAC66050026BD42 /* Entitlements.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Entitlements.entitlements; sourceTree = "<group>"; };
@@ -127,7 +122,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				170EAE532CEE897100468424 /* SystemConfiguration.framework in Frameworks */,
 				170EAE502CEE87E800468424 /* OuisyncBackend in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -160,7 +154,6 @@
 			children = (
 				1EC102C62BAC66050026BD42 /* Info.plist */,
 				1EC102C72BAC66050026BD42 /* Entitlements.entitlements */,
-				175AEAC22CE47CBC00472952 /* EntryPoint.swift */,
 			);
 			path = Extension;
 			sourceTree = "<group>";
@@ -241,7 +234,6 @@
 				179DC58B2D0257DF007B4647 /* MainMenu.xib */,
 				33CC10F02044A3C60003C045 /* AppDelegate.swift */,
 				33CC11122044BFA00003C045 /* MainFlutterWindow.swift */,
-				1E6D33D12BBD4E8A00AFB60E /* FileProviderProxy.swift */,
 				33BA886A226E78AF003329D5 /* Configs */,
 			);
 			path = Runner;
@@ -374,7 +366,7 @@
 			);
 			mainGroup = 33CC10E42044A3C60003C045;
 			packageReferences = (
-				76A41C0C2C9D7C3C004D5A58 /* XCLocalSwiftPackageReference "../ouisync/bindings/swift/OuisyncLib" */,
+				76A41C0C2C9D7C3C004D5A58 /* XCLocalSwiftPackageReference "../ouisync/bindings/swift/Ouisync" */,
 				177064312CBEDB00003FEF6C /* XCRemoteSwiftPackageReference "LaunchAtLogin" */,
 				1746A9522CEE35BC00C5E5E7 /* XCLocalSwiftPackageReference "../darwin/OuisyncCommon" */,
 				175A7AFB2CEE82CA001E7ECE /* XCLocalSwiftPackageReference "../darwin/OuisyncBackend" */,
@@ -524,7 +516,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				175AEAC52CE47EF700472952 /* EntryPoint.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -544,7 +535,6 @@
 				33CC11132044BFA00003C045 /* MainFlutterWindow.swift in Sources */,
 				33CC10F12044A3C60003C045 /* AppDelegate.swift in Sources */,
 				335BBD1B22A9A15E00E9071D /* GeneratedPluginRegistrant.swift in Sources */,
-				1E6D33D22BBD4E8A00AFB60E /* FileProviderProxy.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -854,6 +844,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				PRODUCT_BUNDLE_IDENTIFIER = org.equalitie.ouisync;
+				PRODUCT_MODULE_NAME = OuisyncRunner;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_PRECOMPILE_BRIDGING_HEADER = YES;
 				SWIFT_VERSION = 5.0;
@@ -998,6 +989,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				PRODUCT_BUNDLE_IDENTIFIER = org.equalitie.ouisync;
+				PRODUCT_MODULE_NAME = OuisyncRunner;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_PRECOMPILE_BRIDGING_HEADER = YES;
@@ -1027,6 +1019,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				PRODUCT_BUNDLE_IDENTIFIER = org.equalitie.ouisync;
+				PRODUCT_MODULE_NAME = OuisyncRunner;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_PRECOMPILE_BRIDGING_HEADER = YES;
 				SWIFT_VERSION = 5.0;
@@ -1117,9 +1110,9 @@
 			isa = XCLocalSwiftPackageReference;
 			relativePath = ../darwin/OuisyncBackend;
 		};
-		76A41C0C2C9D7C3C004D5A58 /* XCLocalSwiftPackageReference "../ouisync/bindings/swift/OuisyncLib" */ = {
+		76A41C0C2C9D7C3C004D5A58 /* XCLocalSwiftPackageReference "../ouisync/bindings/swift/Ouisync" */ = {
 			isa = XCLocalSwiftPackageReference;
-			relativePath = ../ouisync/bindings/swift/OuisyncLib;
+			relativePath = ../ouisync/bindings/swift/Ouisync;
 		};
 /* End XCLocalSwiftPackageReference section */
 

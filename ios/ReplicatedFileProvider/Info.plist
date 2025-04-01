@@ -11,7 +11,7 @@
 		<key>NSExtensionPointIdentifier</key>
 		<string>com.apple.fileprovider-nonui</string>
 		<key>NSExtensionPrincipalClass</key>
-		<string>$(PRODUCT_MODULE_NAME).OuisyncReplicated</string>
+		<string>OuisyncBackend.ReplicatedFileProvider</string>
 	</dict>
 </dict>
 </plist>

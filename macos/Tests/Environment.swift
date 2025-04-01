@@ -1,5 +1,5 @@
 import XCTest
-@testable import Ouisync
+@testable import OuisyncRunner
 @testable import OuisyncCommon
 @testable import OuisyncBackend
 

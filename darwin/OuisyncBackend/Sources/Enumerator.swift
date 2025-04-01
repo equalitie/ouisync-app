@@ -1,265 +1,217 @@
-//
-//  FileProviderEnumerator.swift
-//  OuisyncFileProvider
-//
-//  Created by Peter Jankuliak on 15/03/2024.
-//
 import FileProvider
 import OuisyncCommon
-import OuisyncLib
+import Ouisync
 
 
+fileprivate let log = Log("Enumerator")
+fileprivate let defaultPageSize = 128 // only used if the operating system doesn't provide a value
+
+/* The enumerator is a (de facto) single-use async-iterator for the contents of a folder */
 class Enumerator: NSObject, NSFileProviderEnumerator {
-    private let session: OuisyncSession
-    private let itemId: ItemIdentifier
-    private let currentAnchor: NSFileProviderSyncAnchor
-    private let log: Log
-    private let pastEnumerations: PastEnumerations?
+    let client: Future<Client>
+    let item: NSFileProviderItemIdentifier
+    var version: Data?
 
-    init(_ itemIdentifier: ItemIdentifier, _ session: OuisyncSession, _ currentAnchor: NSFileProviderSyncAnchor, _ log: Log, _ pastEnumerations: PastEnumerations?) {
-        let log = log.child("Enumerator").trace("init(\(itemIdentifier), currentAnchor(\(currentAnchor)), ...)")
-        self.itemId = itemIdentifier
-        self.session = session
-        self.currentAnchor = currentAnchor
-        self.log = log
-        self.pastEnumerations = pastEnumerations
-
+    init(_ client: Future<Client>, _ item: NSFileProviderItemIdentifier) {
+        log.debug("Enumerator requested for \(item)")
+        self.client = client
+        self.item = item
         super.init()
     }
 
     func invalidate() {
-        log.trace("invalidate() \(itemId)")
-        // TODO: perform invalidation of server connection if necessary
+        log.debug("Enumerator for \(item) going away")
     }
 
-    func enumerateItems(for observer: NSFileProviderEnumerationObserver, startingAt page: NSFileProviderPage) {
-        let log = log.child("enumerateItems").trace("invoke(...) \(itemId)")
+    deinit {
+        log.debug("Enumerator for \(item) out of scope")
+    }
 
-        /* TODO:
-         - inspect the page to determine whether this is an initial or a follow-up request
-         
-         If this is an enumerator for a directory, the root container or all directories:
-         - perform a server request to fetch directory contents
-         If this is an enumerator for the active set:
-         - perform a server request to update your local database
-         - fetch the active set from your local database
-         
-         - inform the observer about the items returned by the server (possibly multiple times)
-         - inform the observer that you are finished with this page
-         */
+    /**
+     Enumerate items starting from the specified page, typically
+     NSFileProviderInitialPageSortedByDate or NSFileProviderInitialPageSortedByName.
+
+     Pagination allows large collections to be enumerated in multiple batches.  The
+     sort order specified in the initial page is important even if the enumeration
+     results will actually be sorted again before display.  If results are sorted
+     correctly across pages, then the new results will be appended at the bottom of
+     the list, probably not on screen, which is the best user experience.  Otherwise
+     results from the second page might be inserted in the results from the first
+     page, causing bizarre animations.
+
+     The page data should contain whatever information is needed to resume the
+     enumeration after the previous page.  If a file provider sends batches of 200
+     items to -[NSFileProviderEnumerationObserver didEnumerateItems:] for example,
+     then successive pages might contain offsets in increments of 200.
+
+     Execution time:
+     ---------------
+     This method is not expected to take more than a few seconds to complete the
+     enumeration of a page of items. If the enumeration may not complete in a reasonable
+     amount of time because, for instance, of bad network conditions, it is recommended
+     to either report an error (for instance NSFileProviderErrorServerUnreachable) or
+     return everything that is readily available and wait for the enumeration of the
+     next page. */
+    func enumerateItems(for observer: any NSFileProviderEnumerationObserver,
+                        startingAt page: NSFileProviderPage) {
+        let size = observer.suggestedPageSize ?? defaultPageSize
+        guard let page = Page(page) else {
+            log.fault("enumerateItems called with invalid page: \(page.rawValue.base64EncodedString())")
+            return observer.finishEnumeratingWithError(NSFileProviderError(.versionNoLongerAvailable))
+        }
+
         Task {
             do {
-                let items = try await enumerateImpl(itemId)
-                log.trace("  ↳ \(items.map{ $0.providerItem() })")
-                if !items.isEmpty {
-                    observer.didEnumerate(items.map{ $0.providerItem() })
+                let cli = try await client.value
+                switch folder {
+                case .rootContainer:
+
+                // FIXME: handle special folders: `cache:/` and `trash:/`
+                case .trashContainer, .workingSet: observer.finishEnumerating(upTo: nil)
+                default:
+                    guard let (repoName, folderName) = item.path
+                        let repo = await cli.repositories.first { try await $0.path == folder.path }
                 }
-                if let pastEnumerations = self.pastEnumerations {
-                    pastEnumerations.setFor(itemId, Dictionary(uniqueKeysWithValues: items.map { ($0.id(), $0) }))
-                }
-                observer.finishEnumerating(upTo: nil)
+
+                guard case .Directory(let version) = try await repo.entryType(at: path)
+                else { return observer.finishEnumeratingWithError(NSFileProviderError(.noSuchItem)) }
+
+                // FIXME: implement sorting & pagination library-side cause this ain't gonna cut it
+                let all = try await repo.listDirectory(at: path).sorted { $0.name < $1.name }
+                let values = all[page.offset..<page.offset + size].map { Entry($0, in: folder) }
+
+                observer.didEnumerate(values)
+                observer.finishEnumerating(upTo: page.advanced(by: min(size, values.count)))
             } catch {
-                fatalError("Unhandled exception \(error)")
-            }
-        }
-    }
-    
-    func enumerateChanges(for observer: NSFileProviderChangeObserver, from oldAnchor: NSFileProviderSyncAnchor) {
-        let log = log.trace("enumerateChanges(oldAnchor: \(oldAnchor)) { item:\(itemId), currentAnchor:\(currentAnchor) }")
-        /* TODO:
-         - query the server for updates since the passed-in sync anchor
-         
-         If this is an enumerator for the active set:
-         - note the changes in your local database
-         
-         - inform the observer about item deletions and updates (modifications + insertions)
-         - inform the observer when you have finished enumerating up to a subsequent sync anchor
-         */
-        
-        let finishEnumeratingWithError = { (error: NSError, line: Int) in
-            if self.pastEnumerations == nil {
-                // This is a valid error to tell the system that anchor has expired, the system
-                // still prints out an error in the log so no need to clutter the log with our
-                // message as well.
-                if error.code != ExtError.syncAnchorExpired.code {
-                    log.trace("\(error) L\(line)")
-                }
-            } else {
-                log.trace("\(error) L\(line)")
-            }
-            observer.finishEnumeratingWithError(error)
-        }
-
-        if oldAnchor == currentAnchor {
-            observer.finishEnumeratingChanges(upTo: currentAnchor, moreComing: false)
-        } else {
-            guard let pastEnumerations = pastEnumerations?.enumerations else {
-                // We don't know what has changed because we don't track the current state and neither does
-                // the Ouisync backend. So we return `synchAnchorExpired` error which will force the system
-                // to re-enumerate the items (by calling the `enumerateItems` function.
-                // https://developer.apple.com/documentation/fileprovider/replicated_file_provider_extension/synchronizing_files_using_file_provider_extensions#40997540
-                finishEnumeratingWithError(ExtError.syncAnchorExpired, #line)
-                return
-            }
-
-            guard let previousItems = pastEnumerations[itemId] else {
-                finishEnumeratingWithError(ExtError.syncAnchorExpired, #line)
-                return
-            }
-
-            Task {
-                do {
-                    let currentItems = try await enumerateImpl(itemId)
-
-                    let removedIds = Set(previousItems.keys).subtracting(Set(currentItems.map { $0.id() }))
-                    let changed: [EntryItem] = currentItems.makeIterator().filter { (current: EntryItem) in
-                        let removed = removedIds.contains(current.id())
-
-                        if removed {
-                            return false
-                        }
-
-                        if let prev = previousItems[current.id()] {
-                            return prev.providerItem().itemVersion != current.providerItem().itemVersion
-                        } else {
-                            // new file
-                            return true
-                        }
-                    }
-
-                    if !removedIds.isEmpty {
-                        observer.didDeleteItems(withIdentifiers: removedIds.map { $0.item().serialize() })
-                    }
-
-                    if !changed.isEmpty {
-                        observer.didUpdate(changed.map { $0.providerItem() })
-                    }
-
-                    log.trace("\(itemId) -> previous:\(previousItems), current:\(currentItems), changed:\(changed), removed:\(removedIds)")
-
-                    observer.finishEnumeratingChanges(upTo: currentAnchor, moreComing: false)
-                } catch {
-                    fatalError("Unhandled exception \(error)")
-                }
+                log.fault("enumerateItems failed with \(error)")
+                observer.finishEnumeratingWithError(NSFileProviderError(.serverUnreachable))
             }
         }
     }
 
-    private func enumerateImpl(_ itemId: ItemIdentifier, recursive: Bool = false) async throws -> [EntryItem] {
-        var retItems: [EntryItem]
+    /** Enumerate changes starting from a sync anchor. This should enumerate /all/
+     changes (not restricted to a specific page) since the given sync anchor.
 
-        switch itemId {
-        case .workingSet:
-            retItems = try await enumerateImpl(.rootContainer, recursive: true)
-        case .rootContainer:
-            retItems = try await enumerateRootImpl()
-        case .entry(.directory(let identifier)):
-            retItems = try await enumerateDirImpl(identifier)
-        case .trashContainer:
-            retItems = []
-        default: fatalError("Invalid item in `enumerateItems`: \(itemId)")
-        }
+     Until the enumeration update is invalidated, a call to -[NSFileProviderManager
+     signalEnumeratorForContainerItemIdentifier:completionHandler:] will trigger a
+     call to enumerateFromSyncAnchor with the latest known sync anchor, giving the
+     file provider (app or extension) a chance to notify about changes.
 
-        if recursive {
-            let copy = retItems
-            for item in copy {
-                if case let .directory(dirItem) = item {
-                    retItems += try await enumerateImpl(dirItem.directoryIdentifier().item())
-                }
-            }
-        }
+     The anchor data should contain whatever information is needed to resume
+     enumerating changes from the previous synchronization point.  A naive sync
+     anchor might for example be the date of the last change that was sent from the
+     server to the client, meaning that at that date, the client was in sync with
+     all the server changes.  A request to enumerate changes from that sync anchor
+     would only return the changes that happened after that date, which are
+     therefore changes that the client doesn't yet know about.
 
-        return retItems
+     NOTE that the change-based observation methods are marked optional for historical
+     reasons, but are really required. System performance will be severely degraded if
+     they are not implemented.
+
+     Execution time:
+     ---------------
+     This method is not expected to take more than a few seconds to complete the
+     enumeration of a batch of items. If the enumeration may not complete in a reasonable
+     amount of time because, for instance, of bad network conditions, it is recommended
+     to either report an error (for instance NSFileProviderErrorServerUnreachable) or
+     return everything that is readily available and wait for the enumeration of the
+     next batch. */
+    func enumerateChanges(for observer: any NSFileProviderChangeObserver,
+                          from syncAnchor: NSFileProviderSyncAnchor) {
+
     }
 
-    private func enumerateRootImpl() async throws -> [EntryItem] {
-        do {
-            let reposByName = try await listRepositories()
-            var items: [DirectoryItem] = []
-            for (repoName, repo) in reposByName {
-                do {
-                    let dirItem = try await DirectoryItem.load(repo, repoName)
-                    items.append(dirItem)
-                } catch let error as OuisyncError where error.code == .PermissionDenied {
-                    log.error("Failed to load repo \(repoName), might be it has not yet been unlocked")
-                    continue
-                }
-            }
-            return items.map { .directory($0) }
-        } catch {
-            fatalError("Unhandled exception \(error)")
-        }
-    }
-
-    private func enumerateDirImpl(_ dirItemId: DirectoryIdentifier) async throws -> [EntryItem] {
-        do {
-            let dir = try await dirItemId.loadItem(session)
-            let entries = try await dir.directory.listEntries()
-            var items: [EntryItem] = []
-            for entry in entries {
-                switch entry {
-                case .directory(let dirEntry):
-                    let dirItem = try await DirectoryItem.load(dirEntry, dir.repoName)
-                    items.append(.directory(dirItem))
-                case .file(let fileEntry):
-                    let identifier = FileIdentifier(fileEntry.path, dir.repoName)
-                    items.append(.file(try await identifier.loadItem(session)))
-                }
-            }
-            return items
-        } catch let error as OuisyncError where error.code == .PermissionDenied {
-            log.error("Can't open directory dirItemId: \(error)")
-            return [];
-        } catch {
-            fatalError("Unhandled exception for \(dirItemId): \(error)")
-        }
-    }
-
-    func reposToIdentifiers(_ repos: Dictionary<RepoName, OuisyncRepository>) -> Set<DirectoryIdentifier> {
-        var items: Set<DirectoryIdentifier> = Set()
-        for (repoName, _) in repos {
-            items.insert(DirectoryIdentifier("", repoName))
-        }
-        return items
-    }
-
-    func currentSyncAnchor(completionHandler: @escaping (NSFileProviderSyncAnchor?) -> Void) {
-        log.trace("currentSyncAnchor(item:\(itemId)) -> \(currentAnchor)")
-        completionHandler(currentAnchor)
-    }
-
-    func listRepositories() async throws -> Dictionary<RepoName, OuisyncRepository> {
-        var repos: Dictionary<RepoName, OuisyncRepository> = [:]
-        for repo in try await session.listRepositories() {
-            let name = try await repo.getName()
-            repos[name] = repo
-        }
-        return repos
+    /** Request the current sync anchor.
+     To keep an enumeration updated, the system will typically
+     - request the current sync anchor (1)
+     - enumerate items starting with an initial page
+     - continue enumerating pages, each time from the page returned in the previous
+       enumeration, until finishEnumeratingUpToPage: is called with nextPage set to
+       nil
+     - enumerate changes starting from the sync anchor returned in (1), until
+       finishEnumeratingChangesUpToSyncAnchor: is called with the latest sync anchor.
+       If moreComing is YES, continue enumerating changes, using the latest sync anchor returned.
+       If moreComing is NO, stop enumerating.
+     - When the extension calls -[NSFileProviderManager signalEnumeratorForContainerItemIdentifier:
+       completionHandler:] to signal more changes, the system will again enumerate changes,
+       starting at the latest known sync anchor from finishEnumeratingChangesUpToSyncAnchor. */
+    func currentSyncAnchor() async -> NSFileProviderSyncAnchor? {
+        // undocumented async budget, presuming a few seconds like all other enumerator calls
+        nil
     }
 }
 
-class NoConnectionEnumerator: NSObject, NSFileProviderEnumerator {
-    let currentAnchor: NSFileProviderSyncAnchor
 
-    init(_ currentAnchor: NSFileProviderSyncAnchor) {
-        self.currentAnchor = currentAnchor
+struct Page {
+    static let firstByDate = NSFileProviderPage.initialPageSortedByDate as Data // FPPageSortedByDate\0
+    static let firstByName = NSFileProviderPage.initialPageSortedByName as Data // FPPageSortedByName\0
+
+    enum Order: UInt8 { case byDate, byName }
+    let order: Order
+    let offset: Int
+
+    init?(_ page: NSFileProviderPage) {
+        let data = page.rawValue
+        switch data {
+        case Self.firstByDate: order = .byDate; offset = 0
+        case Self.firstByName: order = .byName; offset = 1
+        default:
+            guard data.count == Self.SIZE else { return nil }
+            let val = data.withUnsafeBytes { $0.loadUnaligned(fromByteOffset: 1, as: Int.self) }
+            switch data[0] {
+            case 0: order = .byDate; offset = val
+            case 1: order = .byName; offset = val
+            default: return nil
+            }
+        }
     }
 
-    func invalidate() { }
-
-    func enumerateItems(for observer: NSFileProviderEnumerationObserver, startingAt page: NSFileProviderPage) {
-        NSLog("NoConnectionEnumerator.enumerateItems(...)")
-        observer.finishEnumerating(upTo: nil)
+    func advanced(by count: Int) -> NSFileProviderPage {
+        var data = Data(capacity: Self.SIZE)
+        data.withUnsafeMutableBytes { data in
+            data[0] = order.rawValue
+            data.storeBytes(of: offset + count, toByteOffset: 1, as: Int.self)
+        }
+        return NSFileProviderPage(rawValue: data)
     }
 
-    func enumerateChanges(for observer: NSFileProviderChangeObserver, from anchor: NSFileProviderSyncAnchor) {
-        NSLog("NoConnectionEnumerator.enumerateChanges(...))")
-        observer.finishEnumeratingChanges(upTo: anchor, moreComing: false)
+    fileprivate static let SIZE = MemoryLayout<Int>.stride + 1
+}
+
+
+fileprivate extension NSFileProviderItemIdentifier {
+    var url: String {
+        switch self {
+        case .rootContainer: return: ""
+        case .trashContainer: return "trash:"
+        case .workingSet: return "cache:"
+        default: return rawValue
+        }
     }
 
-    func currentSyncAnchor(completionHandler: @escaping (NSFileProviderSyncAnchor?) -> Void) {
-        NSLog("NoConnectionEnumerator.currentSyncAnchor(...) -> Anchor(\(currentAnchor))")
-        let anchor = currentAnchor
-        completionHandler(anchor)
+    var location: (String, String) {
+        guard let sep = rawValue.firstIndex(of: ":") else { return (rawValue, "") }
+        return (String(rawValue.prefix(upTo: sep)),
+                String(rawValue.suffix(from: rawValue.index(after: sep))))
+    }
+}
+
+
+class Entry: NSObject, NSFileProviderItemProtocol {
+    let itemIdentifier: NSFileProviderItemIdentifier
+    let parentItemIdentifier: NSFileProviderItemIdentifier
+    var filename: String
+
+    init(_ entry: DirectoryEntry, in parent: NSFileProviderItemIdentifier) {
+        filename = entry.name
+        parentItemIdentifier = parent
+
+        // FIXME:
+        if case .rootContainer = parent {
+            itemIdentifier = .init(filename + ":")
+        } else {
+            itemIdentifier = .init(rawValue: "\(parent.url)/\(filename)")
+        }
     }
 }

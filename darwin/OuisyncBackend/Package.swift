@@ -22,12 +22,12 @@ let package = Package(
     ],
     dependencies: [
         .package(path: "../OuisyncCommon"),
-        .package(path: "../../ouisync/bindings/swift/OuisyncLib")
+        .package(path: "../../ouisync/bindings/swift/Ouisync")
     ],
     targets: [
         .target(name: "OuisyncBackend",
                 dependencies: [.product(name: "OuisyncCommon", package: "OuisyncCommon"),
-                               .product(name: "OuisyncLib", package: "OuisyncLib")],
+                               .product(name: "Ouisync", package: "Ouisync")],
                 path: "Sources"),
     ]
 )

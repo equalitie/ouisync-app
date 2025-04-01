@@ -8,7 +8,7 @@
       location = "group:../darwin/OuisyncCommon">
    </FileRef>
    <FileRef
-      location = "group:../ouisync/bindings/swift/OuisyncLib">
+      location = "group:../ouisync/bindings/swift/Ouisync">
    </FileRef>
    <FileRef
       location = "group:Runner.xcodeproj">

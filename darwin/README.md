@@ -1,8 +1,9 @@
 # duisync-darwin
-This folder hosts code specific to deploying Ouisync to apple devices.
+This folder hosts code specific to building Ouisync from apple devices.
 
 ## Supported platforms
-Currently, macOS 11+ and iOS 16+ are supported targets.
+Currently, builds for darwin platforms target macOS 11+ and iOS 16+ though it's
+possible to also build and test for android if you have the necessary tools.
 
 ## Requirements
 To build, you must have a mac and:
@@ -21,7 +22,7 @@ To build, you must have a mac and:
 ## Building
 1. `git clone git@github.com:equalitie/ouisync-app && cd ouisync-app`
 2. `git clone git@github.com:equalitie/ouisync` (or `git submodule update` if
-   you don't use ssh auth / don't want to push changes)
+   you don't use ssh auth / don't want to push changes to the core library)
 3. `darwin/init` to install the remaining dependencies
 4. `flutter build macos` (grab a cup of ☕️ or 🍵 cause this will take some time)
 5. `open macos/Runner.xcworkspace` to continue development (the first build must
@@ -38,6 +39,16 @@ To build, you must have a mac and:
   platforms or opting for lighter release builds instead of debug
 * Importing and enabling `FileProvider.mobileconfig` will provide you with more
   Console logs in case something goes wrong
+* If you also have [Android Studio](https://developer.android.com/studio)
+  installed, make sure you add the bundled JDK and NDK to your `~/.zshrc` to
+  enable you to run kotlin unit tests:
+```
+export ANDROID_HOME="/Users/radu/Library/Android/sdk"
+export PATH="$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/tools/bin:$ANDROID_HOME/platform-tools"
+export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"
+```
+  For this you will also need a compatible version of NDK (side by side) which
+  you can install from the Android SDK Manager
 
 ## Troubleshooting
 * `Module 'biometric_storage' not found`: You can only build from Xcode by
@@ -58,4 +69,3 @@ To build, you must have a mac and:
   `darwin/update-rust-dependencies`) before building or because you've disabled
   your current platform in `config.sh`; the 10th time, it's something else and
   you will have to inspect the logs to figure out what
-
