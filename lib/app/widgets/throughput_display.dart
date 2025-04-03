@@ -14,7 +14,7 @@ class ThroughputDisplay extends StatelessWidget {
     this.orientation = Orientation.landscape,
   });
 
-  final NetworkStats stats;
+  final Stats stats;
   final double? size;
   final Orientation orientation;
 
@@ -76,15 +76,21 @@ class LiveThroughputDisplay extends StatelessWidget {
     this.orientation = Orientation.landscape,
   });
 
-  final Stream<NetworkStats> stream;
+  final Stream<Stats> stream;
   final double? size;
   final Orientation orientation;
 
   @override
-  Widget build(BuildContext context) => StreamBuilder<NetworkStats>(
+  Widget build(BuildContext context) => StreamBuilder<Stats>(
         stream: stream,
         builder: (context, snapshot) => ThroughputDisplay(
-          snapshot.data ?? NetworkStats(),
+          snapshot.data ??
+              Stats(
+                bytesRx: 0,
+                bytesTx: 0,
+                throughputTx: 0,
+                throughputRx: 0,
+              ),
           size: size,
           orientation: orientation,
         ),

@@ -28,7 +28,7 @@ class FileProgress extends Cubit<int?> with CubitActions {
     final file = await repo.openFile(path);
 
     // To avoid read-locking the file for longer than necessary, close it before awaiting the result.
-    final future = file.progress;
+    final future = file.getProgress();
     await file.close();
 
     return await future;

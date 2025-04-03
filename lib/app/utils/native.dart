@@ -27,7 +27,7 @@ class Native {
   }
 
   static Future<void> log(LogLevel level, String message) =>
-      _channel.invokeMethod('log', [level.encode(), message]);
+      _channel.invokeMethod('log', [level.toInt(), message]);
 
   /// In Android, it retrieves the legacy path to the Download directory
   static Future<String?> getDownloadPathForAndroid() =>

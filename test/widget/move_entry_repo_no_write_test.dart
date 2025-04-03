@@ -3,11 +3,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:ouisync_app/app/cubits/cubits.dart' show RepoCubit;
 import 'package:ouisync_app/app/models/models.dart'
-    show LocalSecretMode, LocalSecretKeyAndSalt, RepoEntry, RepoLocation;
-import 'package:ouisync/ouisync.dart' show AccessMode, File, Repository;
+    show LocalSecretMode, RepoEntry, RepoLocation;
+import 'package:ouisync/ouisync.dart' show AccessMode, Repository;
 import 'package:ouisync_app/app/utils/share_token.dart';
 
-import '../utils.dart' show BlocBaseExtension, TestDependencies, testApp;
+import '../utils.dart'
+    show BlocBaseExtension, TestDependencies, randomSetLocalSecret, testApp;
 
 void main() {
   late TestDependencies deps;
@@ -25,7 +26,7 @@ void main() {
   setUp(() async {
     deps = await TestDependencies.create();
 
-    final reposDir = (await deps.session.storeDir)!;
+    final reposDir = (await deps.session.getStoreDir())!;
 
     final originRepoLocation = RepoLocation(
       dir: reposDir,
@@ -44,13 +45,13 @@ void main() {
 
     await deps.reposCubit.createRepository(
       location: originRepoLocation,
-      setLocalSecret: LocalSecretKeyAndSalt.random(),
+      setLocalSecret: randomSetLocalSecret(),
       localSecretMode: LocalSecretMode.randomStored,
     );
 
     lockedRepoEntry = await deps.reposCubit.createRepository(
       location: lockedRepoLocation,
-      setLocalSecret: LocalSecretKeyAndSalt.random(),
+      setLocalSecret: randomSetLocalSecret(),
       localSecretMode: LocalSecretMode.randomStored,
     );
 
@@ -63,17 +64,16 @@ void main() {
     final readToken = (readTokenResult as ShareTokenValid);
     await deps.reposCubit.createRepository(
       location: readRepoLocation,
-      setLocalSecret: LocalSecretKeyAndSalt.random(),
+      setLocalSecret: randomSetLocalSecret(),
       localSecretMode: LocalSecretMode.randomStored,
       token: readToken.value,
     );
 
-    originRepo = await Repository.open(
-      deps.session,
+    originRepo = await deps.session.openRepository(
       path: originRepoLocation.path,
     );
 
-    final newFile = await File.create(originRepo, '/file.txt');
+    final newFile = await originRepo.createFile('/file.txt');
     await newFile.write(0, 'Hello world!'.codeUnits);
     await newFile.close();
   });

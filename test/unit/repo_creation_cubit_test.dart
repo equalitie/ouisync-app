@@ -9,6 +9,7 @@ import 'package:ouisync_app/app/models/repo_entry.dart';
 import 'package:ouisync_app/app/models/repo_location.dart';
 import 'package:ouisync_app/app/utils/cache_servers.dart';
 import 'package:ouisync_app/app/utils/master_key.dart';
+import 'package:ouisync_app/app/utils/random.dart';
 import 'package:ouisync_app/app/utils/settings/settings.dart';
 import 'package:ouisync_app/generated/l10n.dart';
 import 'package:ouisync/native_channels.dart';
@@ -61,7 +62,7 @@ void main() {
       isA<RepoCreationPending>()
           .having((s) => s.location, 'location', isNull)
           .having((s) => s.setLocalSecret, 'setLocalSecret',
-              isA<LocalSecretKeyAndSalt>())
+              isA<SetLocalSecretKeyAndSalt>())
           .having((s) => s.nameError, 'nameError', isNull),
     );
 
@@ -88,10 +89,13 @@ void main() {
     final name = 'my repo';
     await reposCubit.createRepository(
       location: RepoLocation(
-        dir: (await session.storeDir)!,
+        dir: (await session.getStoreDir())!,
         name: name,
       ),
-      setLocalSecret: LocalSecretKeyAndSalt.random(),
+      setLocalSecret: SetLocalSecretKeyAndSalt(
+        key: randomSecretKey(),
+        salt: randomSalt(),
+      ),
       localSecretMode: LocalSecretMode.randomStored,
     );
 

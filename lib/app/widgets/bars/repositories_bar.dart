@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync/ouisync.dart';
+import 'package:ouisync/ouisync.dart' show Stats;
 import 'package:stream_transform/stream_transform.dart';
 
 import '../../../generated/l10n.dart';
@@ -127,6 +127,6 @@ class RepositoriesBar extends StatelessWidget
   }
 }
 
-Stream<NetworkStats> _repoStatsStream(RepoCubit repoCubit) =>
+Stream<Stats> _repoStatsStream(RepoCubit repoCubit) =>
     Stream.periodic(Duration(seconds: 1))
         .asyncMapSample((_) => repoCubit.networkStats);

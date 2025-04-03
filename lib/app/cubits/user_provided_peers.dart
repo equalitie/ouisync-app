@@ -23,5 +23,6 @@ class UserProvidedPeersCubit extends Cubit<List<String>> with CubitActions {
     await _refresh();
   }
 
-  Future<void> _refresh() => _session.userProvidedPeers.then(emitUnlessClosed);
+  Future<void> _refresh() =>
+      _session.getUserProvidedPeers().then(emitUnlessClosed);
 }

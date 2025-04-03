@@ -26,8 +26,7 @@ void main() {
   setUp(() async {
     deps = await TestDependencies.create();
 
-    repo = await Repository.create(
-      deps.session,
+    repo = await deps.session.createRepository(
       path: 'repo',
       readSecret: null,
       writeSecret: null,
@@ -51,23 +50,23 @@ void main() {
 
     // Create 1 nested folder
     {
-      await Directory.create(repo, '/folder1');
+      await repo.createDirectory('/folder1');
     }
 
     // Create files
     {
-      final file1 = await File.create(repo, '/file1.txt');
+      final file1 = await repo.createFile('/file1.txt');
       await file1.write(0, utf8.encode("123"));
       await file1.close();
 
-      final folder1file2 = await File.create(repo, '/folder1/file2.txt');
+      final folder1file2 = await repo.createFile('/folder1/file2.txt');
       await folder1file2.write(0, utf8.encode("123"));
       await folder1file2.close();
 
-      final rootContents = await Directory.read(repo, '/');
+      final rootContents = await repo.readDirectory('/');
       expect(rootContents, hasLength(2));
 
-      final folder1Contents = await Directory.read(repo, 'folder1');
+      final folder1Contents = await repo.readDirectory('folder1');
       expect(folder1Contents, hasLength(1));
     }
   });
@@ -78,7 +77,7 @@ void main() {
   });
 
   test('Only entries with the same parent are selected', () async {
-    final repoInfoHash = await repo.infoHash;
+    final repoInfoHash = await repo.getInfoHash();
 
     final file1 = FileEntry(path: '/file1.txt', size: 0);
     final file5 = FileEntry(path: '/folder1/file2.txt', size: 0);
@@ -105,7 +104,7 @@ void main() {
   });
 
   test('Select an entry before starting selection does nothing', () async {
-    final repoInfoHash = await repo.infoHash;
+    final repoInfoHash = await repo.getInfoHash();
 
     final file1 = FileEntry(path: '/file1.txt', size: 0);
 

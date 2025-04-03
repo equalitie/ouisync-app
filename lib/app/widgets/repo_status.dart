@@ -45,8 +45,8 @@ class _RepoProgressBuilderState extends State<RepoProgressBuilder> {
   @override
   Widget build(BuildContext context) => StreamBuilder(
         stream: stream,
-        builder: (context, snapshot) =>
-            widget.builder(context, snapshot.data ?? Progress(0, 1)),
+        builder: (context, snapshot) => widget.builder(
+            context, snapshot.data ?? Progress(value: 0, total: 1)),
       );
 }
 
@@ -99,8 +99,7 @@ class _Error extends StatelessWidget {
         MountStateMounting() ||
         MountStateSuccess() =>
           SizedBox.shrink(),
-        MountStateFailure(error: final error, stack: _) =>
-          GestureDetector(
+        MountStateFailure(error: final error, stack: _) => GestureDetector(
             onTap: () => _showErrorDialog(
               context,
               error.toString(),

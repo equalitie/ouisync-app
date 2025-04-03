@@ -1,5 +1,7 @@
 import 'package:ouisync/ouisync.dart';
 
+import 'random.dart';
+
 // This class exists mainly to avoid passing the ouisync Session throughout the
 // code where only it's password hashing functionality is needed.
 class PasswordHasher {
@@ -7,13 +9,13 @@ class PasswordHasher {
 
   PasswordHasher(this._ouisyncSession);
 
-  Future<LocalSecretKeyAndSalt> hashPassword(
-    LocalPassword password, [
+  Future<SetLocalSecretKeyAndSalt> hashPassword(
+    Password password, [
     PasswordSalt? salt,
   ]) async {
-    salt = salt ?? PasswordSalt.random();
+    salt = salt ?? randomSalt();
     final key = await _ouisyncSession.deriveSecretKey(password, salt);
 
-    return LocalSecretKeyAndSalt(key, salt);
+    return SetLocalSecretKeyAndSalt(key: key, salt: salt);
   }
 }

@@ -8,8 +8,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:move_to_background/move_to_background.dart';
 import 'package:ouisync/native_channels.dart';
-import 'package:ouisync/ouisync.dart';
-import 'package:ouisync/state_monitor.dart' as oui;
+import 'package:ouisync/ouisync.dart' show EntryType, Session;
+import 'package:ouisync/state_monitor.dart' show MonitorId;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart' as system_path;
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
@@ -103,7 +103,7 @@ class _MainPageState extends State<MainPage>
 
     panicCounter = StateMonitorIntCubit(
       widget.reposCubit.rootStateMonitor.child(
-        oui.MonitorId.expectUnique("Service"),
+        MonitorId.expectUnique("Service"),
       ),
       "panic_counter",
     );

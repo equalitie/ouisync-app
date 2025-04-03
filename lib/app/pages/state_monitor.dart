@@ -65,7 +65,7 @@ class _NodeWidget extends StatelessWidget {
               return SizedBox.shrink();
             }
 
-            if (node.path.isEmpty) {
+            if (cubit.isRoot) {
               // root node - use `ListView` to enable scrolling
               return ListView(children: buildValuesAndChildren(node));
             }

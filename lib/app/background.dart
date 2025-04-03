@@ -1,5 +1,6 @@
 import 'package:loggy/loggy.dart';
-import 'package:ouisync/ouisync.dart' show Repository, Session;
+import 'package:ouisync/ouisync.dart'
+    show Repository, RepositoryExtension, Session;
 import 'package:ouisync_app/app/utils/cache_servers.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
@@ -32,7 +33,8 @@ Future<void> syncInBackground() async {
 
   try {
     await loadAndMigrateSettings(session);
-    final repos = await Repository.list(session);
+    final repos =
+        await session.listRepositories().then((repos) => repos.values.toList());
 
     final completed = await Future.any([
       _waitForAllSynced(repos).then((_) => true),
@@ -74,16 +76,16 @@ Future<void> _waitForSynced(Repository repo) async {
 }
 
 Future<bool> _isSynced(Repository repo) async {
-  final progress = await repo.syncProgress;
+  final progress = await repo.getSyncProgress();
   return progress.total > 0 && progress.value >= progress.total;
 }
 
 Future<void> _waitForSyncInactivity(Session session) async {
-  var prev = await session.networkStats;
+  var prev = await session.getNetworkStats();
 
   while (true) {
     await Future.delayed(_syncInactivityPeriod);
-    final next = await session.networkStats;
+    final next = await session.getNetworkStats();
 
     if (next.bytesTx == prev.bytesTx && next.bytesRx == prev.bytesRx) {
       return;

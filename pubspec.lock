@@ -669,7 +669,7 @@ packages:
     source: hosted
     version: "2.3.2"
   hex:
-    dependency: "direct dev"
+    dependency: "direct main"
     description:
       name: hex
       sha256: "4e7cd54e4b59ba026432a6be2dd9d96e4c5205725194997193bf871703b82c4a"
@@ -905,6 +905,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.11.1"
+  messagepack:
+    dependency: transitive
+    description:
+      name: messagepack
+      sha256: "11e69dd79ba84ba901261558881b42ac8b24155a7846a344875a32c8b0866d71"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.1"
   meta:
     dependency: "direct main"
     description:
@@ -946,14 +954,6 @@ packages:
       url: "https://github.com/J-Pabon/move_to_background"
     source: git
     version: "1.0.2"
-  msgpack_dart:
-    dependency: transitive
-    description:
-      name: msgpack_dart
-      sha256: c2d235ed01f364719b5296aecf43ac330f0d7bc865fa134d0d7910a40454dffb
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.1"
   msix:
     dependency: "direct dev"
     description:

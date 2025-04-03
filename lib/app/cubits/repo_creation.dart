@@ -3,13 +3,18 @@ import 'dart:io' show File;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync/ouisync.dart' show AccessMode, ShareToken;
+import 'package:ouisync/ouisync.dart'
+    show
+        AccessMode,
+        SetLocalSecret,
+        SetLocalSecretKeyAndSalt,
+        SetLocalSecretPassword,
+        ShareToken;
 
 import '../../generated/l10n.dart';
 import '../models/models.dart'
     show
         ErrorRepoEntry,
-        LocalSecretKeyAndSalt,
         LocalSecretInput,
         LocalSecretManual,
         LocalSecretMode,
@@ -17,8 +22,8 @@ import '../models/models.dart'
         LoadingRepoEntry,
         MissingRepoEntry,
         OpenRepoEntry,
-        RepoLocation,
-        SetLocalSecret;
+        RepoLocation;
+import '../utils/random.dart';
 import '../utils/utils.dart' show AppLogger, Dialogs, Strings;
 import 'cubits.dart' show CubitActions, ReposCubit;
 
@@ -161,8 +166,10 @@ class RepoCreationCubit extends Cubit<RepoCreationState>
     await Dialogs.executeFutureWithLoadingDialog(
       null,
       () async {
-        final accessMode = await token.accessMode;
-        final suggestedName = await token.suggestedName;
+        final accessMode =
+            await reposCubit.session.getShareTokenAccessMode(token);
+        final suggestedName =
+            await reposCubit.session.getShareTokenSuggestedName(token);
         final useCacheServers =
             await reposCubit.cacheServers.isEnabledForShareToken(token);
 
@@ -189,8 +196,12 @@ class RepoCreationCubit extends Cubit<RepoCreationState>
     final setLocalSecret = switch ((state.accessMode, input)) {
       (AccessMode.blind, _) ||
       (_, LocalSecretRandom()) =>
-        LocalSecretKeyAndSalt.random(),
-      (_, LocalSecretManual(password: final password)) => password,
+        SetLocalSecretKeyAndSalt(
+          key: randomSecretKey(),
+          salt: randomSalt(),
+        ),
+      (_, LocalSecretManual(password: final password)) =>
+        SetLocalSecretPassword(password),
     };
 
     RepoCreationSubstate substate;
@@ -294,7 +305,7 @@ class RepoCreationCubit extends Cubit<RepoCreationState>
     }
 
     // `storeDir` should be not-null at this point.
-    final storeDir = await reposCubit.session.storeDir;
+    final storeDir = await reposCubit.session.getStoreDir();
     final location = RepoLocation(dir: storeDir!, name: name);
 
     final exists = await File(location.path).exists();

@@ -200,7 +200,7 @@ class Settings with AppLogger {
 
       // Try to write the auth mode to the repo metadata
       try {
-        final repo = await Repository.open(session, path: location.path);
+        final repo = await session.openRepository(path: location.path);
         await repo.setAuthMode(authMode);
         await repo.close();
       } catch (e, st) {

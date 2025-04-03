@@ -6,8 +6,7 @@ import 'package:ouisync_app/app/cubits/repo_creation.dart';
 import 'package:ouisync_app/app/models/auth_mode.dart';
 import 'package:ouisync_app/app/models/repo_location.dart';
 import 'package:ouisync_app/app/utils/share_token.dart';
-import 'package:ouisync/ouisync.dart'
-    show AccessMode, LocalSecretKeyAndSalt, Repository, Session;
+import 'package:ouisync/ouisync.dart' show AccessMode, Session;
 import 'package:path/path.dart' show join;
 
 import '../utils.dart';
@@ -78,10 +77,10 @@ void main() {
 
         await deps.reposCubit.createRepository(
           location: RepoLocation(
-            dir: (await deps.session.storeDir)!,
+            dir: (await deps.session.getStoreDir())!,
             name: name,
           ),
-          setLocalSecret: LocalSecretKeyAndSalt.random(),
+          setLocalSecret: randomSetLocalSecret(),
           localSecretMode: LocalSecretMode.randomStored,
         );
 
@@ -219,8 +218,7 @@ Future<String> _createShareToken({
   final session = await Session.create(configPath: join(dir.path, 'config'));
 
   try {
-    final repo = await Repository.create(
-      session,
+    final repo = await session.createRepository(
       path: join(dir.path, 'store', name),
       readSecret: null,
       writeSecret: null,

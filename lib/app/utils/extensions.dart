@@ -140,9 +140,13 @@ extension RepositoryExtension on Repository {
     bool changed = false;
     do {
       final oldValue = await getMetadata(_authModeKey);
-      changed = await setMetadata(
-        {_authModeKey: (oldValue: oldValue, newValue: newValue)},
-      );
+      changed = await setMetadata([
+        MetadataEdit(
+          key: _authModeKey,
+          oldValue: oldValue,
+          newValue: newValue,
+        ),
+      ]);
     } while (!changed);
   }
 }

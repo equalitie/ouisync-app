@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:ouisync/native_channels.dart';
-import 'package:ouisync/ouisync.dart' show Session;
+import 'package:ouisync/ouisync.dart' show PublicRuntimeId, Session;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:result_type/result_type.dart' show Failure, Result, Success;
@@ -66,7 +66,7 @@ class _AppContainerWrappedState {
   final Session session;
   final NativeChannels nativeChannels;
   final Settings settings;
-  final String sessionId;
+  final PublicRuntimeId sessionId;
 
   _AppContainerWrappedState({
     required this.session,
@@ -102,7 +102,7 @@ class _AppContainerState extends State<AppContainer> with AppLogger {
                         nativeChannels: state.nativeChannels,
                         // we use a custom key tied to the session to force the child
                         // component to drop state whenever the session disconnects
-                        key: Key(state.sessionId)),
+                        key: ValueKey(state.sessionId)),
                     currentLocale: localeState.currentLocale,
                     navigatorObservers: [_AppNavigatorObserver()]))),
         Failure(value: final error) => _createInMaterialApp(ErrorScreen(
@@ -125,7 +125,7 @@ class _AppContainerState extends State<AppContainer> with AppLogger {
             Timer(Duration(seconds: 1), () => unawaited(_restart()));
           });
       final settings = await loadAndMigrateSettings(session);
-      final sessionId = await session.runtimeId;
+      final sessionId = await session.getRuntimeId();
       setState(() => state = Success(_AppContainerWrappedState(
             session: session,
             nativeChannels: NativeChannels(),

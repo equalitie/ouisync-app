@@ -3,6 +3,7 @@ import 'dart:collection';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:hex/hex.dart';
 import 'package:ouisync/ouisync.dart';
 import 'package:stream_transform/stream_transform.dart';
 
@@ -39,7 +40,7 @@ class PeerSetCubit extends Cubit<PeerSet> with CubitActions, AppLogger {
   }
 
   Future<void> refresh() async {
-    final peers = await _session.peers;
+    final peers = await _session.getPeers();
 
     if (!isClosed) {
       emitUnlessClosed(PeerSet(peers));
@@ -64,7 +65,11 @@ class PeerSet extends Equatable {
     var result = SplayTreeMap<PeerKey, List<PeerInfo>>();
 
     for (var peer in peers) {
-      final key = PeerKey(peer.runtimeId);
+      final key = switch (peer.state) {
+        PeerStateActive(id: final id) => PeerKey(HEX.encode(id.value)),
+        _ => PeerKey(null),
+      };
+
       result.putIfAbsent(key, () => <PeerInfo>[]).add(peer);
     }
 
@@ -73,8 +78,11 @@ class PeerSet extends Equatable {
 
   /// Number of connected peers
   int get numConnected => peers
-      .where((peer) => peer.state == PeerStateKind.active)
-      .map((peer) => peer.runtimeId)
+      .map((peer) => switch (peer.state) {
+            PeerStateActive(id: final id) => id,
+            _ => null,
+          })
+      .nonNulls
       .toSet()
       .length;
 

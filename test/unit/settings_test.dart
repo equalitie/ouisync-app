@@ -4,7 +4,7 @@ import 'package:ouisync_app/app/utils/utils.dart';
 import 'package:ouisync_app/app/utils/settings/v0/v0.dart' as v0;
 import 'package:ouisync_app/app/utils/settings/v1.dart' as v1;
 import 'package:ouisync_app/app/models/repo_location.dart';
-import 'package:ouisync/ouisync.dart' show Repository, Session;
+import 'package:ouisync/ouisync.dart' show Session;
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -42,8 +42,7 @@ void main() {
     final session =
         await Session.create(configPath: join(baseDir.path, 'config'));
 
-    await Repository.create(
-      session,
+    await session.createRepository(
       path: fooPath,
       readSecret: null,
       writeSecret: null,
@@ -58,7 +57,7 @@ void main() {
     expect(s1.repos, unorderedEquals([RepoLocation.fromDbPath(fooPath)]));
 
     // The auth mode should have been transferred to the repo metadata
-    final repo = await Repository.open(session, path: fooPath);
+    final repo = await session.openRepository(path: fooPath);
     expect(await repo.getAuthMode(), isA<AuthModeBlindOrManual>());
 
     await s1.setRepoLocation(
@@ -103,8 +102,7 @@ void main() {
     final session =
         await Session.create(configPath: join(baseDir.path, 'config'));
 
-    await Repository.create(
-      session,
+    await session.createRepository(
       path: fooPath,
       readSecret: null,
       writeSecret: null,
@@ -121,7 +119,7 @@ void main() {
     expect(s2.repos, unorderedEquals([RepoLocation.fromDbPath(fooPath)]));
 
     // The auth mode should have been transfered to the repo metadata
-    final repo = await Repository.open(session, path: fooPath);
+    final repo = await session.openRepository(path: fooPath);
     expect(await repo.getAuthMode(), isA<AuthModeBlindOrManual>());
 
     await s2.setRepoLocation(
