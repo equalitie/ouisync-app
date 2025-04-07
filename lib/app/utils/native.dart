@@ -30,16 +30,13 @@ class Native {
       _channel.invokeMethod('log', [level.encode(), message]);
 
   /// In Android, it retrieves the legacy path to the Download directory
-  static Future<String> getDownloadPathForAndroid() async {
-    final dynamic result = await _channel.invokeMethod('getDownloadPath');
-    return result;
-  }
+  static Future<String?> getDownloadPathForAndroid() =>
+      _channel.invokeMethod<String>('getDownloadPath');
 
   // On MacOS this returns the root of the directory where files and folders are stored.
   // Should be something like ~/Library/CloudStorage/Ouisync-<Domain>`.
-  static Future<String> getMountRootDirectory() async {
-    return await _channel.invokeMethod('getMountRootDirectory');
-  }
+  static Future<String?> getMountRootDirectory() =>
+      _channel.invokeMethod<String>('getMountRootDirectory');
 
   /// Path to a directory where the application may place application support
   /// files. If this directory does not exist, it is created automatically.

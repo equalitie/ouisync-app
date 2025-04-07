@@ -1018,19 +1018,17 @@ class _MainPageState extends State<MainPage>
         ),
       );
 
-  Future<void> _showRepoListActions(BuildContext context) async =>
+  Future<void> _showRepoListActions(BuildContext context) =>
       showModalBottomSheet(
         isScrollControlled: true,
         context: context,
         shape: Dimensions.borderBottomSheetTop,
-        builder: (context) {
-          return RepoListActions(
-            context: context,
-            reposCubit: widget.reposCubit,
-            onCreateRepoPressed: _createRepo,
-            onImportRepoPressed: _importRepo,
-          );
-        },
+        builder: (context) => RepoListActions(
+          context: context,
+          reposCubit: widget.reposCubit,
+          onCreateRepoPressed: _createRepo,
+          onImportRepoPressed: _importRepo,
+        ),
       );
 
   Future<RepoEntry?> _createRepo() async {
@@ -1139,13 +1137,11 @@ class _MainPageState extends State<MainPage>
         isScrollControlled: true,
         context: context,
         shape: Dimensions.borderBottomSheetTop,
-        builder: (context) {
-          return RepositorySettings(
-            settings: widget.settings,
-            session: widget.session,
-            repoCubit: repoCubit,
-            reposCubit: widget.reposCubit,
-          );
-        },
+        builder: (context) => RepositorySettings(
+          settings: widget.settings,
+          session: widget.session,
+          repoCubit: repoCubit,
+          reposCubit: widget.reposCubit,
+        ),
       );
 }

@@ -111,6 +111,7 @@ class _AppSettingsContainerState extends State<AppSettingsContainer>
           child: NotificationListener<ScrollEndNotification>(
             child: s.SettingsList(
               platform: s.PlatformUtils.detectPlatform(context),
+              contentPadding: MediaQuery.paddingOf(context),
               sections: widget.sections
                   .map(
                     (section) => s.SettingsSection(
