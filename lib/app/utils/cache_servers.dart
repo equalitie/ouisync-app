@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:collection/collection.dart';
 import 'package:mutex/mutex.dart';
 import 'package:ouisync/ouisync.dart';
 
@@ -32,7 +31,7 @@ class CacheServers with AppLogger {
       listeners = await _session.remoteListenerAddrs(host).then(
             (addrs) => addrs
                 .map(PeerAddr.parse)
-                .whereNotNull()
+                .nonNulls
                 .map((addr) => (addr.proto, addr.port))
                 .toSet(),
           );

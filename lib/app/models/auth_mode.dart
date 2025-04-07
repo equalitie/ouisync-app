@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:ouisync_app/app/utils/log.dart';
 
 import '../utils/master_key.dart';
@@ -146,7 +148,7 @@ class AuthModeKeyStoredOnDevice extends AuthMode {
     required SecretKeyOrigin keyOrigin,
     required bool secureWithBiometrics,
   }) async {
-    final encryptedKey = await masterKey.encryptBytes(plainKey.bytes);
+    final encryptedKey = base64Encode(await masterKey.encrypt(plainKey.bytes));
 
     return AuthModeKeyStoredOnDevice(
       encryptedKey: encryptedKey,
@@ -347,7 +349,7 @@ class EncryptedLocalSecretKey implements EncryptedLocalSecret {
 
   @override
   Future<LocalSecretKey?> decrypt(MasterKey masterKey) async {
-    final decrypted = await masterKey.decryptBytes(encryptedKey);
+    final decrypted = await masterKey.decrypt(base64Decode(encryptedKey));
     if (decrypted == null) return null;
     return LocalSecretKey(decrypted);
   }
@@ -359,9 +361,9 @@ class EncryptedLocalPassword implements EncryptedLocalSecret {
 
   @override
   Future<LocalPassword?> decrypt(MasterKey masterKey) async {
-    final decrypted = await masterKey.decrypt(encryptedPassword);
+    final decrypted = await masterKey.decrypt(base64Decode(encryptedPassword));
     if (decrypted == null) return null;
-    return LocalPassword(decrypted);
+    return LocalPassword(utf8.decode(decrypted));
   }
 }
 

@@ -267,7 +267,7 @@ class Settings with AppLogger {
     }
 
     newAuthMode = AuthModePasswordStoredOnDevice(
-      await masterKey.encrypt(password),
+      base64Encode(await masterKey.encrypt(utf8.encode(password))),
       true,
     );
 

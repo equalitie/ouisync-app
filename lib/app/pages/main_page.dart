@@ -1106,7 +1106,7 @@ class _MainPageState extends State<MainPage>
       case RepoImportFromFiles():
         return result.locations
             .map((location) => widget.reposCubit.state.repos[location])
-            .whereNotNull()
+            .nonNulls
             .toList();
 
       case null:

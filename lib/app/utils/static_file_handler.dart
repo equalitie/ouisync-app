@@ -1,16 +1,18 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io' as io;
 
 import 'package:ouisync/ouisync.dart';
 import 'package:shelf/shelf.dart';
 
-import 'utils.dart';
+import 'cipher.dart' as cipher;
+import 'constants.dart';
 
 Handler createStaticFileHandler(
   String fileHandle,
   String? contentType,
   Future<File> Function(String path) openFile,
-  Cipher pathCipher,
+  cipher.SecretKey pathSecretKey,
 ) {
   return (request) {
     return _handleFile(
@@ -18,7 +20,7 @@ Handler createStaticFileHandler(
       fileHandle,
       () => contentType,
       openFile,
-      pathCipher,
+      pathSecretKey,
     );
   };
 }
@@ -28,7 +30,7 @@ Future<Response> _handleFile(
   String handle,
   FutureOr<String>? Function() getContentType,
   Future<File> Function(String path) openFile,
-  Cipher pathCipher,
+  cipher.SecretKey pathSecretKey,
 ) async {
   final contentType = await getContentType();
   final headers = {
@@ -46,13 +48,13 @@ Future<Response> _handleFile(
     return Response.notFound('\n\nFile not found for handle');
   }
 
-  final filePath = await pathCipher.decrypt(handle);
+  final filePath = await cipher.decrypt(pathSecretKey, base64Decode(handle));
 
   if (filePath == null) {
     return Response.notFound('\n\nFailed to decrypt path');
   }
 
-  final file = await openFile(filePath);
+  final file = await openFile(utf8.decode(filePath));
   final fileSize = await file.length;
 
   return Response.ok(

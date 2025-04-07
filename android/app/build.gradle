@@ -16,7 +16,7 @@ rootProject.file("local.properties").withInputStream { localProperties.load(it) 
 android {
     namespace = "org.equalitie.ouisync"
 
-    compileSdk = 34
+    compileSdk = 35
     ndkVersion = '27.2.12479018'
 
     kotlin {
@@ -37,7 +37,7 @@ android {
         resValue "string", "app_name", "Ouisync"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        minSdk = 23
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io' as io;
 
 import 'package:equatable/equatable.dart';
@@ -12,6 +13,7 @@ import 'package:stream_transform/stream_transform.dart';
 
 import '../../generated/l10n.dart';
 import '../models/models.dart';
+import '../utils/cipher.dart' as cipher;
 import '../utils/repo_path.dart' as repo_path;
 import '../utils/utils.dart';
 import 'cubits.dart';
@@ -108,7 +110,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   final EntrySelectionCubit _entrySelection;
   final EntryBottomSheetCubit _bottomSheet;
   final Repository _repo;
-  final Cipher _pathCipher;
+  final cipher.SecretKey _pathSecretKey;
   final CacheServers _cacheServers;
 
   RepoCubit._(
@@ -117,7 +119,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     this._entrySelection,
     this._bottomSheet,
     this._repo,
-    this._pathCipher,
+    this._pathSecretKey,
     this._cacheServers,
     super.state,
   ) {
@@ -158,7 +160,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
       );
     }
 
-    final pathCipher = await Cipher.newWithRandomKey();
+    final pathSecretKey = cipher.randomSecretKey();
 
     final cubit = RepoCubit._(
       nativeChannels,
@@ -166,7 +168,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
       entrySelection,
       bottomSheet,
       repo,
-      pathCipher,
+      pathSecretKey,
       cacheServers,
       state,
     );
@@ -645,11 +647,16 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   }
 
   Future<Uri> previewFileUrl(String path) async {
-    final encryptedHandle = await _pathCipher.encrypt(path);
+    final encryptedHandle =
+        base64Encode(await cipher.encrypt(_pathSecretKey, utf8.encode(path)));
     final mimeType = MimeTypeResolver().lookup(path);
 
     final handler = createStaticFileHandler(
-        encryptedHandle, mimeType, openFile, _pathCipher);
+      encryptedHandle,
+      mimeType,
+      openFile,
+      _pathSecretKey,
+    );
 
     final server = await serve(handler, Constants.fileServerAuthority, 0);
     final authority = '${server.address.host}:${server.port}';
