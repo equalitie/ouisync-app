@@ -92,7 +92,7 @@ class CopyEntry with EntryOps, AppLogger {
   ) async {
     try {
       final file = await _originRepoCubit.openFile(sourcePath);
-      final fileLength = await file.length;
+      final fileLength = await file.getLength();
 
       await (destinationRepoCubit ?? _originRepoCubit).replaceFile(
         filePath: destinationPath,

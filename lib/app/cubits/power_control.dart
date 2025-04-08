@@ -131,8 +131,8 @@ class PowerControl extends Cubit<PowerControlState>
 
     // TODO: We should be getting `userWantsPortForwardingEnabled` from `_settings`.
     final userWantsPortForwardingEnabled =
-        await _session.isPortForwardingEnabled;
-    final isLocalDiscoveryEnabled = await _session.isLocalDiscoveryEnabled;
+        await _session.isPortForwardingEnabled();
+    final isLocalDiscoveryEnabled = await _session.isLocalDiscoveryEnabled();
 
     final connectivityType = (await _connectivity.checkConnectivity()).last;
 
@@ -182,7 +182,7 @@ class PowerControl extends Cubit<PowerControlState>
       await _session.setLocalDiscoveryEnabled(value);
     }
 
-    final isLocalDiscoveryEnabled = await _session.isLocalDiscoveryEnabled;
+    final isLocalDiscoveryEnabled = await _session.isLocalDiscoveryEnabled();
 
     emitUnlessClosed(state.copyWith(
         userWantsLocalDiscoveryEnabled: value,

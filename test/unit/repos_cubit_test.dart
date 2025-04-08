@@ -9,6 +9,7 @@ import 'package:ouisync_app/app/models/auth_mode.dart';
 import 'package:ouisync_app/app/models/repo_location.dart';
 import 'package:ouisync_app/app/utils/cache_servers.dart';
 import 'package:ouisync_app/app/utils/master_key.dart';
+import 'package:ouisync_app/app/utils/random.dart';
 import 'package:ouisync_app/app/utils/settings/settings.dart';
 import 'package:path/path.dart' show join;
 import 'package:path_provider/path_provider.dart';
@@ -47,10 +48,14 @@ void main() {
   test('current repo', () async {
     expect(reposCubit.state.current, isNull);
 
-    final location = RepoLocation(dir: (await session.storeDir)!, name: 'foo');
+    final location =
+        RepoLocation(dir: (await session.getStoreDir())!, name: 'foo');
     final entry = await reposCubit.createRepository(
       location: location,
-      setLocalSecret: LocalSecretKeyAndSalt.random(),
+      setLocalSecret: SetLocalSecretKeyAndSalt(
+        key: randomSecretKey(),
+        salt: randomSalt(),
+      ),
       localSecretMode: LocalSecretMode.randomStored,
     );
 

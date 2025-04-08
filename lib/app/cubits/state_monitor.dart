@@ -11,6 +11,8 @@ class StateMonitorCubit extends Cubit<StateMonitorNode?> with CubitActions {
     unawaited(_init());
   }
 
+  bool get isRoot => _monitor.isRoot;
+
   Future<void> _init() async {
     await _load();
 

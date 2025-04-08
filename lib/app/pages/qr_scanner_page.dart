@@ -86,7 +86,7 @@ class _QRScannerState extends State<QRScanner> with AppLogger {
             }
 
             try {
-              await plugin.ShareToken.fromString(widget.session, code);
+              await widget.session.validateShareToken(code);
             } catch (_) {
               loggy.debug('Barcode found! $code (invalid)');
               return;

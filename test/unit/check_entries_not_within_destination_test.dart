@@ -7,7 +7,7 @@ import 'package:ouisync_app/app/cubits/cubits.dart';
 import 'package:ouisync_app/app/models/models.dart';
 import 'package:ouisync_app/app/pages/main_page.dart';
 import 'package:ouisync_app/app/utils/utils.dart';
-import 'package:ouisync/ouisync.dart';
+import 'package:ouisync/ouisync.dart' hide DirectoryEntry;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ouisync_app/app/utils/repo_path.dart' as repo_path;
 
@@ -32,15 +32,13 @@ void main() {
   setUp(() async {
     deps = await TestDependencies.create();
 
-    originRepo = await Repository.create(
-      deps.session,
+    originRepo = await deps.session.createRepository(
       path: 'origin',
       readSecret: null,
       writeSecret: null,
     );
 
-    destinationRepo = await Repository.create(
-      deps.session,
+    destinationRepo = await deps.session.createRepository(
       path: 'destination',
       readSecret: null,
       writeSecret: null,
@@ -73,8 +71,8 @@ void main() {
 
     // Create 2 folders, 1 nested, in originRepo
     {
-      await Directory.create(originRepo, '/folder1');
-      await Directory.create(originRepo, 'folder1/folder2');
+      await originRepo.createDirectory('/folder1');
+      await originRepo.createDirectory('folder1/folder2');
     }
 
     // Create files and add to folders
@@ -87,30 +85,22 @@ void main() {
                 : repo_path.join('folder1', 'folder2', 'folder3');
 
         final filePath = repo_path.join(path, 'file$i.txt');
-        final file = await File.create(originRepo, filePath);
+        final file = await originRepo.createFile(filePath);
         await file.write(0, utf8.encode("123$i"));
         await file.close();
       }
 
-      final rootContents = await Directory.read(originRepo, '/');
+      final rootContents = await originRepo.readDirectory('/');
       expect(rootContents, hasLength(1));
 
-      final folder1Contents = await Directory.read(
-        originRepo,
-        'folder1',
-      );
+      final folder1Contents = await originRepo.readDirectory('folder1');
       expect(folder1Contents, hasLength(5));
 
-      final folder2Contents = await Directory.read(
-        originRepo,
-        'folder1/folder2',
-      );
+      final folder2Contents = await originRepo.readDirectory('folder1/folder2');
       expect(folder2Contents, hasLength(5));
 
-      final folder3Contents = await Directory.read(
-        originRepo,
-        'folder1/folder2/folder3',
-      );
+      final folder3Contents =
+          await originRepo.readDirectory('folder1/folder2/folder3');
       expect(folder3Contents, hasLength(4));
     }
   });

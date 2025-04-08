@@ -4,6 +4,7 @@ import 'dart:io' as io;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
+import 'package:hex/hex.dart';
 import 'package:locale_names/locale_names.dart';
 import 'package:ouisync/ouisync.dart';
 import 'package:path/path.dart';
@@ -268,12 +269,12 @@ class AboutSection extends SettingsSection with AppLogger {
     await FlutterEmailSender.send(email);
   }
 
-  Widget _getRuntimeIdForOS() => FutureBuilder(
-      future: session.runtimeId,
+  Widget _getRuntimeIdForOS() => FutureBuilder<PublicRuntimeId>(
+      future: session.getRuntimeId(),
       builder: (context, snapshot) {
-        final runtimeId = snapshot.data ?? '';
+        final runtimeId = snapshot.data;
         final runtimeIdWidget = Text(
-          runtimeId,
+          runtimeId != null ? HEX.encode(runtimeId.value) : '',
           overflow: TextOverflow.ellipsis,
           style: context.theme.appTextStyle.bodySmall,
         );

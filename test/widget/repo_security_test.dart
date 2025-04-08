@@ -20,10 +20,10 @@ void main() {
 
     final repoEntry = await deps.reposCubit.createRepository(
       location: RepoLocation(
-        dir: (await deps.session.storeDir)!,
+        dir: (await deps.session.getStoreDir())!,
         name: 'my repo',
       ),
-      setLocalSecret: LocalSecretKeyAndSalt.random(),
+      setLocalSecret: randomSetLocalSecret(),
       localSecretMode: LocalSecretMode.randomStored,
     );
     repoCubit = repoEntry.cubit!;
@@ -145,7 +145,7 @@ void main() {
         expect(repoCubit.state.accessMode, equals(AccessMode.blind));
 
         // Verify the new secret works
-        await repoCubit.unlock(LocalPassword('admin123'));
+        await repoCubit.unlock(LocalSecretPassword(Password('admin123')));
         expect(repoCubit.state.accessMode, equals(AccessMode.write));
       },
     ),

@@ -70,16 +70,16 @@ class ConnectivityInfo extends Cubit<ConnectivityInfoState>
     // because these events are idempotent, we can trigger them in any order
     // we start with getting the routable addresses (without waiting just yet)
     List<Future> futures = [
-      _session.externalAddressV4.then((externalAddressV4) => emitUnlessClosed(
+      _session.getExternalAddrV4().then((externalAddressV4) => emitUnlessClosed(
           state.copyWith(externalAddressV4: externalAddressV4 ?? ""))),
-      _session.externalAddressV6.then((externalAddressV6) => emitUnlessClosed(
+      _session.getExternalAddrV6().then((externalAddressV6) => emitUnlessClosed(
           state.copyWith(externalAddressV6: externalAddressV6 ?? "")))
     ];
 
     // ask the library for bound sockets; we have to block here because we
     // have a data dependency as fallbacks for local addresses when we're
     // unable to obtain them via the operating system interface
-    final listenerAddrs = await _session.localListenerAddrs.then(
+    final listenerAddrs = await _session.getLocalListenerAddrs().then(
         (addrs) => addrs.map(PeerAddr.parse).whereType<PeerAddr>().toList());
 
     emitUnlessClosed(state.copyWith(listenerAddrs: listenerAddrs));

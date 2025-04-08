@@ -30,13 +30,12 @@ void main() {
       dir: (await getTemporaryDirectory()).path,
       name: name,
     );
-    final repo = await Repository.create(
-      deps.session,
+    final repo = await deps.session.createRepository(
       path: location.path,
       readSecret: null,
       writeSecret: null,
     );
-    await repo.setAccess(write: DisableAccess());
+    await repo.setAccess(write: AccessChangeDisable());
     await repo.close();
 
     return location;
@@ -80,12 +79,12 @@ void main() {
       () async {
         // Create existing repo
         final existingLocation = RepoLocation(
-          dir: (await deps.session.storeDir)!,
+          dir: (await deps.session.getStoreDir())!,
           name: 'some repo',
         );
         await deps.reposCubit.createRepository(
           location: existingLocation,
-          setLocalSecret: LocalSecretKeyAndSalt.random(),
+          setLocalSecret: randomSetLocalSecret(),
           localSecretMode: LocalSecretMode.randomStored,
         );
 

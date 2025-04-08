@@ -3,10 +3,11 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:ouisync_app/app/models/folder.dart';
+import 'package:ouisync_app/app/models/folder.dart'
+    show DirectoryEntry, FileEntry, FileSystemEntry;
 import 'package:ouisync_app/app/pages/main_page.dart';
 import 'package:ouisync_app/app/utils/utils.dart' show CacheServers;
-import 'package:ouisync/ouisync.dart';
+import 'package:ouisync/ouisync.dart' show Repository;
 import 'package:ouisync_app/app/utils/repo_path.dart' as repo_path;
 import 'package:ouisync_app/app/cubits/cubits.dart'
     show EntryBottomSheetCubit, EntrySelectionCubit, NavigationCubit, RepoCubit;
@@ -46,15 +47,13 @@ void main() {
   setUp(() async {
     deps = await TestDependencies.create();
 
-    originRepo = await Repository.create(
-      deps.session,
+    originRepo = await deps.session.createRepository(
       path: 'origin',
       readSecret: null,
       writeSecret: null,
     );
 
-    destinationRepo = await Repository.create(
-      deps.session,
+    destinationRepo = await deps.session.createRepository(
       path: 'destination',
       readSecret: null,
       writeSecret: null,
@@ -87,7 +86,7 @@ void main() {
 
     // Create 1 folder in originRepo
     {
-      await Directory.create(originRepo, '/folder1');
+      await originRepo.createDirectory('/folder1');
     }
 
     // Create files and add to root, folder
@@ -96,15 +95,15 @@ void main() {
         final path = i < 4 ? '/' : 'folder1';
 
         final filePath = repo_path.join(path, 'file$i.txt');
-        final file = await File.create(originRepo, filePath);
+        final file = await originRepo.createFile(filePath);
         await file.write(0, utf8.encode("123$i"));
         await file.close();
       }
 
-      final rootContents = await Directory.read(originRepo, '/');
+      final rootContents = await originRepo.readDirectory('/');
       expect(rootContents, hasLength(5));
 
-      final folder1Contents = await Directory.read(originRepo, 'folder1');
+      final folder1Contents = await originRepo.readDirectory('folder1');
       expect(folder1Contents, hasLength(4));
     }
 

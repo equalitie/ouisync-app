@@ -8,6 +8,7 @@ import '../../generated/l10n.dart';
 import '../models/auth_mode.dart';
 import '../models/access_mode.dart';
 import '../cubits/cubits.dart' show RepoCubit, RepoState;
+import '../utils/random.dart';
 import '../utils/utils.dart'
     show AppThemeExtension, Constants, Fields, LocalAuth, Settings, ThemeGetter;
 import '../widgets/widgets.dart'
@@ -354,20 +355,23 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
     await repo.resetAccess(input.token);
 
     // Generate new local secret which will unlock the repo in the future.
-    final newLocalSecret = LocalSecretKeyAndSalt.random();
+    final newSetLocalSecret = SetLocalSecretKeyAndSalt(
+      key: randomSecretKey(),
+      salt: randomSalt(),
+    );
     AccessChange readAccessChange;
     AccessChange writeAccessChange;
 
     switch (input.accessMode) {
       case AccessMode.blind:
-        readAccessChange = DisableAccess();
-        writeAccessChange = DisableAccess();
+        readAccessChange = AccessChangeDisable();
+        writeAccessChange = AccessChangeDisable();
       case AccessMode.read:
-        readAccessChange = EnableAccess(newLocalSecret);
-        writeAccessChange = DisableAccess();
+        readAccessChange = AccessChangeEnable(newSetLocalSecret);
+        writeAccessChange = AccessChangeDisable();
       case AccessMode.write:
-        readAccessChange = DisableAccess();
-        writeAccessChange = EnableAccess(newLocalSecret);
+        readAccessChange = AccessChangeDisable();
+        writeAccessChange = AccessChangeEnable(newSetLocalSecret);
     }
 
     // Encrypt the global secret from the token using the `newLocalSecret` and
@@ -377,12 +381,13 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
     final AuthMode newAuthMode;
     final Access currentAccess;
 
-    if (readAccessChange is EnableAccess || writeAccessChange is EnableAccess) {
+    if (readAccessChange is AccessChangeEnable ||
+        writeAccessChange is AccessChangeEnable) {
       // Use a reasonably secure and convenient auth mode, the user can go to
       // the security screen to change it later.
       newAuthMode = await AuthModeKeyStoredOnDevice.encrypt(
         widget.settings.masterKey,
-        newLocalSecret.key,
+        newSetLocalSecret.key,
         keyOrigin: SecretKeyOrigin.random,
         // TODO: This isn't really correct, biometric (or other, e.g. pin) should be
         // available whenever the OS supports it **and** when the repository DB files
@@ -391,10 +396,10 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
         secureWithBiometrics: await LocalAuth.canAuthenticate(),
       );
 
-      if (writeAccessChange is EnableAccess) {
-        currentAccess = WriteAccess(newLocalSecret.key);
+      if (writeAccessChange is AccessChangeEnable) {
+        currentAccess = WriteAccess(newSetLocalSecret.toLocalSecret());
       } else {
-        currentAccess = ReadAccess(newLocalSecret.key);
+        currentAccess = ReadAccess(newSetLocalSecret.toLocalSecret());
       }
     } else {
       newAuthMode = AuthModeBlindOrManual();
@@ -445,13 +450,13 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
     ShareToken token;
 
     try {
-      token = await ShareToken.fromString(widget.session, input);
+      token = await widget.session.validateShareToken(input);
     } catch (e) {
       return _InvalidInputToken.malformed();
     }
 
-    final accessMode = await token.accessMode;
-    final infoHash = await token.infoHash;
+    final accessMode = await widget.session.getShareTokenAccessMode(token);
+    final infoHash = await widget.session.getShareTokenInfoHash(token);
 
     return _ValidInputToken(token, accessMode, infoHash);
   }

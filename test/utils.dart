@@ -7,16 +7,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:loggy/loggy.dart';
 import 'package:ouisync_app/app/cubits/locale.dart';
 import 'package:ouisync_app/app/cubits/mount.dart';
 import 'package:ouisync_app/app/cubits/repos.dart';
 import 'package:ouisync_app/app/pages/main_page.dart';
 import 'package:ouisync_app/app/utils/dirs.dart';
 import 'package:ouisync_app/app/utils/platform/platform_window_manager.dart';
+import 'package:ouisync_app/app/utils/random.dart';
 import 'package:ouisync_app/app/utils/utils.dart';
 import 'package:ouisync_app/generated/l10n.dart';
 import 'package:ouisync/native_channels.dart';
-import 'package:ouisync/ouisync.dart' show Session, initLog;
+import 'package:ouisync/ouisync.dart'
+    show Session, SetLocalSecretKeyAndSalt, initLog;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -51,6 +54,8 @@ Future<void> testEnv(FutureOr<void> Function() callback) async {
     callback: (level, message) => debugPrint(
         '${DateTime.now()} ${level.name.toUpperCase().padRight(5)} $message'),
   );
+
+  Loggy.initLoggy();
 
   late Directory tempDir;
   late BlocObserver origBlocObserver;
@@ -439,6 +444,9 @@ extension BlocBaseExtension<State> on BlocBase<State> {
     await stream.where(f).timeout(timeout).first;
   }
 }
+
+SetLocalSecretKeyAndSalt randomSetLocalSecret() =>
+    SetLocalSecretKeyAndSalt(key: randomSecretKey(), salt: randomSalt());
 
 String get _testDirPath {
   var path = (goldenFileComparator as LocalFileComparator).basedir.path;

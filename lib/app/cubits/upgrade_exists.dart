@@ -15,7 +15,8 @@ class UpgradeExistsCubit extends Cubit<bool> with CubitActions, AppLogger {
       : _session = session,
         _settings = settings,
         super(false) {
-    unawaited(_init().catchError((e, st) => loggy.error('During _init():', e, st)));
+    unawaited(
+        _init().catchError((e, st) => loggy.error('During _init():', e, st)));
   }
 
   @override
@@ -40,7 +41,7 @@ class UpgradeExistsCubit extends Cubit<bool> with CubitActions, AppLogger {
   }
 
   Future<void> _init() async {
-    final current = await _session.currentProtocolVersion;
+    final current = await _session.getCurrentProtocolVersion();
     final stored = _settings.getHighestSeenProtocolNumber() ?? current;
 
     await foundVersion(current, stored);
@@ -51,7 +52,7 @@ class UpgradeExistsCubit extends Cubit<bool> with CubitActions, AppLogger {
           break;
         case NetworkEvent.protocolVersionMismatch:
           {
-            final highest = await _session.highestSeenProtocolVersion;
+            final highest = await _session.getHighestSeenProtocolVersion();
             await foundVersion(current, highest);
           }
           break;

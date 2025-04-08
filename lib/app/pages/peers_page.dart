@@ -23,9 +23,8 @@ class PeersPage extends StatefulWidget {
 }
 
 class _PeersPageState extends State<PeersPage> {
-  Stream<NetworkStats> get _networkStatsStream =>
-      Stream.periodic(Duration(seconds: 1))
-          .asyncMapSample((_) => widget.session.networkStats);
+  Stream<Stats> get _networkStatsStream => Stream.periodic(Duration(seconds: 1))
+      .asyncMapSample((_) => widget.session.getNetworkStats());
 
   @override
   void initState() {
@@ -180,7 +179,7 @@ class _PeersPageState extends State<PeersPage> {
               ],
             ),
           ),
-          if (peer.state != PeerStateKind.active)
+          if (peer.state is! PeerStateActive)
             _buildBadge(context, Text(_formatPeerState(peer.state))),
           Spacer(),
           ThroughputDisplay(peer.stats, size: _contentSize),
@@ -223,11 +222,11 @@ class _PeersPageState extends State<PeersPage> {
       );
 
   // TODO: i18n this
-  String _formatPeerState(PeerStateKind state) => switch (state) {
-        PeerStateKind.known => 'Known',
-        PeerStateKind.connecting => 'Connecting',
-        PeerStateKind.handshaking => 'Handshaking',
-        PeerStateKind.active => 'Active',
+  String _formatPeerState(PeerState state) => switch (state) {
+        PeerStateKnown() => 'Known',
+        PeerStateConnecting() => 'Connecting',
+        PeerStateHandshaking() => 'Handshaking',
+        PeerStateActive() => 'Active',
       };
 
   // TODO: i18n this

@@ -54,7 +54,7 @@ void main() {
     final file = await repoCubit.openFile(path);
 
     try {
-      return utf8.decode(await file.read(0, await file.length));
+      return utf8.decode(await file.read(0, await file.getLength()));
     } finally {
       await file.close();
     }
@@ -106,10 +106,10 @@ void main() {
         final repoName = 'my repo';
         final repoEntry = await deps.reposCubit.createRepository(
           location: RepoLocation(
-            dir: (await deps.session.storeDir)!,
+            dir: (await deps.session.getStoreDir())!,
             name: repoName,
           ),
-          setLocalSecret: LocalSecretKeyAndSalt.random(),
+          setLocalSecret: randomSetLocalSecret(),
           localSecretMode: LocalSecretMode.randomStored,
         );
         final repoCubit = repoEntry.cubit!;
@@ -160,10 +160,10 @@ void main() {
         final repoName = 'my repo';
         final repoEntry = await deps.reposCubit.createRepository(
           location: RepoLocation(
-            dir: (await deps.session.storeDir)!,
+            dir: (await deps.session.getStoreDir())!,
             name: repoName,
           ),
-          setLocalSecret: LocalSecretKeyAndSalt.random(),
+          setLocalSecret: randomSetLocalSecret(),
           localSecretMode: LocalSecretMode.randomStored,
           // Set the repo as current so we start on the single repo screen, not on the repo list.
           setCurrent: true,
@@ -210,8 +210,7 @@ void main() {
         final repoName = 'new repo';
         final repoPath =
             join((await getTemporaryDirectory()).path, '$repoName.ouisyncdb');
-        final repo = await Repository.create(
-          deps.session,
+        final repo = await deps.session.createRepository(
           path: repoPath,
           readSecret: null,
           writeSecret: null,
@@ -245,8 +244,7 @@ void main() {
           final repoName = 'new repo';
           final repoPath =
               join((await getTemporaryDirectory()).path, '$repoName.ouisyncdb');
-          final repo = await Repository.create(
-            deps.session,
+          final repo = await deps.session.createRepository(
             path: repoPath,
             readSecret: null,
             writeSecret: null,

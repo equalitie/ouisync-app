@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ouisync/ouisync.dart'
+    show Password, SetLocalSecretKeyAndSalt, SetLocalSecretExtension;
 
 import '../models/models.dart'
     show
@@ -9,14 +11,13 @@ import '../models/models.dart'
         AuthModeKeyStoredOnDevice,
         AuthModePasswordStoredOnDevice,
         UnlockedAccess,
-        LocalSecretKeyAndSalt,
         LocalSecretInput,
         LocalSecretManual,
         LocalSecretMode,
         LocalSecretRandom,
-        LocalPassword,
         SecretKeyOrigin,
         SecretKeyStore;
+import '../utils/random.dart';
 import '../utils/utils.dart'
     show AppLogger, LocalAuth, MasterKey, None, Option, PasswordHasher, Some;
 import 'repo.dart';
@@ -29,17 +30,18 @@ class RepoSecurityCurrentState {
   final UnlockedAccess access;
   // This is `Some` when the user submits local password and it is used to
   // determine whether the password has changed since the last submission.
-  final Option<LocalPassword> localPassword;
+  final Option<Password> localPassword;
 
-  RepoSecurityCurrentState(
-      {required this.localSecretMode,
-      required this.access,
-      this.localPassword = const None()});
+  RepoSecurityCurrentState({
+    required this.localSecretMode,
+    required this.access,
+    this.localPassword = const None(),
+  });
 
   RepoSecurityCurrentState copyWith({
     LocalSecretMode? localSecretMode,
     UnlockedAccess? access,
-    Option<LocalPassword>? localPassword,
+    Option<Password>? localPassword,
   }) =>
       RepoSecurityCurrentState(
           localSecretMode: localSecretMode ?? this.localSecretMode,
@@ -55,7 +57,7 @@ class RepoSecurityState with AppLogger {
   final SecretKeyOrigin plannedOrigin;
   final bool plannedStoreSecret;
   final BiometricsValue plannedWithBiometrics;
-  final Option<LocalPassword> plannedPassword;
+  final Option<Password> plannedPassword;
 
   final bool isBiometricsAvailable;
 
@@ -77,7 +79,7 @@ class RepoSecurityState with AppLogger {
     SecretKeyOrigin? plannedOrigin,
     bool? plannedStoreSecret,
     BiometricsValue? plannedWithBiometrics,
-    Option<LocalPassword>? plannedPassword,
+    Option<Password>? plannedPassword,
     bool? isBiometricsAvailable,
   }) =>
       RepoSecurityState(
@@ -173,8 +175,7 @@ class RepoSecurityState with AppLogger {
     };
   }
 
-  LocalPassword? get newLocalPassword =>
-      switch ((plannedPassword, plannedOrigin)) {
+  Password? get newLocalPassword => switch ((plannedPassword, plannedOrigin)) {
         (Some(value: final value), SecretKeyOrigin.manual) => value,
         (None(), SecretKeyOrigin.manual) || (_, SecretKeyOrigin.random) => null,
       };
@@ -234,7 +235,7 @@ class RepoSecurityCubit extends Cubit<RepoSecurityState>
 
   void setLocalPassword(String? value) {
     emitUnlessClosed(state.copyWith(
-      plannedPassword: value != null ? Some(LocalPassword(value)) : None(),
+      plannedPassword: value != null ? Some(Password(value)) : None(),
     ));
   }
 
@@ -262,10 +263,10 @@ class RepoSecurityCubit extends Cubit<RepoSecurityState>
     try {
       await repoCubit.setAuthMode(newAuthMode);
 
-      Option<LocalPassword> newLocalPassword =
+      Option<Password> newLocalPassword =
           newLocalSecretInput is LocalSecretManual
               ? Some(newLocalSecretInput.password)
-              : None<LocalPassword>();
+              : None<Password>();
 
       emitUnlessClosed(state.copyWith(
         current: state.current.copyWith(
@@ -321,7 +322,7 @@ class RepoSecurityCubit extends Cubit<RepoSecurityState>
   //}
 }
 
-Future<(LocalSecretKeyAndSalt?, AuthMode)> _computeLocalSecretAndAuthMode(
+Future<(SetLocalSecretKeyAndSalt?, AuthMode)> _computeLocalSecretAndAuthMode(
   RepoCubit repoCubit,
   LocalSecretInput localSecretInput,
   PasswordHasher passwordHasher,
@@ -359,15 +360,18 @@ Future<(LocalSecretKeyAndSalt?, AuthMode)> _computeLocalSecretAndAuthMode(
         case AuthModeKeyStoredOnDevice(keyOrigin: SecretKeyOrigin.manual):
         case AuthModePasswordStoredOnDevice():
         case AuthModeBlindOrManual():
-          final localSecretKey = LocalSecretKeyAndSalt.random();
+          final setLocalSecret = SetLocalSecretKeyAndSalt(
+            key: randomSecretKey(),
+            salt: randomSalt(),
+          );
           final authMode = await AuthModeKeyStoredOnDevice.encrypt(
             masterKey,
-            localSecretKey.key,
+            setLocalSecret.key,
             keyOrigin: SecretKeyOrigin.random,
             secureWithBiometrics: localSecretInput.secureWithBiometrics,
           );
 
-          return (localSecretKey, authMode);
+          return (setLocalSecret, authMode);
       }
   }
 }

@@ -146,7 +146,7 @@ class _State extends State<GetPasswordAccessDialog> with AppLogger {
       return;
     }
 
-    final password = LocalPassword(passwordController.text);
+    final localSecret = LocalSecretPassword(Password(passwordController.text));
 
     final AccessMode accessMode;
 
@@ -159,7 +159,7 @@ class _State extends State<GetPasswordAccessDialog> with AppLogger {
     //    widget.repoCubit.getSecretAccessMode(password),
     //  );
     //} else {
-    accessMode = await widget.repoCubit.getSecretAccessMode(password);
+    accessMode = await widget.repoCubit.getSecretAccessMode(localSecret);
     //}
 
     Access access;
@@ -171,9 +171,9 @@ class _State extends State<GetPasswordAccessDialog> with AppLogger {
         });
         return;
       case AccessMode.read:
-        access = ReadAccess(password);
+        access = ReadAccess(localSecret);
       case AccessMode.write:
-        access = WriteAccess(password);
+        access = WriteAccess(localSecret);
     }
 
     setState(() {

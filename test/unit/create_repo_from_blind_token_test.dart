@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:ouisync/ouisync.dart' show SetLocalSecretKeyAndSalt;
 import 'package:ouisync_app/app/cubits/repo_creation.dart';
 import 'package:ouisync_app/app/models/models.dart';
 import 'package:ouisync_app/app/utils/share_token.dart';
@@ -32,17 +33,19 @@ void main() {
             .having((t) => t.value, 'value', isNotNull)
             .having((t) => t.error, 'error', isNull));
 
-    final tokenAccessMode = await (token as ShareTokenValid).value.accessMode;
+    final tokenAccessMode = await deps.session
+        .getShareTokenAccessMode((token as ShareTokenValid).value);
     expect(tokenAccessMode, equals(AccessMode.blind));
 
-    final suggestedRepoName = await token.value.suggestedName;
+    final suggestedRepoName =
+        await deps.session.getShareTokenSuggestedName(token.value);
 
     expect(
       repoCreationCubit.state.substate,
       isA<RepoCreationPending>()
           .having((s) => s.location, 'location', isNull)
           .having((s) => s.setLocalSecret, 'setLocalSecret',
-              isA<LocalSecretKeyAndSalt>())
+              isA<SetLocalSecretKeyAndSalt>())
           .having((s) => s.nameError, 'nameError', isNull),
     );
 
