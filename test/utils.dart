@@ -13,9 +13,10 @@ import 'package:ouisync_app/app/cubits/mount.dart';
 import 'package:ouisync_app/app/cubits/repos.dart';
 import 'package:ouisync_app/app/pages/main_page.dart';
 import 'package:ouisync_app/app/utils/dirs.dart';
-import 'package:ouisync_app/app/utils/platform/platform_window_manager.dart';
+import 'package:ouisync_app/app/utils/platform/platform.dart';
 import 'package:ouisync_app/app/utils/random.dart';
-import 'package:ouisync_app/app/utils/utils.dart';
+import 'package:ouisync_app/app/utils/utils.dart'
+    show CacheServers, MasterKey, Settings, appLogger;
 import 'package:ouisync_app/generated/l10n.dart';
 import 'package:ouisync/native_channels.dart';
 import 'package:ouisync/ouisync.dart'

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ouisync_app/app/models/auth_mode.dart';
 import 'package:ouisync_app/app/utils/utils.dart';
@@ -141,10 +143,12 @@ void main() {
 
     final key = await MasterKey.init();
 
-    final encrypted = await key.encrypt("foobar");
-    final decrypted = await key.decrypt(encrypted);
+    final encrypted = await key.encrypt(utf8.encode("foobar"));
 
-    expect(decrypted, "foobar");
+    final decrypted = await key.decrypt(encrypted);
+    final decryptedString = decrypted != null ? utf8.decode(decrypted) : null;
+
+    expect(decryptedString, "foobar");
   });
 
   //
@@ -159,7 +163,7 @@ void main() {
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   //
   test('compatible encryption', () async {
-    final teststring = "foobar";
+    final testString = "foobar";
 
     ////Use this commented code if you need to generate new values.
     //{
@@ -172,9 +176,11 @@ void main() {
 
     final key =
         MasterKey.initWithKey("eZcpF/CdFblXXhFP4LHk49lGtDEY4c1Gn/qQKBU0QmA=");
-
     final encrypted = "cKMbibnjHsni8olld2sUXjxNsAroR/DOKNj3rUOOrFtUrA==";
 
-    expect(await key.decrypt(encrypted), teststring);
+    final decrypted = await key.decrypt(base64.decode(encrypted));
+    final decryptedString = decrypted != null ? utf8.decode(decrypted) : null;
+
+    expect(decryptedString, testString);
   });
 }

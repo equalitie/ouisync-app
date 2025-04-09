@@ -34,7 +34,7 @@ class DirectoryActions extends StatelessWidget with AppLogger {
         ?.copyWith(fontWeight: FontWeight.w400);
 
     return Container(
-      padding: Dimensions.paddingBottomSheet,
+      padding: MediaQuery.paddingOf(context).add(Dimensions.paddingBottomSheet),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
