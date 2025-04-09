@@ -1,5 +1,6 @@
 import 'dart:io' show Platform;
 
+import 'package:flutter/services.dart';
 import 'package:path/path.dart' show canonicalize, join;
 import 'package:path_provider/path_provider.dart';
 
@@ -43,7 +44,14 @@ class Dirs {
 
 Future<String?> _getDownloadDir() async {
   if (Platform.isAndroid) {
-    return await Native.getDownloadPathForAndroid();
+    try {
+      return await Native.getDownloadPathForAndroid();
+    } on MissingPluginException {
+      // HACK: The method channel handler is defined in `MainActivity` which is not available
+      // when this is accessed from the background service. Catching and returning `null` should be
+      // fine in this case as the background doesn't need to access the downloads dir anyway.
+      return null;
+    }
   } else if (Platform.isIOS) {
     return await getApplicationDocumentsDirectory().then((dir) => dir.path);
   } else {
