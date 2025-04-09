@@ -228,6 +228,6 @@ Future<String> _createShareToken({
     return token.toString();
   } finally {
     await session.close();
-    await dir.delete(recursive: true);
+    await deleteTempDir(dir);
   }
 }

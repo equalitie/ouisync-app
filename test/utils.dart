@@ -97,20 +97,7 @@ Future<void> testEnv(FutureOr<void> Function() callback) async {
 
   tearDown(() async {
     Bloc.observer = origBlocObserver;
-
-    try {
-      await tempDir.delete(recursive: true);
-    } on PathAccessException {
-      // This sometimes happens on the CI on windows. It seems to be caused by another process
-      // accessing the temp directory for some reason. It probably doesn't indicate a problem in
-      // the code under test so it should be safe to ignore it.
-    } on PathNotFoundException {
-      // This shouldn't happen but it still sometimes does. Unknown why. It doesn't really affect
-      // the tests so we ignore it.
-    } catch (exception) {
-      _loggy.error("Exception during temporary directory removal: $exception");
-      rethrow;
-    }
+    await deleteTempDir(tempDir);
   });
 
   await callback();
@@ -448,6 +435,22 @@ extension BlocBaseExtension<State> on BlocBase<State> {
 
 SetLocalSecretKeyAndSalt randomSetLocalSecret() =>
     SetLocalSecretKeyAndSalt(key: randomSecretKey(), salt: randomSalt());
+
+Future<void> deleteTempDir(Directory dir) async {
+  try {
+    await dir.delete(recursive: true);
+  } on PathAccessException {
+    // This sometimes happens on the CI on windows. It seems to be caused by another process
+    // accessing the temp directory for some reason. It probably doesn't indicate a problem in
+    // the code under test so it should be safe to ignore it.
+  } on PathNotFoundException {
+    // This shouldn't happen but it still sometimes does. Unknown why. It doesn't really affect
+    // the tests so we ignore it.
+  } catch (exception) {
+    _loggy.error("Exception during temporary directory removal: $exception");
+    rethrow;
+  }
+}
 
 String get _testDirPath {
   var path = (goldenFileComparator as LocalFileComparator).basedir.path;
