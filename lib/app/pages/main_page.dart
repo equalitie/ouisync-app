@@ -424,7 +424,7 @@ class _MainPageState extends State<MainPage>
       );
     }
 
-    return Container();
+    return SizedBox.shrink();
   }
 
   Widget _repositoryContentBuilder(
