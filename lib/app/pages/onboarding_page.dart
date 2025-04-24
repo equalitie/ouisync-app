@@ -157,6 +157,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 ),
               ),
             ),
+            safeAreaList: const [false, false, false, true],
           ),
         ],
       ),
