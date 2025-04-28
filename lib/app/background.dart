@@ -20,6 +20,8 @@ const _syncInactivityPeriod = Duration(seconds: 30);
 Future<void> syncInBackground() async {
   final packageInfo = await PackageInfo.fromPlatform();
   final dirs = await Dirs.init();
+
+  await LogUtils.init(dirs);
   final logger = Loggy<AppLogger>('background');
 
   final session = await createSession(packageInfo: packageInfo, dirs: dirs);
