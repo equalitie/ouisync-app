@@ -8,11 +8,14 @@ import 'cubits.dart' show CubitActions, RepoCubit;
 /// Cubit representing sync progress of a file.
 class FileProgress extends Cubit<int?> with CubitActions {
   FileProgress(RepoCubit repo, this.path) : super(null) {
-    _subscription =
-        repo.events.startWith(null).asyncMapSample((_) => _fetch(repo)).listen(
-              emitUnlessClosed,
-              onError: (e, st) {}, // these errors are not important - ignore
-            );
+    _subscription = repo.events
+        .throttle(Duration(milliseconds: 250), trailing: true)
+        .startWith(null)
+        .asyncMapSample((_) => _fetch(repo))
+        .listen(
+          emitUnlessClosed,
+          onError: (e, st) {}, // these errors are not important - ignore
+        );
   }
 
   final String path;

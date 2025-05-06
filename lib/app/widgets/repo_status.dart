@@ -40,7 +40,10 @@ class RepoProgressBuilder extends StatefulWidget {
 }
 
 class _RepoProgressBuilderState extends State<RepoProgressBuilder> {
-  late final Stream<Progress> stream = widget.repoCubit.syncProgressStream;
+  late final Stream<Progress> stream = widget.repoCubit.events
+      .throttle(Duration(milliseconds: 250), trailing: true)
+      .startWith(null)
+      .asyncMapSample((_) => widget.repoCubit.syncProgress);
 
   @override
   Widget build(BuildContext context) => StreamBuilder(
@@ -121,9 +124,4 @@ class _Error extends StatelessWidget {
         title: 'Failed to mount the repository',
         message: 'Error: $message',
       );
-}
-
-extension _RepoCubitExtension on RepoCubit {
-  Stream<Progress> get syncProgressStream =>
-      events.startWith(null).asyncMapSample((_) => syncProgress);
 }

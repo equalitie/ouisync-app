@@ -3,6 +3,7 @@ import 'package:ouisync/ouisync.dart'
     show Repository, RepositoryExtension, Session;
 import 'package:ouisync_app/app/utils/cache_servers.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:stream_transform/stream_transform.dart';
 
 import 'session.dart';
 import 'utils/constants.dart';
@@ -66,7 +67,8 @@ Future<void> _waitForSynced(Repository repo) async {
   // event. This also creates the repo event subscription. Doing this before checking if the
   // repo is already synced, to prevent race condition.
   final syncedAfterEvent = repo.events
-      .asyncMap((_) => _isSynced(repo))
+      .throttle(Duration(seconds: 1), trailing: true)
+      .asyncMapSample((_) => _isSynced(repo))
       .where((synced) => synced)
       .first;
 

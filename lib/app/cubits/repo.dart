@@ -188,10 +188,15 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   String get name => state.location.name;
   AccessMode get accessMode => state.accessMode;
   String get currentFolder => _currentFolder.state.path;
-  Stream<void> get events => _repo.events;
   EntrySelectionCubit get entrySelectionCubit => _entrySelection;
-
   Future<void> delete() => _repo.delete();
+
+  // Note: By converting `_repo.events` to a broadcast stream and caching it here we ensure at most
+  // one subscription is created on the backend and then the events are fanned out to every
+  // subscription on the frontend. If we instead returned `_repo.events` directly here, then every
+  // frontend subscription would have its own backend subscription which would multiply the traffic
+  // over the local control socket, potentially degrading performance during heavy event emissions.
+  late final Stream<void> events = _repo.events.asBroadcastStream();
 
   void setCurrent() {
     _nativeChannels.repository = _repo;
