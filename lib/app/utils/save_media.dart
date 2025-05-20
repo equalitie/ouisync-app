@@ -6,9 +6,10 @@ import 'package:path/path.dart' as p;
 
 import '../cubits/cubits.dart' show RepoCubit;
 import '../widgets/widgets.dart' show DisambiguationAction;
-import 'utils.dart' show AppLogger, EntryOps;
+import 'utils.dart'
+    show AppLogger, pickEntryDisambiguationAction, disambiguateEntryName;
 
-class SaveMedia with EntryOps, AppLogger {
+class SaveMedia with AppLogger {
   SaveMedia(
     BuildContext context, {
     required RepoCubit repoCubit,

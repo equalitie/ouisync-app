@@ -5,9 +5,15 @@ import '../cubits/cubits.dart' show RepoCubit;
 import '../models/models.dart' show FileEntry, FileSystemEntry;
 import '../widgets/widgets.dart' show DisambiguationAction;
 import 'repo_path.dart' as repo_path;
-import 'utils.dart' show AppLogger, EntryOps, FileReadStream, StringExtension;
+import 'utils.dart'
+    show
+        AppLogger,
+        FileReadStream,
+        StringExtension,
+        pickEntryDisambiguationAction,
+        disambiguateEntryName;
 
-class MoveEntry with EntryOps, AppLogger {
+class MoveEntry with AppLogger {
   MoveEntry(
     BuildContext context, {
     required RepoCubit originRepoCubit,

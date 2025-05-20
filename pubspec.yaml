@@ -22,7 +22,6 @@ environment:
   flutter: ^3.24.1
 
 dependencies:
-  android_alarm_manager_plus: ^4.0.7
   archive: ^3.3.7
   async: ^2.11.0
   auto_size_text: ^3.0.0
@@ -55,7 +54,7 @@ dependencies:
   flutter_password_strength: ^0.1.6
   flutter_secure_storage: ^10.0.0-beta.4
   hex: ^0.2.0
-  intl: ^0.19.0
+  intl: ^0.20.2
   intro_slider: ^4.2.0
   introduction_screen: ^3.1.14
   launch_at_startup: ^0.3.1
@@ -65,14 +64,6 @@ dependencies:
   meta: ^1.10.0
   mime: ^1.0.6
   mobile_scanner: ^5.2.1
-  # move_to_background: ^1.0.2
-  # - Upgrade Gradle to 8.5.2, minSdk=21, targetSdk and compileSdk to 34;
-  # - Fix deprecation warning
-  #
-  # This package contains one PR from August 2022, and one from February 2024 
-  # So it was best to just updagre de Android project in a forked repo
-  move_to_background:
-    git: 'https://github.com/J-Pabon/move_to_background'
   mutex: ^3.1.0
   network_info_plus: ^6.0.1
   ouisync:

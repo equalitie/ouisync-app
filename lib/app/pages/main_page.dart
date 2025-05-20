@@ -4,17 +4,11 @@ import 'dart:io' as io;
 import 'package:build_context_provider/build_context_provider.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:move_to_background/move_to_background.dart';
-import 'package:ouisync/native_channels.dart';
-import 'package:ouisync/ouisync.dart' show EntryType, Session;
-import 'package:ouisync/state_monitor.dart' show MonitorId;
+import 'package:ouisync/ouisync.dart' show EntryType, MonitorId, Session;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart' as system_path;
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:url_launcher/url_launcher_string.dart';
 
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
@@ -41,14 +35,12 @@ typedef MoveEntryCallback = Future<bool> Function(
 typedef PreviewFileCallback = Future<void> Function(
   RepoCubit repo,
   FileEntry entry,
-  bool useDefaultApp,
 );
 
 class MainPage extends StatefulWidget {
   const MainPage({
     required this.localeCubit,
     required this.mountCubit,
-    required this.nativeChannels,
     required this.packageInfo,
     required this.receivedMedia,
     required this.reposCubit,
@@ -60,7 +52,6 @@ class MainPage extends StatefulWidget {
 
   final PlatformWindowManager windowManager;
   final Session session;
-  final NativeChannels nativeChannels;
   final Settings settings;
   final PackageInfo packageInfo;
   final Stream<List<SharedMediaFile>> receivedMedia;
@@ -329,17 +320,6 @@ class _MainPageState extends State<MainPage>
       widget.reposCubit.showRepoList();
       return;
     }
-
-    if (!io.Platform.isAndroid) return;
-
-    int clickCount = exitClickCounter.registerClick();
-    if (clickCount <= 1) {
-      showSnackBar(S.current.messageExitOuiSync, context: context);
-      return;
-    }
-
-    exitClickCounter.reset();
-    await MoveToBackground.moveTaskToBack();
   }
 
   PreferredSizeWidget _buildOuiSyncBar() => OuiSyncBar(
@@ -529,96 +509,6 @@ class _MainPageState extends State<MainPage>
     );
   }
 
-  Future<void> _previewFile(
-    RepoCubit repo,
-    FileEntry entry,
-    bool useDefaultApp,
-  ) async {
-    if (io.Platform.isAndroid) {
-      // TODO: Consider using `launchUrl` also here, using the 'content://' scheme.
-
-      final previewResult = await widget.nativeChannels.previewOuiSyncFile(
-        widget.packageInfo.packageName,
-        entry.path,
-        entry.size ?? 0,
-        useDefaultApp: useDefaultApp,
-      );
-
-      if (previewResult == PreviewFileResult.previewOK) return;
-
-      final message = switch (previewResult) {
-        PreviewFileResult.mimeTypeNull => S.current.messageUnknownFileExtension,
-        PreviewFileResult.noDefaultApp => S.current.messageNoAppsForThisAction,
-        _ => S.current.messageFilePreviewFailed
-      };
-
-      showSnackBar(message);
-    } else if (io.Platform.isWindows ||
-        io.Platform.isLinux ||
-        io.Platform.isMacOS) {
-      final mountPoint = await repo.mountPoint;
-      if (mountPoint == null) {
-        showSnackBar(S.current.messageRepositoryNotMounted);
-        return;
-      }
-
-      bool previewOk = false;
-      try {
-        if (io.Platform.isWindows) {
-          // Special non ASCII characters are encoded using Escape Encoding
-          // https://datatracker.ietf.org/doc/html/rfc2396#section-2.4.1
-          // which are not decoded back by the url_launcher plugin on Windows
-          // before passing to the system for execution. Thus on Windows
-          // we use the `launchUrlString` function instead of `launchUrl`.
-          final path = '$mountPoint${entry.path}';
-          previewOk = await launchUrlString(path);
-        } else if (io.Platform.isMacOS) {
-          // TODO: There is some issue with permissions, launchUrl doesn't work
-          // and when I try to send this Uri to Swift to run
-          // `NSWorkspace.shared.open(url)` it just returns `false`. Tried also
-          // with running `url.startAccessingSecurityScopedResource()` but that
-          // also just returns `false`. I'll leave this to later or to someone
-          // who understands the macOS file permissions better.
-          showSnackBar("Not yet implemented");
-          return;
-        } else {
-          final url = Uri.parse('file:$mountPoint${entry.path}');
-          previewOk = await launchUrl(url);
-        }
-      } on PlatformException catch (e, st) {
-        loggy.debug(
-          'Preview file (desktop): Error previewing file ${entry.path}:',
-          e,
-          st,
-        );
-
-        showSnackBar(S.current.messagePreviewingFileFailed(entry.path));
-        return;
-      }
-
-      if (!previewOk) {
-        showSnackBar(S.current.messageNoAppsForThisAction);
-      }
-    } else {
-      /// Until we have a proper implementation for OSX (iOS, macOS), we are
-      /// using a local HTTP server and the internet navigator previewer.
-      try {
-        final url = await Dialogs.executeFutureWithLoadingDialog(
-          null,
-          repo.previewFileUrl(entry.path),
-        );
-
-        await launchUrl(url);
-      } on PlatformException catch (e, st) {
-        loggy.debug(
-          '(FileServer) Error previewing file ${entry.path}:',
-          e,
-          st,
-        );
-      }
-    }
-  }
-
   Widget _contentsList(ReposState reposState, RepoCubit currentRepoCubit) =>
       BlocBuilder<EntrySelectionCubit, EntrySelectionState>(
         bloc: currentRepoCubit.entrySelectionCubit,
@@ -713,7 +603,12 @@ class _MainPageState extends State<MainPage>
     bool isSelected = false,
   ]) async {
     if (entry is FileEntry) {
-      return _previewFile(currentRepoCubit, entry, true);
+      return viewFile(
+        repo: currentRepoCubit,
+        path: entry.path,
+        packageInfo: widget.packageInfo,
+        loggy: loggy,
+      );
     }
 
     if (isSelected) {
@@ -759,14 +654,14 @@ class _MainPageState extends State<MainPage>
                   context,
                   repoCubit: repoCubit,
                   entry: entry,
-                  onPreviewFile: (cubit, data, useDefaultApp) => _previewFile(
-                    cubit,
-                    data,
-                    useDefaultApp,
+                  onPreviewFile: (cubit, data) => viewFile(
+                    repo: cubit,
+                    path: data.path,
+                    packageInfo: widget.packageInfo,
+                    loggy: loggy,
                   ),
                   isActionAvailableValidator: _isEntryActionAvailable,
                   packageInfo: widget.packageInfo,
-                  nativeChannels: widget.nativeChannels,
                   dirs: widget.dirs,
                 )
               : EntryDetails.folder(

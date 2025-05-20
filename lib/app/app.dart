@@ -3,19 +3,17 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:ouisync/native_channels.dart';
-import 'package:ouisync/ouisync.dart' show PublicRuntimeId, Session;
+import 'package:ouisync/ouisync.dart' show NetworkDefaults, Server, Session;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
-import 'package:result_type/result_type.dart' show Failure, Result, Success;
 import 'package:sentry_flutter/sentry_flutter.dart';
 
 import '../generated/l10n.dart';
 import 'cubits/cubits.dart'
     show LocaleCubit, LocaleState, MountCubit, ReposCubit;
 import 'pages/pages.dart';
-import 'session.dart';
 import 'utils/dirs.dart';
+import 'utils/log.dart';
 import 'utils/platform/platform.dart' show PlatformWindowManager;
 import 'utils/utils.dart'
     show
@@ -24,150 +22,135 @@ import 'utils/utils.dart'
         AppTypography,
         CacheServers,
         Constants,
-        InvalidSettingsVersion,
         loadAndMigrateSettings,
         Settings;
 import 'widgets/flavor_banner.dart';
 import 'widgets/media_receiver.dart';
 
-Future<Widget> initOuiSyncApp({
-  required Dirs dirs,
-  List<String> args = const [],
-}) async {
+Future<Widget> initApp([List<String> args = const []]) async =>
+    FutureBuilder<HomeWidget>(
+        future: _initHomeWidget(args),
+        builder: (context, snapshot) {
+          final home = snapshot.data;
+
+          if (home != null) {
+            return BlocBuilder<LocaleCubit, LocaleState>(
+              bloc: home.localeCubit,
+              builder: (context, localeState) => _buildMaterialApp(
+                locale: localeState.currentLocale,
+                home: home,
+              ),
+            );
+          } else {
+            return _buildMaterialApp(home: LoadingScreen());
+          }
+        });
+
+Widget _buildMaterialApp({
+  required Widget home,
+  Locale? locale,
+}) =>
+    MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: _setupAppThemeData(),
+      locale: locale,
+      localizationsDelegates: const [
+        S.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: S.delegate.supportedLocales,
+      home: home,
+      builder: (context, child) => FlavorBanner(
+        child: child ?? SizedBox.shrink(),
+      ),
+      navigatorObservers: [_AppNavigatorObserver()],
+    );
+
+Future<HomeWidget> _initHomeWidget(List<String> args) async {
   final packageInfo = await PackageInfo.fromPlatform();
   final windowManager = await PlatformWindowManager.create(
     args,
     packageInfo.appName,
   );
 
-  return AppContainer(
-    packageInfo: packageInfo,
-    windowManager: windowManager,
+  var dirs = await Dirs.init();
+  await LogUtils.init(dirs);
+
+  final session = await _initSession(dirs, windowManager);
+  final settings = await loadAndMigrateSettings(session);
+  final localeCubit = LocaleCubit(settings);
+
+  return HomeWidget(
     dirs: dirs,
+    session: session,
+    windowManager: windowManager,
+    settings: settings,
+    packageInfo: packageInfo,
+    localeCubit: localeCubit,
   );
 }
 
-class AppContainer extends StatefulWidget {
-  @override
-  State<AppContainer> createState() => _AppContainerState();
+Future<Session> _initSession(
+    Dirs dirs, PlatformWindowManager windowManager) async {
+  final server = Server.create(configPath: dirs.config);
 
-  final PackageInfo packageInfo;
-  final PlatformWindowManager windowManager;
-  final Dirs dirs;
+  final logger = appLogger('');
+  server.initLog(
+    callback: (level, message) => logger.log(level.toLoggy(), message),
+  );
 
-  AppContainer({
-    required this.packageInfo,
-    required this.windowManager,
-    required this.dirs,
-  });
-}
+  await server.start();
 
-class _AppContainerWrappedState {
-  final Session session;
-  final NativeChannels nativeChannels;
-  final Settings settings;
-  final PublicRuntimeId sessionId;
+  try {
+    final session = await Session.create(configPath: dirs.config);
 
-  _AppContainerWrappedState({
-    required this.session,
-    required this.nativeChannels,
-    required this.settings,
-    required this.sessionId,
-  });
-}
+    windowManager.onClose(() async {
+      await session.close();
+      await server.stop();
+    });
 
-class _AppContainerState extends State<AppContainer> with AppLogger {
-  Result<_AppContainerWrappedState, Exception>? state;
-
-  @override
-  void initState() {
-    super.initState();
-    unawaited(_restart());
-  }
-
-  @override
-  Widget build(BuildContext context) => switch (state) {
-        null => _createInMaterialApp(ErrorScreen(message: "Loading...")),
-        Success(value: final state) => BlocProvider<LocaleCubit>(
-            create: (context) => LocaleCubit(state.settings),
-            child: BlocBuilder<LocaleCubit, LocaleState>(
-                builder: (context, localeState) => _createInMaterialApp(
-                    OuisyncApp(
-                        dirs: widget.dirs,
-                        session: state.session,
-                        windowManager: widget.windowManager,
-                        settings: state.settings,
-                        packageInfo: widget.packageInfo,
-                        localeCubit: context.read(),
-                        nativeChannels: state.nativeChannels,
-                        // we use a custom key tied to the session to force the child
-                        // component to drop state whenever the session disconnects
-                        key: ValueKey(state.sessionId)),
-                    currentLocale: localeState.currentLocale,
-                    navigatorObservers: [_AppNavigatorObserver()]))),
-        Failure(value: final error) => _createInMaterialApp(ErrorScreen(
-            message: error is InvalidSettingsVersion
-                ? S.current.messageSettingsVersionNewerThanCurrent
-                : "Internal error\n$error",
-          ))
-      };
-
-  Future<void> _restart() async {
-    try {
-      final session = await createSession(
-          packageInfo: widget.packageInfo,
-          windowManager: widget.windowManager,
-          dirs: widget.dirs,
-          onConnectionReset: () {
-            // the session is now defunct: switch to the loading screen
-            setState(() => state = null);
-            // and attempt to start a new one after a short delay
-            Timer(Duration(seconds: 1), () => unawaited(_restart()));
-          });
-      final settings = await loadAndMigrateSettings(session);
-      final sessionId = await session.getRuntimeId();
-      setState(() => state = Success(_AppContainerWrappedState(
-            session: session,
-            nativeChannels: NativeChannels(),
-            settings: settings,
-            sessionId: sessionId,
-          )));
-      // FIXME: convert this into the network error thrown by session on reset
-    } on UnimplementedError catch (error) {
-      // this error is considered transient, retry after a short delay
-      loggy.warning('Unable to acquire session:', error);
-      Timer(Duration(seconds: 1), () => unawaited(_restart()));
-    } on Exception catch (error) {
-      setState(() => state = Failure(error));
+    if (await session.getStoreDir() == null) {
+      await session.setStoreDir(dirs.defaultStore);
     }
+
+    await session.initNetwork(NetworkDefaults(
+      bind: ['quic/0.0.0.0:0', 'quic/[::]:0'],
+      portForwardingEnabled: true,
+      localDiscoveryEnabled: true,
+    ));
+
+    return session;
+  } catch (e) {
+    await server.stop();
+    rethrow;
   }
 }
 
-class OuisyncApp extends StatefulWidget {
-  OuisyncApp({
+class HomeWidget extends StatefulWidget {
+  HomeWidget({
     required this.windowManager,
     required this.dirs,
     required this.session,
     required this.settings,
     required this.packageInfo,
     required this.localeCubit,
-    required this.nativeChannels,
     super.key,
   });
 
   final PlatformWindowManager windowManager;
   final Dirs dirs;
   final Session session;
-  final NativeChannels nativeChannels;
   final Settings settings;
   final PackageInfo packageInfo;
   final LocaleCubit localeCubit;
 
   @override
-  State<OuisyncApp> createState() => _OuisyncAppState();
+  State<HomeWidget> createState() => _HomeWidgetState();
 }
 
-class _OuisyncAppState extends State<OuisyncApp>
+class _HomeWidgetState extends State<HomeWidget>
     with AppLogger /*, RouteAware*/ {
   final receivedMediaController = StreamController<List<SharedMediaFile>>();
   late final MountCubit mountCubit;
@@ -183,7 +166,6 @@ class _OuisyncAppState extends State<OuisyncApp>
     mountCubit = MountCubit(widget.session, widget.dirs)..init();
     reposCubit = ReposCubit(
       session: widget.session,
-      nativeChannels: widget.nativeChannels,
       settings: widget.settings,
       cacheServers: cacheServers,
     );
@@ -214,7 +196,6 @@ class _OuisyncAppState extends State<OuisyncApp>
             mainPage: MainPage(
               localeCubit: widget.localeCubit,
               mountCubit: mountCubit,
-              nativeChannels: widget.nativeChannels,
               packageInfo: widget.packageInfo,
               receivedMedia: receivedMediaController.stream,
               reposCubit: reposCubit,
@@ -253,36 +234,12 @@ ThemeData _setupAppThemeData() => ThemeData().copyWith(
               labelSmall: AppTypography.labelSmall)
         ]);
 
-MaterialApp _createInMaterialApp(
-  Widget topWidget, {
-  Locale? currentLocale,
-  List<NavigatorObserver> navigatorObservers = const [],
-}) =>
-    MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: _setupAppThemeData(),
-      locale: currentLocale,
-      localizationsDelegates: const [
-        S.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: S.delegate.supportedLocales,
-      home: topWidget,
-      builder: (context, child) => FlavorBanner(
-        child: child ?? SizedBox.shrink(),
-      ),
-      navigatorObservers: navigatorObservers,
-    );
-
-class ErrorScreen extends StatelessWidget {
-  final String message;
-  const ErrorScreen({required this.message, super.key});
+class LoadingScreen extends StatelessWidget {
+  const LoadingScreen({super.key});
 
   @override
   Widget build(BuildContext context) =>
-      Scaffold(body: Center(child: Text(message, textAlign: TextAlign.center)));
+      Scaffold(body: Center(child: CircularProgressIndicator()));
 }
 
 // Due to race conditions the app sometimes `pop`s more from the stack than have been pushed

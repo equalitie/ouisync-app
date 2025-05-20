@@ -6,10 +6,6 @@ xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.CAMERA"/>
 
-    <!-- https://pub.dev/packages/android_alarm_manager_plus -->
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
-    <uses-permission android:name="android.permission.WAKE_LOCK"/>
-
     <!-- needed by flutter_email_sender -->
     <queries>
         <intent>
@@ -29,12 +25,12 @@ xmlns:tools="http://schemas.android.com/tools">
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round">
 
-        <provider
+<!--         <provider
             tools:replace="android:authorities"
-            android:name="org.equalitie.ouisync.lib.PipeProvider"
+            android:name="org.equalitie.ouisync.dart.PipeProvider"
             android:authorities="${applicationId}.pipe"
             android:exported="true"/>
-        
+ -->
         <!--
         NOTE: Forcing single Ouisync instance in its own task with launchMode="singleInstance". 
         This is because Ouisync doesn't currently support multiple instances well. 
@@ -89,23 +85,6 @@ xmlns:tools="http://schemas.android.com/tools">
                 <data android:scheme="https" android:host="ouisync.net" android:pathPrefix="/r"/>
             </intent-filter>
         </activity>
-
-        <!-- https://pub.dev/packages/android_alarm_manager_plus -->
-        <service
-            android:name="dev.fluttercommunity.plus.androidalarmmanager.AlarmService"
-            android:permission="android.permission.BIND_JOB_SERVICE"
-            android:exported="false"/>
-        <receiver
-            android:name="dev.fluttercommunity.plus.androidalarmmanager.AlarmBroadcastReceiver"
-            android:exported="false"/>
-        <receiver
-            android:name="dev.fluttercommunity.plus.androidalarmmanager.RebootBroadcastReceiver"
-            android:enabled="false"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-            </intent-filter>
-        </receiver>
 
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->

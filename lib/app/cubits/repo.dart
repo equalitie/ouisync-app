@@ -5,9 +5,7 @@ import 'dart:io' as io;
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mime/mime.dart';
-import 'package:ouisync/native_channels.dart' show NativeChannels;
 import 'package:ouisync/ouisync.dart' hide DirectoryEntry;
-import 'package:ouisync/state_monitor.dart';
 import 'package:shelf/shelf_io.dart';
 import 'package:stream_transform/stream_transform.dart';
 
@@ -105,7 +103,6 @@ class RepoState extends Equatable {
 
 class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   final _currentFolder = Folder();
-  final NativeChannels _nativeChannels;
   final NavigationCubit _navigation;
   final EntrySelectionCubit _entrySelection;
   final EntryBottomSheetCubit _bottomSheet;
@@ -114,7 +111,6 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   final CacheServers _cacheServers;
 
   RepoCubit._(
-    this._nativeChannels,
     this._navigation,
     this._entrySelection,
     this._bottomSheet,
@@ -127,7 +123,6 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   }
 
   static Future<RepoCubit> create({
-    required NativeChannels nativeChannels,
     required Repository repo,
     required Session session,
     required NavigationCubit navigation,
@@ -164,7 +159,6 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     final pathSecretKey = cipher.randomSecretKey();
 
     final cubit = RepoCubit._(
-      nativeChannels,
       navigation,
       entrySelection,
       bottomSheet,
@@ -197,10 +191,6 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   // frontend subscription would have its own backend subscription which would multiply the traffic
   // over the local control socket, potentially degrading performance during heavy event emissions.
   late final Stream<void> events = _repo.events.asBroadcastStream();
-
-  void setCurrent() {
-    _nativeChannels.repository = _repo;
-  }
 
   void updateNavigation() {
     _navigation.current(location, currentFolder);
