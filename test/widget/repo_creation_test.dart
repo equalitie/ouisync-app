@@ -6,7 +6,7 @@ import 'package:ouisync_app/app/cubits/repo_creation.dart';
 import 'package:ouisync_app/app/models/auth_mode.dart';
 import 'package:ouisync_app/app/models/repo_location.dart';
 import 'package:ouisync_app/app/utils/share_token.dart';
-import 'package:ouisync/ouisync.dart' show AccessMode, Session;
+import 'package:ouisync/ouisync.dart' show AccessMode, Session, Server;
 import 'package:path/path.dart' show join;
 
 import '../utils.dart';
@@ -215,19 +215,28 @@ Future<String> _createShareToken({
   required AccessMode accessMode,
 }) async {
   final dir = await Directory.systemTemp.createTemp();
-  final session = await Session.create(configPath: join(dir.path, 'config'));
+  final configPath = join(dir.path, 'config');
+
+  final server = Server.create(configPath: configPath);
 
   try {
-    final repo = await session.createRepository(
-      path: join(dir.path, 'store', name),
-      readSecret: null,
-      writeSecret: null,
-    );
+    await server.start();
+    final session = await Session.create(configPath: configPath);
 
-    final token = await repo.share(accessMode: accessMode);
-    return token.toString();
+    try {
+      final repo = await session.createRepository(
+        path: join(dir.path, 'store', name),
+        readSecret: null,
+        writeSecret: null,
+      );
+
+      final token = await repo.share(accessMode: accessMode);
+      return token.toString();
+    } finally {
+      await session.close();
+      await server.stop();
+    }
   } finally {
-    await session.close();
     await deleteTempDir(dir);
   }
 }

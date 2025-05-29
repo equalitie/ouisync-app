@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
-import 'package:ouisync/native_channels.dart';
 import 'package:ouisync_app/app/app.dart';
 import 'package:ouisync_app/app/cubits/locale.dart';
 import 'package:ouisync_app/app/cubits/repos.dart';
@@ -15,6 +14,7 @@ import '../utils.dart';
 
 void main() {
   late Dirs dirs;
+  late Server server;
   late Session session;
   late Settings settings;
   late LocaleCubit localeCubit;
@@ -24,6 +24,10 @@ void main() {
     await appDir.create(recursive: true);
 
     dirs = Dirs(root: appDir.path);
+
+    server = Server.create(configPath: dirs.config);
+    await server.start();
+
     session = await Session.create(configPath: dirs.config);
     settings = await Settings.init(MasterKey.random());
     localeCubit = LocaleCubit(settings);
@@ -32,6 +36,7 @@ void main() {
   tearDown(() async {
     await localeCubit.close();
     await session.close();
+    await server.stop();
   });
 
   testWidgets(
@@ -39,13 +44,13 @@ void main() {
     (tester) => tester.runAsync(() async {
       final reposObserver = StateObserver.install<ReposState>();
 
-      await tester.pumpWidget(testApp(OuisyncApp(
+      await tester.pumpWidget(testApp(HomeWidget(
         localeCubit: localeCubit,
         packageInfo: fakePackageInfo,
+        server: server,
         session: session,
         settings: settings,
         windowManager: FakeWindowManager(),
-        nativeChannels: NativeChannels(),
         dirs: dirs,
       )));
       await tester.pumpAndSettle();

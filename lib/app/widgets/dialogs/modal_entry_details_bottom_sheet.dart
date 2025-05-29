@@ -1,7 +1,6 @@
 import 'dart:io' as io;
 
 import 'package:flutter/material.dart';
-import 'package:ouisync/native_channels.dart' show NativeChannels;
 import 'package:ouisync/ouisync.dart' show AccessMode;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart' as p;
@@ -12,6 +11,7 @@ import '../../models/models.dart'
     show DirectoryEntry, FileEntry, FileSystemEntry;
 import '../../pages/pages.dart' show PreviewFileCallback;
 import '../../utils/dirs.dart';
+import '../../utils/entry_ops.dart' show shareFile;
 import '../../utils/repo_path.dart' as repo_path;
 import '../../utils/utils.dart'
     show
@@ -40,7 +40,6 @@ class EntryDetails extends StatefulWidget {
     required this.isActionAvailableValidator,
     required this.onPreviewFile,
     required this.packageInfo,
-    required this.nativeChannels,
     required this.dirs,
   }) : assert(entry is FileEntry);
 
@@ -52,8 +51,7 @@ class EntryDetails extends StatefulWidget {
     required this.dirs,
   })  : assert(entry is DirectoryEntry),
         onPreviewFile = null,
-        packageInfo = null,
-        nativeChannels = null;
+        packageInfo = null;
 
   final BuildContext context;
   final RepoCubit repoCubit;
@@ -61,7 +59,6 @@ class EntryDetails extends StatefulWidget {
   final bool Function(AccessMode, EntryAction) isActionAvailableValidator;
   final PreviewFileCallback? onPreviewFile;
   final PackageInfo? packageInfo;
-  final NativeChannels? nativeChannels;
   final Dirs dirs;
 
   @override
@@ -167,7 +164,6 @@ extension on _EntryDetailsState {
     await widget.onPreviewFile!.call(
       widget.repoCubit,
       widget.entry as FileEntry,
-      false,
     );
   }
 
@@ -266,10 +262,10 @@ extension on _EntryDetailsState {
     ).saveFileToDevice(widget.entry as FileEntry, defaultDirectoryPath);
   }
 
-  Future<void> _onShareTap() async => widget.nativeChannels!.shareOuiSyncFile(
-        widget.packageInfo!.packageName,
-        widget.entry.path,
-        (widget.entry as FileEntry).size ?? 0,
+  Future<void> _onShareTap() async => shareFile(
+        repo: widget.repoCubit,
+        path: widget.entry.path,
+        packageInfo: widget.packageInfo!,
       );
 
   Future<void> _onDeleteTap() async => _deleteEntryWithValidation(

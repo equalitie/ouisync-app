@@ -310,7 +310,7 @@ class PowerControl extends Cubit<PowerControlState>
         addrs = ['quic/0.0.0.0:0', 'quic/[::]:0'];
         break;
       case NetworkModeSaving(hotspotAddr: final hotspotAddr):
-        addrs = ['quic/$hotspotAddr'];
+        addrs = hotspotAddr != null ? ['quic/$hotspotAddr'] : [];
         break;
       case NetworkModeDisabled():
         addrs = [];

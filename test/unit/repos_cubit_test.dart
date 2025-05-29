@@ -1,6 +1,5 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:ouisync/native_channels.dart';
 import 'package:ouisync/ouisync.dart';
 import 'package:ouisync_app/app/cubits/entry_bottom_sheet.dart';
 import 'package:ouisync_app/app/cubits/navigation.dart';
@@ -18,6 +17,7 @@ void main() {
   // Needed for `NativeChannels`.
   WidgetsFlutterBinding.ensureInitialized();
 
+  late Server server;
   late Session session;
   late ReposCubit reposCubit;
 
@@ -25,14 +25,18 @@ void main() {
     final appDir = await getApplicationSupportDirectory();
     await appDir.create(recursive: true);
 
-    session = await Session.create(configPath: join(appDir.path, 'config'));
+    final configPath = join(appDir.path, 'config');
+
+    server = Server.create(configPath: configPath);
+    await server.start();
+
+    session = await Session.create(configPath: configPath);
     await session.setStoreDir(join(appDir.path, 'store'));
 
     final settings = await Settings.init(MasterKey.random());
 
     reposCubit = ReposCubit(
       session: session,
-      nativeChannels: NativeChannels(),
       settings: settings,
       navigation: NavigationCubit(),
       bottomSheet: EntryBottomSheetCubit(),
@@ -43,6 +47,7 @@ void main() {
   tearDown(() async {
     await reposCubit.close();
     await session.close();
+    await server.stop();
   });
 
   test('current repo', () async {

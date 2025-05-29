@@ -8,11 +8,16 @@ import 'package:path/path.dart' as p;
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
+  late Server server;
   late Session session;
   late Repository repo;
 
   setUp(() async {
     final dir = await io.Directory.systemTemp.createTemp();
+
+    server = Server.create(configPath: dir.path);
+    await server.start();
+
     session = await Session.create(configPath: dir.path);
 
     repo = await session.createRepository(
@@ -25,6 +30,7 @@ void main() {
   tearDown(() async {
     await repo.close();
     await session.close();
+    await server.stop();
   });
 
   test('Move file (file1.txt) from root (/) to folder1 (/folder1)', () async {

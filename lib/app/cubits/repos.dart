@@ -3,9 +3,7 @@ import 'dart:collection';
 
 import 'package:collection/collection.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync/native_channels.dart';
 import 'package:ouisync/ouisync.dart';
-import 'package:ouisync/state_monitor.dart';
 
 import '../../generated/l10n.dart';
 import '../models/models.dart';
@@ -54,7 +52,6 @@ class ReposState {
 
 class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
   final Session _session;
-  final NativeChannels _nativeChannels;
   StreamSubscription<void>? _subscription;
   final Settings _settings;
 
@@ -66,14 +63,12 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
 
   ReposCubit({
     required session,
-    required nativeChannels,
     required settings,
     required this.cacheServers,
     EntryBottomSheetCubit? bottomSheet,
     NavigationCubit? navigation,
     EntrySelectionCubit? entriesSelection,
   })  : _session = session,
-        _nativeChannels = nativeChannels,
         _settings = settings,
         bottomSheet = bottomSheet ?? EntryBottomSheetCubit(),
         navigation = navigation ?? NavigationCubit(),
@@ -110,8 +105,6 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
     if (state.current == entry) {
       return;
     }
-
-    entry?.cubit?.setCurrent();
 
     await _subscription?.cancel();
     _subscription = null;
@@ -190,7 +183,6 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
   }
 
   Future<RepoCubit> _createRepoCubit(Repository repo) => RepoCubit.create(
-        nativeChannels: _nativeChannels,
         repo: repo,
         session: _session,
         navigation: navigation,
