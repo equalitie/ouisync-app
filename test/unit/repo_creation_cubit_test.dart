@@ -12,7 +12,6 @@ import 'package:ouisync_app/app/utils/master_key.dart';
 import 'package:ouisync_app/app/utils/random.dart';
 import 'package:ouisync_app/app/utils/settings/settings.dart';
 import 'package:ouisync_app/generated/l10n.dart';
-import 'package:ouisync/native_channels.dart';
 import 'package:ouisync/ouisync.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -23,6 +22,7 @@ void main() {
   // Needed for `NativeChannels`.
   WidgetsFlutterBinding.ensureInitialized();
 
+  late Server server;
   late Session session;
   late ReposCubit reposCubit;
   late RepoCreationCubit repoCreationCubit;
@@ -31,14 +31,18 @@ void main() {
     final appDir = await getApplicationSupportDirectory();
     await appDir.create(recursive: true);
 
-    session = await Session.create(configPath: p.join(appDir.path, 'config'));
+    final configPath = p.join(appDir.path, 'config');
+
+    server = Server.create(configPath: configPath);
+    await server.start();
+
+    session = await Session.create(configPath: configPath);
     await session.setStoreDir(p.join(appDir.path, 'store'));
 
     final settings = await Settings.init(MasterKey.random());
 
     reposCubit = ReposCubit(
       session: session,
-      nativeChannels: NativeChannels(),
       settings: settings,
       navigation: NavigationCubit(),
       bottomSheet: EntryBottomSheetCubit(),
@@ -52,6 +56,7 @@ void main() {
     await repoCreationCubit.close();
     await reposCubit.close();
     await session.close();
+    await server.stop();
   });
 
   test('create repository with default local secret', () async {

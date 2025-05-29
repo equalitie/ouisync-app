@@ -39,7 +39,6 @@ void main() {
     bottomSheetCubit = EntryBottomSheetCubit();
 
     repoCubit = await RepoCubit.create(
-      nativeChannels: deps.nativeChannels,
       repo: repo,
       session: deps.session,
       navigation: navigationCubit,

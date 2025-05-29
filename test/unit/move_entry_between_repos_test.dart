@@ -5,7 +5,6 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ouisync_app/app/cubits/cubits.dart';
 import 'package:ouisync_app/app/utils/cache_servers.dart';
-import 'package:ouisync/native_channels.dart';
 import 'package:ouisync/ouisync.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
@@ -51,7 +50,6 @@ void main() {
     final cacheServers = CacheServers(deps.session);
 
     originRepoCubit = await RepoCubit.create(
-      nativeChannels: deps.nativeChannels,
       repo: originRepo,
       navigation: navigationCubit,
       entrySelection: entrySelectionCubit,
@@ -61,7 +59,6 @@ void main() {
     );
 
     otherRepoCubit = await RepoCubit.create(
-      nativeChannels: deps.nativeChannels,
       repo: otherRepo,
       navigation: navigationCubit,
       entrySelection: entrySelectionCubit,
@@ -235,10 +232,6 @@ Matcher dirEntryComparator(Iterable<DirectoryEntry> expected) =>
           e0.entryType == e1?.entryType && e0.name == e1?.name,
       'Check for same DirEntry',
     );
-
-class FakeNativeChannels extends NativeChannels {
-  FakeNativeChannels();
-}
 
 class FakePathProviderPlatform extends PathProviderPlatform {
   final io.Directory root;

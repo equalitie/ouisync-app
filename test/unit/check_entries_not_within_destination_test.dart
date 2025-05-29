@@ -53,7 +53,6 @@ void main() {
     final cacheServers = CacheServers(deps.session);
 
     originRepoCubit = await RepoCubit.create(
-      nativeChannels: deps.nativeChannels,
       repo: originRepo,
       navigation: navigationCubit,
       entrySelection: entrySelectionCubit,
@@ -64,7 +63,6 @@ void main() {
 
     reposCubit = ReposCubit(
       session: deps.session,
-      nativeChannels: deps.nativeChannels,
       settings: deps.settings,
       cacheServers: cacheServers,
     );

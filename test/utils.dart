@@ -18,9 +18,8 @@ import 'package:ouisync_app/app/utils/random.dart';
 import 'package:ouisync_app/app/utils/utils.dart'
     show CacheServers, MasterKey, Settings, appLogger;
 import 'package:ouisync_app/generated/l10n.dart';
-import 'package:ouisync/native_channels.dart';
 import 'package:ouisync/ouisync.dart'
-    show Session, SetLocalSecretKeyAndSalt, initLog;
+    show Session, SetLocalSecretKeyAndSalt, Server;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -51,11 +50,6 @@ Future<void> testEnv(FutureOr<void> Function() callback) async {
     };
   }
 
-  initLog(
-    callback: (level, message) => debugPrint(
-        '${DateTime.now()} ${level.name.toUpperCase().padRight(5)} $message'),
-  );
-
   Loggy.initLoggy();
 
   late Directory tempDir;
@@ -75,18 +69,20 @@ Future<void> testEnv(FutureOr<void> Function() callback) async {
     final native =
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
     native.setMockMethodCallHandler(
-        MethodChannel('org.equalitie.ouisync/native'), (call) async {
-      switch (call.method) {
-        case 'getSharedDir':
-          return (await shared).path;
-        case 'getMountRootDirectory':
-          return (await mount).path;
-        default:
-          throw PlatformException(
-              code: 'OS06',
-              message: 'Method "${call.method}" not exported by host');
-      }
-    });
+      MethodChannel('org.equalitie.ouisync/native'),
+      (call) async {
+        switch (call.method) {
+          case 'getSharedDir':
+            return (await shared).path;
+          case 'getMountRootDirectory':
+            return (await mount).path;
+          default:
+            throw PlatformException(
+                code: 'OS06',
+                message: 'Method "${call.method}" not exported by host');
+        }
+      },
+    );
 
     ConnectivityPlatform.instance = _FakeConnectivityPlatform();
 
@@ -106,9 +102,9 @@ Future<void> testEnv(FutureOr<void> Function() callback) async {
 /// Helper to setup and teardown common widget test dependencies
 class TestDependencies {
   TestDependencies._(
+    this.server,
     this.session,
     this.settings,
-    this.nativeChannels,
     this.reposCubit,
     this.mountCubit,
     this.localeCubit,
@@ -121,15 +117,17 @@ class TestDependencies {
 
     final dirs = Dirs(root: appDir.path);
 
+    final server = Server.create(configPath: dirs.config)
+      ..initLog(stdout: true);
+    await server.start();
+
     final session = await Session.create(configPath: dirs.config);
 
     await session.setStoreDir(dirs.defaultStore);
 
     final settings = await Settings.init(MasterKey.random());
-    final nativeChannels = NativeChannels();
     final reposCubit = ReposCubit(
       cacheServers: CacheServers(session),
-      nativeChannels: nativeChannels,
       session: session,
       settings: settings,
     );
@@ -138,9 +136,9 @@ class TestDependencies {
     final localeCubit = LocaleCubit(settings);
 
     return TestDependencies._(
+      server,
       session,
       settings,
-      nativeChannels,
       reposCubit,
       mountCubit,
       localeCubit,
@@ -153,6 +151,7 @@ class TestDependencies {
     await mountCubit.close();
     await reposCubit.close();
     await session.close();
+    await server.stop();
   }
 
   MainPage createMainPage({
@@ -161,7 +160,6 @@ class TestDependencies {
       MainPage(
         localeCubit: localeCubit,
         mountCubit: mountCubit,
-        nativeChannels: nativeChannels,
         packageInfo: fakePackageInfo,
         receivedMedia: receivedMedia ?? Stream.empty(),
         reposCubit: reposCubit,
@@ -171,9 +169,9 @@ class TestDependencies {
         dirs: dirs,
       );
 
+  final Server server;
   final Session session;
   final Settings settings;
-  final NativeChannels nativeChannels;
   final ReposCubit reposCubit;
   final MountCubit mountCubit;
   final LocaleCubit localeCubit;

@@ -6,7 +6,7 @@ import 'package:ouisync_app/app/utils/utils.dart';
 import 'package:ouisync_app/app/utils/settings/v0/v0.dart' as v0;
 import 'package:ouisync_app/app/utils/settings/v1.dart' as v1;
 import 'package:ouisync_app/app/models/repo_location.dart';
-import 'package:ouisync/ouisync.dart' show Session;
+import 'package:ouisync/ouisync.dart' show Session, Server;
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -41,8 +41,12 @@ void main() {
     );
     await s0.setDefaultRepo('foo');
 
-    final session =
-        await Session.create(configPath: join(baseDir.path, 'config'));
+    final configPath = join(baseDir.path, 'config');
+
+    final server = Server.create(configPath: configPath);
+    await server.start();
+
+    final session = await Session.create(configPath: configPath);
 
     await session.createRepository(
       path: fooPath,
@@ -74,6 +78,9 @@ void main() {
         RepoLocation.fromDbPath(barPath),
       ]),
     );
+
+    await session.close();
+    await server.stop();
   });
 
   test('settings migration v1 to v2', () async {
@@ -101,8 +108,12 @@ void main() {
     await s1.setRepoLocation(DatabaseId('123'), repoLocation);
     await s1.setDefaultRepo(repoLocation);
 
-    final session =
-        await Session.create(configPath: join(baseDir.path, 'config'));
+    final configPath = join(baseDir.path, 'config');
+
+    final server = Server.create(configPath: configPath);
+    await server.start();
+
+    final session = await Session.create(configPath: configPath);
 
     await session.createRepository(
       path: fooPath,
@@ -136,6 +147,9 @@ void main() {
         RepoLocation.fromDbPath(barPath),
       ]),
     );
+
+    await session.close();
+    await server.stop();
   });
 
   test('master key', () async {
