@@ -7,6 +7,7 @@ import 'package:ouisync/ouisync.dart' show NetworkDefaults, Server, Session;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:stream_transform/stream_transform.dart';
 
 import '../generated/l10n.dart';
 import 'cubits/cubits.dart'
@@ -78,12 +79,13 @@ Future<HomeWidget> _initHomeWidget(List<String> args) async {
   var dirs = await Dirs.init();
   await LogUtils.init(dirs);
 
-  final session = await _initSession(dirs, windowManager);
+  final (server, session) = await _initServerAndSession(dirs, windowManager);
   final settings = await loadAndMigrateSettings(session);
   final localeCubit = LocaleCubit(settings);
 
   return HomeWidget(
     dirs: dirs,
+    server: server,
     session: session,
     windowManager: windowManager,
     settings: settings,
@@ -92,8 +94,10 @@ Future<HomeWidget> _initHomeWidget(List<String> args) async {
   );
 }
 
-Future<Session> _initSession(
-    Dirs dirs, PlatformWindowManager windowManager) async {
+Future<(Server, Session)> _initServerAndSession(
+  Dirs dirs,
+  PlatformWindowManager windowManager,
+) async {
   final server = Server.create(configPath: dirs.config);
 
   final logger = appLogger('');
@@ -121,7 +125,7 @@ Future<Session> _initSession(
       localDiscoveryEnabled: true,
     ));
 
-    return session;
+    return (server, session);
   } catch (e) {
     await server.stop();
     rethrow;
@@ -132,6 +136,7 @@ class HomeWidget extends StatefulWidget {
   HomeWidget({
     required this.windowManager,
     required this.dirs,
+    required this.server,
     required this.session,
     required this.settings,
     required this.packageInfo,
@@ -141,6 +146,7 @@ class HomeWidget extends StatefulWidget {
 
   final PlatformWindowManager windowManager;
   final Dirs dirs;
+  final Server server;
   final Session session;
   final Settings settings;
   final PackageInfo packageInfo;
@@ -155,10 +161,18 @@ class _HomeWidgetState extends State<HomeWidget>
   final receivedMediaController = StreamController<List<SharedMediaFile>>();
   late final MountCubit mountCubit;
   late final ReposCubit reposCubit;
+  late final StreamSubscription updateServerNotificationSubscription;
 
   @override
   void initState() {
     super.initState();
+
+    // Update the server notification for the current locale and also every time the current locale
+    // changes. This is so it always shows correctly localized messages.
+    updateServerNotificationSubscription = widget.localeCubit.stream
+        .startWith(widget.localeCubit.state)
+        .listen((_) => widget.server
+            .notify(contentTitle: S.current.messageBackgroundNotification));
 
     final cacheServers = CacheServers(widget.session);
     unawaited(cacheServers.addAll(Constants.cacheServers));
@@ -185,6 +199,8 @@ class _HomeWidgetState extends State<HomeWidget>
     unawaited(mountCubit.close());
     unawaited(receivedMediaController.close());
     //widget.appRouteObserver.unsubscribe(this);
+
+    unawaited(updateServerNotificationSubscription.cancel());
 
     super.dispose();
   }
