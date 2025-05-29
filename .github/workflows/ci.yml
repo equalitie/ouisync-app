@@ -116,7 +116,7 @@ jobs:
 
       - name: Generate the Dart bindings for the Ouisync library
         working-directory: ouisync/bindings/dart
-        run: dart util/bindgen.dart
+        run: dart tool/bindgen.dart
 
       - name: Analyze
         run: |
