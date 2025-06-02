@@ -674,6 +674,7 @@ Future<File> buildDebGUI({
     // HACK: `flutter build linux` doesn't support --flavor yet. Pass it via env variable instead.
     '--dart-define',
     'FLUTTER_APP_FLAVOR=${buildDesc.flavor}',
+    '--verbose',
   ]);
 
   final arch = 'amd64';
