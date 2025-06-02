@@ -101,9 +101,10 @@ Future<void> main(List<String> args) async {
     Flavor flavor = buildDesc.flavor;
 
     final secrets = switch (flavor.requiresSigning) {
-      true => options.androidKeyPropertiesPath != null
-          ? AndroidSecrets(options.androidKeyPropertiesPath!)
-          : await prepareAndroidSecretsFromPass(flavor),
+      true =>
+        options.androidKeyPropertiesPath != null
+            ? AndroidSecrets(options.androidKeyPropertiesPath!)
+            : await prepareAndroidSecretsFromPass(flavor),
       false => null,
     };
 
@@ -135,26 +136,31 @@ Future<void> main(List<String> args) async {
     /// Until we get the certificates and sign the MSIX, we don't upload it to
     /// GitHub releases.
     final asset = await buildWindowsMSIX(
-        options.identityName!, options.publisher!, sentryDSN);
+      options.identityName!,
+      options.publisher!,
+      sentryDSN,
+    );
     assets.add(await collateAsset(outputDir, name, buildDesc, asset));
   }
 
   if (options.debGui) {
     final asset = await buildDebGUI(
-        name: name,
-        outputDir: outputDir,
-        buildDesc: buildDesc,
-        description: pubspec.description ?? '',
-        sentryDSN: sentryDSN);
+      name: name,
+      outputDir: outputDir,
+      buildDesc: buildDesc,
+      description: pubspec.description ?? '',
+      sentryDSN: sentryDSN,
+    );
     assets.add(asset);
   }
 
   if (options.debCli) {
     final asset = await buildDebCLI(
-        name: name,
-        outputDir: outputDir,
-        buildDesc: buildDesc,
-        description: pubspec.description ?? '');
+      name: name,
+      outputDir: outputDir,
+      buildDesc: buildDesc,
+      description: pubspec.description ?? '',
+    );
     assets.add(asset);
   }
 
@@ -168,9 +174,10 @@ Future<void> main(List<String> args) async {
 
   await computeChecksums(assets);
 
-  final auth = options.token != null
-      ? Authentication.withToken(options.token)
-      : Authentication.anonymous();
+  final auth =
+      options.token != null
+          ? Authentication.withToken(options.token)
+          : Authentication.anonymous();
 
   if (options.action != null && options.awaitUpload) {
     print("Press any key to start uploading to github");
@@ -305,10 +312,12 @@ class Options {
           'Await user pressing enter to start uploading, useful for when doing --create and --update concurrently on two different PCs',
     );
 
-    parser.addOption('first-commit',
-        abbr: 'f',
-        help:
-            'Start of commit range to include in release notes. If omitted, includes everything since the previous release');
+    parser.addOption(
+      'first-commit',
+      abbr: 'f',
+      help:
+          'Start of commit range to include in release notes. If omitted, includes everything since the previous release',
+    );
     parser.addFlag(
       'detailed-log',
       abbr: 'l',
@@ -341,11 +350,15 @@ class Options {
       defaultsTo: 'nightly',
     );
 
-    parser.addOption('android-key-properties',
-        help: 'Path to Android key.properties file');
+    parser.addOption(
+      'android-key-properties',
+      help: 'Path to Android key.properties file',
+    );
 
-    parser.addOption('sentry',
-        help: 'Path to file containing Sentry DSN (single line)');
+    parser.addOption(
+      'sentry',
+      help: 'Path to file containing Sentry DSN (single line)',
+    );
 
     final results = parser.parse(args);
 
@@ -360,22 +373,25 @@ class Options {
     }
 
     final tokenFilePath = results['token-file'];
-    final token = (tokenFilePath != null)
-        ? await File(tokenFilePath).readAsString()
-        : null;
+    final token =
+        (tokenFilePath != null)
+            ? await File(tokenFilePath).readAsString()
+            : null;
 
     final slug = RepositorySlug.full(results['repo']!);
 
-    final action = results['create']
-        ? ReleaseAction.create
-        : results['update']
+    final action =
+        results['create']
+            ? ReleaseAction.create
+            : results['update']
             ? ReleaseAction.update
             : null;
 
     if (results['msix']) {
       if (results['identity-name'] == null || results['publisher'] == null) {
         print(
-            "The Windows MSIX creation requires the --identity-name and --publisher parameters");
+          "The Windows MSIX creation requires the --identity-name and --publisher parameters",
+        );
         exit(1);
       }
     }
@@ -386,7 +402,8 @@ class Options {
       final file = File(androidKeyProperties);
       if (!await file.exists()) {
         print(
-            "Android keystore properties file '$androidKeyProperties' does not exist");
+          "Android keystore properties file '$androidKeyProperties' does not exist",
+        );
         exit(1);
       }
 
@@ -423,7 +440,8 @@ class Options {
 
     if (!apk && !aab && !exe && !msix && !debGui && !debCli) {
       print(
-          "No package to build. Use one or more flags from {--apk, --aab, --exe, --msix, --deb-gui, --deb-cli}");
+        "No package to build. Use one or more flags from {--apk, --aab, --exe, --msix, --deb-gui, --deb-cli}",
+      );
       exit(1);
     }
 
@@ -449,10 +467,7 @@ class Options {
   }
 }
 
-enum ReleaseAction {
-  create,
-  update,
-}
+enum ReleaseAction { create, update }
 
 class BuildDesc {
   final Version version;
@@ -491,27 +506,26 @@ class BuildDesc {
   }
 
   StringBuffer _formatTimestamp(StringBuffer buffer, [String separator = '']) =>
-      buffer
-        ..write(formatDate(
-          timestamp,
-          [
-            yyyy,
-            separator,
-            mm,
-            separator,
-            dd,
-            separator,
-            HH,
-            separator,
-            nn,
-            separator,
-            ss,
-          ],
-        ));
+      buffer..write(
+        formatDate(timestamp, [
+          yyyy,
+          separator,
+          mm,
+          separator,
+          dd,
+          separator,
+          HH,
+          separator,
+          nn,
+          separator,
+          ss,
+        ]),
+      );
 
-  StringBuffer _formatRevision(StringBuffer buffer) => _formatTimestamp(buffer)
-    ..write('.')
-    ..write(commit);
+  StringBuffer _formatRevision(StringBuffer buffer) =>
+      _formatTimestamp(buffer)
+        ..write('.')
+        ..write(commit);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -544,12 +558,14 @@ Future<File> buildWindowsInstaller(
 
   final innoScript =
       await File("windows/inno-setup.iss.template").readAsString();
-  await File("build/inno-setup.iss").writeAsString(
-    innoScript.replaceAll("<APP_VERSION>", buildName),
-  );
+  await File(
+    "build/inno-setup.iss",
+  ).writeAsString(innoScript.replaceAll("<APP_VERSION>", buildName));
 
-  await run("C:/Program Files (x86)/Inno Setup 6/Compil32.exe",
-      ['/cc', 'build/inno-setup.iss']);
+  await run("C:/Program Files (x86)/Inno Setup 6/Compil32.exe", [
+    '/cc',
+    'build/inno-setup.iss',
+  ]);
 
   return File('build/windows/x64/runner/Release/ouisync-installer.exe');
 }
@@ -560,7 +576,10 @@ Future<File> buildWindowsInstaller(
 //
 ////////////////////////////////////////////////////////////////////////////////
 Future<File> buildWindowsMSIX(
-    String identityName, String publisher, String? sentryDSN) async {
+  String identityName,
+  String publisher,
+  String? sentryDSN,
+) async {
   if (await Directory(windowsArtifactDir).exists()) {
     // We had a problem when creating the msix when there was an executable from
     // previous non-msix builds, the executable was not regenerated and the
@@ -576,7 +595,7 @@ Future<File> buildWindowsMSIX(
     identityName,
     '--publisher',
     publisher,
-    '--store'
+    '--store',
   ];
 
   /// We first build the MSIX, before adding the additional assets to be
@@ -585,7 +604,7 @@ Future<File> buildWindowsMSIX(
     'run',
     if (sentryDSN != null) '--define=SENTRY_DSN=$sentryDSN',
     'msix:build',
-    ...args
+    ...args,
   ]);
 
   /// Download the Dokan MSI to be bundle with the Ouisync MSIX, into the source
@@ -699,8 +718,9 @@ Future<File> buildDebGUI({
 
   final binDir = Directory('${packageDir.path}/usr/bin');
   await binDir.create();
-  await Link('${binDir.path}/$executableName')
-      .create('../lib/$name/$executableName');
+  await Link(
+    '${binDir.path}/$executableName',
+  ).create('../lib/$name/$executableName');
 
   // Create desktop file
   final desktopDir = Directory('${packageDir.path}/usr/share/applications');
@@ -708,7 +728,8 @@ Future<File> buildDebGUI({
 
   final capitalizedName = '${name[0].toUpperCase()}${name.substring(1)}';
 
-  final desktopContent = '[Desktop Entry]\n'
+  final desktopContent =
+      '[Desktop Entry]\n'
       'Name=$capitalizedName\n'
       'GenericName=File synchronization\n'
       'Version=$buildName\n'
@@ -718,15 +739,17 @@ Future<File> buildDebGUI({
       'Type=Application\n'
       'Icon=$name\n'
       'Categories=Network;FileTransfer;P2P\n';
-  await File('${desktopDir.path}/$applicationId.desktop')
-      .writeAsString(desktopContent);
+  await File(
+    '${desktopDir.path}/$applicationId.desktop',
+  ).writeAsString(desktopContent);
 
   // Add icon
   final iconSrc = File('assets/ouisync_icon.png');
 
   for (final res in [16, 22, 24, 32, 48, 64, 128, 256]) {
     final iconDir = Directory(
-        '${packageDir.path}/usr/share/icons/hicolor/${res}x$res/apps');
+      '${packageDir.path}/usr/share/icons/hicolor/${res}x$res/apps',
+    );
     await iconDir.create(recursive: true);
 
     final iconDst = File('${iconDir.path}/$name.png');
@@ -738,7 +761,8 @@ Future<File> buildDebGUI({
   final debDir = Directory('${packageDir.path}/DEBIAN');
   await debDir.create();
 
-  final controlContent = 'Package: $name-gui\n'
+  final controlContent =
+      'Package: $name-gui\n'
       'Version: $buildName\n'
       'Architecture: $arch\n'
       'Depends: libgtk-3-0, libsecret-1-0, libfuse2, libayatana-appindicator3-1, libappindicator3-1\n'
@@ -763,15 +787,20 @@ Future<File> buildDebGUI({
 // deb CLI
 //
 ////////////////////////////////////////////////////////////////////////////////
-Future<File> buildDebCLI(
-    {required String name,
-    required Directory outputDir,
-    required BuildDesc buildDesc,
-    String description = ''}) async {
+Future<File> buildDebCLI({
+  required String name,
+  required Directory outputDir,
+  required BuildDesc buildDesc,
+  String description = '',
+}) async {
   final buildName = buildDesc.toString();
 
-  await run('cargo', ['build', '--release', '--package', 'ouisync-cli'],
-      workingDirectory: './ouisync');
+  await run('cargo', [
+    'build',
+    '--release',
+    '--package',
+    'ouisync-cli',
+  ], workingDirectory: './ouisync');
 
   final arch = 'amd64';
   final packageName = '$name-cli_${buildDesc}_$arch';
@@ -797,7 +826,8 @@ Future<File> buildDebCLI(
   final debDir = Directory('${packageDir.path}/DEBIAN');
   await debDir.create();
 
-  final controlContent = 'Package: $name-cli\n'
+  final controlContent =
+      'Package: $name-cli\n'
       'Version: $buildName\n'
       'Architecture: $arch\n'
       'Depends: libfuse2\n'
@@ -840,21 +870,17 @@ Future<File> buildAab(
 
   print('Creating Android App Bundle ...');
 
-  await run(
-    'flutter',
-    [
-      'build',
-      'appbundle',
-      '--release',
-      if (sentryDSN != null) '--dart-define=SENTRY_DSN=$sentryDSN',
-      '--build-number',
-      buildDesc.buildIdentifier,
-      '--flavor=$flavor',
-      '--build-name',
-      buildDesc.toString(),
-    ],
-    environment: env,
-  );
+  await run('flutter', [
+    'build',
+    'appbundle',
+    '--release',
+    if (sentryDSN != null) '--dart-define=SENTRY_DSN=$sentryDSN',
+    '--build-number',
+    buildDesc.buildIdentifier,
+    '--flavor=$flavor',
+    '--build-name',
+    buildDesc.toString(),
+  ], environment: env);
 
   return File(inputPath);
 }
@@ -865,7 +891,10 @@ Future<File> buildAab(
 //
 ////////////////////////////////////////////////////////////////////////////////
 Future<File> extractApk(
-    File bundle, Flavor flavor, AndroidSecrets? secrets) async {
+  File bundle,
+  Flavor flavor,
+  AndroidSecrets? secrets,
+) async {
   final outputPath = p.setExtension(bundle.path, '.apk');
   final outputFile = File(outputPath);
 
@@ -907,7 +936,7 @@ Future<File> extractApk(
 
   try {
     final inputStream = InputFileStream(tempPath);
-    final archive = ZipDecoder().decodeBuffer(inputStream);
+    final archive = ZipDecoder().decodeStream(inputStream);
     archive
         .findFile('universal.apk')!
         .writeContent(OutputFileStream(outputFile.path));
@@ -985,12 +1014,13 @@ Future<Release> createRelease(
   );
 
   final release = await client.repositories.createRelease(
-      slug,
-      CreateRelease(tagName)
-        ..name = 'Ouisync $tagName'
-        ..body = body
-        ..isDraft = true
-        ..isPrerelease = false);
+    slug,
+    CreateRelease(tagName)
+      ..name = 'Ouisync $tagName'
+      ..body = body
+      ..isDraft = true
+      ..isPrerelease = false,
+  );
 
   print('Release $tagName ($last) successfully created: ${release.htmlUrl}');
 
@@ -1018,22 +1048,20 @@ Future<void> uploadAssets(
   for (final asset in assets) {
     final name = p.basename(asset.path);
     final content = await asset.readAsBytes();
-    final contentType = p.extension(name) == checksumExtension
-        ? 'text/plain'
-        : 'application/octet-stream';
+    final contentType =
+        p.extension(name) == checksumExtension
+            ? 'text/plain'
+            : 'application/octet-stream';
 
     print('Uploading $name ...');
 
-    await client.repositories.uploadReleaseAssets(
-      release,
-      [
-        CreateReleaseAsset(
-          name: name,
-          contentType: contentType,
-          assetData: content,
-        )
-      ],
-    );
+    await client.repositories.uploadReleaseAssets(release, [
+      CreateReleaseAsset(
+        name: name,
+        contentType: contentType,
+        assetData: content,
+      ),
+    ]);
   }
 
   print('${assets.length} assets successfully uploaded');
@@ -1047,8 +1075,9 @@ Future<File> collateAsset(
   String suffix = '',
 }) async {
   final ext = p.extension(inputFile.path);
-  return await inputFile
-      .copy(p.join(outputDir.path, '${name}_$buildDesc$suffix$ext'));
+  return await inputFile.copy(
+    p.join(outputDir.path, '${name}_$buildDesc$suffix$ext'),
+  );
 }
 
 const checksumExtension = '.sha256';
@@ -1097,48 +1126,32 @@ Future<String> buildReleaseNotes(
 
   // Library
   final libSlug = RepositorySlug(slug.owner, 'ouisync');
-  final libLast = await getSubmoduleCommit(
-    last,
-    'ouisync',
-  );
-  final libFirst = await getSubmoduleCommit(
-    first,
-    'ouisync',
-  );
+  final libLast = await getSubmoduleCommit(last, 'ouisync');
+  final libFirst = await getSubmoduleCommit(first, 'ouisync');
 
   if (libFirst != null && libLast != null && libFirst != libLast) {
     buf.writeln('');
     buf.writeln('### Library');
     buf.writeln('');
-    buf.writeln(
-      changelogUrl(libSlug, libFirst, libLast),
-    );
+    buf.writeln(changelogUrl(libSlug, libFirst, libLast));
 
     if (detailedLog) {
       buf.writeln('');
-      buf.writeln(await getLog(
-        libSlug,
-        libFirst,
-        libLast,
-        'ouisync',
-      ));
+      buf.writeln(await getLog(libSlug, libFirst, libLast, 'ouisync'));
     }
   }
 
   return buf.toString();
 }
 
-Future<String> getCommit([String? workingDirectory]) => runCapture(
-      'git',
-      ['rev-parse', '--short', 'HEAD'],
-      workingDirectory: workingDirectory,
-    );
+Future<String> getCommit([String? workingDirectory]) => runCapture('git', [
+  'rev-parse',
+  '--short',
+  'HEAD',
+], workingDirectory: workingDirectory);
 
 Future<String?> getSubmoduleCommit(String superCommit, String submodule) async {
-  final output = await runCapture(
-    'git',
-    ['ls-tree', superCommit, submodule],
-  );
+  final output = await runCapture('git', ['ls-tree', superCommit, submodule]);
   final parts = output.split(RegExp(r'\s+'));
 
   if (parts.length < 3) {
@@ -1154,16 +1167,11 @@ Future<String> getLog(
   String first,
   String last, [
   String? workingDirectory,
-]) =>
-    runCapture(
-      'git',
-      [
-        'log',
-        '$first...$last',
-        '--pretty=format:- https://github.com/${slug.owner}/${slug.name}/commit/%h %s'
-      ],
-      workingDirectory: workingDirectory,
-    );
+]) => runCapture('git', [
+  'log',
+  '$first...$last',
+  '--pretty=format:- https://github.com/${slug.owner}/${slug.name}/commit/%h %s',
+], workingDirectory: workingDirectory);
 
 String changelogUrl(RepositorySlug slug, String first, String last) {
   return 'https://github.com/${slug.owner}/${slug.name}/compare/$first...$last';
@@ -1206,9 +1214,12 @@ Version determineVersion(Pubspec pubspec, Options options) {
     throw "Pre-release string (the \"foo\" in \"1.2.3-foo\") is already set in pubspec.yaml";
   }
   return Version(
-      pubspecVersion.major, pubspecVersion.minor, pubspecVersion.patch,
-      pre: options.flavor.toString(),
-      build: pubspecVersion.build[0].toString());
+    pubspecVersion.major,
+    pubspecVersion.minor,
+    pubspecVersion.patch,
+    pre: options.flavor.toString(),
+    build: pubspecVersion.build[0].toString(),
+  );
 }
 
 Future<void> run(
@@ -1309,14 +1320,15 @@ Future<bool> checkWorkingTreeIsClean(GitDir git) async {
 }
 
 Future<void> createIcon(File src, File dst, int resolution) async {
-  final command = image.Command()
-    ..decodeImageFile(src.path)
-    ..copyResize(
-      width: resolution,
-      height: resolution,
-      interpolation: image.Interpolation.cubic,
-    )
-    ..writeToFile(dst.path);
+  final command =
+      image.Command()
+        ..decodeImageFile(src.path)
+        ..copyResize(
+          width: resolution,
+          height: resolution,
+          interpolation: image.Interpolation.cubic,
+        )
+        ..writeToFile(dst.path);
 
   await command.executeThread();
 }
@@ -1361,10 +1373,11 @@ class Pass {
 }
 
 Future<AndroidSecrets> prepareAndroidSecretsFromPass(Flavor flavor) async {
-  final dir = await (await Directory(
-              '${Directory.systemTemp.path}/ouisync-android-secrets')
-          .create())
-      .createTemp();
+  final dir =
+      await (await Directory(
+            '${Directory.systemTemp.path}/ouisync-android-secrets',
+          ).create())
+          .createTemp();
 
   Future<void> deleteSecrets() => dir.delete(recursive: true);
 
