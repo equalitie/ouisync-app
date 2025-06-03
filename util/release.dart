@@ -936,12 +936,12 @@ Future<File> extractApk(
 
   try {
     final inputStream = InputFileStream(tempPath);
-    final archive = ZipDecoder().decodeStream(inputStream);
-    archive
-        .findFile('universal.apk')!
-        .writeContent(OutputFileStream(outputFile.path));
+    final outputStream = OutputFileStream(outputFile.path);
 
-    // Need to close this otherwise we won't be able to delete `tempPath` on Windows.
+    final archive = ZipDecoder().decodeStream(inputStream);
+    archive.find('universal.apk')!.writeContent(outputStream);
+
+    await outputStream.close();
     await inputStream.close();
 
     return outputFile;
@@ -957,7 +957,7 @@ Future<File> extractApk(
 ////////////////////////////////////////////////////////////////////////////////
 
 Future<String> prepareBundletool() async {
-  final version = "1.8.2";
+  final version = "1.18.1";
   final name = "bundletool-all-$version.jar";
   final path = p.join(rootWorkDir, name);
 
