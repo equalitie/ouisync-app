@@ -21,10 +21,10 @@ Future<DisambiguationAction?> pickEntryDisambiguationAction(
   BuildContext context,
   String entryName,
   EntryType entryType,
-) async =>
-    await showDialog<DisambiguationAction?>(
-      context: context,
-      builder: (BuildContext context) => AlertDialog(
+) async => await showDialog<DisambiguationAction?>(
+  context: context,
+  builder:
+      (BuildContext context) => AlertDialog(
         title: Flex(
           direction: Axis.horizontal,
           children: [
@@ -32,12 +32,12 @@ Future<DisambiguationAction?> pickEntryDisambiguationAction(
               S.current.titleMovingEntry,
               style: context.theme.appTextStyle.titleMedium,
               maxLines: 2,
-            )
+            ),
           ],
         ),
         content: ReplaceKeepEntry(name: entryName, type: entryType),
       ),
-    );
+);
 
 Future<String> disambiguateEntryName({
   required RepoCubit repoCubit,
@@ -69,8 +69,10 @@ Future<void> viewFile({
 }) async {
   Future<void> view() async {
     if (Platform.isAndroid) {
+      final uri = _makeAndroidUri(repo, path, packageInfo);
+
       // TODO: consider using launchUrl here as well
-      if (!await oui.viewFile(_makeAndroidUri(repo, path, packageInfo))) {
+      if (!await oui.viewFile(uri)) {
         throw _AppNotFound();
       }
     } else if (Platform.isLinux || Platform.isWindows) {
@@ -79,16 +81,17 @@ Future<void> viewFile({
         throw _RepoNotMounted();
       }
 
-      final url = Uri(scheme: 'file', path: posix.join(mountPoint, path));
+      final url = Uri(scheme: 'file', path: '$mountPoint$path');
 
       // Special non ASCII characters are encoded using Escape Encoding
       // https://datatracker.ietf.org/doc/html/rfc2396#section-2.4.1
       // which are not decoded back by the url_launcher plugin on Windows
       // before passing to the system for execution. Thus on Windows
       // we use the `launchUrlString` function instead of `launchUrl`.
-      final result = Platform.isWindows
-          ? await launchUrlString(Uri.decodeFull(url.toString()))
-          : await launchUrl(url);
+      final result =
+          Platform.isWindows
+              ? await launchUrlString(Uri.decodeFull(url.toString()))
+              : await launchUrl(url);
 
       if (!result) {
         throw _AppNotFound();
@@ -118,11 +121,7 @@ Future<void> viewFile({
   } on _NotImplemented {
     showSnackBar(S.current.messageFilePreviewNotAvailable);
   } on PlatformException catch (e, st) {
-    loggy.error(
-      'Error viewing file $path:',
-      e,
-      st,
-    );
+    loggy.error('Error viewing file $path:', e, st);
 
     showSnackBar(S.current.messagePreviewingFileFailed(path));
   }
@@ -144,7 +143,7 @@ Uri _makeAndroidUri(RepoCubit repo, String path, PackageInfo packageInfo) =>
     Uri(
       scheme: 'content',
       host: '${packageInfo.packageName}.provider',
-      path: posix.join(repo.name, path),
+      path: '${repo.name}$path',
     );
 
 class _RepoNotMounted implements Exception {}
