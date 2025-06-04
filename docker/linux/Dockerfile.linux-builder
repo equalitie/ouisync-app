@@ -1,0 +1,54 @@
+# Intentionally using an older LTS version because binaries built there will
+# run in newer versions, but not vice versa.
+FROM ubuntu:24.04
+
+ENV FLUTTER_VERSION=3.29.3
+
+RUN apt-get update && apt-get upgrade -y
+RUN apt-get install -y \
+    build-essential cmake ninja-build clang pkg-config \
+    git xxd unzip \
+    wget curl \
+    libgtk-3-dev libfuse-dev libappindicator3-dev libsecret-1-dev libcurl4-openssl-dev \
+    python3-minimal \
+    openjdk-17-jdk
+
+# download and install sdkmanager
+# https://developer.android.com/studio#command-tools
+ARG ANDROID_SDK_VERSION=13114758
+ENV ANDROID_SDK_ROOT /opt/android-sdk
+RUN mkdir -p ${ANDROID_SDK_ROOT}/cmdline-tools && \
+    wget -q https://dl.google.com/android/repository/commandlinetools-linux-${ANDROID_SDK_VERSION}_latest.zip && \
+    unzip *tools*linux*.zip -d ${ANDROID_SDK_ROOT}/cmdline-tools && \
+    mv ${ANDROID_SDK_ROOT}/cmdline-tools/cmdline-tools ${ANDROID_SDK_ROOT}/cmdline-tools/tools && \
+    rm commandlinetools-linux-*_latest.zip
+
+# download and install Android SDK and NDK
+ENV PATH="${ANDROID_SDK_ROOT}/cmdline-tools/tools/bin:${PATH}"
+RUN yes | sdkmanager --licenses
+RUN sdkmanager --install 'ndk;27.2.12479018' 'platforms;android-36' 'build-tools;36.0.0'
+
+# install flutter
+RUN wget https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_${FLUTTER_VERSION}-stable.tar.xz -P /tmp
+RUN tar xf /tmp/flutter_linux_*-stable.tar.xz -C /opt
+RUN rm /tmp/flutter_linux_*-stable.tar.xz
+ENV PATH="/opt/flutter/bin:$PATH"
+
+# Git doesn't like directories with dubious ownership, it's OK in a container
+# https://nvd.nist.gov/vuln/detail/CVE-2022-24765
+RUN git config --global --add safe.directory /opt/flutter
+
+RUN flutter config --enable-android --enable-linux-desktop
+RUN flutter precache --linux
+RUN flutter config --no-analytics
+RUN flutter doctor -v
+
+# install rust
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+ENV PATH="/root/.cargo/bin:$PATH"
+RUN rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
+
+# some dependency requires python
+RUN ln -s /usr/bin/python3 /usr/bin/python
+
+WORKDIR /opt
