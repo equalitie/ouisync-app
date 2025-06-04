@@ -30,44 +30,40 @@ import 'widgets/media_receiver.dart';
 
 Future<Widget> initApp([List<String> args = const []]) async =>
     FutureBuilder<HomeWidget>(
-        future: _initHomeWidget(args),
-        builder: (context, snapshot) {
-          final home = snapshot.data;
+      future: _initHomeWidget(args),
+      builder: (context, snapshot) {
+        final home = snapshot.data;
 
-          if (home != null) {
-            return BlocBuilder<LocaleCubit, LocaleState>(
-              bloc: home.localeCubit,
-              builder: (context, localeState) => _buildMaterialApp(
-                locale: localeState.currentLocale,
-                home: home,
-              ),
-            );
-          } else {
-            return _buildMaterialApp(home: LoadingScreen());
-          }
-        });
-
-Widget _buildMaterialApp({
-  required Widget home,
-  Locale? locale,
-}) =>
-    MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: _setupAppThemeData(),
-      locale: locale,
-      localizationsDelegates: const [
-        S.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: S.delegate.supportedLocales,
-      home: home,
-      builder: (context, child) => FlavorBanner(
-        child: child ?? SizedBox.shrink(),
-      ),
-      navigatorObservers: [_AppNavigatorObserver()],
+        if (home != null) {
+          return BlocBuilder<LocaleCubit, LocaleState>(
+            bloc: home.localeCubit,
+            builder:
+                (context, localeState) => _buildMaterialApp(
+                  locale: localeState.currentLocale,
+                  home: home,
+                ),
+          );
+        } else {
+          return _buildMaterialApp(home: LoadingScreen());
+        }
+      },
     );
+
+Widget _buildMaterialApp({required Widget home, Locale? locale}) => MaterialApp(
+  debugShowCheckedModeBanner: false,
+  theme: _setupAppThemeData(),
+  locale: locale,
+  localizationsDelegates: const [
+    S.delegate,
+    GlobalMaterialLocalizations.delegate,
+    GlobalWidgetsLocalizations.delegate,
+    GlobalCupertinoLocalizations.delegate,
+  ],
+  supportedLocales: S.delegate.supportedLocales,
+  home: home,
+  builder: (context, child) => FlavorBanner(child: child ?? SizedBox.shrink()),
+  navigatorObservers: [_AppNavigatorObserver()],
+);
 
 Future<HomeWidget> _initHomeWidget(List<String> args) async {
   final packageInfo = await PackageInfo.fromPlatform();
@@ -98,14 +94,19 @@ Future<(Server, Session)> _initServerAndSession(
   Dirs dirs,
   PlatformWindowManager windowManager,
 ) async {
-  final server = Server.create(configPath: dirs.config);
-
   final logger = appLogger('');
+
+  final server = Server.create(configPath: dirs.config);
   server.initLog(
     callback: (level, message) => logger.log(level.toLoggy(), message),
   );
 
-  await server.start();
+  try {
+    await server.start();
+  } catch (e, st) {
+    logger.error('failed to start server:', e, st);
+    rethrow;
+  }
 
   try {
     final session = await Session.create(configPath: dirs.config);
@@ -119,14 +120,17 @@ Future<(Server, Session)> _initServerAndSession(
       await session.setStoreDir(dirs.defaultStore);
     }
 
-    await session.initNetwork(NetworkDefaults(
-      bind: ['quic/0.0.0.0:0', 'quic/[::]:0'],
-      portForwardingEnabled: true,
-      localDiscoveryEnabled: true,
-    ));
+    await session.initNetwork(
+      NetworkDefaults(
+        bind: ['quic/0.0.0.0:0', 'quic/[::]:0'],
+        portForwardingEnabled: true,
+        localDiscoveryEnabled: true,
+      ),
+    );
 
     return (server, session);
-  } catch (e) {
+  } catch (e, st) {
+    logger.error('failed to initialize session:', e, st);
     await server.stop();
     rethrow;
   }
@@ -171,8 +175,11 @@ class _HomeWidgetState extends State<HomeWidget>
     // changes. This is so it always shows correctly localized messages.
     updateServerNotificationSubscription = widget.localeCubit.stream
         .startWith(widget.localeCubit.state)
-        .listen((_) => widget.server
-            .notify(contentTitle: S.current.messageBackgroundNotification));
+        .listen(
+          (_) => widget.server.notify(
+            contentTitle: S.current.messageBackgroundNotification,
+          ),
+        );
 
     final cacheServers = CacheServers(widget.session);
     unawaited(cacheServers.addAll(Constants.cacheServers));
@@ -207,20 +214,23 @@ class _HomeWidgetState extends State<HomeWidget>
 
   @override
   Widget build(BuildContext context) => MediaReceiver(
-        controller: receivedMediaController,
-        child: OnboardingPage(widget.localeCubit, widget.settings,
-            mainPage: MainPage(
-              localeCubit: widget.localeCubit,
-              mountCubit: mountCubit,
-              packageInfo: widget.packageInfo,
-              receivedMedia: receivedMediaController.stream,
-              reposCubit: reposCubit,
-              session: widget.session,
-              settings: widget.settings,
-              windowManager: widget.windowManager,
-              dirs: widget.dirs,
-            )),
-      );
+    controller: receivedMediaController,
+    child: OnboardingPage(
+      widget.localeCubit,
+      widget.settings,
+      mainPage: MainPage(
+        localeCubit: widget.localeCubit,
+        mountCubit: mountCubit,
+        packageInfo: widget.packageInfo,
+        receivedMedia: receivedMediaController.stream,
+        reposCubit: reposCubit,
+        session: widget.session,
+        settings: widget.settings,
+        windowManager: widget.windowManager,
+        dirs: widget.dirs,
+      ),
+    ),
+  );
 
   Future<void> _init() async {
     await widget.windowManager.setTitle(S.current.messageOuiSyncDesktopTitle);
@@ -229,26 +239,29 @@ class _HomeWidgetState extends State<HomeWidget>
 }
 
 ThemeData _setupAppThemeData() => ThemeData().copyWith(
-        appBarTheme: AppBarTheme(),
-        focusColor: Colors.black26,
-        textTheme: TextTheme().copyWith(
-            bodyLarge: AppTypography.bodyBig,
-            bodyMedium: AppTypography.bodyMedium,
-            bodySmall: AppTypography.bodySmall,
-            titleMedium: AppTypography.titleMedium),
-        extensions: <ThemeExtension<dynamic>>[
-          AppTextThemeExtension(
-              titleLarge: AppTypography.titleBig,
-              titleMedium: AppTypography.titleMedium,
-              titleSmall: AppTypography.titleSmall,
-              bodyLarge: AppTypography.bodyBig,
-              bodyMedium: AppTypography.bodyMedium,
-              bodySmall: AppTypography.bodySmall,
-              bodyMicro: AppTypography.bodyMicro,
-              labelLarge: AppTypography.labelBig,
-              labelMedium: AppTypography.labelMedium,
-              labelSmall: AppTypography.labelSmall)
-        ]);
+  appBarTheme: AppBarTheme(),
+  focusColor: Colors.black26,
+  textTheme: TextTheme().copyWith(
+    bodyLarge: AppTypography.bodyBig,
+    bodyMedium: AppTypography.bodyMedium,
+    bodySmall: AppTypography.bodySmall,
+    titleMedium: AppTypography.titleMedium,
+  ),
+  extensions: <ThemeExtension<dynamic>>[
+    AppTextThemeExtension(
+      titleLarge: AppTypography.titleBig,
+      titleMedium: AppTypography.titleMedium,
+      titleSmall: AppTypography.titleSmall,
+      bodyLarge: AppTypography.bodyBig,
+      bodyMedium: AppTypography.bodyMedium,
+      bodySmall: AppTypography.bodySmall,
+      bodyMicro: AppTypography.bodyMicro,
+      labelLarge: AppTypography.labelBig,
+      labelMedium: AppTypography.labelMedium,
+      labelSmall: AppTypography.labelSmall,
+    ),
+  ],
+);
 
 class LoadingScreen extends StatelessWidget {
   const LoadingScreen({super.key});
@@ -269,28 +282,33 @@ class _AppNavigatorObserver extends NavigatorObserver with AppLogger {
   @override
   void didPush(Route route, Route? previousRoute) {
     _pushHistory(
-        "push next:${route.hashCode} onTopOf:${previousRoute?.hashCode}",
-        StackTrace.current);
+      "push next:${route.hashCode} onTopOf:${previousRoute?.hashCode}",
+      StackTrace.current,
+    );
   }
 
   @override
   void didReplace({Route? newRoute, Route? oldRoute}) {
-    _pushHistory("replace new:${newRoute?.hashCode} old:${oldRoute?.hashCode}",
-        StackTrace.current);
+    _pushHistory(
+      "replace new:${newRoute?.hashCode} old:${oldRoute?.hashCode}",
+      StackTrace.current,
+    );
   }
 
   @override
   void didRemove(Route route, Route? previousRoute) {
     _pushHistory(
-        "remove route:${route.hashCode} previous:${previousRoute?.hashCode}",
-        StackTrace.current);
+      "remove route:${route.hashCode} previous:${previousRoute?.hashCode}",
+      StackTrace.current,
+    );
   }
 
   @override
   void didPop(Route beingPopped, Route? nextCurrent) {
     _pushHistory(
-        "pop beingPopped:${beingPopped.hashCode} nextCurrent:${nextCurrent?.hashCode}",
-        StackTrace.current);
+      "pop beingPopped:${beingPopped.hashCode} nextCurrent:${nextCurrent?.hashCode}",
+      StackTrace.current,
+    );
 
     if (nextCurrent == null) {
       // The user will now see the black screen.
@@ -306,8 +324,9 @@ class _AppNavigatorObserver extends NavigatorObserver with AppLogger {
   }
 
   void _reportProblem(String reason) {
-    final buffer =
-        StringBuffer("::::::::AppNavigationObserver error: $reason\n");
+    final buffer = StringBuffer(
+      "::::::::AppNavigationObserver error: $reason\n",
+    );
     for (final e in _stackHistory) {
       buffer.write(":::: ${e.action}\n");
       buffer.write(e.stackTrace);
