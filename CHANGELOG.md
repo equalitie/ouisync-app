@@ -14,13 +14,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Implement operations on multiple files/directories (copy, move, delete, download and upload).
 - Various smaller UI/UX improvements.
 
-## [v0.8.3](https://github.com/equalitie/ouisync-app/compare/v0.8.2...v0.8.3-production)
+## [v0.8.3](https://github.com/equalitie/ouisync-app/compare/v0.8.2...v0.8.3-production) - 2024-11-15
 
 - Fix few instances of black screens caused by popping more routes than were pushed into the navigator
 - Localize more strings
 - Fix storing files from Ouisync onto the file system (storage permissions)
 
-## [v0.8.2](https://github.com/equalitie/ouisync-app/compare/v0.8.1...v0.8.2)
+## [v0.8.2](https://github.com/equalitie/ouisync-app/compare/v0.8.1...v0.8.2) - 2024-10-25
 
 - Add a screen for switching languages
 - Fix RTL Locale
@@ -29,7 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix NAT Type detection by ignoring STUN servers which incorrectly return the "alternate-IP" same as their own
 - Various fixes and sync speed improvements
 
-## [v0.8.1](https://github.com/equalitie/ouisync-app/compare/v0.8.0...v0.8.1)
+## [v0.8.1](https://github.com/equalitie/ouisync-app/compare/v0.8.0...v0.8.1) - 2024-08-22
 
 - Fix issue with Copy/Pasting files into Ouisync on Windows
 - Improve explanation of mounting and other errors
@@ -38,7 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improve progress indication
 - Add translations
 
-## [v0.8.0](https://github.com/equalitie/ouisync-app/compare/v0.7.8...v0.8.0)
+## [v0.8.0](https://github.com/equalitie/ouisync-app/compare/v0.7.8...v0.8.0) - 2024-05-27
 
 - Add sync progress/activity indicator
 - Small improvements to the file and directory sorting functionality
@@ -62,7 +62,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Syncing performance improvements
 - Change the Windows executable name from `ouisync` to `ouisync-gui`
 
-## [v0.7.8](https://github.com/equalitie/ouisync-app/compare/v0.7.7...v0.7.8)
+## [v0.7.8](https://github.com/equalitie/ouisync-app/compare/v0.7.7...v0.7.8) - 2024-01-17
 
 - Show NAT type using the new STUN-based API
 - Implement IP and NAT detection with STUN
@@ -85,11 +85,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix creating file names with non ASCII names
 - Fix regression where unexpired blocks were not requested again
 
-## [v0.7.7](https://github.com/equalitie/ouisync-app/compare/v0.7.6...v0.7.7)
+## [v0.7.7](https://github.com/equalitie/ouisync-app/compare/v0.7.6...v0.7.7) - 2023-12-05
 
 - Update the Ouisync library to fix a bug in re-downloading expired blocks
 
-## [v0.7.6](https://github.com/equalitie/ouisync-app/compare/v0.7.3...v0.7.6)
+## [v0.7.6](https://github.com/equalitie/ouisync-app/compare/v0.7.3...v0.7.6) - 2023-12-05
 
 - Fixing issues with downloading files on the device caused by different behavior on different Android versions.
 - Better handing of SIGINT and SIGTERM (Ctrl-C) on Linux
@@ -98,7 +98,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix downloading files from Onuisync onto PC on Linux
 - Peer count now counts the number of peers, not the number of connections
 
-## [v0.7.3](https://github.com/equalitie/ouisync-app/compare/v0.7.2...v0.7.3)
+## [v0.7.3](https://github.com/equalitie/ouisync-app/compare/v0.7.2...v0.7.3) 2023-10-20
 
 - Fixed message explosion caused by non-commutative merges
 - Windows msix package
@@ -113,7 +113,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix file download progress indicator
 - Improve on-disk performance by implementing block cache and write operation batching
 
-## [v0.7.2](https://github.com/equalitie/ouisync-app/compare/v0.7.0-beta...v0.7.2)
+## [v0.7.2](https://github.com/equalitie/ouisync-app/compare/v0.7.0-beta...v0.7.2) - 2023-10-06
 
 - Windows msix package
 - Add Linux GUI support
@@ -127,7 +127,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix file download progress indicator
 - Improve on-disk performance by implementing block cache and write operation batching
 
-## [v0.7.0-beta](https://github.com/equalitie/ouisync-app/compare/v0.3.11...v0.7.0-beta)
+## [v0.7.0-beta](https://github.com/equalitie/ouisync-app/compare/v0.3.11...v0.7.0-beta) - 2023-07-27
 
 - Create, package and release Windows installer.
 - Fix and add notifications for when mounting fails on windows.
@@ -143,13 +143,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Save logs to the Download directory by default
 - Add terms and conditions
 
-## [v0.3.11](https://github.com/equalitie/ouisync-app/compare/v0.3.10...v0.3.11)
+## [v0.3.11](https://github.com/equalitie/ouisync-app/compare/v0.3.10...v0.3.11) - 2022-10-01
 
 - Fix recently broken "enable/disable DHT button" sometimes not switching.
 - Network while on Mobile is disabled by default until we figure a better way to do it, because it
   interferes with access point mode.
 
-## v0.3.10
+## v0.3.10 - 2022-09-24
 
 - Disable network on Mobile connection by default
 - Tap to lock repositories
