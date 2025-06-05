@@ -2,15 +2,14 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync/ouisync.dart' as oui;
-import 'package:ouisync/state_monitor.dart';
+import 'package:ouisync/ouisync.dart';
 
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart' show StateMonitorCubit;
 import '../widgets/widgets.dart' show DirectionalAppBar;
 
 class StateMonitorPage extends StatefulWidget {
-  final oui.Session session;
+  final Session session;
 
   StateMonitorPage(this.session);
 
@@ -40,7 +39,7 @@ class _StateMonitorState extends State<StateMonitorPage> {
         appBar: DirectionalAppBar(title: Text(S.current.titleStateMonitor)),
         body: Theme(
           data: ThemeData(
-            cardTheme: CardTheme(margin: EdgeInsetsDirectional.all(1.0)),
+            cardTheme: CardThemeData(margin: EdgeInsetsDirectional.all(1.0)),
             listTileTheme: ListTileThemeData(
               dense: true,
             ),
@@ -65,7 +64,7 @@ class _NodeWidget extends StatelessWidget {
               return SizedBox.shrink();
             }
 
-            if (node.path.isEmpty) {
+            if (cubit.isRoot) {
               // root node - use `ListView` to enable scrolling
               return ListView(children: buildValuesAndChildren(node));
             }

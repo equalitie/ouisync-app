@@ -1,14 +1,15 @@
 import 'dart:io' as io;
 
 import 'package:flutter/material.dart';
-import 'package:ouisync/ouisync.dart';
+import 'package:ouisync/ouisync.dart' show EntryType;
 import 'package:path/path.dart' as p;
 
-import '../cubits/cubits.dart';
-import '../widgets/widgets.dart';
-import 'utils.dart';
+import '../cubits/cubits.dart' show RepoCubit;
+import '../widgets/widgets.dart' show DisambiguationAction;
+import 'utils.dart'
+    show AppLogger, pickEntryDisambiguationAction, disambiguateEntryName;
 
-class SaveMedia with EntryOps, AppLogger {
+class SaveMedia with AppLogger {
   SaveMedia(
     BuildContext context, {
     required RepoCubit repoCubit,
@@ -29,7 +30,7 @@ class SaveMedia with EntryOps, AppLogger {
       newFileName,
     );
 
-    final exist = await _repoCubit.exists(newFilePath);
+    final exist = await _repoCubit.entryExists(newFilePath);
     if (!exist) {
       await _saveFile(
         devicePath: sourcePath,
@@ -40,20 +41,19 @@ class SaveMedia with EntryOps, AppLogger {
       return;
     }
 
-    final fileAction = await getFileActionType(
+    final fileAction = await pickEntryDisambiguationAction(
       _context,
       newFileName,
-      newFilePath,
       EntryType.file,
     );
 
     if (fileAction == null) return;
 
-    if (fileAction == FileAction.replace) {
+    if (fileAction == DisambiguationAction.replace) {
       await _replaceFile(devicePath: sourcePath, toPath: newFilePath);
     }
 
-    if (fileAction == FileAction.keep) {
+    if (fileAction == DisambiguationAction.keep) {
       await _renameAndSaveFile(
         devicePath: sourcePath,
         toPath: newFilePath,

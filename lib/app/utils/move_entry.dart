@@ -1,99 +1,139 @@
 import 'package:flutter/material.dart';
-import 'package:ouisync/ouisync.dart';
+import 'package:ouisync/ouisync.dart' show EntryType;
 
-import '../cubits/cubits.dart';
-import '../widgets/widgets.dart';
-import 'utils.dart';
+import '../cubits/cubits.dart' show RepoCubit;
+import '../models/models.dart' show FileEntry, FileSystemEntry;
+import '../widgets/widgets.dart' show DisambiguationAction;
 import 'repo_path.dart' as repo_path;
+import 'utils.dart'
+    show
+        AppLogger,
+        FileReadStream,
+        StringExtension,
+        pickEntryDisambiguationAction,
+        disambiguateEntryName;
 
-class MoveEntry with EntryOps, AppLogger {
+class MoveEntry with AppLogger {
   MoveEntry(
     BuildContext context, {
-    required RepoCubit repoCubit,
-    required this.srcPath,
-    required this.type,
+    required RepoCubit originRepoCubit,
+    required FileSystemEntry entry,
+    required String destinationPath,
   })  : _context = context,
-        _repoCubit = repoCubit;
+        _originRepoCubit = originRepoCubit,
+        _entry = entry,
+        _destinationPath = destinationPath;
 
   final BuildContext _context;
-  final RepoCubit _repoCubit;
-  final String srcPath;
-  final EntryType type;
+  final RepoCubit _originRepoCubit;
+  final FileSystemEntry _entry;
+  final String _destinationPath;
 
-  Future<void> move({required RepoCubit? toRepoCubit}) async {
-    final dstRepo = (toRepoCubit ?? _repoCubit);
-    final dstFolder = dstRepo.state.currentFolder.path;
-    final basename = repo_path.basename(srcPath);
-    final dstPath = repo_path.join(dstFolder, basename);
+  Future<void> move({
+    required RepoCubit? currentRepoCubit,
+    required bool recursive,
+  }) async {
+    final path = _entry.path;
+    final type = _entry is FileEntry ? EntryType.file : EntryType.directory;
 
-    final exist = await dstRepo.exists(dstPath);
+    final fromPathSegment = repo_path
+        .basename(
+          path,
+        )
+        .removePrefix(
+          repo_path.separator(),
+        );
+    final newPath = repo_path.join(_destinationPath, fromPathSegment);
+
+    final destinationRepoCubit = (currentRepoCubit ?? _originRepoCubit);
+
+    final exist = await destinationRepoCubit.entryExists(newPath);
     if (!exist) {
-      await _pickModeAndMoveEntry(toRepoCubit, dstPath);
+      await _pickModeAndMoveEntry(
+        currentRepoCubit,
+        path,
+        newPath,
+        type,
+        recursive,
+      );
       return;
     }
 
-    final fileAction = await getFileActionType(
+    final disambiguationAction = await pickEntryDisambiguationAction(
       _context,
-      basename,
-      dstPath,
+      newPath,
       type,
     );
-
-    if (fileAction == null) return;
-
-    if (fileAction == FileAction.replace) {
-      await _moveAndReplace(toRepoCubit, dstPath);
-    }
-
-    if (fileAction == FileAction.keep) {
-      await _renameAndMove(toRepoCubit, dstPath);
+    switch (disambiguationAction) {
+      case DisambiguationAction.replace:
+        await _moveAndReplaceFile(currentRepoCubit, path, newPath);
+        break;
+      case DisambiguationAction.keep:
+        await _renameAndMove(currentRepoCubit, path, newPath, type, recursive);
+        break;
+      default:
+        break;
     }
   }
 
-  Future<void> _moveAndReplace(RepoCubit? toRepoCubit, String dstPath) async {
+  Future<void> _moveAndReplaceFile(
+    RepoCubit? destinationRepoCubit,
+    String sourcePath,
+    String destinationPath,
+  ) async {
     try {
-      final file = await _repoCubit.openFile(srcPath);
-      final fileLength = await file.length;
+      final file = await _originRepoCubit.openFile(sourcePath);
+      final fileLength = await file.getLength();
 
-      await (toRepoCubit ?? _repoCubit).replaceFile(
-        filePath: dstPath,
+      await (destinationRepoCubit ?? _originRepoCubit).replaceFile(
+        filePath: destinationPath,
         length: fileLength,
-        fileByteStream: file.read(0, fileLength).asStream(),
+        fileByteStream: file.readStream(),
       );
 
-      await _repoCubit.deleteFile(srcPath);
+      await _originRepoCubit.deleteFile(sourcePath);
     } catch (e, st) {
       loggy.debug(e, st);
     }
   }
 
-  Future<void> _renameAndMove(RepoCubit? toRepoCubit, String dstPath) async {
+  Future<void> _renameAndMove(
+    RepoCubit? toRepoCubit,
+    String srcPath,
+    String dstPath,
+    EntryType type,
+    bool recursive,
+  ) async {
     final newPath = await disambiguateEntryName(
-      repoCubit: (toRepoCubit ?? _repoCubit),
+      repoCubit: (toRepoCubit ?? _originRepoCubit),
       path: dstPath,
     );
 
-    await _pickModeAndMoveEntry(toRepoCubit, newPath);
+    await _pickModeAndMoveEntry(toRepoCubit, srcPath, newPath, type, recursive);
   }
 
   Future<void> _pickModeAndMoveEntry(
-    RepoCubit? toRepoCubit,
-    String dstPath,
+    RepoCubit? destinationRepoCubit,
+    String sourcePath,
+    String destinationPath,
+    EntryType type,
+    bool recursive,
   ) async {
-    if (toRepoCubit == null) {
-      await _repoCubit.moveEntry(
-        source: srcPath,
-        destination: dstPath,
+    if (destinationRepoCubit == null) {
+      await _originRepoCubit.moveEntry(
+        source: sourcePath,
+        destination: destinationPath,
       );
 
       return;
     }
 
-    await _repoCubit.moveEntryToRepo(
-      destinationRepoCubit: toRepoCubit,
+    await _originRepoCubit.moveEntryToRepo(
+      destinationRepoCubit: destinationRepoCubit,
       type: type,
-      source: srcPath,
-      destination: dstPath,
+      source: sourcePath,
+      destination: destinationPath,
+      recursive: recursive,
     );
   }
 }

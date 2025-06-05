@@ -1,0 +1,4 @@
+#!/usr/bin/env zsh
+PROJECT=$(realpath "$(realpath "$(dirname "$0")")/..")
+"$PROJECT/ouisync/bindings/swift/OuisyncLib/Plugins/update.sh" \
+	"$PROJECT/build/macos/SourcePackages/plugins/Update rust dependencies.output"

@@ -6,13 +6,13 @@ Currently xcode nor flutter for darwin doesn't compile the Rust backend automati
 thus one has to do it manually:
 
 ```bash
-(cd ouisync; cargo build -p ouisync-ffi)
+(cd ouisync; cargo build -p ouisync-service)
 ```
 
-And then copy the `libouisync_ffi.dylib` to where xcode can find it:
+And then copy the `libouisync_service.dylib` to where xcode can find it:
 
 ```bash
-  cp ouisync/target/debug/libouisync_ffi.dylib ouisync/bindings/dart/macos/
+  cp ouisync/target/debug/libouisync_service.dylib ouisync/bindings/dart/macos/
 ```
 
 Further, xcode won't build flutter dependencies so this has to be done outside

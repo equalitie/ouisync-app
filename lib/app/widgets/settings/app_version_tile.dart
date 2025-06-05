@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync/ouisync.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -50,11 +51,13 @@ class _AppVersionTileState extends State<AppVersionTile> {
           late Widget version;
 
           if (snapshot.hasData) {
-            version = Text(snapshot.data!);
+            final suffix = appFlavor != null ? ' ($appFlavor)' : '';
+
+            version = Text('${snapshot.data!}$suffix');
           } else if (snapshot.hasError) {
-            version = Text("???");
+            version = Text('???');
           } else {
-            version = Text("...");
+            version = Text('...');
           }
 
           return Column(

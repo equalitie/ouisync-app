@@ -1,0 +1,2 @@
+#!/usr/bin/env sh
+adb logcat \*:S flutter:V flutter-ouisync:V MainActivity:V PipeProvider:V OuisyncPlugin:V

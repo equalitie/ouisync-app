@@ -1,0 +1,91 @@
+#!/usr/bin/env zsh
+ROOT=$(realpath "$(realpath "$(dirname "$0")")/..")
+
+# The rust binary assets take up considerable space (the symbols used in a full
+# debug + release build of the library for all platforms weighs in around 10GB)
+# and might be expected in three separate locations by default:
+# *  ~/Library/Developer/Xcode/DerivedData/Runner-{randomhash} for macos
+# *  ~/Library/Developer/Xcode/DerivedData/Runner-{randomhash} for ios
+# *  ./build/ for command line builds triggered by "flutter build macos" (for
+#    ios the default xcode path is used instead)
+#
+# Worse still, to support on-demand compilation, we have to use a build plugin
+# that is sandboxed to ONLY write to those locations, so we have to get creative:
+#
+# To work around this, we use the ./build/ path as the "true" source and symlink
+# the Xcode settings here. Thanks to Isaac Halvorson's awesome hack from
+# https://hisaac.net/blog/set-an-xcode-projects-deriveddata-location-via-script/
+# we don't have to reverse-engineer the hashing mechanism used by Apple and...
+for PLATFORM in macos ios; do
+    CONFIG="$ROOT/$PLATFORM/Runner.xcworkspace/xcuserdata/$(whoami).xcuserdatad"
+    mkdir -p "$CONFIG"
+    PLIST="${CONFIG}/WorkspaceSettings.xcsettings"
+    test -f "$PLIST" || plutil -create xml1 "$PLIST"
+    plutil -replace BuildLocationStyle -string UseAppPreferences "$PLIST"
+    plutil -replace CustomBuildLocationType -string RelativeToDerivedData "$PLIST"
+    plutil -replace DerivedDataCustomLocation -string ../build/$PLATFORM "$PLIST"
+    plutil -replace DerivedDataLocationStyle -string WorkspaceRelativePath "$PLIST"
+    plutil -lint "$PLIST"
+done
+# ... can instead tell Xcode to use a location relative to the workspace.
+# Unfortunately, the the target name is added to our configured path, so we
+# can't use the normative path and instead have to symlink twice.
+SRC="$ROOT/build/macos/SourcePackages/plugins"
+for SUFFIX in "Update rust dependencies.output" "ouisynclib.output"; do
+    mkdir -p "$SRC/$SUFFIX"
+    for DST in "$ROOT/build/macos/Runner/SourcePackages/plugins" \
+               "$ROOT/build/ios/Runner/SourcePackages/plugins"; do
+        mkdir -p "$DST"
+        rm -Rf "$DST/$SUFFIX"
+        ln -s "$SRC/$SUFFIX" "$DST/$SUFFIX"
+    done
+done
+
+# Finally, Xcode expects some sort of actual framework at the target location,
+# which we mock here as an empty library with no headers or data that will be
+# replaced before it is actually needed
+mkdir -p "$SRC/ouisynclib.output/OuisyncLib/FFIBuilder/OuisyncLibFFI.xcframework"
+rm "$ROOT/ouisync/bindings/swift/OuisyncLib/OuisyncLibFFI.xcframework"
+ln -s "$SRC/ouisynclib.output/OuisyncLib/FFIBuilder/OuisyncLibFFI.xcframework" \
+    "$ROOT/ouisync/bindings/swift/OuisyncLib/OuisyncLibFFI.xcframework"
+cat <<EOF > "$SRC/ouisynclib.output/OuisyncLib/FFIBuilder/OuisyncLibFFI.xcframework/Info.plist"
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>AvailableLibraries</key>
+    <array>
+    </array>
+    <key>CFBundlePackageType</key>
+    <string>XFWK</string>
+    <key>XCFrameworkFormatVersion</key>
+    <string>1.0</string>
+</dict>
+</plist>
+EOF
+
+# Even when done incrementally, rust compilation can take considerable time,
+# which is amplified by the number of platforms we have to support. There's no
+# way around this in the general case, but it's worthwhile to allow developers
+# to focus on a single platform in some cases (e.g. when debugging undesired
+# behavior on a particular platform); obviously we would like to gitignore this
+# file, but it should exist, so we create it in this post-clone script instead.
+cat <<EOF > "$ROOT/ouisync/bindings/swift/OuisyncLib/config.sh"
+DEBUG=0  # set to 1 if you want to run rust assertions (much slower)
+TARGETS=(  # if you're focused on a single target, feel free to disable others
+  aarch64-apple-darwin   # mac on apple silicon
+  x86_64-apple-darwin    # mac on intel
+  aarch64-apple-ios      # all supported devices (ios 11+ are 64 bit only)
+#  aarch64-apple-ios-sim  # simulators when running on M chips
+#  x86_64-apple-ios       # simulator running on intel chips
+)
+EOF
+
+# Flutter also needs Xcode command line tools installed, though there's a high
+# likelihood of them already being available since they include git
+xcode-select -p || xcode-select --install
+
+# Install rust and pull all neessary dependencies so that `flutter build` runs
+# once we exit; due to what might be a(nother) flutter bug, "flutter build ios"
+# currently fails to provision the code signing signatures without opening Xcode
+"$ROOT/darwin/update-rust-dependencies"

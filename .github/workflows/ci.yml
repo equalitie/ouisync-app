@@ -9,40 +9,58 @@ on:
 
 jobs:
   build_and_test:
-    name: build and test on ${{ matrix.name }}
+    name: build and/or test on ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
 
     strategy:
       matrix:
-        name: [android, linux, windows]
+        name: [android, linux-test, linux-build, windows]
         include:
           - name: android
             os: ubuntu-24.04
             env:
-              OUISYNC_LIB: ouisync/target/debug/libouisync_ffi.so
+              OUISYNC_LIB: ouisync/target/debug/libouisync_service.so
             target: aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
             ndk:
               abi: arm64-v8a
             build-args: --apk
             artifact-files: ouisync*.apk
+            test: true
+            build: true
 
-          - name: linux
+          - name: linux-test
             os: ubuntu-24.04
             env:
-              OUISYNC_LIB: ouisync/target/debug/libouisync_ffi.so
+              OUISYNC_LIB: ouisync/target/debug/libouisync_service.so
             # TODO: enable analysis
             # analyze: true
             build-args: --deb-gui --deb-cli
             artifact-files: ouisync*.deb
+            test: true
+            build: false
+
+          # For GLIBC and GLIBCXX compatibility we build on not-the-most-recent Ubuntu version
+          - name: linux-build
+            os: ubuntu-22.04
+            env:
+              OUISYNC_LIB: ouisync/target/debug/libouisync_service.so
+            # TODO: enable analysis
+            # analyze: true
+            build-args: --deb-gui --deb-cli
+            artifact-files: ouisync*.deb
+            test: false
+            build: true
 
           - name: windows
             os: windows-latest
             env:
               # Install Dokan2.dll to where `flutter test` can find it
               DOKAN_DLL_OUTPUT_PATH: C:\Windows\System32
-              OUISYNC_LIB: ouisync\target\debug\ouisync_ffi.dll
+              OUISYNC_LIB: ouisync\target\debug\ouisync_service.dll
             build-args: --exe
             artifact-files: ouisync*.exe
+            test: true
+            build: true
 
     env: ${{ matrix.env }}
 
@@ -67,19 +85,19 @@ jobs:
           # https://github.com/orgs/community/discussions/109146
           sudo apt update -y
           sudo apt-get install libappindicator3-dev   \
+                               libcurl4-openssl-dev   \
                                libfuse-dev            \
                                libgtk-3-dev           \
+                               libsecret-1-dev        \
                                ninja-build            \
-                               imagemagick            \
-                               libsecret-1-dev
-        if: matrix.name == 'linux'
+                               imagemagick
+        if: matrix.name == 'linux-test' || matrix.name == 'linux-build'
 
       - name: Install dependencies (android)
         # Note that libfuse-dev is not required to build the Android app, but
         # later in this CI script we also run tests on Linux which do require
         # it.
-        run: |
-          sudo apt-get install libfuse-dev imagemagick
+        run: sudo apt-get install libfuse-dev imagemagick
         if: matrix.name == 'android'
 
       - name: Set NDK ABI filter
@@ -89,7 +107,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          flutter-version: 3.24.1
+          flutter-version: 3.29.3
 
       - name: Run Flutter doctor
         run: flutter doctor -v
@@ -99,7 +117,7 @@ jobs:
 
       - name: Generate the Dart bindings for the Ouisync library
         working-directory: ouisync/bindings/dart
-        run: dart util/bindgen.dart
+        run: dart tool/bindgen.dart
 
       - name: Analyze
         run: |
@@ -117,13 +135,15 @@ jobs:
 
         if: matrix.analyze
 
-      - name: Build Ouisync library for tests
+      - name: Build Ouisync service library for tests
         working-directory: ouisync
-        run: cargo build --package ouisync-ffi --lib
+        run: cargo build --package ouisync-service --lib
+        if: matrix.test
 
       - name: Run tests
         run:
           flutter test
+        if: matrix.test
 
       - name: Setup Sentry DSN for artifact build (different from the production releases)
         run: |
@@ -132,11 +152,11 @@ jobs:
         shell: bash
         env:
           NIGHTLY_SENTRY_DSN : ${{ secrets.NIGHTLY_SENTRY_DSN }}
-        if: env.NIGHTLY_SENTRY_DSN != null
+        if: matrix.build && env.NIGHTLY_SENTRY_DSN != null
 
       - name: Setup secrets for artifact signing (different from the production releases)
         run: |
-          dir=secrets/nightly/android
+          dir=secrets/android
           mkdir -p $dir
           echo $NIGHTLY_KEYSTORE_JKS_HEX > $dir/keystore.jks.hex
           # Use `keytool` to generate the `keystore.jks` keystore.
@@ -153,7 +173,7 @@ jobs:
         env:
           NIGHTLY_KEYSTORE_JKS_HEX : ${{ secrets.NIGHTLY_KEYSTORE_JKS_HEX }}
           NIGHTLY_KEYSTORE_PASSWORD : ${{ secrets.NIGHTLY_KEYSTORE_PASSWORD }}
-        if: env.NIGHTLY_KEYSTORE_JKS_HEX != null && env.NIGHTLY_KEYSTORE_PASSWORD != null
+        if: matrix.build && env.NIGHTLY_KEYSTORE_JKS_HEX != null && env.NIGHTLY_KEYSTORE_PASSWORD != null
 
       - name: Build artifacts
         run: |
@@ -166,6 +186,7 @@ jobs:
 
           dart run util/release.dart --flavor=$flavor $keystore $sentry ${{ matrix.build-args }}
         shell: bash
+        if: matrix.build
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -173,3 +194,4 @@ jobs:
           # Name of the produced zip file
           name: ${{ matrix.name }}
           path: releases/release_*/${{ matrix.artifact-files }}
+        if: matrix.build

@@ -1,24 +1,20 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io' as io;
-import 'dart:typed_data';
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mime/mime.dart';
-import 'package:ouisync/native_channels.dart';
-import 'package:ouisync/ouisync.dart';
-import 'package:ouisync/state_monitor.dart';
+import 'package:ouisync/ouisync.dart' hide DirectoryEntry;
 import 'package:shelf/shelf_io.dart';
 import 'package:stream_transform/stream_transform.dart';
 
 import '../../generated/l10n.dart';
 import '../models/models.dart';
-import '../utils/master_key.dart';
-import '../utils/mounter.dart';
+import '../utils/cipher.dart' as cipher;
 import '../utils/repo_path.dart' as repo_path;
 import '../utils/utils.dart';
 import 'cubits.dart';
-import 'utils.dart';
 
 class RepoState extends Equatable {
   final bool isLoading;
@@ -107,54 +103,52 @@ class RepoState extends Equatable {
 
 class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   final _currentFolder = Folder();
-  final NativeChannels _nativeChannels;
   final NavigationCubit _navigation;
+  final EntrySelectionCubit _entrySelection;
   final EntryBottomSheetCubit _bottomSheet;
   final Repository _repo;
-  final Cipher _pathCipher;
+  final cipher.SecretKey _pathSecretKey;
   final CacheServers _cacheServers;
-  final Mounter _mounter;
 
   RepoCubit._(
-    this._nativeChannels,
     this._navigation,
+    this._entrySelection,
     this._bottomSheet,
     this._repo,
-    this._pathCipher,
+    this._pathSecretKey,
     this._cacheServers,
-    this._mounter,
     super.state,
   ) {
     _currentFolder.repo = this;
   }
 
   static Future<RepoCubit> create({
-    required NativeChannels nativeChannels,
     required Repository repo,
-    required RepoLocation location,
+    required Session session,
     required NavigationCubit navigation,
+    required EntrySelectionCubit entrySelection,
     required EntryBottomSheetCubit bottomSheet,
     required CacheServers cacheServers,
-    required Mounter mounter,
   }) async {
+    final path = await repo.getPath();
     final authMode = await repo.getAuthMode();
 
     var state = RepoState(
-      location: location,
+      location: RepoLocation.fromDbPath(path),
       authMode: authMode,
     );
 
-    final infoHash = await repo.infoHash;
-    final accessMode = await repo.accessMode;
+    final infoHash = await repo.getInfoHash();
+    final accessMode = await repo.getAccessMode();
 
     state = state.copyWith(
       infoHash: infoHash,
       accessMode: accessMode,
     );
 
-    if (await repo.isSyncEnabled) {
-      final isDhtEnabled = await repo.isDhtEnabled;
-      final isPexEnabled = await repo.isPexEnabled;
+    if (await repo.isSyncEnabled()) {
+      final isDhtEnabled = await repo.isDhtEnabled();
+      final isPexEnabled = await repo.isPexEnabled();
 
       state = state.copyWith(
         isDhtEnabled: isDhtEnabled,
@@ -162,16 +156,15 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
       );
     }
 
-    final pathCipher = await Cipher.newWithRandomKey();
+    final pathSecretKey = cipher.randomSecretKey();
 
     final cubit = RepoCubit._(
-      nativeChannels,
       navigation,
+      entrySelection,
       bottomSheet,
       repo,
-      pathCipher,
+      pathSecretKey,
       cacheServers,
-      mounter,
       state,
     );
 
@@ -184,30 +177,62 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     return cubit;
   }
 
+  Future<String> get infoHash async => await _repo.getInfoHash();
   RepoLocation get location => state.location;
   String get name => state.location.name;
   AccessMode get accessMode => state.accessMode;
   String get currentFolder => _currentFolder.state.path;
-  Stream<void> get events => _repo.events;
+  EntrySelectionCubit get entrySelectionCubit => _entrySelection;
+  Future<void> delete() => _repo.delete();
 
-  void setCurrent() {
-    _nativeChannels.repository = _repo;
+  // Note: By converting `_repo.events` to a broadcast stream and caching it here we ensure at most
+  // one subscription is created on the backend and then the events are fanned out to every
+  // subscription on the frontend. If we instead returned `_repo.events` directly here, then every
+  // frontend subscription would have its own backend subscription which would multiply the traffic
+  // over the local control socket, potentially degrading performance during heavy event emissions.
+  late final Stream<void> events = _repo.events.asBroadcastStream();
+
+  void updateNavigation() {
+    _navigation.current(location, currentFolder);
   }
 
-  void updateNavigation({required bool isFolder}) {
-    _navigation.current(location, currentFolder, isFolder);
+  Future<void> startEntriesSelection([
+    bool isSingleSelection = false,
+    FileSystemEntry? singleEntry,
+  ]) async {
+    final currentPath = _currentFolder.state.path;
+    await _entrySelection.startSelectionForRepo(
+      this,
+      currentPath,
+      isSingleSelection,
+      singleEntry,
+    );
+  }
+
+  Future<void> endEntriesSelection() async {
+    await _entrySelection.endSelection();
   }
 
   void showMoveEntryBottomSheet({
     required BottomSheetType sheetType,
-    required String entryPath,
-    required EntryType entryType,
+    required FileSystemEntry entry,
   }) {
     _bottomSheet.showMoveEntry(
       repoCubit: this,
       navigationCubit: _navigation,
-      entryPath: entryPath,
-      entryType: entryType,
+      type: sheetType,
+      entry: entry,
+    );
+  }
+
+  void showMoveSelectedEntriesBottomSheet({
+    required BottomSheetType sheetType,
+    FileSystemEntry? entry,
+  }) {
+    _bottomSheet.showMoveSelectedEntries(
+      repoCubit: this,
+      type: sheetType,
+      entry: entry,
     );
   }
 
@@ -215,10 +240,10 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     await _repo.setSyncEnabled(true);
 
     // DHT and PEX states can only be queried when sync is enabled, so let's do it here.
-    final isDhtEnabled = await _repo.isDhtEnabled;
-    final isPexEnabled = await _repo.isPexEnabled;
+    final isDhtEnabled = await _repo.isDhtEnabled();
+    final isPexEnabled = await _repo.isPexEnabled();
 
-    emit(state.copyWith(
+    emitUnlessClosed(state.copyWith(
       isDhtEnabled: isDhtEnabled,
       isPexEnabled: isPexEnabled,
     ));
@@ -231,7 +256,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
 
     await _repo.setDhtEnabled(value);
 
-    emit(state.copyWith(isDhtEnabled: value));
+    emitUnlessClosed(state.copyWith(isDhtEnabled: value));
   }
 
   Future<void> setPexEnabled(bool value) async {
@@ -241,12 +266,12 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
 
     await _repo.setPexEnabled(value);
 
-    emit(state.copyWith(isPexEnabled: value));
+    emitUnlessClosed(state.copyWith(isPexEnabled: value));
   }
 
   Future<void> setCacheServersEnabled(bool value) async {
     // Update the state to the desired value for immediate feedback...
-    emit(state.copyWith(isCacheServersEnabled: value));
+    emitUnlessClosed(state.copyWith(isCacheServersEnabled: value));
     await _cacheServers.setEnabled(_repo, value);
     // ...then fetch the actual value and update the state again. This is needed because some of
     // the cache server requests might fail.
@@ -257,8 +282,6 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     final value = await _cacheServers.isEnabledForRepo(_repo);
     emitUnlessClosed(state.copyWith(isCacheServersEnabled: value));
   }
-
-  Future<Directory> openDirectory(String path) => Directory.open(_repo, path);
 
   // This operator is required for the DropdownMenuButton to show entries properly.
   @override
@@ -274,89 +297,104 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     AccessMode accessMode, {
     String? password,
   }) async {
-    return await _repo.createShareToken(
+    return await _repo.share(
       accessMode: accessMode,
-      name: name,
-      secret: password != null ? LocalPassword(password) : null,
+      localSecret:
+          password != null ? LocalSecretPassword(Password(password)) : null,
     );
   }
 
-  Future<Uint8List> get credentials => _repo.credentials;
-
-  Future<void> setCredentials(Uint8List credentials) async {
-    await _repo.setCredentials(credentials);
-    final accessMode = await _repo.accessMode;
-    emit(state.copyWith(accessMode: accessMode));
-  }
-
   Future<void> mount() async {
-    if (_mounter.mountPoint == null) {
-      // Mounting not supported.
-      return;
-    }
-
     try {
       await _repo.mount();
-      emit(state.copyWith(mountState: const MountStateSuccess()));
-    } on Error catch (error) {
-      emit(state.copyWith(
-        mountState: MountStateError(error.code, error.message),
-      ));
+      emitUnlessClosed(state.copyWith(mountState: const MountStateSuccess()));
+    } on Unsupported {
+      emitUnlessClosed(state.copyWith(mountState: const MountStateDisabled()));
+    } catch (error, stack) {
+      emitUnlessClosed(
+          state.copyWith(mountState: MountStateFailure(error, stack)));
     }
   }
 
   Future<void> unmount() async {
     try {
       await _repo.unmount();
-      emit(state.copyWith(mountState: const MountStateDisabled()));
+      emitUnlessClosed(state.copyWith(mountState: const MountStateDisabled()));
     } catch (_) {}
   }
 
-  String? get mountPoint {
-    if (state.mountState is! MountStateSuccess) {
-      return null;
-    }
+  Future<String?> get mountPoint => _repo.getMountPoint();
 
-    final mountPoint = _mounter.mountPoint;
-    if (mountPoint == null) {
-      return null;
-    }
+  Future<bool> entryExists(String path) =>
+      _repo.getEntryType(path).then((t) => t != null);
 
-    return "$mountPoint/$name";
-  }
+  Future<EntryType?> entryType(String path) => _repo.getEntryType(path);
 
-  Future<bool> exists(String path) async {
-    return await _repo.exists(path);
-  }
+  Future<Progress> get syncProgress => _repo.getSyncProgress();
 
-  Future<EntryType?> type(String path) => _repo.type(path);
-
-  Future<Progress> get syncProgress => _repo.syncProgress;
-
-  Future<NetworkStats> get networkStats => _repo.networkStats;
+  Future<Stats> get networkStats => _repo.getStats();
 
   // Get the state monitor of this particular repository. That is 'root >
   // Repositories > this repository ID'.
-  StateMonitor? get stateMonitor => _repo.stateMonitor;
+  Future<StateMonitor> get stateMonitor => _repo.stateMonitor;
 
   Future<void> navigateTo(String destination) async {
-    emit(state.copyWith(isLoading: true));
+    emitUnlessClosed(state.copyWith(isLoading: true));
 
     _currentFolder.goTo(destination);
     await refresh();
 
-    emit(state.copyWith(isLoading: false));
+    emitUnlessClosed(state.copyWith(isLoading: false));
+  }
+
+  Future<List<FileSystemEntry>> getFolderContents(String path) async {
+    String? error;
+
+    final content = <FileSystemEntry>[];
+
+    // If the directory does not exist, the following command will throw.
+    final directory = await _repo.readDirectory(path);
+
+    try {
+      for (final dirEntry in directory) {
+        final entryPath = repo_path.join(path, dirEntry.name);
+
+        final entry = switch (dirEntry.entryType) {
+          EntryType.file => FileEntry(
+              path: entryPath,
+              size: await _getFileSize(entryPath),
+            ),
+          EntryType.directory => DirectoryEntry(path: entryPath),
+        };
+
+        content.add(entry);
+      }
+    } catch (e, st) {
+      loggy.debug('Traversing directory $path exception', e, st);
+      error = e.toString();
+    }
+
+    if (error != null) {
+      throw error;
+    }
+
+    return content;
+  }
+
+  Future<bool> isFolderEmpty(String path) async {
+    final directory = await _repo.readDirectory(path);
+    return directory.isEmpty;
   }
 
   Future<bool> createFolder(String folderPath) async {
-    emit(state.copyWith(isLoading: true));
+    emitUnlessClosed(state.copyWith(isLoading: true));
 
     try {
-      await Directory.create(_repo, folderPath);
+      await _repo.createDirectory(folderPath);
       _currentFolder.goTo(folderPath);
       return true;
     } catch (e, st) {
-      loggy.app('Directory $folderPath creation failed', e, st);
+      loggy.debug('Directory $folderPath creation failed', e, st);
       return false;
     } finally {
       await refresh();
@@ -364,13 +402,13 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   }
 
   Future<bool> deleteFolder(String path, bool recursive) async {
-    emit(state.copyWith(isLoading: true));
+    emitUnlessClosed(state.copyWith(isLoading: true));
 
     try {
-      await Directory.remove(_repo, path, recursive: recursive);
+      await _repo.removeDirectory(path, recursive);
       return true;
     } catch (e, st) {
-      loggy.app('Directory $path deletion failed', e, st);
+      loggy.debug('Directory $path deletion failed', e, st);
       return false;
     } finally {
       await refresh();
@@ -398,7 +436,8 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     loggy.debug('Saving file $filePath');
 
     final job = Job(0, length);
-    emit(state.copyWith(uploads: state.uploads.withAdded(filePath, job)));
+    emitUnlessClosed(
+        state.copyWith(uploads: state.uploads.withAdded(filePath, job)));
 
     await refresh();
 
@@ -423,7 +462,8 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
       await file.close();
       await refresh();
 
-      emit(state.copyWith(uploads: state.uploads.withRemoved(filePath)));
+      emitUnlessClosed(
+          state.copyWith(uploads: state.uploads.withRemoved(filePath)));
     }
 
     if (job.state.cancel) {
@@ -449,88 +489,66 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     );
   }
 
-  Future<List<FileSystemEntry>> getFolderContents(String path) async {
-    String? error;
-
-    final content = <FileSystemEntry>[];
-
-    // If the directory does not exist, the following command will throw.
-    final directory = await Directory.open(_repo, path);
+  /// Returns which access mode does the given secret provide.
+  /// TODO: It should be possible to add API which does not temporarily unlock
+  /// the repository.
+  Future<AccessMode> getSecretAccessMode(LocalSecret secret) async {
+    final credentials = await _repo.getCredentials();
 
     try {
-      for (final dirEntry in directory) {
-        final entryPath = repo_path.join(path, dirEntry.name);
-
-        final entry = switch (dirEntry.entryType) {
-          EntryType.file => FileEntry(
-              path: entryPath,
-              size: await _getFileSize(entryPath),
-            ),
-          EntryType.directory => DirectoryEntry(path: entryPath),
-        };
-
-        content.add(entry);
-      }
-    } catch (e, st) {
-      loggy.app('Traversing directory $path exception', e, st);
-      error = e.toString();
-    }
-
-    if (error != null) {
-      throw error;
-    }
-
-    return content;
-  }
-
-  /// Returns which access mode does the given password provide.
-  Future<AccessMode> getPasswordAccessMode(String password) async {
-    final credentials = await _repo.credentials;
-
-    try {
-      await _repo.setAccessMode(AccessMode.blind);
+      await _repo.setAccessMode(AccessMode.blind, null);
       await _repo.setAccessMode(
         AccessMode.write,
-        secret: LocalPassword(password),
+        secret,
       );
-      return await _repo.accessMode;
+      return await _repo.getAccessMode();
     } finally {
       await _repo.setCredentials(credentials);
     }
   }
 
+  Future<Access> getAccessOf(LocalSecret secret) async {
+    final accessMode = await getSecretAccessMode(secret);
+
+    return switch (accessMode) {
+      AccessMode.blind => BlindAccess(),
+      AccessMode.read => ReadAccess(secret),
+      AccessMode.write => WriteAccess(secret),
+    };
+  }
+
   Future<void> setAuthMode(AuthMode authMode) async {
-    emit(state.copyWith(isLoading: true));
+    emitUnlessClosed(state.copyWith(isLoading: true));
     await _repo.setAuthMode(authMode);
-    emit(state.copyWith(authMode: authMode, isLoading: false));
+    emitUnlessClosed(state.copyWith(authMode: authMode, isLoading: false));
   }
 
   Future<bool> setLocalSecret({
     required LocalSecret oldSecret,
     required SetLocalSecret newSecret,
   }) async {
-    emit(state.copyWith(isLoading: true));
+    emitUnlessClosed(state.copyWith(isLoading: true));
 
     // Grab the current credentials so we can restore the access mode when we are done.
-    final credentials = await _repo.credentials;
+    final credentials = await _repo.getCredentials();
 
     try {
       // First try to switch the repo to the write mode using `oldSecret`. If the secret is
       // the correct write secret we end up in write mode. If it's the correct read secret we
       // end up in read mode. Otherwise we end up in blind mode. Depending on the mode we end up
       // in, we change the corresponding secret to `newSecret`.
-      await _repo.setAccessMode(AccessMode.write, secret: oldSecret);
+      await _repo.setAccessMode(AccessMode.write, oldSecret);
 
-      switch (await _repo.accessMode) {
+      switch (await _repo.getAccessMode()) {
         case AccessMode.write:
           await _repo.setAccess(
-            read: EnableAccess(newSecret),
-            write: EnableAccess(newSecret),
+            read: AccessChangeEnable(newSecret),
+            write: AccessChangeEnable(newSecret),
           );
           break;
         case AccessMode.read:
           await _repo.setAccess(
-            read: EnableAccess(newSecret),
+            read: AccessChangeEnable(newSecret),
           );
           break;
         case AccessMode.blind:
@@ -546,41 +564,43 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
       return false;
     } finally {
       await _repo.setCredentials(credentials);
-      emit(state.copyWith(isLoading: false));
+      emitUnlessClosed(state.copyWith(isLoading: false));
     }
   }
 
-  /// Returns null if the authMode is AuthModeBlindOrManual or if decryption fails.
-  /// TODO: If decryption fails, we should throw and catch that above to inform
-  /// the user about the fact.
-  Future<LocalSecret?> getLocalSecret(MasterKey masterKey) async {
-    final authMode = state.authMode;
+  Future<void> setAccess({
+    AccessChange? read,
+    AccessChange? write,
+  }) async {
+    await _repo.setAccess(read: read, write: write);
 
-    try {
-      switch (authMode) {
-        case AuthModeBlindOrManual():
-          return null;
-        case AuthModePasswordStoredOnDevice(encryptedPassword: final encrypted):
-          final decrypted = await masterKey.decrypt(encrypted);
-          if (decrypted == null) throw AuthModeDecryptFailed();
-          return LocalPassword(decrypted);
-        case AuthModeKeyStoredOnDevice(encryptedKey: final encrypted):
-          final decrypted = await masterKey.decryptBytes(encrypted);
-          if (decrypted == null) throw AuthModeDecryptFailed();
-          return LocalSecretKey(decrypted);
-      }
-    } catch (e) {
-      loggy.error("Failed to decrypt local secret: $e");
-      return null;
+    // Operation succeeded (did not throw), so we can set `state.accessMode`
+    // based on `read` and `write`.
+    AccessMode newAccessMode;
+
+    if (read is AccessChangeDisable && write is AccessChangeDisable) {
+      newAccessMode = AccessMode.blind;
+    } else if (write is AccessChangeDisable) {
+      newAccessMode = AccessMode.read;
+    } else /* `write` or both (`read` and `write`) are `AccessChangeEnable` */ {
+      newAccessMode = AccessMode.write;
     }
+
+    emitUnlessClosed(state.copyWith(accessMode: newAccessMode));
+  }
+
+  Future<void> resetAccess(ShareToken token) async {
+    await _repo.resetAccess(token);
+    final accessMode = await _repo.getAccessMode();
+    emitUnlessClosed(state.copyWith(accessMode: accessMode));
   }
 
   /// Unlocks the repository using the secret. The access mode the repository ends up in depends on
   /// what access mode the secret unlock (read or write).
   Future<void> unlock(LocalSecret? secret) async {
-    await _repo.setAccessMode(AccessMode.write, secret: secret);
-    final accessMode = await _repo.accessMode;
-    emit(state.copyWith(accessMode: accessMode));
+    await _repo.setAccessMode(AccessMode.write, secret);
+    final accessMode = await _repo.getAccessMode();
+    emitUnlessClosed(state.copyWith(accessMode: accessMode));
 
     if (state.accessMode != AccessMode.blind) {
       await refresh();
@@ -589,9 +609,19 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
 
   /// Locks the repository (switches it to blind mode)
   Future<void> lock() async {
-    await _repo.setAccessMode(AccessMode.blind);
-    final accessMode = await _repo.accessMode;
-    emit(state.copyWith(accessMode: accessMode));
+    await _repo.setAccessMode(AccessMode.blind, null);
+    final accessMode = await _repo.getAccessMode();
+    emitUnlessClosed(state.copyWith(accessMode: accessMode));
+  }
+
+  /// Move this repo to another location on the filesystem.
+  Future<void> move(String to) async {
+    await _repo.move(to);
+    final path = await _repo.getPath();
+
+    emitUnlessClosed(
+      state.copyWith(location: RepoLocation.fromDbPath(path)),
+    );
   }
 
   Future<int?> _getFileSize(String path) async {
@@ -606,7 +636,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     }
 
     try {
-      return await file.length;
+      return await file.getLength();
     } catch (e, st) {
       loggy.error('Failed to get size of file $path:', e, st);
       return null;
@@ -616,16 +646,21 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   }
 
   Future<Uri> previewFileUrl(String path) async {
-    final encryptedHandle = await _pathCipher.encrypt(path);
+    final encryptedHandle =
+        base64Encode(await cipher.encrypt(_pathSecretKey, utf8.encode(path)));
     final mimeType = MimeTypeResolver().lookup(path);
 
     final handler = createStaticFileHandler(
-        encryptedHandle, mimeType, openFile, _pathCipher);
+      encryptedHandle,
+      mimeType,
+      openFile,
+      _pathSecretKey,
+    );
 
     final server = await serve(handler, Constants.fileServerAuthority, 0);
     final authority = '${server.address.host}:${server.port}';
 
-    print('Serving file at http://$authority');
+    loggy.debug('Serving file at http://$authority');
 
     final url = Uri.http(
       authority,
@@ -646,8 +681,8 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
       return;
     }
 
-    final ouisyncFile = await File.open(_repo, sourcePath);
-    final length = await ouisyncFile.length;
+    final ouisyncFile = await _repo.openFile(sourcePath);
+    final length = await ouisyncFile.getLength();
 
     final newFile = io.File(destinationPath);
 
@@ -657,7 +692,8 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     int offset = 0;
 
     final job = Job(0, length);
-    emit(state.copyWith(downloads: state.downloads.withAdded(sourcePath, job)));
+    emitUnlessClosed(
+        state.copyWith(downloads: state.downloads.withAdded(sourcePath, job)));
 
     try {
       while (job.state.cancel == false) {
@@ -681,28 +717,105 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
         job.update(offset);
       }
     } catch (e, st) {
-      loggy.app('Download file $sourcePath exception', e, st);
+      loggy.debug('Download file $sourcePath exception', e, st);
       showSnackBar(S.current.messageDownloadingFileError(sourcePath));
     } finally {
       showSnackBar(S.current.messageDownloadFileLocation(parentPath));
-      emit(state.copyWith(downloads: state.downloads.withRemoved(sourcePath)));
+      emitUnlessClosed(
+          state.copyWith(downloads: state.downloads.withRemoved(sourcePath)));
 
       await Future.wait(
           [sink.flush().then((_) => sink.close()), ouisyncFile.close()]);
     }
   }
 
+  Future<bool> copyEntry({
+    required String source,
+    required String destination,
+    required EntryType type,
+    RepoCubit? destinationRepoCubit,
+    required bool recursive,
+  }) async {
+    emitUnlessClosed(state.copyWith(isLoading: true));
+    try {
+      final result = type == EntryType.file
+          ? await _copyFile(source, destination, destinationRepoCubit)
+          : await _copyFolder(
+              source,
+              destination,
+              destinationRepoCubit,
+              recursive,
+            );
+
+      return result;
+    } catch (e, st) {
+      loggy.error('Move entry from $source to $destination failed', e, st);
+      return false;
+    } finally {
+      await refresh();
+    }
+  }
+
+  Future<bool> _copyFile(
+    String source,
+    String destination,
+    RepoCubit? destinationRepoCubit,
+  ) async {
+    final originFile = await openFile(source);
+    final originFileLength = await originFile.getLength();
+
+    await (destinationRepoCubit ?? this).saveFile(
+      filePath: destination,
+      length: originFileLength,
+      fileByteStream: originFile.readStream(),
+    );
+
+    return true;
+  }
+
+  Future<bool> _copyFolder(
+    String source,
+    String destination,
+    RepoCubit? destinationRepoCubit,
+    bool recursive,
+  ) async {
+    final createFolderOk = await (destinationRepoCubit ?? this).createFolder(
+      destination,
+    );
+
+    if (createFolderOk && recursive) {
+      final contents = await _repo.readDirectory(source);
+
+      for (var entry in contents) {
+        final from = repo_path.join(source, entry.name);
+        final to = repo_path.join(destination, entry.name);
+        final copyOk = entry.entryType == EntryType.file
+            ? await _copyFile(from, to, destinationRepoCubit)
+            : await _copyFolder(
+                from,
+                to,
+                destinationRepoCubit,
+                recursive,
+              );
+
+        if (!copyOk) return false;
+      }
+    }
+
+    return createFolderOk;
+  }
+
   Future<bool> moveEntry({
     required String source,
     required String destination,
   }) async {
-    emit(state.copyWith(isLoading: true));
+    emitUnlessClosed(state.copyWith(isLoading: true));
 
     try {
-      await _repo.move(source, destination);
+      await _repo.moveEntry(source, destination);
       return true;
     } catch (e, st) {
-      loggy.app('Move entry from $source to $destination failed', e, st);
+      loggy.debug('Move entry from $source to $destination failed', e, st);
       return false;
     } finally {
       await refresh();
@@ -714,24 +827,30 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     required EntryType type,
     required String source,
     required String destination,
+    required bool recursive,
   }) async {
-    emit(state.copyWith(isLoading: true));
+    emitUnlessClosed(state.copyWith(isLoading: true));
     try {
-      final result = type == EntryType.file
-          ? await _moveFileToRepo(
-              destinationRepoCubit,
-              source,
-              destination,
-            )
-          : await _moveFolderToRepo(
-              destinationRepoCubit,
-              source,
-              destination,
-            );
+      if (type == EntryType.file) {
+        final moveFileResult = await _moveFileToRepo(
+          destinationRepoCubit,
+          source,
+          destination,
+        );
 
-      return result;
+        return moveFileResult;
+      }
+
+      final moveFolderResult = await _moveFolderToRepo(
+        destinationRepoCubit,
+        source,
+        destination,
+        recursive,
+      );
+
+      return moveFolderResult;
     } catch (e, st) {
-      loggy.app('Move entry from $source to $destination failed', e, st);
+      loggy.debug('Move entry from $source to $destination failed', e, st);
       return false;
     } finally {
       await destinationRepoCubit.refresh();
@@ -744,53 +863,47 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     String source,
     String destination,
   ) async {
-    final originFile = await openFile(source);
-    final originFileLength = await originFile.length;
-
-    await destinationRepoCubit.saveFile(
-      filePath: destination,
-      length: originFileLength,
-      fileByteStream: originFile.read(0, originFileLength).asStream(),
+    final copied = await _copyFile(
+      source,
+      destination,
+      destinationRepoCubit,
     );
-
-    await File.remove(_repo, source);
-    return true;
+    if (copied) {
+      await _repo.removeFile(source);
+      return true;
+    }
+    return false;
   }
 
   Future<bool> _moveFolderToRepo(
     RepoCubit destinationRepoCubit,
     String source,
     String destination,
+    bool recursive,
   ) async {
-    final createFolderOk = await destinationRepoCubit.createFolder(destination);
-    if (!createFolderOk) return false;
-
-    await openDirectory(source).then(
-      (contents) async {
-        for (var entry in contents) {
-          final from = repo_path.join(source, entry.name);
-          final to = repo_path.join(destination, entry.name);
-          final moveOk = entry.entryType == EntryType.file
-              ? await _moveFileToRepo(destinationRepoCubit, from, to)
-              : await _moveFolderToRepo(destinationRepoCubit, from, to);
-
-          if (!moveOk) return false;
-        }
-      },
+    final copied = await _copyFolder(
+      source,
+      destination,
+      destinationRepoCubit,
+      recursive,
     );
-
-    await Directory.remove(_repo, source);
-    return true;
+    if (copied) {
+      if (recursive) {
+        await _repo.removeDirectory(source, true);
+      }
+      return true;
+    }
+    return false;
   }
 
   Future<bool> deleteFile(String filePath) async {
-    emit(state.copyWith(isLoading: true));
+    emitUnlessClosed(state.copyWith(isLoading: true));
 
     try {
-      await File.remove(_repo, filePath);
+      await _repo.removeFile(filePath);
       return true;
     } catch (e, st) {
-      loggy.app('Delete file $filePath failed', e, st);
+      loggy.debug('Delete file $filePath failed', e, st);
       return false;
     } finally {
       await refresh();
@@ -823,7 +936,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
       showSnackBar(e.toString());
     }
 
-    emit(state.copyWith(
+    emitUnlessClosed(state.copyWith(
       currentFolder: _currentFolder.state,
       isLoading: false,
     ));
@@ -836,30 +949,13 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     File? newFile;
 
     try {
-      newFile = await File.create(_repo, newFilePath);
+      newFile = await _repo.createFile(newFilePath);
     } catch (e, st) {
-      loggy.app('File creation $newFilePath failed', e, st);
+      loggy.debug('File creation $newFilePath failed', e, st);
     }
 
     return newFile;
   }
 
-  Future<File> openFile(String path) => File.open(_repo, path);
-
-  @override
-  Future<void> close() async {
-    await _repo.close();
-    await super.close();
-  }
-
-  Future<PasswordSalt?> getCurrentModePasswordSalt() async {
-    switch (accessMode) {
-      case AccessMode.blind:
-        return null;
-      case AccessMode.read:
-        return await _repo.getReadPasswordSalt();
-      case AccessMode.write:
-        return await _repo.getWritePasswordSalt();
-    }
-  }
+  Future<File> openFile(String path) => _repo.openFile(path);
 }

@@ -9,12 +9,11 @@ import 'package:ouisync_app/app/models/repo_entry.dart';
 import 'package:ouisync_app/app/models/repo_location.dart';
 import 'package:ouisync_app/app/utils/cache_servers.dart';
 import 'package:ouisync_app/app/utils/master_key.dart';
-import 'package:ouisync_app/app/utils/mounter.dart';
-import 'package:ouisync_app/app/utils/repo_path.dart' as repo_path;
+import 'package:ouisync_app/app/utils/random.dart';
 import 'package:ouisync_app/app/utils/settings/settings.dart';
 import 'package:ouisync_app/generated/l10n.dart';
-import 'package:ouisync/native_channels.dart';
 import 'package:ouisync/ouisync.dart';
+import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
 import '../utils.dart';
@@ -23,32 +22,31 @@ void main() {
   // Needed for `NativeChannels`.
   WidgetsFlutterBinding.ensureInitialized();
 
+  late Server server;
   late Session session;
   late ReposCubit reposCubit;
   late RepoCreationCubit repoCreationCubit;
 
   setUp(() async {
-    final configPath = repo_path.join(
-      (await getApplicationSupportDirectory()).path,
-      'config',
-    );
+    final appDir = await getApplicationSupportDirectory();
+    await appDir.create(recursive: true);
 
-    session = Session.create(
-      kind: SessionKind.unique,
-      configPath: configPath,
-    );
+    final configPath = p.join(appDir.path, 'config');
 
-    final nativeChannels = NativeChannels(session);
+    server = Server.create(configPath: configPath);
+    await server.start();
+
+    session = await Session.create(configPath: configPath);
+    await session.setStoreDir(p.join(appDir.path, 'store'));
+
     final settings = await Settings.init(MasterKey.random());
 
     reposCubit = ReposCubit(
       session: session,
-      nativeChannels: nativeChannels,
       settings: settings,
       navigation: NavigationCubit(),
       bottomSheet: EntryBottomSheetCubit(),
-      cacheServers: CacheServers.disabled,
-      mounter: Mounter(session),
+      cacheServers: CacheServers(session),
     );
 
     repoCreationCubit = RepoCreationCubit(reposCubit: reposCubit);
@@ -58,6 +56,7 @@ void main() {
     await repoCreationCubit.close();
     await reposCubit.close();
     await session.close();
+    await server.stop();
   });
 
   test('create repository with default local secret', () async {
@@ -68,7 +67,7 @@ void main() {
       isA<RepoCreationPending>()
           .having((s) => s.location, 'location', isNull)
           .having((s) => s.setLocalSecret, 'setLocalSecret',
-              isA<LocalSecretKeyAndSalt>())
+              isA<SetLocalSecretKeyAndSalt>())
           .having((s) => s.nameError, 'nameError', isNull),
     );
 
@@ -81,7 +80,9 @@ void main() {
     await repoCreationCubit.save();
     expect(repoCreationCubit.state.substate, isA<RepoCreationSuccess>());
     expect(
-      reposCubit.repos.where((entry) => entry.name == name).firstOrNull,
+      reposCubit.state.repos.values
+          .where((entry) => entry.name == name)
+          .firstOrNull,
       isA<OpenRepoEntry>(),
     );
   });
@@ -92,17 +93,23 @@ void main() {
 
     final name = 'my repo';
     await reposCubit.createRepository(
-      location: RepoLocation.fromParts(
-        dir: await reposCubit.settings.getDefaultRepositoriesDir(),
+      location: RepoLocation(
+        dir: (await session.getStoreDir())!,
         name: name,
       ),
-      setLocalSecret: LocalSecretKeyAndSalt.random(),
+      setLocalSecret: SetLocalSecretKeyAndSalt(
+        key: randomSecretKey(),
+        salt: randomSalt(),
+      ),
       localSecretMode: LocalSecretMode.randomStored,
     );
 
     repoCreationCubit.nameController.text = name;
-    await repoCreationCubit.waitUntil((state) => state.loading);
-    await repoCreationCubit.waitUntil((state) => !state.loading);
+
+    await repoCreationCubit.waitUntil((state) {
+      final substate = state.substate;
+      return substate is RepoCreationPending && substate.nameError != null;
+    });
 
     expect(
       repoCreationCubit.state.substate,

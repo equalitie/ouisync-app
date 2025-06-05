@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart' show ReposCubit;
-import '../../models/models.dart' show RepoLocation;
+import '../../models/repo_entry.dart';
 import '../../utils/utils.dart' show AppLogger, Dimensions, Fields;
 
 class RepoListActions extends StatelessWidget with AppLogger {
@@ -16,49 +16,51 @@ class RepoListActions extends StatelessWidget with AppLogger {
   final BuildContext context;
   final ReposCubit reposCubit;
 
-  final Future<RepoLocation?> Function() onCreateRepoPressed;
-  final Future<List<RepoLocation>> Function() onImportRepoPressed;
+  final Future<RepoEntry?> Function() onCreateRepoPressed;
+  final Future<List<RepoEntry>> Function() onImportRepoPressed;
 
   @override
-  Widget build(BuildContext context) => Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Fields.bottomSheetHandle(context),
-          Directionality(
-            textDirection: TextDirection.ltr,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildAction(
-                    name: S.current.actionNewRepo,
-                    icon: Icons.archive_outlined,
-                    action: () async {
-                      final location = await onCreateRepoPressed();
+  Widget build(BuildContext context) => SafeArea(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Fields.bottomSheetHandle(context),
+            Directionality(
+              textDirection: TextDirection.ltr,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _buildAction(
+                      name: S.current.actionNewRepo,
+                      icon: Icons.archive_outlined,
+                      action: () async {
+                        final location = await onCreateRepoPressed();
 
-                      if (location == null) {
-                        return;
-                      }
+                        if (location == null) {
+                          return;
+                        }
 
-                      await Navigator.of(context).maybePop();
-                    }),
-                _buildAction(
-                    name: S.current.actionImportRepo,
-                    icon: Icons.unarchive_outlined,
-                    action: () async {
-                      final locations = await onImportRepoPressed();
+                        await Navigator.of(context).maybePop();
+                      }),
+                  _buildAction(
+                      name: S.current.actionImportRepo,
+                      icon: Icons.unarchive_outlined,
+                      action: () async {
+                        final locations = await onImportRepoPressed();
 
-                      if (locations.isEmpty) {
-                        return;
-                      }
+                        if (locations.isEmpty) {
+                          return;
+                        }
 
-                      await Navigator.of(context).maybePop();
-                    })
-              ],
+                        await Navigator.of(context).maybePop();
+                      })
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       );
 
   Widget _buildAction({name, icon, action}) => Padding(

@@ -10,23 +10,27 @@
 struct _MyApplication {
   GtkApplication parent_instance;
   char** dart_entrypoint_arguments;
+  gboolean unique;
 };
 
 G_DEFINE_TYPE(MyApplication, my_application, GTK_TYPE_APPLICATION)
 
 // Implements GApplication::activate.
 static void my_application_activate(GApplication* application) {
-  // Enforce single instance: switch to the existing instance (if any) instead of starting a new
-  // one (https://stackoverflow.com/a/77016317/170073).
-  GList *list = gtk_application_get_windows(GTK_APPLICATION(application));
-  GtkWindow* existing_window = list ? GTK_WINDOW(list->data) : NULL;
+  MyApplication* self = MY_APPLICATION(application);
 
-  if (existing_window) {
-    gtk_window_present(existing_window);
-    return;
+  if (self->unique) {
+    // Enforce single instance: switch to the existing instance (if any) instead of starting a new
+    // one (https://stackoverflow.com/a/77016317/170073).
+    GList *list = gtk_application_get_windows(GTK_APPLICATION(application));
+    GtkWindow* existing_window = list ? GTK_WINDOW(list->data) : NULL;
+
+    if (existing_window) {
+      gtk_window_present(existing_window);
+      return;
+    }
   }
 
-  MyApplication* self = MY_APPLICATION(application);
   GtkWindow* window =
       GTK_WINDOW(gtk_application_window_new(GTK_APPLICATION(application)));
 
@@ -114,9 +118,19 @@ static void my_application_class_init(MyApplicationClass* klass) {
 static void my_application_init(MyApplication* self) {}
 
 MyApplication* my_application_new() {
-  // Enforce single instance: removed the `G_APPLICATION_NON_UNIQUE` flag
+  // Enforce single instance unless `OUISYNC_NON_UNIQUE` env variable is defined.
   // (https://stackoverflow.com/a/77016317/170073).
-  return MY_APPLICATION(g_object_new(my_application_get_type(),
-                                     "application-id", APPLICATION_ID,
-                                     nullptr));
+  gboolean unique = g_getenv("OUISYNC_NON_UNIQUE") == nullptr;
+
+  MyApplication* self = MY_APPLICATION(g_object_new(
+    my_application_get_type(),
+    "application-id", APPLICATION_ID,
+    "flags", unique ? 0 : G_APPLICATION_NON_UNIQUE,
+    nullptr
+  ));
+
+  self->unique = unique;
+
+
+  return self;
 }

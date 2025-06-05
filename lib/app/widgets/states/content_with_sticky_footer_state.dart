@@ -11,27 +11,25 @@ class ContentWithStickyFooterState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => LayoutBuilder(
-        builder: (context, constraints) {
-          return SingleChildScrollView(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: constraints.maxHeight),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    padding: EdgeInsetsDirectional.symmetric(horizontal: 18.0),
-                    alignment: AlignmentDirectional.topCenter,
-                    child: content,
-                  ),
-                  Container(
-                    padding: EdgeInsetsDirectional.symmetric(vertical: 18.0),
-                    child: footer,
-                  ),
-                ],
-              ),
+        builder: (context, constraints) => SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding: EdgeInsetsDirectional.symmetric(horizontal: 18.0),
+                  alignment: AlignmentDirectional.topCenter,
+                  child: content,
+                ),
+                Container(
+                  padding: EdgeInsetsDirectional.symmetric(vertical: 18.0),
+                  child: SafeArea(child: footer),
+                ),
+              ],
             ),
-          );
-        },
+          ),
+        ),
       );
 }

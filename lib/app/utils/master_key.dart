@@ -3,14 +3,15 @@ import 'package:mutex/mutex.dart';
 import 'package:meta/meta.dart'; // for `@visibleForTesting`
 import 'dart:typed_data';
 import 'dart:convert';
-import './cipher.dart' as cipher;
+import 'cipher.dart' as cipher;
 
 class MasterKey {
   static const String _masterKey = 'masterKey';
+  static final _mutex = Mutex();
 
-  final cipher.Cipher _cipher;
+  final cipher.SecretKey secretKey;
 
-  MasterKey._(cipher.SecretKey masterKey) : _cipher = cipher.Cipher(masterKey);
+  MasterKey._(this.secretKey);
 
   /// Load the master key from the secure storage. Generate a new one if not stored yet.
   static Future<MasterKey> init() async {
@@ -18,49 +19,33 @@ class MasterKey {
 
     // Ensure nothing else tries to initialize the MasterKey concurrently or data
     // loss could happen.
-    final mutex = Mutex();
-    await mutex.acquire();
+    await _mutex.acquire();
 
     try {
       var masterKeyBase64 = await storage.read(key: _masterKey);
 
       if (masterKeyBase64 == null) {
         // No master password was generated yet, generate one now.
-        final algo = cipher.Cipher.newAlgorithm();
-        final key = cipher.Cipher.randomSecretKey(algo);
-        masterKeyBase64 = base64.encode(key.bytes);
+        final masterKey = cipher.randomSecretKey();
+        masterKeyBase64 = base64.encode(masterKey.bytes);
         await storage.write(key: _masterKey, value: masterKeyBase64);
       }
 
       return MasterKey._(cipher.SecretKey(base64.decode(masterKeyBase64)));
     } finally {
-      mutex.release();
+      _mutex.release();
     }
   }
 
   /// Generate a throwaway master key. Useful for testing.
-  static MasterKey random() {
-    final algo = cipher.Cipher.newAlgorithm();
-    final key = cipher.Cipher.randomSecretKey(algo);
-    return MasterKey._(key);
-  }
+  static MasterKey random() => MasterKey._(cipher.randomSecretKey());
 
-  Future<String> encrypt(String plainText) async {
-    return await _cipher.encrypt(plainText);
-  }
-
-  Future<String> encryptBytes(Uint8List plainText) async {
-    return await _cipher.encryptBytes(plainText);
-  }
+  Future<Uint8List> encrypt(Uint8List plainText) =>
+      cipher.encrypt(secretKey, plainText);
 
   // Returns `null` if decryption fails.
-  Future<String?> decrypt(String encrypted) async {
-    return await _cipher.decrypt(encrypted);
-  }
-
-  // Returns `null` if decryption fails.
-  Future<Uint8List?> decryptBytes(String encrypted) async {
-    return await _cipher.decryptBytes(encrypted);
+  Future<Uint8List?> decrypt(Uint8List encrypted) async {
+    return await cipher.decrypt(secretKey, encrypted);
   }
 
   @visibleForTesting
@@ -68,10 +53,7 @@ class MasterKey {
       MasterKey._(cipher.SecretKey(base64.decode(keyBase64)));
 
   @visibleForTesting
-  static String generateKey() {
-    final algo = cipher.Cipher.newAlgorithm();
-    return base64.encode(cipher.Cipher.randomSecretKey(algo).bytes);
-  }
+  static String generateKey() => base64.encode(cipher.randomSecretKey().bytes);
 }
 
 // I think we need the `encryptedSharedPreferense: true` option on Android,

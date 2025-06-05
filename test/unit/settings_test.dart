@@ -1,11 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ouisync_app/app/models/auth_mode.dart';
 import 'package:ouisync_app/app/utils/utils.dart';
 import 'package:ouisync_app/app/utils/settings/v0/v0.dart' as v0;
 import 'package:ouisync_app/app/utils/settings/v1.dart' as v1;
 import 'package:ouisync_app/app/models/repo_location.dart';
-import 'package:ouisync_app/app/utils/master_key.dart';
-import 'package:ouisync/ouisync.dart' show Repository, Session, SessionKind;
+import 'package:ouisync/ouisync.dart' show Session, Server;
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -21,6 +22,7 @@ void main() {
     expect(prefs.getKeys().isEmpty, true);
 
     final baseDir = await getApplicationSupportDirectory();
+    await baseDir.create(recursive: true);
 
     final fooPath = join(baseDir.path, 'foo.db');
     final barPath = join(baseDir.path, 'bar.db');
@@ -39,14 +41,15 @@ void main() {
     );
     await s0.setDefaultRepo('foo');
 
-    final session = Session.create(
-      configPath: join(baseDir.path, 'config'),
-      kind: SessionKind.unique,
-    );
+    final configPath = join(baseDir.path, 'config');
 
-    await Repository.create(
-      session,
-      store: fooPath,
+    final server = Server.create(configPath: configPath);
+    await server.start();
+
+    final session = await Session.create(configPath: configPath);
+
+    await session.createRepository(
+      path: fooPath,
       readSecret: null,
       writeSecret: null,
     );
@@ -60,7 +63,7 @@ void main() {
     expect(s1.repos, unorderedEquals([RepoLocation.fromDbPath(fooPath)]));
 
     // The auth mode should have been transferred to the repo metadata
-    final repo = await Repository.open(session, store: fooPath);
+    final repo = await session.openRepository(path: fooPath);
     expect(await repo.getAuthMode(), isA<AuthModeBlindOrManual>());
 
     await s1.setRepoLocation(
@@ -75,6 +78,9 @@ void main() {
         RepoLocation.fromDbPath(barPath),
       ]),
     );
+
+    await session.close();
+    await server.stop();
   });
 
   test('settings migration v1 to v2', () async {
@@ -85,6 +91,7 @@ void main() {
     expect(prefs.getKeys().isEmpty, true);
 
     final baseDir = await getApplicationSupportDirectory();
+    await baseDir.create(recursive: true);
 
     final fooPath = join(baseDir.path, 'foo.db');
     final barPath = join(baseDir.path, 'bar.db');
@@ -101,14 +108,15 @@ void main() {
     await s1.setRepoLocation(DatabaseId('123'), repoLocation);
     await s1.setDefaultRepo(repoLocation);
 
-    final session = Session.create(
-      configPath: join(baseDir.path, 'config'),
-      kind: SessionKind.unique,
-    );
+    final configPath = join(baseDir.path, 'config');
 
-    await Repository.create(
-      session,
-      store: fooPath,
+    final server = Server.create(configPath: configPath);
+    await server.start();
+
+    final session = await Session.create(configPath: configPath);
+
+    await session.createRepository(
+      path: fooPath,
       readSecret: null,
       writeSecret: null,
     );
@@ -124,7 +132,7 @@ void main() {
     expect(s2.repos, unorderedEquals([RepoLocation.fromDbPath(fooPath)]));
 
     // The auth mode should have been transfered to the repo metadata
-    final repo = await Repository.open(session, store: fooPath);
+    final repo = await session.openRepository(path: fooPath);
     expect(await repo.getAuthMode(), isA<AuthModeBlindOrManual>());
 
     await s2.setRepoLocation(
@@ -139,6 +147,9 @@ void main() {
         RepoLocation.fromDbPath(barPath),
       ]),
     );
+
+    await session.close();
+    await server.stop();
   });
 
   test('master key', () async {
@@ -146,10 +157,12 @@ void main() {
 
     final key = await MasterKey.init();
 
-    final encrypted = await key.encrypt("foobar");
-    final decrypted = await key.decrypt(encrypted);
+    final encrypted = await key.encrypt(utf8.encode("foobar"));
 
-    expect(decrypted, "foobar");
+    final decrypted = await key.decrypt(encrypted);
+    final decryptedString = decrypted != null ? utf8.decode(decrypted) : null;
+
+    expect(decryptedString, "foobar");
   });
 
   //
@@ -164,22 +177,24 @@ void main() {
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   //
   test('compatible encryption', () async {
-    final teststring = "foobar";
+    final testString = "foobar";
 
     ////Use this commented code if you need to generate new values.
     //{
     //  final rawKey = MasterKey.generateKey();
-    //  print("key: $rawKey");
+    //  debugPrint("key: $rawKey");
     //  final key = MasterKey.initWithKey(rawKey);
     //  final encrypted = await key.encrypt(teststring);
-    //  print("encrypted: $encrypted");
+    //  debugPrint("encrypted: $encrypted");
     //}
 
     final key =
         MasterKey.initWithKey("eZcpF/CdFblXXhFP4LHk49lGtDEY4c1Gn/qQKBU0QmA=");
-
     final encrypted = "cKMbibnjHsni8olld2sUXjxNsAroR/DOKNj3rUOOrFtUrA==";
 
-    expect(await key.decrypt(encrypted), teststring);
+    final decrypted = await key.decrypt(base64.decode(encrypted));
+    final decryptedString = decrypted != null ? utf8.decode(decrypted) : null;
+
+    expect(decryptedString, testString);
   });
 }

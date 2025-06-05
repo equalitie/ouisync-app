@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:ouisync/ouisync.dart';
+import 'package:ouisync/ouisync.dart' show SetLocalSecretKeyAndSalt;
 import 'package:ouisync_app/app/cubits/repo_creation.dart';
 import 'package:ouisync_app/app/models/models.dart';
 import 'package:ouisync_app/app/utils/share_token.dart';
@@ -33,24 +33,27 @@ void main() {
             .having((t) => t.value, 'value', isNotNull)
             .having((t) => t.error, 'error', isNull));
 
-    final tokenAccessMode = await (token as ShareTokenValid).value.mode;
+    final tokenAccessMode = await deps.session
+        .getShareTokenAccessMode((token as ShareTokenValid).value);
     expect(tokenAccessMode, equals(AccessMode.blind));
 
-    final suggestedRepoName = await token.value.suggestedName;
+    final suggestedRepoName =
+        await deps.session.getShareTokenSuggestedName(token.value);
 
     expect(
       repoCreationCubit.state.substate,
       isA<RepoCreationPending>()
           .having((s) => s.location, 'location', isNull)
           .having((s) => s.setLocalSecret, 'setLocalSecret',
-              isA<LocalSecretKeyAndSalt>())
+              isA<SetLocalSecretKeyAndSalt>())
           .having((s) => s.nameError, 'nameError', isNull),
     );
 
     await repoCreationCubit.setToken(token.value);
 
     repoCreationCubit.nameController.text = suggestedRepoName;
-    await repoCreationCubit.waitUntil((state) => !state.loading);
+    await repoCreationCubit
+        .waitUntil((state) => state.substate is RepoCreationValid);
 
     expect(repoCreationCubit.state.substate, isA<RepoCreationValid>());
     expect(repoCreationCubit.state.name, equals(suggestedRepoName));
@@ -59,7 +62,7 @@ void main() {
 
     expect(repoCreationCubit.state.substate, isA<RepoCreationSuccess>());
     expect(
-      deps.reposCubit.repos
+      deps.reposCubit.state.repos.values
           .where((entry) => entry.name == suggestedRepoName)
           .firstOrNull,
       isA<OpenRepoEntry>()

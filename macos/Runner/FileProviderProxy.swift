@@ -4,235 +4,104 @@
 //
 //  Created by Peter Jankuliak on 03/04/2024.
 //
-
-import Foundation
 import FileProvider
-import Common
+import FlutterMacOS
+import OuisyncCommon
 
 
-// Facilitate communication between the file provider extension and the rust code.
-class FileProviderProxy {
-    init() {
-        let domain = ouisyncFileProviderDomain
+// TODO: this memory copy is unavoidable unless OuisyncLib is updated to use Data (itself [UInt8]-like)
+extension Data {
+    var bytes: [UInt8] { [UInt8](self) }
+}
+extension FlutterError: Error {}
 
-        SuccessfulTask(name: "FileProviderProxy.init") {
-            while true {
+@MainActor
+class FileProviderProxy: FromFileProviderToAppProtocol {
+    private var manager: NSFileProviderManager!
+    private var service: NSFileProviderService!
+    private var connection: NSXPCConnection!
+    let channel: FlutterMethodChannel
+
+    init(_ flutterBinaryMessenger: FlutterBinaryMessenger) {
+        channel = FlutterMethodChannel(name: Constants.flutterForwardingChannel,
+                                       binaryMessenger: flutterBinaryMessenger)
+        channel.setMethodCallHandler {
+            [weak self] call, result in guard let self
+            else { return result(FlutterError(code: "OS00",
+                                              message: "Host shutdown",
+                                              details: nil)) }
+            Task {
                 do {
-                    try await NSFileProviderManager.add(domain)
-                    Self.log("😀 NSFileProviderManager added domain successfully")
-                    break
+                    let res = try await self.invoke(call)
+                    result(res is Void ? nil : res)
                 } catch {
-                    Self.log("😡 Error starting file provider for domain \(domain): \(String(describing: error))")
-                    try await Task.sleep(nanoseconds: 1_000_000_000)
+                    print(error)
+                    result(error as? FlutterError ?? FlutterError(code: "OS01",
+                                                                  message: "Unknown error in host",
+                                                                  details: String(describing: error)))
                 }
             }
-
-            let ffi = FFI()
-
-            let (fromRustRx, fromRustTx) = makeStream();
-
-            // Compiler complains that `fromRustTx` is not a "class" when I try to get a raw pointer out of it.
-            let wrapFromRustTx = Wrap(fromRustTx)
-
-            let callback: FFICallback = { context, dataPointer, size in
-                let fromRustTx: Wrap<Tx> = FFI.fromUnretainedPtr(ptr: context!)
-                let data = Array(UnsafeBufferPointer(start: dataPointer, count: Int(exactly: size)!))
-                fromRustTx.inner.yield(data)
-            }
-
-            let session = try await ffi.waitForSession(FFI.toUnretainedPtr(obj: wrapFromRustTx), callback)
-
-            let manager = NSFileProviderManager(for: domain)!
-
-            var service: NSFileProviderService? = nil
-
-            while true {
-                do {
-                    service = try await manager.service(named: ouisyncFileProviderServiceName, for: NSFileProviderItemIdentifier.rootContainer)
-                    break
-                } catch {
-                    Self.log("😡 Failed to acquire service from NSFileProviderManager: \(error)")
-                    try await Task.sleep(nanoseconds: 1_000_000_000)
-                }
-            }
-
-            guard let service = service else {
-                Self.log("😡 Failed to acquire service from NSFileProviderManager")
-                return;
-            }
-
-            let connection = try await service.fileProviderConnection()
-            connection.remoteObjectInterface = NSXPCInterface(with: OuisyncFileProviderServerProtocol.self)
-
-            connection.interruptionHandler = {
-                Self.log("😡 Connection to File Provider XPC service has been interrupted")
-                fromRustTx.finish();
-            }
-
-            connection.invalidationHandler = {
-                Self.log("😡 Connection to File Provider XPC service has been invalidated")
-                fromRustTx.finish();
-            }
-
-            let server = connection.remoteObjectProxy() as! OuisyncFileProviderServerProtocol;
-
-            func fromRustToServer(_ server: OuisyncFileProviderServerProtocol, _ fromRustRx: Rx) async {
-                for await message in fromRustRx {
-                    server.messageFromClientToServer(message)
-                }
-            }
-
-            class FromServerToRust : OuisyncFileProviderClientProtocol {
-                let ffi: FFI
-                let session: SessionHandle
-                init(_ ffi: FFI, _ session: SessionHandle) {
-                    self.ffi = ffi
-                    self.session = session
-                }
-                func messageFromServerToClient(_ message: [UInt8]) {
-                    ffi.channelSend(session, message)
-                }
-            }
-
-            connection.exportedObject = FromServerToRust(ffi, session)
-            connection.exportedInterface = NSXPCInterface(with: OuisyncFileProviderClientProtocol.self)
-
-            connection.resume();
-
-            // For some reason the communication wont start unless we send this first message
-            server.messageFromClientToServer([])
-
-            await fromRustToServer(server, fromRustRx);
-
-            await ffi.closeSession(session)
         }
     }
 
-    func invalidate() async throws {
-        try await NSFileProviderManager.remove(ouisyncFileProviderDomain)
-    }
-
-    static func log(_ message: String) {
-        NSLog(message)
-    }
-}
-
-// ---------------------------------------------------------------------------------------
-
-typealias Rx = AsyncStream<[UInt8]>
-typealias Tx = AsyncStream<[UInt8]>.Continuation
-
-class Wrap<T> {
-    let inner: T
-    init(_ inner: T) { self.inner = inner }
-}
-
-class Channel {
-    let rx: Rx
-    let tx: Tx
-
-    init(_ rx: Rx, _ tx: Tx) { self.rx = rx; self.tx = tx }
-}
-
-func makeStream() -> (Rx, Tx) {
-    var continuation: Rx.Continuation!
-    let stream = Rx() { continuation = $0 }
-    return (stream, continuation!)
-}
-
-// ---------------------------------------------------------------------------------------
-
-typealias FFIContext = UnsafeRawPointer
-typealias FFICallback = @convention(c) (FFIContext?, UnsafePointer<UInt8>, CUnsignedLongLong) -> Void;
-typealias FFISessionGrab = @convention(c) (UnsafeRawPointer?, FFICallback) -> SessionCreateResult;
-typealias FFISessionClose = @convention(c) (SessionHandle, FFIContext?, FFICallback) -> Void;
-typealias FFISessionChannelSend = @convention(c) (SessionHandle, UnsafeRawPointer, UInt64) -> Void;
-
-class FFI {
-    let handle: UnsafeMutableRawPointer
-    let ffiSessionGrab: FFISessionGrab
-    let ffiSessionChannelSend: FFISessionChannelSend
-    let ffiSessionClose: FFISessionClose
-
-    init() {
-        handle = dlopen("libouisync_ffi.dylib", RTLD_NOW)!
-        ffiSessionGrab = unsafeBitCast(dlsym(handle, "session_grab"), to: FFISessionGrab.self)
-        ffiSessionChannelSend = unsafeBitCast(dlsym(handle, "session_channel_send"), to: FFISessionChannelSend.self)
-        ffiSessionClose = unsafeBitCast(dlsym(handle, "session_close"), to: FFISessionClose.self)
-    }
-
-    // Blocks until Dart creates a session, then returns it.
-    func waitForSession(_ context: UnsafeRawPointer, _ callback: FFICallback) async throws -> SessionHandle {
-        // TODO: Might be worth change the ffi function to call a callback when the session becomes created instead of busy sleeping.
-        var elapsed: UInt64 = 0;
-        while true {
-            let result = ffiSessionGrab(context, callback)
-            if result.errorCode == 0 {
-                NSLog("😀 Got Ouisync session");
-                return result.session
-            }
-            NSLog("🤨 Ouisync session not yet ready. Code: \(result.errorCode) Message:\(String(cString: result.errorMessage!))");
-
-            let millisecond: UInt64 = 1_000_000
-            let second: UInt64 = 1000 * millisecond
-
-            var timeout = 200 * millisecond
-
-            if elapsed > 10 * second {
-                timeout = second
-            }
-
-            try await Task.sleep(nanoseconds: timeout)
-            elapsed += timeout;
+    nonisolated func fromFileProviderToApp(_ message: [UInt8]) {
+        DispatchQueue.main.async {
+            self.channel.invokeMethod("response", arguments: message)
         }
     }
 
-    func channelSend(_ session: SessionHandle, _ data: [UInt8]) {
-        let count = data.count;
-        data.withUnsafeBufferPointer({ maybePointer in
-            if let pointer = maybePointer.baseAddress {
-                ffiSessionChannelSend(session, pointer, UInt64(count))
-            }
-        })
-    }
+    private func invoke(_ call: FlutterMethodCall) async throws -> Any? {
+        switch call.method {
+        case "initialize":
+            try await NSFileProviderManager.add(ouisyncFileProviderDomain)
+            manager = NSFileProviderManager(for: ouisyncFileProviderDomain)
+            if manager == nil { throw FlutterError(code: "OS02",
+                                                   message: "Unable to obtain File Provider manager",
+                                                   details: nil) }
+            // the following two concurrency warnings can be ignored because they're just transferring
+            // ownership of instances created in a different actor; it's better to see them than
+            // declaring unchecked Sendable conformance because they should be isolated otherwise
+            service = try? await manager.service(named: ouisyncFileProviderServiceName,
+                                                for: NSFileProviderItemIdentifier.rootContainer)
+            if service == nil { throw FlutterError(code: "OS02",
+                                                   message: "Unable to obtain File Provider service",
+                                                   details: nil) }
 
-    func closeSession(_ session: SessionHandle) async {
-        typealias C = CheckedContinuation<Void, Never>
+            connection = try await service.fileProviderConnection()
+            connection.remoteObjectInterface = NSXPCInterface(with: FromAppToFileProviderProtocol.self)
 
-        class Context {
-            let session: SessionHandle
-            let continuation: C
-            init(_ session: SessionHandle, _ continuation: C) {
-                self.session = session
-                self.continuation = continuation
-            }
+            connection.interruptionHandler = { [weak self] in self?.reset("interrupted") }
+            connection.invalidationHandler = { [weak self] in self?.reset("invalidated") }
+
+            connection.exportedObject = self
+            connection.exportedInterface = NSXPCInterface(with: FromFileProviderToAppProtocol.self)
+            connection.resume()
+        case "invoke":
+            guard let bytes = (call.arguments as? FlutterStandardTypedData)?.data.bytes
+            else { throw FlutterError(code: "OS03",
+                                      message: "Unable to parse message",
+                                      details: nil) }
+            guard let connection
+            else { throw FlutterError(code: "OS04",
+                                      message: "Extension is not connected",
+                                      details: nil) }
+            guard let proto = connection.remoteObjectProxy() as? FromAppToFileProviderProtocol
+            else { throw FlutterError(code: "OS05",
+                                      message: "Extension is incompatible with host",
+                                      details: nil) }
+
+            proto.fromAppToFileProvider(bytes)
+        default: throw FlutterError(code: "OS06",
+                                    message: "Method \"\(call.method)\" not exported by host",
+                                    details: nil)
         }
-
-        await withCheckedContinuation(function: "FFI.closeSession", { continuation in
-            let context = Self.toRetainedPtr(obj: Context(session, continuation))
-            let callback: FFICallback = { context, dataPointer, size in
-                let context: Context = FFI.fromRetainedPtr(ptr: context!)
-                context.continuation.resume()
-            }
-            ffiSessionClose(session, context, callback)
-        })
+        return nil
     }
 
-    // Retained pointers have their reference counter incremented by 1.
-    // https://stackoverflow.com/a/33310021/273348
-    static func toUnretainedPtr<T : AnyObject>(obj : T) -> UnsafeRawPointer {
-        return UnsafeRawPointer(Unmanaged.passUnretained(obj).toOpaque())
-    }
-
-    static func fromUnretainedPtr<T : AnyObject>(ptr : UnsafeRawPointer) -> T {
-        return Unmanaged<T>.fromOpaque(ptr).takeUnretainedValue()
-    }
-
-    static func toRetainedPtr<T : AnyObject>(obj : T) -> UnsafeRawPointer {
-        return UnsafeRawPointer(Unmanaged.passRetained(obj).toOpaque())
-    }
-
-    static func fromRetainedPtr<T : AnyObject>(ptr : UnsafeRawPointer) -> T {
-        return Unmanaged<T>.fromOpaque(ptr).takeRetainedValue()
+    nonisolated private func reset(_ reason: String) {
+        DispatchQueue.main.async {
+            self.connection = nil
+            self.channel.invokeMethod("reset", arguments: reason)
+        }
     }
 }

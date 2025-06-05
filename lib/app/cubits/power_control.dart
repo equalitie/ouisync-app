@@ -7,12 +7,9 @@ import 'package:ouisync/ouisync.dart' as oui;
 
 import '../../generated/l10n.dart';
 import '../utils/utils.dart'
-    show AppLogger, LocalInterfaceAddr, LocalInterfaceWatch, AppLoggy, Settings;
+    show AppLogger, LocalInterfaceAddr, LocalInterfaceWatch, Settings;
 import '../utils/watch.dart' as watch;
 import 'cubits.dart' show CubitActions;
-
-const _unspecifiedV4 = "0.0.0.0:0";
-const _unspecifiedV6 = "[::]:0";
 
 class PowerControlState {
   final ConnectivityResult connectivityType;
@@ -134,8 +131,8 @@ class PowerControl extends Cubit<PowerControlState>
 
     // TODO: We should be getting `userWantsPortForwardingEnabled` from `_settings`.
     final userWantsPortForwardingEnabled =
-        await _session.isPortForwardingEnabled;
-    final isLocalDiscoveryEnabled = await _session.isLocalDiscoveryEnabled;
+        await _session.isPortForwardingEnabled();
+    final isLocalDiscoveryEnabled = await _session.isLocalDiscoveryEnabled();
 
     final connectivityType = (await _connectivity.checkConnectivity()).last;
 
@@ -185,7 +182,7 @@ class PowerControl extends Cubit<PowerControlState>
       await _session.setLocalDiscoveryEnabled(value);
     }
 
-    final isLocalDiscoveryEnabled = await _session.isLocalDiscoveryEnabled;
+    final isLocalDiscoveryEnabled = await _session.isLocalDiscoveryEnabled();
 
     emitUnlessClosed(state.copyWith(
         userWantsLocalDiscoveryEnabled: value,
@@ -235,12 +232,12 @@ class PowerControl extends Cubit<PowerControlState>
       // connectivity type does not change. (Although with recent patches
       // `_session.bindNetwork` should be idempotent if local endpoints don't
       // change).
-      loggy.app(
+      loggy.debug(
           'Network mode event: ${oldState.networkMode} -> ${newState.networkMode} (ignored, same as previous)');
       return;
     }
 
-    loggy.app(
+    loggy.debug(
         'NetworkMode event: ${oldState.networkMode} -> ${newState.networkMode}');
 
     await _setNetworkMode(newState.networkMode);
@@ -293,7 +290,7 @@ class PowerControl extends Cubit<PowerControlState>
       return;
     }
 
-    loggy.app('Setting network mode: $mode');
+    loggy.debug('Setting network mode: $mode');
 
     switch (_networkModeTransition) {
       case _Transition.none:
@@ -306,26 +303,22 @@ class PowerControl extends Cubit<PowerControlState>
     }
 
     var transition = _Transition.none;
-    String? quicV4;
-    String? quicV6;
+    final List<String> addrs;
 
     switch (mode) {
       case NetworkModeFull():
-        quicV4 = _unspecifiedV4;
-        quicV6 = _unspecifiedV6;
+        addrs = ['quic/0.0.0.0:0', 'quic/[::]:0'];
         break;
       case NetworkModeSaving(hotspotAddr: final hotspotAddr):
-        quicV4 = hotspotAddr;
-        quicV6 = null;
+        addrs = hotspotAddr != null ? ['quic/$hotspotAddr'] : [];
         break;
       case NetworkModeDisabled():
-        quicV4 = null;
-        quicV6 = null;
+        addrs = [];
         break;
     }
 
     try {
-      await _session.bindNetwork(quicV4: quicV4, quicV6: quicV6);
+      await _session.bindNetwork(addrs);
     } catch (e) {
       if (!emitUnlessClosed(
           state.copyWith(networkMode: NetworkModeDisabled()))) {

@@ -10,7 +10,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../models/models.dart';
 import '../files.dart';
-import '../master_key.dart';
 import '../utils.dart';
 import 'atomic_shared_prefs_settings_key.dart';
 import 'v0/v0.dart' as v0;
@@ -201,14 +200,15 @@ class Settings with AppLogger {
 
       // Try to write the auth mode to the repo metadata
       try {
-        final repo = await Repository.open(session, store: location.path);
+        final repo = await session.openRepository(path: location.path);
         await repo.setAuthMode(authMode);
         await repo.close();
       } catch (e, st) {
         loggy.error(
-            'failed to migrate auth mode for repository ${location.path}:',
-            e,
-            st);
+          'failed to migrate auth mode for repository ${location.path}:',
+          e,
+          st,
+        );
         continue;
       }
 
@@ -267,7 +267,7 @@ class Settings with AppLogger {
     }
 
     newAuthMode = AuthModePasswordStoredOnDevice(
-      await masterKey.encrypt(password),
+      base64Encode(await masterKey.encrypt(utf8.encode(password))),
       true,
     );
 
@@ -290,7 +290,8 @@ class Settings with AppLogger {
               join((await getApplicationDocumentsDirectory()).path, 'Ouisync')),
         ];
 
-        final newDir = await getDefaultRepositoriesDir();
+        final newDir = await Native.getBaseDir().then(
+            (baseDir) => io.Directory(join(baseDir.path, 'repositories')));
 
         for (final oldDir in oldDirs) {
           if (!(await oldDir.exists())) {
@@ -429,21 +430,14 @@ class Settings with AppLogger {
   }
 
   //------------------------------------------------------------------
-  Future<io.Directory> getDefaultRepositoriesDir() async {
-    final baseDir =
-        (io.Platform.isAndroid ? await getExternalStorageDirectory() : null) ??
-            await getApplicationSupportDirectory();
-    return io.Directory(join(baseDir.path, Constants.folderRepositoriesName));
-  }
 
-  //------------------------------------------------------------------
-
-  void debugPrint() {
-    print("============== Settings ===============");
+  void debugSettings() {
+    // debugPrint is flutter's "default" print function
+    loggy.debug("============== Settings ===============");
     for (final kv in _root.repos.entries) {
-      print("=== ${kv.key}");
+      loggy.debug("=== ${kv.key}");
     }
-    print("=======================================");
+    loggy.debug("=======================================");
   }
 
   //------------------------------------------------------------------
@@ -454,14 +448,14 @@ class Settings with AppLogger {
         acceptedEqualitieValues: _root.acceptedEqualitieValues,
         showOnboarding: _root.showOnboarding,
         highestSeenProtocolNumber: _root.highestSeenProtocolNumber,
-        defaultRepo: _root.defaultRepo?.clone(),
+        defaultRepo: _root.defaultRepo,
         repos: Map.from(_root.repos),
         defaultRepositoriesDirVersion: _root.defaultRepositoriesDirVersion,
         sharedPreferences: _prefs,
       );
 }
 
-class InvalidSettingsVersion {
+class InvalidSettingsVersion implements Exception {
   int statedVersion;
   InvalidSettingsVersion(this.statedVersion);
   @override

@@ -21,7 +21,7 @@ class DangerButton extends StatelessWidget {
             shape: const RoundedRectangleBorder(
                 borderRadius: Dimensions.borderRadiusDialogPositiveButton),
             textStyle: TextStyle(
-                color: Theme.of(context).dialogBackgroundColor,
+                color: Theme.of(context).dialogTheme.backgroundColor,
                 fontWeight: FontWeight.w500)));
   }
 

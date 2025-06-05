@@ -15,7 +15,7 @@ sealed class RepoEntry extends Equatable {
   Future<void> close();
 
   @override
-  List<Object> get props => [name, runtimeType];
+  List<Object> get props => [location, runtimeType];
 }
 
 class LoadingRepoEntry extends RepoEntry {

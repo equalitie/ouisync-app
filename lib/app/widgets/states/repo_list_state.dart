@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../mixins/mixins.dart';
 import '../../models/models.dart';
@@ -22,11 +23,12 @@ class RepoListState extends StatelessWidget
 
   @override
   Widget build(BuildContext context) {
-    if (reposCubit.currentRepo is LoadingRepoEntry) {
+    if (reposCubit.state.current is LoadingRepoEntry) {
       return Container();
     }
 
-    final repoList = reposCubit.repos.toList();
+    final repoList = reposCubit.state.repos.values.toList();
+
     return Container(
       color: Colors.white,
       child: Column(
@@ -37,7 +39,7 @@ class RepoListState extends StatelessWidget
             child: _buildRepoList(
               context,
               repoList,
-              reposCubit.currentRepoName,
+              reposCubit.state.current?.name,
             ),
           ),
         ],
@@ -70,20 +72,35 @@ class RepoListState extends StatelessWidget
 
             if (repoCubit == null) {
               return MissingRepoListItem(
-                location: repoEntry.location,
-                mainAction: () {},
-                verticalDotsAction: () => deleteRepository(
-                  parentContext,
-                  reposCubit: reposCubit,
-                  repoLocation: repoEntry.location,
-                ),
-              );
+                  location: repoEntry.location,
+                  mainAction: () {},
+                  verticalDotsAction: () async {
+                    final currentRepoEntry = reposCubit.state.current;
+                    if (currentRepoEntry == null) return;
+
+                    final repoName = currentRepoEntry.name;
+                    final location = currentRepoEntry.location;
+                    final deleteRepoFuture =
+                        reposCubit.deleteRepository(location);
+
+                    final deleted = await deleteRepository(
+                      context,
+                      repoName: repoName,
+                      deleteRepoFuture: deleteRepoFuture,
+                    );
+
+                    if (deleted == true) {
+                      Navigator.of(context).pop();
+                      showSnackBar(
+                          S.current.messageRepositoryDeleted(repoName));
+                    }
+                  });
             }
 
             return RepoListItem(
               repoCubit: repoCubit,
               isDefault: isDefault,
-              mainAction: () async => await reposCubit.setCurrent(repoEntry),
+              mainAction: () => reposCubit.setCurrent(repoEntry),
               verticalDotsAction: () => onShowRepoSettings(
                 parentContext,
                 repoCubit: repoCubit,

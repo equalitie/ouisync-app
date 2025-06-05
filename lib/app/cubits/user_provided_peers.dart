@@ -14,14 +14,15 @@ class UserProvidedPeersCubit extends Cubit<List<String>> with CubitActions {
   }
 
   Future<void> addPeer(String addr) async {
-    await _session.addUserProvidedPeer(addr);
+    await _session.addUserProvidedPeers([addr]);
     await _refresh();
   }
 
   Future<void> removePeer(String addr) async {
-    await _session.removeUserProvidedPeer(addr);
+    await _session.removeUserProvidedPeers([addr]);
     await _refresh();
   }
 
-  Future<void> _refresh() => _session.userProvidedPeers.then(emitUnlessClosed);
+  Future<void> _refresh() =>
+      _session.getUserProvidedPeers().then(emitUnlessClosed);
 }
