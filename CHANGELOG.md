@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- ## [Unreleased](https://github.com/equalitie/ouisync-app/compare/v0.9.0...master) -->
 
-## [v0.9.0](https://github.com/equalitie/ouisync-app/compare/v0.8.3-production...v0.9.0)
+## [v0.9.0](https://github.com/equalitie/ouisync-app/compare/v0.8.3-production...v0.9.0) - 2025-06-05
 
 ### Breaking changes
 
