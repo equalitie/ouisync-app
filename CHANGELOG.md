@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased](https://github.com/equalitie/ouisync-app/compare/v0.8.3-production...develop)
 
 - Update [Ouisync library](https://github.com/equalitie/ouisync) to [v0.9.0](https://github.com/equalitie/ouisync/blob/master/CHANGELOG.md#v0.9.0).
+- Ongoing work towards improving iOS and macOS support.
+- Allow resetting repository access using share token.
+- Implement operations on multiple files/directories (copy, move, delete, download and upload).
+- Various smaller UI/UX improvements.
 
 ## [v0.8.3](https://github.com/equalitie/ouisync-app/compare/v0.8.2...v0.8.3)
 
