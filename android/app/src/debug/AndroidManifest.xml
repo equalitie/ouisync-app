@@ -5,12 +5,4 @@ xmlns:tools="http://schemas.android.com/tools">
          to allow setting breakpoints, to provide hot reload, etc.
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
-
-    <application>
-        <provider
-        tools:replace="android:authorities"
-        android:name="org.equalitie.ouisync.lib.PipeProvider"
-        android:authorities="${applicationId}.pipe"
-        android:exported="true"/>
-    </application>
 </manifest>

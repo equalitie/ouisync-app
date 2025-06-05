@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:ouisync/ouisync.dart';
 
 import '../../generated/l10n.dart';
-import '../cubits/cubits.dart' show SortBy;
-import '../models/auth_mode.dart';
-import 'utils.dart';
+import '../cubits/cubits.dart' show EntrySelectionActions, SortBy;
+import '../models/models.dart' show AuthMode, AuthModeBlindOrManual;
+import 'utils.dart' show AppTextThemeExtension, AppTypography;
 
 extension AnyExtension<T> on T {
   /// This is inspired by
@@ -29,6 +29,10 @@ extension AnyExtension<T> on T {
 extension StringExtension on String {
   String capitalize() {
     return '${this[0].toUpperCase()}${substring(1)}';
+  }
+
+  String removePrefix(String rootPath) {
+    return replaceFirst(rootPath, '').trim();
   }
 }
 
@@ -132,24 +136,18 @@ extension RepositoryExtension on Repository {
   Future<void> setAuthMode(AuthMode authMode) async {
     final newValue = json.encode(authMode.toJson());
 
-    while (true) {
-      // Currently we ignore any concurrent changes and always force the new value.
+    // Currently we ignore any concurrent changes and always force the new value.
+    bool changed = false;
+    do {
       final oldValue = await getMetadata(_authModeKey);
-
-      try {
-        await setMetadata({
-          _authModeKey: (oldValue: oldValue, newValue: newValue),
-        });
-
-        break;
-      } on Error catch (e) {
-        if (e.code == ErrorCode.entryChanged) {
-          continue;
-        } else {
-          rethrow;
-        }
-      }
-    }
+      changed = await setMetadata([
+        MetadataEdit(
+          key: _authModeKey,
+          oldValue: oldValue,
+          newValue: newValue,
+        ),
+      ]);
+    } while (!changed);
   }
 }
 
@@ -172,15 +170,32 @@ extension SortByLocalizedExtension on SortBy {
   }
 }
 
-extension AccessModeLocalizedExtension on AccessMode {
+extension EntrySelectionActionsExtension on EntrySelectionActions {
   String get localized {
     switch (this) {
-      case AccessMode.blind:
-        return S.current.accessModeBlindLabel;
-      case AccessMode.read:
-        return S.current.accessModeReadLabel;
-      case AccessMode.write:
-        return S.current.accessModeWriteLabel;
+      case EntrySelectionActions.download:
+        return S.current.actionDownload;
+      case EntrySelectionActions.copy:
+        return S.current.actionCopy;
+      case EntrySelectionActions.move:
+        return S.current.actionMove;
+      case EntrySelectionActions.delete:
+        return S.current.actionDelete;
+    }
+  }
+}
+
+extension FileReadStream on File {
+  Stream<List<int>> readStream({int offset = 0, int chunkSize = 1024}) async* {
+    while (true) {
+      final chunk = await read(offset, chunkSize);
+      offset += chunk.length;
+
+      if (chunk.isEmpty) {
+        break;
+      }
+
+      yield chunk;
     }
   }
 }

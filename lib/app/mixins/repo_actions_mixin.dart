@@ -6,42 +6,75 @@ import 'package:path/path.dart' as p;
 import 'package:url_launcher/url_launcher.dart' as launcher;
 
 import '../../generated/l10n.dart';
-import '../cubits/cubits.dart';
-import '../models/models.dart';
-import '../pages/pages.dart';
-import '../utils/master_key.dart';
-import '../utils/platform/platform.dart';
-import '../utils/utils.dart';
-import '../widgets/widgets.dart';
+import '../cubits/cubits.dart' show RepoCubit;
+import '../models/models.dart'
+    show
+        Access,
+        AccessModeLocalizedExtension,
+        BlindAccess,
+        ReadAccess,
+        RepoLocation,
+        UnlockedAccess,
+        WriteAccess;
+import '../pages/pages.dart' show RepoSecurityPage;
+import '../utils/platform/platform.dart' show PlatformValues;
+import '../utils/utils.dart'
+    show
+        AppThemeExtension,
+        Dialogs,
+        Dimensions,
+        Fields,
+        LocalAuth,
+        PasswordHasher,
+        Settings,
+        ThemeGetter,
+        showSnackBar;
+import '../widgets/widgets.dart'
+    show
+        ActionsDialog,
+        GetPasswordAccessDialog,
+        NegativeButton,
+        PositiveButton,
+        RenameRepository,
+        ShareRepository;
 
 mixin RepositoryActionsMixin on LoggyType {
-  /// rename => ReposCubit.renameRepository
-  Future<void> renameRepository(
+  Future<String> renameRepository(
     BuildContext context, {
     required RepoCubit repoCubit,
-    required ReposCubit reposCubit,
-    void Function()? popDialog,
+  }) async {
+    final newName = await _getRepositoryNewName(
+      context,
+      repoCubit: repoCubit,
+    );
+    final newLocation = repoCubit.location.rename(newName);
+
+    if (newName.isNotEmpty) {
+      await Dialogs.executeFutureWithLoadingDialog(
+        null,
+        repoCubit.move(newLocation.path),
+      );
+
+      return newName;
+    }
+
+    return '';
+  }
+
+  Future<String> _getRepositoryNewName(
+    BuildContext context, {
+    required RepoCubit repoCubit,
   }) async {
     final newName = await showDialog<String>(
-      context: context,
-      builder: (BuildContext context) => ActionsDialog(
-        title: S.current.messageRenameRepository,
-        body: RenameRepository(repoCubit),
-      ),
-    );
+          context: context,
+          builder: (BuildContext context) => ActionsDialog(
+            title: S.current.messageRenameRepository,
+            body: RenameRepository(repoCubit),
+          ),
+        ) ??
+        '';
 
-    if (newName == null || newName.isEmpty) {
-      return;
-    }
-
-    await Dialogs.executeFutureWithLoadingDialog(
-      null,
-      reposCubit.renameRepository(repoCubit.location, newName),
-    );
-
-    if (popDialog != null) {
-      popDialog();
-    }
+    return newName;
   }
 
   Future<dynamic> shareRepository(BuildContext context,
@@ -73,76 +106,71 @@ mixin RepositoryActionsMixin on LoggyType {
   Future<void> navigateToRepositorySecurity(
     BuildContext context, {
     required Settings settings,
+    required Session session,
     required RepoCubit repoCubit,
     required PasswordHasher passwordHasher,
     required void Function() popDialog,
   }) async {
-    LocalSecret secret;
+    //LocalSecret secret;
+    final authMode = repoCubit.state.authMode;
+    final encryptedSecret = authMode.storedLocalSecret;
 
-    switch (repoCubit.state.authMode) {
-      case (AuthModeBlindOrManual()):
-        final password = await manualUnlock(context, repoCubit);
-        if (password == null || password.isEmpty) return;
-        secret = LocalPassword(password);
-        break;
-      case (AuthModeKeyStoredOnDevice()):
-      case (AuthModePasswordStoredOnDevice()):
-        if (!await LocalAuth.authenticateIfPossible(
-          context,
-          S.current.messageAccessingSecureStorage,
-        )) return;
+    final Access? access;
 
-        secret = (await repoCubit.getLocalSecret(settings.masterKey))!;
-        break;
+    if (encryptedSecret == null) {
+      // TODO: Check if the repo can be unlocked without a secret and if so,
+      // proceed with `authenticateIfPossible`.
+
+      access = await GetPasswordAccessDialog.show(
+        context,
+        settings,
+        session,
+        repoCubit,
+      );
+    } else {
+      if (!await LocalAuth.authenticateIfPossible(
+        context,
+        S.current.messageAccessingSecureStorage,
+      )) {
+        return;
+      }
+
+      // TODO: Tell the user when the decryption fails.
+      final secret = (await encryptedSecret.decrypt(settings.masterKey))!;
+      access = await repoCubit.getAccessOf(secret);
     }
 
     popDialog();
 
-    await Navigator.push(
+    final UnlockedAccess? unlockedAccess = access?.asUnlocked;
+
+    if (unlockedAccess == null) {
+      return;
+    }
+
+    await RepoSecurityPage.show(
       context,
-      MaterialPageRoute(
-        builder: (context) => RepoSecurityPage(
-          settings: settings,
-          repo: repoCubit,
-          currentLocalSecret: secret,
-          passwordHasher: passwordHasher,
-        ),
-      ),
+      settings,
+      session,
+      repoCubit,
+      unlockedAccess,
+      passwordHasher,
     );
   }
-
-  Future<String?> manualUnlock(
-    BuildContext context,
-    RepoCubit repoCubit,
-  ) =>
-      showDialog<String>(
-        context: context,
-        builder: (BuildContext context) => ActionsDialog(
-          title: S.current.messageValidateLocalPassword,
-          body: UnlockDialog(repoCubit),
-        ),
-      );
 
   Future<void> locateRepository(
     BuildContext context, {
     required RepoLocation repoLocation,
     required bool windows,
   }) async {
-    final uri = Uri.directory(repoLocation.dir.path, windows: windows);
+    final uri = Uri.directory(repoLocation.dir, windows: windows);
     if (PlatformValues.isDesktopDevice) {
       await launcher.launchUrl(uri);
       return;
     }
 
-    await _showRepoLocationDialog(context, repoLocation);
-  }
-
-  Future<void> _showRepoLocationDialog(
-    BuildContext context,
-    RepoLocation repoLocation,
-  ) async {
     final dbFile = p.basename(repoLocation.path);
-    final segments = p.split(repoLocation.dir.path);
+    final segments = p.split(repoLocation.dir);
 
     final breadcrumbs = BreadCrumb.builder(
       itemCount: segments.length,
@@ -153,33 +181,43 @@ mixin RepositoryActionsMixin on LoggyType {
       },
     );
 
-    await Dialogs.alertDialogWithActions(
-      context: context,
-      title: S.current.actionLocateRepo,
-      body: [
-        Text(
-          dbFile,
-          style: context.theme.appTextStyle.bodyMedium
-              .copyWith(fontWeight: FontWeight.w400),
-        ),
-        Dimensions.spacingVerticalDouble,
-        breadcrumbs,
-      ],
-      actions: [
-        TextButton(
-          child: Text(S.current.actionCloseCapital),
-          onPressed: () async => await Navigator.of(context).maybePop(false),
-        ),
-      ],
+    await _showRepoLocationDialog(
+      context,
+      dbFile: dbFile,
+      breadcrumbs: breadcrumbs,
     );
   }
 
-  /// delete => ReposCubit.deleteRepository
-  Future<void> deleteRepository(
+  Future<void> _showRepoLocationDialog(
     BuildContext context, {
-    required ReposCubit reposCubit,
-    required RepoLocation repoLocation,
-    void Function()? popDialog,
+    required String dbFile,
+    required BreadCrumb breadcrumbs,
+  }) async =>
+      Dialogs.alertDialogWithActions(
+        context,
+        title: S.current.actionLocateRepo,
+        body: [
+          Text(
+            dbFile,
+            style: context.theme.appTextStyle.bodyMedium
+                .copyWith(fontWeight: FontWeight.w400),
+          ),
+          Dimensions.spacingVerticalDouble,
+          breadcrumbs,
+        ],
+        actions: [
+          TextButton(
+            child: Text(S.current.actionCloseCapital),
+            onPressed: () async => await Navigator.of(context).maybePop(false),
+          ),
+        ],
+      );
+
+  /// delete => ReposCubit.deleteRepository
+  Future<bool> deleteRepository(
+    BuildContext context, {
+    required String repoName,
+    required Future deleteRepoFuture,
   }) async {
     final deleteRepo = await showDialog<bool>(
       context: context,
@@ -207,12 +245,10 @@ mixin RepositoryActionsMixin on LoggyType {
               text: S.current.actionCancelCapital,
               onPressed: () async =>
                   await Navigator.of(context).maybePop(false),
-              buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
             ),
             PositiveButton(
               text: S.current.actionDeleteCapital,
               onPressed: () async => await Navigator.of(context).maybePop(true),
-              buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
               isDangerButton: true,
             )
           ])
@@ -220,66 +256,78 @@ mixin RepositoryActionsMixin on LoggyType {
       ),
     );
 
-    if (deleteRepo ?? false) {
+    if (deleteRepo == true) {
       await Dialogs.executeFutureWithLoadingDialog(
         null,
-        reposCubit.deleteRepository(repoLocation),
+        deleteRepoFuture,
       );
 
-      if (popDialog != null) {
-        popDialog();
-      }
+      return true;
     }
+
+    return false;
   }
 
   Future<void> unlockRepository(
     BuildContext context,
+    Settings settings,
+    Session session,
     RepoCubit repoCubit,
-    MasterKey masterKey,
     PasswordHasher passwordHasher,
   ) async {
     final authMode = repoCubit.state.authMode;
+    final LocalSecret? secret;
     String? errorMessage;
 
-    switch (authMode) {
-      case (AuthModeBlindOrManual()):
-        // First try to unlock it without a password.
-        await repoCubit.unlock(null);
-        final accessMode = repoCubit.accessMode;
-        if (accessMode != AccessMode.blind) {
-          showSnackBar(S.current.messageUnlockRepoOk(accessMode.localized));
+    final encryptedSecret = authMode.storedLocalSecret;
+
+    if (encryptedSecret == null) {
+      // First try to unlock it without a password.
+      await repoCubit.unlock(null);
+      final accessMode = repoCubit.accessMode;
+      if (accessMode != AccessMode.blind) {
+        showSnackBar(S.current.messageUnlockRepoOk(accessMode.localized));
+        return;
+      }
+
+      // If it didn't work, try to unlock using a password from the user.
+      final access = await GetPasswordAccessDialog.show(
+        context,
+        settings,
+        session,
+        repoCubit,
+      );
+
+      switch (access) {
+        case null:
+        case BlindAccess():
+          return;
+        case ReadAccess():
+          secret = access.localSecret;
+        case WriteAccess():
+          secret = access.localSecret;
+      }
+    } else {
+      final bio = authMode.isSecuredWithBiometrics;
+
+      errorMessage = bio
+          ? S.current.messageBiometricUnlockRepositoryFailed
+          : S.current.messageAutomaticUnlockRepositoryFailed;
+
+      if (bio) {
+        if (!await LocalAuth.authenticateIfPossible(
+            context, S.current.messageAccessingSecureStorage)) {
           return;
         }
+      }
 
-        // If it didn't work, try to unlock using a password from the user.
-        final unlockResult = await unlockRepositoryManually(
-          context,
-          repoCubit,
-          masterKey,
-          passwordHasher,
-        );
-        if (unlockResult == null) return;
-
-        showSnackBar(unlockResult.message);
-
-        return;
-      case AuthModeKeyStoredOnDevice(secureWithBiometrics: true):
-      case AuthModePasswordStoredOnDevice(secureWithBiometrics: true):
-        if (!await LocalAuth.authenticateIfPossible(
-          context,
-          S.current.messageAccessingSecureStorage,
-        )) return;
-
-        errorMessage = S.current.messageBiometricUnlockRepositoryFailed;
-      case AuthModeKeyStoredOnDevice():
-      case AuthModePasswordStoredOnDevice():
-        errorMessage = S.current.messageAutomaticUnlockRepositoryFailed;
+      secret = await encryptedSecret.decrypt(settings.masterKey);
     }
 
-    final secret = await repoCubit.getLocalSecret(masterKey);
-
     if (secret == null) {
-      showSnackBar(errorMessage);
+      if (errorMessage != null) {
+        showSnackBar(errorMessage);
+      }
       return;
     }
 
@@ -291,33 +339,6 @@ mixin RepositoryActionsMixin on LoggyType {
         : S.current.messageUnlockRepoFailed;
 
     showSnackBar(message);
-  }
-
-  Future<UnlockRepositoryResult?> unlockRepositoryManually(
-    BuildContext context,
-    RepoCubit repoCubit,
-    MasterKey masterKey,
-    PasswordHasher passwordHasher,
-  ) async {
-    final isBiometricsAvailable = await LocalAuth.canAuthenticate();
-
-    return await showDialog<UnlockRepositoryResult?>(
-      context: context,
-      builder: (BuildContext context) => ScaffoldMessenger(
-        child: Scaffold(
-          backgroundColor: Colors.transparent,
-          body: ActionsDialog(
-            title: S.current.messageUnlockRepository(repoCubit.name),
-            body: UnlockRepository(
-              repoCubit: repoCubit,
-              masterKey: masterKey,
-              passwordHasher: passwordHasher,
-              isBiometricsAvailable: isBiometricsAvailable,
-            ),
-          ),
-        ),
-      ),
-    );
   }
 }
 

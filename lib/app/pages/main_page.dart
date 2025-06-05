@@ -2,22 +2,18 @@ import 'dart:async';
 import 'dart:io' as io;
 
 import 'package:build_context_provider/build_context_provider.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:move_to_background/move_to_background.dart';
-import 'package:ouisync/native_channels.dart';
-import 'package:ouisync/ouisync.dart';
-import 'package:ouisync/state_monitor.dart' as oui;
+import 'package:ouisync/ouisync.dart' show EntryType, MonitorId, Session;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart' as system_path;
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:url_launcher/url_launcher_string.dart';
 
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
 import '../models/models.dart';
+import '../utils/dirs.dart';
 import '../utils/platform/platform.dart';
 import '../utils/utils.dart';
 import '../widgets/notification_badge.dart';
@@ -39,33 +35,30 @@ typedef MoveEntryCallback = Future<bool> Function(
 typedef PreviewFileCallback = Future<void> Function(
   RepoCubit repo,
   FileEntry entry,
-  bool useDefaultApp,
 );
 
 class MainPage extends StatefulWidget {
   const MainPage({
     required this.localeCubit,
     required this.mountCubit,
-    required this.nativeChannels,
     required this.packageInfo,
-    required this.powerControl,
     required this.receivedMedia,
     required this.reposCubit,
     required this.session,
     required this.settings,
     required this.windowManager,
+    required this.dirs,
   });
 
   final PlatformWindowManager windowManager;
   final Session session;
-  final NativeChannels nativeChannels;
   final Settings settings;
   final PackageInfo packageInfo;
-  final PowerControl powerControl;
   final Stream<List<SharedMediaFile>> receivedMedia;
   final ReposCubit reposCubit;
   final MountCubit mountCubit;
   final LocaleCubit localeCubit;
+  final Dirs dirs;
 
   @override
   State<StatefulWidget> createState() => _MainPageState();
@@ -74,6 +67,8 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage>
     with TickerProviderStateMixin, AppLogger {
   late final StateMonitorIntCubit panicCounter;
+  late final PowerControl powerControl =
+      PowerControl(widget.session, widget.settings);
   late final SortListCubit sortListCubit;
   late final UpgradeExistsCubit upgradeExists;
 
@@ -82,6 +77,7 @@ class _MainPageState extends State<MainPage>
     neededPadding: 0.0,
     entry: '',
   ));
+  bool _isBottomSheetInfoDisposed = false;
 
   final exitClickCounter = ClickCounter(timeoutMs: 3000);
 
@@ -92,15 +88,13 @@ class _MainPageState extends State<MainPage>
 
   StreamSubscription? _receivedMediaSubscription;
 
-  RepoEntry? get _currentRepo => widget.reposCubit.currentRepo;
-
   @override
   void initState() {
     super.initState();
 
     panicCounter = StateMonitorIntCubit(
       widget.reposCubit.rootStateMonitor.child(
-        oui.MonitorId.expectUnique("Session"),
+        MonitorId.expectUnique("Service"),
       ),
       "panic_counter",
     );
@@ -127,349 +121,149 @@ class _MainPageState extends State<MainPage>
   @override
   void dispose() {
     _bottomSheetInfo.dispose();
+    _isBottomSheetInfoDisposed = true;
+
     _appSettingsIconFocus.dispose();
     _fabFocus.dispose();
     _receivedMediaSubscription?.cancel();
 
     unawaited(upgradeExists.close());
     unawaited(sortListCubit.close());
+    unawaited(powerControl.close());
     unawaited(panicCounter.close());
 
     super.dispose();
   }
 
-  getContent() {
-    final current = _currentRepo;
-    if (current is OpenRepoEntry) {
-      current.cubit.refresh();
-    }
-  }
-
   void checkForDokan() {
-    final dokanCheck = DokanCheck(
-      requiredMayor: Constants.dokanMayorRequired,
-      minimumRequiredVersion: Constants.dokanMinimumVersion,
+    installationOk() => widget.mountCubit.init();
+    Future<bool?> installationFailed() => Dialogs.simpleAlertDialog(
+          context,
+          title: S.current.titleDokanInstallation,
+          message: S.current.messageDokanInstallationFailed,
+        );
+
+    final dokanValidation = DokanValidation(
+      context,
+      installationOk: installationOk,
+      installationFailed: installationFailed,
     );
 
-    final dokanCheckResult = dokanCheck.checkDokanInstallation();
-    final result = dokanCheckResult.result;
+    final dokanCheckResult = dokanValidation.checkDokanInstallation;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      switch (dokanCheckResult.result) {
+        case DokanResult.notFound:
+          unawaited(dokanValidation.tryInstallDokan());
+          break;
 
-    if (result == null) return;
+        case DokanResult.differentMayor:
+          unawaited(dokanValidation.tryInstallNewerDokanMayor());
+          break;
 
-    switch (result) {
-      case DokanResult.sameVersion:
-      case DokanResult.newerVersionMayor:
-        {
-          // No install required
-          loggy.app('The Dokan version installed is supported: ${result.name}');
-        }
-      case DokanResult.notFound:
-        {
-          //Install Dokan using the bundled MSI
-          WidgetsBinding.instance.addPostFrameCallback(
-            (_) {
-              unawaited(
-                showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (BuildContext context) => AlertDialog(
-                    title: Flex(
-                      direction: Axis.horizontal,
-                      children: [
-                        Fields.constrainedText(
-                          S.current.titleDokanMissing,
-                          style: context.theme.appTextStyle.titleMedium,
-                          maxLines: 2,
-                        )
-                      ],
-                    ),
-                    content: SingleChildScrollView(
-                      child: ListBody(
-                        children: [
-                          RichText(
-                            text: TextSpan(
-                              style: context.theme.appTextStyle.bodyMedium,
-                              children: [
-                                TextSpan(
-                                    text:
-                                        '${S.current.messageInstallDokanForOuisyncP1} '),
-                                Fields.linkTextSpan(
-                                  context,
-                                  S.current.messageDokan,
-                                  _launchDokanGitHub,
-                                ),
-                                TextSpan(
-                                    text:
-                                        ' ${S.current.messageInstallDokanForOuisyncP2}')
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    actions: [
-                      TextButton(
-                        child: Text(S.current.actionSkip.toUpperCase()),
-                        onPressed: () async =>
-                            await Navigator.of(context).maybePop(false),
-                      ),
-                      TextButton(
-                        child: Text(S.current.actionInstallDokan.toUpperCase()),
-                        onPressed: () async =>
-                            await Navigator.of(context).maybePop(true),
-                      )
-                    ],
-                  ),
-                ).then(
-                  (installDokan) async {
-                    if (installDokan ?? false) {
-                      unawaited(_installBundledDokan(
-                          dokanCheck.runDokanMsiInstallation));
-                    }
-                  },
-                ),
-              );
-            },
-          );
-        }
-      case DokanResult.differentMayor:
-        {
-          WidgetsBinding.instance.addPostFrameCallback(
-            (_) {
-              unawaited(
-                showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (BuildContext context) => AlertDialog(
-                    title: Flex(
-                      direction: Axis.horizontal,
-                      children: [
-                        Fields.constrainedText(
-                          S.current.titleDokanInstallationFound,
-                          style: context.theme.appTextStyle.titleMedium,
-                          maxLines: 2,
-                        )
-                      ],
-                    ),
-                    content: SingleChildScrollView(
-                      child: ListBody(
-                        children: [
-                          RichText(
-                            text: TextSpan(
-                              style: context.theme.appTextStyle.bodyMedium,
-                              children: [
-                                TextSpan(
-                                    text:
-                                        '${S.current.messageDokanDifferentMayorP1} '),
-                                Fields.linkTextSpan(
-                                  context,
-                                  S.current.messageDokan,
-                                  _launchDokanGitHub,
-                                ),
-                                TextSpan(
-                                    text:
-                                        ' ${S.current.messageDokanDifferentMayorP2}')
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    actions: [
-                      TextButton(
-                        child: Text(S.current.actionSkip.toUpperCase()),
-                        onPressed: () async =>
-                            Navigator.of(context).maybePop(false),
-                      ),
-                      TextButton(
-                        child: Text(S.current.actionInstallDokan.toUpperCase()),
-                        onPressed: () async =>
-                            await Navigator.of(context).maybePop(true),
-                      )
-                    ],
-                  ),
-                ).then(
-                  (installDokan) async {
-                    if (installDokan ?? false) {
-                      unawaited(_installBundledDokan(
-                          dokanCheck.runDokanMsiInstallation));
-                    }
-                  },
-                ),
-              );
-            },
-          );
-        }
-      case DokanResult.olderVersionMayor:
-        {
-          WidgetsBinding.instance.addPostFrameCallback(
-            (_) => unawaited(
-              showDialog(
-                context: context,
-                barrierDismissible: false,
-                builder: (BuildContext context) => AlertDialog(
-                  title: Flex(
-                    direction: Axis.horizontal,
-                    children: [
-                      Fields.constrainedText(
-                        S.current.titleDokanInstallationFound,
-                        style: context.theme.appTextStyle.titleMedium,
-                        maxLines: 2,
-                      )
-                    ],
-                  ),
-                  content: SingleChildScrollView(
-                    child: ListBody(
-                      children: [
-                        RichText(
-                          text: TextSpan(
-                            style: context.theme.appTextStyle.bodyMedium,
-                            children: [
-                              TextSpan(
-                                  text:
-                                      '${S.current.messageDokanDifferentMayorP1} '),
-                              Fields.linkTextSpan(
-                                context,
-                                S.current.messageDokan,
-                                _launchDokanGitHub,
-                              ),
-                              TextSpan(
-                                  text:
-                                      ' ${S.current.messageDokanOlderVersionP2}')
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  actions: [
-                    TextButton(
-                      child: Text(S.current.actionCloseCapital),
-                      onPressed: () async =>
-                          await Navigator.of(context, rootNavigator: true)
-                              .maybePop(false),
-                    )
-                  ],
-                ),
-              ).then(
-                (installDokan) async {
-                  if (installDokan ?? false) {
-                    unawaited(_installBundledDokan(
-                        dokanCheck.runDokanMsiInstallation));
-                  }
-                },
-              ),
-            ),
-          );
-        }
-    }
-  }
+        case DokanResult.olderVersionMayor:
+          unawaited(dokanValidation.tryInstallDifferentDokanMayor());
+          break;
 
-  void _launchDokanGitHub(BuildContext context) async {
-    final title = Text('Dokan');
-    await Fields.openUrl(context, title, Constants.dokanUrl);
-  }
+        case DokanResult.sameVersion:
+        case DokanResult.newerVersionMayor:
+          loggy.debug('The Dokan version installed is supported: '
+              '${dokanCheckResult.result!.name}');
+          break;
 
-  Future<void> _installBundledDokan(
-      Future<bool?> Function() runDokanMsiInstallation) async {
-    final installationResult = await runDokanMsiInstallation();
-
-    if (installationResult == null) {
-      return;
-    }
-
-    if (installationResult) {
-      widget.mountCubit.init();
-      return;
-    }
-
-    await Dialogs.simpleAlertDialog(
-      context: context,
-      title: S.current.titleDokanInstallation,
-      message: S.current.messageDokanInstallationFailed,
-    );
-  }
-
-  Widget buildMainWidget(TextDirection directionality) {
-    return widget.reposCubit.builder((repos) {
-      final currentRepo = repos.currentRepo;
-      final currentRepoCubit = currentRepo?.cubit;
-
-      if (currentRepoCubit != null) {
-        final isFolder = !repos.showList;
-        currentRepoCubit.updateNavigation(isFolder: isFolder);
+        case null:
+          loggy.debug('Check Dokan installation status failed: '
+              '${dokanCheckResult.error}');
+          break;
       }
-
-      if (repos.repos.isNotEmpty && repos.showList) {
-        /// This needs to be structured better
-        /// TODO: Add sorting to repo list
-        // _sortListCubit?.sortBy(SortBy.name);
-
-        // final sortBy = SortBy.name;
-        // final sortDirection =
-        //     _sortListCubit?.state.direction ?? SortDirection.asc;
-
-        /// Using the "back" arrow causes the app settings icon (gear) to get
-        /// the focus, even if we explicitly ask for it to losse it.
-        /// So for now we request focus for the FAB, then unfocused it.
-        _fabFocus.requestFocus();
-        _fabFocus.unfocus();
-
-        return RepoListState(
-          reposCubit: repos,
-          bottomSheetInfo: _bottomSheetInfo,
-          onShowRepoSettings: _showRepoSettings,
-        );
-      }
-
-      if (repos.isLoading || currentRepo is LoadingRepoEntry) {
-        // This one is mainly for when we're unlocking the repository,
-        // because during that time the current repository is destroyed so we
-        // can't show it's content.
-        return const Center(child: CircularProgressIndicator());
-      }
-
-      if (currentRepo is OpenRepoEntry) {
-        final navigationPath = currentRepo.cubit.state.currentFolder.path;
-        currentRepo.cubit.navigateTo(navigationPath);
-
-        return _repositoryContentBuilder(currentRepo, directionality);
-      }
-
-      if (currentRepo is MissingRepoEntry) {
-        return MissingRepositoryState(
-            directionality: directionality,
-            repositoryLocation: currentRepo.location,
-            errorMessage: currentRepo.error,
-            errorDescription: currentRepo.errorDescription,
-            onBackToList: () => repos.setCurrent(null),
-            reposCubit: repos);
-      }
-
-      if (currentRepo is ErrorRepoEntry) {
-        // This is a general purpose error state.
-        // errorDescription is required, but nullable.
-        return ErrorState(
-          directionality: directionality,
-          errorMessage: currentRepo.error,
-          errorDescription: currentRepo.errorDescription,
-          onBackToList: () => repos.setCurrent(null),
-        );
-      }
-
-      if (currentRepo == null) {
-        return repos.repos.isNotEmpty
-            ? SizedBox.shrink()
-            : NoRepositoriesState(
-                directionality: directionality,
-                onCreateRepoPressed: _createRepo,
-                onImportRepoPressed: _importRepo,
-              );
-      }
-
-      return Center(child: Text(S.current.messageErrorUnhandledState));
     });
   }
+
+  Widget buildMainWidget(TextDirection directionality) =>
+      BlocBuilder<ReposCubit, ReposState>(
+        bloc: widget.reposCubit,
+        builder: (context, state) {
+          final currentRepoEntry = state.current;
+          final currentRepoCubit = currentRepoEntry?.cubit;
+
+          if (currentRepoCubit != null) {
+            currentRepoCubit.updateNavigation();
+          }
+
+          if (state.repos.isNotEmpty && currentRepoCubit == null) {
+            /// This needs to be structured better
+            /// TODO: Add sorting to repo list
+            // _sortListCubit?.sortBy(SortBy.name);
+
+            // final sortBy = SortBy.name;
+            // final sortDirection =
+            //     _sortListCubit?.state.direction ?? SortDirection.asc;
+
+            /// Using the "back" arrow causes the app settings icon (gear) to get
+            /// the focus, even if we explicitly ask for it to losse it.
+            /// So for now we request focus for the FAB, then unfocused it.
+            _fabFocus.requestFocus();
+            _fabFocus.unfocus();
+
+            return RepoListState(
+              reposCubit: widget.reposCubit,
+              bottomSheetInfo: _bottomSheetInfo,
+              onShowRepoSettings: _showRepoSettings,
+            );
+          }
+
+          if (state.isLoading || currentRepoEntry is LoadingRepoEntry) {
+            // This one is mainly for when we're unlocking the repository,
+            // because during that time the current repository is destroyed so we
+            // can't show it's content.
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (currentRepoCubit != null) {
+            final navigationPath = currentRepoCubit.state.currentFolder.path;
+            currentRepoCubit.navigateTo(navigationPath);
+
+            return _repositoryContentBuilder(
+              state,
+              currentRepoCubit,
+              directionality,
+            );
+          }
+
+          if (currentRepoEntry is MissingRepoEntry) {
+            return MissingRepositoryState(
+              directionality: directionality,
+              repositoryLocation: currentRepoEntry.location,
+              errorMessage: currentRepoEntry.error,
+              errorDescription: currentRepoEntry.errorDescription,
+              onBackToList: () => widget.reposCubit.setCurrent(null),
+              reposCubit: widget.reposCubit,
+            );
+          }
+
+          if (currentRepoEntry is ErrorRepoEntry) {
+            // This is a general purpose error state.
+            // errorDescription is required, but nullable.
+            return ErrorState(
+              directionality: directionality,
+              errorMessage: currentRepoEntry.error,
+              errorDescription: currentRepoEntry.errorDescription,
+              onBackToList: () => widget.reposCubit.setCurrent(null),
+            );
+          }
+
+          if (currentRepoEntry == null) {
+            return state.repos.isNotEmpty
+                ? SizedBox.shrink()
+                : NoRepositoriesState(
+                    directionality: directionality,
+                    onCreateRepoPressed: _createRepo,
+                    onImportRepoPressed: _importRepo,
+                  );
+          }
+
+          return Center(child: Text(S.current.messageErrorUnhandledState));
+        },
+      );
 
   @override
   Widget build(BuildContext context) => Directionality(
@@ -503,20 +297,22 @@ class _MainPageState extends State<MainPage>
           ),
           floatingActionButtonLocation:
               FloatingActionButtonLocation.miniEndFloat,
-          floatingActionButton: widget.reposCubit
-              .builder((repos) => _buildFAB(context, repos.currentRepo)),
+          floatingActionButton: BlocBuilder<ReposCubit, ReposState>(
+            bloc: widget.reposCubit,
+            builder: _buildFAB,
+          ),
           bottomSheet: modalBottomSheet(),
         ),
       );
 
   Future<void> _onBackPressed(bool didPop, Object? result) async {
-    final currentRepo = _currentRepo;
+    final currentRepoEntry = widget.reposCubit.state.current;
 
-    if (currentRepo != null) {
-      if (currentRepo is OpenRepoEntry) {
-        final currentFolder = currentRepo.cubit.state.currentFolder;
+    if (currentRepoEntry != null) {
+      if (currentRepoEntry is OpenRepoEntry) {
+        final currentFolder = currentRepoEntry.cubit.state.currentFolder;
         if (!currentFolder.isRoot) {
-          await currentRepo.cubit.navigateTo(currentFolder.parent);
+          await currentRepoEntry.cubit.navigateTo(currentFolder.parent);
           return;
         }
       }
@@ -524,23 +320,14 @@ class _MainPageState extends State<MainPage>
       widget.reposCubit.showRepoList();
       return;
     }
-
-    int clickCount = exitClickCounter.registerClick();
-
-    if (clickCount <= 1) {
-      showSnackBar(S.current.messageExitOuiSync, context: context);
-    } else {
-      exitClickCounter.reset();
-      await MoveToBackground.moveTaskToBack();
-    }
   }
 
-  _buildOuiSyncBar() => OuiSyncBar(
+  PreferredSizeWidget _buildOuiSyncBar() => OuiSyncBar(
         reposCubit: widget.reposCubit,
         repoPicker: RepositoriesBar(
           mount: widget.mountCubit,
           panicCounter: panicCounter,
-          powerControl: widget.powerControl,
+          powerControl: powerControl,
           reposCubit: widget.reposCubit,
           upgradeExists: upgradeExists,
         ),
@@ -552,7 +339,7 @@ class _MainPageState extends State<MainPage>
   Widget _buildAppSettingsIcon() => NotificationBadge(
         mount: widget.mountCubit,
         panicCounter: panicCounter,
-        powerControl: widget.powerControl,
+        powerControl: powerControl,
         upgradeExists: upgradeExists,
         moveDownwards: 5,
         moveRight: 3,
@@ -563,16 +350,18 @@ class _MainPageState extends State<MainPage>
         ),
       );
 
-  Widget _buildRepoSettingsIcon() =>
-      Fields.actionIcon(const Icon(Icons.more_vert_rounded),
-          onPressed: () async {
-        final cubit = _currentRepo?.cubit;
-        if (cubit == null) {
-          return;
-        }
+  Widget _buildRepoSettingsIcon() => Fields.actionIcon(
+        const Icon(Icons.more_vert_rounded),
+        onPressed: () async {
+          final repoCubit = widget.reposCubit.state.current?.cubit;
+          if (repoCubit == null) {
+            return;
+          }
 
-        await _showRepoSettings(context, repoCubit: cubit);
-      }, size: Dimensions.sizeIconSmall);
+          await _showRepoSettings(context, repoCubit: repoCubit);
+        },
+        size: Dimensions.sizeIconSmall,
+      );
 
   Widget _buildSearchIcon() => Fields.actionIcon(
         const Icon(Icons.search_rounded),
@@ -582,11 +371,12 @@ class _MainPageState extends State<MainPage>
         size: Dimensions.sizeIconSmall,
       );
 
-  Widget _buildFAB(BuildContext context, RepoEntry? current) {
+  Widget _buildFAB(BuildContext context, ReposState reposState) {
     final icon = const Icon(Icons.add_rounded);
+    final current = reposState.current;
 
-    if (widget.reposCubit.showList) {
-      if (widget.reposCubit.repos.isNotEmpty) {
+    if (current == null) {
+      if (reposState.repos.isNotEmpty) {
         return FloatingActionButton(
           mini: true,
           focusNode: _fabFocus,
@@ -614,20 +404,25 @@ class _MainPageState extends State<MainPage>
       );
     }
 
-    return Container();
+    return SizedBox.shrink();
   }
 
   Widget _repositoryContentBuilder(
-    OpenRepoEntry repo,
+    ReposState reposState,
+    RepoCubit repoCubit,
     TextDirection directionality,
   ) =>
       BlocBuilder<RepoCubit, RepoState>(
-        bloc: repo.cubit,
-        builder: (context, state) => _selectLayoutWidget(directionality),
+        bloc: repoCubit,
+        builder: (context, state) =>
+            _selectLayoutWidget(reposState, directionality),
       );
 
-  Widget _selectLayoutWidget(TextDirection directionality) {
-    final current = _currentRepo;
+  Widget _selectLayoutWidget(
+    ReposState reposState,
+    TextDirection directionality,
+  ) {
+    final current = reposState.current;
 
     if (current == null || current is LoadingRepoEntry) {
       return NoRepositoriesState(
@@ -640,16 +435,19 @@ class _MainPageState extends State<MainPage>
     if (current is OpenRepoEntry) {
       if (!current.cubit.state.canRead) {
         return LockedRepositoryState(
-          parentContext: context,
           directionality: directionality,
           repoCubit: current.cubit,
+          // TODO: masterKey is not needed when passing settings.
           masterKey: widget.settings.masterKey,
+          settings: widget.settings,
+          session: widget.session,
           passwordHasher: PasswordHasher(widget.session),
         );
       }
 
       _appSettingsIconFocus.unfocus();
-      return _contentBrowser(current.cubit, directionality);
+
+      return _contentBrowser(reposState, current.cubit, directionality);
     }
 
     return Center(
@@ -660,7 +458,11 @@ class _MainPageState extends State<MainPage>
     );
   }
 
-  Widget _contentBrowser(RepoCubit repo, TextDirection directionality) {
+  Widget _contentBrowser(
+    ReposState reposState,
+    RepoCubit repo,
+    TextDirection directionality,
+  ) {
     Widget child;
     final folder = repo.state.currentFolder;
 
@@ -676,7 +478,7 @@ class _MainPageState extends State<MainPage>
         );
       }
     } else {
-      child = _contentsList(repo);
+      child = _contentsList(reposState, repo);
     }
 
     return ValueListenableBuilder(
@@ -693,11 +495,13 @@ class _MainPageState extends State<MainPage>
           children: <Widget>[
             // TODO: A shadow would be nicer.
             const Divider(height: 1),
-            if (folder.content.isNotEmpty)
-              SortContentsBar(
-                sortListCubit: sortListCubit,
-                reposCubit: widget.reposCubit,
-              ),
+            FolderContentsBar(
+              reposCubit: widget.reposCubit,
+              repoCubit: repo,
+              hasContents: folder.content.isNotEmpty,
+              sortListCubit: sortListCubit,
+              entrySelectionCubit: repo.entrySelectionCubit,
+            ),
             Expanded(child: child),
           ],
         ),
@@ -705,204 +509,194 @@ class _MainPageState extends State<MainPage>
     );
   }
 
-  Future<void> _previewFile(
-    RepoCubit repo,
-    FileEntry entry,
-    bool useDefaultApp,
-  ) async {
-    if (io.Platform.isAndroid) {
-      // TODO: Consider using `launchUrl` also here, using the 'content://' scheme.
+  Widget _contentsList(ReposState reposState, RepoCubit currentRepoCubit) =>
+      BlocBuilder<EntrySelectionCubit, EntrySelectionState>(
+        bloc: currentRepoCubit.entrySelectionCubit,
+        builder: (context, selectionState) {
+          final contents = currentRepoCubit.state.currentFolder.content;
+          final totalEntries = contents.length;
 
-      final previewResult = await widget.nativeChannels.previewOuiSyncFile(
-        widget.packageInfo.packageName,
-        entry.path,
-        entry.size ?? 0,
-        useDefaultApp: useDefaultApp,
+          return RefreshIndicator(
+            onRefresh: () async {
+              await reposState.current?.cubit?.refresh();
+            },
+            child: Container(
+              child: ListView.separated(
+                separatorBuilder: (context, index) => const Divider(
+                  height: 1,
+                  color: Colors.transparent,
+                ),
+                itemCount: totalEntries,
+                itemBuilder: (context, index) {
+                  final entry = contents[index];
+                  final key = ValueKey(entry.name);
+
+                  return Column(
+                    children: [
+                      (entry is FileEntry
+                          ? _builFileListItem
+                          : _buildDirectoryListItem)(
+                        context,
+                        key,
+                        currentRepoCubit,
+                        selectionState,
+                        entry,
+                      ),
+                      if (index == (totalEntries - 1)) SizedBox(height: 56)
+                    ],
+                  );
+                },
+              ),
+            ),
+          );
+        },
       );
 
-      if (previewResult == PreviewFileResult.previewOK) return;
+  FileListItem _builFileListItem(
+    BuildContext context,
+    ValueKey<String> key,
+    RepoCubit currentRepoCubit,
+    EntrySelectionState selectionState,
+    FileSystemEntry entry,
+  ) =>
+      FileListItem(
+        key: key,
+        entry: entry as FileEntry,
+        repoCubit: currentRepoCubit,
+        mainAction: () async => await _entryMainAction(currentRepoCubit, entry),
+        verticalDotsAction: () async => await _entryDotsMenuAction(
+          currentRepoCubit,
+          entry,
+          selectionState.status == SelectionStatus.on,
+        ),
+      );
 
-      final message = switch (previewResult) {
-        PreviewFileResult.mimeTypeNull => S.current.messageUnknownFileExtension,
-        PreviewFileResult.noDefaultApp => S.current.messageNoAppsForThisAction,
-        _ => S.current.messageFilePreviewFailed
-      };
+  DirectoryListItem _buildDirectoryListItem(
+    BuildContext context,
+    ValueKey<String> key,
+    RepoCubit currentRepoCubit,
+    EntrySelectionState selectionState,
+    FileSystemEntry entry,
+  ) =>
+      DirectoryListItem(
+        key: key,
+        entry: entry as DirectoryEntry,
+        repoCubit: currentRepoCubit,
+        mainAction: () async => await _entryMainAction(
+          currentRepoCubit,
+          entry,
+          selectionState.isEntrySelected(
+            currentRepoCubit.state.infoHash,
+            entry,
+          ),
+        ),
+        verticalDotsAction: () async => await _entryDotsMenuAction(
+          currentRepoCubit,
+          entry,
+          selectionState.status == SelectionStatus.on,
+        ),
+      );
 
-      showSnackBar(message);
-    } else if (io.Platform.isWindows ||
-        io.Platform.isLinux ||
-        io.Platform.isMacOS) {
-      final mountPoint = repo.mountPoint;
-      if (mountPoint == null) {
-        showSnackBar(S.current.messageRepositoryNotMounted);
-        return;
-      }
+  Future<void> _entryMainAction(
+    RepoCubit currentRepoCubit,
+    FileSystemEntry entry, [
+    bool isSelected = false,
+  ]) async {
+    if (entry is FileEntry) {
+      return viewFile(
+        repo: currentRepoCubit,
+        path: entry.path,
+        packageInfo: widget.packageInfo,
+        loggy: loggy,
+      );
+    }
 
-      bool previewOk = false;
-      try {
-        if (!io.Platform.isWindows) {
-          final url = Uri.parse('file:$mountPoint${entry.path}');
-          previewOk = await launchUrl(url);
-        } else {
-          // Special non ASCII characters are encoded using Escape Encoding
-          // https://datatracker.ietf.org/doc/html/rfc2396#section-2.4.1
-          // which are not decoded back by the url_launcher plugin on Windows
-          // before passing to the system for execution. Thus on Windows
-          // we use the `launchUrlString` function instead of `launchUrl`.
-          final path = '$mountPoint${entry.path}';
-          previewOk = await launchUrlString(path);
-        }
-      } on PlatformException catch (e, st) {
-        loggy.app(
-          'Preview file (desktop): Error previewing file ${entry.path}:',
-          e,
-          st,
-        );
+    if (isSelected) {
+      await _showNotAvailableMessage();
+      return;
+    }
 
-        showSnackBar(S.current.messagePreviewingFileFailed(entry.path));
-        return;
-      }
-
-      if (!previewOk) {
-        showSnackBar(S.current.messageNoAppsForThisAction);
-      }
-    } else {
-      /// Until we have a proper implementation for OSX (iOS, macOS), we are
-      /// using a local HTTP server and the internet navigator previewer.
-      try {
-        final url = await Dialogs.executeFutureWithLoadingDialog(
-          null,
-          repo.previewFileUrl(entry.path),
-        );
-
-        await launchUrl(url);
-      } on PlatformException catch (e, st) {
-        loggy.app(
-          '(FileServer) Error previewing file ${entry.path}:',
-          e,
-          st,
-        );
-      }
+    final path = entry.path;
+    if (_bottomSheetInfo.value.entry != path) {
+      return currentRepoCubit.navigateTo(path);
     }
   }
 
-  Widget _contentsList(RepoCubit currentRepoCubit) {
-    final contents = currentRepoCubit.state.currentFolder.content;
-    final totalEntries = contents.length;
+  Future<void> _entryDotsMenuAction(
+    RepoCubit currentRepoCubit,
+    FileSystemEntry entry,
+    bool isSelecting,
+  ) async {
+    if (isSelecting) {
+      await _showNotAvailableMessage();
+      return;
+    }
 
-    return RefreshIndicator(
-      onRefresh: () async => getContent(),
-      child: Container(
-        child: ListView.separated(
-          separatorBuilder: (context, index) => const Divider(
-            height: 1,
-            color: Colors.transparent,
-          ),
-          itemCount: totalEntries,
-          itemBuilder: (context, index) {
-            final entry = contents[index];
-            final key = ValueKey(entry.name);
-
-            return Column(
-              children: [
-                switch (entry) {
-                  FileEntry entry => FileListItem(
-                      key: key,
-                      entry: entry,
-                      repoCubit: currentRepoCubit,
-                      mainAction: () async {
-                        if (_bottomSheetInfo.value.type ==
-                            BottomSheetType.gone) {
-                          await _previewFile(currentRepoCubit, entry, true);
-                          return;
-                        }
-
-                        await _showMovingEntryAlertDialog(context);
-                      },
-                      verticalDotsAction: () async {
-                        if (_bottomSheetInfo.value.type ==
-                            BottomSheetType.gone) {
-                          await _showFileDetails(currentRepoCubit, entry);
-                          return;
-                        }
-
-                        await _showMovingEntryAlertDialog(context);
-                      }),
-                  DirectoryEntry entry => DirectoryListItem(
-                      key: key,
-                      entry: entry,
-                      mainAction: () {
-                        if (_bottomSheetInfo.value.entry != entry.path) {
-                          currentRepoCubit.navigateTo(entry.path);
-                          return;
-                        }
-
-                        // TODO: Show toast with explanation
-                      },
-                      verticalDotsAction: () async {
-                        if (_bottomSheetInfo.value.type ==
-                            BottomSheetType.gone) {
-                          await _showFolderDetails(currentRepoCubit, entry);
-                          return;
-                        }
-
-                        await _showMovingEntryAlertDialog(context);
-                      },
-                    ),
-                },
-                if (index == (totalEntries - 1)) SizedBox(height: 56)
-              ],
-            );
-          },
-        ),
-      ),
-    );
+    if (_bottomSheetInfo.value.type == BottomSheetType.gone) {
+      await _showEntryDetails(currentRepoCubit, entry);
+    }
   }
 
-  Future<void> _showMovingEntryAlertDialog(BuildContext context) =>
-      Dialogs.simpleAlertDialog(
-        context: context,
+  // void _showNotAvailableMessage() => showSnackBar(S.current.messageMovingEntry);
+  Future<void> _showNotAvailableMessage() => Dialogs.simpleAlertDialog(
+        context,
         title: S.current.titleMovingEntry,
         message: S.current.messageMovingEntry,
       );
 
-  Future<dynamic> _showFileDetails(
-    RepoCubit repoCubit,
-    FileEntry entry,
-  ) =>
+  Future<void> _showEntryDetails(RepoCubit repoCubit, FileSystemEntry entry) =>
       showModalBottomSheet(
-        isScrollControlled: true,
-        context: context,
-        shape: Dimensions.borderBottomSheetTop,
-        builder: (context) => FileDetail(
-          repoCubit: repoCubit,
-          entry: entry,
-          onPreviewFile: (cubit, data, useDefaultApp) => _previewFile(
-            cubit,
-            data,
-            useDefaultApp,
-          ),
-          isActionAvailableValidator: _isEntryActionAvailable,
-          packageInfo: widget.packageInfo,
-          nativeChannels: widget.nativeChannels,
-        ),
-      );
-
-  Future<dynamic> _showFolderDetails(
-    RepoCubit repoCubit,
-    DirectoryEntry entry,
-  ) =>
-      showModalBottomSheet(
-        isScrollControlled: true,
-        context: context,
-        shape: Dimensions.borderBottomSheetTop,
-        builder: (context) => FolderDetail(
+          isScrollControlled: true,
           context: context,
-          repoCubit: repoCubit,
-          entry: entry,
-          isActionAvailableValidator: _isEntryActionAvailable,
-        ),
-      );
+          shape: Dimensions.borderBottomSheetTop,
+          builder: (_) => entry is FileEntry
+              ? EntryDetails.file(
+                  context,
+                  repoCubit: repoCubit,
+                  entry: entry,
+                  onPreviewFile: (cubit, data) => viewFile(
+                    repo: cubit,
+                    path: data.path,
+                    packageInfo: widget.packageInfo,
+                    loggy: loggy,
+                  ),
+                  isActionAvailableValidator: _isEntryActionAvailable,
+                  packageInfo: widget.packageInfo,
+                  dirs: widget.dirs,
+                )
+              : EntryDetails.folder(
+                  context,
+                  repoCubit: repoCubit,
+                  entry: entry,
+                  isActionAvailableValidator: _isEntryActionAvailable,
+                  dirs: widget.dirs,
+                )
+          // TODO: Find out how to get this to work, so we can use the snackbar on the bottom sheet.
+          //  ScaffoldMessenger(
+          //   child: Scaffold(
+          //     bottomSheet: entry is FileEntry
+          //         ? EntryDetails.file(
+          //             context,
+          //             repoCubit: repoCubit,
+          //             entry: entry,
+          //             onPreviewFile: (cubit, data, useDefaultApp) => _previewFile(
+          //               cubit,
+          //               data,
+          //               useDefaultApp,
+          //             ),
+          //             isActionAvailableValidator: _isEntryActionAvailable,
+          //             packageInfo: widget.packageInfo,
+          //             nativeChannels: widget.nativeChannels,
+          //           )
+          //         : EntryDetails.folder(
+          //             context,
+          //             repoCubit: repoCubit,
+          //             entry: entry,
+          //             isActionAvailableValidator: _isEntryActionAvailable,
+          //           ),
+          //   ),
+          // ),
+          );
 
   bool _isEntryActionAvailable(
     AccessMode accessMode,
@@ -912,6 +706,7 @@ class _MainPageState extends State<MainPage>
 
     final readDisabledActions = [
       EntryAction.delete,
+      EntryAction.copy,
       EntryAction.move,
       EntryAction.rename,
     ];
@@ -922,79 +717,59 @@ class _MainPageState extends State<MainPage>
   Widget modalBottomSheet() =>
       BlocBuilder<EntryBottomSheetCubit, EntryBottomSheetState>(
         bloc: widget.reposCubit.bottomSheet,
-        builder: (context, state) {
-          Widget? sheet;
-
-          if (state is MoveEntrySheetState) {
-            sheet = _moveEntryState(
-              repoCubit: state.repoCubit,
-              navigationCubit: state.navigationCubit,
-              entryPath: state.entryPath,
-              entryType: state.entryType,
-            );
-          }
-
-          if (state is SaveMediaSheetState) {
-            sheet = _uploadFileState(
-              reposCubit: state.reposCubit,
-              paths: state.sharedMediaPaths,
-            );
-          }
-
-          return sheet ?? SizedBox.shrink();
+        builder: (context, state) => switch (state) {
+          MoveEntrySheetState() => _moveSingleEntryState(state),
+          MoveSelectedEntriesSheetState() => _moveMultipleEntriesState(state),
+          SaveMediaSheetState() => _saveSharedMediaState(state),
+          HideSheetState() => _hideBottomSheet(),
         },
       );
 
-  Widget _moveEntryState({
-    required RepoCubit repoCubit,
-    required NavigationCubit navigationCubit,
-    required String entryPath,
-    required EntryType entryType,
-  }) =>
-      MoveEntryDialog(
+  EntriesActionsDialog _moveSingleEntryState(MoveEntrySheetState state) =>
+      EntriesActionsDialog.single(
+        context,
         reposCubit: widget.reposCubit,
-        originRepoCubit: repoCubit,
-        entryPath: entryPath,
+        originRepoCubit: state.repoCubit,
+        entry: state.entry,
+        sheetType: state.type,
         onUpdateBottomSheet: updateBottomSheetInfo,
-        onMoveEntry: () async => await moveEntry(
-          repoCubit,
-          entryPath,
-          entryType,
-        ),
-        onCancel: widget.reposCubit.bottomSheet.hide,
+        dirs: widget.dirs,
       );
 
-  Future<void> moveEntry(
-    RepoCubit originRepoCubit,
-    String entryPath,
-    EntryType entryType,
-  ) async {
-    if (_currentRepo == null) return;
+  EntriesActionsDialog _moveMultipleEntriesState(
+    MoveSelectedEntriesSheetState state,
+  ) =>
+      EntriesActionsDialog.multiple(
+        context,
+        reposCubit: widget.reposCubit,
+        originRepoCubit: state.repoCubit,
+        sheetType: state.type,
+        onUpdateBottomSheet: updateBottomSheetInfo,
+        dirs: widget.dirs,
+      );
 
-    final toRepoCubit =
-        originRepoCubit.location.compareTo(_currentRepo!.location) != 0
-            ? _currentRepo!.cubit
-            : null;
-
-    await MoveEntry(
-      context,
-      repoCubit: originRepoCubit,
-      srcPath: entryPath,
-      type: entryType,
-    ).move(toRepoCubit: toRepoCubit);
-  }
-
-  Widget _uploadFileState({
-    required ReposCubit reposCubit,
-    required List<String> paths,
-  }) =>
+  SaveSharedMedia _saveSharedMediaState(SaveMediaSheetState state) =>
       SaveSharedMedia(
-        reposCubit,
-        sharedMediaPaths: paths,
+        state.reposCubit,
+        sharedMediaPaths: state.sharedMediaPaths,
         onUpdateBottomSheet: updateBottomSheetInfo,
         onSaveFile: trySaveFile,
         canSaveMedia: canSaveFiles,
       );
+
+  Widget _hideBottomSheet() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_isBottomSheetInfoDisposed == false) {
+        _bottomSheetInfo.value = BottomSheetInfo(
+          type: BottomSheetType.gone,
+          neededPadding: 0.0,
+          entry: '',
+        );
+      }
+    });
+
+    return SizedBox.shrink();
+  }
 
   void updateBottomSheetInfo(
       BottomSheetType type, double padding, String entry) {
@@ -1003,38 +778,44 @@ class _MainPageState extends State<MainPage>
       neededPadding: padding,
       entry: entry,
     );
-    _bottomSheetInfo.value = newInfo;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_isBottomSheetInfoDisposed == false) {
+        _bottomSheetInfo.value = newInfo;
+      }
+    });
   }
 
   Future<void> trySaveFile(String sourcePath) async {
-    if (_currentRepo is! OpenRepoEntry) {
+    final current = widget.reposCubit.state.current;
+
+    if (current is! OpenRepoEntry) {
       return;
     }
 
-    if (_currentRepo?.cubit == null) return;
-
     await SaveMedia(
       context,
-      repoCubit: _currentRepo!.cubit!,
+      repoCubit: current.cubit,
       sourcePath: sourcePath,
       type: EntryType.file,
     ).save();
   }
 
   Future<bool> canSaveFiles() async {
-    final currentRepo = _currentRepo;
-    if (currentRepo is! OpenRepoEntry) {
+    final current = widget.reposCubit.state.current;
+
+    if (current is! OpenRepoEntry) {
       await Dialogs.simpleAlertDialog(
-          context: context,
-          title: S.current.titleAddFile,
-          message: S.current.messageNoRepo);
+        context,
+        title: S.current.titleAddFile,
+        message: S.current.messageNoRepo,
+      );
 
       return false;
     }
 
-    final accessModeMessage = currentRepo.cubit.state.canWrite
+    final accessModeMessage = current.cubit.state.canWrite
         ? null
-        : currentRepo.cubit.state.canRead
+        : current.cubit.state.canRead
             ? S.current.messageAddingFileToReadRepository
             : S.current.messageAddingFileToLockedRepository;
 
@@ -1076,7 +857,7 @@ class _MainPageState extends State<MainPage>
     for (final medium in media) {
       switch (medium.type) {
         case SharedMediaType.file
-            when (widget.reposCubit.showList ||
+            when (widget.reposCubit.state.current == null ||
                     !PlatformValues.isDesktopDevice) &&
                 system_path.extension(medium.path) ==
                     ".${RepoLocation.defaultExtension}":
@@ -1132,49 +913,42 @@ class _MainPageState extends State<MainPage>
         ),
       );
 
-  Future<void> _showRepoListActions(BuildContext context) async =>
+  Future<void> _showRepoListActions(BuildContext context) =>
       showModalBottomSheet(
         isScrollControlled: true,
         context: context,
         shape: Dimensions.borderBottomSheetTop,
-        builder: (context) {
-          return RepoListActions(
-            context: context,
-            reposCubit: widget.reposCubit,
-            onCreateRepoPressed: _createRepo,
-            onImportRepoPressed: _importRepo,
-          );
-        },
+        builder: (context) => RepoListActions(
+          context: context,
+          reposCubit: widget.reposCubit,
+          onCreateRepoPressed: _createRepo,
+          onImportRepoPressed: _importRepo,
+        ),
       );
 
-  Future<RepoLocation?> _createRepo() async {
-    final location = await createRepoDialog(context);
+  Future<RepoEntry?> _createRepo() async {
+    final repoEntry = await createRepoDialog(context);
 
-    if (location != null) {
-      await setCurrent(location);
+    if (repoEntry != null) {
+      await widget.reposCubit.setCurrent(repoEntry);
     }
 
-    return location;
+    return repoEntry;
   }
 
-  Future<List<RepoLocation>> _importRepo() async {
-    final locations = await importRepoDialog(context);
-    final location = locations.singleOrNull;
+  Future<List<RepoEntry>> _importRepo() async {
+    final repoEntries = await importRepoDialog(context);
+    final repoEntry = repoEntries.singleOrNull;
 
-    if (location != null) {
-      await setCurrent(location);
+    if (repoEntry != null) {
+      await widget.reposCubit.setCurrent(repoEntry);
     }
 
-    return locations;
+    return repoEntries;
   }
 
-  Future<void> setCurrent(RepoLocation location) async {
-    final repo = widget.reposCubit.get(location);
-    await widget.reposCubit.setCurrent(repo);
-  }
-
-  Future<RepoLocation?> createRepoDialog(BuildContext parentContext) async =>
-      Navigator.push<RepoLocation?>(
+  Future<RepoEntry?> createRepoDialog(BuildContext parentContext) async =>
+      Navigator.push<RepoEntry?>(
         context,
         MaterialPageRoute(
           builder: (context) => RepoCreationPage(
@@ -1183,7 +957,7 @@ class _MainPageState extends State<MainPage>
         ),
       );
 
-  Future<List<RepoLocation>> importRepoDialog(
+  Future<List<RepoEntry>> importRepoDialog(
     BuildContext parentContext, {
     String? initialTokenValue,
   }) async {
@@ -1210,7 +984,7 @@ class _MainPageState extends State<MainPage>
 
     switch (result) {
       case RepoImportFromToken(token: final token):
-        final location = await Navigator.push<RepoLocation>(
+        final repoEntry = await Navigator.push<RepoEntry?>(
           context,
           MaterialPageRoute(
             builder: (context) => RepoCreationPage(
@@ -1220,10 +994,13 @@ class _MainPageState extends State<MainPage>
           ),
         );
 
-        return location != null ? [location] : [];
+        return repoEntry != null ? [repoEntry] : [];
 
       case RepoImportFromFiles():
-        return result.locations;
+        return result.locations
+            .map((location) => widget.reposCubit.state.repos[location])
+            .nonNulls
+            .toList();
 
       case null:
         return [];
@@ -1238,10 +1015,11 @@ class _MainPageState extends State<MainPage>
             localeCubit: widget.localeCubit,
             mount: widget.mountCubit,
             panicCounter: panicCounter,
-            powerControl: widget.powerControl,
+            powerControl: powerControl,
             reposCubit: widget.reposCubit,
             upgradeExists: upgradeExists,
             checkForDokan: checkForDokan,
+            dirs: widget.dirs,
           ),
         ),
       );
@@ -1254,13 +1032,11 @@ class _MainPageState extends State<MainPage>
         isScrollControlled: true,
         context: context,
         shape: Dimensions.borderBottomSheetTop,
-        builder: (context) {
-          return RepositorySettings(
-            context: context,
-            settings: widget.settings,
-            repoCubit: repoCubit,
-            reposCubit: widget.reposCubit,
-          );
-        },
+        builder: (context) => RepositorySettings(
+          settings: widget.settings,
+          session: widget.session,
+          repoCubit: repoCubit,
+          reposCubit: widget.reposCubit,
+        ),
       );
 }

@@ -18,8 +18,10 @@ class S {
   static S? _current;
 
   static S get current {
-    assert(_current != null,
-        'No instance of S was loaded. Try to initialize the S delegate before accessing S.current.');
+    assert(
+      _current != null,
+      'No instance of S was loaded. Try to initialize the S delegate before accessing S.current.',
+    );
     return _current!;
   }
 
@@ -41,8 +43,10 @@ class S {
 
   static S of(BuildContext context) {
     final instance = S.maybeOf(context);
-    assert(instance != null,
-        'No instance of S present in the widget tree. Did you add S.delegate in localizationsDelegates?');
+    assert(
+      instance != null,
+      'No instance of S present in the widget tree. Did you add S.delegate in localizationsDelegates?',
+    );
     return instance!;
   }
 
@@ -52,22 +56,12 @@ class S {
 
   /// `About`
   String get titleAbout {
-    return Intl.message(
-      'About',
-      name: 'titleAbout',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('About', name: 'titleAbout', desc: '', args: []);
   }
 
   /// `Ouisync`
   String get titleAppTitle {
-    return Intl.message(
-      'Ouisync',
-      name: 'titleAppTitle',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Ouisync', name: 'titleAppTitle', desc: '', args: []);
   }
 
   /// `Add file to Ouisync`
@@ -92,12 +86,7 @@ class S {
 
   /// `Add`
   String get titleFolderActions {
-    return Intl.message(
-      'Add',
-      name: 'titleFolderActions',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Add', name: 'titleFolderActions', desc: '', args: []);
   }
 
   /// `Create a folder`
@@ -152,12 +141,7 @@ class S {
 
   /// `Settings`
   String get titleSettings {
-    return Intl.message(
-      'Settings',
-      name: 'titleSettings',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Settings', name: 'titleSettings', desc: '', args: []);
   }
 
   /// `Repository`
@@ -242,22 +226,12 @@ class S {
 
   /// `Network`
   String get titleNetwork {
-    return Intl.message(
-      'Network',
-      name: 'titleNetwork',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Network', name: 'titleNetwork', desc: '', args: []);
   }
 
   /// `Logs`
   String get titleLogs {
-    return Intl.message(
-      'Logs',
-      name: 'titleLogs',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Logs', name: 'titleLogs', desc: '', args: []);
   }
 
   /// `Delete repository`
@@ -352,12 +326,7 @@ class S {
 
   /// `Security`
   String get titleSecurity {
-    return Intl.message(
-      'Security',
-      name: 'titleSecurity',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Security', name: 'titleSecurity', desc: '', args: []);
   }
 
   /// `Remove biometrics`
@@ -442,12 +411,7 @@ class S {
 
   /// `FAQ`
   String get titleFAQShort {
-    return Intl.message(
-      'FAQ',
-      name: 'titleFAQShort',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('FAQ', name: 'titleFAQShort', desc: '', args: []);
   }
 
   /// `Send feedback`
@@ -552,12 +516,7 @@ class S {
 
   /// `Privacy`
   String get titlePrivacy {
-    return Intl.message(
-      'Privacy',
-      name: 'titlePrivacy',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Privacy', name: 'titlePrivacy', desc: '', args: []);
   }
 
   /// `Privacy Policy`
@@ -692,22 +651,12 @@ class S {
 
   /// `Log Data`
   String get titleLogData {
-    return Intl.message(
-      'Log Data',
-      name: 'titleLogData',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Log Data', name: 'titleLogData', desc: '', args: []);
   }
 
   /// `Cookies`
   String get titleCookies {
-    return Intl.message(
-      'Cookies',
-      name: 'titleCookies',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Cookies', name: 'titleCookies', desc: '', args: []);
   }
 
   /// `Links to Other Sites`
@@ -772,12 +721,7 @@ class S {
 
   /// `Sort by`
   String get titleSortBy {
-    return Intl.message(
-      'Sort by',
-      name: 'titleSortBy',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Sort by', name: 'titleSortBy', desc: '', args: []);
   }
 
   /// `User provided peers`
@@ -820,24 +764,54 @@ class S {
     );
   }
 
-  /// `Folder`
-  String get typeFolder {
+  /// `Copy`
+  String get titleCopyEntries {
     return Intl.message(
-      'Folder',
-      name: 'typeFolder',
-      desc: '',
+      'Copy',
+      name: 'titleCopyEntries',
+      desc: 'Title for the confirmation dialog when copying entries',
       args: [],
     );
   }
 
-  /// `File`
-  String get typeFile {
+  /// `Move`
+  String get titleMoveEntries {
     return Intl.message(
-      'File',
-      name: 'typeFile',
-      desc: '',
+      'Move',
+      name: 'titleMoveEntries',
+      desc: 'Title for the confirmation dialog when moving entries',
       args: [],
     );
+  }
+
+  /// `Save to device`
+  String get titleSaveEntriesToDevice {
+    return Intl.message(
+      'Save to device',
+      name: 'titleSaveEntriesToDevice',
+      desc: 'Title for the confirmation dialog when saving entries to device',
+      args: [],
+    );
+  }
+
+  /// `Delete`
+  String get titleDeleteEntries {
+    return Intl.message(
+      'Delete',
+      name: 'titleDeleteEntries',
+      desc: 'Title for the confirmation dialog when deleting entries',
+      args: [],
+    );
+  }
+
+  /// `Folder`
+  String get typeFolder {
+    return Intl.message('Folder', name: 'typeFolder', desc: '', args: []);
+  }
+
+  /// `File`
+  String get typeFile {
+    return Intl.message('File', name: 'typeFile', desc: '', args: []);
   }
 
   /// `Repository link: `
@@ -852,22 +826,12 @@ class S {
 
   /// `Name: `
   String get labelName {
-    return Intl.message(
-      'Name: ',
-      name: 'labelName',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Name: ', name: 'labelName', desc: '', args: []);
   }
 
   /// `New name: `
   String get labelNewName {
-    return Intl.message(
-      'New name: ',
-      name: 'labelNewName',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('New name: ', name: 'labelNewName', desc: '', args: []);
   }
 
   /// `Location: `
@@ -882,12 +846,7 @@ class S {
 
   /// `Size: `
   String get labelSize {
-    return Intl.message(
-      'Size: ',
-      name: 'labelSize',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Size: ', name: 'labelSize', desc: '', args: []);
   }
 
   /// `Password: `
@@ -982,12 +941,7 @@ class S {
 
   /// `Peers`
   String get labelPeers {
-    return Intl.message(
-      'Peers',
-      name: 'labelPeers',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Peers', name: 'labelPeers', desc: '', args: []);
   }
 
   /// `Destination`
@@ -1042,12 +996,7 @@ class S {
 
   /// `Copy link`
   String get labelCopyLink {
-    return Intl.message(
-      'Copy link',
-      name: 'labelCopyLink',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Copy link', name: 'labelCopyLink', desc: '', args: []);
   }
 
   /// `Share link`
@@ -1062,12 +1011,7 @@ class S {
 
   /// `QR code`
   String get labelQRCode {
-    return Intl.message(
-      'QR code',
-      name: 'labelQRCode',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('QR code', name: 'labelQRCode', desc: '', args: []);
   }
 
   /// `Lock all`
@@ -1772,42 +1716,22 @@ class S {
 
   /// `Weak`
   String get messageWeak {
-    return Intl.message(
-      'Weak',
-      name: 'messageWeak',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Weak', name: 'messageWeak', desc: '', args: []);
   }
 
   /// `Medium`
   String get messageMedium {
-    return Intl.message(
-      'Medium',
-      name: 'messageMedium',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Medium', name: 'messageMedium', desc: '', args: []);
   }
 
   /// `Good`
   String get messageGood {
-    return Intl.message(
-      'Good',
-      name: 'messageGood',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Good', name: 'messageGood', desc: '', args: []);
   }
 
   /// `Strong`
   String get messageStrong {
-    return Intl.message(
-      'Strong',
-      name: 'messageStrong',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Strong', name: 'messageStrong', desc: '', args: []);
   }
 
   /// `The current password`
@@ -1912,22 +1836,12 @@ class S {
 
   /// `Error!`
   String get messageError {
-    return Intl.message(
-      'Error!',
-      name: 'messageError',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Error!', name: 'messageError', desc: '', args: []);
   }
 
   /// `Ack!`
   String get messageAck {
-    return Intl.message(
-      'Ack!',
-      name: 'messageAck',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Ack!', name: 'messageAck', desc: '', args: []);
   }
 
   /// `Creating the share token…`
@@ -2050,6 +1964,16 @@ class S {
     );
   }
 
+  /// `File deleted successfully: {name}`
+  String messageFileDeleted(Object name) {
+    return Intl.message(
+      'File deleted successfully: $name',
+      name: 'messageFileDeleted',
+      desc: '',
+      args: [name],
+    );
+  }
+
   /// `Press back again to exit.`
   String get messageExitOuiSync {
     return Intl.message(
@@ -2140,11 +2064,11 @@ class S {
     );
   }
 
-  /// `Is running`
-  String get messageBackgroundNotificationAndroid {
+  /// `Ouisync is running`
+  String get messageBackgroundNotification {
     return Intl.message(
-      'Is running',
-      name: 'messageBackgroundNotificationAndroid',
+      'Ouisync is running',
+      name: 'messageBackgroundNotification',
       desc: '',
       args: [],
     );
@@ -2242,12 +2166,7 @@ class S {
 
   /// `Or`
   String get messageOr {
-    return Intl.message(
-      'Or',
-      name: 'messageOr',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Or', name: 'messageOr', desc: '', args: []);
   }
 
   /// `Import a repository using a token link`
@@ -2312,22 +2231,12 @@ class S {
 
   /// `file`
   String get messageFile {
-    return Intl.message(
-      'file',
-      name: 'messageFile',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('file', name: 'messageFile', desc: '', args: []);
   }
 
   /// `files`
   String get messageFiles {
-    return Intl.message(
-      'files',
-      name: 'messageFiles',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('files', name: 'messageFiles', desc: '', args: []);
   }
 
   /// `The repository deletion failed`
@@ -2462,12 +2371,7 @@ class S {
 
   /// `All`
   String get messageLogLevelAll {
-    return Intl.message(
-      'All',
-      name: 'messageLogLevelAll',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('All', name: 'messageLogLevelAll', desc: '', args: []);
   }
 
   /// `Save log file`
@@ -2642,12 +2546,7 @@ class S {
 
   /// `View`
   String get messageView {
-    return Intl.message(
-      'View',
-      name: 'messageView',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('View', name: 'messageView', desc: '', args: []);
   }
 
   /// `Local Discovery`
@@ -2672,12 +2571,7 @@ class S {
 
   /// `NAT type`
   String get messageNATType {
-    return Intl.message(
-      'NAT type',
-      name: 'messageNATType',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('NAT type', name: 'messageNATType', desc: '', args: []);
   }
 
   /// `Bluetooth`
@@ -2692,22 +2586,12 @@ class S {
 
   /// `Wi-Fi`
   String get messageWiFi {
-    return Intl.message(
-      'Wi-Fi',
-      name: 'messageWiFi',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Wi-Fi', name: 'messageWiFi', desc: '', args: []);
   }
 
   /// `Mobile`
   String get messageMobile {
-    return Intl.message(
-      'Mobile',
-      name: 'messageMobile',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Mobile', name: 'messageMobile', desc: '', args: []);
   }
 
   /// `Ethernet`
@@ -2722,22 +2606,12 @@ class S {
 
   /// `VPN`
   String get messageVPN {
-    return Intl.message(
-      'VPN',
-      name: 'messageVPN',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('VPN', name: 'messageVPN', desc: '', args: []);
   }
 
   /// `None`
   String get messageNone {
-    return Intl.message(
-      'None',
-      name: 'messageNone',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('None', name: 'messageNone', desc: '', args: []);
   }
 
   /// `Peer Exchange`
@@ -2755,6 +2629,16 @@ class S {
     return Intl.message(
       'You have unsaved changes.\n\nWould you like to discard them?',
       name: 'messageUnsavedChanges',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please authenticate`
+  String get messagePleaseAuthenticate {
+    return Intl.message(
+      'Please authenticate',
+      name: 'messagePleaseAuthenticate',
       desc: '',
       args: [],
     );
@@ -2832,12 +2716,7 @@ class S {
 
   /// `Granted`
   String get messageGranted {
-    return Intl.message(
-      'Granted',
-      name: 'messageGranted',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Granted', name: 'messageGranted', desc: '', args: []);
   }
 
   /// `This permission is required`
@@ -2892,22 +2771,12 @@ class S {
 
   /// `Storage`
   String get messageStorage {
-    return Intl.message(
-      'Storage',
-      name: 'messageStorage',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Storage', name: 'messageStorage', desc: '', args: []);
   }
 
   /// `Camera`
   String get messageCamera {
-    return Intl.message(
-      'Camera',
-      name: 'messageCamera',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Camera', name: 'messageCamera', desc: '', args: []);
   }
 
   /// `{name} already exist in this location.\n\nWhat do you want to do?`
@@ -3022,12 +2891,7 @@ class S {
 
   /// `by`
   String get messageBy {
-    return Intl.message(
-      'by',
-      name: 'messageBy',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('by', name: 'messageBy', desc: '', args: []);
   }
 
   /// `Tap here to read our values`
@@ -3552,22 +3416,12 @@ class S {
 
   /// `PIPEDA`
   String get messagePIPEDA {
-    return Intl.message(
-      'PIPEDA',
-      name: 'messagePIPEDA',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('PIPEDA', name: 'messagePIPEDA', desc: '', args: []);
   }
 
   /// `Note`
   String get messageNote {
-    return Intl.message(
-      'Note',
-      name: 'messageNote',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Note', name: 'messageNote', desc: '', args: []);
   }
 
   /// `The repository is not mounted `
@@ -3800,10 +3654,10 @@ class S {
     );
   }
 
-  /// `Not apps can perform this action`
+  /// `No application can perform this action`
   String get messageNoAppsForThisAction {
     return Intl.message(
-      'Not apps can perform this action',
+      'No application can perform this action',
       name: 'messageNoAppsForThisAction',
       desc: '',
       args: [],
@@ -3942,12 +3796,7 @@ class S {
 
   /// `Dokan`
   String get messageDokan {
-    return Intl.message(
-      'Dokan',
-      name: 'messageDokan',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Dokan', name: 'messageDokan', desc: '', args: []);
   }
 
   /// `Ouisync uses`
@@ -4010,6 +3859,47 @@ class S {
     );
   }
 
+  /// `Copy selection here:\n\n\t\t{totals}`
+  String messageCopyEntries(String totals) {
+    return Intl.message(
+      'Copy selection here:\n\n\t\t$totals',
+      name: 'messageCopyEntries',
+      desc: 'Message displayed in a confirmation dialog when copying entries',
+      args: [totals],
+    );
+  }
+
+  /// `Move selection here:\n\n\t\t{totals}`
+  String messageMoveEntries(String totals) {
+    return Intl.message(
+      'Move selection here:\n\n\t\t$totals',
+      name: 'messageMoveEntries',
+      desc: 'Message displayed in a confirmation dialog when moving entries',
+      args: [totals],
+    );
+  }
+
+  /// `Save selection:\n\n\t\t{totals}`
+  String messageSaveEntriesToDevice(String totals) {
+    return Intl.message(
+      'Save selection:\n\n\t\t$totals',
+      name: 'messageSaveEntriesToDevice',
+      desc:
+          'Message displayed in a confirmation dialog when saving entries to the device',
+      args: [totals],
+    );
+  }
+
+  /// `Delete selection:\n\n\t\t{totals}`
+  String messageDeleteEntries(String totals) {
+    return Intl.message(
+      'Delete selection:\n\n\t\t$totals',
+      name: 'messageDeleteEntries',
+      desc: 'Message displayed in a confirmation dialog when deleting entries',
+      args: [totals],
+    );
+  }
+
   /// `Copy password`
   String get popupMenuItemCopyPassword {
     return Intl.message(
@@ -4030,6 +3920,346 @@ class S {
     );
   }
 
+  /// `Reset repository access`
+  String get repoResetTitle {
+    return Intl.message(
+      'Reset repository access',
+      name: 'repoResetTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Repository name`
+  String get repoResetRepoNameLabel {
+    return Intl.message(
+      'Repository name',
+      name: 'repoResetRepoNameLabel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Repository access type`
+  String get repoResetAccessTypeLabel {
+    return Intl.message(
+      'Repository access type',
+      name: 'repoResetAccessTypeLabel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Blind or locked`
+  String get repoResetAccessTypeInfoBlindOrLocked {
+    return Intl.message(
+      'Blind or locked',
+      name: 'repoResetAccessTypeInfoBlindOrLocked',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Read`
+  String get repoResetAccessTypeInfoRead {
+    return Intl.message(
+      'Read',
+      name: 'repoResetAccessTypeInfoRead',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Write`
+  String get repoResetAccessTypeInfoWrite {
+    return Intl.message(
+      'Write',
+      name: 'repoResetAccessTypeInfoWrite',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Token access type`
+  String get repoResetTokenTypeLabel {
+    return Intl.message(
+      'Token access type',
+      name: 'repoResetTokenTypeLabel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Action to be submitted`
+  String get repoResetActionInfoLabel {
+    return Intl.message(
+      'Action to be submitted',
+      name: 'repoResetActionInfoLabel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Authentication method`
+  String get repoResetAuthInfoLabel {
+    return Intl.message(
+      'Authentication method',
+      name: 'repoResetAuthInfoLabel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Authentication method`
+  String get repoResetAuthInfoBlindOrLocked {
+    return Intl.message(
+      'Authentication method',
+      name: 'repoResetAuthInfoBlindOrLocked',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The application cannot tell the difference.`
+  String get repoResetAuthInfoBlindOrLockedWarn {
+    return Intl.message(
+      'The application cannot tell the difference.',
+      name: 'repoResetAuthInfoBlindOrLockedWarn',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Locked behind a local password.`
+  String get repoResetAuthInfoLocked {
+    return Intl.message(
+      'Locked behind a local password.',
+      name: 'repoResetAuthInfoLocked',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Password is stored on this device.`
+  String get repoResetAuthInfoPasswordIsStored {
+    return Intl.message(
+      'Password is stored on this device.',
+      name: 'repoResetAuthInfoPasswordIsStored',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Key is stored on this device.`
+  String get repoResetAuthInfoKeyIsStored {
+    return Intl.message(
+      'Key is stored on this device.',
+      name: 'repoResetAuthInfoKeyIsStored',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Key is stored on this device and additional verification is needed to open the repository.`
+  String get repoResetAuthInfoKeyIsStoredAndProtected {
+    return Intl.message(
+      'Key is stored on this device and additional verification is needed to open the repository.',
+      name: 'repoResetAuthInfoKeyIsStoredAndProtected',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please provide a valid token link to determine the action.`
+  String get repoResetTokenEmptyInfo {
+    return Intl.message(
+      'Please provide a valid token link to determine the action.',
+      name: 'repoResetTokenEmptyInfo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Invalid`
+  String get repoResetTokenInvalid {
+    return Intl.message(
+      'Invalid',
+      name: 'repoResetTokenInvalid',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The token link is invalid.`
+  String get repoResetTokenInvalidInfo {
+    return Intl.message(
+      'The token link is invalid.',
+      name: 'repoResetTokenInvalidInfo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No action can be performed because the token does not correspond to this repository.`
+  String get repoResetTokenNonMatching {
+    return Intl.message(
+      'No action can be performed because the token does not correspond to this repository.',
+      name: 'repoResetTokenNonMatching',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No action will be performed because the token has already been submitted.`
+  String get repoResetTokenAlreadySubmitted {
+    return Intl.message(
+      'No action will be performed because the token has already been submitted.',
+      name: 'repoResetTokenAlreadySubmitted',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The repository will become blind.`
+  String get repoResetActionBlindToBlind {
+    return Intl.message(
+      'The repository will become blind.',
+      name: 'repoResetActionBlindToBlind',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This repository may have read or write access locked behind a local password. If so, unlocking will not be possible after this action is executed.`
+  String get repoResetActionBlindToBlindWarn {
+    return Intl.message(
+      'This repository may have read or write access locked behind a local password. If so, unlocking will not be possible after this action is executed.',
+      name: 'repoResetActionBlindToBlindWarn',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No action will be performed because the token and repository access are the same.`
+  String get repoResetActionSame {
+    return Intl.message(
+      'No action will be performed because the token and repository access are the same.',
+      name: 'repoResetActionSame',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The repository will become read only.`
+  String get repoResetActionBlindToRead {
+    return Intl.message(
+      'The repository will become read only.',
+      name: 'repoResetActionBlindToRead',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This repository may have write access locked behind a local password. If so, unlocking for writing will not be possible after this action is executed.`
+  String get repoResetActionBlindToReadWarn {
+    return Intl.message(
+      'This repository may have write access locked behind a local password. If so, unlocking for writing will not be possible after this action is executed.',
+      name: 'repoResetActionBlindToReadWarn',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The repository will gain write access.`
+  String get repoResetActionAnyToWrite {
+    return Intl.message(
+      'The repository will gain write access.',
+      name: 'repoResetActionAnyToWrite',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The repository will lose its read access.`
+  String get repoResetActionReadToBlind {
+    return Intl.message(
+      'The repository will lose its read access.',
+      name: 'repoResetActionReadToBlind',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This action is irreversible without a read or write token link.`
+  String get repoResetActionReadToBlindWarn {
+    return Intl.message(
+      'This action is irreversible without a read or write token link.',
+      name: 'repoResetActionReadToBlindWarn',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The repository will lose its write access.`
+  String get repoResetActionWriteToRead {
+    return Intl.message(
+      'The repository will lose its write access.',
+      name: 'repoResetActionWriteToRead',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This action is irreversible without a write token link.`
+  String get repoResetActionWriteToReadWarn {
+    return Intl.message(
+      'This action is irreversible without a write token link.',
+      name: 'repoResetActionWriteToReadWarn',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The repository will lose its read and write access.`
+  String get repoResetActionWriteToBlind {
+    return Intl.message(
+      'The repository will lose its read and write access.',
+      name: 'repoResetActionWriteToBlind',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This action is irreversible without a write token link.`
+  String get repoResetActionWriteToBlindWarn {
+    return Intl.message(
+      'This action is irreversible without a write token link.',
+      name: 'repoResetActionWriteToBlindWarn',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please confirm`
+  String get repoResetConfirmUpdateTitle {
+    return Intl.message(
+      'Please confirm',
+      name: 'repoResetConfirmUpdateTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Are you sure you want to proceed with the Update action?`
+  String get repoResetConfirmUpdateMessage {
+    return Intl.message(
+      'Are you sure you want to proceed with the Update action?',
+      name: 'repoResetConfirmUpdateMessage',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Repository`
   String get menuItemRepository {
     return Intl.message(
@@ -4042,32 +4272,17 @@ class S {
 
   /// `Network`
   String get menuItemNetwork {
-    return Intl.message(
-      'Network',
-      name: 'menuItemNetwork',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Network', name: 'menuItemNetwork', desc: '', args: []);
   }
 
   /// `Logs`
   String get menuItemLogs {
-    return Intl.message(
-      'Logs',
-      name: 'menuItemLogs',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Logs', name: 'menuItemLogs', desc: '', args: []);
   }
 
   /// `About`
   String get menuItemAbout {
-    return Intl.message(
-      'About',
-      name: 'menuItemAbout',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('About', name: 'menuItemAbout', desc: '', args: []);
   }
 
   /// `{name}`
@@ -4152,12 +4367,7 @@ class S {
 
   /// `SYNCED`
   String get statusSync {
-    return Intl.message(
-      'SYNCED',
-      name: 'statusSync',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('SYNCED', name: 'statusSync', desc: '', args: []);
   }
 
   /// `Unspecified`
@@ -4182,62 +4392,32 @@ class S {
 
   /// `Download`
   String get iconDownload {
-    return Intl.message(
-      'Download',
-      name: 'iconDownload',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Download', name: 'iconDownload', desc: '', args: []);
   }
 
   /// `Preview`
   String get iconPreview {
-    return Intl.message(
-      'Preview',
-      name: 'iconPreview',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Preview', name: 'iconPreview', desc: '', args: []);
   }
 
   /// `Share`
   String get iconShare {
-    return Intl.message(
-      'Share',
-      name: 'iconShare',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Share', name: 'iconShare', desc: '', args: []);
   }
 
   /// `Rename`
   String get iconRename {
-    return Intl.message(
-      'Rename',
-      name: 'iconRename',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Rename', name: 'iconRename', desc: '', args: []);
   }
 
   /// `Move`
   String get iconMove {
-    return Intl.message(
-      'Move',
-      name: 'iconMove',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Move', name: 'iconMove', desc: '', args: []);
   }
 
   /// `Delete`
   String get iconDelete {
-    return Intl.message(
-      'Delete',
-      name: 'iconDelete',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Delete', name: 'iconDelete', desc: '', args: []);
   }
 
   /// `Create a new repository`
@@ -4278,6 +4458,11 @@ class S {
       desc: '',
       args: [],
     );
+  }
+
+  /// `Copy`
+  String get iconCopy {
+    return Intl.message('Copy', name: 'iconCopy', desc: '', args: []);
   }
 
   /// `Create Repository`
@@ -4330,6 +4515,16 @@ class S {
     );
   }
 
+  /// `I don't have a local password for this repository`
+  String get actionIDontHaveALocalPassword {
+    return Intl.message(
+      'I don\'t have a local password for this repository',
+      name: 'actionIDontHaveALocalPassword',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Import repository`
   String get actionImportRepo {
     return Intl.message(
@@ -4362,132 +4557,67 @@ class S {
 
   /// `Folder`
   String get actionNewFolder {
-    return Intl.message(
-      'Folder',
-      name: 'actionNewFolder',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Folder', name: 'actionNewFolder', desc: '', args: []);
   }
 
   /// `File`
   String get actionNewFile {
-    return Intl.message(
-      'File',
-      name: 'actionNewFile',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('File', name: 'actionNewFile', desc: '', args: []);
   }
 
   /// `Create`
   String get actionCreate {
-    return Intl.message(
-      'Create',
-      name: 'actionCreate',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Create', name: 'actionCreate', desc: '', args: []);
   }
 
   /// `Cancel`
   String get actionCancel {
-    return Intl.message(
-      'Cancel',
-      name: 'actionCancel',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Cancel', name: 'actionCancel', desc: '', args: []);
   }
 
   /// `Delete`
   String get actionDelete {
-    return Intl.message(
-      'Delete',
-      name: 'actionDelete',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Delete', name: 'actionDelete', desc: '', args: []);
   }
 
   /// `Eject`
   String get actionEject {
-    return Intl.message(
-      'Eject',
-      name: 'actionEject',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Eject', name: 'actionEject', desc: '', args: []);
   }
 
   /// `Move`
   String get actionMove {
-    return Intl.message(
-      'Move',
-      name: 'actionMove',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Move', name: 'actionMove', desc: '', args: []);
   }
 
   /// `Save`
   String get actionSave {
-    return Intl.message(
-      'Save',
-      name: 'actionSave',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Save', name: 'actionSave', desc: '', args: []);
   }
 
   /// `Unlock`
   String get actionUnlock {
-    return Intl.message(
-      'Unlock',
-      name: 'actionUnlock',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Unlock', name: 'actionUnlock', desc: '', args: []);
   }
 
   /// `Retry`
   String get actionRetry {
-    return Intl.message(
-      'Retry',
-      name: 'actionRetry',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Retry', name: 'actionRetry', desc: '', args: []);
   }
 
   /// `Share`
   String get actionShare {
-    return Intl.message(
-      'Share',
-      name: 'actionShare',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Share', name: 'actionShare', desc: '', args: []);
   }
 
   /// `Rename`
   String get actionRename {
-    return Intl.message(
-      'Rename',
-      name: 'actionRename',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Rename', name: 'actionRename', desc: '', args: []);
   }
 
   /// `Accept`
   String get actionAccept {
-    return Intl.message(
-      'Accept',
-      name: 'actionAccept',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Accept', name: 'actionAccept', desc: '', args: []);
   }
 
   /// `Delete folder`
@@ -4552,42 +4682,22 @@ class S {
 
   /// `Show`
   String get actionShow {
-    return Intl.message(
-      'Show',
-      name: 'actionShow',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Show', name: 'actionShow', desc: '', args: []);
   }
 
   /// `Hide`
   String get actionHide {
-    return Intl.message(
-      'Hide',
-      name: 'actionHide',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Hide', name: 'actionHide', desc: '', args: []);
   }
 
   /// `Exit`
   String get actionExit {
-    return Intl.message(
-      'Exit',
-      name: 'actionExit',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Exit', name: 'actionExit', desc: '', args: []);
   }
 
   /// `OK`
   String get actionOK {
-    return Intl.message(
-      'OK',
-      name: 'actionOK',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('OK', name: 'actionOK', desc: '', args: []);
   }
 
   /// `Scan a QR code`
@@ -4622,12 +4732,7 @@ class S {
 
   /// `HIDE`
   String get actionHideCapital {
-    return Intl.message(
-      'HIDE',
-      name: 'actionHideCapital',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('HIDE', name: 'actionHideCapital', desc: '', args: []);
   }
 
   /// `CLOSE`
@@ -4652,42 +4757,22 @@ class S {
 
   /// `LOCK`
   String get actionLockCapital {
-    return Intl.message(
-      'LOCK',
-      name: 'actionLockCapital',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('LOCK', name: 'actionLockCapital', desc: '', args: []);
   }
 
   /// `Remove`
   String get actionRemove {
-    return Intl.message(
-      'Remove',
-      name: 'actionRemove',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Remove', name: 'actionRemove', desc: '', args: []);
   }
 
   /// `Discard`
   String get actionDiscard {
-    return Intl.message(
-      'Discard',
-      name: 'actionDiscard',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Discard', name: 'actionDiscard', desc: '', args: []);
   }
 
   /// `Clear`
   String get actionClear {
-    return Intl.message(
-      'Clear',
-      name: 'actionClear',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Clear', name: 'actionClear', desc: '', args: []);
   }
 
   /// `Save changes`
@@ -4712,92 +4797,47 @@ class S {
 
   /// `Undo`
   String get actionUndo {
-    return Intl.message(
-      'Undo',
-      name: 'actionUndo',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Undo', name: 'actionUndo', desc: '', args: []);
   }
 
   /// `Back`
   String get actionBack {
-    return Intl.message(
-      'Back',
-      name: 'actionBack',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Back', name: 'actionBack', desc: '', args: []);
   }
 
   /// `Import`
   String get actionImport {
-    return Intl.message(
-      'Import',
-      name: 'actionImport',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Import', name: 'actionImport', desc: '', args: []);
   }
 
   /// `Yes`
   String get actionYes {
-    return Intl.message(
-      'Yes',
-      name: 'actionYes',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Yes', name: 'actionYes', desc: '', args: []);
   }
 
   /// `No`
   String get actionNo {
-    return Intl.message(
-      'No',
-      name: 'actionNo',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('No', name: 'actionNo', desc: '', args: []);
   }
 
   /// `Skip`
   String get actionSkip {
-    return Intl.message(
-      'Skip',
-      name: 'actionSkip',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Skip', name: 'actionSkip', desc: '', args: []);
   }
 
   /// `Done`
   String get actionDone {
-    return Intl.message(
-      'Done',
-      name: 'actionDone',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Done', name: 'actionDone', desc: '', args: []);
   }
 
   /// `Next`
   String get actionNext {
-    return Intl.message(
-      'Next',
-      name: 'actionNext',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Next', name: 'actionNext', desc: '', args: []);
   }
 
   /// `I agree`
   String get actionIAgree {
-    return Intl.message(
-      'I agree',
-      name: 'actionIAgree',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('I agree', name: 'actionIAgree', desc: '', args: []);
   }
 
   /// `I don’t agree`
@@ -4822,12 +4862,7 @@ class S {
 
   /// `Update`
   String get actionUpdate {
-    return Intl.message(
-      'Update',
-      name: 'actionUpdate',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Update', name: 'actionUpdate', desc: '', args: []);
   }
 
   /// `Media`
@@ -4868,6 +4903,21 @@ class S {
       desc: '',
       args: [],
     );
+  }
+
+  /// `Select`
+  String get actionSelect {
+    return Intl.message('Select', name: 'actionSelect', desc: '', args: []);
+  }
+
+  /// `Download`
+  String get actionDownload {
+    return Intl.message('Download', name: 'actionDownload', desc: '', args: []);
+  }
+
+  /// `Copy`
+  String get actionCopy {
+    return Intl.message('Copy', name: 'actionCopy', desc: '', args: []);
   }
 
   /// `App language`
@@ -4932,32 +4982,17 @@ class S {
 
   /// `Name`
   String get sortByNameLabel {
-    return Intl.message(
-      'Name',
-      name: 'sortByNameLabel',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Name', name: 'sortByNameLabel', desc: '', args: []);
   }
 
   /// `Size`
   String get sortBySizeLabel {
-    return Intl.message(
-      'Size',
-      name: 'sortBySizeLabel',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Size', name: 'sortBySizeLabel', desc: '', args: []);
   }
 
   /// `Type`
   String get sortByTypeLabel {
-    return Intl.message(
-      'Type',
-      name: 'sortByTypeLabel',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Type', name: 'sortByTypeLabel', desc: '', args: []);
   }
 
   /// `blind`
@@ -4992,11 +5027,56 @@ class S {
 
   /// `Synced`
   String get labelSynced {
+    return Intl.message('Synced', name: 'labelSynced', desc: '', args: []);
+  }
+
+  /// `Repository {name} deleted`
+  String messageRepositoryDeleted(Object name) {
     return Intl.message(
-      'Synced',
-      name: 'labelSynced',
+      'Repository $name deleted',
+      name: 'messageRepositoryDeleted',
       desc: '',
-      args: [],
+      args: [name],
+    );
+  }
+
+  /// `Repository renamed as {name}`
+  String messageRepositoryRenamed(Object name) {
+    return Intl.message(
+      'Repository renamed as $name',
+      name: 'messageRepositoryRenamed',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `File renamed as {name}`
+  String messageFileRenamed(Object name) {
+    return Intl.message(
+      'File renamed as $name',
+      name: 'messageFileRenamed',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Error creating folder {name}`
+  String messageErrorCreatingFolder(Object name) {
+    return Intl.message(
+      'Error creating folder $name',
+      name: 'messageErrorCreatingFolder',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Folder renamed as {name}`
+  String messageFolderRenamed(Object name) {
+    return Intl.message(
+      'Folder renamed as $name',
+      name: 'messageFolderRenamed',
+      desc: '',
+      args: [name],
     );
   }
 }

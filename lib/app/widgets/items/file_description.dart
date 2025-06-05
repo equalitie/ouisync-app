@@ -5,9 +5,10 @@ import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../models/models.dart';
 import '../../utils/utils.dart';
+import 'scrollable_text_widget.dart';
 
 class FileDescription extends StatelessWidget with AppLogger {
-  const FileDescription(
+  FileDescription(
     this.repoCubit,
     this.entry,
     this.uploadJob,
@@ -21,12 +22,7 @@ class FileDescription extends StatelessWidget with AppLogger {
   Widget build(BuildContext context) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            entry.name,
-            maxLines: 1,
-            softWrap: true,
-            overflow: TextOverflow.ellipsis,
-          ),
+          ScrollableTextWidget(child: Text(entry.name)),
           Dimensions.spacingVerticalHalf,
           _buildDetails(context),
         ],

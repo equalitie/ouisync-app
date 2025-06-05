@@ -113,9 +113,9 @@ RUN echo "Checking out master branch" && \
 RUN echo "rust.rustcCommand=/root/.cargo/bin/rustc" >> /home/code/ouisync-app/android/local.properties
 RUN echo "rust.cargoCommand=/root/.cargo/bin/cargo" >> /home/code/ouisync-app/android/local.properties
 
-# Build the ouisync library and generate the headers
+# Build the ouisync library and generate the bindings
 RUN cd ouisync-app/ouisync-plugin/ouisync && \
-    cargo build --release -p ouisync-ffi && \
+    cargo build --release -p ouisync-service && \
     cargo run --bin bindgen
 
 # Get the plugin dependencies and generate the bindings for the library headers

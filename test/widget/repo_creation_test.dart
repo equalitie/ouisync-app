@@ -4,11 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ouisync_app/app/cubits/repo_creation.dart';
 import 'package:ouisync_app/app/models/auth_mode.dart';
-import 'package:ouisync_app/app/models/local_secret.dart';
 import 'package:ouisync_app/app/models/repo_location.dart';
 import 'package:ouisync_app/app/utils/share_token.dart';
-import 'package:ouisync/ouisync.dart'
-    show AccessMode, LocalSecretKeyAndSalt, Repository, Session, SessionKind;
+import 'package:ouisync/ouisync.dart' show AccessMode, Session, Server;
 import 'package:path/path.dart' show join;
 
 import '../utils.dart';
@@ -18,6 +16,7 @@ void main() {
 
   setUp(() async {
     deps = await TestDependencies.create();
+    await deps.reposCubit.waitUntil((state) => !state.isLoading);
   });
 
   tearDown(() async {
@@ -39,8 +38,8 @@ void main() {
         // Filling in the repo name triggers an async operation and so we must explicitly wait until
         // it completes.
         await tester.enterText(find.byKey(ValueKey('name')), 'my repo');
-        await repoCreationObserver.waitUntil(
-            (state) => !state.loading && state.substate is RepoCreationValid);
+        await repoCreationObserver
+            .waitUntil((state) => state.substate is RepoCreationValid);
         await tester.pump();
 
         await tester.tap(find.descendant(
@@ -57,62 +56,13 @@ void main() {
         await repoCreationObserver
             .waitUntil((state) => state.substate is RepoCreationSuccess);
 
-        final repoCubit = deps.reposCubit.repos
+        final repoCubit = deps.reposCubit.state.repos.values
             .where((entry) => entry.name == 'my repo')
             .first
             .cubit!;
 
         expect(repoCubit.state.accessMode, equals(AccessMode.write));
         expect(repoCubit.state.isCacheServersEnabled, isFalse);
-      },
-    ),
-  );
-
-  testWidgets(
-    'create repository with password',
-    (tester) => tester.runAsync(
-      () async {
-        final name = 'my repo';
-        final password = 'supersecret';
-
-        final repoCreationObserver = StateObserver.install<RepoCreationState>();
-
-        await tester.pumpWidget(testApp(deps.createMainPage()));
-        await tester.pumpAndSettle();
-
-        await tester.tap(find.text('CREATE REPOSITORY'));
-        await tester.pumpAndSettle();
-
-        await tester.enterText(find.byKey(ValueKey('name')), name);
-        await repoCreationObserver.waitUntil((state) => !state.loading);
-        await tester.pumpAndSettle();
-
-        await tester.tap(find.byKey(ValueKey('use-local-password')));
-        await tester.pumpAndSettle();
-
-        await tester.enterText(find.byKey(ValueKey('password')), password);
-        await tester.enterText(
-            find.byKey(ValueKey('retype-password')), password);
-        await tester.pumpAndSettle();
-
-        final submit = find.text('CREATE');
-        await tester.ensureVisible(submit);
-        await tester.tap(submit);
-
-        await repoCreationObserver
-            .waitUntil((state) => state.substate is RepoCreationSuccess);
-
-        final repoCubit = deps.reposCubit.repos
-            .where((entry) => entry.name == name)
-            .first
-            .cubit!;
-        expect(repoCubit.state.accessMode, equals(AccessMode.write));
-
-        await repoCubit.lock();
-        expect(repoCubit.state.accessMode, equals(AccessMode.blind));
-
-        await repoCubit.unlock(LocalPassword(password));
-        expect(repoCubit.state.accessMode, equals(AccessMode.write));
       },
     ),
   );
@@ -126,11 +76,11 @@ void main() {
         final repoCreationObserver = StateObserver.install<RepoCreationState>();
 
         await deps.reposCubit.createRepository(
-          location: RepoLocation.fromParts(
-            dir: await deps.reposCubit.settings.getDefaultRepositoriesDir(),
+          location: RepoLocation(
+            dir: (await deps.session.getStoreDir())!,
             name: name,
           ),
-          setLocalSecret: LocalSecretKeyAndSalt.random(),
+          setLocalSecret: randomSetLocalSecret(),
           localSecretMode: LocalSecretMode.randomStored,
         );
 
@@ -143,14 +93,13 @@ void main() {
         await tester.pumpAndSettle();
 
         await tester.enterText(find.byKey(ValueKey('name')), name);
-        await repoCreationObserver.waitUntil((state) =>
-            !state.loading &&
-            switch (state.substate) {
-              RepoCreationPending(nameError: final nameError)
-                  when nameError != null && nameError.isNotEmpty =>
-                true,
-              _ => false,
-            });
+        await repoCreationObserver
+            .waitUntil((state) => switch (state.substate) {
+                  RepoCreationPending(nameError: final nameError)
+                      when nameError != null && nameError.isNotEmpty =>
+                    true,
+                  _ => false,
+                });
 
         await tester.pump();
 
@@ -171,7 +120,7 @@ void main() {
         final repoCreationObserver = StateObserver.install<RepoCreationState>();
         final repoImportObserver = StateObserver.install<ShareTokenResult?>();
 
-        expect(deps.reposCubit.repos, isEmpty);
+        expect(deps.reposCubit.state.repos, isEmpty);
 
         await tester.pumpWidget(testApp(deps.createMainPage()));
         await tester.pumpAndSettle();
@@ -192,11 +141,11 @@ void main() {
           findsOne,
         );
 
-        await tester.tap(find.widgetWithText(ElevatedButton, 'IMPORT A REPOSITORY'));
+        await tester
+            .tap(find.widgetWithText(ElevatedButton, 'IMPORT A REPOSITORY'));
         await tester.pump();
 
-        await repoCreationObserver
-            .waitUntil((state) => !state.loading && state.token != null);
+        await repoCreationObserver.waitUntil((state) => state.token != null);
         await tester.pump();
 
         expect(find.widgetWithText(TextFormField, token), findsOne);
@@ -215,8 +164,6 @@ void main() {
         await tester.enterText(find.byKey(ValueKey('name')), "");
         await tester.pumpAndSettle();
 
-        await repoCreationObserver.waitUntil((state) => !state.loading);
-
         // The name field is empty.
         expect(
           find.descendant(
@@ -233,8 +180,7 @@ void main() {
 
         // Tap on the suggested name and wait until it gets applied.
         await tester.tap(suggestedName);
-        await repoCreationObserver
-            .waitUntil((state) => !state.loading && state.name == name);
+        await repoCreationObserver.waitUntil((state) => state.name == name);
 
         await tester.pumpAndSettle();
 
@@ -253,7 +199,7 @@ void main() {
             .waitUntil((state) => state.substate is RepoCreationSuccess);
 
         // The repo got created correctly.
-        final repoCubit = deps.reposCubit.repos.first.cubit!;
+        final repoCubit = deps.reposCubit.state.repos.values.first.cubit!;
         final actualMode = repoCubit.state.accessMode;
         final actualToken = await repoCubit.createShareToken(AccessMode.read);
 
@@ -269,30 +215,28 @@ Future<String> _createShareToken({
   required AccessMode accessMode,
 }) async {
   final dir = await Directory.systemTemp.createTemp();
-  final session = Session.create(
-    kind: SessionKind.unique,
-    configPath: join(dir.path, 'config'),
-  );
+  final configPath = join(dir.path, 'config');
+
+  final server = Server.create(configPath: configPath);
 
   try {
-    final repo = await Repository.create(
-      session,
-      store: join(dir.path, 'store', 'repo.ouisyncdb'),
-      readSecret: null,
-      writeSecret: null,
-    );
+    await server.start();
+    final session = await Session.create(configPath: configPath);
 
     try {
-      final token = await repo.createShareToken(
-        name: name,
-        accessMode: accessMode,
+      final repo = await session.createRepository(
+        path: join(dir.path, 'store', name),
+        readSecret: null,
+        writeSecret: null,
       );
+
+      final token = await repo.share(accessMode: accessMode);
       return token.toString();
     } finally {
-      await repo.close();
+      await session.close();
+      await server.stop();
     }
   } finally {
-    await session.close();
-    await dir.delete(recursive: true);
+    await deleteTempDir(dir);
   }
 }

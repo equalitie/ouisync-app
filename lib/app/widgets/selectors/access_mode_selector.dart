@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:ouisync/ouisync.dart';
 
 import '../../../generated/l10n.dart';
 import '../../utils/utils.dart';
+import '../../models/access_mode.dart';
 
 class AccessModeSelector extends StatefulWidget {
   const AccessModeSelector({
@@ -67,7 +67,7 @@ class _AccessModeSelectorState extends State<AccessModeSelector>
                 groupValue: _selectedMode,
                 toggleable: true,
                 onChanged: (current) async {
-                  loggy.app('Access mode: $current');
+                  loggy.debug('Access mode: $current');
 
                   if (!widget.availableAccessMode.contains(mode)) {
                     final message = S.current.messageAccessModeDisabled(

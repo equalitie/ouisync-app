@@ -1,14 +1,16 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync/ouisync.dart';
+import 'package:ouisync/ouisync.dart' show Session;
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../pages/peers_page.dart';
+import '../../utils/peer_addr.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 import 'settings_section.dart';
@@ -139,22 +141,38 @@ class NetworkSection extends SettingsSection {
         _buildConnectivityInfoTile(
           S.current.labelTcpListenerEndpointV4,
           Icons.computer,
-          (state) => state.tcpListenerV4,
+          (state) => _findListenerAddr(
+            state.listenerAddrs,
+            PeerProto.tcp,
+            InternetAddressType.IPv4,
+          ),
         ),
         _buildConnectivityInfoTile(
           S.current.labelTcpListenerEndpointV6,
           Icons.computer,
-          (state) => state.tcpListenerV6,
+          (state) => _findListenerAddr(
+            state.listenerAddrs,
+            PeerProto.tcp,
+            InternetAddressType.IPv6,
+          ),
         ),
         _buildConnectivityInfoTile(
           S.current.labelQuicListenerEndpointV4,
           Icons.computer,
-          (state) => state.quicListenerV4,
+          (state) => _findListenerAddr(
+            state.listenerAddrs,
+            PeerProto.quic,
+            InternetAddressType.IPv4,
+          ),
         ),
         _buildConnectivityInfoTile(
           S.current.labelQuicListenerEndpointV6,
           Icons.computer,
-          (state) => state.quicListenerV6,
+          (state) => _findListenerAddr(
+            state.listenerAddrs,
+            PeerProto.quic,
+            InternetAddressType.IPv6,
+          ),
         ),
         _buildAddressTile(
           S.current.labelExternalIPv4,
@@ -327,3 +345,11 @@ String _natBehaviorText(NatBehavior nat) => switch (nat) {
       NatBehavior.addressAndPortDependent => 'Address and port dependent',
       NatBehavior.unknown => 'Unknown'
     };
+
+String _findListenerAddr(
+        List<PeerAddr> addrs, PeerProto proto, InternetAddressType type) =>
+    addrs
+        .where((addr) => addr.proto == proto && addr.addr.type == type)
+        .map((addr) => addr.toString())
+        .firstOrNull ??
+    '';

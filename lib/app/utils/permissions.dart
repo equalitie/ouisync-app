@@ -67,7 +67,7 @@ class Permissions {
       final name = (_labels[permission]?.name)!;
 
       await Dialogs.alertDialogWithActions(
-        context: context,
+        context,
         title: S.current.titleRequiredPermission,
         body: [Text(name), Dimensions.spacingVerticalDouble, Text(message)],
         actions: actions,

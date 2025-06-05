@@ -10,7 +10,7 @@ import '../utils/utils.dart';
 
 const _iconSize = 20.0;
 const _iconPadding = 2.0;
-final _color = Colors.black.withOpacity(0.25);
+final _color = Colors.black.withAlpha(64);
 
 /// Widget that displays repository error and sync progress.
 class RepoStatus extends StatelessWidget {
@@ -40,13 +40,16 @@ class RepoProgressBuilder extends StatefulWidget {
 }
 
 class _RepoProgressBuilderState extends State<RepoProgressBuilder> {
-  late final Stream<Progress> stream = widget.repoCubit.syncProgressStream;
+  late final Stream<Progress> stream = widget.repoCubit.events
+      .throttle(Duration(milliseconds: 250), trailing: true)
+      .startWith(null)
+      .asyncMapSample((_) => widget.repoCubit.syncProgress);
 
   @override
   Widget build(BuildContext context) => StreamBuilder(
         stream: stream,
-        builder: (context, snapshot) =>
-            widget.builder(context, snapshot.data ?? Progress(0, 1)),
+        builder: (context, snapshot) => widget.builder(
+            context, snapshot.data ?? Progress(value: 0, total: 1)),
       );
 }
 
@@ -99,12 +102,10 @@ class _Error extends StatelessWidget {
         MountStateMounting() ||
         MountStateSuccess() =>
           SizedBox.shrink(),
-        MountStateError(code: final code, message: final message) =>
-          GestureDetector(
+        MountStateFailure(error: final error, stack: _) => GestureDetector(
             onTap: () => _showErrorDialog(
               context,
-              code,
-              message,
+              error.toString(),
             ),
             child: Icon(
               Icons.warning,
@@ -116,17 +117,11 @@ class _Error extends StatelessWidget {
 
   Future<void> _showErrorDialog(
     BuildContext context,
-    ErrorCode code,
     String message,
   ) =>
       Dialogs.simpleAlertDialog(
-        context: context,
+        context,
         title: 'Failed to mount the repository',
         message: 'Error: $message',
       );
-}
-
-extension _RepoCubitExtension on RepoCubit {
-  Stream<Progress> get syncProgressStream =>
-      events.startWith(null).asyncMapSample((_) => syncProgress);
 }

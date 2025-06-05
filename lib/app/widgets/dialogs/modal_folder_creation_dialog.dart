@@ -121,7 +121,7 @@ class FolderCreation extends HookWidget {
     if (!(formKey.currentState?.validate() ?? false)) return false;
 
     final newFolderPath = repo_path.join(parent, newName);
-    if (await cubit.exists(newFolderPath)) {
+    if (await cubit.entryExists(newFolderPath)) {
       errorMessage.value = S.current.messageEntryAlreadyExist(newName);
       return false;
     } else {
@@ -139,8 +139,7 @@ class FolderCreation extends HookWidget {
       [
         NegativeButton(
             text: S.current.actionCancel,
-            onPressed: () async => await Navigator.of(context).maybePop(''),
-            buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton),
+            onPressed: () async => await Navigator.of(context).maybePop('')),
         PositiveButton(
           text: S.current.actionCreate,
           onPressed: () async => await _onCreateButtonPress(
@@ -148,7 +147,6 @@ class FolderCreation extends HookWidget {
             parent: parent,
             newFolderName: nameController.text,
           ),
-          buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
           focusNode: positiveButtonFocus,
         )
       ];

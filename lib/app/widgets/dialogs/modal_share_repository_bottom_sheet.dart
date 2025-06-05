@@ -60,7 +60,8 @@ class _ShareRepositoryState extends State<ShareRepository> with AppLogger {
 
     return Container(
         alignment: AlignmentDirectional.bottomCenter,
-        padding: Dimensions.paddingBottomSheet,
+        padding:
+            MediaQuery.paddingOf(context).add(Dimensions.paddingBottomSheet),
         child: SingleChildScrollView(
             controller: scrollController,
             child: Column(

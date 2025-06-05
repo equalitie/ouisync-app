@@ -7,28 +7,20 @@ import 'cubits.dart' show CubitActions;
 class NavigationState {
   final RepoLocation? repoLocation;
   final String path;
-  final bool isFolder;
 
   NavigationState({
     required this.repoLocation,
     required this.path,
-    required this.isFolder,
   });
 }
 
 class NavigationCubit extends Cubit<NavigationState>
     with AppLogger, CubitActions {
-  NavigationCubit()
-      : super(NavigationState(
-          repoLocation: null,
-          path: '',
-          isFolder: false,
-        ));
+  NavigationCubit() : super(NavigationState(repoLocation: null, path: ''));
 
-  void current(RepoLocation repoLocation, String path, bool isFolder) =>
+  void current(RepoLocation repoLocation, String path) =>
       emitUnlessClosed(NavigationState(
         repoLocation: repoLocation,
         path: path,
-        isFolder: isFolder,
       ));
 }

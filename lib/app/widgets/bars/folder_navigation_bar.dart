@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../utils/extensions.dart';
+import '../widgets.dart';
 
 import '../../cubits/cubits.dart';
 import '../../utils/repo_path.dart' as repo_path;
@@ -21,7 +23,7 @@ class FolderNavigationBar extends StatelessWidget {
           Expanded(
             child: Row(
               children: [
-                Expanded(child: _currentLocationBar(path)),
+                Expanded(child: _currentLocationBar(context, path)),
               ],
             ),
           ),
@@ -30,9 +32,12 @@ class FolderNavigationBar extends StatelessWidget {
     );
   }
 
-  Widget _currentLocationBar(String path) {
+  Widget _currentLocationBar(BuildContext context, String path) {
     final current = repo_path.basename(path);
     String separator = Strings.root;
+
+    final parentColor =
+        context.theme.primaryTextTheme.titleMedium?.color ?? Colors.transparent;
 
     return Row(
       children: [
@@ -41,11 +46,9 @@ class FolderNavigationBar extends StatelessWidget {
         Expanded(
           child: Padding(
             padding: EdgeInsets.only(left: 12.0, right: 12.0),
-            child: Text(
-              current,
-              maxLines: 1,
-              softWrap: true,
-              overflow: TextOverflow.ellipsis,
+            child: ScrollableTextWidget(
+              child: Text(current),
+              parentColor: parentColor,
             ),
           ),
         ),

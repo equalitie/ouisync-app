@@ -11,8 +11,6 @@ icons_launcher:
       enable: true
       image_path: 'assets/Ouisync_v1_1560x1553.png'
     windows:
-      enable: true
-      image_path: 'assets/Ouisync_v1_1560x1553.png'
+      enable: false
     linux:
-      enable: true
-      image_path: 'assets/Ouisync_v1_1560x1553.png'
+      enable: false

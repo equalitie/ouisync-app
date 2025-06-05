@@ -4,6 +4,7 @@ import 'dart:io' as io;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
+import 'package:hex/hex.dart';
 import 'package:locale_names/locale_names.dart';
 import 'package:ouisync/ouisync.dart';
 import 'package:path/path.dart';
@@ -30,11 +31,9 @@ import '../../utils/utils.dart'
         AppThemeExtension,
         Constants,
         Dialogs,
-        Dimensions,
         dumpAll,
         Fields,
         formatSize,
-        Settings,
         ThemeGetter;
 import '../widgets.dart' show InfoBuble, NegativeButton, PositiveButton;
 import 'app_version_tile.dart';
@@ -95,14 +94,12 @@ class AboutSection extends SettingsSection with AppLogger {
           ),
         ),
       NavigationTile(
-          title: Text(S.current.titleApplicationLanguage, style: bodyStyle),
-          leading: Icon(Icons.language_rounded),
-          value: Text(currentLanguage.toString(),
-              style: context.theme.appTextStyle.bodySmall),
-          onTap: () async => await _navigateToLanguagePicker(
-                context,
-                reposCubit.settings,
-              )),
+        title: Text(S.current.titleApplicationLanguage, style: bodyStyle),
+        leading: Icon(Icons.language_rounded),
+        value: Text(currentLanguage.toString(),
+            style: context.theme.appTextStyle.bodySmall),
+        onTap: () => _navigateToLanguagePicker(context),
+      ),
       NavigationTile(
           title: Text(S.current.titleFAQShort, style: bodyStyle),
           leading: Icon(Icons.question_answer_rounded),
@@ -146,7 +143,7 @@ class AboutSection extends SettingsSection with AppLogger {
         onTap: () => unawaited(launchUrl(Uri.parse(Constants.issueTrackerUrl))),
       ),
       AppVersionTile(
-        session: reposCubit.session,
+        session: session,
         upgradeExists: upgradeExists,
         leading: Icon(Icons.info_rounded),
         title: Text(S.current.labelAppVersion, style: bodyStyle),
@@ -174,10 +171,7 @@ class AboutSection extends SettingsSection with AppLogger {
   @override
   bool containsErrorNotification() => upgradeExists.state;
 
-  Future<void> _navigateToLanguagePicker(
-    BuildContext context,
-    Settings settings,
-  ) async {
+  Future<void> _navigateToLanguagePicker(BuildContext context) async {
     await Navigator.of(context).push<Locale>(
       MaterialPageRoute(
         builder: (_) => LanguagePicker(
@@ -275,13 +269,15 @@ class AboutSection extends SettingsSection with AppLogger {
     await FlutterEmailSender.send(email);
   }
 
-  Widget _getRuntimeIdForOS() => FutureBuilder(
-      future: reposCubit.session.thisRuntimeId,
+  Widget _getRuntimeIdForOS() => FutureBuilder<PublicRuntimeId>(
+      future: session.getRuntimeId(),
       builder: (context, snapshot) {
-        final runtimeId = snapshot.data ?? '';
-        final runtimeIdWidget = Text(runtimeId,
-            overflow: TextOverflow.ellipsis,
-            style: context.theme.appTextStyle.bodySmall);
+        final runtimeId = snapshot.data;
+        final runtimeIdWidget = Text(
+          runtimeId != null ? HEX.encode(runtimeId.value) : '',
+          overflow: TextOverflow.ellipsis,
+          style: context.theme.appTextStyle.bodySmall,
+        );
 
         if (io.Platform.isIOS) {
           return Expanded(
@@ -329,13 +325,11 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                 text: S.current.actionCancel,
                 onPressed: () async =>
                     await Navigator.of(context).maybePop(null),
-                buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
               ),
               PositiveButton(
                 text: S.current.actionOK,
                 onPressed: () async =>
                     await Navigator.of(context).maybePop(attachments),
-                buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
               )
             ])
           ]);

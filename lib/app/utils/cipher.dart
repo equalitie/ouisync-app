@@ -1,74 +1,38 @@
-import 'dart:math';
-import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:cryptography/cryptography.dart';
-export 'package:cryptography/cryptography.dart' show SecretKey;
-import 'package:cryptography_flutter/cryptography_flutter.dart';
+import 'package:cryptography_plus/cryptography_plus.dart'
+    show Chacha20, SecretBox, SecretBoxAuthenticationError, SecretKeyData;
 
-class Cipher {
-  final FlutterChacha20 _algorithm;
-  final SecretKey secretKey;
+final _algorithm = Chacha20.poly1305Aead();
 
-  static FlutterChacha20 newAlgorithm() => FlutterChacha20.poly1305Aead();
+typedef SecretKey = SecretKeyData;
 
-  Cipher(this.secretKey) : _algorithm = newAlgorithm();
+SecretKey randomSecretKey() =>
+    SecretKeyData.random(length: _algorithm.secretKeyLength);
 
-  static Future<Cipher> newWithRandomKey() async {
-    final algorithm = FlutterChacha20.poly1305Aead();
-    final key = await algorithm.newSecretKey();
-    return Cipher.newFromKeyAndAlgorithm(key, algorithm);
-  }
+Future<Uint8List> encrypt(SecretKey secretKey, Uint8List plainData) async {
+  final secretBox = await _algorithm.encrypt(plainData, secretKey: secretKey);
+  return secretBox.concatenation();
+}
 
-  static SecretKeyData randomSecretKey(FlutterChacha20 algorithm) {
-    return SecretKeyData.random(
-      length: algorithm.secretKeyLength,
-      random: Random.secure(),
+Future<Uint8List?> decrypt(
+  SecretKey secretKey,
+  Uint8List encryptedData,
+) async {
+  final nonceLength = _algorithm.nonceLength;
+  final macLength = _algorithm.macAlgorithm.macLength;
+
+  final box = SecretBox.fromConcatenation(
+    encryptedData,
+    nonceLength: nonceLength,
+    macLength: macLength,
+  );
+
+  try {
+    return Uint8List.fromList(
+      await _algorithm.decrypt(box, secretKey: secretKey),
     );
-  }
-
-  Cipher.newFromKeyAndAlgorithm(this.secretKey, this._algorithm);
-
-  Future<String> encrypt(String data) async {
-    return await encryptBytes(utf8.encode(data));
-  }
-
-  Future<String> encryptBytes(Uint8List data) async {
-    final secretBox = await _algorithm.encrypt(data, secretKey: secretKey);
-
-    final encryptedBytes = secretBox.concatenation();
-    final encryptedData = base64Encode(encryptedBytes);
-
-    return encryptedData;
-  }
-
-  Future<String?> decrypt(String encryptedData) async {
-    final secretBox = _boxFromString(encryptedData);
-
-    try {
-      return await _algorithm.decryptString(secretBox, secretKey: secretKey);
-    } on SecretBoxAuthenticationError {
-      return null;
-    }
-  }
-
-  Future<Uint8List?> decryptBytes(String encryptedData) async {
-    final secretBox = _boxFromString(encryptedData);
-
-    try {
-      return Uint8List.fromList(
-          await _algorithm.decrypt(secretBox, secretKey: secretKey));
-    } on SecretBoxAuthenticationError {
-      return null;
-    }
-  }
-
-  SecretBox _boxFromString(String box) {
-    final nonceLength = _algorithm.nonceLength;
-    final macLength = _algorithm.macAlgorithm.macLength;
-    final encryptedDataBytes = base64Decode(box);
-
-    return SecretBox.fromConcatenation(encryptedDataBytes,
-        nonceLength: nonceLength, macLength: macLength);
+  } on SecretBoxAuthenticationError {
+    return null;
   }
 }

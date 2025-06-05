@@ -2,57 +2,98 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 
-import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:connectivity_plus_platform_interface/connectivity_plus_platform_interface.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:loggy/loggy.dart';
 import 'package:ouisync_app/app/cubits/locale.dart';
 import 'package:ouisync_app/app/cubits/mount.dart';
-import 'package:ouisync_app/app/cubits/power_control.dart';
 import 'package:ouisync_app/app/cubits/repos.dart';
 import 'package:ouisync_app/app/pages/main_page.dart';
-import 'package:ouisync_app/app/utils/cache_servers.dart';
-import 'package:ouisync_app/app/utils/master_key.dart';
-import 'package:ouisync_app/app/utils/mounter.dart';
-import 'package:ouisync_app/app/utils/platform/platform_window_manager.dart';
-import 'package:ouisync_app/app/utils/settings/settings.dart';
+import 'package:ouisync_app/app/utils/dirs.dart';
+import 'package:ouisync_app/app/utils/platform/platform.dart';
+import 'package:ouisync_app/app/utils/random.dart';
+import 'package:ouisync_app/app/utils/utils.dart'
+    show CacheServers, MasterKey, Settings, appLogger;
 import 'package:ouisync_app/generated/l10n.dart';
-import 'package:ouisync/native_channels.dart';
-import 'package:ouisync/ouisync.dart' show Session, SessionKind;
+import 'package:ouisync/ouisync.dart'
+    show Session, SetLocalSecretKeyAndSalt, Server;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:stack_trace/stack_trace.dart';
+export 'package:flutter/foundation.dart' show debugPrint;
+
+final _loggy = appLogger("TestHelper");
 
 /// Setup the test environment and run `callback` inside it.
 ///
 /// This can be applied automatically using `flutter_test_config.dart`.
 Future<void> testEnv(FutureOr<void> Function() callback) async {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  if (Platform.environment.containsKey("DEMANGLE_STACK")) {
+    // https://api.flutter.dev/flutter/foundation/FlutterError/demangleStackTrace.html
+    FlutterError.demangleStackTrace = (StackTrace stack) {
+      if (stack is Trace) {
+        return stack.vmTrace;
+      }
+      if (stack is Chain) {
+        return stack.toTrace().vmTrace;
+      }
+      return stack;
+    };
+  }
+
+  Loggy.initLoggy();
+
   late Directory tempDir;
   late BlocObserver origBlocObserver;
 
   setUp(() async {
     origBlocObserver = Bloc.observer;
 
-    final dir = await Directory.systemTemp.createTemp();
-    PathProviderPlatform.instance = _FakePathProviderPlatform(dir);
-    SharedPreferences.setMockInitialValues({});
+    tempDir = await Directory.systemTemp.createTemp();
 
-    tempDir = dir;
+    final platformDir = Directory(join(tempDir.path, 'platform'));
+    await platformDir.create();
+    PathProviderPlatform.instance = _FakePathProviderPlatform(platformDir);
+
+    final shared = Directory(join(tempDir.path, 'shared')).create();
+    final mount = Directory(join(tempDir.path, 'mount')).create();
+    final native =
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+    native.setMockMethodCallHandler(
+      MethodChannel('org.equalitie.ouisync/native'),
+      (call) async {
+        switch (call.method) {
+          case 'getSharedDir':
+            return (await shared).path;
+          case 'getMountRootDirectory':
+            return (await mount).path;
+          default:
+            throw PlatformException(
+                code: 'OS06',
+                message: 'Method "${call.method}" not exported by host');
+        }
+      },
+    );
+
+    ConnectivityPlatform.instance = _FakeConnectivityPlatform();
+
+    // TODO: add mock for 'org.equalitie.ouisync/backend' once the tests are updated to use channels
+
+    SharedPreferences.setMockInitialValues({});
   });
 
   tearDown(() async {
     Bloc.observer = origBlocObserver;
-
-    try {
-      await tempDir.delete(recursive: true);
-    } on PathAccessException catch (_) {
-      // This sometimes happen on the CI on windows. It seems to be caused by another process
-      // accessing the temp directory for some reason. It probably doesn't indicate a problem in
-      // the code under test so it should be safe to ignore it.
-    }
+    await deleteTempDir(tempDir);
   });
 
   await callback();
@@ -61,52 +102,47 @@ Future<void> testEnv(FutureOr<void> Function() callback) async {
 /// Helper to setup and teardown common widget test dependencies
 class TestDependencies {
   TestDependencies._(
+    this.server,
     this.session,
     this.settings,
-    this.nativeChannels,
-    this.powerControl,
     this.reposCubit,
     this.mountCubit,
     this.localeCubit,
+    this.dirs,
   );
 
   static Future<TestDependencies> create() async {
-    final configPath = join(
-      (await getApplicationSupportDirectory()).path,
-      'config',
-    );
+    final appDir = await getApplicationSupportDirectory();
+    await appDir.create(recursive: true);
 
-    final session = Session.create(
-      kind: SessionKind.unique,
-      configPath: configPath,
-    );
+    final dirs = Dirs(root: appDir.path);
+
+    final server = Server.create(configPath: dirs.config)
+      ..initLog(stdout: true);
+    await server.start();
+
+    final session = await Session.create(configPath: dirs.config);
+
+    await session.setStoreDir(dirs.defaultStore);
 
     final settings = await Settings.init(MasterKey.random());
-    final nativeChannels = NativeChannels(session);
-    final powerControl = PowerControl(
-      session,
-      settings,
-      connectivity: FakeConnectivity(),
-    );
     final reposCubit = ReposCubit(
-      cacheServers: CacheServers.disabled,
-      nativeChannels: nativeChannels,
+      cacheServers: CacheServers(session),
       session: session,
       settings: settings,
-      mounter: Mounter(session),
     );
 
-    final mountCubit = MountCubit(reposCubit.mounter);
+    final mountCubit = MountCubit(session, dirs);
     final localeCubit = LocaleCubit(settings);
 
     return TestDependencies._(
+      server,
       session,
       settings,
-      nativeChannels,
-      powerControl,
       reposCubit,
       mountCubit,
       localeCubit,
+      dirs,
     );
   }
 
@@ -114,8 +150,8 @@ class TestDependencies {
     await localeCubit.close();
     await mountCubit.close();
     await reposCubit.close();
-    await powerControl.close();
     await session.close();
+    await server.stop();
   }
 
   MainPage createMainPage({
@@ -124,23 +160,31 @@ class TestDependencies {
       MainPage(
         localeCubit: localeCubit,
         mountCubit: mountCubit,
-        nativeChannels: nativeChannels,
         packageInfo: fakePackageInfo,
-        powerControl: powerControl,
         receivedMedia: receivedMedia ?? Stream.empty(),
         reposCubit: reposCubit,
         session: session,
         settings: settings,
         windowManager: FakeWindowManager(),
+        dirs: dirs,
       );
 
+  final Server server;
   final Session session;
   final Settings settings;
-  final NativeChannels nativeChannels;
-  final PowerControl powerControl;
   final ReposCubit reposCubit;
   final MountCubit mountCubit;
   final LocaleCubit localeCubit;
+  final Dirs dirs;
+}
+
+class _FakeConnectivityPlatform extends ConnectivityPlatform {
+  @override
+  final Stream<List<ConnectivityResult>> onConnectivityChanged = Stream.empty();
+
+  @override
+  Future<List<ConnectivityResult>> checkConnectivity() =>
+      Future.value([ConnectivityResult.none]);
 }
 
 class _FakePathProviderPlatform extends PathProviderPlatform {
@@ -182,16 +226,6 @@ class FakeWindowManager extends PlatformWindowManager {
 
   @override
   Future<void> initSystemTray() => Future.value();
-}
-
-/// Fake Connectivity
-class FakeConnectivity implements Connectivity {
-  @override
-  final Stream<List<ConnectivityResult>> onConnectivityChanged = Stream.empty();
-
-  @override
-  Future<List<ConnectivityResult>> checkConnectivity() =>
-      Future.value([ConnectivityResult.none]);
 }
 
 /// Fake PackageInfo
@@ -278,10 +312,16 @@ extension WidgetTesterExtension on WidgetTester {
   /// details.
   ///
   /// This Code is taken from https://github.com/flutter/flutter/issues/129623.
-  Future<void> takeScreenshot([String name = 'screenshot']) async {
+  Future<void> takeScreenshot(
+      {String name = 'screenshot', Element? element}) async {
     try {
-      final finder = find.bySubtype<Widget>().first;
-      final image = await captureImage(finder.evaluate().single);
+      if (element == null) {
+        // If no element is given, take the screenshot of the topmost widget.
+        final finder = find.bySubtype<Widget>().first;
+        element = finder.evaluate().single;
+      }
+
+      final image = await captureImage(element);
       final bytes = (await image.toByteData(format: ImageByteFormat.png))!
           .buffer
           .asUint8List();
@@ -289,13 +329,90 @@ extension WidgetTesterExtension on WidgetTester {
       final path = join(_testDirPath, 'screenshots', '$name.png');
 
       await Directory(dirname(path)).create(recursive: true);
-
-      debugPrint('screenshot saved to $path');
-
       await File(path).writeAsBytes(bytes);
+
+      _loggy.info('screenshot saved to $path');
     } catch (e) {
-      debugPrint('Failed to save screenshot: $e');
+      _loggy.error('Failed to save screenshot: $e');
     }
+  }
+
+  // This is useful to observe the screen when things are still moving.
+  Future<void> takeNScreenshots(int n, String name) async {
+    assert(n > 0 && n < 1000); // sanity
+    for (int i = 0; i < n; i++) {
+      await takeScreenshot(name: "$name-$i");
+      await pump(Duration(milliseconds: 200));
+      await Future.delayed(Duration(milliseconds: 200));
+    }
+  }
+
+  // Invoke this somewhere at the beginning of a test so that the above
+  // `takeScreenshot` renders normal fonts instead of squares.
+  Future<void> loadFonts() async {
+    // TODO: Path on other platforms.
+    final fontFile = File(
+        '/usr/lib/ouisync/data/flutter_assets/packages/golden_toolkit/fonts/Roboto-Regular.ttf');
+
+    if (!(await fontFile.exists())) {
+      _loggy.error(
+          "Failed to load fonts, the file ${fontFile.path} does not exist");
+      return;
+    }
+
+    final fontData = fontFile
+        .readAsBytes()
+        .then((bytes) => ByteData.view(Uint8List.fromList(bytes).buffer));
+
+    final fontLoader = FontLoader('Roboto')..addFont(fontData);
+    await fontLoader.load();
+  }
+
+  // A workaround for the issue with pumpAndSettle as described here
+  // https://stackoverflow.com/questions/67186472/error-pumpandsettle-timed-out-maybe-due-to-riverpod
+  Future<Finder> pumpUntilFound(Finder finder,
+      {Duration? timeout, Duration? pumpTime}) async {
+    final found = await pumpUntilNonNull(
+        () => finder.tryEvaluate() ? finder : null,
+        timeout: timeout,
+        pumpTime: pumpTime);
+    // Too often when the above first finds a widget it's outside of the screen
+    // area and tapping on it would generate a warning. After this
+    // `pumpAndSettle` the widget finds its place inside the screen.
+    await pumpAndSettle();
+    return found;
+  }
+
+  Future<void> pumpUntil(bool Function() predicate,
+      {Duration? timeout, Duration? pumpTime}) async {
+    await pumpUntilNonNull(() => predicate() ? true : null,
+        timeout: timeout, pumpTime: pumpTime);
+    return;
+  }
+
+  Future<T> pumpUntilNonNull<T>(T? Function() f,
+      {Duration? timeout, Duration? pumpTime}) async {
+    timeout ??= Duration(seconds: 5);
+    pumpTime ??= Duration(milliseconds: 100);
+
+    final stopwatch = Stopwatch();
+    stopwatch.start();
+
+    while (stopwatch.elapsed <= timeout) {
+      // Hack: it seems the `pump` function "pumps" only when something is
+      // moving on the screen, so this delay is needed when we're waiting for
+      // async actions which don't generate any GUI changes.
+      await Future.delayed(pumpTime);
+
+      final retval = f();
+      if (retval != null) {
+        return retval;
+      }
+
+      await pump(pumpTime);
+    }
+
+    throw "pumpUntilNotNull timeout";
   }
 }
 
@@ -311,6 +428,25 @@ extension BlocBaseExtension<State> on BlocBase<State> {
     }
 
     await stream.where(f).timeout(timeout).first;
+  }
+}
+
+SetLocalSecretKeyAndSalt randomSetLocalSecret() =>
+    SetLocalSecretKeyAndSalt(key: randomSecretKey(), salt: randomSalt());
+
+Future<void> deleteTempDir(Directory dir) async {
+  try {
+    await dir.delete(recursive: true);
+  } on PathAccessException {
+    // This sometimes happens on the CI on windows. It seems to be caused by another process
+    // accessing the temp directory for some reason. It probably doesn't indicate a problem in
+    // the code under test so it should be safe to ignore it.
+  } on PathNotFoundException {
+    // This shouldn't happen but it still sometimes does. Unknown why. It doesn't really affect
+    // the tests so we ignore it.
+  } catch (exception) {
+    _loggy.error("Exception during temporary directory removal: $exception");
+    rethrow;
   }
 }
 

@@ -1,23 +1,22 @@
 import 'dart:async';
 
-import 'package:ouisync/state_monitor.dart';
+import 'package:ouisync/ouisync.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'utils.dart';
 
 class StateMonitorCubit extends Cubit<StateMonitorNode?> with CubitActions {
   final StateMonitor _monitor;
-  final Subscription _subscription;
 
-  StateMonitorCubit(this._monitor)
-      : _subscription = _monitor.subscribe(),
-        super(null) {
+  StateMonitorCubit(this._monitor) : super(null) {
     unawaited(_init());
   }
+
+  bool get isRoot => _monitor.isRoot;
 
   Future<void> _init() async {
     await _load();
 
-    await for (final _ in _subscription.stream) {
+    await for (final _ in _monitor.changes) {
       await _load();
     }
   }
@@ -27,12 +26,6 @@ class StateMonitorCubit extends Cubit<StateMonitorNode?> with CubitActions {
     emitUnlessClosed(node);
   }
 
-  @override
-  Future<void> close() async {
-    await _subscription.close();
-    await super.close();
-  }
-
   StateMonitorCubit child(MonitorId id) =>
       StateMonitorCubit(_monitor.child(id));
 }
@@ -40,18 +33,15 @@ class StateMonitorCubit extends Cubit<StateMonitorNode?> with CubitActions {
 class StateMonitorIntCubit extends Cubit<int?> with CubitActions {
   final StateMonitor _monitor;
   final String _name;
-  final Subscription _subscription;
 
-  StateMonitorIntCubit(this._monitor, this._name)
-      : _subscription = _monitor.subscribe(),
-        super(null) {
+  StateMonitorIntCubit(this._monitor, this._name) : super(null) {
     unawaited(_init());
   }
 
   Future<void> _init() async {
     await _load();
 
-    await for (final _ in _subscription.stream) {
+    await for (final _ in _monitor.changes) {
       await _load();
     }
   }
@@ -59,11 +49,5 @@ class StateMonitorIntCubit extends Cubit<int?> with CubitActions {
   Future<void> _load() async {
     final node = await _monitor.load();
     emitUnlessClosed(node?.parseIntValue(_name));
-  }
-
-  @override
-  Future<void> close() async {
-    await _subscription.close();
-    await super.close();
   }
 }

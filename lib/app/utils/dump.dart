@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:archive/archive_io.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
-import 'package:ouisync/state_monitor.dart';
+import 'package:ouisync/ouisync.dart' show MonitorId, StateMonitor;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -49,10 +49,7 @@ Future<File> dumpAll(
     sink.writeln("externalAddressV4: ${connInfo.externalAddressV4}");
     sink.writeln("externalAddressV6: ${connInfo.externalAddressV6}");
     sink.writeln("NAT type: $natType");
-    sink.writeln("tcpListenerV4:  ${connInfo.tcpListenerV4}");
-    sink.writeln("tcpListenerV6:  ${connInfo.tcpListenerV6}");
-    sink.writeln("quicListenerV4: ${connInfo.quicListenerV4}");
-    sink.writeln("quicListenerV6: ${connInfo.quicListenerV6}");
+    sink.writeln("listenerAddrs:  ${connInfo.listenerAddrs}");
 
     sink.writeln(
         "\n\n------------------------- State Monitor -------------------------\n\n");
@@ -87,11 +84,11 @@ Future<void> _dumpStateMonitor(
 ) async {
   final node = await monitor.load();
 
-  final pad = '  ' * depth;
   if (node == null) {
-    sink.writeln("${pad}null");
     return;
   }
+
+  final pad = '  ' * depth;
 
   for (MapEntry e in node.values.entries) {
     sink.writeln("$pad${e.key}: ${e.value}");

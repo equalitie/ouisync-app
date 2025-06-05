@@ -23,7 +23,7 @@ import 'dart:async';
 //   while (true) {
 //     switch (await receiver.receive()) {
 //       case Value(value: final i):
-//         print("Last value from sender is $i");
+//         // Last value from sender is $i
 //         break;
 //       case Closed():
 //         return;

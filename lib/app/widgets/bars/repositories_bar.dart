@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync/ouisync.dart';
-import '../notification_badge.dart';
-import '../throughput_display.dart';
+import 'package:ouisync/ouisync.dart' show Stats;
 import 'package:stream_transform/stream_transform.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../models/models.dart';
 import '../../utils/utils.dart';
-import '../repo_status.dart';
+import '../notification_badge.dart';
+import '../widgets.dart';
 
 class RepositoriesBar extends StatelessWidget
     with AppLogger
@@ -30,38 +29,46 @@ class RepositoriesBar extends StatelessWidget
   final UpgradeExistsCubit upgradeExists;
 
   @override
-  Widget build(BuildContext context) => reposCubit.builder((state) {
-        if (reposCubit.isLoading || reposCubit.showList) {
-          return SizedBox.shrink();
-        }
+  Widget build(BuildContext context) => BlocBuilder<ReposCubit, ReposState>(
+        bloc: reposCubit,
+        builder: (context, state) {
+          if (state.isLoading || state.current == null) {
+            return SizedBox.shrink();
+          }
 
-        return Row(
-          children: [
-            _buildBackButton(),
-            _buildName(reposCubit.currentRepo),
-            _buildStats(context, reposCubit.currentRepo),
-            _buildStatus(reposCubit.currentRepo),
-            _buildLockButton(reposCubit.currentRepo),
-          ],
-        );
-      });
+          final current = state.current;
 
-  Widget _buildName(RepoEntry? repo) => Expanded(
-        child: Container(
-          padding: Dimensions.paddingItem,
-          child: Text(
-            repo?.name ?? S.current.messageNoRepos,
-            maxLines: 1,
-            softWrap: true,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
+          return Row(
+            children: [
+              _buildBackButton(),
+              _buildName(context, current),
+              _buildStats(context, current),
+              _buildStatus(current),
+              _buildLockButton(current),
+            ],
+          );
+        },
       );
+
+  Widget _buildName(BuildContext context, RepoEntry? repo) {
+    final parentColor =
+        context.theme.primaryTextTheme.titleMedium?.color ?? Colors.transparent;
+
+    return Expanded(
+      child: Container(
+        padding: Dimensions.paddingItem,
+        child: ScrollableTextWidget(
+          child: Text(repo?.name ?? S.current.messageNoRepos),
+          parentColor: parentColor,
+        ),
+      ),
+    );
+  }
 
   Widget _buildStats(BuildContext context, RepoEntry? repo) =>
       repo is OpenRepoEntry
           ? Padding(
-              padding: EdgeInsetsDirectional.only(end: 10.0),
+              padding: EdgeInsets.only(right: 10.0),
               child: LiveThroughputDisplay(
                 _repoStatsStream(repo.cubit),
                 size: Theme.of(context).textTheme.labelSmall?.fontSize,
@@ -72,7 +79,7 @@ class RepositoriesBar extends StatelessWidget
 
   Widget _buildStatus(RepoEntry? repo) => repo is OpenRepoEntry
       ? Padding(
-          padding: EdgeInsetsDirectional.only(end: 10.0),
+          padding: EdgeInsets.only(right: 10.0),
           child: RepoStatus(repo.cubit),
         )
       : SizedBox.shrink();
@@ -90,11 +97,12 @@ class RepositoriesBar extends StatelessWidget
   }
 
   Widget _buildLockButtonContent(RepoCubit? repoCubit) => IconButton(
+        key: Key('access-mode-button'),
         icon: Icon(
             Fields.accessModeIcon(repoCubit?.accessMode ?? AccessMode.blind)),
         iconSize: Dimensions.sizeIconSmall,
         onPressed: () => repoCubit?.lock(),
-        alignment: AlignmentDirectional.centerEnd,
+        alignment: Alignment.centerRight,
       );
 
   // TODO: Why does the badge appear to move quickly after entering this screen?
@@ -119,6 +127,6 @@ class RepositoriesBar extends StatelessWidget
   }
 }
 
-Stream<NetworkStats> _repoStatsStream(RepoCubit repoCubit) =>
+Stream<Stats> _repoStatsStream(RepoCubit repoCubit) =>
     Stream.periodic(Duration(seconds: 1))
         .asyncMapSample((_) => repoCubit.networkStats);

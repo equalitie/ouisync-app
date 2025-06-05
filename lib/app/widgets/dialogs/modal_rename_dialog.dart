@@ -185,8 +185,7 @@ class RenameEntry extends HookWidget with AppLogger {
 
     if (title.isEmpty) return true;
 
-    final continueAnyway = await Dialogs.alertDialogWithActions(
-        context: parentContext,
+    final continueAnyway = await Dialogs.alertDialogWithActions(parentContext,
         title: title,
         body: [
           Text(message)
@@ -212,7 +211,7 @@ class RenameEntry extends HookWidget with AppLogger {
     String newName,
   ) async {
     final newPath = p.join(parent, newName);
-    final exist = await repoCubit.exists(newPath);
+    final exist = await repoCubit.entryExists(newPath);
     if (exist) {
       _errorMessage.value = S.current.messageEntryAlreadyExist(newName);
       return false;
@@ -225,13 +224,11 @@ class RenameEntry extends HookWidget with AppLogger {
   List<Widget> _actions(BuildContext context) => [
         NegativeButton(
             text: S.current.actionCancel,
-            onPressed: () async => await Navigator.of(context).maybePop(''),
-            buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton),
+            onPressed: () async => await Navigator.of(context).maybePop('')),
         PositiveButton(
             text: S.current.actionRename,
             onPressed: () async =>
                 await _onSaved(context, parent, _newNameController.text),
-            buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
             focusNode: _positiveButtonFocus)
       ];
 

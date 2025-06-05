@@ -6,6 +6,8 @@ plugins {
     id "kotlin-android"
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id "dev.flutter.flutter-gradle-plugin"
+    id "com.starter.easylauncher" version "6.4.0"
+    id "com.diffplug.spotless" version "7.0.2"
 }
 
 def localProperties = new Properties()
@@ -14,7 +16,7 @@ rootProject.file("local.properties").withInputStream { localProperties.load(it) 
 android {
     namespace = "org.equalitie.ouisync"
 
-    compileSdk = 34
+    compileSdk = 35
     ndkVersion = '27.2.12479018'
 
     kotlin {
@@ -26,10 +28,6 @@ android {
         disable 'InvalidPackage'
     }
 
-    // Suffix to append to the application id, name and version. This allows installing multiple
-    // versions of the app on the same device (e.g., production and development).
-    def appSuffix = System.getenv("APP_SUFFIX") ?: localProperties.getProperty("app.suffix")
-
     def keystoreProperties = loadKeystorePropertiesFile(System.getenv('STORE_FILE') ?: localProperties['STORE_FILE'])
 
     defaultConfig {
@@ -39,17 +37,11 @@ android {
         resValue "string", "app_name", "Ouisync"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        minSdk = 26
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
         multiDexEnabled = true
-
-        if (appSuffix != null) {
-            applicationIdSuffix = ".$appSuffix"
-            versionNameSuffix = "-$appSuffix"
-            resValue "string", "app_name", "Ouisync $appSuffix"
-        }
     }
 
     signingConfigs {
@@ -65,23 +57,18 @@ android {
     productFlavors {
         production {
             dimension "releaseType"
-            applicationIdSuffix applicationIdSuffix
         }
         nightly {
             dimension "releaseType"
-            applicationIdSuffix appendUnlessNull(".nightly", applicationIdSuffix)
+            applicationIdSuffix ".nightly"
+            resValue "string", "app_name", "Ouisync nightly"
         }
         unofficial {
             dimension "releaseType"
-            applicationIdSuffix appendUnlessNull(".unofficial", applicationIdSuffix)
+            applicationIdSuffix ".unofficial"
+            resValue "string", "app_name", "Ouisync unofficial"
         }
     }
-
-    // Flutter building will exit with an incomprehensive error if the flavor
-    // is not specified. So in this function we do our own check if the
-    // --flavor parameter was used and tell the user that it needs to be set if
-    // it's not.
-    checkFlavorParameter(getCurrentFlavor(), productFlavors)
 
     buildTypes {
         release {
@@ -90,6 +77,11 @@ android {
             } else {
                 signingConfig signingConfigs.debug
             }
+
+            proguardFiles(
+                getDefaultProguardFile('proguard-android-optimize.txt'),
+                'proguard-rules.pro',
+            )
         }
 
         debug {
@@ -98,70 +90,81 @@ android {
     }
 }
 
-flutter {
-   source = "../.."
+// Generate launcher icons by invoking [icons_launcher](https://pub.dev/packages/icons_launcher)
+def isWindows = System.getProperty('os.name').toLowerCase().contains('windows')
+tasks.register("generateLauncherIcons", Exec) {
+    workingDir "${project.rootDir}/.."
+    // TODO: This generates icons for all platforms. Ideally we would restrict it to generate them
+    // only for android (and set it up separately in other platforms' respective build systems).
+    if (isWindows) {
+       commandLine 'cmd.exe', '/c', 'dart', 'run', 'icons_launcher:create'
+    } else {
+        commandLine 'dart', 'run', 'icons_launcher:create'
+    }
 }
 
-// Generate images in `android/src/main/res/mipmap-*/` based on those in `assets/
-task generateResourceImages() {
-    def images = [
-        "ic_launcher.png": [
-            "hdpi": "72x72",
-            "mdpi": "48x48",
-            "xhdpi": "96x96",
-            "xxhdpi": "144x144",
-            "xxxhdpi": "192x192",
-        ],
-        "ic_launcher_background.png": [
-            "hdpi": "162x162",
-            "mdpi": "108x108",
-            "xhdpi": "216x216",
-            "xxhdpi": "324x324",
-            "xxxhdpi": "432x432",
-        ],
-        "ic_launcher_foreground.png": [
-            "hdpi": "162x162",
-            "mdpi": "108x108",
-            "xhdpi": "216x216",
-            "xxhdpi": "324x324",
-            "xxxhdpi": "432x432",
-        ],
-        "ic_launcher_round.png": [
-            "hdpi": "72x72",
-            "mdpi": "48x48",
-            "xhdpi": "96x96",
-            "xxhdpi": "144x144",
-            "xxxhdpi": "192x192",
-        ],
-    ]
-
-    def imagemagick
-
-    def Os = org.apache.tools.ant.taskdefs.condition.Os
-
-    if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-        imagemagick = 'magick'
-    } else {
-        imagemagick = 'convert'
+afterEvaluate {
+    android.applicationVariants.each { variant ->
+        tasks.named("generate${variant.name.capitalize()}Assets") {
+            dependsOn "generateLauncherIcons"
+        }
     }
 
-    images.each { file, resolutions ->
-        resolutions.each { resName, dimensions ->
-            exec {
-                // TODO: With these `{in,out}put.file` lines I'd like gradle to not re-generate the output files
-                // if input files did not change, but changing the paths don't result in an error, so I'm not sure
-                // the lines do anything useful.
-                inputs.file "../../assets/$file"
-                outputs.file "src/main/res/mipmap-$resName/$file"
-                // PWD is `ouisync-app/android/app/`
-                commandLine imagemagick, "../../assets/$file", "-resize", dimensions, "src/main/res/mipmap-$resName/$file"
+    // Flutter building will exit with an incomprehensive error if the flavor is not specified. So
+    // we do our own check if the --flavor parameter was used and tell the user that it needs to be
+    // set if it's not.
+    //
+    // NOTE: We are injecting this check into the `preBuild` task which is (one of) the first tasks
+    // run during a build so that this check happens as soon as possible. Also this way it doesn't
+    // interfere with any non-build tasks (e.g. `clean` or `tasks`, ...).
+    tasks.named("preBuild") {
+        doFirst {
+            android.buildTypes.each { buildType ->
+                def unflavoredTaskName = "assemble${buildType.name.capitalize()}"
+
+                gradle.startParameter.taskNames.each { taskName ->
+                    if (taskName == unflavoredTaskName) {
+                        def flavors = android.productFlavors.collect { it.name }
+                        throw new GradleException("Missing '--flavor=${flavors.join('|')}' argument.")
+                    }
+                }
             }
         }
     }
 }
 
-gradle.projectsEvaluated {
-    preBuild.dependsOn('generateResourceImages')
+flutter {
+   source = "../.."
+}
+
+easylauncher {
+    defaultFlavorNaming true
+
+    productFlavors {
+        production {
+            enable false
+        }
+
+        nightly {
+            filters = [
+                customRibbon(position: "topRight", ribbonColor: "#FFE65100")
+            ]
+        }
+
+        unofficial {
+            filters = [
+                customRibbon(position: "topRight", ribbonColor: "#FF0D47A1")
+            ]
+        }
+    }
+}
+
+spotless {
+    kotlin {
+        target("**/*.kt")
+        ktfmt()
+        ktlint()
+    }
 }
 
 class SigningConfig {
@@ -177,13 +180,19 @@ def loadKeystorePropertiesFile(String keystorePropertiesPath) {
     }
     def properties = new Properties()
 
-    def proFile = rootProject.file(keystorePropertiesPath)
+    def propFile = rootProject.file(keystorePropertiesPath)
 
-    if (!proFile.exists()) {
-        return null
+    if (!propFile.exists()) {
+        throw new GradleException("The keystore properties file does not exist: ${keystorePropertiesPath}");
     }
 
-    proFile.withInputStream { properties.load(it) }
+    propFile.withInputStream { properties.load(it) }
+
+    def storeFile = file(properties['storeFile']);
+
+    if (!storeFile.exists()) {
+        throw new GradleException("The store file does not exist: ${storeFile.getPath()}");
+    }
 
     def config = new SigningConfig(
         keyAlias: properties['keyAlias'],
@@ -193,36 +202,6 @@ def loadKeystorePropertiesFile(String keystorePropertiesPath) {
     )
 
     return config
-}
-
-// Check if the user provided the `--flavor=` argument.
-def checkFlavorParameter(String currentFlavor, availableFlavors) {
-    def availableFlavorNames = availableFlavors.collect { it.name }
-
-    if (currentFlavor == null) {
-        if (availableFlavors.empty) {
-            return
-        }
-        throw new GradleException("Missing '--flavor=${availableFlavorNames}' argument.")
-    }
-
-    if (!availableFlavorNames.contains(currentFlavor)) {
-        throw new GradleException("Unrecognized flavor '${currentFlavor}'. Use one from ${availableFlavorNames}.")
-    }
-}
-
-// Return the current flavor or null.
-def getCurrentFlavor() {
-    String taskRequests = gradle.startParameter.taskRequests.toString()
-
-    Pattern pattern = Pattern.compile("(assemble|bundle)(\\w+)(Release|Debug)")
-    Matcher matcher = pattern.matcher(taskRequests)
-
-    if (matcher.find()) {
-        return matcher.group(2).toLowerCase()
-    } else {
-        return null
-    }
 }
 
 def appendUnlessNull(String s1, String s2) {

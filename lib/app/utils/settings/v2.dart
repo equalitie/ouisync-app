@@ -1,15 +1,10 @@
 import 'dart:convert';
-import 'dart:io' as io;
 import 'dart:ui' show Locale;
 
-import 'package:path/path.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../models/models.dart';
-import '../master_key.dart';
 import '../utils.dart';
-import '../option.dart';
 import 'atomic_shared_prefs_settings_key.dart';
 import 'v1.dart' as v1;
 
@@ -134,9 +129,7 @@ class Settings with AppLogger {
         atomicSharedPrefsSettingsKey, json.encode(_root.toJson()));
   }
 
-  static Future<Settings> init(
-    MasterKey masterKey,
-  ) async {
+  static Future<Settings> init(MasterKey masterKey) async {
     final prefs = await SharedPreferences.getInstance();
 
     final json = prefs.getString(atomicSharedPrefsSettingsKey);
@@ -276,14 +269,6 @@ class Settings with AppLogger {
   }
 
   //------------------------------------------------------------------
-  Future<io.Directory> getDefaultRepositoriesDir() async {
-    final baseDir =
-        (io.Platform.isAndroid ? await getExternalStorageDirectory() : null) ??
-            await getApplicationSupportDirectory();
-    return io.Directory(join(baseDir.path, Constants.folderRepositoriesName));
-  }
-
-  //------------------------------------------------------------------
 
   SettingsLocale? getLocale() => _root.locale;
 
@@ -297,16 +282,16 @@ class Settings with AppLogger {
 
   //------------------------------------------------------------------
 
-  void debugPrint() {
-    print("============== Settings ===============");
+  void debugSettings() {
+    loggy.debug("============== Settings ===============");
     for (final kv in _root.repos.entries) {
-      print("=== ${kv.key}");
+      loggy.debug("=== ${kv.key}");
     }
-    print("=======================================");
+    loggy.debug("=======================================");
   }
 }
 
-class InvalidSettingsVersion {
+class InvalidSettingsVersion implements Exception {
   int statedVersion;
   InvalidSettingsVersion(this.statedVersion);
   @override

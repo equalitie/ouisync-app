@@ -2,9 +2,9 @@ import 'dart:async';
 
 import 'package:equatable/equatable.dart';
 
-import '../cubits/cubits.dart';
+import '../cubits/cubits.dart' show RepoCubit, SortBy, SortDirection;
 import '../utils/repo_path.dart' as repo_path;
-import '../utils/utils.dart';
+import '../utils/utils.dart' show Strings;
 
 class FolderState extends Equatable {
   final String path;
@@ -26,8 +26,8 @@ class FolderState extends Equatable {
   List<Object?> get props => [path, content, sortBy, sortDirection];
 }
 
-sealed class FileSystemEntry {
-  FileSystemEntry({required this.path});
+sealed class FileSystemEntry extends Equatable {
+  const FileSystemEntry({required this.path});
 
   final String path;
 
@@ -35,14 +35,20 @@ sealed class FileSystemEntry {
 }
 
 class FileEntry extends FileSystemEntry {
-  FileEntry({required super.path, required this.size});
+  const FileEntry({required super.path, required this.size});
 
   // null means size unknown due to the file not being downloaded yet.
   final int? size;
+
+  @override
+  List<Object?> get props => [path, size];
 }
 
 class DirectoryEntry extends FileSystemEntry {
-  DirectoryEntry({required super.path});
+  const DirectoryEntry({required super.path});
+
+  @override
+  List<Object?> get props => [path];
 }
 
 class Folder {
@@ -56,13 +62,13 @@ class Folder {
 
   void goUp() {
     state = FolderState(path: state.parent, content: state.content);
-    repo.updateNavigation(isFolder: true);
+    repo.updateNavigation();
   }
 
   void goTo(String path) {
     if (path != state.path) {
       state = FolderState(path: path);
-      repo.updateNavigation(isFolder: true);
+      repo.updateNavigation();
     }
   }
 

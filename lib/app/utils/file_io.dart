@@ -4,14 +4,14 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart'
     show AlertDialog, Axis, BuildContext, Flex, showDialog;
-import 'package:ouisync/ouisync.dart';
+import 'package:ouisync/ouisync.dart' show EntryType;
 import 'package:path/path.dart' as p;
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart' show RepoCubit;
 import '../models/models.dart' show FileEntry;
-import '../widgets/widgets.dart' show FileAction, ReplaceKeepEntry;
+import '../widgets/widgets.dart' show DisambiguationAction, ReplaceKeepEntry;
 import 'platform/platform.dart' show PlatformValues;
 import 'utils.dart'
     show
@@ -60,7 +60,7 @@ class FileIO with AppLogger {
         String fileName = srcFile.name;
         String destinationFilePath = p.join(parentPath, fileName);
 
-        final exist = await repoCubit.exists(destinationFilePath);
+        final exist = await repoCubit.entryExists(destinationFilePath);
         if (!exist) {
           await repoCubit.saveFile(
             filePath: destinationFilePath,
@@ -80,7 +80,7 @@ class FileIO with AppLogger {
           continue;
         }
 
-        if (replaceOrKeepEntry == FileAction.replace) {
+        if (replaceOrKeepEntry == DisambiguationAction.replace) {
           await repoCubit.replaceFile(
             filePath: destinationFilePath,
             length: srcFile.size,
@@ -90,7 +90,7 @@ class FileIO with AppLogger {
           continue;
         }
 
-        if (replaceOrKeepEntry == FileAction.keep) {
+        if (replaceOrKeepEntry == DisambiguationAction.keep) {
           final newPath = await _renameFileWithVersion(
             fileName,
             parentPath,
@@ -107,11 +107,11 @@ class FileIO with AppLogger {
     }
   }
 
-  Future<FileAction?> _confirmKeepOrReplaceEntry(
+  Future<DisambiguationAction?> _confirmKeepOrReplaceEntry(
     BuildContext context, {
     required String fileName,
   }) async =>
-      showDialog<FileAction>(
+      showDialog<DisambiguationAction>(
         context: context,
         builder: (BuildContext context) => AlertDialog(
           title: Flex(
@@ -128,57 +128,46 @@ class FileIO with AppLogger {
         ),
       );
 
-  Future<void> saveFileToDevice({
-    required FileEntry entry,
-    required String defaultPath,
-  }) async {
+  Future<void> saveFileToDevice(
+    FileEntry entry, [
+    String? defaultPath,
+    ({String parentPath, String destinationPath})? paths,
+  ]) async {
+    if (defaultPath == null && paths == null) return;
+
     final storagePermissionOk = await _maybeRequestPermission(context);
     if (storagePermissionOk == false) {
       return;
     }
 
+    String path = entry.path;
     String fileName = entry.name;
 
-    String? parentDir;
-    String? destinationFilePath;
+    String parentPath;
+    String destinationPath;
 
-    if (PlatformValues.isDesktopDevice) {
-      destinationFilePath = await _desktopPath(defaultPath, fileName);
-
-      if (destinationFilePath == null || destinationFilePath.isEmpty) {
+    if (defaultPath != null) {
+      final destinationPaths = await getDestinationPath(defaultPath, fileName);
+      if (destinationPaths.canceled) {
         final errorMessage = S.current.messageDownloadFileCanceled;
         showSnackBar(errorMessage);
 
         return;
       }
 
-      final dirName = p.dirname(destinationFilePath);
-      parentDir = p.basename(dirName);
+      parentPath = destinationPaths.parentPath;
+      destinationPath = destinationPaths.destinationPath;
     } else {
-      parentDir = p.basename(defaultPath);
-      if (io.Platform.isAndroid) {
-        parentDir = p.join(parentDir, 'Ouisync');
-        defaultPath = p.join(defaultPath, 'Ouisync');
-      }
-
-      destinationFilePath = p.join(defaultPath, fileName);
-
-      final exist = await io.File(destinationFilePath).exists();
-      if (exist) {
-        destinationFilePath = await _renameFileWithVersion(
-          fileName,
-          defaultPath,
-          FileDestination.device,
-        );
-      }
+      parentPath = paths!.parentPath;
+      destinationPath = paths.destinationPath;
     }
 
     final destinationFile =
-        await io.File(destinationFilePath).create(recursive: true);
+        await io.File(destinationPath).create(recursive: true);
 
     return repoCubit.downloadFile(
-      sourcePath: entry.path,
-      parentPath: parentDir,
+      sourcePath: path,
+      parentPath: parentPath,
       destinationPath: destinationFile.path,
     );
   }
@@ -213,13 +202,62 @@ class FileIO with AppLogger {
     return false;
   }
 
-  Future<String?> _desktopPath(String parentPath, String fileName) async {
-    final filePath = await FilePicker.platform.saveFile(
-      fileName: fileName,
-      initialDirectory: parentPath,
-    );
+  Future<
+      ({
+        String parentPath,
+        String destinationPath,
+        bool canceled,
+      })> getDestinationPath(String defaultPath, [String? fileName]) async {
+    String parentPath = '';
+    String? destinationFilePath = '';
 
-    return filePath;
+    if (PlatformValues.isDesktopDevice) {
+      destinationFilePath = await _getDesktopPath(defaultPath, fileName);
+
+      if (destinationFilePath == null || destinationFilePath.isEmpty) {
+        return (parentPath: '', destinationPath: '', canceled: true);
+      }
+
+      final dirName = fileName != null
+          ? p.dirname(destinationFilePath)
+          : destinationFilePath;
+      parentPath = p.basename(dirName);
+    } else {
+      parentPath = p.basename(defaultPath);
+      if (io.Platform.isAndroid) {
+        parentPath = p.join(parentPath, 'Ouisync');
+        defaultPath = p.join(defaultPath, 'Ouisync');
+      }
+
+      destinationFilePath = p.join(defaultPath, fileName);
+
+      final exist = await io.File(destinationFilePath).exists();
+      if (exist) {
+        destinationFilePath = await _renameFileWithVersion(
+          fileName ?? '',
+          defaultPath,
+          FileDestination.device,
+        );
+      }
+    }
+
+    return (
+      parentPath: parentPath,
+      destinationPath: destinationFilePath,
+      canceled: false,
+    );
+  }
+
+  Future<String?> _getDesktopPath(String parentPath, String? fileName) async {
+    final basePath = (fileName ?? '').isEmpty
+        ? await FilePicker.platform
+            .getDirectoryPath(initialDirectory: parentPath)
+        : await FilePicker.platform.saveFile(
+            fileName: fileName,
+            initialDirectory: parentPath,
+          );
+
+    return basePath;
   }
 
   Future<String> _renameFileWithVersion(
@@ -252,7 +290,7 @@ class FileIO with AppLogger {
 
     final exist = destination == FileDestination.device
         ? io.File(newDestinationPath).exists()
-        : repoCubit.exists(newDestinationPath);
+        : repoCubit.entryExists(newDestinationPath);
 
     if (await exist) {
       return _renameFile(

@@ -1,11 +1,11 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync/bindings.dart';
+import 'package:flutter_bloc/flutter_bloc.dart' show Cubit;
 
+import '../models/models.dart' show FileSystemEntry;
 import '../utils/utils.dart' show AppLogger;
 import 'cubits.dart' show CubitActions, NavigationCubit, RepoCubit, ReposCubit;
 
-enum BottomSheetType { move, upload, gone }
+enum BottomSheetType { copy, delete, download, move, upload, gone }
 
 class BottomSheetInfo extends Equatable {
   final BottomSheetType type;
@@ -38,22 +38,42 @@ sealed class EntryBottomSheetState {}
 class MoveEntrySheetState extends Equatable implements EntryBottomSheetState {
   final RepoCubit repoCubit;
   final NavigationCubit navigationCubit;
-  final String entryPath;
-  final EntryType entryType;
+  final BottomSheetType type;
+  final FileSystemEntry entry;
 
   MoveEntrySheetState({
     required this.repoCubit,
     required this.navigationCubit,
-    required this.entryPath,
-    required this.entryType,
+    required this.type,
+    required this.entry,
   });
 
   @override
   List<Object?> get props => [
         repoCubit,
         navigationCubit,
-        entryPath,
-        entryType,
+        type,
+        entry,
+      ];
+}
+
+class MoveSelectedEntriesSheetState extends Equatable
+    implements EntryBottomSheetState {
+  final RepoCubit repoCubit;
+  final BottomSheetType type;
+  final FileSystemEntry? entry;
+
+  MoveSelectedEntriesSheetState({
+    required this.repoCubit,
+    required this.type,
+    this.entry,
+  });
+
+  @override
+  List<Object?> get props => [
+        repoCubit,
+        type,
+        entry,
       ];
 }
 
@@ -79,26 +99,35 @@ class EntryBottomSheetCubit extends Cubit<EntryBottomSheetState>
   void showMoveEntry({
     required RepoCubit repoCubit,
     required NavigationCubit navigationCubit,
-    required String entryPath,
-    required EntryType entryType,
+    required BottomSheetType type,
+    required FileSystemEntry entry,
   }) =>
-      emitUnlessClosed(
-        MoveEntrySheetState(
-          repoCubit: repoCubit,
-          navigationCubit: navigationCubit,
-          entryPath: entryPath,
-          entryType: entryType,
-        ),
-      );
+      emitUnlessClosed(MoveEntrySheetState(
+        repoCubit: repoCubit,
+        navigationCubit: navigationCubit,
+        type: type,
+        entry: entry,
+      ));
 
-  void showSaveMedia(
-          {required ReposCubit reposCubit, required List<String> paths}) =>
-      emitUnlessClosed(
-        SaveMediaSheetState(
-          reposCubit: reposCubit,
-          sharedMediaPaths: paths,
-        ),
-      );
+  void showMoveSelectedEntries({
+    required RepoCubit repoCubit,
+    required BottomSheetType type,
+    FileSystemEntry? entry,
+  }) =>
+      emitUnlessClosed(MoveSelectedEntriesSheetState(
+        repoCubit: repoCubit,
+        type: type,
+        entry: entry,
+      ));
+
+  void showSaveMedia({
+    required ReposCubit reposCubit,
+    required List<String> paths,
+  }) =>
+      emitUnlessClosed(SaveMediaSheetState(
+        reposCubit: reposCubit,
+        sharedMediaPaths: paths,
+      ));
 
   void hide() => emitUnlessClosed(HideSheetState());
 }

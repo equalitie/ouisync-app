@@ -110,6 +110,22 @@
   "titleDokanInstallation":"Dokan installation",
   "titleDokanMissing":"Dokan is missing",
   "titleDokanInstallationFound":"Dokan installation found",
+  "titleCopyEntries":"Copy",
+  "@titleCopyEntries":{
+    "description": "Title for the confirmation dialog when copying entries"
+  },
+  "titleMoveEntries":"Move",
+  "@titleMoveEntries":{
+    "description": "Title for the confirmation dialog when moving entries"
+  },
+  "titleSaveEntriesToDevice":"Save to device",
+  "@titleSaveEntriesToDevice":{
+    "description": "Title for the confirmation dialog when saving entries to device"	
+  },
+  "titleDeleteEntries":"Delete",
+  "@titleDeleteEntries":{
+    "description": "Title for the confirmation dialog when deleting entries"	
+  },
   "typeFolder": "Folder",
   "@typeFolder": {},
   "typeFile": "File",
@@ -330,6 +346,8 @@
   "@messageEntryAlreadyExist": {},
   "messageFolderDeleted": "Folder deleted successfully: {name}",
   "@messageFolderDeleted": {},
+  "messageFileDeleted": "File deleted successfully: {name}",
+  "@messageFileDeleted": {},
   "messageExitOuiSync": "Press back again to exit.",
   "@messageExitOuiSync": {},
   "messageInitializing": "Initializing…",
@@ -348,8 +366,8 @@
   "@messageOuiSyncDesktopTitle": {},
   "messageFilePreviewNotAvailable": "File preview is not yet available",
   "@messageFilePreviewNotAvailable": {},
-  "messageBackgroundNotificationAndroid": "Is running",
-  "@messageBackgroundNotificationAndroid": {},
+  "messageBackgroundNotification": "Ouisync is running",
+  "@messageBackgroundNotification": {},
   "messageBackgroundAndroidPermissions": "Shortly the OS will ask you for permission to execute this app in the background.\n\nThis is required in order to keep syncing while the app is not in the foreground",
   "@messageBackgroundAndroidPermissions": {},
   "messageSelectAccessMode": "Select a permission to create a share link",
@@ -427,6 +445,7 @@
   "messageNone":"None",
   "messagePeerExchange":"Peer Exchange",
   "messageUnsavedChanges":"You have unsaved changes.\n\nWould you like to discard them?",
+  "messagePleaseAuthenticate":"Please authenticate",
   "messageAccessingSecureStorage":"Accessing secure storage",
   "messageSavingChanges":"Do you want to save the current changes?",
   "messageUpdateLocalSecretFailed":"Updating security properties of the repository failed.",
@@ -531,7 +550,7 @@
   "messageBiometricUnlockRepositoryFailed":"Biometric unlocking failed",
   "messageEnterDifferentName":"Please enter a different name",
   "messageUnknownFileExtension":"Unknown file extension",
-  "messageNoAppsForThisAction":"Not apps can perform this action",
+  "messageNoAppsForThisAction":"No application can perform this action",
   "messageFilePreviewFailed":"We couldn’t start the file preview",
   "messagePreviewingFileFailed":"Previewing file {path} failed",
   "messageDownloadFileCanceled":"File download canceled",
@@ -552,8 +571,82 @@
   "messageDokanDifferentMayorP2":"is out of date. Please update it to the latest version.", 
   "messageDokanOlderVersionP2":"is out of date.\n\nPlease uninstall the existing version of Dokan, reboot the system and run Ouisync again.",
   "messageDokanInstallationFailed":"The Dokan installation failed.",
+  "messageCopyEntries":"Copy selection here:\n\n\t\t{totals}",
+  "@messageCopyEntries": {
+    "description": "Message displayed in a confirmation dialog when copying entries",
+    "placeholders": {
+        "totals": {
+          "type": "String",
+          "example": "2 files, 1 folder"
+        }
+    }
+  },
+  "messageMoveEntries":"Move selection here:\n\n\t\t{totals}",
+  "@messageMoveEntries": {
+    "description": "Message displayed in a confirmation dialog when moving entries",
+    "placeholders": {
+        "totals": {
+          "type": "String",
+          "example": "2 files, 1 folder"
+        }
+    }
+  },
+  "messageSaveEntriesToDevice":"Save selection:\n\n\t\t{totals}",
+  "@messageSaveEntriesToDevice": {
+    "description": "Message displayed in a confirmation dialog when saving entries to the device",
+    "placeholders": {
+        "totals": {
+          "type": "String",
+          "example": "2 files, 1 folder"
+        }
+    }
+  },
+  "messageDeleteEntries":"Delete selection:\n\n\t\t{totals}",
+  "@messageDeleteEntries": {
+    "description": "Message displayed in a confirmation dialog when deleting entries",
+    "placeholders": {
+        "totals": {
+          "type": "String",
+          "example": "2 files, 1 folder"
+        }
+    }
+  },
   "popupMenuItemCopyPassword":"Copy password",
   "popupMenuItemChangePassword":"Change password",
+  "repoResetTitle": "Reset repository access",
+  "repoResetRepoNameLabel": "Repository name",
+  "repoResetAccessTypeLabel": "Repository access type",
+  "repoResetAccessTypeInfoBlindOrLocked": "Blind or locked",
+  "repoResetAccessTypeInfoRead": "Read",
+  "repoResetAccessTypeInfoWrite": "Write",
+  "repoResetTokenTypeLabel": "Token access type",
+  "repoResetActionInfoLabel": "Action to be submitted",
+  "repoResetAuthInfoLabel": "Authentication method",
+  "repoResetAuthInfoBlindOrLocked": "Authentication method",
+  "repoResetAuthInfoBlindOrLockedWarn": "The application cannot tell the difference.",
+  "repoResetAuthInfoLocked": "Locked behind a local password.",
+  "repoResetAuthInfoPasswordIsStored": "Password is stored on this device.",
+  "repoResetAuthInfoKeyIsStored": "Key is stored on this device.",
+  "repoResetAuthInfoKeyIsStoredAndProtected": "Key is stored on this device and additional verification is needed to open the repository.",
+  "repoResetTokenEmptyInfo": "Please provide a valid token link to determine the action.",
+  "repoResetTokenInvalid": "Invalid",
+  "repoResetTokenInvalidInfo": "The token link is invalid.",
+  "repoResetTokenNonMatching": "No action can be performed because the token does not correspond to this repository.",
+  "repoResetTokenAlreadySubmitted": "No action will be performed because the token has already been submitted.",
+  "repoResetActionBlindToBlind": "The repository will become blind.",
+  "repoResetActionBlindToBlindWarn": "This repository may have read or write access locked behind a local password. If so, unlocking will not be possible after this action is executed.",
+  "repoResetActionSame": "No action will be performed because the token and repository access are the same.",
+  "repoResetActionBlindToRead": "The repository will become read only.",
+  "repoResetActionBlindToReadWarn": "This repository may have write access locked behind a local password. If so, unlocking for writing will not be possible after this action is executed.",
+  "repoResetActionAnyToWrite": "The repository will gain write access.",
+  "repoResetActionReadToBlind": "The repository will lose its read access.",
+  "repoResetActionReadToBlindWarn": "This action is irreversible without a read or write token link.",
+  "repoResetActionWriteToRead": "The repository will lose its write access.",
+  "repoResetActionWriteToReadWarn": "This action is irreversible without a write token link.",
+  "repoResetActionWriteToBlind": "The repository will lose its read and write access.",
+  "repoResetActionWriteToBlindWarn": "This action is irreversible without a write token link.",
+  "repoResetConfirmUpdateTitle": "Please confirm",
+  "repoResetConfirmUpdateMessage": "Are you sure you want to proceed with the Update action?",
   "menuItemRepository":"Repository",
   "menuItemNetwork":"Network",
   "menuItemLogs":"Logs",
@@ -598,6 +691,8 @@
   "@iconAccessMode": {},
   "iconShareTokenWithPeer": "Share this with your peer",
   "@iconShareTokenWithPeer": {},
+  "iconCopy":"Copy",
+  "@iconCopy": {},
   "actionCreateRepository": "Create Repository",
   "@actionCreateRepository": {},
   "actionAddRepository": "Import a Repository",
@@ -608,6 +703,7 @@
   "@actionReloadContents": {},
   "actionNewRepo": "Create repository",
   "@actionNewRepo": {},
+  "actionIDontHaveALocalPassword":"I don't have a local password for this repository",
   "actionImportRepo":"Import repository",
   "actionReloadRepo": "Reload repository",
   "actionRemoveRepo":"Remove repository",
@@ -692,6 +788,9 @@
   "actionInstallDokan":"Install Dokan",
   "actionUpdateDokan":"Update Dokan",
   "actionLocateRepo":"Locate repository",
+  "actionSelect":"Select",
+  "actionDownload":"Download",
+  "actionCopy":"Copy",
   "titleApplicationLanguage": "App language",
   "languageOfTheDevice": "device's language",
   "languageIsNotAvailable": "not available",
@@ -714,5 +813,10 @@
   "accessModeBlindLabel":"blind",
   "accessModeReadLabel":"read",
   "accessModeWriteLabel":"write",
-  "labelSynced":"Synced"
+  "labelSynced":"Synced",
+  "messageRepositoryDeleted":"Repository {name} deleted",
+  "messageRepositoryRenamed":"Repository renamed as {name}",
+  "messageFileRenamed":"File renamed as {name}",
+  "messageErrorCreatingFolder":"Error creating folder {name}",
+  "messageFolderRenamed":"Folder renamed as {name}"
 }

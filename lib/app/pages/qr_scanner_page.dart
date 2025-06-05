@@ -70,8 +70,11 @@ class _QRScannerState extends State<QRScanner> with AppLogger {
         controller: cameraController,
         onDetect: (capture) async {
           String? code;
-          if ((capture.raw as List?)?.isNotEmpty ?? false) {
-            code = (capture.raw as List?)?[0]['rawValue'];
+
+          if (capture.barcodes.isNotEmpty) {
+            code = capture.barcodes
+                .map((bc) => bc.rawValue)
+                .firstWhere((code) => code != null, orElse: () => null);
           }
 
           if (code == null) {
@@ -83,7 +86,7 @@ class _QRScannerState extends State<QRScanner> with AppLogger {
             }
 
             try {
-              await plugin.ShareToken.fromString(widget.session, code);
+              await widget.session.validateShareToken(code);
             } catch (_) {
               loggy.debug('Barcode found! $code (invalid)');
               return;

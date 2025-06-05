@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 enum PasswordAction { add, change, remove, biometrics }
 
@@ -43,8 +44,6 @@ class Constants {
   static const Color warningColor = Colors.orange;
   static const Color dangerColor = Colors.red;
 
-  static const String folderRepositoriesName = 'repositories';
-  static const String configDirName = 'configs';
   static const String logFileName = 'ouisync.log';
 
   static const int bufferSize = 64000;
@@ -134,9 +133,13 @@ class Constants {
   static const String dokanUrl = "https://dokan-dev.github.io";
 
   // List of available cache servers.
-  static const List<String> cacheServers = [
-    "server-ca.ouisync.net",
-  ];
+  static List<String> get cacheServers => _cacheServers[appFlavor] ?? [];
+
+  static const Map<String, List<String>> _cacheServers = {
+    'production': ['server-ca.ouisync.net'],
+    'unofficial': ['server-ca.ouisync.net'],
+    'nightly': ['server-ca.ouisync.net:22443'],
+  };
 
   static const int android12SDK = 32;
 

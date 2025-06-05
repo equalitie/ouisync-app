@@ -2,13 +2,13 @@ import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync/ouisync.dart';
+import 'package:ouisync/ouisync.dart' as o;
 
 import '../utils/log.dart';
 import 'utils.dart';
 
 class NatDetection extends Cubit<NatBehavior> with CubitActions, AppLogger {
-  final Session session;
+  final o.Session session;
   StreamSubscription<List<ConnectivityResult>>? _subscription;
 
   NatDetection(this.session) : super(NatBehavior.pending) {
@@ -39,7 +39,16 @@ class NatDetection extends Cubit<NatBehavior> with CubitActions, AppLogger {
     }
 
     emitUnlessClosed(NatBehavior.pending);
-    emitUnlessClosed(NatBehavior.parse(await session.natBehavior));
+
+    final nat = switch (await session.getNatBehavior()) {
+      o.NatBehavior.endpointIndependent => NatBehavior.endpointIndependent,
+      o.NatBehavior.addressDependent => NatBehavior.addressDependent,
+      o.NatBehavior.addressAndPortDependent =>
+        NatBehavior.addressAndPortDependent,
+      null => NatBehavior.unknown,
+    };
+
+    emitUnlessClosed(nat);
   }
 }
 
@@ -50,12 +59,4 @@ enum NatBehavior {
   addressDependent,
   addressAndPortDependent,
   unknown,
-  ;
-
-  static NatBehavior parse(String? input) => switch (input) {
-        "endpoint independent" => endpointIndependent,
-        "address dependent" => addressDependent,
-        "address and port dependent" => addressAndPortDependent,
-        _ => unknown,
-      };
 }

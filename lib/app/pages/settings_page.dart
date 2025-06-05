@@ -6,6 +6,7 @@ import 'package:stream_transform/stream_transform.dart';
 
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
+import '../utils/dirs.dart';
 import '../widgets/widgets.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -18,6 +19,7 @@ class SettingsPage extends StatefulWidget {
     required this.reposCubit,
     required this.upgradeExists,
     required this.checkForDokan,
+    required this.dirs,
   });
 
   final Session session;
@@ -28,6 +30,7 @@ class SettingsPage extends StatefulWidget {
   final ReposCubit reposCubit;
   final UpgradeExistsCubit upgradeExists;
   final void Function() checkForDokan;
+  final Dirs dirs;
 
   @override
   State<SettingsPage> createState() => _SettingsPageState();
@@ -79,6 +82,7 @@ class _SettingsPageState extends State<SettingsPage> {
           checkForDokan: widget.checkForDokan,
           launchAtStartup: launchAtStartup,
           upgradeExists: widget.upgradeExists,
+          dirs: widget.dirs,
         ),
       );
 }
