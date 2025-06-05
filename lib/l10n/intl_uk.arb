@@ -936,7 +936,7 @@
   "@messageUpdateLocalPassword": {},
   "labelExternalIPv4": "Зовнішня IPv4",
   "@labelExternalIPv4": {},
-  "messageNoAppsForThisAction": "Не всі застосунки можуть виконувати цю дію",
+  "messageNoAppsForThisAction": "Жодна програма не може виконати цю дію",
   "@messageNoAppsForThisAction": {},
   "messageEnterDifferentName": "Будь ласка, введіть інше ім'я",
   "@messageEnterDifferentName": {},
@@ -1039,5 +1039,155 @@
   "messageSettingsVersionNewerThanCurrent": "У налаштуваннях, знайдені на цьому пристрої були створені з новою версією Ouisync і не можуть бути мігровані.",
   "@messageSettingsVersionNewerThanCurrent": {},
   "labelSynced": "Синхронізовано",
-  "@labelSynced": {}
+  "@labelSynced": {},
+  "titleCopyEntries": "Копіювати",
+  "@titleCopyEntries": {
+    "description": "Title for the confirmation dialog when copying entries"
+  },
+  "titleMoveEntries": "Перемістити",
+  "@titleMoveEntries": {
+    "description": "Title for the confirmation dialog when moving entries"
+  },
+  "titleSaveEntriesToDevice": "Зберегти на пристрої",
+  "@titleSaveEntriesToDevice": {
+    "description": "Title for the confirmation dialog when saving entries to device"
+  },
+  "titleDeleteEntries": "Видалити",
+  "@titleDeleteEntries": {
+    "description": "Title for the confirmation dialog when deleting entries"
+  },
+  "messageFileDeleted": "Файл успішно видалено: {name}",
+  "@messageFileDeleted": {},
+  "messageBackgroundNotification": "Ouisync працює",
+  "@messageBackgroundNotification": {},
+  "messagePleaseAuthenticate": "Будь ласка, автентифікуйте",
+  "@messagePleaseAuthenticate": {},
+  "messageCopyEntries": "Скопіювати вибір сюди:\n\n\t\t{totals}",
+  "@messageCopyEntries": {
+    "description": "Message displayed in a confirmation dialog when copying entries",
+    "placeholders": {
+      "totals": {
+        "type": "String",
+        "example": "2 files, 1 folder"
+      }
+    }
+  },
+  "messageMoveEntries": "Перемістити вибір сюди:\n\n\t\t{totals}",
+  "@messageMoveEntries": {
+    "description": "Message displayed in a confirmation dialog when moving entries",
+    "placeholders": {
+      "totals": {
+        "type": "String",
+        "example": "2 files, 1 folder"
+      }
+    }
+  },
+  "messageSaveEntriesToDevice": "Зберегти вибір:\n\n\t\t{totals}",
+  "@messageSaveEntriesToDevice": {
+    "description": "Message displayed in a confirmation dialog when saving entries to the device",
+    "placeholders": {
+      "totals": {
+        "type": "String",
+        "example": "2 files, 1 folder"
+      }
+    }
+  },
+  "repoResetRepoNameLabel": "Назва репозиторію",
+  "@repoResetRepoNameLabel": {},
+  "repoResetAccessTypeLabel": "Тип доступу до репозиторію",
+  "@repoResetAccessTypeLabel": {},
+  "repoResetAccessTypeInfoBlindOrLocked": "Сліпий або замкнений",
+  "@repoResetAccessTypeInfoBlindOrLocked": {},
+  "repoResetAccessTypeInfoRead": "Читати",
+  "@repoResetAccessTypeInfoRead": {},
+  "repoResetAccessTypeInfoWrite": "Написати",
+  "@repoResetAccessTypeInfoWrite": {},
+  "repoResetActionInfoLabel": "Дія, яку потрібно подати",
+  "@repoResetActionInfoLabel": {},
+  "repoResetAuthInfoBlindOrLocked": "Метод автентифікації",
+  "@repoResetAuthInfoBlindOrLocked": {},
+  "repoResetAuthInfoBlindOrLockedWarn": "Додаток не може розпізнати різницю.",
+  "@repoResetAuthInfoBlindOrLockedWarn": {},
+  "repoResetAuthInfoPasswordIsStored": "Пароль зберігається на цьому пристрої.",
+  "@repoResetAuthInfoPasswordIsStored": {},
+  "repoResetAuthInfoKeyIsStored": "Ключ зберігається на цьому пристрої.",
+  "@repoResetAuthInfoKeyIsStored": {},
+  "repoResetTokenEmptyInfo": "Будь ласка, надайте дійсне посилання на токен, щоб визначити дію.",
+  "@repoResetTokenEmptyInfo": {},
+  "repoResetTokenInvalid": "Недійсний",
+  "@repoResetTokenInvalid": {},
+  "repoResetTokenInvalidInfo": "Посилання на токен недійсне.",
+  "@repoResetTokenInvalidInfo": {},
+  "repoResetTokenNonMatching": "Неможливо виконати жодної дії, оскільки токен не відповідає цьому репозиторію.",
+  "@repoResetTokenNonMatching": {},
+  "repoResetTokenAlreadySubmitted": "Жодних дій не буде виконано, оскільки токен вже надіслано.",
+  "@repoResetTokenAlreadySubmitted": {},
+  "repoResetActionBlindToBlind": "Сховище стане сліпим.",
+  "@repoResetActionBlindToBlind": {},
+  "repoResetActionBlindToBlindWarn": "Можливо, доступ для читання або запису в цьому репозиторії заблоковано локальним паролем. Якщо так, розблокування буде неможливим після виконання цієї дії.",
+  "@repoResetActionBlindToBlindWarn": {},
+  "repoResetActionSame": "Жодних дій не буде виконано, оскільки токен та доступ до репозиторію однакові.",
+  "@repoResetActionSame": {},
+  "repoResetActionBlindToRead": "Репозиторій стане доступним лише для читання.",
+  "@repoResetActionBlindToRead": {},
+  "repoResetActionBlindToReadWarn": "Можливо, доступ для запису в цьому репозиторії заблоковано локальним паролем. Якщо так, розблокування для запису буде неможливим після виконання цієї дії.",
+  "@repoResetActionBlindToReadWarn": {},
+  "repoResetActionWriteToRead": "Репозиторій втратить доступ для запису.",
+  "@repoResetActionWriteToRead": {},
+  "repoResetActionWriteToReadWarn": "Ця дія незворотна без посилання на токен запису.",
+  "@repoResetActionWriteToReadWarn": {},
+  "repoResetActionWriteToBlind": "Репозиторій втратить доступ для читання та запису.",
+  "@repoResetActionWriteToBlind": {},
+  "repoResetActionWriteToBlindWarn": "Ця дія незворотна без посилання токена запису.",
+  "@repoResetActionWriteToBlindWarn": {},
+  "repoResetConfirmUpdateTitle": "Будь ласка, підтвердіть",
+  "@repoResetConfirmUpdateTitle": {},
+  "repoResetConfirmUpdateMessage": "Ви впевнені, що хочете продовжити дію оновлення?",
+  "@repoResetConfirmUpdateMessage": {},
+  "iconCopy": "Копіювати",
+  "@iconCopy": {},
+  "actionCopy": "Копіювати",
+  "@actionCopy": {},
+  "messageRepositoryRenamed": "Репозиторій перейменовано на {name}",
+  "@messageRepositoryRenamed": {},
+  "messageErrorCreatingFolder": "Помилка створення папки {name}",
+  "@messageErrorCreatingFolder": {},
+  "messageFolderRenamed": "Папку перейменовано на {name}",
+  "@messageFolderRenamed": {},
+  "repoResetAuthInfoKeyIsStoredAndProtected": "Ключ зберігається на цьому пристрої, і для відкриття репозиторію потрібна додаткова перевірка.",
+  "@repoResetAuthInfoKeyIsStoredAndProtected": {},
+  "actionDownload": "Завантажити",
+  "@actionDownload": {},
+  "messageFileRenamed": "Файл перейменовано на {name}",
+  "@messageFileRenamed": {},
+  "actionSelect": "Виберіть",
+  "@actionSelect": {},
+  "messageRepositoryDeleted": "Репозиторій {name} видалено",
+  "@messageRepositoryDeleted": {},
+  "messageDeleteEntries": "Видалити виділення:\n\n\t\t{totals}",
+  "@messageDeleteEntries": {
+    "description": "Message displayed in a confirmation dialog when deleting entries",
+    "placeholders": {
+      "totals": {
+        "type": "String",
+        "example": "2 files, 1 folder"
+      }
+    }
+  },
+  "actionIDontHaveALocalPassword": "У мене немає локального пароля для цього репозиторію",
+  "@actionIDontHaveALocalPassword": {},
+  "repoResetAuthInfoLocked": "Заблоковано локальним паролем.",
+  "@repoResetAuthInfoLocked": {},
+  "repoResetTitle": "Скинути доступ до репозиторію",
+  "@repoResetTitle": {},
+  "repoResetTokenTypeLabel": "Тип доступу за допомогою токена",
+  "@repoResetTokenTypeLabel": {},
+  "repoResetAuthInfoLabel": "Метод автентифікації",
+  "@repoResetAuthInfoLabel": {},
+  "repoResetActionReadToBlindWarn": "Ця дія незворотна без посилання на токен читання або запису.",
+  "@repoResetActionReadToBlindWarn": {},
+  "repoResetActionAnyToWrite": "Репозиторій отримає доступ для запису.",
+  "@repoResetActionAnyToWrite": {},
+  "repoResetActionReadToBlind": "Репозиторій втратить доступ для читання.",
+  "@repoResetActionReadToBlind": {}
 }
