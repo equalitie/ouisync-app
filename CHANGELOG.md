@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Implement operations on multiple files/directories (copy, move, delete, download and upload).
 - Various smaller UI/UX improvements.
 
-## [v0.8.3](https://github.com/equalitie/ouisync-app/compare/v0.8.2...v0.8.3)
+## [v0.8.3](https://github.com/equalitie/ouisync-app/compare/v0.8.2...v0.8.3-production)
 
 - Fix few instances of black screens caused by popping more routes than were pushed into the navigator
 - Localize more strings
