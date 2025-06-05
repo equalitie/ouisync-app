@@ -77,6 +77,11 @@ android {
             } else {
                 signingConfig signingConfigs.debug
             }
+
+            proguardFiles(
+                getDefaultProguardFile('proguard-android-optimize.txt'),
+                'proguard-rules.pro',
+            )
         }
 
         debug {
