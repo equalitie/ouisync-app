@@ -6,12 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased](https://github.com/equalitie/ouisync-app/compare/v0.8.3-production...develop)
+<!-- ## [Unreleased](https://github.com/equalitie/ouisync-app/compare/v0.9.0...master) -->
 
-- Update [Ouisync library](https://github.com/equalitie/ouisync) to [v0.9.0](https://github.com/equalitie/ouisync/blob/master/CHANGELOG.md#v0.9.0).
+## [v0.9.0](https://github.com/equalitie/ouisync-app/compare/v0.8.3-production...v0.9.0)
+
+### Breaking changes
+
+- Update [Ouisync library](https://github.com/equalitie/ouisync) to [v0.9.0]
+  (https://github.com/equalitie/ouisync/blob/master/CHANGELOG.md#v0.9.0). Due to the sync protocol
+  changes this version can no longer sync with peers running any of the the previous versions.
+
+### Other changes
+
 - Ongoing work towards improving iOS and macOS support.
 - Allow resetting repository access using share token.
 - Implement operations on multiple files/directories (copy, move, delete, download and upload).
+- Support edge-to-edge mode on Android 15+.
 - Various smaller UI/UX improvements.
 
 ## [v0.8.3](https://github.com/equalitie/ouisync-app/compare/v0.8.2...v0.8.3-production) - 2024-11-15
