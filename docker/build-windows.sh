@@ -19,8 +19,8 @@ while [[ "$#" -gt 0 ]]; do
     shift
 done
 
-if [ -z "$host"   ]; then echo "Use --host";   print_help; exit 1; fi
-if [ -z "$commit" ]; then echo "Use --commit"; print_help; exit 1; fi
+if [ -z "$host"   ]; then echo "Missing --host";   print_help; exit 1; fi
+if [ -z "$commit" ]; then echo "Missing --commit"; print_help; exit 1; fi
 
 image_name=ouisync.windows-builder.$USER
 container_name="ouisync.windows-builder.$(date +"%Y-%m-%dT%H-%M-%S")"
