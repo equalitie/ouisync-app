@@ -4,16 +4,18 @@ set -e
 
 function print_help() {
     echo "Script for building Ouisync App in a Docker container"
-    echo "Usage: $0 --host <HOST> --commit <COMMIT>"
-    echo "  HOST:   IP or entry in ~/.ssh/config of machine running Docker"
-    echo "  COMMIT: Commit from which to build"
+    echo "Usage: $0 --host <HOST> --commit <COMMIT> [--out <OUTPUT_DIRECTORY>]"
+    echo "  HOST:             IP or entry in ~/.ssh/config of machine running Docker"
+    echo "  COMMIT:           Commit from which to build"
+    echo "  OUTPUT_DIRECTORY: Directory where artifacts will be stored"
 }
 
 while [[ "$#" -gt 0 ]]; do
     case $1 in
         -h) print_help; exit ;;
         --host) host="$2"; shift ;;
-        -c|--commit) commit="$2"; shift ;;
+        --commit) commit="$2"; shift ;;
+        --out) dst_dir="$2"; shift ;;
         *) echo "Unknown argument: $1"; print_help; exit 1 ;;
     esac
     shift
@@ -23,7 +25,9 @@ if [ -z "$host"   ]; then echo "Missing --host";   print_help; exit 1; fi
 if [ -z "$commit" ]; then echo "Missing --commit"; print_help; exit 1; fi
 
 image_name=ouisync.linux-builder.$USER
-container_name="ouisync.linux-builder.$(date +"%Y-%m-%dT%H-%M-%S")"
+container_name="ouisync.linux-builder.$(date +'%Y-%m-%dT%H-%M-%S')"
+
+dst_dir=${dst_dir:=./releases/$container_name}
 
 # Collect secrets
 secretSentryDsn=$(pass cenoers/ouisync/app/production/sentry_dsn)
@@ -92,5 +96,8 @@ exe /opt/ouisync-app dart run util/release.dart \
     --apk --aab --deb-gui --deb-cli
 
 # Collect artifacts
-mkdir -p ./releases/$container_name
-dock cp $container_name:/opt/ouisync-app/releases ./releases/$container_name/
+mkdir -p $dst_dir
+src_dir=/opt/ouisync-app/releases/latest
+for artifact in $(exe $src_dir ls); do
+    dock cp $container_name:$src_dir/$artifact $dst_dir/
+done
