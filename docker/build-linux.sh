@@ -58,7 +58,8 @@ dock run -d --rm --name $container_name $image_name \
     sh -c 'sleep 60; while [ -n "$(find /tmp/alive -cmin -10)" ]; do sleep 10; done'
 
 # Prevent the container from stopping
-(while true; do exe / touch /tmp/alive || true; sleep 14; done) &
+while true; do exe / touch /tmp/alive || true; sleep 14; done &
+keep_alive_pid=$!
 
 # Enter the container on exit
 trap on_exit EXIT
@@ -66,6 +67,7 @@ function on_exit() {
     echo "Entering container $container_name"
     dock exec -it $container_name bash
     echo "Stopping the container"
+    kill $keep_alive_pid
     dock container stop $container_name
 }
 
