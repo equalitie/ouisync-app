@@ -3,10 +3,10 @@
 set -e
 
 function print_help() {
-    echo "Use this script to build Ouisync App in a Docker container"
+    echo "Script for building Ouisync App in a Docker container"
     echo "Usage: $0 --host <HOST> --commit <COMMIT>"
     echo "  HOST:   IP or entry in ~/.ssh/config of machine running Docker"
-    echo "  COMMIT: Ouisync commit from which to build"
+    echo "  COMMIT: Commit from which to build"
 }
 
 while [[ "$#" -gt 0 ]]; do
@@ -14,7 +14,7 @@ while [[ "$#" -gt 0 ]]; do
         -h) print_help; exit ;;
         --host) host="$2"; shift ;;
         -c|--commit) commit="$2"; shift ;;
-        *) echo "Unknown parameter passed: $1"; print_help; exit 1 ;;
+        *) echo "Unknown argument: $1"; print_help; exit 1 ;;
     esac
     shift
 done
@@ -22,11 +22,11 @@ done
 if [ -z "$host"   ]; then echo "Use --host";   print_help; exit 1; fi
 if [ -z "$commit" ]; then echo "Use --commit"; print_help; exit 1; fi
 
-# Collect secrets
-secretSentryDSN=$(pass cenoers/ouisync/app/production/sentry_dsn)
-
 image_name=ouisync.windows-builder.$USER
 container_name="ouisync.windows-builder.$(date +"%Y-%m-%dT%H-%M-%S")"
+
+# Collect secrets
+secretSentryDSN=$(pass cenoers/ouisync/app/production/sentry_dsn)
 
 # Define shortcuts
 function dock() {
@@ -39,7 +39,7 @@ function exe {
 }
 
 # Build image
-dock build -t $image_name - < docker/windows/Dockerfile.windows-builder
+dock build -t $image_name - < docker/Dockerfile.build-windows
 
 # Start container; Auto destroy on this script exit
 dock run -d --rm --name $container_name -p 22 ouisync.windows-builder \

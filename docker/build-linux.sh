@@ -3,10 +3,10 @@
 set -e
 
 function print_help() {
-    echo "Use this script to build Ouisync App in a Docker container"
+    echo "Script for building Ouisync App in a Docker container"
     echo "Usage: $0 --host <HOST> --commit <COMMIT>"
     echo "  HOST:   IP or entry in ~/.ssh/config of machine running Docker"
-    echo "  COMMIT: Ouisync commit from which to build"
+    echo "  COMMIT: Commit from which to build"
 }
 
 while [[ "$#" -gt 0 ]]; do
@@ -14,7 +14,7 @@ while [[ "$#" -gt 0 ]]; do
         -h) print_help; exit ;;
         --host) host="$2"; shift ;;
         -c|--commit) commit="$2"; shift ;;
-        *) echo "Unknown parameter passed: $1"; print_help; exit 1 ;;
+        *) echo "Unknown argument: $1"; print_help; exit 1 ;;
     esac
     shift
 done
@@ -47,7 +47,7 @@ function exe_i() {
 }
 
 # Build docker image
-dock build -t $image_name - < docker/linux/Dockerfile.linux-builder
+dock build -t $image_name - < docker/Dockerfile.build-linux
 
 # Run the container for as long as this script is running
 dock run -d --rm --name $container_name $image_name \
