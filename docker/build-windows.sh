@@ -4,9 +4,10 @@ set -e
 
 function print_help() {
     echo "Script for building Ouisync App in a Docker container"
-    echo "Usage: $0 --host <HOST> --commit <COMMIT>"
-    echo "  HOST:   IP or entry in ~/.ssh/config of machine running Docker"
-    echo "  COMMIT: Commit from which to build"
+    echo "Usage: $0 --host <HOST> --commit <COMMIT> [--out <OUTPUT_DIRECTORY>]"
+    echo "  HOST:             IP or entry in ~/.ssh/config of machine running Docker"
+    echo "  COMMIT:           Commit from which to build"
+    echo "  OUTPUT_DIRECTORY: Directory where artifacts will be stored"
 }
 
 while [[ "$#" -gt 0 ]]; do
@@ -14,6 +15,7 @@ while [[ "$#" -gt 0 ]]; do
         -h) print_help; exit ;;
         --host) host="$2"; shift ;;
         -c|--commit) commit="$2"; shift ;;
+        --out) out_dir="$2"; shift ;;
         *) echo "Unknown argument: $1"; print_help; exit 1 ;;
     esac
     shift
@@ -23,7 +25,9 @@ if [ -z "$host"   ]; then echo "Missing --host";   print_help; exit 1; fi
 if [ -z "$commit" ]; then echo "Missing --commit"; print_help; exit 1; fi
 
 image_name=ouisync.windows-builder.$USER
-container_name="ouisync.windows-builder.$(date +"%Y-%m-%dT%H-%M-%S")"
+container_name="ouisync.windows-builder.$(date +'%Y-%m-%dT%H-%M-%S')"
+
+out_dir=${out_dir:=./releases/$container_name}
 
 # Collect secrets
 secretSentryDSN=$(pass cenoers/ouisync/app/production/sentry_dsn)
@@ -95,9 +99,9 @@ function setup_ssh() {
     exe / powershell Start-Service sshd
 }
 
-mkdir -p ./releases/$container_name
+mkdir -p $out_dir
 scp -P $ssh_port -r \
     -o "ProxyJump ${host}" \
     -o 'UserKnownHostsFile /dev/null' \
     -o 'StrictHostKeyChecking no' \
-    ssh@localhost:c:/ouisync-app/releases ./releases/$container_name/
+    ssh@localhost:'c:/ouisync-app/releases/latest/*' $out_dir
