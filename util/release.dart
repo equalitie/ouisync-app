@@ -35,42 +35,25 @@ enum Flavor {
   final bool requiresSentryDSN;
   final bool doGitCleanCheck;
 
-  static Flavor fromString(String name) {
-    switch (name) {
-      case "":
-      case "production":
-        return Flavor.production;
-      case "nightly":
-        return Flavor.nightly;
-      case "unofficial":
-        return Flavor.unofficial;
-      default:
-        throw ('Invalid flavor "$name", must be one of {production, nightly, unofficial}');
-    }
-  }
+  static Flavor fromString(String name) => switch (name) {
+    "" || "production" => Flavor.production,
+    "nightly" => Flavor.nightly,
+    "unofficial" => Flavor.unofficial,
+    _ =>
+      throw ('Invalid flavor "$name", must be one of {production, nightly, unofficial}'),
+  };
 
   @override
-  String toString() {
-    switch (this) {
-      case Flavor.production:
-        return "production";
-      case Flavor.nightly:
-        return "nightly";
-      case Flavor.unofficial:
-        return "unofficial";
-    }
-  }
+  String toString() => switch (this) {
+    Flavor.production => 'production',
+    Flavor.nightly => 'nightly',
+    Flavor.unofficial => 'unofficial',
+  };
 
-  String get displayString {
-    switch (this) {
-      case Flavor.production:
-        return "";
-      case Flavor.nightly:
-        return "nightly";
-      case Flavor.unofficial:
-        return "unofficial";
-    }
-  }
+  String get displayString => switch (this) {
+    Flavor.production => "",
+    _ => toString(),
+  };
 }
 
 Future<void> main(List<String> args) async {
@@ -195,9 +178,6 @@ Future<void> main(List<String> args) async {
           client,
           options.slug,
           version: version,
-          first: options.firstCommit,
-          last: commit,
-          detailedLog: options.detailedLog,
         );
         await uploadAssets(client, release, assets);
         break;
@@ -226,8 +206,6 @@ class Options {
   final String? token;
   final RepositorySlug slug;
   final ReleaseAction? action;
-  final String? firstCommit;
-  final bool detailedLog;
   final String? identityName;
   final String? publisher;
   final bool awaitUpload;
@@ -245,8 +223,6 @@ class Options {
     this.token,
     required this.slug,
     this.action,
-    this.firstCommit,
-    this.detailedLog = true,
     this.identityName,
     this.publisher,
     this.awaitUpload = false,
@@ -312,18 +288,6 @@ class Options {
           'Await user pressing enter to start uploading, useful for when doing --create and --update concurrently on two different PCs',
     );
 
-    parser.addOption(
-      'first-commit',
-      abbr: 'f',
-      help:
-          'Start of commit range to include in release notes. If omitted, includes everything since the previous release',
-    );
-    parser.addFlag(
-      'detailed-log',
-      abbr: 'l',
-      defaultsTo: true,
-      help: 'Whether to generate detailed changelog in the release notes',
-    );
     parser.addOption(
       'identity-name',
       abbr: 'i',
@@ -438,13 +402,6 @@ class Options {
     final debGui = results['deb-gui'];
     final debCli = results['deb-cli'];
 
-    if (!apk && !aab && !exe && !msix && !debGui && !debCli) {
-      print(
-        "No package to build. Use one or more flags from {--apk, --aab, --exe, --msix, --deb-gui, --deb-cli}",
-      );
-      exit(1);
-    }
-
     return Options._(
       apk: apk,
       aab: aab,
@@ -455,8 +412,6 @@ class Options {
       token: token?.trim(),
       slug: slug,
       action: action,
-      firstCommit: results['first-commit']?.trim(),
-      detailedLog: results['detailed-log'],
       identityName: results['identity-name'],
       publisher: results['publisher'],
       awaitUpload: results['await-upload'],
@@ -880,6 +835,7 @@ Future<File> buildAab(
     '--flavor=$flavor',
     '--build-name',
     buildDesc.toString(),
+    '--verbose',
   ], environment: env);
 
   return File(inputPath);
@@ -988,30 +944,13 @@ Future<Release> createRelease(
   GitHub client,
   RepositorySlug slug, {
   required Version version,
-  String? first,
-  required String last,
   bool detailedLog = true,
 }) async {
   final tagName = buildTagName(version);
 
-  print('Creating release $tagName ($last) ...');
+  print('Creating release $tagName ...');
 
-  if (first == null) {
-    try {
-      final prev = await client.repositories.getLatestRelease(slug);
-      first = prev.tagName!;
-    } on NotFound {
-      print('No previous release found');
-      rethrow;
-    }
-  }
-
-  final body = await buildReleaseNotes(
-    slug,
-    first,
-    last,
-    detailedLog: detailedLog,
-  );
+  final body = await buildReleaseNotes(version);
 
   final release = await client.repositories.createRelease(
     slug,
@@ -1022,7 +961,7 @@ Future<Release> createRelease(
       ..isPrerelease = false,
   );
 
-  print('Release $tagName ($last) successfully created: ${release.htmlUrl}');
+  print('Release $tagName successfully created: ${release.htmlUrl}');
 
   return release;
 }
@@ -1064,7 +1003,11 @@ Future<void> uploadAssets(
     ]);
   }
 
-  print('${assets.length} assets successfully uploaded');
+  if (assets.isEmpty) {
+    print('no assets to upload specified');
+  } else {
+    print('${assets.length} assets successfully uploaded');
+  }
 }
 
 Future<File> collateAsset(
@@ -1103,45 +1046,46 @@ Future<File> computeChecksum(File input) async {
   return output;
 }
 
-Future<String> buildReleaseNotes(
-  RepositorySlug slug,
-  String first,
-  String last, {
-  bool detailedLog = true,
-}) async {
-  final buf = StringBuffer();
+/// Create release notes by extracting the latest entry from the changelog.
+Future<String> buildReleaseNotes(Version version) async {
+  final headerRegexp = RegExp(r'^\s*##\s+\[(.*)\]\((.*)\)\s+\-\s+(.*)\s*$');
 
-  buf.writeln('## What\'s new');
-  buf.writeln('');
+  final input = File('CHANGELOG.md');
+  final output = StringBuffer()..writeln('## What\'s new');
 
-  // App
-  buf.writeln('### App');
-  buf.writeln('');
-  buf.writeln(changelogUrl(slug, first, last));
+  final expectedVersionString =
+      'v${version.major}.${version.minor}.${version.patch}';
+  var extracting = false;
+  String? compareUrl;
 
-  if (detailedLog) {
-    buf.writeln('');
-    buf.writeln(await getLog(slug, first, last));
-  }
+  await for (final line in input
+      .openRead()
+      .transform(utf8.decoder)
+      .transform(LineSplitter())) {
+    final match = headerRegexp.firstMatch(line);
 
-  // Library
-  final libSlug = RepositorySlug(slug.owner, 'ouisync');
-  final libLast = await getSubmoduleCommit(last, 'ouisync');
-  final libFirst = await getSubmoduleCommit(first, 'ouisync');
+    if (match == null) {
+      if (extracting) {
+        output.writeln(line);
+      }
 
-  if (libFirst != null && libLast != null && libFirst != libLast) {
-    buf.writeln('');
-    buf.writeln('### Library');
-    buf.writeln('');
-    buf.writeln(changelogUrl(libSlug, libFirst, libLast));
+      continue;
+    }
 
-    if (detailedLog) {
-      buf.writeln('');
-      buf.writeln(await getLog(libSlug, libFirst, libLast, 'ouisync'));
+    if (extracting) {
+      break;
+    }
+
+    if (match.group(1) == expectedVersionString) {
+      extracting = true;
+      compareUrl = match.group(2);
+      continue;
     }
   }
 
-  return buf.toString();
+  output.writeln('[All changes]($compareUrl)');
+
+  return output.toString();
 }
 
 Future<String> getCommit([String? workingDirectory]) => runCapture('git', [
@@ -1177,18 +1121,8 @@ String changelogUrl(RepositorySlug slug, String first, String last) {
   return 'https://github.com/${slug.owner}/${slug.name}/compare/$first...$last';
 }
 
-Version stripBuild(Version version) {
-  final pre = version.preRelease.join('.');
-  return Version(
-    version.major,
-    version.minor,
-    version.patch,
-    pre: pre.isNotEmpty ? pre : null,
-  );
-}
-
 String buildTagName(Version version) {
-  final v = stripBuild(version).canonicalizedVersion;
+  final v = Version(version.major, version.minor, version.patch);
   return 'v$v';
 }
 
