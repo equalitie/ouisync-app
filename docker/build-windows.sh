@@ -46,7 +46,7 @@ function exe {
 dock build -t $image_name - < docker/Dockerfile.build-windows
 
 # Start container; Auto destroy on this script exit
-dock run -d --rm --name $container_name -p 22 ouisync.windows-builder \
+dock run -d --rm --name $container_name -p 22 $image_name \
     sh -c 'sleep 60; while [ -n "$(find /tmp/alive -cmin -10)" ]; do sleep 10; done'
 
 # Prevent the container from stopping
@@ -95,11 +95,13 @@ exe c:/ouisync-app dart pub get
 exe c:/ouisync-app dart run util/release.dart --flavor=production --sentry=C:/secrets/sentry_dsn --exe --msix
 
 # Collect artifacts. Hyper-V doesn't allow `docker cp` from a running container, so using scp
-function setup_ssh() {
+function setup_sshd() {
     local public_key=$(cat ~/.ssh/id_ed25519.pub)
-    exe / powershell Add-Content -Force -Path C:\ProgramData\ssh\administrators_authorized_keys -Value "$public_key"
+    exe / powershell Add-Content -Force -Path c:/ProgramData/ssh/administrators_authorized_keys -Value "'$public_key'"
     exe / powershell Start-Service sshd
 }
+
+setup_sshd
 
 mkdir -p $out_dir
 scp -P $ssh_port -r \
