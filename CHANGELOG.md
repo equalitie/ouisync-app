@@ -12,9 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Breaking changes
 
-- Update [Ouisync library](https://github.com/equalitie/ouisync) to [v0.9.0]
-  (https://github.com/equalitie/ouisync/blob/master/CHANGELOG.md#v0.9.0). Due to the sync protocol
-  changes this version can no longer sync with peers running any of the the previous versions.
+- Update [Ouisync library](https://github.com/equalitie/ouisync) to [v0.9.0](https://github.com/equalitie/ouisync/blob/master/CHANGELOG.md#v0.9.0). Due to the sync protocol changes this version can no longer sync with peers running any of the the previous versions.
 
 ### Other changes
 
