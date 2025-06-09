@@ -1,6 +1,6 @@
 # Intentionally using an older LTS version because binaries built there will
 # run in newer versions, but not vice versa.
-FROM ubuntu:24.04
+FROM ubuntu:22.04
 
 ENV FLUTTER_VERSION=3.29.3
 
