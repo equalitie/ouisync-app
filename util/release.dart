@@ -653,7 +653,8 @@ Future<File> buildDebGUI({
   final arch = 'amd64';
   final packageName = '$name-gui_${buildDesc}_$arch';
 
-  final packageDir = Directory('${outputDir.path}/$packageName');
+  final bundleDir = Directory('build/linux/x64/release/bundle');
+  final packageDir = Directory('${bundleDir.parent.path}/gui_debian_package');
 
   // Delete any previous dir
   try {
@@ -665,8 +666,6 @@ Future<File> buildDebGUI({
   await packageDir.create();
 
   // Copy files
-  final bundleDir = Directory('build/linux/x64/release/bundle');
-
   final libDir = Directory('${packageDir.path}/usr/lib/$name');
   await libDir.create(recursive: true);
   await copyDirectory(bundleDir, libDir);
@@ -760,7 +759,8 @@ Future<File> buildDebCLI({
   final arch = 'amd64';
   final packageName = '$name-cli_${buildDesc}_$arch';
 
-  final packageDir = Directory('${outputDir.path}/$packageName');
+  final targetDir = Directory('./ouisync/target/release');
+  final packageDir = Directory('${targetDir.path}/cli_debian_package');
 
   // Delete any previous dir
   try {
@@ -775,7 +775,7 @@ Future<File> buildDebCLI({
 
   final binDir = Directory('${packageDir.path}/usr/bin');
   await binDir.create(recursive: true);
-  await File('./ouisync/target/release/ouisync').copy('${binDir.path}/ouisync');
+  await File(p.join(targetDir.path, 'ouisync')).copy('${binDir.path}/ouisync');
 
   // Create debian control file
   final debDir = Directory('${packageDir.path}/DEBIAN');
