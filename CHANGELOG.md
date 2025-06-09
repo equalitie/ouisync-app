@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Implement operations on multiple files/directories (copy, move, delete, download and upload).
 - Support edge-to-edge mode on Android 15+.
 - Various smaller UI/UX improvements.
+- Add scripts and Dockerfiles for remote release building.
 
 ## [v0.8.3](https://github.com/equalitie/ouisync-app/compare/v0.8.2...v0.8.3-production) - 2024-11-15
 
