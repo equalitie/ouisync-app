@@ -64,24 +64,22 @@ Future<void> main(List<String> args) async {
 
   final git = await GitDir.fromExisting(p.current);
 
-  Version version = determineVersion(pubspec, options);
-
   final commit = await getCommit();
-  final buildDesc = BuildDesc(version, commit);
+  Version version = determineVersion(pubspec, options, commit);
 
-  if (buildDesc.flavor.doGitCleanCheck && !await checkWorkingTreeIsClean(git)) {
+  if (version.flavor.doGitCleanCheck && !await checkWorkingTreeIsClean(git)) {
     return;
   }
 
   // TODO: use `pubspec.name` here but first rename it from "ouisync_app" to "ouisync"
   final name = 'ouisync';
 
-  final outputDir = await createOutputDir(buildDesc);
+  final outputDir = await createOutputDir(options.assetDirPath, version);
 
   List<File> assets = [];
 
   if (options.apk || options.aab) {
-    Flavor flavor = buildDesc.flavor;
+    Flavor flavor = version.flavor;
 
     final secrets = switch (flavor.requiresSigning) {
       true =>
@@ -92,15 +90,15 @@ Future<void> main(List<String> args) async {
     };
 
     try {
-      final aab = await buildAab(buildDesc, secrets, sentryDSN);
+      final aab = await buildAab(version, secrets, sentryDSN);
 
       if (options.aab) {
-        assets.add(await collateAsset(outputDir, name, buildDesc, aab));
+        assets.add(await collateAsset(outputDir, name, version, aab));
       }
 
       if (options.apk) {
         final apk = await extractApk(aab, flavor, secrets);
-        assets.add(await collateAsset(outputDir, name, buildDesc, apk));
+        assets.add(await collateAsset(outputDir, name, version, apk));
       }
     } finally {
       await secrets?.destroy();
@@ -108,8 +106,8 @@ Future<void> main(List<String> args) async {
   }
 
   if (options.exe) {
-    final asset = await buildWindowsInstaller(buildDesc, sentryDSN);
-    assets.add(await collateAsset(outputDir, name, buildDesc, asset));
+    final asset = await buildWindowsInstaller(version, sentryDSN);
+    assets.add(await collateAsset(outputDir, name, version, asset));
   }
 
   if (options.msix) {
@@ -123,14 +121,14 @@ Future<void> main(List<String> args) async {
       options.publisher!,
       sentryDSN,
     );
-    assets.add(await collateAsset(outputDir, name, buildDesc, asset));
+    assets.add(await collateAsset(outputDir, name, version, asset));
   }
 
   if (options.debGui) {
     final asset = await buildDebGUI(
       name: name,
       outputDir: outputDir,
-      buildDesc: buildDesc,
+      version: version,
       description: pubspec.description ?? '',
       sentryDSN: sentryDSN,
     );
@@ -141,7 +139,7 @@ Future<void> main(List<String> args) async {
     final asset = await buildDebCLI(
       name: name,
       outputDir: outputDir,
-      buildDesc: buildDesc,
+      version: version,
       description: pubspec.description ?? '',
     );
     assets.add(asset);
@@ -169,30 +167,54 @@ Future<void> main(List<String> args) async {
     stdin.readLineSync();
   }
 
-  final client = GitHub(auth: auth);
+  if (options.action == ReleaseAction.create ||
+      options.action == ReleaseAction.update) {
+    final client = GitHub(auth: auth);
+    final storedAssets = await readAssetsFromDir(outputDir);
 
-  try {
-    switch (options.action) {
-      case ReleaseAction.create:
-        final release = await createRelease(
-          client,
-          options.slug,
-          version: version,
-        );
-        await uploadAssets(client, release, assets);
-        break;
+    try {
+      // Get assets from the output dir instead of `assets` because some could have been
+      // created by different run's of this script.
 
-      case ReleaseAction.update:
-        final release = await findLatestDraftRelease(client, options.slug);
-        await uploadAssets(client, release, assets);
-        break;
+      switch (options.action) {
+        case ReleaseAction.create:
+          final release = await createRelease(
+            client,
+            options.slug,
+            version: version,
+          );
+          await uploadAssets(client, release, storedAssets);
+          break;
 
-      case null:
-        break;
+        case ReleaseAction.update:
+          final release = await findLatestDraftRelease(client, options.slug);
+          await uploadAssets(client, release, storedAssets);
+          break;
+
+        case null:
+          break;
+      }
+    } finally {
+      client.dispose();
     }
-  } finally {
-    client.dispose();
   }
+}
+
+Future<List<File>> readAssetsFromDir(Directory assetDir) async {
+  final files = <File>[];
+  Version? version;
+  await for (final entry in assetDir.list()) {
+    if (entry is File) {
+      final desc = AssetDesc.parse(p.basename(entry.path));
+      if (version == null) {
+        version = desc.version;
+      } else if (version != desc.version) {
+        throw "Assets in ${assetDir.path} have different versions ('$version' != '${desc.version}')";
+      }
+      files.add(entry);
+    }
+  }
+  return files;
 }
 
 class Options {
@@ -212,6 +234,7 @@ class Options {
   final Flavor flavor;
   final String? androidKeyPropertiesPath;
   final String? sentryDSN;
+  final String? assetDirPath;
 
   Options._({
     this.apk = false,
@@ -221,6 +244,7 @@ class Options {
     this.debGui = false,
     this.debCli = false,
     this.token,
+    this.assetDirPath,
     required this.slug,
     this.action,
     this.identityName,
@@ -251,6 +275,12 @@ class Options {
       'deb-cli',
       help: 'Build Linux deb CLI package',
       defaultsTo: false,
+    );
+
+    parser.addOption(
+      'asset-dir',
+      help:
+          'Path to a directory where assets will be created and/or taken from when releasing to GitHub',
     );
 
     parser.addOption(
@@ -342,6 +372,8 @@ class Options {
             ? await File(tokenFilePath).readAsString()
             : null;
 
+    final assetDirPath = results['asset-dir'];
+
     final slug = RepositorySlug.full(results['repo']!);
 
     final action =
@@ -410,6 +442,7 @@ class Options {
       debGui: debGui,
       debCli: debCli,
       token: token?.trim(),
+      assetDirPath: assetDirPath,
       slug: slug,
       action: action,
       identityName: results['identity-name'],
@@ -424,72 +457,130 @@ class Options {
 
 enum ReleaseAction { create, update }
 
-class BuildDesc {
-  final Version version;
-  final DateTime timestamp;
-  final String commit;
+extension OuisyncVersion on Version {
+  Flavor get flavor => Flavor.fromString(preRelease.first.toString());
+  String? get buildId => build.elementAtOrNull(0)?.toString();
+  String? get commit => build.elementAtOrNull(1)?.toString();
 
-  BuildDesc(this.version, this.commit) : timestamp = DateTime.now();
+  Version withoutBuildMetadata() {
+    return Version(
+      major,
+      minor,
+      patch,
+      pre: preRelease.isNotEmpty ? flavor.toString() : null,
+    );
+  }
 
-  // The "foo" in "1.2.3+foo".
-  String get buildIdentifier => version.build[0].toString();
+  Version withoutFlavor() {
+    String? build;
+    final buildId = this.buildId;
+    final commit = this.commit;
 
-  Flavor get flavor => Flavor.fromString(version.preRelease.first.toString());
+    if (buildId != null && commit != null) {
+      build = "$buildId.$commit";
+    } else if (buildId != null && commit == null) {
+      build = "$buildId";
+    } else if (buildId == null && commit != null) {
+      build = "$commit";
+    }
+
+    return Version(major, minor, patch, build: build);
+  }
+
+  Version withoutBuildId() {
+    String? build;
+    final commit = this.commit;
+
+    if (commit != null) {
+      build = "$commit";
+    }
+
+    return Version(major, minor, patch, build: build);
+  }
+}
+
+class AssetDesc {
+  // "ouisync-cli_0.9.0-nightly+70.2a5e03d5_amd64.deb"
+  // |-----------|-------------------------|-----|---|
+  //      |                 |                 |    |
+  //     name            version            arch   |
+  //                                             extension
+  String name;
+  Version version;
+  String arch;
+  String extension;
+  bool isChecksum;
+
+  AssetDesc(
+    this.name,
+    this.version,
+    this.extension, {
+    this.arch = '',
+    this.isChecksum = false,
+  }) {}
+
+  static AssetDesc parse(String filename) {
+    final (name, rest0) = _splitAt(filename, filename.indexOf('_'));
+    var (version_and_suffix, extension) = _splitAt(
+      rest0!,
+      rest0!.lastIndexOf('.'),
+    );
+    bool isChecksum = false;
+    if (extension == checksumExtension) {
+      isChecksum = true;
+      (version_and_suffix, extension) = _splitAt(
+        version_and_suffix,
+        version_and_suffix.lastIndexOf('.'),
+      );
+    }
+    final (version, arch) = _splitAt(
+      version_and_suffix,
+      version_and_suffix.indexOf('_'),
+    );
+
+    return AssetDesc(
+      name,
+      Version.parse(version),
+      extension!,
+      arch: arch ?? '',
+      isChecksum: isChecksum,
+    );
+  }
 
   @override
   String toString() {
-    final buffer = StringBuffer();
-
-    _formatVersion(buffer);
-
-    buffer.write('-');
-
-    _formatRevision(buffer);
-
-    return buffer.toString();
+    return toStringWith(version.toString());
   }
 
-  // Portion of the package _file_ name description
-  String packageDescription() {
-    final buffer = StringBuffer();
-    _formatVersion(buffer);
-    buffer.write('-');
-    buffer.write(commit);
-    return buffer.toString();
+  String toStringWith(String version) {
+    return "${name}_${version}${_archTag}.$extension${_checksumExtTag}";
   }
 
-  StringBuffer _formatVersion(StringBuffer buffer) {
-    buffer
-      ..write(version.major)
-      ..write('.')
-      ..write(version.minor)
-      ..write('.')
-      ..write(version.patch);
-
-    return buffer;
-  }
-
-  StringBuffer _formatTimestamp(StringBuffer buffer, [String separator = '']) =>
-      buffer..write(
-        formatDate(timestamp, [
-          yyyy,
-          separator,
-          mm,
-          separator,
-          dd,
-          separator,
-          HH,
-          separator,
-          nn,
-          separator,
-          ss,
-        ]),
+  String gitHubName() {
+    if (version.flavor == Flavor.production) {
+      return toStringWith(
+        version.withoutFlavor().withoutBuildMetadata().toString(),
       );
+    } else {
+      return toStringWith(version.commit!);
+    }
+  }
 
-  StringBuffer _formatRevision(StringBuffer buffer) =>
-      _formatTimestamp(buffer)
-        ..write('.')
-        ..write(commit);
+  String get _checksumExtTag {
+    return isChecksum ? '.$checksumExtension' : '';
+  }
+
+  String get _archTag {
+    return arch.isNotEmpty ? '_$arch' : '';
+  }
+
+  static (String, String?) _splitAt(String str, int index) {
+    if (index != -1) {
+      return (str.substring(0, index), str.substring(index + 1));
+    } else {
+      return (str, null);
+    }
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -497,11 +588,8 @@ class BuildDesc {
 // exe
 //
 ////////////////////////////////////////////////////////////////////////////////
-Future<File> buildWindowsInstaller(
-  BuildDesc buildDesc,
-  String? sentryDSN,
-) async {
-  final buildName = buildDesc.toString();
+Future<File> buildWindowsInstaller(Version version, String? sentryDSN) async {
+  final buildName = version.toString();
 
   await run('flutter', [
     'build',
@@ -513,7 +601,7 @@ Future<File> buildWindowsInstaller(
     buildName,
     // HACK: `flutter build windows` doesn't support --flavor yet. Pass it via env variable instead.
     '--dart-define',
-    'FLUTTER_APP_FLAVOR=${buildDesc.flavor}',
+    'FLUTTER_APP_FLAVOR=${version.flavor}',
   ]);
 
   /// Download the Dokan MSI to be bundle with the Ouisync MSIX, into the source
@@ -633,7 +721,7 @@ Future<void> prepareDokanBundle() async {
 Future<File> buildDebGUI({
   required String name,
   required Directory outputDir,
-  required BuildDesc buildDesc,
+  required Version version,
   required String? sentryDSN,
   String description = '',
 }) async {
@@ -646,7 +734,7 @@ Future<File> buildDebGUI({
   // NOTE: This must be the same as `APPLICATION_ID` defined in `linux/CMakeList.txt`.
   final applicationId = "org.equalitie.$name";
 
-  final buildName = buildDesc.toString();
+  final buildName = version.toString();
 
   await run('flutter', [
     'build',
@@ -656,11 +744,10 @@ Future<File> buildDebGUI({
     buildName,
     // HACK: `flutter build linux` doesn't support --flavor yet. Pass it via env variable instead.
     '--dart-define',
-    'FLUTTER_APP_FLAVOR=${buildDesc.flavor}',
+    'FLUTTER_APP_FLAVOR=${version.flavor}',
   ]);
 
-  final arch = 'amd64';
-  final packageName = '$name-gui_${buildDesc.packageDescription()}_$arch';
+  final assetDesc = AssetDesc('$name-gui', version, 'deb', arch: 'amd64');
 
   final bundleDir = Directory('build/linux/x64/release/bundle');
   final packageDir = Directory('${bundleDir.parent.path}/gui_debian_package');
@@ -727,13 +814,13 @@ Future<File> buildDebGUI({
   final controlContent =
       'Package: $name-gui\n'
       'Version: $buildName\n'
-      'Architecture: $arch\n'
+      'Architecture: ${assetDesc.arch}\n'
       'Depends: libgtk-3-0, libsecret-1-0, libfuse2, libayatana-appindicator3-1, libappindicator3-1\n'
       'Maintainer: Ouisync developers <support@ouisync.net>\n'
       'Description: $description\n';
   await File('${debDir.path}/control').writeAsString(controlContent);
 
-  final package = File('${outputDir.path}/$packageName.deb');
+  final package = File('${outputDir.path}/$assetDesc');
 
   await run('dpkg-deb', [
     '--root-owner-group',
@@ -753,10 +840,10 @@ Future<File> buildDebGUI({
 Future<File> buildDebCLI({
   required String name,
   required Directory outputDir,
-  required BuildDesc buildDesc,
+  required Version version,
   String description = '',
 }) async {
-  final buildName = buildDesc.toString();
+  final buildName = version.toString();
 
   await run('cargo', [
     'build',
@@ -765,8 +852,7 @@ Future<File> buildDebCLI({
     'ouisync-cli',
   ], workingDirectory: './ouisync');
 
-  final arch = 'amd64';
-  final packageName = '$name-cli_${buildDesc.packageDescription()}_$arch';
+  final assetDesc = AssetDesc('$name-cli', version, 'deb', arch: 'amd64');
 
   final targetDir = Directory('./ouisync/target/release');
   final packageDir = Directory('${targetDir.path}/cli_debian_package');
@@ -793,13 +879,13 @@ Future<File> buildDebCLI({
   final controlContent =
       'Package: $name-cli\n'
       'Version: $buildName\n'
-      'Architecture: $arch\n'
+      'Architecture: ${assetDesc.arch}\n'
       'Depends: libfuse2\n'
       'Maintainer: Ouisync developers <support@ouisync.net>\n'
       'Description: $description\n';
   await File('${debDir.path}/control').writeAsString(controlContent);
 
-  final package = File('${outputDir.path}/$packageName.deb');
+  final package = File('${outputDir.path}/$assetDesc');
 
   await run('dpkg-deb', [
     '--root-owner-group',
@@ -817,11 +903,11 @@ Future<File> buildDebCLI({
 //
 ////////////////////////////////////////////////////////////////////////////////
 Future<File> buildAab(
-  BuildDesc buildDesc,
+  Version version,
   AndroidSecrets? secrets,
   String? sentryDSN,
 ) async {
-  Flavor flavor = buildDesc.flavor;
+  Flavor flavor = version.flavor;
 
   final env = <String, String>{};
 
@@ -840,10 +926,10 @@ Future<File> buildAab(
     '--release',
     if (sentryDSN != null) '--dart-define=SENTRY_DSN=$sentryDSN',
     '--build-number',
-    buildDesc.buildIdentifier,
+    version.buildId!,
     '--flavor=$flavor',
     '--build-name',
-    buildDesc.toString(),
+    version.toString(),
     '--verbose',
   ], environment: env);
 
@@ -994,18 +1080,21 @@ Future<void> uploadAssets(
   List<File> assets,
 ) async {
   for (final asset in assets) {
-    final name = p.basename(asset.path);
+    final fileName = p.basename(asset.path);
+    AssetDesc dsc = AssetDesc.parse(fileName);
     final content = await asset.readAsBytes();
     final contentType =
-        p.extension(name) == checksumExtension
+        dsc.extension == ".$checksumExtension"
             ? 'text/plain'
             : 'application/octet-stream';
 
-    print('Uploading $name ...');
+    final dstFileName = dsc.gitHubName();
+
+    print('Uploading $fileName as $dstFileName ...');
 
     await client.repositories.uploadReleaseAssets(release, [
       CreateReleaseAsset(
-        name: name,
+        name: dstFileName,
         contentType: contentType,
         assetData: content,
       ),
@@ -1022,20 +1111,16 @@ Future<void> uploadAssets(
 Future<File> collateAsset(
   Directory outputDir,
   String name,
-  BuildDesc buildDesc,
-  File inputFile, {
-  String suffix = '',
-}) async {
-  final ext = p.extension(inputFile.path);
+  Version version,
+  File inputFile,
+) async {
+  final ext = p.extension(inputFile.path).substring(1);
   return await inputFile.copy(
-    p.join(
-      outputDir.path,
-      '${name}_${buildDesc.packageDescription()}$suffix$ext',
-    ),
+    p.join(outputDir.path, AssetDesc(name, version, ext).toString()),
   );
 }
 
-const checksumExtension = '.sha256';
+const checksumExtension = 'sha256';
 
 Future<void> computeChecksums(List<File> assets) async {
   assets.addAll(await Future.wait(assets.map(computeChecksum)));
@@ -1052,7 +1137,7 @@ Future<File> computeChecksum(File input) async {
   final hash = HEX.encode((await sink.hash()).bytes);
   final name = p.basename(input.path);
 
-  final output = File('${input.path}$checksumExtension');
+  final output = File('${input.path}.$checksumExtension');
   await output.writeAsString('$hash  $name\n');
 
   return output;
@@ -1138,8 +1223,31 @@ String buildTagName(Version version) {
   return 'v$v';
 }
 
-Future<Directory> createOutputDir(BuildDesc buildDesc) async {
-  final dir = Directory('$rootWorkDir/release_$buildDesc');
+String formatTimestamp(DateTime timestamp) {
+  final separator = '';
+  return formatDate(timestamp, [
+    yyyy,
+    '-',
+    mm,
+    '-',
+    dd,
+    'T',
+    HH,
+    '-',
+    nn,
+    '-',
+    ss,
+  ]).toString();
+}
+
+Future<Directory> createOutputDir(String? dir_path, Version version) async {
+  final timestamp = formatTimestamp(DateTime.now());
+  final Directory dir;
+  if (dir_path != null) {
+    dir = Directory(dir_path);
+  } else {
+    dir = Directory('$rootWorkDir/release_${timestamp}_$version');
+  }
   await dir.create(recursive: true);
 
   // Create 'latest' symlink
@@ -1154,7 +1262,7 @@ Future<Directory> createOutputDir(BuildDesc buildDesc) async {
   return dir;
 }
 
-Version determineVersion(Pubspec pubspec, Options options) {
+Version determineVersion(Pubspec pubspec, Options options, String commit) {
   final pubspecVersion = pubspec.version!;
   if (pubspecVersion.isPreRelease) {
     throw "Pre-release string (the \"foo\" in \"1.2.3-foo\") is already set in pubspec.yaml";
@@ -1164,7 +1272,7 @@ Version determineVersion(Pubspec pubspec, Options options) {
     pubspecVersion.minor,
     pubspecVersion.patch,
     pre: options.flavor.toString(),
-    build: pubspecVersion.build[0].toString(),
+    build: "${pubspecVersion.build[0].toString()}.$commit",
   );
 }
 
