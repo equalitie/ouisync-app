@@ -449,6 +449,15 @@ class BuildDesc {
     return buffer.toString();
   }
 
+  // Portion of the package _file_ name description
+  String packageDescription() {
+    final buffer = StringBuffer();
+    _formatVersion(buffer);
+    buffer.write('-');
+    buffer.write(commit);
+    return buffer.toString();
+  }
+
   StringBuffer _formatVersion(StringBuffer buffer) {
     buffer
       ..write(version.major)
@@ -651,7 +660,7 @@ Future<File> buildDebGUI({
   ]);
 
   final arch = 'amd64';
-  final packageName = '$name-gui_${buildDesc}_$arch';
+  final packageName = '$name-gui_${buildDesc.packageDescription()}_$arch';
 
   final bundleDir = Directory('build/linux/x64/release/bundle');
   final packageDir = Directory('${bundleDir.parent.path}/gui_debian_package');
@@ -757,7 +766,7 @@ Future<File> buildDebCLI({
   ], workingDirectory: './ouisync');
 
   final arch = 'amd64';
-  final packageName = '$name-cli_${buildDesc}_$arch';
+  final packageName = '$name-cli_${buildDesc.packageDescription()}_$arch';
 
   final targetDir = Directory('./ouisync/target/release');
   final packageDir = Directory('${targetDir.path}/cli_debian_package');
@@ -1019,7 +1028,10 @@ Future<File> collateAsset(
 }) async {
   final ext = p.extension(inputFile.path);
   return await inputFile.copy(
-    p.join(outputDir.path, '${name}_$buildDesc$suffix$ext'),
+    p.join(
+      outputDir.path,
+      '${name}_${buildDesc.packageDescription()}$suffix$ext',
+    ),
   );
 }
 
