@@ -1,54 +1,56 @@
 # Creating a release
 
-## Prerequisite
+Bump the app version in `pubspec.yaml`.
 
-Create `android/key.properties` with the following content:
+Then run the following from the project root:
+
+```bash
+# Update dart dependencies
+dart pub get
+```
+
+Prepare secrets (see the next section) and run
+
+```bash
+# Build Linux and Android packages
+dart run util/release.dart --android-key-properties=$KEY_PROPERTIES --flavor=production --sentry=$SENTRY_DSN --apk --aab --deb-gui --deb-cli --asset-dir=/tmp/release
+```
+
+```bash
+# Build Windows packages (needs to run on a Windows OS)
+dart run util/release.dart --flavor=production --sentry=$SENTRY_DSN --exe --msix --asset-dir=/tmp/release
+```
+
+```bash
+# Publish the packages
+dart run utils/release.dart --create --token-file $GITHUB_TOKEN --asset-dir=/tmp/release
+```
+
+# Preparing secrets
+
+All packages require [Sentry DSN](https://docs.sentry.io/concepts/key-terms/dsn-explainer/),
+write it to a file and pass path to it as `--sentry` argument to `release.dart`.
+
+## Android packages
+
+Create `key.properties` file with the following content:
 
     storePassword=$STORE_PASSWORD
     keyPassword=$KEY_PASSWORD
-    keyAlias=upload
+    keyAlias=$KEY_ALIAS
     storeFile=path/to/keystore.jks
-
-(Note in our case `$STORE_PASSWORD` and `$KEY_PASSWORD` are the same). Do not commit this file to
-the source control (it should already be in `.gitignore`).
 
 The `path/to/keystore.jks` path should be absolute, or relative to the `android/app/` directory.
 
-Additionally, create a [GitHub access
-token](https://docs.github.com/en/rest/guides/getting-started-with-the-rest-api?apiVersion=2022-11-28#about-tokens)
+Pass path to the `key.properties` file as `--android-key-properties` argument to `release.dart`
+
+## Publishing to Github
+
+Create a [GitHub access token](https://docs.github.com/en/rest/guides/getting-started-with-the-rest-api?apiVersion=2022-11-28#about-tokens)
 
 Click on your profile icon > Settings > Developer settings > Personal access
 tokens > Tokens. Check the `write:packages` and `delete:packages` scopes
-(without the latter you won't be able to upload more assets using the script).
+(the latter is needed to `--update` packages once a release is created).
 
-and put it into a file somewhere, you'll pass it to the release script as an
-argument. Again, don't commit it.
+Write it to a file and pass it to `release.dart` as the `--token-file` argument.
 
-## Creating a release
-
-Bump the app version in `pubspec.yaml`. The version has the following format:
-
-    MAJOR.MINOR.PATH{-PRE}+BUILD
-
-Where `MAJOR`, `MINOR` and `PATCH` are the corresponding semver components, `PRE` is an optional
-pre-release tag (e.g. `alpha`, `beta`, `rc1`, `rc2`, ...) and `BUILD` is the build number. The build
-number must be incremented for every release. The other components are just for user information
-and can be set to anything but ideally we should follow established practices (i.e., semver).
-
-Then run the provided `release.dart` script from the project root:
-
-    dart pub get
-    dart run utils/release.dart --create -t path/to/github/token/file
-
-Notes:
-
-- Omitting the github token still creates the release packages but doesn't upload them to github.
-
-## MSIX Additional assets
-
-For bundling additional assets with the Ouisync MSIX, place the required files inside ./additional_assets 
-
-## Publishing the release
-
-Go to [github releases](https://github.com/equalitie/ouisync-app/releases), edit the draft release,
-(add release notes, etc..) and when happy, publish it.
