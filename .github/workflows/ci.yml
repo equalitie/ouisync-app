@@ -135,6 +135,11 @@ jobs:
 
         if: matrix.analyze
 
+      - name: Test util
+        run: |
+          dart util/test.dart
+        if: matrix.name == 'linux-test'
+
       - name: Build Ouisync service library for tests
         working-directory: ouisync
         run: cargo build --package ouisync-service --lib
