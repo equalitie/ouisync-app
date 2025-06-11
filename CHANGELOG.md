@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Other changes
 
 - Ongoing work towards improving iOS and macOS support.
+- Implement background service icon on Android
 - Allow resetting repository access using share token.
 - Implement operations on multiple files/directories (copy, move, delete, download and upload).
 - Support edge-to-edge mode on Android 15+.
