@@ -155,52 +155,57 @@ Future<void> main(List<String> args) async {
 
   await computeChecksums(assets);
 
-  final auth =
-      options.token != null
-          ? Authentication.withToken(options.token)
-          : Authentication.anonymous();
-
-  if (options.action != null && options.awaitUpload) {
-    print("Press any key to start uploading to github");
-    // Doing async readline is a bit cumbersome, and the sync version will work just fine.
-    // https://gist.github.com/frencojobs/dca6a24e07ada2b9df1683ddc8fa45c6?permalink_comment_id=4057248#gistcomment-4057248
-    stdin.readLineSync();
-  }
-
-  if (options.action == ReleaseAction.create ||
-      options.action == ReleaseAction.update) {
-    final client = GitHub(auth: auth);
-    final storedAssets = await readAssetsFromDir(outputDir);
-
-    try {
-      // Get assets from the output dir instead of `assets` because some could have been
-      // created by different run's of this script.
-
-      switch (options.action) {
-        case ReleaseAction.create:
-          final release = await createRelease(
-            client,
-            options.slug,
-            version: version,
-          );
-          await uploadAssets(client, release, storedAssets);
-          break;
-
-        case ReleaseAction.update:
-          final release = await findLatestDraftRelease(client, options.slug);
-          await uploadAssets(client, release, storedAssets);
-          break;
-
-        case null:
-          break;
-      }
-    } finally {
-      client.dispose();
+  if (options.action != null) {
+    if (options.awaitUpload) {
+      print("Press any key to start uploading to github");
+      // Doing async readline is a bit cumbersome, and the sync version will work just fine.
+      // https://gist.github.com/frencojobs/dca6a24e07ada2b9df1683ddc8fa45c6?permalink_comment_id=4057248#gistcomment-4057248
+      stdin.readLineSync();
     }
+
+    final auth =
+        options.token != null
+            ? Authentication.withToken(options.token)
+            : Authentication.anonymous();
+
+    await publishToGithub(outputDir, options.action!, options.slug, auth);
   }
 }
 
-Future<List<File>> readAssetsFromDir(Directory assetDir) async {
+Future<void> publishToGithub(
+  Directory assetDir,
+  ReleaseAction action,
+  RepositorySlug slug,
+  Authentication auth,
+) async {
+  final client = GitHub(auth: auth);
+
+  // Get assets from the output dir instead of using the ones built in this run
+  // of this script because some assets could have been created by previous
+  // run's.
+  final (version, storedAssets) = await readAssetsFromDir(assetDir);
+
+  try {
+    switch (action) {
+      case ReleaseAction.create:
+        final release = await createRelease(client, slug, version: version);
+        await uploadAssets(client, release, storedAssets);
+        break;
+
+      case ReleaseAction.update:
+        final release = await findLatestDraftRelease(client, slug);
+        await uploadAssets(client, release, storedAssets);
+        break;
+
+      case null:
+        break;
+    }
+  } finally {
+    client.dispose();
+  }
+}
+
+Future<(Version, List<File>)> readAssetsFromDir(Directory assetDir) async {
   final files = <File>[];
   Version? version;
   await for (final entry in assetDir.list()) {
@@ -214,7 +219,10 @@ Future<List<File>> readAssetsFromDir(Directory assetDir) async {
       files.add(entry);
     }
   }
-  return files;
+  if (version == null || files.isEmpty) {
+    throw "No assets in ${assetDir.path} to publish";
+  }
+  return (version, files);
 }
 
 class Options {
