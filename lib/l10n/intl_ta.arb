@@ -752,7 +752,7 @@
   "@messageEnterDifferentName": {},
   "messageUnknownFileExtension": "தெரியாத கோப்பு நீட்டிப்பு",
   "@messageUnknownFileExtension": {},
-  "messageNoAppsForThisAction": "பயன்பாடுகள் இந்த செயலைச் செய்ய முடியாது",
+  "messageNoAppsForThisAction": "இந்த செயலை எந்த பயன்பாடும் செய்ய முடியாது",
   "@messageNoAppsForThisAction": {},
   "messageFilePreviewFailed": "எங்களால் கோப்பு முன்னோட்டத்தைத் தொடங்க முடியவில்லை",
   "@messageFilePreviewFailed": {},
@@ -999,5 +999,155 @@
   "accessModeWriteLabel": "எழுதுங்கள்",
   "@accessModeWriteLabel": {},
   "labelSynced": "ஒத்திசைக்கப்பட்டது",
-  "@labelSynced": {}
+  "@labelSynced": {},
+  "repoResetAuthInfoLabel": "அங்கீகார முறை",
+  "@repoResetAuthInfoLabel": {},
+  "repoResetAuthInfoBlindOrLocked": "அங்கீகார முறை",
+  "@repoResetAuthInfoBlindOrLocked": {},
+  "repoResetAuthInfoBlindOrLockedWarn": "பயன்பாட்டால் வித்தியாசத்தை சொல்ல முடியாது.",
+  "@repoResetAuthInfoBlindOrLockedWarn": {},
+  "repoResetAuthInfoLocked": "உள்ளக கடவுச்சொல்லின் பின்னால் பூட்டப்பட்டுள்ளது.",
+  "@repoResetAuthInfoLocked": {},
+  "repoResetAuthInfoPasswordIsStored": "கடவுச்சொல் இந்த சாதனத்தில் சேமிக்கப்படுகிறது.",
+  "@repoResetAuthInfoPasswordIsStored": {},
+  "repoResetAuthInfoKeyIsStored": "இந்த சாதனத்தில் விசை சேமிக்கப்படுகிறது.",
+  "@repoResetAuthInfoKeyIsStored": {},
+  "repoResetAuthInfoKeyIsStoredAndProtected": "இந்த சாதனத்தில் விசை சேமிக்கப்படுகிறது மற்றும் களஞ்சியத்தைத் திறக்க கூடுதல் சரிபார்ப்பு தேவை.",
+  "@repoResetAuthInfoKeyIsStoredAndProtected": {},
+  "repoResetTokenEmptyInfo": "செயலைத் தீர்மானிக்க சரியான கிள்ளாக்கு இணைப்பை வழங்கவும்.",
+  "@repoResetTokenEmptyInfo": {},
+  "repoResetTokenInvalid": "செல்லுபடியாகாத",
+  "@repoResetTokenInvalid": {},
+  "repoResetTokenInvalidInfo": "கிள்ளாக்கு இணைப்பு தவறானது.",
+  "@repoResetTokenInvalidInfo": {},
+  "repoResetTokenNonMatching": "கிள்ளாக்கு இந்த களஞ்சியத்துடன் ஒத்துப்போகாததால் எந்த நடவடிக்கையும் செய்ய முடியாது.",
+  "@repoResetTokenNonMatching": {},
+  "repoResetActionSame": "கிள்ளாக்கு மற்றும் களஞ்சிய அணுகல் ஒரே மாதிரியாக இருப்பதால் எந்த நடவடிக்கையும் செய்யப்படாது.",
+  "@repoResetActionSame": {},
+  "repoResetTokenAlreadySubmitted": "கிள்ளாக்கு ஏற்கனவே சமர்ப்பிக்கப்பட்டதால் எந்த நடவடிக்கையும் செய்யப்படாது.",
+  "@repoResetTokenAlreadySubmitted": {},
+  "repoResetActionBlindToBlind": "களஞ்சியம் குருடனாக மாறும்.",
+  "@repoResetActionBlindToBlind": {},
+  "repoResetActionBlindToBlindWarn": "இந்த களஞ்சியம் உள்ளக கடவுச்சொல்லின் பின்னால் பூட்டப்பட்ட அணுகலைப் படித்திருக்கலாம் அல்லது எழுதலாம். அப்படியானால், இந்த நடவடிக்கை செயல்படுத்தப்பட்ட பிறகு திறத்தல் சாத்தியமில்லை.",
+  "@repoResetActionBlindToBlindWarn": {},
+  "repoResetActionBlindToRead": "களஞ்சியம் மட்டுமே படிக்கப்படும்.",
+  "@repoResetActionBlindToRead": {},
+  "repoResetActionAnyToWrite": "களஞ்சியம் எழுதும் அணுகலைப் பெறும்.",
+  "@repoResetActionAnyToWrite": {},
+  "repoResetActionReadToBlind": "களஞ்சியம் அதன் வாசிப்பு அணுகலை இழக்கும்.",
+  "@repoResetActionReadToBlind": {},
+  "repoResetActionBlindToReadWarn": "இந்த களஞ்சியத்தில் உள்ளக கடவுச்சொல்லின் பின்னால் எழுதும் அணுகல் பூட்டப்பட்டிருக்கலாம். அப்படியானால், இந்த நடவடிக்கை செயல்படுத்தப்பட்ட பிறகு எழுத்தைத் திறப்பது சாத்தியமில்லை.",
+  "@repoResetActionBlindToReadWarn": {},
+  "repoResetActionWriteToBlindWarn": "இந்த நடவடிக்கை எழுத முடியாத கிள்ளாக்கு இணைப்பு இல்லாமல் மாற்ற முடியாதது.",
+  "@repoResetActionWriteToBlindWarn": {},
+  "repoResetConfirmUpdateMessage": "புதுப்பிப்பு செயலுடன் தொடர விரும்புகிறீர்களா?",
+  "@repoResetConfirmUpdateMessage": {},
+  "messageRepositoryDeleted": "களஞ்சியம் {name} நீக்கப்பட்டது",
+  "@messageRepositoryDeleted": {},
+  "messageRepositoryRenamed": "களஞ்சியம் {name} என மறுபெயரிடப்பட்டது",
+  "@messageRepositoryRenamed": {},
+  "messageFileRenamed": "கோப்பு {name} என மறுபெயரிடப்பட்டது",
+  "@messageFileRenamed": {},
+  "titleCopyEntries": "நகலெடு",
+  "@titleCopyEntries": {
+    "description": "Title for the confirmation dialog when copying entries"
+  },
+  "titleMoveEntries": "நகர்த்தவும்",
+  "@titleMoveEntries": {
+    "description": "Title for the confirmation dialog when moving entries"
+  },
+  "titleSaveEntriesToDevice": "சாதனத்தில் சேமிக்கவும்",
+  "@titleSaveEntriesToDevice": {
+    "description": "Title for the confirmation dialog when saving entries to device"
+  },
+  "titleDeleteEntries": "நீக்கு",
+  "@titleDeleteEntries": {
+    "description": "Title for the confirmation dialog when deleting entries"
+  },
+  "messageFileDeleted": "கோப்பு வெற்றிகரமாக நீக்கப்பட்டது: {name}",
+  "@messageFileDeleted": {},
+  "messageBackgroundNotification": "OUISYNC இயங்குகிறது",
+  "@messageBackgroundNotification": {},
+  "messagePleaseAuthenticate": "தயவுசெய்து அங்கீகரிக்கவும்",
+  "@messagePleaseAuthenticate": {},
+  "messageCopyEntries": "தேர்வை இங்கே நகலெடுக்கவும்: \n\n{totals}",
+  "@messageCopyEntries": {
+    "description": "Message displayed in a confirmation dialog when copying entries",
+    "placeholders": {
+      "totals": {
+        "type": "String",
+        "example": "2 files, 1 folder"
+      }
+    }
+  },
+  "messageMoveEntries": "தேர்வை இங்கே நகர்த்தவும்: \n\n{totals}",
+  "@messageMoveEntries": {
+    "description": "Message displayed in a confirmation dialog when moving entries",
+    "placeholders": {
+      "totals": {
+        "type": "String",
+        "example": "2 files, 1 folder"
+      }
+    }
+  },
+  "messageSaveEntriesToDevice": "தேர்வைச் சேமிக்கவும்: \n\n{totals}",
+  "@messageSaveEntriesToDevice": {
+    "description": "Message displayed in a confirmation dialog when saving entries to the device",
+    "placeholders": {
+      "totals": {
+        "type": "String",
+        "example": "2 files, 1 folder"
+      }
+    }
+  },
+  "messageDeleteEntries": "தேர்வை நீக்கு: \n\n{totals}",
+  "@messageDeleteEntries": {
+    "description": "Message displayed in a confirmation dialog when deleting entries",
+    "placeholders": {
+      "totals": {
+        "type": "String",
+        "example": "2 files, 1 folder"
+      }
+    }
+  },
+  "repoResetTitle": "களஞ்சிய அணுகலை மீட்டமைக்கவும்",
+  "@repoResetTitle": {},
+  "repoResetRepoNameLabel": "களஞ்சிய பெயர்",
+  "@repoResetRepoNameLabel": {},
+  "repoResetAccessTypeLabel": "களஞ்சிய அணுகல் வகை",
+  "@repoResetAccessTypeLabel": {},
+  "repoResetAccessTypeInfoBlindOrLocked": "குருட்டு அல்லது பூட்டப்பட்ட",
+  "@repoResetAccessTypeInfoBlindOrLocked": {},
+  "repoResetAccessTypeInfoRead": "படிக்க",
+  "@repoResetAccessTypeInfoRead": {},
+  "repoResetAccessTypeInfoWrite": "எழுதுங்கள்",
+  "@repoResetAccessTypeInfoWrite": {},
+  "repoResetTokenTypeLabel": "கிள்ளாக்கு அணுகல் வகை",
+  "@repoResetTokenTypeLabel": {},
+  "repoResetActionInfoLabel": "சமர்ப்பிக்க வேண்டிய நடவடிக்கை",
+  "@repoResetActionInfoLabel": {},
+  "repoResetActionWriteToRead": "களஞ்சியம் அதன் எழுதும் அணுகலை இழக்கும்.",
+  "@repoResetActionWriteToRead": {},
+  "repoResetActionWriteToReadWarn": "இந்த நடவடிக்கை எழுத முடியாத கிள்ளாக்கு இணைப்பு இல்லாமல் மாற்ற முடியாதது.",
+  "@repoResetActionWriteToReadWarn": {},
+  "repoResetActionWriteToBlind": "களஞ்சியம் அதன் வாசிப்பு மற்றும் எழுதும் அணுகலை இழக்கும்.",
+  "@repoResetActionWriteToBlind": {},
+  "repoResetConfirmUpdateTitle": "உறுதி செய்யவும்",
+  "@repoResetConfirmUpdateTitle": {},
+  "repoResetActionReadToBlindWarn": "கிள்ளாக்கு இணைப்பு படிக்க அல்லது எழுதாமல் இந்த நடவடிக்கை மாற்ற முடியாதது.",
+  "@repoResetActionReadToBlindWarn": {},
+  "iconCopy": "நகலெடு",
+  "@iconCopy": {},
+  "actionIDontHaveALocalPassword": "இந்த களஞ்சியத்திற்கான உள்ளக கடவுச்சொல் என்னிடம் இல்லை",
+  "@actionIDontHaveALocalPassword": {},
+  "actionSelect": "தேர்ந்தெடு",
+  "@actionSelect": {},
+  "actionDownload": "பதிவிறக்கம்",
+  "@actionDownload": {},
+  "actionCopy": "நகலெடு",
+  "@actionCopy": {},
+  "messageErrorCreatingFolder": "கோப்புறையை உருவாக்கும் பிழை {name}",
+  "@messageErrorCreatingFolder": {},
+  "messageFolderRenamed": "கோப்புறை {name} என மறுபெயரிடப்பட்டது",
+  "@messageFolderRenamed": {}
 }
