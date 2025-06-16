@@ -81,8 +81,15 @@ Future<void> viewFile({
         throw _RepoNotMounted();
       }
 
+      loggy.warning("mountPoint: $mountPoint");
+      loggy.warning("path: $path");
       final url = Uri(scheme: 'file', path: '$mountPoint$path');
 
+      loggy.warning("url: $url");
+      loggy.warning("url.toString(): ${url.toString()}");
+      loggy.warning(
+        "Uri.decodeFull(url.toString()): ${Uri.decodeFull(url.toString())}",
+      );
       // Special non ASCII characters are encoded using Escape Encoding
       // https://datatracker.ietf.org/doc/html/rfc2396#section-2.4.1
       // which are not decoded back by the url_launcher plugin on Windows
