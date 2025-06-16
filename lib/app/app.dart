@@ -14,7 +14,7 @@ import 'cubits/cubits.dart'
     show LocaleCubit, LocaleState, MountCubit, ReposCubit;
 import 'pages/pages.dart';
 import 'utils/dirs.dart';
-import 'utils/log.dart';
+import 'utils/log.dart' as log;
 import 'utils/platform/platform.dart' show PlatformWindowManager;
 import 'utils/utils.dart'
     show
@@ -72,8 +72,8 @@ Future<HomeWidget> _initHomeWidget(List<String> args) async {
     packageInfo.appName,
   );
 
-  var dirs = await Dirs.init();
-  await LogUtils.init(dirs);
+  final dirs = await Dirs.init();
+  await log.init(dirs);
 
   final (server, session) = await _initServerAndSession(dirs, windowManager);
   final settings = await loadAndMigrateSettings(session);
@@ -94,12 +94,10 @@ Future<(Server, Session)> _initServerAndSession(
   Dirs dirs,
   PlatformWindowManager windowManager,
 ) async {
-  final logger = appLogger('');
+  final logger = log.named('');
 
   final server = Server.create(configPath: dirs.config);
-  server.initLog(
-    callback: (level, message) => logger.log(level.toLoggy(), message),
-  );
+  await server.initLog();
 
   try {
     await server.start();

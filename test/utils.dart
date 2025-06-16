@@ -14,10 +14,11 @@ import 'package:ouisync_app/app/cubits/mount.dart';
 import 'package:ouisync_app/app/cubits/repos.dart';
 import 'package:ouisync_app/app/pages/main_page.dart';
 import 'package:ouisync_app/app/utils/dirs.dart';
+import 'package:ouisync_app/app/utils/log.dart' as log;
 import 'package:ouisync_app/app/utils/platform/platform.dart';
 import 'package:ouisync_app/app/utils/random.dart';
 import 'package:ouisync_app/app/utils/utils.dart'
-    show CacheServers, MasterKey, Settings, appLogger;
+    show CacheServers, MasterKey, Settings;
 import 'package:ouisync_app/generated/l10n.dart';
 import 'package:ouisync/ouisync.dart'
     show Session, SetLocalSecretKeyAndSalt, Server;
@@ -29,7 +30,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stack_trace/stack_trace.dart';
 export 'package:flutter/foundation.dart' show debugPrint;
 
-final _loggy = appLogger("TestHelper");
+final _loggy = log.named("TestHelper");
 
 /// Setup the test environment and run `callback` inside it.
 ///
@@ -115,8 +116,8 @@ class TestDependencies {
   static Future<TestDependencies> create() async {
     final dirs = await Dirs.init();
 
-    final server = Server.create(configPath: dirs.config)
-      ..initLog(stdout: true);
+    final server = Server.create(configPath: dirs.config);
+    await server.initLog();
     await server.start();
 
     final session = await Session.create(configPath: dirs.config);

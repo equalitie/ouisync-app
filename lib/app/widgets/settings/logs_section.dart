@@ -172,7 +172,9 @@ class LogsSection extends SettingsSection with AppLogger {
     final tempFile = await _dumpInfo(context, natDetection);
 
     try {
-      await Share.shareXFiles([XFile(tempFile.path, mimeType: 'text/plain')]);
+      await Share.shareXFiles([
+        XFile(tempFile.path, mimeType: 'application/zip'),
+      ]);
     } finally {
       await tempFile.delete();
     }
@@ -190,5 +192,6 @@ class LogsSection extends SettingsSection with AppLogger {
         natDetection: natDetection,
         powerControl: powerControl,
         rootMonitor: stateMonitor,
+        compress: true,
       );
 }
