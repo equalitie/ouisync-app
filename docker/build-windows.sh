@@ -18,8 +18,8 @@ while [[ "$#" -gt 0 ]]; do
         -h) print_help; exit ;;
         --host) host="$2"; shift ;;
         -c|--commit) commit="$2"; shift ;;
-        --no-exe) build_exe=''; shift ;;
-        --no-msix) build_msix=''; shift ;;
+        --no-exe) build_exe='' ;;
+        --no-msix) build_msix='' ;;
         --out) out_dir="$2"; shift ;;
         *) echo "Unknown argument: $1"; print_help; exit 1 ;;
     esac
