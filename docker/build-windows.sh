@@ -10,11 +10,16 @@ function print_help() {
     echo "  OUTPUT_DIRECTORY: Directory where artifacts will be stored"
 }
 
+build_exe="--exe"
+build_msix="--msix"
+
 while [[ "$#" -gt 0 ]]; do
     case $1 in
         -h) print_help; exit ;;
         --host) host="$2"; shift ;;
         -c|--commit) commit="$2"; shift ;;
+        --no-exe) build_exe='' ;;
+        --no-msix) build_msix='' ;;
         --out) out_dir="$2"; shift ;;
         *) echo "Unknown argument: $1"; print_help; exit 1 ;;
     esac
@@ -92,7 +97,7 @@ exe c:/ouisync-app/ouisync/bindings/dart dart tool/bindgen.dart
 
 # Build Ouisync
 exe c:/ouisync-app dart pub get
-exe c:/ouisync-app dart run util/release.dart --flavor=production --sentry=C:/secrets/sentry_dsn --exe --msix
+exe c:/ouisync-app dart run util/release.dart --flavor=production --sentry=C:/secrets/sentry_dsn $build_exe $build_msix
 
 # Collect artifacts. Hyper-V doesn't allow `docker cp` from a running container, so using scp
 function setup_sshd() {
