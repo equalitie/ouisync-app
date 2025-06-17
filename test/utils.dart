@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:connectivity_plus_platform_interface/connectivity_plus_platform_interface.dart';
@@ -22,7 +23,6 @@ import 'package:ouisync/ouisync.dart'
     show Session, SetLocalSecretKeyAndSalt, Server;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -78,8 +78,9 @@ Future<void> testEnv(FutureOr<void> Function() callback) async {
             return (await mount).path;
           default:
             throw PlatformException(
-                code: 'OS06',
-                message: 'Method "${call.method}" not exported by host');
+              code: 'OS06',
+              message: 'Method "${call.method}" not exported by host',
+            );
         }
       },
     );
@@ -112,10 +113,7 @@ class TestDependencies {
   );
 
   static Future<TestDependencies> create() async {
-    final appDir = await getApplicationSupportDirectory();
-    await appDir.create(recursive: true);
-
-    final dirs = Dirs(root: appDir.path);
+    final dirs = await Dirs.init();
 
     final server = Server.create(configPath: dirs.config)
       ..initLog(stdout: true);
@@ -154,9 +152,7 @@ class TestDependencies {
     await server.stop();
   }
 
-  MainPage createMainPage({
-    Stream<List<SharedMediaFile>>? receivedMedia,
-  }) =>
+  MainPage createMainPage({Stream<List<SharedMediaFile>>? receivedMedia}) =>
       MainPage(
         localeCubit: localeCubit,
         mountCubit: mountCubit,
@@ -201,6 +197,9 @@ class _FakePathProviderPlatform extends PathProviderPlatform {
       Future.value(join(root.path, 'application-documents'));
 
   @override
+  Future<String?> getDownloadsPath() => Future.value(null);
+
+  @override
   Future<String?> getTemporaryPath() =>
       Future.value(join(root.path, 'temporary'));
 }
@@ -209,12 +208,11 @@ class _FakePathProviderPlatform extends PathProviderPlatform {
 Widget testApp(
   Widget child, {
   List<NavigatorObserver> navigatorObservers = const [],
-}) =>
-    MaterialApp(
-      home: Scaffold(body: child),
-      localizationsDelegates: const [S.delegate],
-      navigatorObservers: navigatorObservers,
-    );
+}) => MaterialApp(
+  home: Scaffold(body: child),
+  localizationsDelegates: const [S.delegate],
+  navigatorObservers: navigatorObservers,
+);
 
 /// Fake window manager
 class FakeWindowManager extends PlatformWindowManager {
@@ -250,10 +248,9 @@ class StateObserver<State> extends BlocObserver {
   Future<void> waitUntil(
     bool Function(State) f, {
     Duration timeout = _timeout,
-  }) =>
-      _completer.future
-          .timeout(timeout)
-          .then((bloc) => bloc.waitUntil(f, timeout: timeout));
+  }) => _completer.future
+      .timeout(timeout)
+      .then((bloc) => bloc.waitUntil(f, timeout: timeout));
 
   @override
   void onCreate(BlocBase bloc) {
@@ -290,10 +287,7 @@ class NavigationObserver extends NavigatorObserver {
     _controller.add(_depth);
   }
 
-  Future<void> waitForDepth(
-    int expected, {
-    Duration timeout = _timeout,
-  }) async {
+  Future<void> waitForDepth(int expected, {Duration timeout = _timeout}) async {
     if (_depth == expected) {
       return;
     }
@@ -312,8 +306,10 @@ extension WidgetTesterExtension on WidgetTester {
   /// details.
   ///
   /// This Code is taken from https://github.com/flutter/flutter/issues/129623.
-  Future<void> takeScreenshot(
-      {String name = 'screenshot', Element? element}) async {
+  Future<void> takeScreenshot({
+    String name = 'screenshot',
+    Element? element,
+  }) async {
     try {
       if (element == null) {
         // If no element is given, take the screenshot of the topmost widget.
@@ -322,9 +318,10 @@ extension WidgetTesterExtension on WidgetTester {
       }
 
       final image = await captureImage(element);
-      final bytes = (await image.toByteData(format: ImageByteFormat.png))!
-          .buffer
-          .asUint8List();
+      final bytes =
+          (await image.toByteData(
+            format: ImageByteFormat.png,
+          ))!.buffer.asUint8List();
 
       final path = join(_testDirPath, 'screenshots', '$name.png');
 
@@ -352,17 +349,19 @@ extension WidgetTesterExtension on WidgetTester {
   Future<void> loadFonts() async {
     // TODO: Path on other platforms.
     final fontFile = File(
-        '/usr/lib/ouisync/data/flutter_assets/packages/golden_toolkit/fonts/Roboto-Regular.ttf');
+      '/usr/lib/ouisync/data/flutter_assets/packages/golden_toolkit/fonts/Roboto-Regular.ttf',
+    );
 
     if (!(await fontFile.exists())) {
       _loggy.error(
-          "Failed to load fonts, the file ${fontFile.path} does not exist");
+        "Failed to load fonts, the file ${fontFile.path} does not exist",
+      );
       return;
     }
 
-    final fontData = fontFile
-        .readAsBytes()
-        .then((bytes) => ByteData.view(Uint8List.fromList(bytes).buffer));
+    final fontData = fontFile.readAsBytes().then(
+      (bytes) => ByteData.view(Uint8List.fromList(bytes).buffer),
+    );
 
     final fontLoader = FontLoader('Roboto')..addFont(fontData);
     await fontLoader.load();
@@ -370,12 +369,16 @@ extension WidgetTesterExtension on WidgetTester {
 
   // A workaround for the issue with pumpAndSettle as described here
   // https://stackoverflow.com/questions/67186472/error-pumpandsettle-timed-out-maybe-due-to-riverpod
-  Future<Finder> pumpUntilFound(Finder finder,
-      {Duration? timeout, Duration? pumpTime}) async {
+  Future<Finder> pumpUntilFound(
+    Finder finder, {
+    Duration? timeout,
+    Duration? pumpTime,
+  }) async {
     final found = await pumpUntilNonNull(
-        () => finder.tryEvaluate() ? finder : null,
-        timeout: timeout,
-        pumpTime: pumpTime);
+      () => finder.tryEvaluate() ? finder : null,
+      timeout: timeout,
+      pumpTime: pumpTime,
+    );
     // Too often when the above first finds a widget it's outside of the screen
     // area and tapping on it would generate a warning. After this
     // `pumpAndSettle` the widget finds its place inside the screen.
@@ -383,15 +386,24 @@ extension WidgetTesterExtension on WidgetTester {
     return found;
   }
 
-  Future<void> pumpUntil(bool Function() predicate,
-      {Duration? timeout, Duration? pumpTime}) async {
-    await pumpUntilNonNull(() => predicate() ? true : null,
-        timeout: timeout, pumpTime: pumpTime);
+  Future<void> pumpUntil(
+    bool Function() predicate, {
+    Duration? timeout,
+    Duration? pumpTime,
+  }) async {
+    await pumpUntilNonNull(
+      () => predicate() ? true : null,
+      timeout: timeout,
+      pumpTime: pumpTime,
+    );
     return;
   }
 
-  Future<T> pumpUntilNonNull<T>(T? Function() f,
-      {Duration? timeout, Duration? pumpTime}) async {
+  Future<T> pumpUntilNonNull<T>(
+    T? Function() f, {
+    Duration? timeout,
+    Duration? pumpTime,
+  }) async {
     timeout ??= Duration(seconds: 5);
     pumpTime ??= Duration(milliseconds: 100);
 
@@ -448,6 +460,19 @@ Future<void> deleteTempDir(Directory dir) async {
     _loggy.error("Exception during temporary directory removal: $exception");
     rethrow;
   }
+}
+
+String randomAsciiString(int length) {
+  const chars =
+      'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
+  final rng = Random();
+
+  return String.fromCharCodes(
+    Iterable.generate(
+      length,
+      (_) => chars.codeUnitAt(rng.nextInt(chars.length)),
+    ),
+  );
 }
 
 String get _testDirPath {

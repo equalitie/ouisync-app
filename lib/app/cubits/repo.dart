@@ -414,14 +414,13 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     required String filePath,
     required int length,
     required Stream<List<int>> fileByteStream,
-    File? currentFile,
   }) async {
     if (state.uploads.containsKey(filePath)) {
       showSnackBar(S.current.messageFileIsDownloading);
       return;
     }
 
-    final file = currentFile ?? await _createFile(filePath);
+    final file = await _createFile(filePath);
 
     if (file == null) {
       showSnackBar(S.current.messageNewFileError(filePath));

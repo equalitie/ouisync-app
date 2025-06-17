@@ -8,7 +8,6 @@ import 'package:ouisync_app/app/utils/dirs.dart';
 import 'package:ouisync_app/app/utils/master_key.dart';
 import 'package:ouisync_app/app/utils/settings/settings.dart';
 import 'package:ouisync/ouisync.dart';
-import 'package:path_provider/path_provider.dart';
 
 import '../utils.dart';
 
@@ -20,10 +19,7 @@ void main() {
   late LocaleCubit localeCubit;
 
   setUp(() async {
-    final appDir = await getApplicationSupportDirectory();
-    await appDir.create(recursive: true);
-
-    dirs = Dirs(root: appDir.path);
+    dirs = await Dirs.init();
 
     server = Server.create(configPath: dirs.config);
     await server.start();
@@ -44,15 +40,19 @@ void main() {
     (tester) => tester.runAsync(() async {
       final reposObserver = StateObserver.install<ReposState>();
 
-      await tester.pumpWidget(testApp(HomeWidget(
-        localeCubit: localeCubit,
-        packageInfo: fakePackageInfo,
-        server: server,
-        session: session,
-        settings: settings,
-        windowManager: FakeWindowManager(),
-        dirs: dirs,
-      )));
+      await tester.pumpWidget(
+        testApp(
+          HomeWidget(
+            localeCubit: localeCubit,
+            packageInfo: fakePackageInfo,
+            server: server,
+            session: session,
+            settings: settings,
+            windowManager: FakeWindowManager(),
+            dirs: dirs,
+          ),
+        ),
+      );
       await tester.pumpAndSettle();
 
       final englishItem = find.text('English').first;
