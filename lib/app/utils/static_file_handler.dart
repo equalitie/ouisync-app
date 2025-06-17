@@ -58,6 +58,7 @@ Future<Response> _handleFile(
   final fileSize = await file.getLength();
 
   return Response.ok(
-      request.method == 'HEAD' ? null : file.read(0, fileSize).asStream(),
-      headers: headers..[io.HttpHeaders.contentLengthHeader] = '$fileSize');
+    request.method == 'HEAD' ? null : file.read(0, fileSize).asStream(),
+    headers: headers..[io.HttpHeaders.contentLengthHeader] = '$fileSize',
+  );
 }

@@ -19,10 +19,10 @@ class MoveEntry with AppLogger {
     required RepoCubit originRepoCubit,
     required FileSystemEntry entry,
     required String destinationPath,
-  })  : _context = context,
-        _originRepoCubit = originRepoCubit,
-        _entry = entry,
-        _destinationPath = destinationPath;
+  }) : _context = context,
+       _originRepoCubit = originRepoCubit,
+       _entry = entry,
+       _destinationPath = destinationPath;
 
   final BuildContext _context;
   final RepoCubit _originRepoCubit;
@@ -37,12 +37,8 @@ class MoveEntry with AppLogger {
     final type = _entry is FileEntry ? EntryType.file : EntryType.directory;
 
     final fromPathSegment = repo_path
-        .basename(
-          path,
-        )
-        .removePrefix(
-          repo_path.separator(),
-        );
+        .basename(path)
+        .removePrefix(repo_path.separator());
     final newPath = repo_path.join(_destinationPath, fromPathSegment);
 
     final destinationRepoCubit = (currentRepoCubit ?? _originRepoCubit);

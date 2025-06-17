@@ -18,7 +18,8 @@ class NoContentsState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final emptyFolderImageHeight = MediaQuery.of(context).size.height *
+    final emptyFolderImageHeight =
+        MediaQuery.of(context).size.height *
         Constants.statePlaceholderImageHeightFactor;
 
     return Directionality(
@@ -31,18 +32,21 @@ class NoContentsState extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Align(
-                  alignment: AlignmentDirectional.center,
-                  child: Fields.placeholderWidget(
-                      assetName: Constants.assetEmptyFolder,
-                      assetHeight: emptyFolderImageHeight)),
+                alignment: AlignmentDirectional.center,
+                child: Fields.placeholderWidget(
+                  assetName: Constants.assetEmptyFolder,
+                  assetHeight: emptyFolderImageHeight,
+                ),
+              ),
               Dimensions.spacingVerticalDouble,
               Align(
                 alignment: AlignmentDirectional.center,
                 child: Fields.inPageMainMessage(
-                    path.isEmpty
-                        ? S.current.messageEmptyRepo
-                        : S.current.messageEmptyFolder,
-                    style: context.theme.appTextStyle.bodyLarge),
+                  path.isEmpty
+                      ? S.current.messageEmptyRepo
+                      : S.current.messageEmptyFolder,
+                  style: context.theme.appTextStyle.bodyLarge,
+                ),
               ),
               Dimensions.spacingVertical,
               Align(
@@ -54,9 +58,10 @@ class NoContentsState extends StatelessWidget {
                   tags: {
                     Constants.inlineTextBold: InlineTextStyles.bold,
                     Constants.inlineTextIcon: InlineTextStyles.icon(
-                        Icons.add_circle,
-                        size: Dimensions.sizeIconBig,
-                        color: Theme.of(context).primaryColor)
+                      Icons.add_circle,
+                      size: Dimensions.sizeIconBig,
+                      color: Theme.of(context).primaryColor,
+                    ),
                   },
                 ),
               ),

@@ -24,39 +24,38 @@ class RepoCreation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => MultiBlocListener(
-        listeners: [
-          // Handle substate changes
-          BlocListener<RepoCreationCubit, RepoCreationState>(
-            bloc: creationCubit,
-            listenWhen: (previous, current) =>
-                current.substate != previous.substate,
-            listener: _handleSubstateChange,
-          ),
-          // Prefill suggested name on first load
-          BlocListener<RepoCreationCubit, RepoCreationState>(
-            bloc: creationCubit,
-            listenWhen: (previous, current) =>
+    listeners: [
+      // Handle substate changes
+      BlocListener<RepoCreationCubit, RepoCreationState>(
+        bloc: creationCubit,
+        listenWhen:
+            (previous, current) => current.substate != previous.substate,
+        listener: _handleSubstateChange,
+      ),
+      // Prefill suggested name on first load
+      BlocListener<RepoCreationCubit, RepoCreationState>(
+        bloc: creationCubit,
+        listenWhen:
+            (previous, current) =>
                 current.suggestedName.isNotEmpty &&
                 previous.suggestedName.isEmpty,
-            listener: _handlePrefillSuggestedName,
-          ),
-        ],
-        child: BlocBuilder<RepoCreationCubit, RepoCreationState>(
-          bloc: creationCubit,
-          builder: (context, state) => ContentWithStickyFooterState(
+        listener: _handlePrefillSuggestedName,
+      ),
+    ],
+    child: BlocBuilder<RepoCreationCubit, RepoCreationState>(
+      bloc: creationCubit,
+      builder:
+          (context, state) => ContentWithStickyFooterState(
             content: _buildContent(context, state),
             footer: Fields.dialogActions(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               buttons: _buildActions(context, state),
             ),
           ),
-        ),
-      );
+    ),
+  );
 
-  Widget _buildContent(
-    BuildContext context,
-    RepoCreationState creationState,
-  ) =>
+  Widget _buildContent(BuildContext context, RepoCreationState creationState) =>
       Column(
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -71,72 +70,74 @@ class RepoCreation extends StatelessWidget {
   List<Widget> _buildActions(
     BuildContext context,
     RepoCreationState creationState,
-  ) =>
-      [
-        Fields.inPageButton(
-          text: S.current.actionCancel,
-          onPressed: () async => await Navigator.of(context).maybePop(null),
-        ),
-        Fields.inPageButton(
-          text: creationState.token == null
+  ) => [
+    Fields.inPageButton(
+      text: S.current.actionCancel,
+      onPressed: () async => await Navigator.of(context).maybePop(null),
+    ),
+    Fields.inPageButton(
+      text:
+          creationState.token == null
               ? S.current.actionCreate
               : S.current.actionImport,
-          onPressed: creationState.substate is RepoCreationValid
+      onPressed:
+          creationState.substate is RepoCreationValid
               ? () => creationCubit.save()
               : null,
-          autofocus: true,
-          focusNode: creationCubit.positiveButtonFocusNode,
-        )
-      ];
+      autofocus: true,
+      focusNode: creationCubit.positiveButtonFocusNode,
+    ),
+  ];
 
   List<Widget> _buildTokenLabel(
     BuildContext context,
     RepoCreationState state,
-  ) =>
-      [
-        Container(
-          padding: Dimensions.paddingShareLinkBox,
-          decoration: const BoxDecoration(
-            borderRadius: BorderRadiusDirectional.all(
-              Radius.circular(Dimensions.radiusSmall),
+  ) => [
+    Container(
+      padding: Dimensions.paddingShareLinkBox,
+      decoration: const BoxDecoration(
+        borderRadius: BorderRadiusDirectional.all(
+          Radius.circular(Dimensions.radiusSmall),
+        ),
+        color: Constants.inputBackgroundColor,
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Fields.constrainedText(
+            S.current.labelRepositoryLink,
+            flex: 0,
+            style: context.theme.appTextStyle.labelMedium.copyWith(
+              color: Constants.inputLabelForeColor,
             ),
-            color: Constants.inputBackgroundColor,
           ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
+          Dimensions.spacingVerticalHalf,
+          Row(
             children: [
-              Fields.constrainedText(
-                S.current.labelRepositoryLink,
-                flex: 0,
-                style: context.theme.appTextStyle.labelMedium
-                    .copyWith(color: Constants.inputLabelForeColor),
-              ),
-              Dimensions.spacingVerticalHalf,
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      state.token?.toString() ?? '',
-                      softWrap: true,
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
-                      style: context.theme.appTextStyle.bodySmall
-                          .copyWith(fontWeight: FontWeight.w700),
-                    ),
+              Expanded(
+                child: Text(
+                  state.token?.toString() ?? '',
+                  softWrap: true,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                  style: context.theme.appTextStyle.bodySmall.copyWith(
+                    fontWeight: FontWeight.w700,
                   ),
-                ],
+                ),
               ),
             ],
           ),
-        ),
-        Dimensions.spacingVerticalHalf,
-        Text(
-          S.current.messageRepositoryAccessMode(state.accessMode.name),
-          style: _smallMessageStyle(context),
-        ),
-        Dimensions.spacingVertical,
-      ];
+        ],
+      ),
+    ),
+    Dimensions.spacingVerticalHalf,
+    Text(
+      S.current.messageRepositoryAccessMode(state.accessMode.name),
+      style: _smallMessageStyle(context),
+    ),
+    Dimensions.spacingVertical,
+  ];
 
   List<Widget> _buildNameField(BuildContext context, RepoCreationState state) =>
       [
@@ -169,12 +170,12 @@ class RepoCreation extends StatelessWidget {
   ) =>
       state.accessMode == AccessMode.write
           ? CustomAdaptiveSwitch(
-              key: ValueKey('use-cache-servers'),
-              value: state.useCacheServers,
-              title: S.current.messageUseCacheServers,
-              contentPadding: EdgeInsetsDirectional.zero,
-              onChanged: (value) => creationCubit.setUseCacheServers(value),
-            )
+            key: ValueKey('use-cache-servers'),
+            value: state.useCacheServers,
+            title: S.current.messageUseCacheServers,
+            contentPadding: EdgeInsetsDirectional.zero,
+            onChanged: (value) => creationCubit.setUseCacheServers(value),
+          )
           : SizedBox.shrink();
 
   TextStyle _smallMessageStyle(BuildContext context) =>
@@ -202,6 +203,5 @@ class RepoCreation extends StatelessWidget {
   void _handlePrefillSuggestedName(
     BuildContext context,
     RepoCreationState state,
-  ) =>
-      creationCubit.acceptSuggestedName();
+  ) => creationCubit.acceptSuggestedName();
 }

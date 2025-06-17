@@ -47,16 +47,16 @@ showSnackBar(
     context != null
         ? _showSnackBar(context, message, action, showCloseIcon, behavior!)
         : WidgetsBinding.instance.addPostFrameCallback(
-            (_) => BuildContextProvider().call(
-              (context) => _showSnackBar(
-                context,
-                message,
-                action,
-                showCloseIcon,
-                behavior!,
-              ),
+          (_) => BuildContextProvider().call(
+            (context) => _showSnackBar(
+              context,
+              message,
+              action,
+              showCloseIcon,
+              behavior!,
             ),
-          );
+          ),
+        );
 
 _showSnackBar(
   BuildContext context,
@@ -84,20 +84,23 @@ _showSnackBar(
 }
 
 hideSnackBar(context) => SnackBarAction(
-    label: S.current.actionHideCapital,
-    onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar());
+  label: S.current.actionHideCapital,
+  onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar(),
+);
 
 Future<void> copyStringToClipboard(String data) async {
   await Clipboard.setData(ClipboardData(text: data));
 }
 
-String? Function(String?) validateNoEmptyMaybeRegExpr(
-        {required String emptyError, String? regExp, String? regExpError}) =>
-    (String? value) {
-      if (value?.isEmpty ?? true) return emptyError;
-      if (regExp != null) {
-        if (value!.contains(RegExp(regExp))) return regExpError;
-      }
+String? Function(String?) validateNoEmptyMaybeRegExpr({
+  required String emptyError,
+  String? regExp,
+  String? regExpError,
+}) => (String? value) {
+  if (value?.isEmpty ?? true) return emptyError;
+  if (regExp != null) {
+    if (value!.contains(RegExp(regExp))) return regExpError;
+  }
 
-      return null;
-    };
+  return null;
+};

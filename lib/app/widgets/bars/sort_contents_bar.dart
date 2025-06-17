@@ -26,27 +26,30 @@ class _SortContentsBarState extends State<SortContentsBar> {
   @override
   Widget build(BuildContext context) =>
       BlocBuilder<SortListCubit, SortListState>(
-          bloc: widget.sortListCubit,
-          builder: (context, state) => widget.reposState.current == null
-              ? SizedBox.shrink()
-              : Container(
-                  alignment: AlignmentDirectional.centerStart,
-                  padding: Dimensions.paddingActionBox,
-                  child: Row(
-                    children: [
-                      SortByButton(
-                        sortBy: state.sortBy,
-                        sort: _showSortByDialog,
+        bloc: widget.sortListCubit,
+        builder:
+            (context, state) =>
+                widget.reposState.current == null
+                    ? SizedBox.shrink()
+                    : Container(
+                      alignment: AlignmentDirectional.centerStart,
+                      padding: Dimensions.paddingActionBox,
+                      child: Row(
+                        children: [
+                          SortByButton(
+                            sortBy: state.sortBy,
+                            sort: _showSortByDialog,
+                          ),
+                          const VerticalDivider(width: 6.0),
+                          SortDirectionButton(
+                            direction: state.direction,
+                            sortBy: state.sortBy,
+                            sort: _updateSortDirection,
+                          ),
+                        ],
                       ),
-                      const VerticalDivider(width: 6.0),
-                      SortDirectionButton(
-                        direction: state.direction,
-                        sortBy: state.sortBy,
-                        sort: _updateSortDirection,
-                      ),
-                    ],
-                  ),
-                ));
+                    ),
+      );
 
   void _updateSortDirection(SortDirection direction, SortBy sortBy) {
     final newDirection =
@@ -59,23 +62,17 @@ class _SortContentsBarState extends State<SortContentsBar> {
     if (current is OpenRepoEntry) {
       Dialogs.executeFutureWithLoadingDialog(
         context,
-        current.cubit.refresh(
-          sortBy: sortBy,
-          sortDirection: newDirection,
-        ),
+        current.cubit.refresh(sortBy: sortBy, sortDirection: newDirection),
       );
     }
   }
 
   Future<dynamic> _showSortByDialog() async => await showModalBottomSheet(
-        isScrollControlled: true,
-        context: context,
-        shape: Dimensions.borderBottomSheetTop,
-        builder: (context) => _SortByList(
-          widget.sortListCubit,
-          widget.reposState,
-        ),
-      );
+    isScrollControlled: true,
+    context: context,
+    shape: Dimensions.borderBottomSheetTop,
+    builder: (context) => _SortByList(widget.sortListCubit, widget.reposState),
+  );
 }
 
 class _SortByList extends StatelessWidget with AppLogger {
@@ -89,10 +86,9 @@ class _SortByList extends StatelessWidget with AppLogger {
 
   @override
   Widget build(BuildContext context) {
-    final sheetTitleStyle = Theme.of(context)
-        .textTheme
-        .bodyLarge
-        ?.copyWith(fontWeight: FontWeight.w400);
+    final sheetTitleStyle = Theme.of(
+      context,
+    ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w400);
 
     return BlocBuilder<SortListCubit, SortListState>(
       bloc: _sortCubit,
@@ -111,11 +107,7 @@ class _SortByList extends StatelessWidget with AppLogger {
                 S.current.titleSortBy,
                 style: sheetTitleStyle,
               ),
-              _buildSortByList(
-                context,
-                state.sortBy,
-                state.direction,
-              )
+              _buildSortByList(context, state.sortBy, state.direction),
             ],
           ),
         );
@@ -124,62 +116,63 @@ class _SortByList extends StatelessWidget with AppLogger {
   }
 
   Widget _buildSortByList(
-          BuildContext context, SortBy sortBy, SortDirection direction) =>
-      ListView.builder(
-        shrinkWrap: true,
-        itemCount: SortBy.values.length,
-        itemBuilder: (context, index) {
-          final sortByItem = SortBy.values[index];
+    BuildContext context,
+    SortBy sortBy,
+    SortDirection direction,
+  ) => ListView.builder(
+    shrinkWrap: true,
+    itemCount: SortBy.values.length,
+    itemBuilder: (context, index) {
+      final sortByItem = SortBy.values[index];
 
-          final settingStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: sortByItem.name == sortBy.name
-                    ? Colors.black87
-                    : Colors.black54,
-                fontWeight: sortByItem.name == sortBy.name
-                    ? FontWeight.bold
-                    : FontWeight.normal,
-              );
-
-          return Row(
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              Expanded(
-                child: Fields.actionListTile(
-                  sortByItem.localized,
-                  textOverflow: TextOverflow.ellipsis,
-                  textSoftWrap: false,
-                  style: settingStyle,
-                  onTap: () async {
-                    _sortCubit.sortBy(sortByItem);
-
-                    final current = _reposState.current;
-
-                    if (current == null) {
-                      if (sortByItem.name != sortBy.name) return;
-                      Navigator.of(context).pop();
-                      return;
-                    }
-
-                    if (current is OpenRepoEntry) {
-                      await Dialogs.executeFutureWithLoadingDialog(
-                        null,
-                        current.cubit.refresh(
-                          sortBy: sortByItem,
-                          sortDirection: direction,
-                        ),
-                      );
-
-                      Navigator.of(context).pop();
-                    }
-                  },
-                  icon: sortByItem.name == sortBy.name ? Icons.check : null,
-                  iconColor: Theme.of(context).primaryColor,
-                  dense: true,
-                  visualDensity: VisualDensity.compact,
-                ),
-              ),
-            ],
-          );
-        },
+      final settingStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
+        color: sortByItem.name == sortBy.name ? Colors.black87 : Colors.black54,
+        fontWeight:
+            sortByItem.name == sortBy.name
+                ? FontWeight.bold
+                : FontWeight.normal,
       );
+
+      return Row(
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          Expanded(
+            child: Fields.actionListTile(
+              sortByItem.localized,
+              textOverflow: TextOverflow.ellipsis,
+              textSoftWrap: false,
+              style: settingStyle,
+              onTap: () async {
+                _sortCubit.sortBy(sortByItem);
+
+                final current = _reposState.current;
+
+                if (current == null) {
+                  if (sortByItem.name != sortBy.name) return;
+                  Navigator.of(context).pop();
+                  return;
+                }
+
+                if (current is OpenRepoEntry) {
+                  await Dialogs.executeFutureWithLoadingDialog(
+                    null,
+                    current.cubit.refresh(
+                      sortBy: sortByItem,
+                      sortDirection: direction,
+                    ),
+                  );
+
+                  Navigator.of(context).pop();
+                }
+              },
+              icon: sortByItem.name == sortBy.name ? Icons.check : null,
+              iconColor: Theme.of(context).primaryColor,
+              dense: true,
+              visualDensity: VisualDensity.compact,
+            ),
+          ),
+        ],
+      );
+    },
+  );
 }

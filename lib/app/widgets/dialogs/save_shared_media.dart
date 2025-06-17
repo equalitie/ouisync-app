@@ -21,11 +21,8 @@ class SaveSharedMedia extends StatefulWidget {
   final ReposCubit reposCubit;
   final List<String> sharedMediaPaths;
   final Future<bool> Function() canSaveMedia;
-  final void Function(
-    BottomSheetType type,
-    double padding,
-    String entry,
-  ) onUpdateBottomSheet;
+  final void Function(BottomSheetType type, double padding, String entry)
+  onUpdateBottomSheet;
   final SaveFileCallback onSaveFile;
 
   @override
@@ -50,11 +47,7 @@ class _SaveSharedMediaState extends State<SaveSharedMedia> {
     widgetSize = widgetContext.size;
 
     widgetContext.size?.let((it) {
-          widget.onUpdateBottomSheet(
-            BottomSheetType.move,
-            it.height,
-            '',
-          );
+          widget.onUpdateBottomSheet(BottomSheetType.move, it.height, '');
         }) ??
         0.0;
   }
@@ -104,10 +97,8 @@ class _SaveSharedMediaState extends State<SaveSharedMedia> {
       ),
       child: ListView.separated(
         shrinkWrap: true,
-        separatorBuilder: (context, index) => const Divider(
-          height: 1,
-          color: Colors.black12,
-        ),
+        separatorBuilder:
+            (context, index) => const Divider(height: 1, color: Colors.black12),
         itemCount: mediaPaths.length,
         itemBuilder: (context, index) {
           final path = mediaPaths[index];
@@ -124,21 +115,19 @@ class _SaveSharedMediaState extends State<SaveSharedMedia> {
 
     return Padding(
       padding: EdgeInsetsDirectional.all(4.0),
-      child: Text(
-        '$totalFiles $pluralizedMessage',
-        textAlign: TextAlign.right,
-      ),
+      child: Text('$totalFiles $pluralizedMessage', textAlign: TextAlign.right),
     );
   }
 
   Widget _buildActions() => BlocBuilder<ReposCubit, ReposState>(
-        bloc: widget.reposCubit,
-        builder: (context, state) => Fields.dialogActions(
+    bloc: widget.reposCubit,
+    builder:
+        (context, state) => Fields.dialogActions(
           buttons: _actions(state),
           padding: const EdgeInsetsDirectional.only(top: 20.0),
           mainAxisAlignment: MainAxisAlignment.end,
         ),
-      );
+  );
 
   List<Widget> _actions(ReposState reposState) {
     final isRepoList = reposState.current == null;
@@ -154,20 +143,21 @@ class _SaveSharedMediaState extends State<SaveSharedMedia> {
       ),
       PositiveButton(
         text: S.current.actionSave,
-        onPressed: isRepoList
-            ? null
-            : () async {
-                final canSaveMedia = await widget.canSaveMedia();
-                if (!canSaveMedia) {
-                  return;
-                }
-                for (final path in widget.sharedMediaPaths) {
-                  await widget.onSaveFile(path);
-                }
+        onPressed:
+            isRepoList
+                ? null
+                : () async {
+                  final canSaveMedia = await widget.canSaveMedia();
+                  if (!canSaveMedia) {
+                    return;
+                  }
+                  for (final path in widget.sharedMediaPaths) {
+                    await widget.onSaveFile(path);
+                  }
 
-                widget.onUpdateBottomSheet(BottomSheetType.gone, 0.0, '');
-                widget.reposCubit.bottomSheet.hide();
-              },
+                  widget.onUpdateBottomSheet(BottomSheetType.gone, 0.0, '');
+                  widget.reposCubit.bottomSheet.hide();
+                },
         buttonsAspectRatio: Dimensions.aspectRatioBottomDialogButton,
       ),
     ];
@@ -194,8 +184,10 @@ class _MediaDescription extends StatelessWidget {
             children: <Widget>[
               Expanded(
                 flex: 0,
-                child: const Icon(Icons.insert_drive_file_outlined,
-                    size: Dimensions.sizeIconAverage),
+                child: const Icon(
+                  Icons.insert_drive_file_outlined,
+                  size: Dimensions.sizeIconAverage,
+                ),
               ),
               Expanded(
                 child: Container(

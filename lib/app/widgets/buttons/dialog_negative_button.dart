@@ -11,7 +11,7 @@ class NegativeButton extends StatelessWidget {
     this.focusNode,
     super.key,
   }) : buttonsAspectRatio =
-            buttonsAspectRatio ?? Dimensions.aspectRatioModalDialogButton;
+           buttonsAspectRatio ?? Dimensions.aspectRatioModalDialogButton;
 
   final String? text;
   final GestureTapCallback? onPressed;
@@ -22,28 +22,29 @@ class NegativeButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Expanded(
-        child: Row(
-      children: [
-        Expanded(
-          child: Align(
-            alignment: AlignmentDirectional.bottomEnd,
-            child: AspectRatio(
-              aspectRatio: buttonsAspectRatio,
-              child: Container(
-                margin: Dimensions.marginDialogNegativeButton,
-                child: RawMaterialButton(
-                  focusNode: focusNode,
-                  onPressed: onPressed,
-                  child: Text((text ?? '').toUpperCase()),
-                  constraints: buttonConstrains,
-                  elevation: Dimensions.elevationDialogAction,
-                  textStyle: Dimensions.textStyleDialogNegativeButton,
+      child: Row(
+        children: [
+          Expanded(
+            child: Align(
+              alignment: AlignmentDirectional.bottomEnd,
+              child: AspectRatio(
+                aspectRatio: buttonsAspectRatio,
+                child: Container(
+                  margin: Dimensions.marginDialogNegativeButton,
+                  child: RawMaterialButton(
+                    focusNode: focusNode,
+                    onPressed: onPressed,
+                    child: Text((text ?? '').toUpperCase()),
+                    constraints: buttonConstrains,
+                    elevation: Dimensions.elevationDialogAction,
+                    textStyle: Dimensions.textStyleDialogNegativeButton,
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-      ],
-    ));
+        ],
+      ),
+    );
   }
 }

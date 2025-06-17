@@ -6,11 +6,12 @@ import '../../../cubits/cubits.dart';
 import '../../../utils/platform/platform.dart';
 
 class PlatformDhtSwitch extends StatelessWidget {
-  const PlatformDhtSwitch(
-      {required this.repository,
-      required this.title,
-      required this.icon,
-      required this.onToggle});
+  const PlatformDhtSwitch({
+    required this.repository,
+    required this.title,
+    required this.icon,
+    required this.onToggle,
+  });
 
   final RepoCubit repository;
   final Widget title;
@@ -28,21 +29,24 @@ class PlatformDhtSwitch extends StatelessWidget {
 
   Widget buildDesktopWidget(BuildContext context) =>
       BlocSelector<RepoCubit, RepoState, bool>(
-          bloc: repository,
-          selector: (state) => state.isDhtEnabled,
-          builder: (context, value) => SwitchListTile.adaptive(
-                value: repository.state.isDhtEnabled,
-                title: title,
-                secondary: Icon(icon),
-                onChanged: (value) {
-                  onToggle?.call(value);
-                },
-              ));
+        bloc: repository,
+        selector: (state) => state.isDhtEnabled,
+        builder:
+            (context, value) => SwitchListTile.adaptive(
+              value: repository.state.isDhtEnabled,
+              title: title,
+              secondary: Icon(icon),
+              onChanged: (value) {
+                onToggle?.call(value);
+              },
+            ),
+      );
 
   AbstractSettingsTile buildMobileWidget(BuildContext context) =>
       SettingsTile.switchTile(
-          initialValue: repository.state.isDhtEnabled,
-          title: title,
-          leading: Icon(icon),
-          onToggle: (value) => onToggle?.call(value));
+        initialValue: repository.state.isDhtEnabled,
+        title: title,
+        leading: Icon(icon),
+        onToggle: (value) => onToggle?.call(value),
+      );
 }

@@ -19,10 +19,10 @@ class CopyEntry with AppLogger {
     required RepoCubit originRepoCubit,
     required FileSystemEntry entry,
     required String destinationPath,
-  })  : _context = context,
-        _originRepoCubit = originRepoCubit,
-        _entry = entry,
-        _destinationPath = destinationPath;
+  }) : _context = context,
+       _originRepoCubit = originRepoCubit,
+       _entry = entry,
+       _destinationPath = destinationPath;
 
   final BuildContext _context;
   final RepoCubit _originRepoCubit;
@@ -47,25 +47,15 @@ class CopyEntry with AppLogger {
     final type = _entry is FileEntry ? EntryType.file : EntryType.directory;
 
     final fromPathSegment = repo_path
-        .basename(
-          path,
-        )
-        .removePrefix(
-          repo_path.separator(),
-        );
+        .basename(path)
+        .removePrefix(repo_path.separator());
     final newPath = repo_path.join(_destinationPath, fromPathSegment);
 
     final destinationRepoCubit = (currentRepoCubit ?? _originRepoCubit);
 
     final exist = await destinationRepoCubit.entryExists(newPath);
     if (!exist) {
-      await _copyEntry(
-        currentRepoCubit,
-        path,
-        newPath,
-        type,
-        recursive,
-      );
+      await _copyEntry(currentRepoCubit, path, newPath, type, recursive);
 
       return;
     }
@@ -146,12 +136,11 @@ class CopyEntry with AppLogger {
     String destinationPath,
     EntryType type,
     bool recursive,
-  ) async =>
-      _originRepoCubit.copyEntry(
-        source: sourcePath,
-        destination: destinationPath,
-        type: type,
-        destinationRepoCubit: destinationRepoCubit,
-        recursive: recursive,
-      );
+  ) async => _originRepoCubit.copyEntry(
+    source: sourcePath,
+    destination: destinationPath,
+    type: type,
+    destinationRepoCubit: destinationRepoCubit,
+    recursive: recursive,
+  );
 }

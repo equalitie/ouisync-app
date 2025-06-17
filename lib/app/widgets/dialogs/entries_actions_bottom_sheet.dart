@@ -56,11 +56,8 @@ class EntriesActionsDialog extends StatefulWidget {
   final FileSystemEntry? entry;
 
   final BottomSheetType sheetType;
-  final void Function(
-    BottomSheetType type,
-    double padding,
-    String entry,
-  ) onUpdateBottomSheet;
+  final void Function(BottomSheetType type, double padding, String entry)
+  onUpdateBottomSheet;
 
   @override
   State<EntriesActionsDialog> createState() => _EntriesActionsDialogState();
@@ -84,13 +81,17 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
     widgetSize = widgetContext.size;
 
     widget.onUpdateBottomSheet(
-        BottomSheetType.move, widgetSize?.height ?? 0.0, '');
+      BottomSheetType.move,
+      widgetSize?.height ?? 0.0,
+      '',
+    );
   }
 
   @override
   Widget build(BuildContext context) => BlocBuilder<ReposCubit, ReposState>(
-        bloc: widget.reposCubit,
-        builder: (context, reposState) => Container(
+    bloc: widget.reposCubit,
+    builder:
+        (context, reposState) => Container(
           key: bodyKey,
           padding: Dimensions.paddingBottomSheet,
           decoration: Dimensions.decorationBottomSheetAlternative,
@@ -117,32 +118,31 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
             ),
           ),
         ),
-      );
+  );
 
   List<Widget> _getLayout(EntrySelectionCubit entrySelectionCubit) =>
       widget.entry == null
           ? [
-              _entriesCountLabel(entrySelectionCubit),
-              _sourceLabel(entrySelectionCubit),
-            ]
+            _entriesCountLabel(entrySelectionCubit),
+            _sourceLabel(entrySelectionCubit),
+          ]
           : [
-              Fields.iconLabel(
-                icon: Icons.drive_file_move_outlined,
-                text: repo_path.basename(widget.entry!.path),
+            Fields.iconLabel(
+              icon: Icons.drive_file_move_outlined,
+              text: repo_path.basename(widget.entry!.path),
+            ),
+            Text(
+              S.current.messageMoveEntryOrigin(
+                repo_path.dirname(widget.entry!.path),
               ),
-              Text(
-                S.current.messageMoveEntryOrigin(
-                  repo_path.dirname(widget.entry!.path),
-                ),
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyMedium
-                    ?.copyWith(fontWeight: FontWeight.w800),
-                maxLines: 1,
-                softWrap: true,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ];
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w800),
+              maxLines: 1,
+              softWrap: true,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ];
 
   Widget _entriesCountLabel(EntrySelectionCubit entrySelectionCubit) =>
       BlocBuilder<EntrySelectionCubit, EntrySelectionState>(
@@ -163,16 +163,16 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
   Widget _sourceLabel(EntrySelectionCubit entrySelectionCubit) =>
       BlocBuilder<EntrySelectionCubit, EntrySelectionState>(
         bloc: entrySelectionCubit,
-        builder: (context, state) => Text(
-          S.current.messageMoveEntryOrigin(state.selectionOriginPath),
-          style: Theme.of(context)
-              .textTheme
-              .bodyMedium
-              ?.copyWith(fontWeight: FontWeight.w800),
-          maxLines: 1,
-          softWrap: true,
-          overflow: TextOverflow.ellipsis,
-        ),
+        builder:
+            (context, state) => Text(
+              S.current.messageMoveEntryOrigin(state.selectionOriginPath),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w800),
+              maxLines: 1,
+              softWrap: true,
+              overflow: TextOverflow.ellipsis,
+            ),
       );
 
   Widget _selectActions(
@@ -185,41 +185,40 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
     FileSystemEntry? entry,
     BottomSheetType sheetType,
     Dirs dirs,
-  ) =>
-      BlocBuilder<NavigationCubit, NavigationState>(
-        bloc: navigationCubit,
-        builder: (context, state) {
-          final moveEntriesActions = MoveEntriesActions(
-            context,
-            reposCubit: reposCubit,
-            originRepoCubit: originRepoCubit,
-            sheetType: sheetType,
-          );
-
-          return entry == null
-              ? _multipleEntriesActions(
-                  context,
-                  entrySelectionCubit!,
-                  reposCubit,
-                  originRepoCubit,
-                  reposState,
-                  moveEntriesActions,
-                  sheetType,
-                  dirs,
-                )
-              : _singleEntryActions(
-                  context,
-                  state,
-                  entrySelectionCubit!,
-                  reposCubit,
-                  originRepoCubit,
-                  reposState,
-                  moveEntriesActions,
-                  sheetType,
-                  entry,
-                );
-        },
+  ) => BlocBuilder<NavigationCubit, NavigationState>(
+    bloc: navigationCubit,
+    builder: (context, state) {
+      final moveEntriesActions = MoveEntriesActions(
+        context,
+        reposCubit: reposCubit,
+        originRepoCubit: originRepoCubit,
+        sheetType: sheetType,
       );
+
+      return entry == null
+          ? _multipleEntriesActions(
+            context,
+            entrySelectionCubit!,
+            reposCubit,
+            originRepoCubit,
+            reposState,
+            moveEntriesActions,
+            sheetType,
+            dirs,
+          )
+          : _singleEntryActions(
+            context,
+            state,
+            entrySelectionCubit!,
+            reposCubit,
+            originRepoCubit,
+            reposState,
+            moveEntriesActions,
+            sheetType,
+            entry,
+          );
+    },
+  );
 
   Widget _singleEntryActions(
     BuildContext parentContext,
@@ -283,70 +282,70 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
     MoveEntriesActions moveEntriesActions,
     BottomSheetType sheetType,
     Dirs dirs,
-  ) =>
-      BlocBuilder<EntrySelectionCubit, EntrySelectionState>(
-        bloc: entrySelectionCubit,
-        builder: (context, state) {
-          bool enableAction = false;
-          if ([BottomSheetType.download, BottomSheetType.delete]
-              .contains(sheetType)) {
-            enableAction = true;
-          } else {
-            final validation = entrySelectionCubit.validateDestination;
-            enableAction =
-                moveEntriesActions.enableAction(validation, reposState.current);
-          }
+  ) => BlocBuilder<EntrySelectionCubit, EntrySelectionState>(
+    bloc: entrySelectionCubit,
+    builder: (context, state) {
+      bool enableAction = false;
+      if ([
+        BottomSheetType.download,
+        BottomSheetType.delete,
+      ].contains(sheetType)) {
+        enableAction = true;
+      } else {
+        final validation = entrySelectionCubit.validateDestination;
+        enableAction = moveEntriesActions.enableAction(
+          validation,
+          reposState.current,
+        );
+      }
 
-          negativeAction() => cancelAndDismiss(
-                moveEntriesActions,
-                originRepoCubit,
-              );
-          final negativeText = S.current.actionCancel;
+      negativeAction() => cancelAndDismiss(moveEntriesActions, originRepoCubit);
+      final negativeText = S.current.actionCancel;
 
-          Future<void> positiveAction() async {
-            final currentRepoCubit = reposState.current?.cubit;
-            if (currentRepoCubit == null) return;
+      Future<void> positiveAction() async {
+        final currentRepoCubit = reposState.current?.cubit;
+        if (currentRepoCubit == null) return;
 
-            final multiEntryActions = MultiEntryActions(
-              parentContext,
-              entrySelectionCubit: entrySelectionCubit,
-              dirs: dirs,
-            );
+        final multiEntryActions = MultiEntryActions(
+          parentContext,
+          entrySelectionCubit: entrySelectionCubit,
+          dirs: dirs,
+        );
 
-            final action = moveEntriesActions.getAction(
-              currentRepoCubit,
-              multiEntryActions,
-            );
-            if (action == null) return;
+        final action = moveEntriesActions.getAction(
+          currentRepoCubit,
+          multiEntryActions,
+        );
+        if (action == null) return;
 
-            final resultOk = await action;
-            if (!resultOk) return;
+        final resultOk = await action;
+        if (!resultOk) return;
 
-            cancelAndDismiss(moveEntriesActions, originRepoCubit);
-          }
+        cancelAndDismiss(moveEntriesActions, originRepoCubit);
+      }
 
-          final positiveText = moveEntriesActions.getActionText(sheetType);
+      final positiveText = moveEntriesActions.getActionText(sheetType);
 
-          final aspectRatio = _getButtonAspectRatio(widgetSize);
-          final isDangerButton = sheetType == BottomSheetType.delete;
+      final aspectRatio = _getButtonAspectRatio(widgetSize);
+      final isDangerButton = sheetType == BottomSheetType.delete;
 
-          final actions = _actions(
-            enableAction,
-            aspectRatio,
-            positiveAction,
-            positiveText,
-            negativeAction,
-            negativeText,
-            isDangerButton,
-          );
-
-          return Fields.dialogActions(
-            buttons: actions,
-            padding: const EdgeInsetsDirectional.only(top: 20.0),
-            mainAxisAlignment: MainAxisAlignment.end,
-          );
-        },
+      final actions = _actions(
+        enableAction,
+        aspectRatio,
+        positiveAction,
+        positiveText,
+        negativeAction,
+        negativeText,
+        isDangerButton,
       );
+
+      return Fields.dialogActions(
+        buttons: actions,
+        padding: const EdgeInsetsDirectional.only(top: 20.0),
+        mainAxisAlignment: MainAxisAlignment.end,
+      );
+    },
+  );
 
   List<Widget> _actions(
     bool enableAction,
@@ -356,26 +355,25 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
     void Function()? negativeAction,
     String negativeText,
     bool isDangerButton,
-  ) =>
-      [
-        NegativeButton(
-          buttonsAspectRatio: aspectRatio,
-          buttonConstrains: Dimensions.sizeConstrainsBottomDialogAction,
-          text: negativeText,
-          onPressed: negativeAction,
-        ),
-        PositiveButton(
-          key: ValueKey('move_entry'),
-          buttonsAspectRatio: aspectRatio,
-          isDangerButton: isDangerButton,
-          buttonConstrains: Dimensions.sizeConstrainsBottomDialogAction,
-          text: positiveText,
-          onPressed: enableAction ? positiveAction : null,
-        )
+  ) => [
+    NegativeButton(
+      buttonsAspectRatio: aspectRatio,
+      buttonConstrains: Dimensions.sizeConstrainsBottomDialogAction,
+      text: negativeText,
+      onPressed: negativeAction,
+    ),
+    PositiveButton(
+      key: ValueKey('move_entry'),
+      buttonsAspectRatio: aspectRatio,
+      isDangerButton: isDangerButton,
+      buttonConstrains: Dimensions.sizeConstrainsBottomDialogAction,
+      text: positiveText,
+      onPressed: enableAction ? positiveAction : null,
+    ),
 
-        /// If the entry can't be moved (the user selected the same entry/path, for example)
-        /// Then null is used instead of the function, which disable the button.
-      ];
+    /// If the entry can't be moved (the user selected the same entry/path, for example)
+    /// Then null is used instead of the function, which disable the button.
+  ];
 
   void cancelAndDismiss(
     MoveEntriesActions moveEntriesActions,

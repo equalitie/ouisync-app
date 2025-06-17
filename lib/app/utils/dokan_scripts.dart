@@ -23,13 +23,11 @@ class DokanScripts with AppLogger {
 
   DokanCheckResult checkDokanInstallation() {
     final scriptFilePath = buildPathToFile('check_dokan_installation.ps1');
-    final script = 'powershell.exe -executionpolicy bypass -File '
+    final script =
+        'powershell.exe -executionpolicy bypass -File '
         '"$scriptFilePath"';
 
-    final args = [
-      requiredMayor,
-      minimumRequiredVersion,
-    ];
+    final args = [requiredMayor, minimumRequiredVersion];
 
     final resultCheckDokanInstallation = io.Process.runSync(script, args);
 
@@ -48,10 +46,7 @@ class DokanScripts with AppLogger {
   }
 
   Future<bool?> runDokanMsiInstallation() async {
-    final args = [
-      '/i',
-      buildPathToFile('Dokan_x64.msi'),
-    ];
+    final args = ['/i', buildPathToFile('Dokan_x64.msi')];
 
     final processResult = io.Process.runSync('msiexec', args);
 
@@ -68,8 +63,9 @@ class DokanScripts with AppLogger {
       case 1602:
         {
           loggy.debug(
-              'The user canceled the Dokan MSI execution before it was done\n'
-              'stdout:\n$stdOut\n');
+            'The user canceled the Dokan MSI execution before it was done\n'
+            'stdout:\n$stdOut\n',
+          );
           return null;
         }
       case 1603:

@@ -36,17 +36,15 @@ class _StateMonitorState extends State<StateMonitorPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: DirectionalAppBar(title: Text(S.current.titleStateMonitor)),
-        body: Theme(
-          data: ThemeData(
-            cardTheme: CardThemeData(margin: EdgeInsetsDirectional.all(1.0)),
-            listTileTheme: ListTileThemeData(
-              dense: true,
-            ),
-          ),
-          child: _NodeWidget(root),
-        ),
-      );
+    appBar: DirectionalAppBar(title: Text(S.current.titleStateMonitor)),
+    body: Theme(
+      data: ThemeData(
+        cardTheme: CardThemeData(margin: EdgeInsetsDirectional.all(1.0)),
+        listTileTheme: ListTileThemeData(dense: true),
+      ),
+      child: _NodeWidget(root),
+    ),
+  );
 }
 
 class _NodeWidget extends StatelessWidget {
@@ -55,25 +53,28 @@ class _NodeWidget extends StatelessWidget {
   _NodeWidget(this.cubit);
 
   @override
-  Widget build(BuildContext context) =>
-      BlocBuilder<StateMonitorCubit, StateMonitorNode?>(
-          bloc: cubit,
-          builder: (context, node) {
-            if (node == null) {
-              // node not loaded yet
-              return SizedBox.shrink();
-            }
+  Widget build(
+    BuildContext context,
+  ) => BlocBuilder<StateMonitorCubit, StateMonitorNode?>(
+    bloc: cubit,
+    builder: (context, node) {
+      if (node == null) {
+        // node not loaded yet
+        return SizedBox.shrink();
+      }
 
-            if (cubit.isRoot) {
-              // root node - use `ListView` to enable scrolling
-              return ListView(children: buildValuesAndChildren(node));
-            }
+      if (cubit.isRoot) {
+        // root node - use `ListView` to enable scrolling
+        return ListView(children: buildValuesAndChildren(node));
+      }
 
-            // child node - use regular `Column` because we are already inside `ListView`.
-            return Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(20, 0, 0, 0),
-                child: Column(children: buildValuesAndChildren(node)));
-          });
+      // child node - use regular `Column` because we are already inside `ListView`.
+      return Padding(
+        padding: const EdgeInsetsDirectional.fromSTEB(20, 0, 0, 0),
+        child: Column(children: buildValuesAndChildren(node)),
+      );
+    },
+  );
 
   List<Widget> buildValuesAndChildren(StateMonitorNode node) =>
       node.values.entries
@@ -120,10 +121,12 @@ class _ChildWidgetState extends State<_ChildWidget> {
       );
     } else {
       return Card(
-          child: ListTile(
-              trailing: const Icon(Icons.add),
-              title: Text(widget.id.name),
-              onTap: expand));
+        child: ListTile(
+          trailing: const Icon(Icons.add),
+          title: Text(widget.id.name),
+          onTap: expand,
+        ),
+      );
     }
   }
 

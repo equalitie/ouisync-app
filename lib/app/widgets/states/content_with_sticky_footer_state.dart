@@ -11,7 +11,8 @@ class ContentWithStickyFooterState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => LayoutBuilder(
-        builder: (context, constraints) => SingleChildScrollView(
+    builder:
+        (context, constraints) => SingleChildScrollView(
           child: ConstrainedBox(
             constraints: BoxConstraints(minHeight: constraints.maxHeight),
             child: Column(
@@ -31,5 +32,5 @@ class ContentWithStickyFooterState extends StatelessWidget {
             ),
           ),
         ),
-      );
+  );
 }

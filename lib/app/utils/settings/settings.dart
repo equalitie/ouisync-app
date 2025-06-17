@@ -40,10 +40,14 @@ Future<Settings> loadAndMigrateSettings(Session session) async {
 
 Future<void> _migratePaths() async {
   final newDir = await Native.getBaseDir();
-  final oldDir = io.Directory(newDir.path
-      .split(separator)
-      .map((component) => (component == 'ouisync') ? 'ouisync_app' : component)
-      .join(separator));
+  final oldDir = io.Directory(
+    newDir.path
+        .split(separator)
+        .map(
+          (component) => (component == 'ouisync') ? 'ouisync_app' : component,
+        )
+        .join(separator),
+  );
 
   if (newDir.path == oldDir.path) {
     return;

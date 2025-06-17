@@ -11,10 +11,10 @@ class LogViewPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: DirectionalAppBar(title: Text(S.current.messageLogViewer)),
-        body: Padding(
-          padding: Dimensions.paddingContents,
-          child: LogView(reader, theme: LogViewTheme.system(context)),
-        ),
-      );
+    appBar: DirectionalAppBar(title: Text(S.current.messageLogViewer)),
+    body: Padding(
+      padding: Dimensions.paddingContents,
+      child: LogView(reader, theme: LogViewTheme.system(context)),
+    ),
+  );
 }

@@ -13,10 +13,10 @@ class MoveEntriesActions with AppLogger {
     required ReposCubit reposCubit,
     required RepoCubit originRepoCubit,
     required BottomSheetType sheetType,
-  })  : _context = context,
-        _reposCubit = reposCubit,
-        _originRepoCubit = originRepoCubit,
-        _sheetType = sheetType;
+  }) : _context = context,
+       _reposCubit = reposCubit,
+       _originRepoCubit = originRepoCubit,
+       _sheetType = sheetType;
 
   final BuildContext _context;
   final ReposCubit _reposCubit;
@@ -24,28 +24,29 @@ class MoveEntriesActions with AppLogger {
   final BottomSheetType _sheetType;
 
   String getActionText(BottomSheetType type) => switch (type) {
-        BottomSheetType.copy => S.current.actionCopy,
-        BottomSheetType.delete => S.current.actionDelete,
-        BottomSheetType.download => S.current.actionDownload,
-        BottomSheetType.move => S.current.actionMove,
-        BottomSheetType.upload => '',
-        BottomSheetType.gone => '',
-      };
+    BottomSheetType.copy => S.current.actionCopy,
+    BottomSheetType.delete => S.current.actionDelete,
+    BottomSheetType.download => S.current.actionDownload,
+    BottomSheetType.move => S.current.actionMove,
+    BottomSheetType.upload => '',
+    BottomSheetType.gone => '',
+  };
 
   Future<bool>? getAction(
     RepoCubit destinationRepoCubit,
     MultiEntryActions multiEntryActions,
-  ) =>
-      switch (_sheetType) {
-        BottomSheetType.copy =>
-          multiEntryActions.copyEntriesTo(destinationRepoCubit),
-        BottomSheetType.delete => multiEntryActions.deleteSelectedEntries(),
-        BottomSheetType.download => multiEntryActions.saveEntriesToDevice(),
-        BottomSheetType.move =>
-          multiEntryActions.moveEntriesTo(destinationRepoCubit),
-        BottomSheetType.upload => null,
-        BottomSheetType.gone => null,
-      };
+  ) => switch (_sheetType) {
+    BottomSheetType.copy => multiEntryActions.copyEntriesTo(
+      destinationRepoCubit,
+    ),
+    BottomSheetType.delete => multiEntryActions.deleteSelectedEntries(),
+    BottomSheetType.download => multiEntryActions.saveEntriesToDevice(),
+    BottomSheetType.move => multiEntryActions.moveEntriesTo(
+      destinationRepoCubit,
+    ),
+    BottomSheetType.upload => null,
+    BottomSheetType.gone => null,
+  };
 
   Future<void> copyOrMoveSingleEntry({
     required RepoCubit destinationRepoCubit,
@@ -61,15 +62,15 @@ class MoveEntriesActions with AppLogger {
 
     final action = switch (_sheetType) {
       BottomSheetType.copy => copySingleEntry(
-          currentFolderPath,
-          entry,
-          toRepoCubit,
-        ),
+        currentFolderPath,
+        entry,
+        toRepoCubit,
+      ),
       BottomSheetType.move => moveSingleEntry(
-          currentFolderPath,
-          entry,
-          toRepoCubit,
-        ),
+        currentFolderPath,
+        entry,
+        toRepoCubit,
+      ),
       _ => null,
     };
 
@@ -80,31 +81,30 @@ class MoveEntriesActions with AppLogger {
     String currentFolderPath,
     FileSystemEntry entry,
     RepoCubit? toRepoCubit,
-  ) async =>
-      CopyEntry(
-        _context,
-        originRepoCubit: _originRepoCubit,
-        entry: entry,
-        destinationPath: currentFolderPath,
-      ).copy(currentRepoCubit: toRepoCubit, recursive: true);
+  ) async => CopyEntry(
+    _context,
+    originRepoCubit: _originRepoCubit,
+    entry: entry,
+    destinationPath: currentFolderPath,
+  ).copy(currentRepoCubit: toRepoCubit, recursive: true);
 
   Future<void> moveSingleEntry(
     String currentFolderPath,
     FileSystemEntry entry,
     RepoCubit? toRepoCubit,
-  ) async =>
-      MoveEntry(
-        _context,
-        originRepoCubit: _originRepoCubit,
-        entry: entry,
-        destinationPath: currentFolderPath,
-      ).move(currentRepoCubit: toRepoCubit, recursive: true);
+  ) async => MoveEntry(
+    _context,
+    originRepoCubit: _originRepoCubit,
+    entry: entry,
+    destinationPath: currentFolderPath,
+  ).move(currentRepoCubit: toRepoCubit, recursive: true);
 
   bool enableAction(
     ({bool destinationOk, String errorMessage}) Function(
       RepoCubit destinationRepoCubit,
       String destinationPath,
-    ) validation,
+    )
+    validation,
     RepoEntry? currentRepo,
   ) {
     if (currentRepo == null) return false;

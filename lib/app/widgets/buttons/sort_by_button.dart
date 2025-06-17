@@ -5,10 +5,7 @@ import '../../cubits/sort_list.dart';
 import '../../utils/utils.dart' show SortByLocalizedExtension;
 
 class SortByButton extends StatelessWidget {
-  const SortByButton({
-    required this.sortBy,
-    required this.sort,
-  });
+  const SortByButton({required this.sortBy, required this.sort});
 
   final SortBy sortBy;
   final Future Function() sort;

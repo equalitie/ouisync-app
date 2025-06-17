@@ -40,8 +40,9 @@ class _RepositorySettingsState extends State<RepositorySettings>
     with AppLogger, RepositoryActionsMixin {
   @override
   Widget build(BuildContext context) => BlocBuilder<RepoCubit, RepoState>(
-        bloc: widget.repoCubit,
-        builder: (c, state) => SingleChildScrollView(
+    bloc: widget.repoCubit,
+    builder:
+        (c, state) => SingleChildScrollView(
           child: Container(
             padding: Dimensions.paddingBottomSheet,
             child: SafeArea(
@@ -79,8 +80,9 @@ class _RepositorySettingsState extends State<RepositorySettings>
                       title: S.current.messageUseCacheServers,
                       icon: Icons.cloud_outlined,
                       value: state.isCacheServersEnabled,
-                      onChanged: (value) =>
-                          widget.repoCubit.setCacheServersEnabled(value),
+                      onChanged:
+                          (value) =>
+                              widget.repoCubit.setCacheServersEnabled(value),
                     ),
                   EntryActionItem(
                     iconData: Icons.edit_outlined,
@@ -95,31 +97,37 @@ class _RepositorySettingsState extends State<RepositorySettings>
                       if (newName.isNotEmpty) {
                         Navigator.of(context).pop();
                         showSnackBar(
-                            S.current.messageRepositoryRenamed(newName));
+                          S.current.messageRepositoryRenamed(newName),
+                        );
                       }
                     },
                   ),
                   EntryActionItem(
-                      iconData: Icons.share_outlined,
-                      title: S.current.actionShare,
-                      dense: true,
-                      onTap: () async {
-                        await Navigator.of(context).maybePop();
-                        await shareRepository(context,
-                            repository: widget.repoCubit);
-                      }),
+                    iconData: Icons.share_outlined,
+                    title: S.current.actionShare,
+                    dense: true,
+                    onTap: () async {
+                      await Navigator.of(context).maybePop();
+                      await shareRepository(
+                        context,
+                        repository: widget.repoCubit,
+                      );
+                    },
+                  ),
                   EntryActionItem(
-                      iconData: Icons.password_outlined,
-                      title: S.current.titleSecurity,
-                      dense: true,
-                      onTap: () async => await navigateToRepositorySecurity(
-                            context,
-                            settings: widget.settings,
-                            session: widget.session,
-                            repoCubit: widget.repoCubit,
-                            passwordHasher: widget.reposCubit.passwordHasher,
-                            popDialog: () => Navigator.of(context).pop(),
-                          )),
+                    iconData: Icons.password_outlined,
+                    title: S.current.titleSecurity,
+                    dense: true,
+                    onTap:
+                        () async => await navigateToRepositorySecurity(
+                          context,
+                          settings: widget.settings,
+                          session: widget.session,
+                          repoCubit: widget.repoCubit,
+                          passwordHasher: widget.reposCubit.passwordHasher,
+                          popDialog: () => Navigator.of(context).pop(),
+                        ),
+                  ),
                   //// TODO: Removed the eject button for now until the
                   //// next release and after team discussion on where to
                   //// best put it and how to explain the use case to the
@@ -141,11 +149,12 @@ class _RepositorySettingsState extends State<RepositorySettings>
                     iconData: Icons.snippet_folder_outlined,
                     title: S.current.actionLocateRepo,
                     dense: true,
-                    onTap: () async => await locateRepository(
-                      context,
-                      repoLocation: widget.repoCubit.location,
-                      windows: Platform.isWindows,
-                    ),
+                    onTap:
+                        () async => await locateRepository(
+                          context,
+                          repoLocation: widget.repoCubit.location,
+                          windows: Platform.isWindows,
+                        ),
                   ),
                   EntryActionItem(
                     iconData: Icons.delete_outline,
@@ -155,8 +164,8 @@ class _RepositorySettingsState extends State<RepositorySettings>
                     onTap: () async {
                       final repoName = widget.repoCubit.name;
                       final location = widget.repoCubit.location;
-                      final deleteRepoFuture =
-                          widget.reposCubit.deleteRepository(location);
+                      final deleteRepoFuture = widget.reposCubit
+                          .deleteRepository(location);
 
                       final deleted = await deleteRepository(
                         context,
@@ -167,7 +176,8 @@ class _RepositorySettingsState extends State<RepositorySettings>
                       if (deleted == true) {
                         Navigator.of(context).pop();
                         showSnackBar(
-                            S.current.messageRepositoryDeleted(repoName));
+                          S.current.messageRepositoryDeleted(repoName),
+                        );
                       }
                     },
                   ),
@@ -176,7 +186,7 @@ class _RepositorySettingsState extends State<RepositorySettings>
             ),
           ),
         ),
-      );
+  );
 }
 
 class _SwitchItem extends StatelessWidget {
@@ -194,18 +204,18 @@ class _SwitchItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SwitchListTile.adaptive(
-        title: Text(title, style: context.theme.appTextStyle.bodyMedium),
-        secondary: Icon(
-          icon,
-          size: Dimensions.sizeIconMicro,
-          color: Colors.black87,
-        ),
-        contentPadding: EdgeInsetsDirectional.zero,
-        dense: true,
-        visualDensity: VisualDensity(horizontal: -4.0),
-        value: value,
-        onChanged: onChanged,
-      );
+    title: Text(title, style: context.theme.appTextStyle.bodyMedium),
+    secondary: Icon(
+      icon,
+      size: Dimensions.sizeIconMicro,
+      color: Colors.black87,
+    ),
+    contentPadding: EdgeInsetsDirectional.zero,
+    dense: true,
+    visualDensity: VisualDensity(horizontal: -4.0),
+    value: value,
+    onChanged: onChanged,
+  );
 }
 
 class _Progress extends StatelessWidget {
@@ -215,15 +225,17 @@ class _Progress extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => RepoProgressBuilder(
-        repoCubit: repoCubit,
-        builder: (context, progress) => Fields.bottomSheetTitle(
+    repoCubit: repoCubit,
+    builder:
+        (context, progress) => Fields.bottomSheetTitle(
           '${S.current.labelSynced}: ${_formatProgress(progress)}',
         ),
-      );
+  );
 }
 
 String _formatProgress(Progress progress) {
-  final value =
-      (progress.fraction * 100.0).truncateToDouble().toStringAsFixed(0);
+  final value = (progress.fraction * 100.0).truncateToDouble().toStringAsFixed(
+    0,
+  );
   return '$value%';
 }

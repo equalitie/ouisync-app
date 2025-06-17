@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 
 class AppTextThemeExtension extends ThemeExtension<AppTextThemeExtension> {
-  const AppTextThemeExtension(
-      {required this.titleLarge,
-      required this.titleMedium,
-      required this.titleSmall,
-      required this.bodyLarge,
-      required this.bodyMedium,
-      required this.bodySmall,
-      required this.bodyMicro,
-      required this.labelLarge,
-      required this.labelMedium,
-      required this.labelSmall});
+  const AppTextThemeExtension({
+    required this.titleLarge,
+    required this.titleMedium,
+    required this.titleSmall,
+    required this.bodyLarge,
+    required this.bodyMedium,
+    required this.bodySmall,
+    required this.bodyMicro,
+    required this.labelLarge,
+    required this.labelMedium,
+    required this.labelSmall,
+  });
 
   final TextStyle titleLarge;
   final TextStyle titleMedium;
@@ -25,28 +26,30 @@ class AppTextThemeExtension extends ThemeExtension<AppTextThemeExtension> {
   final TextStyle labelSmall;
 
   @override
-  ThemeExtension<AppTextThemeExtension> copyWith(
-      {TextStyle? titleLarge,
-      TextStyle? titleMedium,
-      TextStyle? titleSmall,
-      TextStyle? bodyLarge,
-      TextStyle? bodyMedium,
-      TextStyle? bodySmall,
-      TextStyle? bodyMicro,
-      TextStyle? labelLarge,
-      TextStyle? labelMedium,
-      TextStyle? labelSmall}) {
+  ThemeExtension<AppTextThemeExtension> copyWith({
+    TextStyle? titleLarge,
+    TextStyle? titleMedium,
+    TextStyle? titleSmall,
+    TextStyle? bodyLarge,
+    TextStyle? bodyMedium,
+    TextStyle? bodySmall,
+    TextStyle? bodyMicro,
+    TextStyle? labelLarge,
+    TextStyle? labelMedium,
+    TextStyle? labelSmall,
+  }) {
     return AppTextThemeExtension(
-        titleLarge: titleLarge ?? this.titleLarge,
-        titleMedium: titleMedium ?? this.titleMedium,
-        titleSmall: titleSmall ?? this.titleSmall,
-        bodyLarge: bodyLarge ?? this.bodyLarge,
-        bodyMedium: bodyMedium ?? this.bodyMedium,
-        bodySmall: bodySmall ?? this.bodySmall,
-        bodyMicro: bodyMicro ?? this.bodyMicro,
-        labelLarge: labelLarge ?? this.labelLarge,
-        labelMedium: labelLarge ?? this.labelMedium,
-        labelSmall: labelLarge ?? this.labelSmall);
+      titleLarge: titleLarge ?? this.titleLarge,
+      titleMedium: titleMedium ?? this.titleMedium,
+      titleSmall: titleSmall ?? this.titleSmall,
+      bodyLarge: bodyLarge ?? this.bodyLarge,
+      bodyMedium: bodyMedium ?? this.bodyMedium,
+      bodySmall: bodySmall ?? this.bodySmall,
+      bodyMicro: bodyMicro ?? this.bodyMicro,
+      labelLarge: labelLarge ?? this.labelLarge,
+      labelMedium: labelLarge ?? this.labelMedium,
+      labelSmall: labelLarge ?? this.labelSmall,
+    );
   }
 
   @override
@@ -59,15 +62,16 @@ class AppTextThemeExtension extends ThemeExtension<AppTextThemeExtension> {
     }
 
     return AppTextThemeExtension(
-        titleLarge: TextStyle.lerp(titleLarge, other.titleLarge, t)!,
-        titleMedium: TextStyle.lerp(titleMedium, other.titleMedium, t)!,
-        titleSmall: TextStyle.lerp(titleSmall, other.titleSmall, t)!,
-        bodyLarge: TextStyle.lerp(bodyLarge, other.bodyLarge, t)!,
-        bodyMedium: TextStyle.lerp(bodyMedium, other.bodyMedium, t)!,
-        bodySmall: TextStyle.lerp(bodySmall, other.bodySmall, t)!,
-        bodyMicro: TextStyle.lerp(bodyMicro, other.bodyMicro, t)!,
-        labelLarge: TextStyle.lerp(labelLarge, other.labelLarge, t)!,
-        labelMedium: TextStyle.lerp(labelMedium, other.labelMedium, t)!,
-        labelSmall: TextStyle.lerp(labelSmall, other.labelSmall, t)!);
+      titleLarge: TextStyle.lerp(titleLarge, other.titleLarge, t)!,
+      titleMedium: TextStyle.lerp(titleMedium, other.titleMedium, t)!,
+      titleSmall: TextStyle.lerp(titleSmall, other.titleSmall, t)!,
+      bodyLarge: TextStyle.lerp(bodyLarge, other.bodyLarge, t)!,
+      bodyMedium: TextStyle.lerp(bodyMedium, other.bodyMedium, t)!,
+      bodySmall: TextStyle.lerp(bodySmall, other.bodySmall, t)!,
+      bodyMicro: TextStyle.lerp(bodyMicro, other.bodyMicro, t)!,
+      labelLarge: TextStyle.lerp(labelLarge, other.labelLarge, t)!,
+      labelMedium: TextStyle.lerp(labelMedium, other.labelMedium, t)!,
+      labelSmall: TextStyle.lerp(labelSmall, other.labelSmall, t)!,
+    );
   }
 }

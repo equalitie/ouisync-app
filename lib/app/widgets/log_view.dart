@@ -56,31 +56,37 @@ class _LogViewState extends State<LogView> {
       child: ListView.builder(
         controller: _scrollController,
         shrinkWrap: true,
-        itemBuilder: (context, index) => _buildMessage(
-          context,
-          _buffer[index],
-        ),
+        itemBuilder: (context, index) => _buildMessage(context, _buffer[index]),
         itemCount: _buffer.length,
       ),
     );
   }
 
-  Widget _buildMessage(BuildContext context, LogMessage message) =>
-      Text.rich(TextSpan(
-          children: message.content
-              .map((span) => TextSpan(
-                    text: span.text,
-                    style: _resolveStyle(span.style),
-                  ))
-              .toList()));
+  Widget _buildMessage(BuildContext context, LogMessage message) => Text.rich(
+    TextSpan(
+      children:
+          message.content
+              .map(
+                (span) =>
+                    TextSpan(text: span.text, style: _resolveStyle(span.style)),
+              )
+              .toList(),
+    ),
+  );
 
   TextStyle _resolveStyle(AnsiStyle style) => TextStyle(
-        color: widget.theme.resolveColor(style.foreground),
-        backgroundColor: widget.theme.resolveColor(style.background),
-        fontWeight: style.fontWeight,
-        fontStyle: style.fontStyle,
-        fontFamilyFallback: ["Monaco", "Consolas", "Droid Sans Mono", "Courier New", "Courier"]
-      );
+    color: widget.theme.resolveColor(style.foreground),
+    backgroundColor: widget.theme.resolveColor(style.background),
+    fontWeight: style.fontWeight,
+    fontStyle: style.fontStyle,
+    fontFamilyFallback: [
+      "Monaco",
+      "Consolas",
+      "Droid Sans Mono",
+      "Courier New",
+      "Courier",
+    ],
+  );
 
   void _onMessage(LogMessage message) {
     setState(() {
@@ -89,8 +95,9 @@ class _LogViewState extends State<LogView> {
 
     if (_follow) {
       // Scroll to bottom after widget fully rebuilds.
-      WidgetsBinding.instance
-          .addPostFrameCallback((_) => unawaited(_scrollToBottom()));
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => unawaited(_scrollToBottom()),
+      );
     }
   }
 

@@ -12,37 +12,42 @@ class ReplaceKeepEntry extends StatelessWidget {
   final String name;
   final EntryType type;
 
-  final _fileAction =
-      ValueNotifier<DisambiguationAction>(DisambiguationAction.replace);
+  final _fileAction = ValueNotifier<DisambiguationAction>(
+    DisambiguationAction.replace,
+  );
 
   @override
   Widget build(BuildContext context) {
     final bodyStyle = context.theme.appTextStyle.bodyMedium;
 
-    final replaceMessage = type == EntryType.file
-        ? S.current.messageReplaceExistingFile
-        : S.current.messageReplaceExistingFolder;
+    final replaceMessage =
+        type == EntryType.file
+            ? S.current.messageReplaceExistingFile
+            : S.current.messageReplaceExistingFolder;
 
-    final keepMessage = type == EntryType.file
-        ? S.current.messageKeepBothFiles
-        : S.current.messageKeepBothFolders;
+    final keepMessage =
+        type == EntryType.file
+            ? S.current.messageKeepBothFiles
+            : S.current.messageKeepBothFolders;
 
-    _fileAction.value = type == EntryType.file
-        ? DisambiguationAction.replace
-        : DisambiguationAction.keep;
+    _fileAction.value =
+        type == EntryType.file
+            ? DisambiguationAction.replace
+            : DisambiguationAction.keep;
 
     return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Dimensions.spacingVerticalDouble,
-          Text(S.current.messageFileAlreadyExist(name), style: bodyStyle),
-          Dimensions.spacingVertical,
-          ValueListenableBuilder(
-            valueListenable: _fileAction,
-            builder: (context, value, child) {
-              return Column(children: [
+      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Dimensions.spacingVerticalDouble,
+        Text(S.current.messageFileAlreadyExist(name), style: bodyStyle),
+        Dimensions.spacingVertical,
+        ValueListenableBuilder(
+          valueListenable: _fileAction,
+          builder: (context, value, child) {
+            return Column(
+              children: [
                 GestureDetector(
                   onTap: () {
                     if (type == EntryType.directory) {
@@ -67,23 +72,27 @@ class ReplaceKeepEntry extends StatelessWidget {
                   groupValue: value,
                   onChanged: _onFileActionChanged,
                 ),
-              ]);
-            },
-          ),
-          Dimensions.spacingVertical,
-          Fields.dialogActions(buttons: _actions(context)),
-        ]);
+              ],
+            );
+          },
+        ),
+        Dimensions.spacingVertical,
+        Fields.dialogActions(buttons: _actions(context)),
+      ],
+    );
   }
 
   List<Widget> _actions(context) => [
-        NegativeButton(
-            text: S.current.actionCancel,
-            onPressed: () async => await Navigator.of(context).maybePop(null)),
-        PositiveButton(
-            text: S.current.actionAccept,
-            onPressed: () async =>
-                await Navigator.of(context).maybePop(_fileAction.value)),
-      ];
+    NegativeButton(
+      text: S.current.actionCancel,
+      onPressed: () async => await Navigator.of(context).maybePop(null),
+    ),
+    PositiveButton(
+      text: S.current.actionAccept,
+      onPressed:
+          () async => await Navigator.of(context).maybePop(_fileAction.value),
+    ),
+  ];
 
   void _onFileActionChanged(DisambiguationAction? value) =>
       _fileAction.value = value ?? DisambiguationAction.replace;

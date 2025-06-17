@@ -4,7 +4,9 @@ class Strings {
   static const String root = '/';
   static const String atSymbol = '@';
 
-  static const String entityNameRegExp = '.*[/\\\\].*'; /// No / nor \ allowed
+  static const String entityNameRegExp = '.*[/\\\\].*';
+
+  /// No / nor \ allowed
 
   static const String upNP = 'UPnP';
 }

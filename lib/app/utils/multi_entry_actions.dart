@@ -14,9 +14,9 @@ class MultiEntryActions {
     BuildContext context, {
     required Dirs dirs,
     required EntrySelectionCubit entrySelectionCubit,
-  })  : _context = context,
-        _entrySelectionCubit = entrySelectionCubit,
-        _dirs = dirs;
+  }) : _context = context,
+       _entrySelectionCubit = entrySelectionCubit,
+       _dirs = dirs;
 
   final BuildContext _context;
   final EntrySelectionCubit _entrySelectionCubit;
@@ -117,7 +117,8 @@ class MultiEntryActions {
         'Folders: $totalSelectedDirs, Files: $totalSelectedFiles';
     final strings = _getStringsForConfirmationDialog(actionType, totalsMessage);
     final isDangerButton = actionType == EntrySelectionActions.delete;
-    final confirmed = await _getConfirmation(
+    final confirmed =
+        await _getConfirmation(
           context,
           strings.title,
           strings.message,
@@ -135,11 +136,8 @@ class MultiEntryActions {
     return result;
   }
 
-  ({
-    String title,
-    String message,
-    String positiveText,
-  }) _getStringsForConfirmationDialog(
+  ({String title, String message, String positiveText})
+  _getStringsForConfirmationDialog(
     EntrySelectionActions actionType,
     String totalsMessage,
   ) {
@@ -191,8 +189,8 @@ class MultiEntryActions {
           children: [
             NegativeButton(
               text: S.current.actionCancel,
-              onPressed: () async =>
-                  await Navigator.of(context).maybePop(false),
+              onPressed:
+                  () async => await Navigator.of(context).maybePop(false),
               buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
             ),
             PositiveButton(

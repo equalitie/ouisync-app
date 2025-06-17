@@ -16,10 +16,10 @@ class RepoLocation implements Comparable<RepoLocation> {
   });
 
   static RepoLocation fromDbPath(String pathToDbFile) => RepoLocation(
-        dir: p.dirname(pathToDbFile),
-        name: p.basenameWithoutExtension(pathToDbFile),
-        ext: _trimLeadingDot(p.extension(pathToDbFile)),
-      );
+    dir: p.dirname(pathToDbFile),
+    name: p.basenameWithoutExtension(pathToDbFile),
+    ext: _trimLeadingDot(p.extension(pathToDbFile)),
+  );
 
   String get path => _addExtension(p.join(dir, name), ext);
 

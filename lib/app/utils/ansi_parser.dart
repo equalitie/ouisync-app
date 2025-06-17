@@ -23,10 +23,7 @@ Iterable<AnsiSpan> parseAnsi(String input) sync* {
   for (final span in parseAnsiRaw(input)) {
     final style = styleBuilder.interpret(span.codes);
 
-    yield AnsiSpan(
-      text: span.text,
-      style: style,
-    );
+    yield AnsiSpan(text: span.text, style: style);
   }
 }
 
@@ -107,16 +104,7 @@ class _StyleBuilder {
   }
 }
 
-enum AnsiColor {
-  black,
-  red,
-  green,
-  yellow,
-  blue,
-  magenta,
-  cyan,
-  white,
-}
+enum AnsiColor { black, red, green, yellow, blue, magenta, cyan, white }
 
 class AnsiStyle {
   AnsiColor? foreground;
@@ -124,9 +112,10 @@ class AnsiStyle {
   FontWeight fontWeight;
   FontStyle fontStyle;
 
-  AnsiStyle(
-      {this.foreground,
-      this.background,
-      this.fontWeight = FontWeight.normal,
-      this.fontStyle = FontStyle.normal});
+  AnsiStyle({
+    this.foreground,
+    this.background,
+    this.fontWeight = FontWeight.normal,
+    this.fontStyle = FontStyle.normal,
+  });
 }

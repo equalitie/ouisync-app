@@ -7,9 +7,7 @@ import 'utils.dart';
 class UserProvidedPeersCubit extends Cubit<List<String>> with CubitActions {
   final Session _session;
 
-  UserProvidedPeersCubit(Session session)
-      : _session = session,
-        super([]) {
+  UserProvidedPeersCubit(Session session) : _session = session, super([]) {
     unawaited(_refresh());
   }
 

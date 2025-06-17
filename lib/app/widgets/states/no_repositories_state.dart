@@ -17,13 +17,16 @@ class NoRepositoriesState extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final nothingHereYetImageHeight = MediaQuery.of(context).size.height *
+    final nothingHereYetImageHeight =
+        MediaQuery.of(context).size.height *
         Constants.statePlaceholderImageHeightFactor;
 
-    final newRepoButtonFocus =
-        useFocusNode(debugLabel: 'new_repo_button_focus');
-    final importRepoButtonFocus =
-        useFocusNode(debugLabel: 'import_repo_button_focus');
+    final newRepoButtonFocus = useFocusNode(
+      debugLabel: 'new_repo_button_focus',
+    );
+    final importRepoButtonFocus = useFocusNode(
+      debugLabel: 'import_repo_button_focus',
+    );
 
     return Directionality(
       textDirection: directionality,

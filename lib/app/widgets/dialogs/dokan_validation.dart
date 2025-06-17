@@ -15,9 +15,9 @@ class DokanValidation {
     BuildContext context, {
     required void Function() installationOk,
     required Future<bool?> Function() installationFailed,
-  })  : _context = context,
-        _installationOk = installationOk,
-        _installationFailed = installationFailed;
+  }) : _context = context,
+       _installationOk = installationOk,
+       _installationFailed = installationFailed;
 
   final BuildContext _context;
   final void Function() _installationOk;
@@ -71,13 +71,12 @@ class DokanValidation {
   }
 
   Future<void> _runInstallation(String title, Widget body) async {
-    final install = await showDialog<bool?>(
+    final install =
+        await showDialog<bool?>(
           context: _context,
           barrierDismissible: false,
-          builder: (BuildContext context) => ActionsDialog(
-            title: title,
-            body: body,
-          ),
+          builder:
+              (BuildContext context) => ActionsDialog(title: title, body: body),
         ) ??
         false;
 

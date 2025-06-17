@@ -18,20 +18,21 @@ class LocaleState {
   // in `S.delegate.supportedLocales`.
   final bool currentIsDefault;
 
-  LocaleState(
-      {required this.currentLocale,
-      required this.deviceLocale,
-      required this.currentIsDefault});
+  LocaleState({
+    required this.currentLocale,
+    required this.deviceLocale,
+    required this.currentIsDefault,
+  });
 
-  LocaleState copyWith(
-          {Locale? currentLocale,
-          Option<Locale>? deviceLocale,
-          bool? currentIsDefault}) =>
-      LocaleState(
-        currentLocale: currentLocale ?? this.currentLocale,
-        deviceLocale: deviceLocale ?? this.deviceLocale,
-        currentIsDefault: currentIsDefault ?? this.currentIsDefault,
-      );
+  LocaleState copyWith({
+    Locale? currentLocale,
+    Option<Locale>? deviceLocale,
+    bool? currentIsDefault,
+  }) => LocaleState(
+    currentLocale: currentLocale ?? this.currentLocale,
+    deviceLocale: deviceLocale ?? this.deviceLocale,
+    currentIsDefault: currentIsDefault ?? this.currentIsDefault,
+  );
 }
 
 class LocaleCubit extends Cubit<LocaleState> with CubitActions<LocaleState> {
@@ -56,12 +57,17 @@ class LocaleCubit extends Cubit<LocaleState> with CubitActions<LocaleState> {
   }
 
   LocaleCubit._(
-      Settings settings, Locale currentLocale, Option<Locale> deviceLocale)
-      : _settings = settings,
-        super(LocaleState(
-            currentLocale: currentLocale,
-            deviceLocale: deviceLocale,
-            currentIsDefault: currentLocale == deviceLocale.value)) {
+    Settings settings,
+    Locale currentLocale,
+    Option<Locale> deviceLocale,
+  ) : _settings = settings,
+      super(
+        LocaleState(
+          currentLocale: currentLocale,
+          deviceLocale: deviceLocale,
+          currentIsDefault: currentLocale == deviceLocale.value,
+        ),
+      ) {
     // TODO: If someone/something creates another `LocaleCubit`, will that replace
     // the `this._onLocaleChanged` causing `this` to no longer receive the events?
     PlatformDispatcher.instance.onLocaleChanged =
@@ -76,26 +82,31 @@ class LocaleCubit extends Cubit<LocaleState> with CubitActions<LocaleState> {
 
     await _settings.setLocale(newIsDefault ? null : locale);
 
-    emitUnlessClosed(state.copyWith(
-      currentLocale: locale,
-      currentIsDefault: newIsDefault,
-    ));
+    emitUnlessClosed(
+      state.copyWith(currentLocale: locale, currentIsDefault: newIsDefault),
+    );
   }
 
   void _onSystemLocaleChanged() {
-    final newDeviceLocale =
-        _closestSupported(PlatformDispatcher.instance.locale);
+    final newDeviceLocale = _closestSupported(
+      PlatformDispatcher.instance.locale,
+    );
 
     if (state.currentIsDefault) {
-      final newCurrent = Option.andThen(newDeviceLocale, _closestSupported) ??
+      final newCurrent =
+          Option.andThen(newDeviceLocale, _closestSupported) ??
           LocaleCubit._defaultLocale;
 
-      emitUnlessClosed(state.copyWith(
+      emitUnlessClosed(
+        state.copyWith(
           currentLocale: newCurrent,
-          deviceLocale: Option.from(newDeviceLocale)));
+          deviceLocale: Option.from(newDeviceLocale),
+        ),
+      );
     } else {
       emitUnlessClosed(
-          state.copyWith(deviceLocale: Option.from(newDeviceLocale)));
+        state.copyWith(deviceLocale: Option.from(newDeviceLocale)),
+      );
     }
   }
 }
@@ -129,15 +140,21 @@ Locale? _closestWithin(Locale desired, List<Locale> within) {
     //
     // TODO: Is it correct to first compare by `scriptCode` and then by
     // `countryCode`?  or should it be vice-versa?
-    final scriptCompare =
-        _comparator(desired.scriptCode, a.scriptCode, b.scriptCode);
+    final scriptCompare = _comparator(
+      desired.scriptCode,
+      a.scriptCode,
+      b.scriptCode,
+    );
 
     if (scriptCompare != 0) {
       return scriptCompare;
     }
 
-    final countryCompare =
-        _comparator(desired.countryCode, a.countryCode, b.countryCode);
+    final countryCompare = _comparator(
+      desired.countryCode,
+      a.countryCode,
+      b.countryCode,
+    );
 
     if (countryCompare != 0) {
       return countryCompare;
@@ -157,7 +174,7 @@ int _comparator(String? target, String? left, String? right) {
   return switch ((
     _nullOrEmpty(target),
     _nullOrEmpty(left),
-    _nullOrEmpty(right)
+    _nullOrEmpty(right),
   )) {
     (true, true, true) => 0,
     (true, true, false) => -1,

@@ -37,13 +37,8 @@ class CustomAdaptiveSwitch extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(
-              width: 12.0,
-            ),
-            Switch.adaptive(
-              value: value,
-              onChanged: onChanged,
-            ),
+            SizedBox(width: 12.0),
+            Switch.adaptive(value: value, onChanged: onChanged),
           ],
         ),
       ),

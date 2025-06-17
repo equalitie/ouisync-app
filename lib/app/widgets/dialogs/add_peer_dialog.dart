@@ -21,46 +21,42 @@ class _AddPeerDialogState extends State<AddPeerDialog> {
 
   @override
   Widget build(BuildContext context) => AlertDialog(
-          title: Text(
-            'Add peer',
-            style: context.theme.appTextStyle.titleLarge,
+    title: Text('Add peer', style: context.theme.appTextStyle.titleLarge),
+    content: Form(
+      key: _formKey,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextFormField(
+            initialValue: _address?.address,
+            validator: _validateAddress,
+            onChanged: _onAddressChanged,
+            decoration: InputDecoration(labelText: 'IP address'),
+            textInputAction: TextInputAction.next,
+            autofocus: true,
           ),
-          content: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextFormField(
-                  initialValue: _address?.address,
-                  validator: _validateAddress,
-                  onChanged: _onAddressChanged,
-                  decoration: InputDecoration(
-                    labelText: 'IP address',
-                  ),
-                  textInputAction: TextInputAction.next,
-                  autofocus: true,
-                ),
-                TextFormField(
-                  initialValue: _port?.toString(),
-                  validator: _validatePort,
-                  onChanged: _onPortChanged,
-                  decoration: InputDecoration(labelText: 'Port'),
-                  keyboardType: TextInputType.number,
-                  textInputAction: TextInputAction.done,
-                )
-              ],
-            ),
+          TextFormField(
+            initialValue: _port?.toString(),
+            validator: _validatePort,
+            onChanged: _onPortChanged,
+            decoration: InputDecoration(labelText: 'Port'),
+            keyboardType: TextInputType.number,
+            textInputAction: TextInputAction.done,
           ),
-          actions: [
-            TextButton(
-              child: Text(S.current.actionOK),
-              onPressed: () async => await _submit(context),
-            ),
-            TextButton(
-              child: Text(S.current.actionCancel),
-              onPressed: () async => await _cancel(context),
-            )
-          ]);
+        ],
+      ),
+    ),
+    actions: [
+      TextButton(
+        child: Text(S.current.actionOK),
+        onPressed: () async => await _submit(context),
+      ),
+      TextButton(
+        child: Text(S.current.actionCancel),
+        onPressed: () async => await _cancel(context),
+      ),
+    ],
+  );
 
   String? _validateAddress(String? value) {
     if (_parseAddress(value) == null) {

@@ -65,33 +65,34 @@ class FileListItem extends StatelessWidget {
 
     return ValueListenableBuilder(
       valueListenable: _backgroundColor,
-      builder: (context, stateColor, child) => _ListItemContainer(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            FileIconAnimated(downloadJob),
-            Expanded(
-              child: Container(
-                padding: Dimensions.paddingItem,
-                child: FileDescription(repoCubit, entry, uploadJob),
-              ),
+      builder:
+          (context, stateColor, child) => _ListItemContainer(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                FileIconAnimated(downloadJob),
+                Expanded(
+                  child: Container(
+                    padding: Dimensions.paddingItem,
+                    child: FileDescription(repoCubit, entry, uploadJob),
+                  ),
+                ),
+                TrailAction(
+                  repoInfoHash,
+                  entry,
+                  entrySelectionCubit: entrySelectionCubit,
+                  selectedNotifier: _selected,
+                  backgroundColorNotifier: _backgroundColor,
+                  onSelectEntry: onSelectEntry,
+                  onClearEntry: onClearEntry,
+                  uploadJob: uploadJob,
+                  verticalDotsAction: verticalDotsAction,
+                ),
+              ],
             ),
-            TrailAction(
-              repoInfoHash,
-              entry,
-              entrySelectionCubit: entrySelectionCubit,
-              selectedNotifier: _selected,
-              backgroundColorNotifier: _backgroundColor,
-              onSelectEntry: onSelectEntry,
-              onClearEntry: onClearEntry,
-              uploadJob: uploadJob,
-              verticalDotsAction: verticalDotsAction,
-            ),
-          ],
-        ),
-        mainAction: mainAction,
-        backgroundColor: stateColor,
-      ),
+            mainAction: mainAction,
+            backgroundColor: stateColor,
+          ),
     );
   }
 }
@@ -139,38 +140,39 @@ class DirectoryListItem extends StatelessWidget {
 
     return ValueListenableBuilder(
       valueListenable: _backgroundColor,
-      builder: (context, stateColor, child) => _ListItemContainer(
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            Icon(
-              Icons.folder_rounded,
-              size: Dimensions.sizeIconAverage,
-              color: Constants.folderIconColor,
+      builder:
+          (context, stateColor, child) => _ListItemContainer(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                Icon(
+                  Icons.folder_rounded,
+                  size: Dimensions.sizeIconAverage,
+                  color: Constants.folderIconColor,
+                ),
+                Expanded(
+                  child: Container(
+                    padding: Dimensions.paddingItem,
+                    child: ScrollableTextWidget(child: Text(entry.name)),
+                  ),
+                ),
+                TrailAction(
+                  repoInfoHash,
+                  entry,
+                  entrySelectionCubit: entrySelectionCubit,
+                  selectedNotifier: _selected,
+                  backgroundColorNotifier: _backgroundColor,
+                  onSelectEntry: onSelectEntry,
+                  onClearEntry: onClearEntry,
+                  uploadJob: null,
+                  verticalDotsAction: verticalDotsAction,
+                ),
+              ],
             ),
-            Expanded(
-              child: Container(
-                padding: Dimensions.paddingItem,
-                child: ScrollableTextWidget(child: Text(entry.name)),
-              ),
-            ),
-            TrailAction(
-              repoInfoHash,
-              entry,
-              entrySelectionCubit: entrySelectionCubit,
-              selectedNotifier: _selected,
-              backgroundColorNotifier: _backgroundColor,
-              onSelectEntry: onSelectEntry,
-              onClearEntry: onClearEntry,
-              uploadJob: null,
-              verticalDotsAction: verticalDotsAction,
-            ),
-          ],
-        ),
-        mainAction: mainAction,
-        backgroundColor: stateColor,
-      ),
+            mainAction: mainAction,
+            backgroundColor: stateColor,
+          ),
     );
   }
 }
@@ -191,9 +193,10 @@ class RepoListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => _ListItemContainer(
-        child: BlocBuilder<RepoCubit, RepoState>(
-          bloc: repoCubit,
-          builder: (context, state) => Row(
+    child: BlocBuilder<RepoCubit, RepoState>(
+      bloc: repoCubit,
+      builder:
+          (context, state) => Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               IconButton(
@@ -209,22 +212,16 @@ class RepoListItem extends StatelessWidget {
               Expanded(
                 child: Container(
                   padding: Dimensions.paddingItem,
-                  child: RepoDescription(
-                    state,
-                    isDefault: isDefault,
-                  ),
+                  child: RepoDescription(state, isDefault: isDefault),
                 ),
               ),
               RepoStatus(repoCubit),
-              _VerticalDotsButton(
-                disable: false,
-                action: verticalDotsAction,
-              ),
+              _VerticalDotsButton(disable: false, action: verticalDotsAction),
             ],
           ),
-        ),
-        mainAction: mainAction,
-      );
+    ),
+    mainAction: mainAction,
+  );
 }
 
 class MissingRepoListItem extends StatelessWidget {
@@ -241,36 +238,36 @@ class MissingRepoListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => _ListItemContainer(
-        mainAction: mainAction,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            Expanded(
-              flex: 1,
-              child: Icon(
-                Icons.error_outline_rounded,
-                size: Dimensions.sizeIconAverage,
-                color: Constants.folderIconColor,
-              ),
-            ),
-            Expanded(
-              flex: 9,
-              child: Padding(
-                padding: Dimensions.paddingItem,
-                child: MissingRepoDescription(location.name),
-              ),
-            ),
-            IconButton(
-              icon: const Icon(
-                Icons.delete,
-                size: Dimensions.sizeIconMicro,
-                color: Constants.dangerColor,
-              ),
-              onPressed: () => verticalDotsAction(),
-            )
-          ],
+    mainAction: mainAction,
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        Expanded(
+          flex: 1,
+          child: Icon(
+            Icons.error_outline_rounded,
+            size: Dimensions.sizeIconAverage,
+            color: Constants.folderIconColor,
+          ),
         ),
-      );
+        Expanded(
+          flex: 9,
+          child: Padding(
+            padding: Dimensions.paddingItem,
+            child: MissingRepoDescription(location.name),
+          ),
+        ),
+        IconButton(
+          icon: const Icon(
+            Icons.delete,
+            size: Dimensions.sizeIconMicro,
+            color: Constants.dangerColor,
+          ),
+          onPressed: () => verticalDotsAction(),
+        ),
+      ],
+    ),
+  );
 }
 
 class _ListItemContainer extends StatelessWidget {
@@ -286,16 +283,13 @@ class _ListItemContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Material(
-        color: backgroundColor ?? Colors.white,
-        child: InkWell(
-          onTap: () => mainAction.call(),
-          splashColor: Colors.blue,
-          child: Container(
-            padding: Dimensions.paddingListItem,
-            child: child,
-          ),
-        ),
-      );
+    color: backgroundColor ?? Colors.white,
+    child: InkWell(
+      onTap: () => mainAction.call(),
+      splashColor: Colors.blue,
+      child: Container(padding: Dimensions.paddingListItem, child: child),
+    ),
+  );
 }
 
 class TrailAction extends StatelessWidget {
@@ -310,8 +304,8 @@ class TrailAction extends StatelessWidget {
     required this.uploadJob,
     required this.verticalDotsAction,
     super.key,
-  })  : _selectedNotifier = selectedNotifier,
-        _backgroundColorNotifier = backgroundColorNotifier;
+  }) : _selectedNotifier = selectedNotifier,
+       _backgroundColorNotifier = backgroundColorNotifier;
 
   final String repoInfoHash;
   final FileSystemEntry entry;
@@ -343,32 +337,32 @@ class TrailAction extends StatelessWidget {
         final isSelectable = state.isSelectable(repoInfoHash, parent);
         return isSelectable
             ? ValueListenableBuilder(
-                valueListenable: _selectedNotifier,
-                builder: (BuildContext context, bool? value, Widget? child) =>
-                    Checkbox.adaptive(
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(6.0),
-                    ),
-                  ),
-                  visualDensity: VisualDensity.adaptivePlatformDensity,
-                  value: value,
-                  onChanged: (value) async => await _updateSelection(
-                    context,
-                    value ?? false,
-                    repoInfoHash: repoInfoHash,
-                    entry: entry,
-                    valueNotifier: _selectedNotifier,
-                    colorNotifier: _backgroundColorNotifier,
-                    onSelectEntry: onSelectEntry,
-                    onClearEntry: onClearEntry,
-                  ),
-                ),
-              )
+              valueListenable: _selectedNotifier,
+              builder:
+                  (BuildContext context, bool? value, Widget? child) =>
+                      Checkbox.adaptive(
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(6.0)),
+                        ),
+                        visualDensity: VisualDensity.adaptivePlatformDensity,
+                        value: value,
+                        onChanged:
+                            (value) async => await _updateSelection(
+                              context,
+                              value ?? false,
+                              repoInfoHash: repoInfoHash,
+                              entry: entry,
+                              valueNotifier: _selectedNotifier,
+                              colorNotifier: _backgroundColorNotifier,
+                              onSelectEntry: onSelectEntry,
+                              onClearEntry: onClearEntry,
+                            ),
+                      ),
+            )
             : _VerticalDotsButton(
-                disable: state.status == SelectionStatus.on,
-                action: uploadJob == null ? verticalDotsAction : null,
-              );
+              disable: state.status == SelectionStatus.on,
+              action: uploadJob == null ? verticalDotsAction : null,
+            );
       },
       listener: (context, state) async {
         if (repoInfoHash != state.originRepoInfoHash) return;
@@ -411,11 +405,7 @@ Future<void> _updateSelection(
         : onClearEntry(repoInfoHash, entry),
   );
 
-  _getBackgroundColor(
-    context,
-    notifier: colorNotifier,
-    value: value,
-  );
+  _getBackgroundColor(context, notifier: colorNotifier, value: value);
 }
 
 void _getBackgroundColor(
@@ -436,12 +426,12 @@ class _VerticalDotsButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => IconButton(
-        key: ValueKey('file_vert'),
-        color: disable ? Colors.grey : null,
-        icon: Icon(
-          disable ? Icons.more_horiz_rounded : Icons.more_vert_rounded,
-          size: Dimensions.sizeIconSmall,
-        ),
-        onPressed: action,
-      );
+    key: ValueKey('file_vert'),
+    color: disable ? Colors.grey : null,
+    icon: Icon(
+      disable ? Icons.more_horiz_rounded : Icons.more_vert_rounded,
+      size: Dimensions.sizeIconSmall,
+    ),
+    onPressed: action,
+  );
 }

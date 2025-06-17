@@ -15,8 +15,9 @@ class NatDetection extends Cubit<NatBehavior> with CubitActions, AppLogger {
     final connectivity = Connectivity();
 
     // TODO: throttle this to at most 1 per minute or so.
-    _subscription = connectivity.onConnectivityChanged
-        .listen((result) => _detect(result.last));
+    _subscription = connectivity.onConnectivityChanged.listen(
+      (result) => _detect(result.last),
+    );
 
     unawaited(
       connectivity.checkConnectivity().then((result) => _detect(result.last)),

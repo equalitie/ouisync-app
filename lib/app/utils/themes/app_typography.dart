@@ -3,73 +3,83 @@ import 'package:flutter/material.dart';
 abstract class AppTypography {
   /// Body
   static const bodyBig = TextStyle(
-      color: Color(0xdd000000),
-      fontSize: 16.0,
-      fontWeight: FontWeight.w500,
-      textBaseline: TextBaseline.alphabetic,
-      decoration: TextDecoration.none);
+    color: Color(0xdd000000),
+    fontSize: 16.0,
+    fontWeight: FontWeight.w500,
+    textBaseline: TextBaseline.alphabetic,
+    decoration: TextDecoration.none,
+  );
   static const bodyMedium = TextStyle(
-      color: Color(0xdd000000),
-      fontSize: 14.0,
-      fontWeight: FontWeight.w400,
-      textBaseline: TextBaseline.alphabetic,
-      decoration: TextDecoration.none);
+    color: Color(0xdd000000),
+    fontSize: 14.0,
+    fontWeight: FontWeight.w400,
+    textBaseline: TextBaseline.alphabetic,
+    decoration: TextDecoration.none,
+  );
   static const bodySmall = TextStyle(
-      color: Color(0x8a000000),
-      fontSize: 12.0,
-      fontWeight: FontWeight.w400,
-      textBaseline: TextBaseline.alphabetic,
-      decoration: TextDecoration.none);
+    color: Color(0x8a000000),
+    fontSize: 12.0,
+    fontWeight: FontWeight.w400,
+    textBaseline: TextBaseline.alphabetic,
+    decoration: TextDecoration.none,
+  );
   static const bodyMicro = TextStyle(
-      color: Color(0x8a000000),
-      fontSize: 10.0,
-      fontWeight: FontWeight.w400,
-      textBaseline: TextBaseline.alphabetic,
-      decoration: TextDecoration.none);
+    color: Color(0x8a000000),
+    fontSize: 10.0,
+    fontWeight: FontWeight.w400,
+    textBaseline: TextBaseline.alphabetic,
+    decoration: TextDecoration.none,
+  );
 
   /// Title
   static const titleBig = TextStyle(
-      color: Color(0xdd000000),
-      fontSize: 20.0,
-      fontWeight: FontWeight.w500,
-      textBaseline: TextBaseline.alphabetic,
-      decoration: TextDecoration.none);
+    color: Color(0xdd000000),
+    fontSize: 20.0,
+    fontWeight: FontWeight.w500,
+    textBaseline: TextBaseline.alphabetic,
+    decoration: TextDecoration.none,
+  );
   static const titleMedium = TextStyle(
-      color: Color(0xdd000000),
-      fontSize: 16.0,
-      fontWeight: FontWeight.w400,
-      textBaseline: TextBaseline.alphabetic,
-      decoration: TextDecoration.none);
+    color: Color(0xdd000000),
+    fontSize: 16.0,
+    fontWeight: FontWeight.w400,
+    textBaseline: TextBaseline.alphabetic,
+    decoration: TextDecoration.none,
+  );
   static const titleSmall = TextStyle(
-      color: Color(0xdd000000),
-      fontSize: 14.0,
-      fontWeight: FontWeight.w500,
-      letterSpacing: 0.1,
-      textBaseline: TextBaseline.alphabetic,
-      decoration: TextDecoration.none);
+    color: Color(0xdd000000),
+    fontSize: 14.0,
+    fontWeight: FontWeight.w500,
+    letterSpacing: 0.1,
+    textBaseline: TextBaseline.alphabetic,
+    decoration: TextDecoration.none,
+  );
 
   /// Label
   static const labelBig = TextStyle(
-      color: Color(0xdd000000),
-      fontSize: 14.0,
-      fontWeight: FontWeight.w500,
-      textBaseline: TextBaseline.alphabetic,
-      decoration: TextDecoration.none);
+    color: Color(0xdd000000),
+    fontSize: 14.0,
+    fontWeight: FontWeight.w500,
+    textBaseline: TextBaseline.alphabetic,
+    decoration: TextDecoration.none,
+  );
 
   static const labelMedium = TextStyle(
-      color: Color(0xdd000000),
-      fontSize: 12.0,
-      fontWeight: FontWeight.w400,
-      textBaseline: TextBaseline.alphabetic,
-      decoration: TextDecoration.none);
+    color: Color(0xdd000000),
+    fontSize: 12.0,
+    fontWeight: FontWeight.w400,
+    textBaseline: TextBaseline.alphabetic,
+    decoration: TextDecoration.none,
+  );
 
   static const labelSmall = TextStyle(
-      color: Color(0xdd000000),
-      fontSize: 10.0,
-      fontWeight: FontWeight.w400,
-      letterSpacing: 1.5,
-      textBaseline: TextBaseline.alphabetic,
-      decoration: TextDecoration.none);
+    color: Color(0xdd000000),
+    fontSize: 10.0,
+    fontWeight: FontWeight.w400,
+    letterSpacing: 1.5,
+    textBaseline: TextBaseline.alphabetic,
+    decoration: TextDecoration.none,
+  );
 }
 
 // TextTheme.bodyLarge: color: Color(0xdd000000), family: Roboto, size: 14.0, weight: 500, baseline: alphabetic, decoration: TextDecoration.none)

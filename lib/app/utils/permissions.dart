@@ -25,44 +25,54 @@ class Permissions {
         break;
 
       case PermissionStatus.permanentlyDenied:
-        final header = _labels[permission]?.rationale ??
+        final header =
+            _labels[permission]?.rationale ??
             S.current.messagePermissionRequired;
 
         message = '$header\n\n${S.current.messageGrantingRequiresSettings}';
         break;
 
       default:
-        message = _labels[permission]?.rationale ??
+        message =
+            _labels[permission]?.rationale ??
             S.current.messagePermissionRequired;
         break;
     }
 
     if (status != PermissionStatus.granted) {
-      final actions = status == PermissionStatus.permanentlyDenied
-          ? <Widget>[
-              TextButton(
-                child: Text(S.current.actionCloseCapital),
-                onPressed: () async =>
-                    await Navigator.of(context, rootNavigator: true)
-                        .maybePop(false),
-              ),
-              TextButton(
+      final actions =
+          status == PermissionStatus.permanentlyDenied
+              ? <Widget>[
+                TextButton(
+                  child: Text(S.current.actionCloseCapital),
+                  onPressed:
+                      () async => await Navigator.of(
+                        context,
+                        rootNavigator: true,
+                      ).maybePop(false),
+                ),
+                TextButton(
                   child: Text(S.current.actionGoToSettings.toUpperCase()),
                   onPressed: () async {
                     await openAppSettings();
 
-                    await Navigator.of(context, rootNavigator: true)
-                        .maybePop(true);
-                  })
-            ]
-          : <Widget>[
-              TextButton(
-                child: Text(S.current.actionCloseCapital),
-                onPressed: () async =>
-                    await Navigator.of(context, rootNavigator: true)
-                        .maybePop(false),
-              )
-            ];
+                    await Navigator.of(
+                      context,
+                      rootNavigator: true,
+                    ).maybePop(true);
+                  },
+                ),
+              ]
+              : <Widget>[
+                TextButton(
+                  child: Text(S.current.actionCloseCapital),
+                  onPressed:
+                      () async => await Navigator.of(
+                        context,
+                        rootNavigator: true,
+                      ).maybePop(false),
+                ),
+              ];
 
       final name = (_labels[permission]?.name)!;
 

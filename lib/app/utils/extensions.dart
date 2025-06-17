@@ -97,16 +97,17 @@ extension AppThemeExtension on ThemeData {
   AppTextThemeExtension get appTextStyle =>
       extension<AppTextThemeExtension>() ??
       AppTextThemeExtension(
-          titleLarge: AppTypography.titleBig,
-          titleMedium: AppTypography.titleMedium,
-          titleSmall: AppTypography.titleSmall,
-          bodyLarge: AppTypography.bodyBig,
-          bodyMedium: AppTypography.bodyMedium,
-          bodySmall: AppTypography.bodySmall,
-          bodyMicro: AppTypography.bodyMicro,
-          labelLarge: AppTypography.labelBig,
-          labelMedium: AppTypography.labelMedium,
-          labelSmall: AppTypography.labelSmall);
+        titleLarge: AppTypography.titleBig,
+        titleMedium: AppTypography.titleMedium,
+        titleSmall: AppTypography.titleSmall,
+        bodyLarge: AppTypography.bodyBig,
+        bodyMedium: AppTypography.bodyMedium,
+        bodySmall: AppTypography.bodySmall,
+        bodyMicro: AppTypography.bodyMicro,
+        labelLarge: AppTypography.labelBig,
+        labelMedium: AppTypography.labelMedium,
+        labelSmall: AppTypography.labelSmall,
+      );
 }
 
 extension ThemeGetter on BuildContext {
@@ -121,17 +122,21 @@ extension TextEditingControllerExtension on TextEditingController {
     extentOffset ??= 0;
 
     selection = TextSelection(
-        baseOffset: baseOffset, extentOffset: text.length - extentOffset);
+      baseOffset: baseOffset,
+      extentOffset: text.length - extentOffset,
+    );
   }
 }
 
 extension RepositoryExtension on Repository {
   static const _authModeKey = 'authMode';
 
-  Future<AuthMode> getAuthMode() =>
-      getMetadata(_authModeKey).then((data) => data != null
-          ? AuthMode.fromJson(json.decode(data))
-          : AuthModeBlindOrManual());
+  Future<AuthMode> getAuthMode() => getMetadata(_authModeKey).then(
+    (data) =>
+        data != null
+            ? AuthMode.fromJson(json.decode(data))
+            : AuthModeBlindOrManual(),
+  );
 
   Future<void> setAuthMode(AuthMode authMode) async {
     final newValue = json.encode(authMode.toJson());
@@ -141,11 +146,7 @@ extension RepositoryExtension on Repository {
     do {
       final oldValue = await getMetadata(_authModeKey);
       changed = await setMetadata([
-        MetadataEdit(
-          key: _authModeKey,
-          oldValue: oldValue,
-          newValue: newValue,
-        ),
+        MetadataEdit(key: _authModeKey, oldValue: oldValue, newValue: newValue),
       ]);
     } while (!changed);
   }

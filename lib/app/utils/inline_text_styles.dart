@@ -4,8 +4,9 @@ import 'package:styled_text/styled_text.dart';
 class InlineTextStyles {
   InlineTextStyles._();
 
-  static StyledTextTagBase bold =
-      StyledTextTag(style: const TextStyle(fontWeight: FontWeight.bold));
+  static StyledTextTagBase bold = StyledTextTag(
+    style: const TextStyle(fontWeight: FontWeight.bold),
+  );
 
   static StyledTextTagBase size({double size = 28.0}) =>
       StyledTextTag(style: TextStyle(fontSize: size));

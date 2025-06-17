@@ -31,12 +31,13 @@ class RepoResetAccessPage extends StatefulWidget {
     required Access startAccess,
   }) async {
     final route = MaterialPageRoute<Access>(
-      builder: (context) => RepoResetAccessPage._(
-        session: session,
-        settings: settings,
-        repo: repo,
-        startAccess: startAccess,
-      ),
+      builder:
+          (context) => RepoResetAccessPage._(
+            session: session,
+            settings: settings,
+            repo: repo,
+            startAccess: startAccess,
+          ),
     );
 
     return (await Navigator.push(context, route)) ?? startAccess;
@@ -59,50 +60,58 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
   Access currentAccess;
 
   RepoResetAccessPageState(this.currentAccess)
-      : _tokenStatus = _InvalidTokenStatus(_InvalidTokenType.empty);
+    : _tokenStatus = _InvalidTokenStatus(_InvalidTokenType.empty);
 
   bool get hasPendingChanges => _tokenStatus is _SubmitableTokenStatus;
 
   @override
   Widget build(BuildContext context) => PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, _) {
-        if (didPop) return;
-        Navigator.pop(context, currentAccess);
-      },
-      child: Scaffold(
-        appBar: DirectionalAppBar(title: Text(S.current.repoResetTitle)),
-        body: BlocBuilder<RepoCubit, RepoState>(
-          bloc: widget.repo,
-          builder: (context, repoState) {
-            return Column(
-              children: [
-                Expanded(
-                    child: ListView(children: [
-                  _buildRepoNameInfo(),
-                  _buildCurrentAccessModeInfo(),
-                  _buildAuthMethodInfo(),
-                  _buildTokenInputWidget(),
-                  _buildTokenInfo(),
-                  _buildActionInfo(),
-                ])),
-                Container(
-                  // TODO: Constants should be defined globally.
-                  padding: EdgeInsetsDirectional.symmetric(vertical: 18.0),
-                  child: _buildSubmitButton(),
+    canPop: false,
+    onPopInvokedWithResult: (didPop, _) {
+      if (didPop) return;
+      Navigator.pop(context, currentAccess);
+    },
+    child: Scaffold(
+      appBar: DirectionalAppBar(title: Text(S.current.repoResetTitle)),
+      body: BlocBuilder<RepoCubit, RepoState>(
+        bloc: widget.repo,
+        builder: (context, repoState) {
+          return Column(
+            children: [
+              Expanded(
+                child: ListView(
+                  children: [
+                    _buildRepoNameInfo(),
+                    _buildCurrentAccessModeInfo(),
+                    _buildAuthMethodInfo(),
+                    _buildTokenInputWidget(),
+                    _buildTokenInfo(),
+                    _buildActionInfo(),
+                  ],
                 ),
-              ],
-            );
-          },
-        ),
-      ));
+              ),
+              Container(
+                // TODO: Constants should be defined globally.
+                padding: EdgeInsetsDirectional.symmetric(vertical: 18.0),
+                child: _buildSubmitButton(),
+              ),
+            ],
+          );
+        },
+      ),
+    ),
+  );
 
   // -----------------------------------------------------------------
 
-  Widget _buildInfoWidget(
-      {required String title, required String subtitle, String? warning}) {
-    final dangerStyle = context.theme.appTextStyle.bodySmall
-        .copyWith(color: Constants.dangerColor);
+  Widget _buildInfoWidget({
+    required String title,
+    required String subtitle,
+    String? warning,
+  }) {
+    final dangerStyle = context.theme.appTextStyle.bodySmall.copyWith(
+      color: Constants.dangerColor,
+    );
 
     return ListTile(
       title: Text(title),
@@ -176,16 +185,19 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
 
   Widget _buildTokenInfo() {
     final info = switch (_tokenStatus) {
-      _SubmitableTokenStatus status =>
-        _capitalized(status.inputToken.accessMode.localized),
-      _SubmittedTokenStatus status =>
-        _capitalized(status.inputToken.accessMode.localized),
-      _NonMatchingTokenStatus status =>
-        _capitalized(status.inputToken.accessMode.localized),
+      _SubmitableTokenStatus status => _capitalized(
+        status.inputToken.accessMode.localized,
+      ),
+      _SubmittedTokenStatus status => _capitalized(
+        status.inputToken.accessMode.localized,
+      ),
+      _NonMatchingTokenStatus status => _capitalized(
+        status.inputToken.accessMode.localized,
+      ),
       _InvalidTokenStatus status => switch (status.type) {
-          _InvalidTokenType.empty => "",
-          _InvalidTokenType.malformed => S.current.repoResetTokenInvalid,
-        },
+        _InvalidTokenType.empty => "",
+        _InvalidTokenType.malformed => S.current.repoResetTokenInvalid,
+      },
     };
 
     return _buildInfoWidget(
@@ -266,7 +278,8 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
   }
 
   (String, String?) _buildTokenStatusNonMatching(
-      _NonMatchingTokenStatus status) {
+    _NonMatchingTokenStatus status,
+  ) {
     return (S.current.repoResetTokenNonMatching, null);
   }
 
@@ -277,19 +290,20 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
   // -----------------------------------------------------------------
 
   Widget _buildTokenInputWidget() => ListTile(
-          title: Fields.formTextField(
-        key: Key('token-input'), // Used in tests
-        context: context,
-        labelText: S.current.labelRepositoryLink,
-        hintText: S.current.messageRepositoryToken,
-        suffixIcon: const Icon(Icons.key_rounded),
-        onChanged: (input) {
-          widget._jobs.addJob(() async {
-            final inputToken = await _parseTokenInput(input);
-            _updateTokenStatusOnTokenInputChange(inputToken);
-          });
-        },
-      ));
+    title: Fields.formTextField(
+      key: Key('token-input'), // Used in tests
+      context: context,
+      labelText: S.current.labelRepositoryLink,
+      hintText: S.current.messageRepositoryToken,
+      suffixIcon: const Icon(Icons.key_rounded),
+      onChanged: (input) {
+        widget._jobs.addJob(() async {
+          final inputToken = await _parseTokenInput(input);
+          _updateTokenStatusOnTokenInputChange(inputToken);
+        });
+      },
+    ),
+  );
 
   // -----------------------------------------------------------------
 
@@ -307,43 +321,48 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
     }
 
     return Fields.inPageAsyncButton(
-        key: Key('repo-reset-submit'),
-        text: S.current.actionUpdate,
-        onPressed: onPressed);
+      key: Key('repo-reset-submit'),
+      text: S.current.actionUpdate,
+      onPressed: onPressed,
+    );
   }
 
   Future<bool> _confirmUpdateDialog() async {
     final bool? confirmed = await showDialog<bool>(
       context: context,
-      builder: (BuildContext context) => ActionsDialog(
-        title: S.current.repoResetConfirmUpdateTitle,
-        body: ListBody(
-          children: <Widget>[
-            const SizedBox(height: 20.0),
-            Text(
-              S.current.repoResetConfirmUpdateMessage,
-              style: context.theme.appTextStyle.bodyMedium
-                  .copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 20.0),
-            Fields.dialogActions(
-              buttons: [
-                NegativeButton(
-                  text: S.current.actionCancel,
-                  onPressed: () async =>
-                      await Navigator.of(context).maybePop(false),
+      builder:
+          (BuildContext context) => ActionsDialog(
+            title: S.current.repoResetConfirmUpdateTitle,
+            body: ListBody(
+              children: <Widget>[
+                const SizedBox(height: 20.0),
+                Text(
+                  S.current.repoResetConfirmUpdateMessage,
+                  style: context.theme.appTextStyle.bodyMedium.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-                PositiveButton(
-                  text: S.current.actionYes,
-                  isDangerButton: true,
-                  onPressed: () async =>
-                      await Navigator.of(context).maybePop(true),
+                const SizedBox(height: 20.0),
+                Fields.dialogActions(
+                  buttons: [
+                    NegativeButton(
+                      text: S.current.actionCancel,
+                      onPressed:
+                          () async =>
+                              await Navigator.of(context).maybePop(false),
+                    ),
+                    PositiveButton(
+                      text: S.current.actionYes,
+                      isDangerButton: true,
+                      onPressed:
+                          () async =>
+                              await Navigator.of(context).maybePop(true),
+                    ),
+                  ],
                 ),
               ],
             ),
-          ],
-        ),
-      ),
+          ),
     );
     return confirmed ?? false;
   }

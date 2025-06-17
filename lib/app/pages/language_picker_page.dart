@@ -10,9 +10,11 @@ import '../widgets/widgets.dart'
     show ContentWithStickyFooterState, DirectionalAppBar;
 
 class LanguagePicker extends StatelessWidget {
-  LanguagePicker(
-      {required this.localeCubit, required this.canPop, this.onSelect})
-      : exitClickCounter = ClickCounter(timeoutMs: 3000);
+  LanguagePicker({
+    required this.localeCubit,
+    required this.canPop,
+    this.onSelect,
+  }) : exitClickCounter = ClickCounter(timeoutMs: 3000);
 
   final LocaleCubit localeCubit;
   final bool canPop;
@@ -24,28 +26,32 @@ class LanguagePicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SafeArea(
-        child: Scaffold(
-          appBar: DirectionalAppBar(
-            title: Text(S.current.titleApplicationLanguage),
-            automaticallyImplyLeading: canPop,
-          ),
-          body: PopScope<Object?>(
-            canPop: canPop,
-            onPopInvokedWithResult: (bool didPop, Object? result) =>
+    child: Scaffold(
+      appBar: DirectionalAppBar(
+        title: Text(S.current.titleApplicationLanguage),
+        automaticallyImplyLeading: canPop,
+      ),
+      body: PopScope<Object?>(
+        canPop: canPop,
+        onPopInvokedWithResult:
+            (bool didPop, Object? result) =>
                 _onBackPressed(context, didPop, result),
-            child: Padding(
-              padding: Dimensions.paddingActionBox,
-              child: ContentWithStickyFooterState(
-                content: _buildContent(context),
-                footer: SizedBox.shrink(),
-              ),
-            ),
+        child: Padding(
+          padding: Dimensions.paddingActionBox,
+          child: ContentWithStickyFooterState(
+            content: _buildContent(context),
+            footer: SizedBox.shrink(),
           ),
         ),
-      );
+      ),
+    ),
+  );
 
   Future<void> _onBackPressed(
-      BuildContext context, bool didPop, Object? result) async {
+    BuildContext context,
+    bool didPop,
+    Object? result,
+  ) async {
     if (didPop) return;
 
     int clickCount = exitClickCounter.registerClick();
@@ -76,9 +82,10 @@ class LanguagePicker extends StatelessWidget {
             itemBuilder: (context, index) {
               final item = localeItems[index];
 
-              final selectionColor = item.isCurrent
-                  ? Theme.of(context).colorScheme.primaryContainer
-                  : null;
+              final selectionColor =
+                  item.isCurrent
+                      ? Theme.of(context).colorScheme.primaryContainer
+                      : null;
 
               final title = StringBuffer(item.locale.nativeDisplayLanguage);
 
@@ -88,16 +95,17 @@ class LanguagePicker extends StatelessWidget {
               }
 
               return ListTile(
-                  tileColor: selectionColor,
-                  title: Text(title.toString()),
-                  subtitle: Text(subtitle.toString()),
-                  trailing: Text(item.locale.countryCode ?? ''),
-                  onTap: () async {
-                    await localeCubit.changeLocale(item.locale);
-                    await S.delegate.load(item.locale);
+                tileColor: selectionColor,
+                title: Text(title.toString()),
+                subtitle: Text(subtitle.toString()),
+                trailing: Text(item.locale.countryCode ?? ''),
+                onTap: () async {
+                  await localeCubit.changeLocale(item.locale);
+                  await S.delegate.load(item.locale);
 
-                    if (onSelect != null) onSelect!();
-                  });
+                  if (onSelect != null) onSelect!();
+                },
+              );
             },
           ),
         ),
@@ -108,13 +116,15 @@ class LanguagePicker extends StatelessWidget {
   List<LocaleItem> _getLocaleItems() {
     final localeItems = <LocaleItem>[];
 
-    localeItems.addAll(S.delegate.supportedLocales.map((l) {
-      return LocaleItem(
-        locale: l,
-        isDevice: l == localeCubit.deviceLocale,
-        isCurrent: l == localeCubit.currentLocale,
-      );
-    }));
+    localeItems.addAll(
+      S.delegate.supportedLocales.map((l) {
+        return LocaleItem(
+          locale: l,
+          isDevice: l == localeCubit.deviceLocale,
+          isCurrent: l == localeCubit.currentLocale,
+        );
+      }),
+    );
 
     localeItems.sort();
 
@@ -140,7 +150,8 @@ class LocaleItem implements Comparable<LocaleItem> {
     if (isCurrent != other.isCurrent) {
       return isCurrent ? -1 : 1;
     }
-    return locale.defaultDisplayLanguage
-        .compareTo(other.locale.defaultDisplayLanguage);
+    return locale.defaultDisplayLanguage.compareTo(
+      other.locale.defaultDisplayLanguage,
+    );
   }
 }

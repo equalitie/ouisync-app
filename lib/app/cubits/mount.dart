@@ -51,6 +51,12 @@ class MountCubit extends Cubit<MountState> with CubitActions, AppLogger {
         mountRoot != null ? MountStateSuccess() : MountStateDisabled(),
       );
     } catch (error, stack) {
+      loggy.error(
+        "failed to set mount root to ${dirs.defaultMount}:",
+        error,
+        stack,
+      );
+
       emitUnlessClosed(MountStateFailure(error, stack));
     }
   }

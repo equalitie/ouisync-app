@@ -21,10 +21,7 @@ class SpinningIcon extends AnimatedWidget {
 
     return RotationTransition(
       turns: animation,
-      child: IconButton(
-        icon: icon,
-        onPressed: onPressed,
-      ),
+      child: IconButton(icon: icon, onPressed: onPressed),
     );
   }
 }

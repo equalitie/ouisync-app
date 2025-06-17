@@ -2,11 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 
 class LinkStyleAsyncButton extends StatefulWidget {
-  LinkStyleAsyncButton({
-    super.key,
-    required this.text,
-    this.onTap,
-  });
+  LinkStyleAsyncButton({super.key, required this.text, this.onTap});
 
   final String text;
   final Future<void> Function()? onTap;
@@ -23,27 +19,29 @@ class _State extends State<LinkStyleAsyncButton> {
     final asyncOnPressed = widget.onTap;
     final enabled = (asyncOnPressed != null && isRunning == false);
 
-    final onTap = enabled
-        ? () {
-            unawaited(() async {
-              setState(() {
-                isRunning = true;
-              });
-              try {
-                await asyncOnPressed();
-              } finally {
+    final onTap =
+        enabled
+            ? () {
+              unawaited(() async {
                 setState(() {
-                  isRunning = false;
+                  isRunning = true;
                 });
-              }
-            }());
-          }
-        : null;
+                try {
+                  await asyncOnPressed();
+                } finally {
+                  setState(() {
+                    isRunning = false;
+                  });
+                }
+              }());
+            }
+            : null;
 
     return InkWell(
-        child: RichText(
-            text: TextSpan(
-                text: widget.text, style: TextStyle(color: Colors.blue))),
-        onTap: onTap);
+      child: RichText(
+        text: TextSpan(text: widget.text, style: TextStyle(color: Colors.blue)),
+      ),
+      onTap: onTap,
+    );
   }
 }

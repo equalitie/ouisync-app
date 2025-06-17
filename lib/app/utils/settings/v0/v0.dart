@@ -123,7 +123,7 @@ class Settings with AppLogger {
   final Map<String, String> _repos;
 
   Settings._(this._prefs, this._repos, this._osPathConverter)
-      : _defaultRepo = _CachedString(_currentRepoKey, _prefs);
+    : _defaultRepo = _CachedString(_currentRepoKey, _prefs);
 
   static Future<Settings> init(SharedPreferences prefs) async {
     final osPathConverter = await _OsPathConverter.create();
@@ -165,9 +165,13 @@ class Settings with AppLogger {
   }
 
   static Future<void> _storeRepos(
-      SharedPreferences prefs, Map<String, String> repos) async {
-    await prefs.setStringList(knownRepositoriesKey,
-        repos.entries.map((e) => p.join(e.value, e.key)).toList());
+    SharedPreferences prefs,
+    Map<String, String> repos,
+  ) async {
+    await prefs.setStringList(
+      knownRepositoriesKey,
+      repos.entries.map((e) => p.join(e.value, e.key)).toList(),
+    );
   }
 
   // Returns true if the user accepted eQ values.
@@ -214,8 +218,10 @@ class Settings with AppLogger {
 
     final context = p.Context(style: p.Style.posix);
 
-    final nonAndroidAlternativePath =
-        context.join(alternativeDir.path, 'ouisync');
+    final nonAndroidAlternativePath = context.join(
+      alternativeDir.path,
+      'ouisync',
+    );
 
     return await Directory(nonAndroidAlternativePath).create();
   }
@@ -266,7 +272,8 @@ class Settings with AppLogger {
   }) async {
     if (_repos.containsKey(info.name)) {
       loggy.debug(
-          'Settings already contains a repo with the name "${info.name}"');
+        'Settings already contains a repo with the name "${info.name}"',
+      );
       return null;
     }
 
@@ -329,7 +336,10 @@ class Settings with AppLogger {
   String? getMountPoint() => _defaultMountPoint();
 
   Future<void> _setRepositoryString(
-      String repoName, String key, String? value) async {
+    String repoName,
+    String key,
+    String? value,
+  ) async {
     final fullKey = _repositoryKey(repoName, key);
 
     if (value != null) {
@@ -356,7 +366,9 @@ class Settings with AppLogger {
   }
 
   static Future<bool> _includeLegacyRepos(
-      SharedPreferences prefs, Map<String, String> repos) async {
+    SharedPreferences prefs,
+    Map<String, String> repos,
+  ) async {
     if (Platform.environment.containsKey('FLUTTER_TEST')) {
       // The path_provider.getApplicationSupportDirectory() function fails in tests.
       return false;

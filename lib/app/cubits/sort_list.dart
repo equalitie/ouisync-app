@@ -9,17 +9,21 @@ class SortListState extends Equatable {
   final SortDirection direction;
   final ListType listType;
 
-  SortListState(
-      {this.sortBy = SortBy.name,
-      this.direction = SortDirection.asc,
-      this.listType = ListType.repos});
+  SortListState({
+    this.sortBy = SortBy.name,
+    this.direction = SortDirection.asc,
+    this.listType = ListType.repos,
+  });
 
-  SortListState copyWith(
-          {SortBy? sortBy, SortDirection? direction, ListType? listType}) =>
-      SortListState(
-          sortBy: sortBy ?? this.sortBy,
-          direction: direction ?? this.direction,
-          listType: listType ?? this.listType);
+  SortListState copyWith({
+    SortBy? sortBy,
+    SortDirection? direction,
+    ListType? listType,
+  }) => SortListState(
+    sortBy: sortBy ?? this.sortBy,
+    direction: direction ?? this.direction,
+    listType: listType ?? this.listType,
+  );
 
   @override
   List<Object?> get props => [sortBy, direction, listType];
@@ -28,12 +32,16 @@ class SortListState extends Equatable {
 class SortListCubit extends Cubit<SortListState> with AppLogger, CubitActions {
   SortListCubit._(super.state);
 
-  static SortListCubit create(
-      {required SortBy sortBy,
-      required SortDirection direction,
-      required ListType listType}) {
-    var initialState = SortListState()
-        .copyWith(sortBy: sortBy, direction: direction, listType: listType);
+  static SortListCubit create({
+    required SortBy sortBy,
+    required SortDirection direction,
+    required ListType listType,
+  }) {
+    var initialState = SortListState().copyWith(
+      sortBy: sortBy,
+      direction: direction,
+      listType: listType,
+    );
 
     return SortListCubit._(initialState);
   }

@@ -26,81 +26,79 @@ class OuiSyncBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) => BlocBuilder<ReposCubit, ReposState>(
-        bloc: reposCubit,
-        builder: (context, state) {
-          final leadingWidget = state.current == null
+    bloc: reposCubit,
+    builder: (context, state) {
+      final leadingWidget =
+          state.current == null
               ? Padding(
-                  padding: const EdgeInsetsDirectional.only(start: 8.0),
-                  child: ouisyncLogo,
-                )
+                padding: const EdgeInsetsDirectional.only(start: 8.0),
+                child: ouisyncLogo,
+              )
               : null;
 
-          final cubit = state.current?.cubit;
+      final cubit = state.current?.cubit;
 
-          final titleWidget = cubit != null
-              ? getTitleWidget(
-                  cubit,
-                  repoPicker,
-                )
+      final titleWidget =
+          cubit != null
+              ? getTitleWidget(cubit, repoPicker)
               : const SizedBox.shrink();
 
-          final settingsButton = cubit != null
+      final settingsButton =
+          cubit != null
               ? getSettingsAction(
-                  cubit: cubit,
-                  appSettingsButton: appSettingsButton,
-                  repoSettingsButton: repoSettingsButton,
-                )
+                cubit: cubit,
+                appSettingsButton: appSettingsButton,
+                repoSettingsButton: repoSettingsButton,
+              )
               : appSettingsButton;
 
-          final actionsList = <Widget>[];
+      final actionsList = <Widget>[];
 
-          /// TODO: Implement the search before showing the button in the bar
-          // if (reposCubit.repos.isNotEmpty) {
-          //   actionsList.add(searchButton);
-          // }
+      /// TODO: Implement the search before showing the button in the bar
+      // if (reposCubit.repos.isNotEmpty) {
+      //   actionsList.add(searchButton);
+      // }
 
-          actionsList.add(settingsButton);
+      actionsList.add(settingsButton);
 
-          return DirectionalAppBar(
-            leading: leadingWidget,
-            title: titleWidget,
-            automaticallyImplyLeading: true,
-            actions: actionsList,
-            // Make the `repoList` have no spacing on the horizontal axis.
-            titleSpacing: 0.0,
-            leadingWidth: 120.0,
-          );
-        },
+      return DirectionalAppBar(
+        leading: leadingWidget,
+        title: titleWidget,
+        automaticallyImplyLeading: true,
+        actions: actionsList,
+        // Make the `repoList` have no spacing on the horizontal axis.
+        titleSpacing: 0.0,
+        leadingWidth: 120.0,
       );
+    },
+  );
 
-  Widget getTitleWidget(
-    RepoCubit cubit,
-    PreferredSizeWidget repoPicker,
-  ) =>
+  Widget getTitleWidget(RepoCubit cubit, PreferredSizeWidget repoPicker) =>
       BlocBuilder<RepoCubit, RepoState>(
         bloc: cubit,
-        builder: (_, state) => _selectWidget(
-          type: AppBarWidgetType.title,
-          isFolderRoot: state.currentFolder.isRoot,
-          repoListWidget: repoPicker,
-          folderContentWidget: FolderNavigationBar(cubit),
-        ),
+        builder:
+            (_, state) => _selectWidget(
+              type: AppBarWidgetType.title,
+              isFolderRoot: state.currentFolder.isRoot,
+              repoListWidget: repoPicker,
+              folderContentWidget: FolderNavigationBar(cubit),
+            ),
       );
 
   Widget getSettingsAction({
     required RepoCubit cubit,
     required Widget repoSettingsButton,
     required Widget appSettingsButton,
-  }) =>
-      BlocBuilder<RepoCubit, RepoState>(
-        bloc: cubit,
-        builder: (_, state) => _selectWidget(
+  }) => BlocBuilder<RepoCubit, RepoState>(
+    bloc: cubit,
+    builder:
+        (_, state) => _selectWidget(
           type: AppBarWidgetType.action,
           isFolderRoot: state.currentFolder.isRoot,
           repoListWidget: repoSettingsButton,
           folderContentWidget: appSettingsButton,
         ),
-      );
+  );
 
   Widget _selectWidget({
     required AppBarWidgetType type,
@@ -117,8 +115,6 @@ class OuiSyncBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   @override
-  Size get preferredSize => Size(
-        repoPicker.preferredSize.width,
-        repoPicker.preferredSize.height,
-      );
+  Size get preferredSize =>
+      Size(repoPicker.preferredSize.width, repoPicker.preferredSize.height);
 }

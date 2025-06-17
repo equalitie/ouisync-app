@@ -26,7 +26,9 @@ abstract class LocalAuth {
   // This is a "best effort" to authenticate the user, but if the device
   // doesn't support authentication, then we proceed as if authenticated.
   static Future<bool> authenticateIfPossible(
-      BuildContext context, String? reason) async {
+    BuildContext context,
+    String? reason,
+  ) async {
     reason ??= S.current.messageAccessingSecureStorage;
 
     if (_useDebug()) {
@@ -57,22 +59,24 @@ abstract class LocalAuth {
 // dialog.
 Future<bool> _debugAuthenticate(BuildContext context, String reason) async {
   Widget button(context, text, value) => TextButton(
-        child: Text(text),
-        onPressed: () => Navigator.of(context).pop(value),
-      );
+    child: Text(text),
+    onPressed: () => Navigator.of(context).pop(value),
+  );
 
   bool? authenticated = await showDialog(
-      context: context,
-      builder: (BuildContext context) => AlertDialog(
-            title: Text("Mock authentication"),
-            titleTextStyle: context.theme.appTextStyle.titleMedium,
-            content: Text("$reason. Is it you?"),
-            actions: [
-              button(context, "Yes", true),
-              button(context, "No", false),
-              button(context, "Cancel", null),
-            ],
-          ));
+    context: context,
+    builder:
+        (BuildContext context) => AlertDialog(
+          title: Text("Mock authentication"),
+          titleTextStyle: context.theme.appTextStyle.titleMedium,
+          content: Text("$reason. Is it you?"),
+          actions: [
+            button(context, "Yes", true),
+            button(context, "No", false),
+            button(context, "Cancel", null),
+          ],
+        ),
+  );
 
   authenticated = authenticated ?? false;
 

@@ -37,19 +37,20 @@ class GetPasswordAccessDialog extends StatefulWidget {
   ) async {
     return await showDialog<Access>(
       context: context,
-      builder: (BuildContext context) => ScaffoldMessenger(
-        child: Scaffold(
-          backgroundColor: Colors.transparent,
-          body: ActionsDialog(
-            title: S.current.messageUnlockRepository(repoCubit.name),
-            body: GetPasswordAccessDialog(
-              repoCubit: repoCubit,
-              settings: settings,
-              session: session,
+      builder:
+          (BuildContext context) => ScaffoldMessenger(
+            child: Scaffold(
+              backgroundColor: Colors.transparent,
+              body: ActionsDialog(
+                title: S.current.messageUnlockRepository(repoCubit.name),
+                body: GetPasswordAccessDialog(
+                  repoCubit: repoCubit,
+                  settings: settings,
+                  session: session,
+                ),
+              ),
             ),
           ),
-        ),
-      ),
     );
   }
 
@@ -66,76 +67,81 @@ class _State extends State<GetPasswordAccessDialog> with AppLogger {
 
   @override
   Widget build(BuildContext context) => Form(
-      key: formKey,
-      autovalidateMode: AutovalidateMode.onUserInteraction,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.max,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _buildPasswordField(context),
-          _buildIDontHaveLocalPasswordButton(context),
-          Fields.dialogActions(buttons: _buildActions(context)),
-        ],
-      ));
+    key: formKey,
+    autovalidateMode: AutovalidateMode.onUserInteraction,
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.max,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _buildPasswordField(context),
+        _buildIDontHaveLocalPasswordButton(context),
+        Fields.dialogActions(buttons: _buildActions(context)),
+      ],
+    ),
+  );
 
   Widget _buildIDontHaveLocalPasswordButton(BuildContext context) {
     return LinkStyleAsyncButton(
-        key: Key('enter-repo-reset-screen'),
-        text: "\n${S.current.actionIDontHaveALocalPassword}\n",
-        onTap: () async {
-          if (!await LocalAuth.authenticateIfPossible(
-              context, S.current.messagePleaseAuthenticate)) {
-            return;
-          }
+      key: Key('enter-repo-reset-screen'),
+      text: "\n${S.current.actionIDontHaveALocalPassword}\n",
+      onTap: () async {
+        if (!await LocalAuth.authenticateIfPossible(
+          context,
+          S.current.messagePleaseAuthenticate,
+        )) {
+          return;
+        }
 
-          final access = await RepoResetAccessPage.show(
-            context: context,
-            session: widget.session,
-            settings: widget.settings,
-            repo: widget.repoCubit,
-            startAccess: BlindAccess(),
-          );
+        final access = await RepoResetAccessPage.show(
+          context: context,
+          session: widget.session,
+          settings: widget.settings,
+          repo: widget.repoCubit,
+          startAccess: BlindAccess(),
+        );
 
-          Navigator.of(context).pop(access);
-        });
+        Navigator.of(context).pop(access);
+      },
+    );
   }
 
   Widget _buildPasswordField(BuildContext context) => Fields.formTextField(
-        context: context,
-        controller: passwordController,
-        obscureText: obscurePassword,
-        labelText: S.current.labelTypePassword,
-        hintText: S.current.messageRepositoryPassword,
-        errorText: passwordInvalid ? S.current.messageUnlockRepoFailed : null,
-        suffixIcon: Fields.actionIcon(
-          Icon(
-            obscurePassword
-                ? Constants.iconVisibilityOn
-                : Constants.iconVisibilityOff,
-            size: Dimensions.sizeIconSmall,
-          ),
-          color: Colors.black,
-          onPressed: () => setState(() {
+    context: context,
+    controller: passwordController,
+    obscureText: obscurePassword,
+    labelText: S.current.labelTypePassword,
+    hintText: S.current.messageRepositoryPassword,
+    errorText: passwordInvalid ? S.current.messageUnlockRepoFailed : null,
+    suffixIcon: Fields.actionIcon(
+      Icon(
+        obscurePassword
+            ? Constants.iconVisibilityOn
+            : Constants.iconVisibilityOff,
+        size: Dimensions.sizeIconSmall,
+      ),
+      color: Colors.black,
+      onPressed:
+          () => setState(() {
             obscurePassword = !obscurePassword;
           }),
-        ),
-        validator: validateNoEmptyMaybeRegExpr(
-          emptyError: S.current.messageErrorRepositoryPasswordValidation,
-        ),
-        autofocus: true,
-      );
+    ),
+    validator: validateNoEmptyMaybeRegExpr(
+      emptyError: S.current.messageErrorRepositoryPasswordValidation,
+    ),
+    autofocus: true,
+  );
 
   List<Widget> _buildActions(context) => [
-        NegativeButton(
-          text: S.current.actionCancel,
-          onPressed: () async => await Navigator.of(context).maybePop(null),
-        ),
-        PositiveButton(
-          text: S.current.actionUnlock,
-          onPressed: () => _onSubmit(context),
-        )
-      ];
+    NegativeButton(
+      text: S.current.actionCancel,
+      onPressed: () async => await Navigator.of(context).maybePop(null),
+    ),
+    PositiveButton(
+      text: S.current.actionUnlock,
+      onPressed: () => _onSubmit(context),
+    ),
+  ];
 
   Future<void> _onSubmit(BuildContext context) async {
     if (!formKey.currentState!.validate()) {

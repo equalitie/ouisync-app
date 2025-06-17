@@ -23,7 +23,7 @@ class Dirs {
   /// Download directory.
   final String? download;
 
-  Dirs({
+  Dirs._({
     required String root,
     String? defaultStore,
     this.defaultMount,
@@ -34,11 +34,11 @@ class Dirs {
   /// Initialize the `Dirs` with default directories. Specify `root` to override the default data
   /// root directory. `root` can also be overriden using the `OUISYNC_ROOT_DIR` env variable.
   static Future<Dirs> init({String? root}) async {
-    final r = root ?? await _getDefaultRootDir();
+    root ??= await _getDefaultRootDir();
 
-    return Dirs(
-      root: r,
-      defaultStore: await _getDefaultStoreDir(r),
+    return Dirs._(
+      root: root,
+      defaultStore: await _getDefaultStoreDir(root),
       defaultMount: await _getDefaultMountDir(),
       download: await _getDownloadDir(),
     );
@@ -53,9 +53,12 @@ const _storeDirName = 'repositories';
 
 Future<String> _getDefaultStoreDir(String root) async {
   final base =
-      (Platform.isAndroid ? await getExternalStorageDirectory() : null) ??
-      await getApplicationSupportDirectory();
-  return join(base.path, _storeDirName);
+      (Platform.isAndroid
+          ? await getExternalStorageDirectory().then((dir) => dir?.path)
+          : null) ??
+      root;
+
+  return join(base, _storeDirName);
 }
 
 Future<String?> _getDownloadDir() async {
@@ -89,7 +92,7 @@ Future<String?> _getDefaultMountDir() async {
 
     return '$home/Ouisync';
   } else if (Platform.isWindows) {
-    return 'O:';
+    return 'O:\\';
   } else {
     return null;
   }

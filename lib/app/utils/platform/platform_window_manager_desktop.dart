@@ -137,13 +137,14 @@ class PlatformWindowManagerDesktop
     const minSize = Size(minWidth, minHeight);
 
     WindowOptions windowOptions = const WindowOptions(
-        center: true,
-        backgroundColor: Colors.transparent,
-        skipTaskbar: false,
-        titleBarStyle: TitleBarStyle.normal,
-        title: 'Ouisync',
-        size: initialSize,
-        minimumSize: minSize);
+      center: true,
+      backgroundColor: Colors.transparent,
+      skipTaskbar: false,
+      titleBarStyle: TitleBarStyle.normal,
+      title: 'Ouisync',
+      size: initialSize,
+      minimumSize: minSize,
+    );
 
     await windowManager.waitUntilReadyToShow(windowOptions);
     await _toggleVisible(_showWindow);
@@ -176,15 +177,20 @@ class PlatformWindowManagerDesktop
   }
 
   Future<void> _ensureWindowsSingleInstance(
-      List<String> args, String pipeName) async {
+    List<String> args,
+    String pipeName,
+  ) async {
     if (!Platform.isWindows) {
       return;
     }
 
-    await WindowsSingleInstance.ensureSingleInstance(args, pipeName,
-        onSecondWindow: (args) {
-      loggy.debug(args);
-    });
+    await WindowsSingleInstance.ensureSingleInstance(
+      args,
+      pipeName,
+      onSecondWindow: (args) {
+        loggy.debug(args);
+      },
+    );
   }
 
   Future<void> _handleSignal(Stream<ProcessSignal> signals) async {
@@ -213,8 +219,4 @@ Future<void> _toggleVisible([bool? visible]) async {
   }
 }
 
-enum _State {
-  open,
-  closing,
-  closed,
-}
+enum _State { open, closing, closed }

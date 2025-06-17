@@ -54,30 +54,28 @@ class RepoCreationState {
     String? suggestedName,
     ShareToken? token,
     bool? useCacheServers,
-  }) =>
-      RepoCreationState(
-        accessMode: accessMode ?? this.accessMode,
-        localSecretMode: localSecretMode ?? this.localSecretMode,
-        substate: substate ?? this.substate,
-        suggestedName: suggestedName ?? this.suggestedName,
-        token: token ?? this.token,
-        useCacheServers: useCacheServers ?? this.useCacheServers,
-      );
+  }) => RepoCreationState(
+    accessMode: accessMode ?? this.accessMode,
+    localSecretMode: localSecretMode ?? this.localSecretMode,
+    substate: substate ?? this.substate,
+    suggestedName: suggestedName ?? this.suggestedName,
+    token: token ?? this.token,
+    useCacheServers: useCacheServers ?? this.useCacheServers,
+  );
 
   RepoLocation? get location => switch (substate) {
-        RepoCreationPending(location: final location) => location,
-        RepoCreationValid(location: final location) ||
-        RepoCreationFailure(location: final location) =>
-          location,
-        RepoCreationSuccess(entry: final entry) => entry.location,
-      };
+    RepoCreationPending(location: final location) => location,
+    RepoCreationValid(location: final location) ||
+    RepoCreationFailure(location: final location) => location,
+    RepoCreationSuccess(entry: final entry) => entry.location,
+  };
 
   String? get name => location?.name;
 
   String? get nameError => switch (substate) {
-        RepoCreationPending(nameError: final nameError) => nameError,
-        _ => null,
-      };
+    RepoCreationPending(nameError: final nameError) => nameError,
+    _ => null,
+  };
 
   @override
   String toString() =>
@@ -119,18 +117,13 @@ class RepoCreationValid extends RepoCreationSubstate {
 }
 
 class RepoCreationSuccess extends RepoCreationSubstate {
-  const RepoCreationSuccess({
-    required this.entry,
-  });
+  const RepoCreationSuccess({required this.entry});
 
   final OpenRepoEntry entry;
 }
 
 class RepoCreationFailure extends RepoCreationSubstate {
-  const RepoCreationFailure({
-    required this.location,
-    required this.error,
-  });
+  const RepoCreationFailure({required this.location, required this.error});
 
   final RepoLocation location;
   final String error;
@@ -163,24 +156,25 @@ class RepoCreationCubit extends Cubit<RepoCreationState>
     }
 
     // TODO: Cubits should not do UI
-    await Dialogs.executeFutureWithLoadingDialog(
-      null,
-      () async {
-        final accessMode =
-            await reposCubit.session.getShareTokenAccessMode(token);
-        final suggestedName =
-            await reposCubit.session.getShareTokenSuggestedName(token);
-        final useCacheServers =
-            await reposCubit.cacheServers.isEnabledForShareToken(token);
+    await Dialogs.executeFutureWithLoadingDialog(null, () async {
+      final accessMode = await reposCubit.session.getShareTokenAccessMode(
+        token,
+      );
+      final suggestedName = await reposCubit.session.getShareTokenSuggestedName(
+        token,
+      );
+      final useCacheServers = await reposCubit.cacheServers
+          .isEnabledForShareToken(token);
 
-        emitUnlessClosed(state.copyWith(
+      emitUnlessClosed(
+        state.copyWith(
           accessMode: accessMode,
           suggestedName: suggestedName,
           token: token,
           useCacheServers: useCacheServers,
-        ));
-      }(),
-    );
+        ),
+      );
+    }());
   }
 
   void acceptSuggestedName() {
@@ -194,12 +188,8 @@ class RepoCreationCubit extends Cubit<RepoCreationState>
 
   void setLocalSecret(LocalSecretInput input) {
     final setLocalSecret = switch ((state.accessMode, input)) {
-      (AccessMode.blind, _) ||
-      (_, LocalSecretRandom()) =>
-        SetLocalSecretKeyAndSalt(
-          key: randomSecretKey(),
-          salt: randomSalt(),
-        ),
+      (AccessMode.blind, _) || (_, LocalSecretRandom()) =>
+        SetLocalSecretKeyAndSalt(key: randomSecretKey(), salt: randomSalt()),
       (_, LocalSecretManual(password: final password)) =>
         SetLocalSecretPassword(password),
     };
@@ -208,13 +198,10 @@ class RepoCreationCubit extends Cubit<RepoCreationState>
 
     substate = switch (state.substate) {
       RepoCreationPending(location: final location) when location != null =>
-        RepoCreationValid(
-          location: location,
-          setLocalSecret: setLocalSecret,
-        ),
+        RepoCreationValid(location: location, setLocalSecret: setLocalSecret),
       RepoCreationPending(
         location: final location,
-        nameError: final nameError
+        nameError: final nameError,
       ) =>
         RepoCreationPending(
           location: location,
@@ -222,21 +209,22 @@ class RepoCreationCubit extends Cubit<RepoCreationState>
           setLocalSecret: setLocalSecret,
         ),
       RepoCreationValid(location: final location) => RepoCreationValid(
-          location: location,
-          setLocalSecret: setLocalSecret,
-        ),
+        location: location,
+        setLocalSecret: setLocalSecret,
+      ),
       RepoCreationSuccess(entry: final entry) => RepoCreationValid(
-          location: entry.location,
-          setLocalSecret: setLocalSecret,
-        ),
+        location: entry.location,
+        setLocalSecret: setLocalSecret,
+      ),
       RepoCreationFailure(location: final location) => RepoCreationValid(
-          location: location,
-          setLocalSecret: setLocalSecret,
-        ),
+        location: location,
+        setLocalSecret: setLocalSecret,
+      ),
     };
 
     emitUnlessClosed(
-        state.copyWith(substate: substate, localSecretMode: input.mode));
+      state.copyWith(substate: substate, localSecretMode: input.mode),
+    );
   }
 
   Future<void> save() async {
@@ -268,16 +256,18 @@ class RepoCreationCubit extends Cubit<RepoCreationState>
 
     switch (repoEntry) {
       case OpenRepoEntry():
-        emitUnlessClosed(state.copyWith(
-          substate: RepoCreationSuccess(entry: repoEntry),
-        ));
+        emitUnlessClosed(
+          state.copyWith(substate: RepoCreationSuccess(entry: repoEntry)),
+        );
       case ErrorRepoEntry():
-        emitUnlessClosed(state.copyWith(
-          substate: RepoCreationFailure(
-            location: substate.location,
-            error: repoEntry.error,
+        emitUnlessClosed(
+          state.copyWith(
+            substate: RepoCreationFailure(
+              location: substate.location,
+              error: repoEntry.error,
+            ),
           ),
-        ));
+        );
       case LoadingRepoEntry():
       case MissingRepoEntry():
         throw 'unreachable code';
@@ -322,23 +312,13 @@ class RepoCreationCubit extends Cubit<RepoCreationState>
     final substate = switch (state.substate) {
       RepoCreationPending(setLocalSecret: final setLocalSecret)
           when setLocalSecret != null =>
-        RepoCreationValid(
-          location: location,
-          setLocalSecret: setLocalSecret,
-        ),
+        RepoCreationValid(location: location, setLocalSecret: setLocalSecret),
       RepoCreationPending(setLocalSecret: final setLocalSecret) =>
-        RepoCreationPending(
-          setLocalSecret: setLocalSecret,
-          location: location,
-        ),
+        RepoCreationPending(setLocalSecret: setLocalSecret, location: location),
       RepoCreationValid(setLocalSecret: final setLocalSecret) =>
-        RepoCreationValid(
-          location: location,
-          setLocalSecret: setLocalSecret,
-        ),
+        RepoCreationValid(location: location, setLocalSecret: setLocalSecret),
       RepoCreationSuccess() ||
-      RepoCreationFailure() =>
-        RepoCreationPending(location: location),
+      RepoCreationFailure() => RepoCreationPending(location: location),
     };
 
     emitUnlessClosed(state.copyWith(substate: substate));
@@ -351,8 +331,7 @@ class RepoCreationCubit extends Cubit<RepoCreationState>
       RepoCreationValid(setLocalSecret: final setLocalSecret) =>
         RepoCreationPending(setLocalSecret: setLocalSecret, nameError: error),
       RepoCreationSuccess() ||
-      RepoCreationFailure() =>
-        RepoCreationPending(nameError: error),
+      RepoCreationFailure() => RepoCreationPending(nameError: error),
     };
 
     emitUnlessClosed(state.copyWith(substate: substate));

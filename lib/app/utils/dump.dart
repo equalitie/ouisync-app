@@ -52,11 +52,13 @@ Future<File> dumpAll(
     sink.writeln("listenerAddrs:  ${connInfo.listenerAddrs}");
 
     sink.writeln(
-        "\n\n------------------------- State Monitor -------------------------\n\n");
+      "\n\n------------------------- State Monitor -------------------------\n\n",
+    );
     await _dumpStateMonitor(sink, rootMonitor, 0);
 
     sink.writeln(
-        "\n\n------------------------- Logs ----------------------------------\n\n");
+      "\n\n------------------------- Logs ----------------------------------\n\n",
+    );
     await LogUtils.dump(sink);
   } finally {
     await sink.close();

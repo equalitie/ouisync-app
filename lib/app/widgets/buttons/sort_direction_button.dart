@@ -39,12 +39,12 @@ class SortDirectionButton extends StatelessWidget {
   Widget _getDirectionArrow(SortDirection direction) {
     return direction == SortDirection.asc
         ? const Image(
-            image: AssetImage('assets/sort_asc.png'),
-            width: Dimensions.sizeIconMicro,
-          )
+          image: AssetImage('assets/sort_asc.png'),
+          width: Dimensions.sizeIconMicro,
+        )
         : const Image(
-            image: AssetImage('assets/sort_desc.png'),
-            width: Dimensions.sizeIconMicro,
-          );
+          image: AssetImage('assets/sort_desc.png'),
+          width: Dimensions.sizeIconMicro,
+        );
   }
 }

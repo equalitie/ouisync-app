@@ -37,13 +37,15 @@ class ErrorState extends HookWidget {
                 alignment: AlignmentDirectional.center,
                 child: Fields.inPageMainMessage(
                   errorMessage,
-                  style: context.theme.appTextStyle.bodyLarge
-                      .copyWith(color: Constants.dangerColor),
+                  style: context.theme.appTextStyle.bodyLarge.copyWith(
+                    color: Constants.dangerColor,
+                  ),
                   tags: {
-                    Constants.inlineTextColor:
-                        InlineTextStyles.color(Colors.black),
+                    Constants.inlineTextColor: InlineTextStyles.color(
+                      Colors.black,
+                    ),
                     Constants.inlineTextSize: InlineTextStyles.size(),
-                    Constants.inlineTextBold: InlineTextStyles.bold
+                    Constants.inlineTextBold: InlineTextStyles.bold,
                   },
                 ),
               ),
@@ -56,8 +58,9 @@ class ErrorState extends HookWidget {
                     tags: {
                       Constants.inlineTextSize: InlineTextStyles.size(),
                       Constants.inlineTextBold: InlineTextStyles.bold,
-                      Constants.inlineTextIcon:
-                          InlineTextStyles.icon(Icons.south)
+                      Constants.inlineTextIcon: InlineTextStyles.icon(
+                        Icons.south,
+                      ),
                     },
                   ),
                 ),
@@ -67,7 +70,7 @@ class ErrorState extends HookWidget {
                 text: S.current.actionBack,
                 focusNode: reloadButtonFocus,
                 autofocus: true,
-              )
+              ),
             ],
           ),
         ),

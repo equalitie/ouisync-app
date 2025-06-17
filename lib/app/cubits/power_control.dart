@@ -46,20 +46,19 @@ class PowerControlState {
     bool? userWantsLocalDiscoveryEnabled,
     bool? isLocalDiscoveryEnabled,
     LocalInterfaceAddr? localInterface,
-  }) =>
-      PowerControlState(
-        connectivityType: connectivityType ?? this.connectivityType,
-        networkMode: networkMode ?? this.networkMode,
-        userWantsSyncOnMobileEnabled:
-            userWantsSyncOnMobileEnabled ?? this.userWantsSyncOnMobileEnabled,
-        userWantsPortForwardingEnabled: userWantsPortForwardingEnabled ??
-            this.userWantsPortForwardingEnabled,
-        userWantsLocalDiscoveryEnabled: userWantsLocalDiscoveryEnabled ??
-            this.userWantsLocalDiscoveryEnabled,
-        isLocalDiscoveryEnabled:
-            isLocalDiscoveryEnabled ?? this.isLocalDiscoveryEnabled,
-        localInterface: localInterface ?? this.localInterface,
-      );
+  }) => PowerControlState(
+    connectivityType: connectivityType ?? this.connectivityType,
+    networkMode: networkMode ?? this.networkMode,
+    userWantsSyncOnMobileEnabled:
+        userWantsSyncOnMobileEnabled ?? this.userWantsSyncOnMobileEnabled,
+    userWantsPortForwardingEnabled:
+        userWantsPortForwardingEnabled ?? this.userWantsPortForwardingEnabled,
+    userWantsLocalDiscoveryEnabled:
+        userWantsLocalDiscoveryEnabled ?? this.userWantsLocalDiscoveryEnabled,
+    isLocalDiscoveryEnabled:
+        isLocalDiscoveryEnabled ?? this.isLocalDiscoveryEnabled,
+    localInterface: localInterface ?? this.localInterface,
+  );
 
   // Null means the answer is not yet known (the init function hasn't finished
   // or was not called yet).
@@ -89,10 +88,11 @@ class PowerControlState {
     );
 
     final newNetworkMode = PowerControl._determineNetworkMode(
-        connectivityType: newState.connectivityType,
-        userWantsSyncOnMobileEnabled: newState.userWantsSyncOnMobileEnabled,
-        userWantsLocalDiscoveryEnabled: newState.userWantsLocalDiscoveryEnabled,
-        localInterface: newState.localInterface);
+      connectivityType: newState.connectivityType,
+      userWantsSyncOnMobileEnabled: newState.userWantsSyncOnMobileEnabled,
+      userWantsLocalDiscoveryEnabled: newState.userWantsLocalDiscoveryEnabled,
+      localInterface: newState.localInterface,
+    );
 
     return newState.copyWith(networkMode: newNetworkMode);
   }
@@ -110,12 +110,9 @@ class PowerControl extends Cubit<PowerControlState>
   _Transition _networkModeTransition = _Transition.none;
   final LocalInterfaceWatch _localInterfaceWatch = LocalInterfaceWatch();
 
-  PowerControl(
-    this._session,
-    this._settings, {
-    Connectivity? connectivity,
-  })  : _connectivity = connectivity ?? Connectivity(),
-        super(PowerControlState()) {
+  PowerControl(this._session, this._settings, {Connectivity? connectivity})
+    : _connectivity = connectivity ?? Connectivity(),
+      super(PowerControlState()) {
     unawaited(_init());
   }
 
@@ -159,8 +156,9 @@ class PowerControl extends Cubit<PowerControlState>
     }
 
     await _settings.setSyncOnMobileEnabled(value);
-    final newState =
-        state.copyWithNetworkModeUpdate(userWantsSyncOnMobileEnabled: value);
+    final newState = state.copyWithNetworkModeUpdate(
+      userWantsSyncOnMobileEnabled: value,
+    );
     await _updateNetworkMode(newState);
   }
 
@@ -184,9 +182,12 @@ class PowerControl extends Cubit<PowerControlState>
 
     final isLocalDiscoveryEnabled = await _session.isLocalDiscoveryEnabled();
 
-    emitUnlessClosed(state.copyWith(
+    emitUnlessClosed(
+      state.copyWith(
         userWantsLocalDiscoveryEnabled: value,
-        isLocalDiscoveryEnabled: isLocalDiscoveryEnabled));
+        isLocalDiscoveryEnabled: isLocalDiscoveryEnabled,
+      ),
+    );
   }
 
   Future<void> _listenToConnectivityChanges() async {
@@ -205,7 +206,8 @@ class PowerControl extends Cubit<PowerControlState>
       switch (await _localInterfaceWatch.onChange()) {
         case watch.Value(value: final iface):
           await _updateNetworkMode(
-              state.copyWithNetworkModeUpdate(localInterface: iface));
+            state.copyWithNetworkModeUpdate(localInterface: iface),
+          );
           break;
         case watch.Closed():
           return;
@@ -215,7 +217,8 @@ class PowerControl extends Cubit<PowerControlState>
 
   Future<void> _onConnectivityChange(ConnectivityResult result) async {
     await _updateNetworkMode(
-        state.copyWithNetworkModeUpdate(connectivityType: result));
+      state.copyWithNetworkModeUpdate(connectivityType: result),
+    );
   }
 
   Future<void> _updateNetworkMode(PowerControlState newState) async {
@@ -233,21 +236,24 @@ class PowerControl extends Cubit<PowerControlState>
       // `_session.bindNetwork` should be idempotent if local endpoints don't
       // change).
       loggy.debug(
-          'Network mode event: ${oldState.networkMode} -> ${newState.networkMode} (ignored, same as previous)');
+        'Network mode event: ${oldState.networkMode} -> ${newState.networkMode} (ignored, same as previous)',
+      );
       return;
     }
 
     loggy.debug(
-        'NetworkMode event: ${oldState.networkMode} -> ${newState.networkMode}');
+      'NetworkMode event: ${oldState.networkMode} -> ${newState.networkMode}',
+    );
 
     await _setNetworkMode(newState.networkMode);
   }
 
-  static NetworkMode _determineNetworkMode(
-      {required ConnectivityResult connectivityType,
-      required bool userWantsSyncOnMobileEnabled,
-      required bool userWantsLocalDiscoveryEnabled,
-      required LocalInterfaceAddr? localInterface}) {
+  static NetworkMode _determineNetworkMode({
+    required ConnectivityResult connectivityType,
+    required bool userWantsSyncOnMobileEnabled,
+    required bool userWantsLocalDiscoveryEnabled,
+    required LocalInterfaceAddr? localInterface,
+  }) {
     NetworkMode newMode = NetworkModeDisabled();
 
     switch (connectivityType) {
@@ -321,7 +327,8 @@ class PowerControl extends Cubit<PowerControlState>
       await _session.bindNetwork(addrs);
     } catch (e) {
       if (!emitUnlessClosed(
-          state.copyWith(networkMode: NetworkModeDisabled()))) {
+        state.copyWith(networkMode: NetworkModeDisabled()),
+      )) {
         return;
       }
       rethrow;
@@ -421,8 +428,4 @@ class NetworkModeDisabled extends NetworkMode {
   String toString() => "NetworkModeDisabled()";
 }
 
-enum _Transition {
-  none,
-  ongoing,
-  queued,
-}
+enum _Transition { none, ongoing, queued }

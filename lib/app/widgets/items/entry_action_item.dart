@@ -72,11 +72,12 @@ class _EntryActionItemState extends State<EntryActionItem> {
 
     setState(() {
       _enabled = isEnabled;
-      _itemColor = isEnabled
-          ? widget.isDanger
-              ? Constants.dangerColor
-              : Colors.black
-          : Colors.grey;
+      _itemColor =
+          isEnabled
+              ? widget.isDanger
+                  ? Constants.dangerColor
+                  : Colors.black
+              : Colors.grey;
 
       if (!init) {
         _message = widget.disabledMessage;
@@ -88,8 +89,10 @@ class _EntryActionItemState extends State<EntryActionItem> {
 
         if (widget.disabledMessageDuration > 0) {
           _duration = Duration(seconds: widget.disabledMessageDuration);
-          _timer ??= RestartableTimer(_duration!,
-              () => setState(() => _isDisabledMessageVisible = false));
+          _timer ??= RestartableTimer(
+            _duration!,
+            () => setState(() => _isDisabledMessageVisible = false),
+          );
 
           _timer?.reset();
         }
@@ -98,60 +101,77 @@ class _EntryActionItemState extends State<EntryActionItem> {
   }
 
   void _hideDisabledMessage() => setState(() {
-        _isDisabledMessageVisible = false;
-        _timer?.cancel();
-      });
+    _isDisabledMessageVisible = false;
+    _timer?.cancel();
+  });
 
   @override
-  Widget build(BuildContext context) => Column(children: [
-        InkWell(
-          child: ListTile(
-            contentPadding: widget.contentPadding,
-            dense: widget.dense,
-            visualDensity: widget.visualDensity,
-            minLeadingWidth: widget.minLeadingWidth,
-            leading: widget.iconData != null
-                ? Icon(widget.iconData, color: _itemColor)
-                : null,
-            title: Text(widget.title,
-                textAlign: widget.textAlign,
-                softWrap: widget.textSoftWrap,
-                overflow: widget.textOverflow,
-                style: widget.titleTextStyle?.copyWith(color: _itemColor)),
-            subtitle: widget.subtitle != null
-                ? Text(widget.subtitle!,
-                    style:
-                        widget.subtitleTextStyle?.copyWith(color: _itemColor))
-                : null,
+  Widget build(BuildContext context) => Column(
+    children: [
+      InkWell(
+        child: ListTile(
+          contentPadding: widget.contentPadding,
+          dense: widget.dense,
+          visualDensity: widget.visualDensity,
+          minLeadingWidth: widget.minLeadingWidth,
+          leading:
+              widget.iconData != null
+                  ? Icon(widget.iconData, color: _itemColor)
+                  : null,
+          title: Text(
+            widget.title,
+            textAlign: widget.textAlign,
+            softWrap: widget.textSoftWrap,
+            overflow: widget.textOverflow,
+            style: widget.titleTextStyle?.copyWith(color: _itemColor),
           ),
-          onTap: () {
-            if (widget.onTap == null) return;
-
-            if (!_enabled) {
-              _validateEnabledState(init: false);
-              return;
-            }
-
-            widget.onTap!();
-          },
+          subtitle:
+              widget.subtitle != null
+                  ? Text(
+                    widget.subtitle!,
+                    style: widget.subtitleTextStyle?.copyWith(
+                      color: _itemColor,
+                    ),
+                  )
+                  : null,
         ),
-        Visibility(
-            visible: _isDisabledMessageVisible,
-            child: GestureDetector(
-                onTap: _hideDisabledMessage,
-                child: Padding(
-                    padding: const EdgeInsetsDirectional.only(end: 20.0, bottom: 4.0),
-                    child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Expanded(
-                              child: Text(_message ?? '',
-                                  overflow: TextOverflow.ellipsis,
-                                  softWrap: true,
-                                  maxLines: 2,
-                                  textAlign: TextAlign.end,
-                                  style: widget.titleTextStyle
-                                      ?.copyWith(color: Colors.red.shade400)))
-                        ]))))
-      ]);
+        onTap: () {
+          if (widget.onTap == null) return;
+
+          if (!_enabled) {
+            _validateEnabledState(init: false);
+            return;
+          }
+
+          widget.onTap!();
+        },
+      ),
+      Visibility(
+        visible: _isDisabledMessageVisible,
+        child: GestureDetector(
+          onTap: _hideDisabledMessage,
+          child: Padding(
+            padding: const EdgeInsetsDirectional.only(end: 20.0, bottom: 4.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Expanded(
+                  child: Text(
+                    _message ?? '',
+                    overflow: TextOverflow.ellipsis,
+                    softWrap: true,
+                    maxLines: 2,
+                    textAlign: TextAlign.end,
+                    style: widget.titleTextStyle?.copyWith(
+                      color: Colors.red.shade400,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ],
+  );
 }

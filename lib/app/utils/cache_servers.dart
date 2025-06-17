@@ -28,12 +28,15 @@ class CacheServers with AppLogger {
 
     // Use the remote control API to obrain the listener protocols and ports
     try {
-      listeners = await _session.getRemoteListenerAddrs(host).then(
-            (addrs) => addrs
-                .map(PeerAddr.parse)
-                .nonNulls
-                .map((addr) => (addr.proto, addr.port))
-                .toSet(),
+      listeners = await _session
+          .getRemoteListenerAddrs(host)
+          .then(
+            (addrs) =>
+                addrs
+                    .map(PeerAddr.parse)
+                    .nonNulls
+                    .map((addr) => (addr.proto, addr.port))
+                    .toSet(),
           );
       loggy.debug('got listeners for $host: $listeners');
     } catch (e) {
@@ -46,14 +49,15 @@ class CacheServers with AppLogger {
     final addrs = await InternetAddress.lookup(_stripPort(host));
     loggy.debug('resolved $host: $addrs');
 
-    final peers = addrs
-        .expand(
-          (addr) => listeners.map(
-            (listener) => PeerAddr(listener.$1, addr, listener.$2),
-          ),
-        )
-        .map((addr) => addr.toString())
-        .toList();
+    final peers =
+        addrs
+            .expand(
+              (addr) => listeners.map(
+                (listener) => PeerAddr(listener.$1, addr, listener.$2),
+              ),
+            )
+            .map((addr) => addr.toString())
+            .toList();
 
     // Add the host as peer, obtaininig the peer address(es) by composing them from the
     // listener protocols, ports and the resolved ip addresses.
@@ -92,9 +96,7 @@ class CacheServers with AppLogger {
   Future<bool> isEnabledForShareToken(ShareToken token) =>
       _isEnabled((host) => _session.mirrorExists(token, host));
 
-  Future<bool> _isEnabled(
-    Future<bool> Function(String) mirrorExists,
-  ) async {
+  Future<bool> _isEnabled(Future<bool> Function(String) mirrorExists) async {
     Future<bool> check(String host) async {
       try {
         return await mirrorExists(host);
@@ -103,8 +105,9 @@ class CacheServers with AppLogger {
       }
     }
 
-    return await Future.wait(_hosts.map(check))
-        .then((results) => results.contains(true));
+    return await Future.wait(
+      _hosts.map(check),
+    ).then((results) => results.contains(true));
   }
 }
 

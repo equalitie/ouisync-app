@@ -8,9 +8,7 @@ import 'log.dart';
 class LogMessage {
   final List<AnsiSpan> content;
 
-  LogMessage(
-    this.content,
-  );
+  LogMessage(this.content);
 
   static LogMessage parse(String input) =>
       LogMessage(parseAnsi(input).toList());
@@ -23,10 +21,10 @@ class LogReader {
   LogReader() : this._(LogUtils.watch);
 
   LogReader._(Stream<List<int>> input)
-      : messages = input
-            .asBroadcastStream()
-            .map((chunk) => utf8.decode(chunk))
-            .map((chunk) => LogMessage.parse(chunk));
+    : messages = input
+          .asBroadcastStream()
+          .map((chunk) => utf8.decode(chunk))
+          .map((chunk) => LogMessage.parse(chunk));
 }
 
 /// Rolling window of the most recent log messages

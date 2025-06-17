@@ -10,13 +10,14 @@ class ElevatedAsyncButton extends StatefulWidget {
 
   // When adding arguments, for consistency, they should be the same as the one
   // in `ElevatedButton`.
-  ElevatedAsyncButton(
-      {super.key,
-      required this.child,
-      this.style,
-      this.onPressed,
-      this.autofocus = false,
-      this.focusNode});
+  ElevatedAsyncButton({
+    super.key,
+    required this.child,
+    this.style,
+    this.onPressed,
+    this.autofocus = false,
+    this.focusNode,
+  });
 
   @override
   State<ElevatedAsyncButton> createState() => ElevatedAsyncButtonState();
@@ -31,24 +32,28 @@ class ElevatedAsyncButtonState extends State<ElevatedAsyncButton> {
   Widget build(BuildContext context) {
     final widgetOnPressed = widget.onPressed;
 
-    final onPressed = widgetOnPressed != null && isExecuting == false
-        ? () {
-            setState(() {
-              isExecuting = true;
-            });
-            unawaited(widgetOnPressed().whenComplete(() {
+    final onPressed =
+        widgetOnPressed != null && isExecuting == false
+            ? () {
               setState(() {
-                isExecuting = false;
+                isExecuting = true;
               });
-            }));
-          }
-        : null;
+              unawaited(
+                widgetOnPressed().whenComplete(() {
+                  setState(() {
+                    isExecuting = false;
+                  });
+                }),
+              );
+            }
+            : null;
 
     return ElevatedButton(
-        onPressed: onPressed,
-        child: widget.child,
-        style: widget.style,
-        autofocus: widget.autofocus,
-        focusNode: widget.focusNode);
+      onPressed: onPressed,
+      child: widget.child,
+      style: widget.style,
+      autofocus: widget.autofocus,
+      focusNode: widget.focusNode,
+    );
   }
 }

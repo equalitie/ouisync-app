@@ -48,9 +48,6 @@ class _ObjectHolderState<T> extends State<ObjectHolder<T>> {
 /// Helper widget that maintains a lifecycle of a `Bloc` or `Cubit`. Similar to `BlocProvider` but
 /// passes the bloc/cubit explicitly to avoid runtime errors.
 class BlocHolder<T extends BlocBase> extends ObjectHolder<T> {
-  BlocHolder({
-    super.key,
-    required super.create,
-    required super.builder,
-  }) : super(dispose: (bloc) => unawaited(bloc.close()));
+  BlocHolder({super.key, required super.create, required super.builder})
+    : super(dispose: (bloc) => unawaited(bloc.close()));
 }

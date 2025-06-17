@@ -6,10 +6,7 @@ import '../../models/access_mode.dart';
 import '../widgets.dart';
 
 class RepoDescription extends StatelessWidget with AppLogger {
-  RepoDescription(
-    this.state, {
-    required this.isDefault,
-  });
+  RepoDescription(this.state, {required this.isDefault});
 
   final RepoState state;
   final bool isDefault;
@@ -31,10 +28,7 @@ class RepoDescription extends StatelessWidget with AppLogger {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ScrollableTextWidget(
-            child: Text(
-              state.location.name,
-              style: nameTextStyle,
-            ),
+            child: Text(state.location.name, style: nameTextStyle),
           ),
           Fields.autosizeText(
             state.accessMode.localized,

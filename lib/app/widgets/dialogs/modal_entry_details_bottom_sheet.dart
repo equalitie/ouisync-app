@@ -49,9 +49,9 @@ class EntryDetails extends StatefulWidget {
     required this.entry,
     required this.isActionAvailableValidator,
     required this.dirs,
-  })  : assert(entry is DirectoryEntry),
-        onPreviewFile = null,
-        packageInfo = null;
+  }) : assert(entry is DirectoryEntry),
+       onPreviewFile = null,
+       packageInfo = null;
 
   final BuildContext context;
   final RepoCubit repoCubit;
@@ -70,94 +70,92 @@ class _EntryDetailsState extends State<EntryDetails> {
 
   @override
   Widget build(BuildContext context) => SingleChildScrollView(
-        child: Container(
-          padding: Dimensions.paddingBottomSheet,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Fields.bottomSheetHandle(context),
-              Fields.bottomSheetTitle(
-                isFile
-                    ? S.current.titleFileDetails
-                    : S.current.titleFolderDetails,
-                style: context.theme.appTextStyle.titleMedium,
-              ),
-              if (isFile) _buildAction(EntryAction.preview),
-              _buildAction(EntryAction.copy),
-              _buildAction(EntryAction.move),
-              _buildAction(EntryAction.rename),
-              if (isFile) _buildAction(EntryAction.download),
-              if (isFile && io.Platform.isAndroid)
-                _buildAction(EntryAction.share),
-              _buildAction(EntryAction.delete),
-              const Divider(
-                height: 10.0,
-                thickness: 2.0,
-                indent: 20.0,
-                endIndent: 20.0,
-              ),
-              EntryInfoTable(
-                entryInfo: {
-                  S.current.labelName: widget.entry.name,
-                  S.current.labelLocation: p.dirname(widget.entry.path),
-                  if (isFile)
-                    S.current.labelSize: formatSize(
-                      (widget.entry as FileEntry).size ?? 0,
-                    ),
-                },
-              ),
-            ],
+    child: Container(
+      padding: Dimensions.paddingBottomSheet,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Fields.bottomSheetHandle(context),
+          Fields.bottomSheetTitle(
+            isFile ? S.current.titleFileDetails : S.current.titleFolderDetails,
+            style: context.theme.appTextStyle.titleMedium,
           ),
-        ),
-      );
+          if (isFile) _buildAction(EntryAction.preview),
+          _buildAction(EntryAction.copy),
+          _buildAction(EntryAction.move),
+          _buildAction(EntryAction.rename),
+          if (isFile) _buildAction(EntryAction.download),
+          if (isFile && io.Platform.isAndroid) _buildAction(EntryAction.share),
+          _buildAction(EntryAction.delete),
+          const Divider(
+            height: 10.0,
+            thickness: 2.0,
+            indent: 20.0,
+            endIndent: 20.0,
+          ),
+          EntryInfoTable(
+            entryInfo: {
+              S.current.labelName: widget.entry.name,
+              S.current.labelLocation: p.dirname(widget.entry.path),
+              if (isFile)
+                S.current.labelSize: formatSize(
+                  (widget.entry as FileEntry).size ?? 0,
+                ),
+            },
+          ),
+        ],
+      ),
+    ),
+  );
 }
 
 extension on _EntryDetailsState {
   Widget _buildAction(EntryAction type) => EntryActionItem(
-        iconData: _getIconForAction(type),
-        title: _getTextForType(type),
-        onTap: _getActionForType(type),
-        enabledValidation: () => widget.isActionAvailableValidator(
+    iconData: _getIconForAction(type),
+    title: _getTextForType(type),
+    onTap: _getActionForType(type),
+    enabledValidation:
+        () => widget.isActionAvailableValidator(
           widget.repoCubit.state.accessMode,
           type,
         ),
-        dense: true,
-        isDanger: type == EntryAction.delete,
-        disabledMessage: S.current.messageActionNotAvailable,
-        disabledMessageDuration: Constants.notAvailableActionMessageDuration,
-      );
+    dense: true,
+    isDanger: type == EntryAction.delete,
+    disabledMessage: S.current.messageActionNotAvailable,
+    disabledMessageDuration: Constants.notAvailableActionMessageDuration,
+  );
 
   IconData _getIconForAction(EntryAction type) => switch (type) {
-        EntryAction.preview => Icons.preview_outlined,
-        EntryAction.copy => Icons.copy_outlined,
-        EntryAction.move => Icons.drive_file_move_outlined,
-        EntryAction.rename => Icons.edit_outlined,
-        EntryAction.download => Icons.download_outlined,
-        EntryAction.share => Icons.share_outlined,
-        EntryAction.delete => Icons.delete_outlined,
-      };
+    EntryAction.preview => Icons.preview_outlined,
+    EntryAction.copy => Icons.copy_outlined,
+    EntryAction.move => Icons.drive_file_move_outlined,
+    EntryAction.rename => Icons.edit_outlined,
+    EntryAction.download => Icons.download_outlined,
+    EntryAction.share => Icons.share_outlined,
+    EntryAction.delete => Icons.delete_outlined,
+  };
 
   String _getTextForType(EntryAction type) => switch (type) {
-        EntryAction.preview => S.current.iconPreview,
-        EntryAction.copy => S.current.iconCopy,
-        EntryAction.move => S.current.iconMove,
-        EntryAction.rename => S.current.iconRename,
-        EntryAction.download => S.current.iconDownload,
-        EntryAction.share => S.current.iconShare,
-        EntryAction.delete => S.current.iconDelete,
-      };
+    EntryAction.preview => S.current.iconPreview,
+    EntryAction.copy => S.current.iconCopy,
+    EntryAction.move => S.current.iconMove,
+    EntryAction.rename => S.current.iconRename,
+    EntryAction.download => S.current.iconDownload,
+    EntryAction.share => S.current.iconShare,
+    EntryAction.delete => S.current.iconDelete,
+  };
 
   Function() _getActionForType(EntryAction type) => switch (type) {
-        EntryAction.preview => _onPreviewFileTap,
-        EntryAction.copy => _onCopyTap,
-        EntryAction.move => _onMoveTap,
-        EntryAction.rename => _onRenameTap,
-        EntryAction.download => _onDownloadTap,
-        EntryAction.share => _onShareTap,
-        EntryAction.delete => _onDeleteTap,
-      };
+    EntryAction.preview => _onPreviewFileTap,
+    EntryAction.copy => _onCopyTap,
+    EntryAction.move => _onMoveTap,
+    EntryAction.rename => _onRenameTap,
+    EntryAction.download => _onDownloadTap,
+    EntryAction.share => _onShareTap,
+    EntryAction.delete => _onDeleteTap,
+  };
 
   Future<void> _onPreviewFileTap() async {
     await Navigator.of(context).maybePop();
@@ -212,13 +210,16 @@ extension on _EntryDetailsState {
       destination: newEntryPath,
     );
 
-    showSnackBar(widget.entry is FileEntry
-        ? S.current.messageFileRenamed(newName)
-        : S.current.messageFolderRenamed(newName));
+    showSnackBar(
+      widget.entry is FileEntry
+          ? S.current.messageFileRenamed(newName)
+          : S.current.messageFolderRenamed(newName),
+    );
   }
 
   Future<String> _getNewEntryName(FileSystemEntry entry) async {
-    final newName = await showDialog<String>(
+    final newName =
+        await showDialog<String>(
           context: context,
           barrierDismissible: false,
           builder: (BuildContext context) {
@@ -228,9 +229,10 @@ extension on _EntryDetailsState {
                 entry is FileEntry ? p.extension(entry.path) : '';
 
             return ActionsDialog(
-              title: entry is FileEntry
-                  ? S.current.messageRenameFile
-                  : S.current.messageRenameFolder,
+              title:
+                  entry is FileEntry
+                      ? S.current.messageRenameFile
+                      : S.current.messageRenameFolder,
               body: RenameEntry(
                 parentContext: context,
                 repoCubit: widget.repoCubit,
@@ -238,9 +240,10 @@ extension on _EntryDetailsState {
                 oldName: oldName,
                 originalExtension: originalExtension,
                 isFile: entry is FileEntry,
-                hint: entry is FileEntry
-                    ? S.current.messageFileName
-                    : S.current.messageFolderName,
+                hint:
+                    entry is FileEntry
+                        ? S.current.messageFileName
+                        : S.current.messageFolderName,
               ),
             );
           },
@@ -263,15 +266,13 @@ extension on _EntryDetailsState {
   }
 
   Future<void> _onShareTap() async => shareFile(
-        repo: widget.repoCubit,
-        path: widget.entry.path,
-        packageInfo: widget.packageInfo!,
-      );
+    repo: widget.repoCubit,
+    path: widget.entry.path,
+    packageInfo: widget.packageInfo!,
+  );
 
-  Future<void> _onDeleteTap() async => _deleteEntryWithValidation(
-        widget.repoCubit,
-        widget.entry,
-      );
+  Future<void> _onDeleteTap() async =>
+      _deleteEntryWithValidation(widget.repoCubit, widget.entry);
 
   Future<void> _deleteEntryWithValidation(
     RepoCubit repo,
@@ -295,9 +296,11 @@ extension on _EntryDetailsState {
 
     if (deleteEntryOk) {
       Navigator.of(context).pop(deleteEntryOk);
-      showSnackBar(isFile
-          ? S.current.messageFileDeleted(repo_path.basename(path))
-          : S.current.messageFolderDeleted(entry.name));
+      showSnackBar(
+        isFile
+            ? S.current.messageFileDeleted(repo_path.basename(path))
+            : S.current.messageFolderDeleted(entry.name),
+      );
     }
   }
 }
