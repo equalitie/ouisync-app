@@ -41,50 +41,51 @@ class _RenameRepository extends State<RenameRepository> {
 
   @override
   Widget build(BuildContext context) => Form(
-        key: formKey,
-        autovalidateMode: AutovalidateMode.onUserInteraction,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.max,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Fields.constrainedText(
-              '"${widget.repoCubit.name}"',
-              flex: 0,
-              style: context.theme.appTextStyle.bodyMedium
-                  .copyWith(fontWeight: FontWeight.w400),
-            ),
-            Fields.formTextField(
-              context: context,
-              controller: newNameController,
-              textInputAction: TextInputAction.done,
-              labelText: S.current.labelRenameRepository,
-              hintText: S.current.messageRepositoryNewName,
-              errorText:
-                  nameTaken ? S.current.messageErrorRepositoryNameExist : null,
-              validator: validateNoEmptyMaybeRegExpr(
-                emptyError: S.current.messageErrorFormValidatorNameDefault,
-                regExp: Strings.entityNameRegExp,
-                regExpError: S.current.messageErrorCharactersNotAllowed,
-              ),
-              focusNode: newNameFocus,
-              autofocus: true,
-            ),
-            Fields.dialogActions(buttons: buildActions(context)),
-          ],
+    key: formKey,
+    autovalidateMode: AutovalidateMode.onUserInteraction,
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.max,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Fields.constrainedText(
+          '"${widget.repoCubit.name}"',
+          flex: 0,
+          style: context.theme.appTextStyle.bodyMedium.copyWith(
+            fontWeight: FontWeight.w400,
+          ),
         ),
-      );
+        Fields.formTextField(
+          context: context,
+          controller: newNameController,
+          textInputAction: TextInputAction.done,
+          labelText: S.current.labelRenameRepository,
+          hintText: S.current.messageRepositoryNewName,
+          errorText:
+              nameTaken ? S.current.messageErrorRepositoryNameExist : null,
+          validator: validateNoEmptyMaybeRegExpr(
+            emptyError: S.current.messageErrorFormValidatorNameDefault,
+            regExp: Strings.entityNameRegExp,
+            regExpError: S.current.messageErrorCharactersNotAllowed,
+          ),
+          focusNode: newNameFocus,
+          autofocus: true,
+        ),
+        Fields.dialogActions(buttons: buildActions(context)),
+      ],
+    ),
+  );
 
   List<Widget> buildActions(BuildContext context) => [
-        NegativeButton(
-          text: S.current.actionCancel,
-          onPressed: () async => await Navigator.of(context).maybePop(null),
-        ),
-        PositiveButton(
-          text: S.current.actionRename,
-          onPressed: () => onSubmit(context),
-        )
-      ];
+    NegativeButton(
+      text: S.current.actionCancel,
+      onPressed: () async => await Navigator.of(context).maybePop(null),
+    ),
+    PositiveButton(
+      text: S.current.actionRename,
+      onPressed: () => onSubmit(context),
+    ),
+  ];
 
   Future<void> onSubmit(BuildContext context) async {
     if (!(await validate(context))) {
@@ -104,8 +105,9 @@ class _RenameRepository extends State<RenameRepository> {
     }
 
     // Check if name is already taken
-    final newLocation =
-        widget.repoCubit.location.rename(newNameController.text);
+    final newLocation = widget.repoCubit.location.rename(
+      newNameController.text,
+    );
     final exists = await Dialogs.executeFutureWithLoadingDialog(
       null,
       File(newLocation.path).exists(),

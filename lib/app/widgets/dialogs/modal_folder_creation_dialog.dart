@@ -34,48 +34,49 @@ class FolderCreation extends HookWidget {
     initHooks();
 
     return Form(
-        key: formKey,
-        autovalidateMode: AutovalidateMode.onUserInteraction,
-        child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.max,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Dimensions.spacingVerticalDouble,
-              ValueListenableBuilder(
-                valueListenable: errorMessage,
-                builder: (context, errorMessage, child) {
-                  return Fields.formTextField(
-                      context: context,
-                      controller: nameController,
-                      textInputAction: TextInputAction.done,
-                      labelText: S.current.labelName,
-                      hintText: S.current.messageFolderName,
-                      errorText:
-                          nameController.text.isEmpty ? '' : errorMessage,
-                      onFieldSubmitted: (String? newFolderName) async {
-                        if (newFolderName == null || newFolderName.isEmpty) {
-                          return;
-                        }
+      key: formKey,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.max,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Dimensions.spacingVerticalDouble,
+          ValueListenableBuilder(
+            valueListenable: errorMessage,
+            builder: (context, errorMessage, child) {
+              return Fields.formTextField(
+                context: context,
+                controller: nameController,
+                textInputAction: TextInputAction.done,
+                labelText: S.current.labelName,
+                hintText: S.current.messageFolderName,
+                errorText: nameController.text.isEmpty ? '' : errorMessage,
+                onFieldSubmitted: (String? newFolderName) async {
+                  if (newFolderName == null || newFolderName.isEmpty) {
+                    return;
+                  }
 
-                        await _onCreateButtonPress(
-                          context,
-                          parent: parent,
-                          newFolderName: newFolderName,
-                        );
-                      },
-                      validator: validateNoEmptyMaybeRegExpr(
-                          emptyError:
-                              S.current.messageErrorFormValidatorNameDefault,
-                          regExp: Strings.entityNameRegExp,
-                          regExpError:
-                              S.current.messageErrorCharactersNotAllowed),
-                      autofocus: true,
-                      focusNode: nameTextFieldFocus);
+                  await _onCreateButtonPress(
+                    context,
+                    parent: parent,
+                    newFolderName: newFolderName,
+                  );
                 },
-              ),
-              Fields.dialogActions(buttons: _actions(context, parent: parent)),
-            ]));
+                validator: validateNoEmptyMaybeRegExpr(
+                  emptyError: S.current.messageErrorFormValidatorNameDefault,
+                  regExp: Strings.entityNameRegExp,
+                  regExpError: S.current.messageErrorCharactersNotAllowed,
+                ),
+                autofocus: true,
+                focusNode: nameTextFieldFocus,
+              );
+            },
+          ),
+          Fields.dialogActions(buttons: _actions(context, parent: parent)),
+        ],
+      ),
+    );
   }
 
   void initHooks() {
@@ -132,24 +133,22 @@ class FolderCreation extends HookWidget {
     return true;
   }
 
-  List<Widget> _actions(
-    BuildContext context, {
-    required String parent,
-  }) =>
-      [
-        NegativeButton(
-            text: S.current.actionCancel,
-            onPressed: () async => await Navigator.of(context).maybePop('')),
-        PositiveButton(
-          text: S.current.actionCreate,
-          onPressed: () async => await _onCreateButtonPress(
+  List<Widget> _actions(BuildContext context, {required String parent}) => [
+    NegativeButton(
+      text: S.current.actionCancel,
+      onPressed: () async => await Navigator.of(context).maybePop(''),
+    ),
+    PositiveButton(
+      text: S.current.actionCreate,
+      onPressed:
+          () async => await _onCreateButtonPress(
             context,
             parent: parent,
             newFolderName: nameController.text,
           ),
-          focusNode: positiveButtonFocus,
-        )
-      ];
+      focusNode: positiveButtonFocus,
+    ),
+  ];
 
   Future<void> _onCreateButtonPress(
     BuildContext context, {

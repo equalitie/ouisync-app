@@ -22,12 +22,11 @@ class BottomSheetInfo extends Equatable {
     BottomSheetType? type,
     double? neededPadding,
     String? entry,
-  }) =>
-      BottomSheetInfo(
-        type: type ?? BottomSheetType.gone,
-        neededPadding: neededPadding ?? 0.0,
-        entry: entry ?? '',
-      );
+  }) => BottomSheetInfo(
+    type: type ?? BottomSheetType.gone,
+    neededPadding: neededPadding ?? 0.0,
+    entry: entry ?? '',
+  );
 
   @override
   List<Object?> get props => [type, neededPadding, entry];
@@ -49,12 +48,7 @@ class MoveEntrySheetState extends Equatable implements EntryBottomSheetState {
   });
 
   @override
-  List<Object?> get props => [
-        repoCubit,
-        navigationCubit,
-        type,
-        entry,
-      ];
+  List<Object?> get props => [repoCubit, navigationCubit, type, entry];
 }
 
 class MoveSelectedEntriesSheetState extends Equatable
@@ -70,11 +64,7 @@ class MoveSelectedEntriesSheetState extends Equatable
   });
 
   @override
-  List<Object?> get props => [
-        repoCubit,
-        type,
-        entry,
-      ];
+  List<Object?> get props => [repoCubit, type, entry];
 }
 
 class SaveMediaSheetState extends Equatable implements EntryBottomSheetState {
@@ -101,33 +91,33 @@ class EntryBottomSheetCubit extends Cubit<EntryBottomSheetState>
     required NavigationCubit navigationCubit,
     required BottomSheetType type,
     required FileSystemEntry entry,
-  }) =>
-      emitUnlessClosed(MoveEntrySheetState(
-        repoCubit: repoCubit,
-        navigationCubit: navigationCubit,
-        type: type,
-        entry: entry,
-      ));
+  }) => emitUnlessClosed(
+    MoveEntrySheetState(
+      repoCubit: repoCubit,
+      navigationCubit: navigationCubit,
+      type: type,
+      entry: entry,
+    ),
+  );
 
   void showMoveSelectedEntries({
     required RepoCubit repoCubit,
     required BottomSheetType type,
     FileSystemEntry? entry,
-  }) =>
-      emitUnlessClosed(MoveSelectedEntriesSheetState(
-        repoCubit: repoCubit,
-        type: type,
-        entry: entry,
-      ));
+  }) => emitUnlessClosed(
+    MoveSelectedEntriesSheetState(
+      repoCubit: repoCubit,
+      type: type,
+      entry: entry,
+    ),
+  );
 
   void showSaveMedia({
     required ReposCubit reposCubit,
     required List<String> paths,
-  }) =>
-      emitUnlessClosed(SaveMediaSheetState(
-        reposCubit: reposCubit,
-        sharedMediaPaths: paths,
-      ));
+  }) => emitUnlessClosed(
+    SaveMediaSheetState(reposCubit: reposCubit, sharedMediaPaths: paths),
+  );
 
   void hide() => emitUnlessClosed(HideSheetState());
 }

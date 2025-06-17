@@ -52,9 +52,9 @@ class AboutSection extends SettingsSection with AppLogger {
     required this.launchAtStartup,
     required this.upgradeExists,
   }) : super(
-          key: GlobalKey(debugLabel: 'key_about_section'),
-          title: S.current.titleAbout,
-        );
+         key: GlobalKey(debugLabel: 'key_about_section'),
+         title: S.current.titleAbout,
+       );
 
   final Session session;
   final LocaleCubit localeCubit;
@@ -83,39 +83,52 @@ class AboutSection extends SettingsSection with AppLogger {
       if (PlatformValues.isDesktopDevice)
         BlocBuilder<LaunchAtStartupCubit, bool>(
           bloc: launchAtStartup,
-          builder: (context, state) => SwitchSettingsTile(
-            value: state,
-            onChanged: (value) => unawaited(launchAtStartup.setEnabled(value)),
-            title: Text(
-              S.current.messageLaunchAtStartup,
-              style: bodyStyle,
-            ),
-            leading: Icon(Icons.rocket_launch_sharp),
-          ),
+          builder:
+              (context, state) => SwitchSettingsTile(
+                value: state,
+                onChanged:
+                    (value) => unawaited(launchAtStartup.setEnabled(value)),
+                title: Text(S.current.messageLaunchAtStartup, style: bodyStyle),
+                leading: Icon(Icons.rocket_launch_sharp),
+              ),
         ),
       NavigationTile(
         title: Text(S.current.titleApplicationLanguage, style: bodyStyle),
         leading: Icon(Icons.language_rounded),
-        value: Text(currentLanguage.toString(),
-            style: context.theme.appTextStyle.bodySmall),
+        value: Text(
+          currentLanguage.toString(),
+          style: context.theme.appTextStyle.bodySmall,
+        ),
         onTap: () => _navigateToLanguagePicker(context),
       ),
       NavigationTile(
-          title: Text(S.current.titleFAQShort, style: bodyStyle),
-          leading: Icon(Icons.question_answer_rounded),
-          trailing:
-              PlatformValues.isDesktopDevice ? _externalNavigationIcon : null,
-          value: Text(S.current.messageFAQ,
-              style: context.theme.appTextStyle.bodySmall),
-          onTap: () => unawaited(
-              _openUrl(context, S.current.titleFAQShort, Constants.faqUrl))),
+        title: Text(S.current.titleFAQShort, style: bodyStyle),
+        leading: Icon(Icons.question_answer_rounded),
+        trailing:
+            PlatformValues.isDesktopDevice ? _externalNavigationIcon : null,
+        value: Text(
+          S.current.messageFAQ,
+          style: context.theme.appTextStyle.bodySmall,
+        ),
+        onTap:
+            () => unawaited(
+              _openUrl(context, S.current.titleFAQShort, Constants.faqUrl),
+            ),
+      ),
       NavigationTile(
-          title: Text(S.current.titlePrivacyPolicy, style: bodyStyle),
-          leading: Icon(Icons.privacy_tip_rounded),
-          trailing:
-              PlatformValues.isDesktopDevice ? _externalNavigationIcon : null,
-          onTap: () => unawaited(_openUrl(context, S.current.titlePrivacyPolicy,
-              Constants.eqPrivacyPolicy))),
+        title: Text(S.current.titlePrivacyPolicy, style: bodyStyle),
+        leading: Icon(Icons.privacy_tip_rounded),
+        trailing:
+            PlatformValues.isDesktopDevice ? _externalNavigationIcon : null,
+        onTap:
+            () => unawaited(
+              _openUrl(
+                context,
+                S.current.titlePrivacyPolicy,
+                Constants.eqPrivacyPolicy,
+              ),
+            ),
+      ),
       if (PlatformValues.isMobileDevice)
         NavigationTile(
           title: Text(S.current.titleSendFeedback, style: bodyStyle),
@@ -133,8 +146,10 @@ class AboutSection extends SettingsSection with AppLogger {
         title: Text(Constants.supportEmail, style: bodyStyle),
         leading: Icon(Icons.mail_rounded),
         trailing: _externalNavigationIcon,
-        onTap: () =>
-            unawaited(launchUrl(Uri.parse('mailto:${Constants.supportEmail}'))),
+        onTap:
+            () => unawaited(
+              launchUrl(Uri.parse('mailto:${Constants.supportEmail}')),
+            ),
       ),
       NavigationTile(
         title: Text(S.current.titleIssueTracker, style: bodyStyle),
@@ -150,18 +165,24 @@ class AboutSection extends SettingsSection with AppLogger {
       ),
       SettingsTile(
         title: BlocBuilder<PeerSetCubit, PeerSet>(
-            bloc: peerSet,
-            builder: (context, state) => InfoBuble(
-                    child: Text(S.current.messageSettingsRuntimeID,
-                        style: bodyStyle),
-                    title: S.current.messageSettingsRuntimeID,
-                    description: [
-                      TextSpan(text: S.current.messageInfoRuntimeID),
-                      Fields.linkTextSpan(
-                          context,
-                          '\n\n${S.current.messageGoToPeers}',
-                          _navigateToPeers),
-                    ])),
+          bloc: peerSet,
+          builder:
+              (context, state) => InfoBuble(
+                child: Text(
+                  S.current.messageSettingsRuntimeID,
+                  style: bodyStyle,
+                ),
+                title: S.current.messageSettingsRuntimeID,
+                description: [
+                  TextSpan(text: S.current.messageInfoRuntimeID),
+                  Fields.linkTextSpan(
+                    context,
+                    '\n\n${S.current.messageGoToPeers}',
+                    _navigateToPeers,
+                  ),
+                ],
+              ),
+        ),
         leading: Icon(Icons.person_rounded),
         value: _getRuntimeIdForOS(),
       ),
@@ -174,10 +195,7 @@ class AboutSection extends SettingsSection with AppLogger {
   Future<void> _navigateToLanguagePicker(BuildContext context) async {
     await Navigator.of(context).push<Locale>(
       MaterialPageRoute(
-        builder: (_) => LanguagePicker(
-          localeCubit: localeCubit,
-          canPop: true,
-        ),
+        builder: (_) => LanguagePicker(localeCubit: localeCubit, canPop: true),
       ),
     );
 
@@ -185,11 +203,9 @@ class AboutSection extends SettingsSection with AppLogger {
   }
 
   void _navigateToPeers(BuildContext context) => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => PeersPage(session, peerSet),
-        ),
-      );
+    context,
+    MaterialPageRoute(builder: (context) => PeersPage(session, peerSet)),
+  );
 
   Future<void> _openUrl(BuildContext context, String title, String url) async {
     final webView = PlatformWebView();
@@ -197,22 +213,17 @@ class AboutSection extends SettingsSection with AppLogger {
     if (PlatformValues.isMobileDevice) {
       final pageTitle = Text(title);
 
-      await Dialogs.executeWithLoadingDialog(
-        null,
-        () async {
-          final content = await webView.loadUrl(context, url);
+      await Dialogs.executeWithLoadingDialog(null, () async {
+        final content = await webView.loadUrl(context, url);
 
-          await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => WebViewPage(
-                title: pageTitle,
-                content: content,
-              ),
-            ),
-          );
-        },
-      );
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder:
+                (context) => WebViewPage(title: pageTitle, content: content),
+          ),
+        );
+      });
     } else {
       await webView.launchUrl(url);
     }
@@ -270,23 +281,24 @@ class AboutSection extends SettingsSection with AppLogger {
   }
 
   Widget _getRuntimeIdForOS() => FutureBuilder<PublicRuntimeId>(
-      future: session.getRuntimeId(),
-      builder: (context, snapshot) {
-        final runtimeId = snapshot.data;
-        final runtimeIdWidget = Text(
-          runtimeId != null ? HEX.encode(runtimeId.value) : '',
-          overflow: TextOverflow.ellipsis,
-          style: context.theme.appTextStyle.bodySmall,
+    future: session.getRuntimeId(),
+    builder: (context, snapshot) {
+      final runtimeId = snapshot.data;
+      final runtimeIdWidget = Text(
+        runtimeId != null ? HEX.encode(runtimeId.value) : '',
+        overflow: TextOverflow.ellipsis,
+        style: context.theme.appTextStyle.bodySmall,
+      );
+
+      if (io.Platform.isIOS) {
+        return Expanded(
+          child: Row(children: [Expanded(child: runtimeIdWidget)]),
         );
+      }
 
-        if (io.Platform.isIOS) {
-          return Expanded(
-            child: Row(children: [Expanded(child: runtimeIdWidget)]),
-          );
-        }
-
-        return runtimeIdWidget;
-      });
+      return runtimeIdWidget;
+    },
+  );
 }
 
 const _externalNavigationIcon = Icon(Icons.open_in_browser);
@@ -303,36 +315,46 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
 
   @override
   Widget build(BuildContext context) => AlertDialog(
-          title: Flex(direction: Axis.horizontal, children: [
-            Fields.constrainedText(S.current.messageGoToMailApp,
-                style: context.theme.appTextStyle.titleMedium, maxLines: 2)
-          ]),
-          content: CheckboxListTile(
-            title: Text(S.current.labelAttachLogs,
-                style: context.theme.appTextStyle.bodyMedium),
-            value: attachments.logs,
-            onChanged: (value) {
-              if (value != null) {
-                setState(() {
-                  attachments = FeedbackAttachments(logs: value);
-                });
-              }
-            },
+    title: Flex(
+      direction: Axis.horizontal,
+      children: [
+        Fields.constrainedText(
+          S.current.messageGoToMailApp,
+          style: context.theme.appTextStyle.titleMedium,
+          maxLines: 2,
+        ),
+      ],
+    ),
+    content: CheckboxListTile(
+      title: Text(
+        S.current.labelAttachLogs,
+        style: context.theme.appTextStyle.bodyMedium,
+      ),
+      value: attachments.logs,
+      onChanged: (value) {
+        if (value != null) {
+          setState(() {
+            attachments = FeedbackAttachments(logs: value);
+          });
+        }
+      },
+    ),
+    actions: [
+      Fields.dialogActions(
+        buttons: [
+          NegativeButton(
+            text: S.current.actionCancel,
+            onPressed: () async => await Navigator.of(context).maybePop(null),
           ),
-          actions: [
-            Fields.dialogActions(buttons: [
-              NegativeButton(
-                text: S.current.actionCancel,
-                onPressed: () async =>
-                    await Navigator.of(context).maybePop(null),
-              ),
-              PositiveButton(
-                text: S.current.actionOK,
-                onPressed: () async =>
-                    await Navigator.of(context).maybePop(attachments),
-              )
-            ])
-          ]);
+          PositiveButton(
+            text: S.current.actionOK,
+            onPressed:
+                () async => await Navigator.of(context).maybePop(attachments),
+          ),
+        ],
+      ),
+    ],
+  );
 }
 
 class FeedbackAttachments {

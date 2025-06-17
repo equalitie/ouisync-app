@@ -29,7 +29,8 @@ class MissingRepositoryState extends HookWidget
 
   @override
   Widget build(BuildContext context) {
-    final emptyFolderImageHeight = MediaQuery.of(context).size.height *
+    final emptyFolderImageHeight =
+        MediaQuery.of(context).size.height *
         Constants.statePlaceholderImageHeightFactor;
 
     final reloadButtonFocus = useFocusNode(debugLabel: 'reload_button_focus');
@@ -45,33 +46,40 @@ class MissingRepositoryState extends HookWidget
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Align(
-                  alignment: AlignmentDirectional.center,
-                  child: Fields.placeholderWidget(
-                      assetName: Constants.assetEmptyFolder,
-                      assetHeight: emptyFolderImageHeight)),
+                alignment: AlignmentDirectional.center,
+                child: Fields.placeholderWidget(
+                  assetName: Constants.assetEmptyFolder,
+                  assetHeight: emptyFolderImageHeight,
+                ),
+              ),
               Dimensions.spacingVerticalDouble,
               Align(
                 alignment: AlignmentDirectional.center,
-                child: Fields.inPageMainMessage(errorMessage,
-                    style: context.theme.appTextStyle.bodyLarge
-                        .copyWith(color: Constants.dangerColor)),
+                child: Fields.inPageMainMessage(
+                  errorMessage,
+                  style: context.theme.appTextStyle.bodyLarge.copyWith(
+                    color: Constants.dangerColor,
+                  ),
+                ),
               ),
               if (errorDescription != null) Dimensions.spacingVertical,
               if (errorDescription != null)
                 Align(
-                    alignment: AlignmentDirectional.center,
-                    child: Fields.inPageSecondaryMessage(errorDescription!,
-                        tags: {
-                          Constants.inlineTextBold: InlineTextStyles.bold
-                        })),
+                  alignment: AlignmentDirectional.center,
+                  child: Fields.inPageSecondaryMessage(
+                    errorDescription!,
+                    tags: {Constants.inlineTextBold: InlineTextStyles.bold},
+                  ),
+                ),
               Dimensions.spacingVerticalDouble,
               Fields.inPageButton(
-                  onPressed: onBackToList,
-                  text: S.current.actionBack,
-                  size: Dimensions.sizeInPageButtonLong,
-                  alignment: AlignmentDirectional.center,
-                  focusNode: reloadButtonFocus,
-                  autofocus: true),
+                onPressed: onBackToList,
+                text: S.current.actionBack,
+                size: Dimensions.sizeInPageButtonLong,
+                alignment: AlignmentDirectional.center,
+                focusNode: reloadButtonFocus,
+                autofocus: true,
+              ),
             ],
           ),
         ),

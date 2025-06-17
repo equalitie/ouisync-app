@@ -9,8 +9,10 @@ class FlutterSecure {
 
   static final _storage = FlutterSecureStorage(aOptions: _getAndroidOptions());
 
-  static Future<Result<Void, Error>> writeValue(
-      {required DatabaseId databaseId, required String password}) async {
+  static Future<Result<Void, Error>> writeValue({
+    required DatabaseId databaseId,
+    required String password,
+  }) async {
     try {
       await _storage.write(key: databaseId.toString(), value: password);
       return Success(Void());
@@ -19,8 +21,9 @@ class FlutterSecure {
     }
   }
 
-  static Future<Result<String?, Error>> readValue(
-      {required DatabaseId databaseId}) async {
+  static Future<Result<String?, Error>> readValue({
+    required DatabaseId databaseId,
+  }) async {
     try {
       return Success(await _storage.read(key: databaseId.toString()));
     } on Exception catch (e, st) {
@@ -28,8 +31,9 @@ class FlutterSecure {
     }
   }
 
-  static Future<Result<Void, Error>> deleteValue(
-      {required DatabaseId databaseId}) async {
+  static Future<Result<Void, Error>> deleteValue({
+    required DatabaseId databaseId,
+  }) async {
     try {
       await _storage.delete(key: databaseId.toString());
       return Success(Void());
@@ -38,8 +42,9 @@ class FlutterSecure {
     }
   }
 
-  static Future<Result<bool, Error>> exist(
-      {required DatabaseId databaseId}) async {
+  static Future<Result<bool, Error>> exist({
+    required DatabaseId databaseId,
+  }) async {
     try {
       return Success(await _storage.containsKey(key: databaseId.toString()));
     } on Exception catch (e, st) {

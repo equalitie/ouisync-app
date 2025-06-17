@@ -8,8 +8,9 @@ import 'package:path_provider/path_provider.dart';
 /// TODO: merge them into a single ouisync channel, some time around when we
 /// finally rename the bindings to libouisync and the UI to ouisync proper
 class Native {
-  static const MethodChannel _channel =
-      MethodChannel('org.equalitie.ouisync/native');
+  static const MethodChannel _channel = MethodChannel(
+    'org.equalitie.ouisync/native',
+  );
 
   /// Sets the method handler for the calls to and from native implementations.
   static void init() {
@@ -23,7 +24,9 @@ class Native {
   /// and any arguments included ([call.arguments])
   static Future<dynamic> _methodHandler(MethodCall call) async {
     throw PlatformException(
-        code: '0', message: 'No such method: "${call.method}"');
+      code: '0',
+      message: 'No such method: "${call.method}"',
+    );
   }
 
   static Future<void> log(LogLevel level, String message) =>

@@ -36,27 +36,27 @@ class EntrySelectionState extends Equatable {
     List<FileSystemEntry>? selectedEntries,
     FileSystemEntry? singleEntry,
     bool? updating,
-  }) =>
-      EntrySelectionState(
-        originRepoInfoHash: originRepoInfoHash ?? this.originRepoInfoHash,
-        status: selectionStatus ?? status,
-        selectedEntries: selectedEntries ?? this.selectedEntries,
-        singleEntry: singleEntry ?? this.singleEntry,
-        updating: updating ?? false,
-      );
+  }) => EntrySelectionState(
+    originRepoInfoHash: originRepoInfoHash ?? this.originRepoInfoHash,
+    status: selectionStatus ?? status,
+    selectedEntries: selectedEntries ?? this.selectedEntries,
+    singleEntry: singleEntry ?? this.singleEntry,
+    updating: updating ?? false,
+  );
 
   @override
   List<Object?> get props => [
-        originRepoInfoHash,
-        status,
-        selectedEntries,
-        singleEntry,
-        updating,
-      ];
+    originRepoInfoHash,
+    status,
+    selectedEntries,
+    singleEntry,
+    updating,
+  ];
 
-  String get selectionOriginPath => singleEntry.path.isNotEmpty
-      ? p.dirname(singleEntry.path)
-      : selectedEntries.isNotEmpty
+  String get selectionOriginPath =>
+      singleEntry.path.isNotEmpty
+          ? p.dirname(singleEntry.path)
+          : selectedEntries.isNotEmpty
           ? p.dirname(selectedEntries.first.path)
           : '';
 
@@ -112,12 +112,14 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
     _isSingleSelection = isSingleSelection;
     _singleEntry = singleEntry;
 
-    emitUnlessClosed(state.copyWith(
-      originRepoInfoHash: _originRepoInfoHash,
-      selectionStatus: SelectionStatus.on,
-      selectedEntries: _entries,
-      singleEntry: _singleEntry,
-    ));
+    emitUnlessClosed(
+      state.copyWith(
+        originRepoInfoHash: _originRepoInfoHash,
+        selectionStatus: SelectionStatus.on,
+        selectedEntries: _entries,
+        singleEntry: _singleEntry,
+      ),
+    );
   }
 
   Future<void> endSelection() async {
@@ -129,11 +131,13 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
 
     _entries.clear();
 
-    emitUnlessClosed(state.copyWith(
-      selectionStatus: SelectionStatus.off,
-      selectedEntries: <FileSystemEntry>[],
-      singleEntry: const DirectoryEntry(path: ''),
-    ));
+    emitUnlessClosed(
+      state.copyWith(
+        selectionStatus: SelectionStatus.off,
+        selectedEntries: <FileSystemEntry>[],
+        singleEntry: const DirectoryEntry(path: ''),
+      ),
+    );
   }
 
   Future<void> selectEntry(String repoInfoHash, FileSystemEntry entry) async {
@@ -153,10 +157,9 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
 
     _entries.add(entry);
 
-    emitUnlessClosed(state.copyWith(
-      selectedEntries: _entries,
-      updating: false,
-    ));
+    emitUnlessClosed(
+      state.copyWith(selectedEntries: _entries, updating: false),
+    );
   }
 
   Future<void> clearEntry(String repoInfoHash, FileSystemEntry entry) async {
@@ -169,10 +172,9 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
 
     _entries.remove(entry);
 
-    emitUnlessClosed(state.copyWith(
-      selectedEntries: _entries,
-      updating: false,
-    ));
+    emitUnlessClosed(
+      state.copyWith(selectedEntries: _entries, updating: false),
+    );
   }
 
   //============================================================================
@@ -181,10 +183,7 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
     BuildContext context, {
     required String defaultDirectoryPath,
   }) async {
-    final fileIO = FileIO(
-      context: context,
-      repoCubit: _originRepoCubit!,
-    );
+    final fileIO = FileIO(context: context, repoCubit: _originRepoCubit!);
 
     final destinationPaths = await fileIO.getDestinationPath(
       defaultDirectoryPath,
@@ -214,14 +213,10 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
           continue;
         }
 
-        await fileIO.saveFileToDevice(
-          entry as FileEntry,
-          null,
-          (
-            parentPath: destinationPaths.parentPath,
-            destinationPath: destinationPath,
-          ),
-        );
+        await fileIO.saveFileToDevice(entry as FileEntry, null, (
+          parentPath: destinationPaths.parentPath,
+          destinationPath: destinationPath,
+        ));
       }
     } on Exception catch (e) {
       loggy.debug('Error saving selected entries to device: ${e.toString()}');
@@ -235,25 +230,23 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
     BuildContext context, {
     required RepoCubit destinationRepoCubit,
     required String destinationPath,
-  }) async =>
-      _moveOrCopySelectedEntries(
-        context,
-        action: EntrySelectionActions.copy,
-        destinationRepoCubit: destinationRepoCubit,
-        destinationPath: destinationPath,
-      );
+  }) async => _moveOrCopySelectedEntries(
+    context,
+    action: EntrySelectionActions.copy,
+    destinationRepoCubit: destinationRepoCubit,
+    destinationPath: destinationPath,
+  );
 
   Future<bool> moveEntriesTo(
     BuildContext context, {
     required RepoCubit destinationRepoCubit,
     required String destinationPath,
-  }) async =>
-      _moveOrCopySelectedEntries(
-        context,
-        action: EntrySelectionActions.move,
-        destinationRepoCubit: destinationRepoCubit,
-        destinationPath: destinationPath,
-      );
+  }) async => _moveOrCopySelectedEntries(
+    context,
+    action: EntrySelectionActions.move,
+    destinationRepoCubit: destinationRepoCubit,
+    destinationPath: destinationPath,
+  );
 
   Future<bool> _moveOrCopySelectedEntries(
     BuildContext context, {
@@ -262,9 +255,10 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
     required String destinationPath,
   }) async {
     final destinationRepoInfoHash = await destinationRepoCubit.infoHash;
-    final toRepoCubit = _originRepoInfoHash != destinationRepoInfoHash
-        ? destinationRepoCubit
-        : null;
+    final toRepoCubit =
+        _originRepoInfoHash != destinationRepoInfoHash
+            ? destinationRepoCubit
+            : null;
 
     final sortedEntries = [..._entries];
     sortedEntries.sort((a, b) {
@@ -294,13 +288,12 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
     required RepoCubit? toRepoCubit,
     required String destinationPath,
     required FileSystemEntry entry,
-  }) async =>
-      CopyEntry(
-        context,
-        originRepoCubit: originRepoCubit,
-        entry: entry,
-        destinationPath: destinationPath,
-      ).copy(currentRepoCubit: toRepoCubit, recursive: true);
+  }) async => CopyEntry(
+    context,
+    originRepoCubit: originRepoCubit,
+    entry: entry,
+    destinationPath: destinationPath,
+  ).copy(currentRepoCubit: toRepoCubit, recursive: true);
 
   Future<void> _move(
     BuildContext context, {
@@ -308,18 +301,18 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
     required RepoCubit? toRepoCubit,
     required String destinationPath,
     required FileSystemEntry entry,
-  }) async =>
-      MoveEntry(
-        context,
-        originRepoCubit: originRepoCubit,
-        entry: entry,
-        destinationPath: destinationPath,
-      ).move(currentRepoCubit: toRepoCubit, recursive: true);
+  }) async => MoveEntry(
+    context,
+    originRepoCubit: originRepoCubit,
+    entry: entry,
+    destinationPath: destinationPath,
+  ).move(currentRepoCubit: toRepoCubit, recursive: true);
 
   Future<bool> deleteEntries() async {
     try {
-      final fileEntriesPath =
-          _entries.whereType<FileEntry>().map((e) => e.path);
+      final fileEntriesPath = _entries.whereType<FileEntry>().map(
+        (e) => e.path,
+      );
       await for (var path in Stream.fromIterable(fileEntriesPath)) {
         await _originRepoCubit!.deleteFile(path);
       }
@@ -330,8 +323,8 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
 
     try {
       final dirEntriesPath = _entries.whereType<DirectoryEntry>().map(
-            (e) => e.path,
-          );
+        (e) => e.path,
+      );
       await for (var path in Stream.fromIterable(dirEntriesPath)) {
         await _originRepoCubit!.deleteFolder(path, true);
       }

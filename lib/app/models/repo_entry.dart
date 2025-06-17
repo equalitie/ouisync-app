@@ -44,11 +44,7 @@ class OpenRepoEntry extends RepoEntry {
 }
 
 class MissingRepoEntry extends RepoEntry {
-  MissingRepoEntry(
-    this.location,
-    this.error,
-    this.errorDescription,
-  );
+  MissingRepoEntry(this.location, this.error, this.errorDescription);
 
   @override
   final RepoLocation location;
@@ -61,11 +57,7 @@ class MissingRepoEntry extends RepoEntry {
 }
 
 class ErrorRepoEntry extends RepoEntry {
-  ErrorRepoEntry(
-    this.location,
-    this.error,
-    this.errorDescription,
-  );
+  ErrorRepoEntry(this.location, this.error, this.errorDescription);
 
   @override
   final RepoLocation location;

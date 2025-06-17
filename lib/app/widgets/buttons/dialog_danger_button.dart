@@ -11,18 +11,22 @@ class DangerButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-        margin: Dimensions.marginDialogPositiveButton,
-        child: RawMaterialButton(
-            onPressed: onPressed,
-            child: Text((text ?? '').toUpperCase()),
-            constraints: Dimensions.sizeConstrainsDialogAction,
-            elevation: Dimensions.elevationDialogAction,
-            fillColor: _fillColorStatus(context),
-            shape: const RoundedRectangleBorder(
-                borderRadius: Dimensions.borderRadiusDialogPositiveButton),
-            textStyle: TextStyle(
-                color: Theme.of(context).dialogTheme.backgroundColor,
-                fontWeight: FontWeight.w500)));
+      margin: Dimensions.marginDialogPositiveButton,
+      child: RawMaterialButton(
+        onPressed: onPressed,
+        child: Text((text ?? '').toUpperCase()),
+        constraints: Dimensions.sizeConstrainsDialogAction,
+        elevation: Dimensions.elevationDialogAction,
+        fillColor: _fillColorStatus(context),
+        shape: const RoundedRectangleBorder(
+          borderRadius: Dimensions.borderRadiusDialogPositiveButton,
+        ),
+        textStyle: TextStyle(
+          color: Theme.of(context).dialogTheme.backgroundColor,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+    );
   }
 
   Color _fillColorStatus(context) {

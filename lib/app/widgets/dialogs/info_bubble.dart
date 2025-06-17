@@ -31,16 +31,26 @@ class InfoBuble extends StatelessWidget {
     final focusableWidgetKey = GlobalKey();
 
     return Wrap(
-        spacing: 1.0,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        children: [
-          child,
-          GestureDetector(
-              onTap: () => _showInfoBubble(
-                  title, description, focusableWidgetKey, bgColor),
-              child: Icon(Icons.info_outline_rounded,
-                  key: focusableWidgetKey, size: Dimensions.sizeIconMicro))
-        ]);
+      spacing: 1.0,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        child,
+        GestureDetector(
+          onTap:
+              () => _showInfoBubble(
+                title,
+                description,
+                focusableWidgetKey,
+                bgColor,
+              ),
+          child: Icon(
+            Icons.info_outline_rounded,
+            key: focusableWidgetKey,
+            size: Dimensions.sizeIconMicro,
+          ),
+        ),
+      ],
+    );
   }
 
   void _showInfoBubble(
@@ -52,30 +62,33 @@ class InfoBuble extends StatelessWidget {
     double bubblePadding = 32.0,
     double bubbleTipWidth = 22.0,
     double bubbleTipHeight = 12.0,
-  }) =>
-      showDialog(
-          context: focusableWidgetKey.currentContext!,
-          builder: (BuildContext context) => _InfoBubbleDialog(
-              focusableWidgetKey: focusableWidgetKey,
-              title: title,
-              description: description,
-              bgColor: bgColor,
-              bubbleWidth: bubbleWidth,
-              bubblePadding: bubblePadding,
-              bubbleTipWidth: bubbleTipWidth,
-              bubbleTipHeight: bubbleTipHeight));
+  }) => showDialog(
+    context: focusableWidgetKey.currentContext!,
+    builder:
+        (BuildContext context) => _InfoBubbleDialog(
+          focusableWidgetKey: focusableWidgetKey,
+          title: title,
+          description: description,
+          bgColor: bgColor,
+          bubbleWidth: bubbleWidth,
+          bubblePadding: bubblePadding,
+          bubbleTipWidth: bubbleTipWidth,
+          bubbleTipHeight: bubbleTipHeight,
+        ),
+  );
 }
 
 class _InfoBubbleDialog extends StatefulWidget {
-  const _InfoBubbleDialog(
-      {required this.focusableWidgetKey,
-      required this.title,
-      required this.description,
-      required this.bgColor,
-      required this.bubbleWidth,
-      required this.bubblePadding,
-      required this.bubbleTipHeight,
-      required this.bubbleTipWidth});
+  const _InfoBubbleDialog({
+    required this.focusableWidgetKey,
+    required this.title,
+    required this.description,
+    required this.bgColor,
+    required this.bubbleWidth,
+    required this.bubblePadding,
+    required this.bubbleTipHeight,
+    required this.bubbleTipWidth,
+  });
 
   final GlobalKey focusableWidgetKey;
 
@@ -186,80 +199,87 @@ class _InfoBubbleDialogState extends State<_InfoBubbleDialog> {
 
   @override
   Widget build(BuildContext context) => Stack(
-        children: [
-          AnimatedPositioned(
-            duration: animationDuration,
-            left: leftPosition,
-            right: rightPosition,
-            top: topPosition,
-            bottom: bottomPosition,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // if (!showBubbleAboveWidget)
-                //   Padding(
-                //     padding: EdgeInsetsDirectional.only(left: bubbleTipLeftPadding),
-                //     child: CustomPaint(
-                //       painter: TrianglePainter(
-                //         strokeColor: widget.bgColor,
-                //         strokeWidth: 10,
-                //         paintingStyle: PaintingStyle.fill,
-                //       ),
-                //       child: SizedBox(
-                //         height: widget.bubbleTipHeight,
-                //         width: widget.bubbleTipWidth,
-                //       ),
-                //     ),
-                //   ),
-                Material(
-                  color: Colors.transparent,
-                  child: Container(
-                    padding: const EdgeInsetsDirectional.all(12),
-                    width: widget.bubbleWidth,
-                    decoration: BoxDecoration(
-                        color: widget.bgColor,
-                        borderRadius: BorderRadiusDirectional.circular(8)),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(widget.title,
-                            style: context.theme.appTextStyle.bodySmall
-                                .copyWith(fontWeight: FontWeight.w500)),
-                        const SizedBox(height: 12),
-                        RichText(
-                            textAlign: TextAlign.start,
-                            text: TextSpan(
-                                style: context.theme.appTextStyle.bodySmall
-                                    .copyWith(color: Colors.black87),
-                                children: widget.description)),
-                      ],
-                    ),
-                  ),
+    children: [
+      AnimatedPositioned(
+        duration: animationDuration,
+        left: leftPosition,
+        right: rightPosition,
+        top: topPosition,
+        bottom: bottomPosition,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // if (!showBubbleAboveWidget)
+            //   Padding(
+            //     padding: EdgeInsetsDirectional.only(left: bubbleTipLeftPadding),
+            //     child: CustomPaint(
+            //       painter: TrianglePainter(
+            //         strokeColor: widget.bgColor,
+            //         strokeWidth: 10,
+            //         paintingStyle: PaintingStyle.fill,
+            //       ),
+            //       child: SizedBox(
+            //         height: widget.bubbleTipHeight,
+            //         width: widget.bubbleTipWidth,
+            //       ),
+            //     ),
+            //   ),
+            Material(
+              color: Colors.transparent,
+              child: Container(
+                padding: const EdgeInsetsDirectional.all(12),
+                width: widget.bubbleWidth,
+                decoration: BoxDecoration(
+                  color: widget.bgColor,
+                  borderRadius: BorderRadiusDirectional.circular(8),
                 ),
-                // if (showBubbleAboveWidget)
-                //   Padding(
-                //     padding: EdgeInsetsDirectional.only(left: bubbleTipLeftPadding),
-                //     child: RotatedBox(
-                //       quarterTurns: 2,
-                //       child: CustomPaint(
-                //         painter: TrianglePainter(
-                //           strokeColor: widget.bgColor,
-                //           strokeWidth: 10,
-                //           paintingStyle: PaintingStyle.fill,
-                //         ),
-                //         child: SizedBox(
-                //           height: widget.bubbleTipHeight,
-                //           width: widget.bubbleTipWidth,
-                //         ),
-                //       ),
-                //     ),
-                //   ),
-              ],
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      widget.title,
+                      style: context.theme.appTextStyle.bodySmall.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    RichText(
+                      textAlign: TextAlign.start,
+                      text: TextSpan(
+                        style: context.theme.appTextStyle.bodySmall.copyWith(
+                          color: Colors.black87,
+                        ),
+                        children: widget.description,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ),
-        ],
-      );
+            // if (showBubbleAboveWidget)
+            //   Padding(
+            //     padding: EdgeInsetsDirectional.only(left: bubbleTipLeftPadding),
+            //     child: RotatedBox(
+            //       quarterTurns: 2,
+            //       child: CustomPaint(
+            //         painter: TrianglePainter(
+            //           strokeColor: widget.bgColor,
+            //           strokeWidth: 10,
+            //           paintingStyle: PaintingStyle.fill,
+            //         ),
+            //         child: SizedBox(
+            //           height: widget.bubbleTipHeight,
+            //           width: widget.bubbleTipWidth,
+            //         ),
+            //       ),
+            //     ),
+            //   ),
+          ],
+        ),
+      ),
+    ],
+  );
 
   @override
   void dispose() {
@@ -281,10 +301,11 @@ class TrianglePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    Paint paint = Paint()
-      ..color = strokeColor
-      ..strokeWidth = strokeWidth
-      ..style = paintingStyle;
+    Paint paint =
+        Paint()
+          ..color = strokeColor
+          ..strokeWidth = strokeWidth
+          ..style = paintingStyle;
 
     canvas.drawPath(getTrianglePath(size.width, size.height), paint);
   }

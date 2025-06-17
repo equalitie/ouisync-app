@@ -8,8 +8,9 @@ import 'utils.dart';
 
 class RepoImportCubit extends Cubit<ShareTokenResult?> with CubitActions {
   RepoImportCubit({required this.reposCubit}) : super(null) {
-    tokenController
-        .addListener(() => unawaited(setToken(tokenController.text)));
+    tokenController.addListener(
+      () => unawaited(setToken(tokenController.text)),
+    );
   }
 
   final ReposCubit reposCubit;

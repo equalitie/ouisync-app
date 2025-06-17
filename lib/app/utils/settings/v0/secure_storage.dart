@@ -10,12 +10,17 @@ class SecureStorage with AppLogger {
   SecureStorage({required this.databaseId});
 
   Future<String?> saveOrUpdatePassword({required String value}) async {
-    final result =
-        await FlutterSecure.writeValue(databaseId: databaseId, password: value);
+    final result = await FlutterSecure.writeValue(
+      databaseId: databaseId,
+      password: value,
+    );
 
     if (result.isFailure) {
-      loggy.error('Saving repository password to flutter_secure_storage failed',
-          result.failure.exception, result.failure.stackTrace);
+      loggy.error(
+        'Saving repository password to flutter_secure_storage failed',
+        result.failure.exception,
+        result.failure.stackTrace,
+      );
 
       return null;
     }
@@ -73,7 +78,9 @@ class SecureStorage with AppLogger {
     }
 
     final value = await _readLegacyBiometricStorage(
-        databaseId: databaseId, authMode: authMode);
+      databaseId: databaseId,
+      authMode: authMode,
+    );
 
     if (value == null) {
       return null;
@@ -88,8 +95,11 @@ class SecureStorage with AppLogger {
     final result = await FlutterSecure.deleteValue(databaseId: databaseId);
 
     if (result.isFailure) {
-      loggy.error('Deleting repository password from secure storage failed',
-          result.failure.exception, result.failure.stackTrace);
+      loggy.error(
+        'Deleting repository password from secure storage failed',
+        result.failure.exception,
+        result.failure.stackTrace,
+      );
 
       return false;
     }
@@ -111,7 +121,9 @@ class SecureStorage with AppLogger {
   }
 
   Future<String?> _readFlutterSecureStorage(
-      DatabaseId databaseId, AuthMode authMode) async {
+    DatabaseId databaseId,
+    AuthMode authMode,
+  ) async {
     if (PlatformValues.isMobileDevice &&
         [AuthMode.version1, AuthMode.version2].contains(authMode)) {
       final authorized = await _validateBiometrics();
@@ -123,9 +135,10 @@ class SecureStorage with AppLogger {
     final result = await FlutterSecure.readValue(databaseId: databaseId);
     if (result.isFailure) {
       loggy.error(
-          'Getting repository password from flutter_secure_storage failed',
-          result.failure.exception,
-          result.failure.stackTrace);
+        'Getting repository password from flutter_secure_storage failed',
+        result.failure.exception,
+        result.failure.stackTrace,
+      );
 
       return null;
     }
@@ -133,14 +146,21 @@ class SecureStorage with AppLogger {
     return result.success;
   }
 
-  Future<String?> _readLegacyBiometricStorage(
-      {required DatabaseId databaseId, required AuthMode authMode}) async {
+  Future<String?> _readLegacyBiometricStorage({
+    required DatabaseId databaseId,
+    required AuthMode authMode,
+  }) async {
     final result = await BiometricSecure.getRepositoryPassword(
-        databaseId: databaseId, authMode: authMode);
+      databaseId: databaseId,
+      authMode: authMode,
+    );
 
     if (result.isFailure) {
-      loggy.error('Getting repository password from biometric_storage failed',
-          result.failure.exception, result.failure.stackTrace);
+      loggy.error(
+        'Getting repository password from biometric_storage failed',
+        result.failure.exception,
+        result.failure.stackTrace,
+      );
 
       return null;
     }
@@ -149,9 +169,14 @@ class SecureStorage with AppLogger {
   }
 
   Future<void> _migrateToSecureAuthMode(
-      DatabaseId databaseId, String password, AuthMode authMode) async {
+    DatabaseId databaseId,
+    String password,
+    AuthMode authMode,
+  ) async {
     final result = await FlutterSecure.writeValue(
-        databaseId: databaseId, password: password);
+      databaseId: databaseId,
+      password: password,
+    );
 
     if (result.isFailure) {
       loggy.error('', result.failure.exception, result.failure.stackTrace);
@@ -159,19 +184,22 @@ class SecureStorage with AppLogger {
     }
 
     final deleteOldResult = await BiometricSecure.deleteRepositoryPassword(
-        databaseId: databaseId,
-        authMode: authMode,
-        authenticationRequired: false);
+      databaseId: databaseId,
+      authMode: authMode,
+      authenticationRequired: false,
+    );
 
     if (deleteOldResult.isFailure) {
       loggy.error(
-          'Adding repository to latest storage was successful, but removal from legacy secure storage failed: It was ${authMode.name}',
-          deleteOldResult.failure.exception,
-          deleteOldResult.failure.stackTrace);
+        'Adding repository to latest storage was successful, but removal from legacy secure storage failed: It was ${authMode.name}',
+        deleteOldResult.failure.exception,
+        deleteOldResult.failure.stackTrace,
+      );
     }
 
     loggy.info(
-        'Migrating repository in legacy secure storage to latest storage was successful: It was ${authMode.name}');
+      'Migrating repository in legacy secure storage to latest storage was successful: It was ${authMode.name}',
+    );
   }
 }
 

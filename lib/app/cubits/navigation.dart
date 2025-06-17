@@ -8,10 +8,7 @@ class NavigationState {
   final RepoLocation? repoLocation;
   final String path;
 
-  NavigationState({
-    required this.repoLocation,
-    required this.path,
-  });
+  NavigationState({required this.repoLocation, required this.path});
 }
 
 class NavigationCubit extends Cubit<NavigationState>
@@ -19,8 +16,5 @@ class NavigationCubit extends Cubit<NavigationState>
   NavigationCubit() : super(NavigationState(repoLocation: null, path: ''));
 
   void current(RepoLocation repoLocation, String path) =>
-      emitUnlessClosed(NavigationState(
-        repoLocation: repoLocation,
-        path: path,
-      ));
+      emitUnlessClosed(NavigationState(repoLocation: repoLocation, path: path));
 }

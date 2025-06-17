@@ -14,9 +14,7 @@ class PeerSetCubit extends Cubit<PeerSet> with CubitActions, AppLogger {
   final Session _session;
   StreamSubscription<void>? _subscription;
 
-  PeerSetCubit(Session session)
-      : _session = session,
-        super(const PeerSet([])) {
+  PeerSetCubit(Session session) : _session = session, super(const PeerSet([])) {
     unawaited(_init());
   }
 
@@ -29,12 +27,14 @@ class PeerSetCubit extends Cubit<PeerSet> with CubitActions, AppLogger {
     await _subscription?.cancel();
 
     if (period != null) {
-      _subscription =
-          Stream.periodic(period).asyncMapSample((_) => refresh()).listen(null);
+      _subscription = Stream.periodic(
+        period,
+      ).asyncMapSample((_) => refresh()).listen(null);
       loggy.debug('peer set auto refresh enabled (period: $period)');
     } else {
-      _subscription =
-          _session.networkEvents.asyncMapSample((_) => refresh()).listen(null);
+      _subscription = _session.networkEvents
+          .asyncMapSample((_) => refresh())
+          .listen(null);
       loggy.debug('peer set auto refresh disabled');
     }
   }
@@ -77,14 +77,17 @@ class PeerSet extends Equatable {
   }
 
   /// Number of connected peers
-  int get numConnected => peers
-      .map((peer) => switch (peer.state) {
-            PeerStateActive(id: final id) => id,
-            _ => null,
-          })
-      .nonNulls
-      .toSet()
-      .length;
+  int get numConnected =>
+      peers
+          .map(
+            (peer) => switch (peer.state) {
+              PeerStateActive(id: final id) => id,
+              _ => null,
+            },
+          )
+          .nonNulls
+          .toSet()
+          .length;
 
   @override
   List<Object> get props => [peers];

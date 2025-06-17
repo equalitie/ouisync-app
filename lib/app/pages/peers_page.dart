@@ -23,8 +23,9 @@ class PeersPage extends StatefulWidget {
 }
 
 class _PeersPageState extends State<PeersPage> {
-  Stream<Stats> get _networkStatsStream => Stream.periodic(Duration(seconds: 1))
-      .asyncMapSample((_) => widget.session.getNetworkStats());
+  Stream<Stats> get _networkStatsStream => Stream.periodic(
+    Duration(seconds: 1),
+  ).asyncMapSample((_) => widget.session.getNetworkStats());
 
   @override
   void initState() {
@@ -40,39 +41,41 @@ class _PeersPageState extends State<PeersPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: DirectionalAppBar(
-          title: Row(
-            children: [
-              Text(S.current.labelPeers),
-              Spacer(),
-              LiveThroughputDisplay(
-                _networkStatsStream,
-                size: Theme.of(context).textTheme.labelSmall?.fontSize,
-                orientation: Orientation.portrait,
-              ),
-            ],
+    appBar: DirectionalAppBar(
+      title: Row(
+        children: [
+          Text(S.current.labelPeers),
+          Spacer(),
+          LiveThroughputDisplay(
+            _networkStatsStream,
+            size: Theme.of(context).textTheme.labelSmall?.fontSize,
+            orientation: Orientation.portrait,
           ),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.manage_accounts),
-              tooltip: 'User provided peers',
-              onPressed: () => Navigator.push(
+        ],
+      ),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.manage_accounts),
+          tooltip: 'User provided peers',
+          onPressed:
+              () => Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => UserProvidedPeersPage(widget.session),
                 ),
               ),
-            )
-          ],
         ),
-        body: BlocBuilder<PeerSetCubit, PeerSet>(
-          bloc: widget.cubit,
-          builder: (context, state) => ListView(
+      ],
+    ),
+    body: BlocBuilder<PeerSetCubit, PeerSet>(
+      bloc: widget.cubit,
+      builder:
+          (context, state) => ListView(
             padding: Dimensions.paddingContents,
             children: _buildItems(context, state),
           ),
-        ),
-      );
+    ),
+  );
 
   List<Widget> _buildItems(BuildContext context, PeerSet peers) {
     var connected = false;
@@ -105,86 +108,77 @@ class _PeersPageState extends State<PeersPage> {
   }
 
   Widget _buildHeader(BuildContext context, String title) => Container(
-        padding: EdgeInsetsDirectional.symmetric(
-          horizontal: 4.0,
-          vertical: 8.0,
-        ),
-        child: Text(title, style: context.theme.appTextStyle.titleLarge),
-      );
+    padding: EdgeInsetsDirectional.symmetric(horizontal: 4.0, vertical: 8.0),
+    child: Text(title, style: context.theme.appTextStyle.titleLarge),
+  );
 
-  Widget _buildPeerHeader(BuildContext context, int index, String runtimeId) =>
-      Container(
-        padding: EdgeInsetsDirectional.symmetric(
-          horizontal: 4.0,
-          vertical: 4.0,
+  Widget _buildPeerHeader(
+    BuildContext context,
+    int index,
+    String runtimeId,
+  ) => Container(
+    padding: EdgeInsetsDirectional.symmetric(horizontal: 4.0, vertical: 4.0),
+    decoration: BoxDecoration(
+      border: BorderDirectional(
+        top: BorderSide(color: context.theme.dividerColor.withAlpha(128)),
+      ),
+    ),
+    child: Row(
+      children: [
+        Expanded(
+          flex: 0,
+          child: Text('#$index', style: context.theme.appTextStyle.titleMedium),
         ),
-        decoration: BoxDecoration(
-          border: BorderDirectional(
-            top: BorderSide(
-              color: context.theme.dividerColor.withAlpha(128),
-            ),
+        Expanded(
+          flex: 15,
+          child: Row(
+            children: [
+              Icon(Icons.person, size: Dimensions.sizeIconMicro),
+              Expanded(child: LongText(runtimeId)),
+            ],
           ),
         ),
-        child: Row(
-          children: [
-            Expanded(
-              flex: 0,
-              child: Text('#$index',
-                  style: context.theme.appTextStyle.titleMedium),
-            ),
-            Expanded(
-              flex: 15,
-              child: Row(children: [
-                Icon(Icons.person, size: Dimensions.sizeIconMicro),
-                Expanded(
-                  child: LongText(
-                    runtimeId,
-                  ),
-                )
-              ]),
-            ),
-          ],
-        ),
-      );
+      ],
+    ),
+  );
 
   Widget _buildPeer(BuildContext context, PeerInfo peer) => Container(
-        padding: EdgeInsetsDirectional.all(4.0),
-        child: Row(
-          children: [
-            Spacer(flex: 1),
-            Expanded(
-              flex: 15,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  LongText(peer.addr),
-                  _buildDetails(context, peer),
-                ],
-              ),
-            ),
-          ],
+    padding: EdgeInsetsDirectional.all(4.0),
+    child: Row(
+      children: [
+        Spacer(flex: 1),
+        Expanded(
+          flex: 15,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [LongText(peer.addr), _buildDetails(context, peer)],
+          ),
         ),
-      );
+      ],
+    ),
+  );
 
   Widget _buildDetails(BuildContext context, PeerInfo peer) => Row(
-        children: [
-          _buildBadge(
-            context,
-            Row(
-              children: [
-                Icon(peer.source == PeerSource.listener
-                    ? Icons.arrow_downward
-                    : Icons.arrow_upward),
-                Text(_formatPeerSource(peer.source)),
-              ],
+    children: [
+      _buildBadge(
+        context,
+        Row(
+          children: [
+            Icon(
+              peer.source == PeerSource.listener
+                  ? Icons.arrow_downward
+                  : Icons.arrow_upward,
             ),
-          ),
-          if (peer.state is! PeerStateActive)
-            _buildBadge(context, Text(_formatPeerState(peer.state))),
-          Spacer(),
-          ThroughputDisplay(peer.stats, size: _contentSize),
-        ],
-      );
+            Text(_formatPeerSource(peer.source)),
+          ],
+        ),
+      ),
+      if (peer.state is! PeerStateActive)
+        _buildBadge(context, Text(_formatPeerState(peer.state))),
+      Spacer(),
+      ThroughputDisplay(peer.stats, size: _contentSize),
+    ],
+  );
 
   Widget _buildBadge(BuildContext context, Widget child) {
     final theme = Theme.of(context);
@@ -212,29 +206,28 @@ class _PeersPageState extends State<PeersPage> {
     Color? bgColor,
     double? contentSize,
     required Widget child,
-  }) =>
-      IconTheme(
-        data: IconThemeData(color: fgColor, size: contentSize),
-        child: DefaultTextStyle(
-          style: TextStyle(color: fgColor, fontSize: contentSize),
-          child: child,
-        ),
-      );
+  }) => IconTheme(
+    data: IconThemeData(color: fgColor, size: contentSize),
+    child: DefaultTextStyle(
+      style: TextStyle(color: fgColor, fontSize: contentSize),
+      child: child,
+    ),
+  );
 
   // TODO: i18n this
   String _formatPeerState(PeerState state) => switch (state) {
-        PeerStateKnown() => 'Known',
-        PeerStateConnecting() => 'Connecting',
-        PeerStateHandshaking() => 'Handshaking',
-        PeerStateActive() => 'Active',
-      };
+    PeerStateKnown() => 'Known',
+    PeerStateConnecting() => 'Connecting',
+    PeerStateHandshaking() => 'Handshaking',
+    PeerStateActive() => 'Active',
+  };
 
   // TODO: i18n this
   String _formatPeerSource(PeerSource source) => switch (source) {
-        PeerSource.dht => 'DHT',
-        PeerSource.listener => 'Listener',
-        PeerSource.localDiscovery => 'Local discovery',
-        PeerSource.peerExchange => 'Peer exchange',
-        PeerSource.userProvided => 'User provided',
-      };
+    PeerSource.dht => 'DHT',
+    PeerSource.listener => 'Listener',
+    PeerSource.localDiscovery => 'Local discovery',
+    PeerSource.peerExchange => 'Peer exchange',
+    PeerSource.userProvided => 'User provided',
+  };
 }

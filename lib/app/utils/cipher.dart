@@ -15,10 +15,7 @@ Future<Uint8List> encrypt(SecretKey secretKey, Uint8List plainData) async {
   return secretBox.concatenation();
 }
 
-Future<Uint8List?> decrypt(
-  SecretKey secretKey,
-  Uint8List encryptedData,
-) async {
+Future<Uint8List?> decrypt(SecretKey secretKey, Uint8List encryptedData) async {
   final nonceLength = _algorithm.nonceLength;
   final macLength = _algorithm.macAlgorithm.macLength;
 

@@ -13,8 +13,9 @@ class FileIconAnimated extends StatelessWidget with AppLogger {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-        child: _getWidgetForState(context),
-        onTap: () => onFileIconTap(context));
+      child: _getWidgetForState(context),
+      onTap: () => onFileIconTap(context),
+    );
   }
 
   void onFileIconTap(BuildContext context) {
@@ -29,25 +30,31 @@ class FileIconAnimated extends StatelessWidget with AppLogger {
     final job = _downloadJob;
 
     if (job == null) {
-      return const Icon(Icons.insert_drive_file_outlined,
-          size: Dimensions.sizeIconAverage);
+      return const Icon(
+        Icons.insert_drive_file_outlined,
+        size: Dimensions.sizeIconAverage,
+      );
     }
 
     return BlocBuilder<Job, JobState>(
-        bloc: job,
-        builder: (context, state) {
-          final ratio = state.soFar / state.total;
-          final percentage = (ratio * 100.0).round();
+      bloc: job,
+      builder: (context, state) {
+        final ratio = state.soFar / state.total;
+        final percentage = (ratio * 100.0).round();
 
-          return CircularPercentIndicator(
-              radius: Dimensions.sizeIconMicro,
-              animation: true,
-              animateFromLastPercent: true,
-              percent: ratio,
-              progressColor: Theme.of(context).colorScheme.secondary,
-              center: Text('$percentage%',
-                  style: context.theme.appTextStyle.bodyMicro));
-        });
+        return CircularPercentIndicator(
+          radius: Dimensions.sizeIconMicro,
+          animation: true,
+          animateFromLastPercent: true,
+          percent: ratio,
+          progressColor: Theme.of(context).colorScheme.secondary,
+          center: Text(
+            '$percentage%',
+            style: context.theme.appTextStyle.bodyMicro,
+          ),
+        );
+      },
+    );
 
     // TODO: This code used to show a different icon once the download finished.
     //   Also after the download was done, clicking on the icon would show the

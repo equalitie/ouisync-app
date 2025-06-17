@@ -7,11 +7,7 @@ import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 /// Widget for receiving media files via drag-and-drop (on desktop) or share intents (on mobile).
 class MediaReceiver extends StatefulWidget {
-  MediaReceiver({
-    required this.child,
-    required this.controller,
-    super.key,
-  });
+  MediaReceiver({required this.child, required this.controller, super.key});
 
   final Widget child;
   final StreamController<List<SharedMediaFile>> controller;
@@ -28,14 +24,14 @@ class _MediaReceiverState extends State<MediaReceiver> {
     super.initState();
 
     if (Platform.isAndroid || Platform.isIOS) {
-      subscription = ReceiveSharingIntent.instance
-          .getMediaStream()
-          .listen(onMediaReceived);
+      subscription = ReceiveSharingIntent.instance.getMediaStream().listen(
+        onMediaReceived,
+      );
 
       // For sharing media coming from outside the app while the app is closed
-      unawaited(ReceiveSharingIntent.instance
-          .getInitialMedia()
-          .then(onMediaReceived));
+      unawaited(
+        ReceiveSharingIntent.instance.getInitialMedia().then(onMediaReceived),
+      );
     }
   }
 
@@ -47,16 +43,20 @@ class _MediaReceiverState extends State<MediaReceiver> {
 
   @override
   Widget build(BuildContext context) => DropTarget(
-        onDragDone: (detail) => onMediaReceived(
+    onDragDone:
+        (detail) => onMediaReceived(
           detail.files
-              .map((file) => SharedMediaFile(
+              .map(
+                (file) => SharedMediaFile(
                   path: file.path,
                   type: SharedMediaType.file,
-                  mimeType: file.mimeType))
+                  mimeType: file.mimeType,
+                ),
+              )
               .toList(),
         ),
-        child: widget.child,
-      );
+    child: widget.child,
+  );
 
   void onMediaReceived(List<SharedMediaFile> media) {
     if (media.isEmpty) {

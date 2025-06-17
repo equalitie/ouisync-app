@@ -19,35 +19,36 @@ class _DeleteRepoDialogState extends State<DeleteRepoDialog> {
 
   @override
   Widget build(BuildContext context) => Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.max,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Fields.constrainedText(
-            '"${widget.repoName}"',
-            flex: 0,
-            style: context.theme.appTextStyle.bodyMedium
-                .copyWith(fontWeight: FontWeight.w400),
-          ),
-          Text(
-            S.current.messageConfirmRepositoryDeletion,
-            style: context.theme.appTextStyle.bodyMedium,
-          ),
-          Fields.dialogActions(buttons: buildActions(context)),
-        ],
-      );
+    mainAxisAlignment: MainAxisAlignment.center,
+    mainAxisSize: MainAxisSize.max,
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      Fields.constrainedText(
+        '"${widget.repoName}"',
+        flex: 0,
+        style: context.theme.appTextStyle.bodyMedium.copyWith(
+          fontWeight: FontWeight.w400,
+        ),
+      ),
+      Text(
+        S.current.messageConfirmRepositoryDeletion,
+        style: context.theme.appTextStyle.bodyMedium,
+      ),
+      Fields.dialogActions(buttons: buildActions(context)),
+    ],
+  );
 
   List<Widget> buildActions(BuildContext context) => [
-        NegativeButton(
-          text: S.current.actionCancelCapital,
-          onPressed: () async => await Navigator.of(context).maybePop(false),
-          buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
-        ),
-        PositiveButton(
-          text: S.current.actionDeleteCapital,
-          onPressed: () async => await Navigator.of(context).maybePop(true),
-          buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
-          isDangerButton: true,
-        )
-      ];
+    NegativeButton(
+      text: S.current.actionCancelCapital,
+      onPressed: () async => await Navigator.of(context).maybePop(false),
+      buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
+    ),
+    PositiveButton(
+      text: S.current.actionDeleteCapital,
+      onPressed: () async => await Navigator.of(context).maybePop(true),
+      buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
+      isDangerButton: true,
+    ),
+  ];
 }

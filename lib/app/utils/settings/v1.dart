@@ -75,7 +75,7 @@ class SettingsRoot {
       _highestSeenProtocolNumberKey: highestSeenProtocolNumber,
       _defaultRepoKey: defaultRepo?.path,
       _reposKey: <String, Object?>{
-        for (var kv in repos.entries) kv.key.toString(): kv.value.path
+        for (var kv in repos.entries) kv.key.toString(): kv.value.path,
       },
       _defaultRepositoriesDirVersionKey: defaultRepositoriesDirVersion,
     };
@@ -97,7 +97,7 @@ class SettingsRoot {
 
     final repos = {
       for (var kv in data[_reposKey]!.entries)
-        DatabaseId(kv.key): RepoLocation.fromDbPath(kv.value)
+        DatabaseId(kv.key): RepoLocation.fromDbPath(kv.value),
     };
 
     String? defaultRepo = data[_defaultRepoKey];
@@ -127,12 +127,12 @@ class Settings with AppLogger {
 
   Future<void> _storeRoot() async {
     await _prefs.setString(
-        atomicSharedPrefsSettingsKey, json.encode(_root.toJson()));
+      atomicSharedPrefsSettingsKey,
+      json.encode(_root.toJson()),
+    );
   }
 
-  static Future<Settings> init(
-    MasterKey masterKey,
-  ) async {
+  static Future<Settings> init(MasterKey masterKey) async {
     final prefs = await SharedPreferences.getInstance();
 
     final json = prefs.getString(atomicSharedPrefsSettingsKey);
@@ -165,7 +165,7 @@ class Settings with AppLogger {
         s0.getHighestSeenProtocolNumber() ?? _root.highestSeenProtocolNumber;
     _root.defaultRepo =
         s0.getDefaultRepo()?.let((name) => s0.repoLocation(name)) ??
-            _root.defaultRepo;
+        _root.defaultRepo;
 
     for (final repo in s0.repos()) {
       final databaseId = DatabaseId(repo.databaseId);
@@ -285,13 +285,16 @@ class Settings with AppLogger {
         // New repos are created in the new directory even on android though.
         final oldDirs = [
           io.Directory(
-              join((await getApplicationDocumentsDirectory()).path, 'ouisync')),
+            join((await getApplicationDocumentsDirectory()).path, 'ouisync'),
+          ),
           io.Directory(
-              join((await getApplicationDocumentsDirectory()).path, 'Ouisync')),
+            join((await getApplicationDocumentsDirectory()).path, 'Ouisync'),
+          ),
         ];
 
         final newDir = await Native.getBaseDir().then(
-            (baseDir) => io.Directory(join(baseDir.path, 'repositories')));
+          (baseDir) => io.Directory(join(baseDir.path, 'repositories')),
+        );
 
         for (final oldDir in oldDirs) {
           if (!(await oldDir.exists())) {
@@ -314,19 +317,25 @@ class Settings with AppLogger {
             }
           }
 
-          final replacements = Map.fromEntries(statuses
-              .where((status) => status.exception == null)
-              .map((status) => MapEntry(
+          final replacements = Map.fromEntries(
+            statuses
+                .where((status) => status.exception == null)
+                .map(
+                  (status) => MapEntry(
                     RepoLocation.fromDbPath(status.oldPath),
                     RepoLocation.fromDbPath(status.newPath),
-                  )));
+                  ),
+                ),
+          );
 
           // Update locations
           _root.repos.updateAll(
-              (databaseId, location) => replacements[location] ?? location);
+            (databaseId, location) => replacements[location] ?? location,
+          );
 
-          _root.defaultRepo = _root.defaultRepo
-              ?.let((location) => replacements[location] ?? location);
+          _root.defaultRepo = _root.defaultRepo?.let(
+            (location) => replacements[location] ?? location,
+          );
         }
 
         _root.defaultRepositoriesDirVersion = 1;
@@ -336,7 +345,8 @@ class Settings with AppLogger {
         return;
       default:
         loggy.error(
-            'invalid defaultRepositoriesDirVersion: expected 0 or 1, was ${_root.defaultRepositoriesDirVersion}');
+          'invalid defaultRepositoriesDirVersion: expected 0 or 1, was ${_root.defaultRepositoriesDirVersion}',
+        );
         return;
     }
   }
@@ -390,15 +400,13 @@ class Settings with AppLogger {
     await _storeRoot();
   }
 
-  DatabaseId? findRepoByLocation(RepoLocation location) => _root.repos.entries
-      .where((entry) => entry.value == location)
-      .map((entry) => entry.key)
-      .firstOrNull;
+  DatabaseId? findRepoByLocation(RepoLocation location) =>
+      _root.repos.entries
+          .where((entry) => entry.value == location)
+          .map((entry) => entry.key)
+          .firstOrNull;
 
-  Future<void> renameRepo(
-    DatabaseId repoId,
-    RepoLocation newLocation,
-  ) async {
+  Future<void> renameRepo(DatabaseId repoId, RepoLocation newLocation) async {
     if (findRepoByLocation(newLocation) != null) {
       throw 'Failed to rename repo: "${newLocation.path}" already exists';
     }
@@ -444,15 +452,15 @@ class Settings with AppLogger {
 
   // Only for use in migrations!
   MigrationContext getMigrationContext() => MigrationContext(
-        masterKey: masterKey,
-        acceptedEqualitieValues: _root.acceptedEqualitieValues,
-        showOnboarding: _root.showOnboarding,
-        highestSeenProtocolNumber: _root.highestSeenProtocolNumber,
-        defaultRepo: _root.defaultRepo,
-        repos: Map.from(_root.repos),
-        defaultRepositoriesDirVersion: _root.defaultRepositoriesDirVersion,
-        sharedPreferences: _prefs,
-      );
+    masterKey: masterKey,
+    acceptedEqualitieValues: _root.acceptedEqualitieValues,
+    showOnboarding: _root.showOnboarding,
+    highestSeenProtocolNumber: _root.highestSeenProtocolNumber,
+    defaultRepo: _root.defaultRepo,
+    repos: Map.from(_root.repos),
+    defaultRepositoriesDirVersion: _root.defaultRepositoriesDirVersion,
+    sharedPreferences: _prefs,
+  );
 }
 
 class InvalidSettingsVersion implements Exception {

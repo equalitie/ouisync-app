@@ -24,9 +24,10 @@ class EntryInfoTable extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Fields.iconLabel(
-              icon: Icons.info_outline_rounded,
-              text: S.current.iconInformation,
-              style: context.theme.appTextStyle.titleMedium),
+            icon: Icons.info_outline_rounded,
+            text: S.current.iconInformation,
+            style: context.theme.appTextStyle.titleMedium,
+          ),
           _getInfoTable(entryInfo),
         ],
       ),
@@ -35,37 +36,33 @@ class EntryInfoTable extends StatelessWidget {
 
   Table _getInfoTable(Map<String, String> entryInfo) {
     return Table(
-      columnWidths: {
-        0: IntrinsicColumnWidth(),
-        2: IntrinsicColumnWidth(),
-      },
-      children: entryInfo.entries
-          .map((info) => _getInfoItem(info.key, info.value))
-          .toList(),
+      columnWidths: {0: IntrinsicColumnWidth(), 2: IntrinsicColumnWidth()},
+      children:
+          entryInfo.entries
+              .map((info) => _getInfoItem(info.key, info.value))
+              .toList(),
     );
   }
 
   TableRow _getInfoItem(String label, String info) => TableRow(
-        children: [
-          Padding(
-              padding: EdgeInsetsDirectional.only(
-                end: spacing,
-                top: verticalPadding,
-                bottom: verticalPadding,
-              ),
-              child: Text(label)),
-          Container(
-            padding: EdgeInsets.only(
-              top: verticalPadding,
-              bottom: verticalPadding,
-            ),
-            child: Text(
-              info,
-              maxLines: 4,
-              softWrap: true,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
-      );
+    children: [
+      Padding(
+        padding: EdgeInsetsDirectional.only(
+          end: spacing,
+          top: verticalPadding,
+          bottom: verticalPadding,
+        ),
+        child: Text(label),
+      ),
+      Container(
+        padding: EdgeInsets.only(top: verticalPadding, bottom: verticalPadding),
+        child: Text(
+          info,
+          maxLines: 4,
+          softWrap: true,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
+    ],
+  );
 }

@@ -9,12 +9,8 @@ class LongText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Tooltip(
-        message: text,
-        triggerMode: TooltipTriggerMode.tap,
-        child: Text(
-          text,
-          overflow: TextOverflow.ellipsis,
-          style: style,
-        ),
-      );
+    message: text,
+    triggerMode: TooltipTriggerMode.tap,
+    child: Text(text, overflow: TextOverflow.ellipsis, style: style),
+  );
 }

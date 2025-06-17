@@ -68,21 +68,21 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: DirectionalAppBar(title: Text(S.current.titleSettings)),
-        body: AppSettingsContainer(
-          widget.session,
-          localeCubit: widget.localeCubit,
-          mount: widget.mount,
-          panicCounter: widget.panicCounter,
-          powerControl: widget.powerControl,
-          reposCubit: widget.reposCubit,
-          connectivityInfo: connectivityInfo,
-          natDetection: natDetection,
-          peerSet: peerSet,
-          checkForDokan: widget.checkForDokan,
-          launchAtStartup: launchAtStartup,
-          upgradeExists: widget.upgradeExists,
-          dirs: widget.dirs,
-        ),
-      );
+    appBar: DirectionalAppBar(title: Text(S.current.titleSettings)),
+    body: AppSettingsContainer(
+      widget.session,
+      localeCubit: widget.localeCubit,
+      mount: widget.mount,
+      panicCounter: widget.panicCounter,
+      powerControl: widget.powerControl,
+      reposCubit: widget.reposCubit,
+      connectivityInfo: connectivityInfo,
+      natDetection: natDetection,
+      peerSet: peerSet,
+      checkForDokan: widget.checkForDokan,
+      launchAtStartup: launchAtStartup,
+      upgradeExists: widget.upgradeExists,
+      dirs: widget.dirs,
+    ),
+  );
 }

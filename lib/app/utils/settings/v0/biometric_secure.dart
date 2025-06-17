@@ -22,9 +22,12 @@ class BiometricSecure {
   BiometricSecure._();
 
   static Future<BiometricStorageFile> _getStorageFileForKey(
-      String key, bool authenticationRequired) async {
-    final initOptions =
-        StorageFileInitOptions(authenticationRequired: authenticationRequired);
+    String key,
+    bool authenticationRequired,
+  ) async {
+    final initOptions = StorageFileInitOptions(
+      authenticationRequired: authenticationRequired,
+    );
 
     return _storage.getStorage(key, options: initOptions);
   }
@@ -45,16 +48,19 @@ class BiometricSecure {
     return false;
   }
 
-  static Future<Result<Void, Error>> addRepositoryPassword(
-      {required DatabaseId databaseId,
-      required String password,
-      required AuthMode authMode}) async {
+  static Future<Result<Void, Error>> addRepositoryPassword({
+    required DatabaseId databaseId,
+    required String password,
+    required AuthMode authMode,
+  }) async {
     final key = _getKey(databaseId, authMode);
     final authenticationRequired = _isAuthenticationRequired(authMode);
 
     try {
-      final storageFile =
-          await _getStorageFileForKey(key, authenticationRequired);
+      final storageFile = await _getStorageFileForKey(
+        key,
+        authenticationRequired,
+      );
 
       await storageFile.write(password);
       return Success(Void());
@@ -63,14 +69,18 @@ class BiometricSecure {
     }
   }
 
-  static Future<Result<String?, Error>> getRepositoryPassword(
-      {required DatabaseId databaseId, required AuthMode authMode}) async {
+  static Future<Result<String?, Error>> getRepositoryPassword({
+    required DatabaseId databaseId,
+    required AuthMode authMode,
+  }) async {
     final key = _getKey(databaseId, authMode);
     final authenticationRequired = _isAuthenticationRequired(authMode);
 
     try {
-      final storageFile =
-          await _getStorageFileForKey(key, authenticationRequired);
+      final storageFile = await _getStorageFileForKey(
+        key,
+        authenticationRequired,
+      );
 
       return Success(await storageFile.read());
     } on Exception catch (e, st) {
@@ -78,14 +88,17 @@ class BiometricSecure {
     }
   }
 
-  static Future<Result<Void, Error>> deleteRepositoryPassword(
-      {required DatabaseId databaseId,
-      required AuthMode authMode,
-      required bool authenticationRequired}) async {
+  static Future<Result<Void, Error>> deleteRepositoryPassword({
+    required DatabaseId databaseId,
+    required AuthMode authMode,
+    required bool authenticationRequired,
+  }) async {
     final key = _getKey(databaseId, authMode);
     try {
-      final storageFile =
-          await _getStorageFileForKey(key, authenticationRequired);
+      final storageFile = await _getStorageFileForKey(
+        key,
+        authenticationRequired,
+      );
 
       await storageFile.delete();
       return Success(Void());

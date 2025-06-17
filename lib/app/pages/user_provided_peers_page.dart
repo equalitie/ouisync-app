@@ -21,41 +21,42 @@ class UserProvidedPeersPage extends StatefulWidget {
 
 class _UserProvidedPeersState extends State<UserProvidedPeersPage> {
   _UserProvidedPeersState(Session session)
-      : _cubit = UserProvidedPeersCubit(session);
+    : _cubit = UserProvidedPeersCubit(session);
 
   final UserProvidedPeersCubit _cubit;
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: DirectionalAppBar(
-          title: Text(S.current.titleUserProvidedPeers),
-        ),
-        body: BlocBuilder<UserProvidedPeersCubit, List<String>>(
-          bloc: _cubit,
-          builder: (context, state) => ListView(
+    appBar: DirectionalAppBar(title: Text(S.current.titleUserProvidedPeers)),
+    body: BlocBuilder<UserProvidedPeersCubit, List<String>>(
+      bloc: _cubit,
+      builder:
+          (context, state) => ListView(
             padding: Dimensions.paddingContents,
             children: _buildPeers(context, state),
           ),
-        ),
-        floatingActionButton: FloatingActionButton(
-          child: const Icon(Icons.add_rounded),
-          onPressed: () => _addPeer(context),
-        ),
-      );
+    ),
+    floatingActionButton: FloatingActionButton(
+      child: const Icon(Icons.add_rounded),
+      onPressed: () => _addPeer(context),
+    ),
+  );
 
   List<Widget> _buildPeers(BuildContext context, List<String> peers) =>
       peers.map((peer) => _buildPeer(context, peer)).toList();
 
   Widget _buildPeer(BuildContext context, String peer) => Padding(
-        padding: EdgeInsetsDirectional.all(4.0),
-        child: Row(children: [
-          Expanded(child: LongText(peer)),
-          IconButton(
-            icon: Icon(Icons.delete_outlined),
-            onPressed: () => _removePeer(context, peer),
-          ),
-        ]),
-      );
+    padding: EdgeInsetsDirectional.all(4.0),
+    child: Row(
+      children: [
+        Expanded(child: LongText(peer)),
+        IconButton(
+          icon: Icon(Icons.delete_outlined),
+          onPressed: () => _removePeer(context, peer),
+        ),
+      ],
+    ),
+  );
 
   Future<void> _addPeer(BuildContext context) async {
     final addr = await showDialog<String>(

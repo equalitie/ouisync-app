@@ -12,7 +12,7 @@ class PositiveButton extends StatelessWidget {
     this.isDangerButton = false,
     super.key,
   }) : buttonsAspectRatio =
-            buttonsAspectRatio ?? Dimensions.aspectRatioModalDialogButton;
+           buttonsAspectRatio ?? Dimensions.aspectRatioModalDialogButton;
 
   final String? text;
   final GestureTapCallback? onPressed;
@@ -23,39 +23,43 @@ class PositiveButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Expanded(
-          child: Row(
-        children: [
-          Expanded(
-              child: Align(
-                  alignment: AlignmentDirectional.bottomEnd,
-                  child: AspectRatio(
-                      aspectRatio: buttonsAspectRatio,
-                      child: Container(
-                        margin: Dimensions.marginDialogPositiveButton,
-                        child: RawMaterialButton(
-                            onPressed: onPressed,
-                            child: Text((text ?? '').toUpperCase()),
-                            constraints: buttonConstrains,
-                            elevation: Dimensions.elevationDialogAction,
-                            fillColor: _fillColorStatus(context),
-                            shape: const RoundedRectangleBorder(
-                                borderRadius: Dimensions
-                                    .borderRadiusDialogPositiveButton),
-                            textStyle: TextStyle(
-                                color: Theme.of(context)
-                                    .dialogTheme
-                                    .backgroundColor,
-                                fontWeight: FontWeight.w500),
-                            focusNode: focusNode),
-                      ))))
-        ],
-      ));
+    child: Row(
+      children: [
+        Expanded(
+          child: Align(
+            alignment: AlignmentDirectional.bottomEnd,
+            child: AspectRatio(
+              aspectRatio: buttonsAspectRatio,
+              child: Container(
+                margin: Dimensions.marginDialogPositiveButton,
+                child: RawMaterialButton(
+                  onPressed: onPressed,
+                  child: Text((text ?? '').toUpperCase()),
+                  constraints: buttonConstrains,
+                  elevation: Dimensions.elevationDialogAction,
+                  fillColor: _fillColorStatus(context),
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: Dimensions.borderRadiusDialogPositiveButton,
+                  ),
+                  textStyle: TextStyle(
+                    color: Theme.of(context).dialogTheme.backgroundColor,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  focusNode: focusNode,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
 
   Color _fillColorStatus(context) {
     return onPressed == null
         ? Colors.grey
         : isDangerButton
-            ? Theme.of(context).colorScheme.error
-            : Theme.of(context).colorScheme.primary;
+        ? Theme.of(context).colorScheme.error
+        : Theme.of(context).colorScheme.primary;
   }
 }

@@ -33,32 +33,32 @@ sealed class AuthMode {
   bool get isStored => localSecretMode.isSecuredWithBiometrics;
 
   LocalSecretMode get localSecretMode => switch (this) {
-        AuthModeBlindOrManual() => LocalSecretMode.manual,
-        AuthModeKeyStoredOnDevice(
-          keyOrigin: SecretKeyOrigin.random,
-          secureWithBiometrics: false
-        ) =>
-          LocalSecretMode.randomStored,
-        AuthModeKeyStoredOnDevice(
-          keyOrigin: SecretKeyOrigin.random,
-          secureWithBiometrics: true
-        ) =>
-          LocalSecretMode.randomSecuredWithBiometrics,
-        AuthModeKeyStoredOnDevice(
-          keyOrigin: SecretKeyOrigin.manual,
-          secureWithBiometrics: false
-        ) =>
-          LocalSecretMode.manualStored,
-        AuthModeKeyStoredOnDevice(
-          keyOrigin: SecretKeyOrigin.manual,
-          secureWithBiometrics: true
-        ) =>
-          LocalSecretMode.manualSecuredWithBiometrics,
-        AuthModePasswordStoredOnDevice(secureWithBiometrics: false) =>
-          LocalSecretMode.manualStored,
-        AuthModePasswordStoredOnDevice(secureWithBiometrics: true) =>
-          LocalSecretMode.manualSecuredWithBiometrics,
-      };
+    AuthModeBlindOrManual() => LocalSecretMode.manual,
+    AuthModeKeyStoredOnDevice(
+      keyOrigin: SecretKeyOrigin.random,
+      secureWithBiometrics: false,
+    ) =>
+      LocalSecretMode.randomStored,
+    AuthModeKeyStoredOnDevice(
+      keyOrigin: SecretKeyOrigin.random,
+      secureWithBiometrics: true,
+    ) =>
+      LocalSecretMode.randomSecuredWithBiometrics,
+    AuthModeKeyStoredOnDevice(
+      keyOrigin: SecretKeyOrigin.manual,
+      secureWithBiometrics: false,
+    ) =>
+      LocalSecretMode.manualStored,
+    AuthModeKeyStoredOnDevice(
+      keyOrigin: SecretKeyOrigin.manual,
+      secureWithBiometrics: true,
+    ) =>
+      LocalSecretMode.manualSecuredWithBiometrics,
+    AuthModePasswordStoredOnDevice(secureWithBiometrics: false) =>
+      LocalSecretMode.manualStored,
+    AuthModePasswordStoredOnDevice(secureWithBiometrics: true) =>
+      LocalSecretMode.manualSecuredWithBiometrics,
+  };
 
   EncryptedLocalSecret? get storedLocalSecret {
     switch (this) {
@@ -100,17 +100,16 @@ class AuthModePasswordStoredOnDevice extends AuthMode {
   AuthModePasswordStoredOnDevice copyWith({
     String? encryptedPassword,
     bool? secureWithBiometrics,
-  }) =>
-      AuthModePasswordStoredOnDevice(
-        encryptedPassword ?? this.encryptedPassword,
-        secureWithBiometrics ?? this.secureWithBiometrics,
-      );
+  }) => AuthModePasswordStoredOnDevice(
+    encryptedPassword ?? this.encryptedPassword,
+    secureWithBiometrics ?? this.secureWithBiometrics,
+  );
 
   @override
   Object? toJson() => {
-        _keys.encryptedPassword: encryptedPassword,
-        _keys.secureWithBiometrics: secureWithBiometrics,
-      };
+    _keys.encryptedPassword: encryptedPassword,
+    _keys.secureWithBiometrics: secureWithBiometrics,
+  };
 
   static AuthMode? fromJson(Object? data) {
     if (data is! Map) {
@@ -147,8 +146,9 @@ class AuthModeKeyStoredOnDevice extends AuthMode {
     required SecretKeyOrigin keyOrigin,
     required bool secureWithBiometrics,
   }) async {
-    final encryptedKey = base64
-        .encode(await masterKey.encrypt(Uint8List.fromList(plainKey.value)));
+    final encryptedKey = base64.encode(
+      await masterKey.encrypt(Uint8List.fromList(plainKey.value)),
+    );
 
     return AuthModeKeyStoredOnDevice(
       encryptedKey: encryptedKey,
@@ -161,19 +161,18 @@ class AuthModeKeyStoredOnDevice extends AuthMode {
     String? encryptedKey,
     SecretKeyOrigin? keyOrigin,
     bool? secureWithBiometrics,
-  }) =>
-      AuthModeKeyStoredOnDevice(
-        encryptedKey: encryptedKey ?? this.encryptedKey,
-        keyOrigin: keyOrigin ?? this.keyOrigin,
-        secureWithBiometrics: secureWithBiometrics ?? this.secureWithBiometrics,
-      );
+  }) => AuthModeKeyStoredOnDevice(
+    encryptedKey: encryptedKey ?? this.encryptedKey,
+    keyOrigin: keyOrigin ?? this.keyOrigin,
+    secureWithBiometrics: secureWithBiometrics ?? this.secureWithBiometrics,
+  );
 
   @override
   Object? toJson() => {
-        _keys.encryptedKey: encryptedKey,
-        _keys.keyOrigin: keyOrigin.toJson(),
-        _keys.secureWithBiometrics: secureWithBiometrics,
-      };
+    _keys.encryptedKey: encryptedKey,
+    _keys.keyOrigin: keyOrigin.toJson(),
+    _keys.secureWithBiometrics: secureWithBiometrics,
+  };
 
   static AuthMode? fromJson(Object? data) {
     if (data is! Map) {
@@ -207,8 +206,7 @@ enum SecretKeyOrigin {
   manual,
 
   /// The key is randomly generated.
-  random,
-  ;
+  random;
 
   Object toJson() => name;
 
@@ -228,18 +226,17 @@ enum SecretKeyOrigin {
 enum SecretKeyStore {
   notStored,
   stored,
-  securedWithBiometrics,
-  ;
+  securedWithBiometrics;
 
   bool get isStored => switch (this) {
-        notStored => false,
-        stored || securedWithBiometrics => true,
-      };
+    notStored => false,
+    stored || securedWithBiometrics => true,
+  };
 
   bool get isSecuredWithBiometrics => switch (this) {
-        securedWithBiometrics => true,
-        notStored || stored => false,
-      };
+    securedWithBiometrics => true,
+    notStored || stored => false,
+  };
 }
 
 /// How is the local secret key obtained and stored
@@ -258,27 +255,25 @@ enum LocalSecretMode {
   randomStored,
 
   /// Randomly generated, stored in the secure storage and requires biometric check to retrieve
-  randomSecuredWithBiometrics,
-  ;
+  randomSecuredWithBiometrics;
 
   SecretKeyOrigin get origin => switch (this) {
-        manual ||
-        manualStored ||
-        manualSecuredWithBiometrics =>
-          SecretKeyOrigin.manual,
-        randomStored || randomSecuredWithBiometrics => SecretKeyOrigin.random,
-      };
+    manual ||
+    manualStored ||
+    manualSecuredWithBiometrics => SecretKeyOrigin.manual,
+    randomStored || randomSecuredWithBiometrics => SecretKeyOrigin.random,
+  };
 
   bool get isStored => store.isStored;
   bool get isSecuredWithBiometrics => store.isSecuredWithBiometrics;
 
   SecretKeyStore get store => switch (this) {
-        manual => SecretKeyStore.notStored,
-        manualStored || randomStored => SecretKeyStore.stored,
-        LocalSecretMode.manualSecuredWithBiometrics ||
-        LocalSecretMode.randomSecuredWithBiometrics =>
-          SecretKeyStore.securedWithBiometrics,
-      };
+    manual => SecretKeyStore.notStored,
+    manualStored || randomStored => SecretKeyStore.stored,
+    LocalSecretMode.manualSecuredWithBiometrics ||
+    LocalSecretMode
+        .randomSecuredWithBiometrics => SecretKeyStore.securedWithBiometrics,
+  };
 }
 
 /// Parameters to compute local secret and auth mode.
@@ -294,11 +289,11 @@ class LocalSecretManual extends LocalSecretInput {
 
   @override
   LocalSecretMode get mode => switch (store) {
-        SecretKeyStore.notStored => LocalSecretMode.manual,
-        SecretKeyStore.stored => LocalSecretMode.manualStored,
-        SecretKeyStore.securedWithBiometrics =>
-          LocalSecretMode.manualSecuredWithBiometrics,
-      };
+    SecretKeyStore.notStored => LocalSecretMode.manual,
+    SecretKeyStore.stored => LocalSecretMode.manualStored,
+    SecretKeyStore.securedWithBiometrics =>
+      LocalSecretMode.manualSecuredWithBiometrics,
+  };
 }
 
 class LocalSecretRandom extends LocalSecretInput {
@@ -307,9 +302,10 @@ class LocalSecretRandom extends LocalSecretInput {
   final bool secureWithBiometrics;
 
   @override
-  LocalSecretMode get mode => secureWithBiometrics
-      ? LocalSecretMode.randomSecuredWithBiometrics
-      : LocalSecretMode.randomStored;
+  LocalSecretMode get mode =>
+      secureWithBiometrics
+          ? LocalSecretMode.randomSecuredWithBiometrics
+          : LocalSecretMode.randomStored;
 }
 
 sealed class AuthModeException implements Exception {}

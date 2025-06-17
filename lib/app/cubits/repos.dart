@@ -36,12 +36,11 @@ class ReposState {
     Map<RepoLocation, RepoEntry>? repos,
     Option<RepoEntry>? current,
     bool? isLoading,
-  }) =>
-      ReposState(
-        repos: repos ?? this.repos,
-        current: current != null ? current.value : this.current,
-        isLoading: isLoading ?? this.isLoading,
-      );
+  }) => ReposState(
+    repos: repos ?? this.repos,
+    current: current != null ? current.value : this.current,
+    isLoading: isLoading ?? this.isLoading,
+  );
 
   Iterable<RepoLocation> get locations => repos.keys;
   Iterable<String> get names => locations.map((location) => location.name);
@@ -68,13 +67,13 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
     EntryBottomSheetCubit? bottomSheet,
     NavigationCubit? navigation,
     EntrySelectionCubit? entriesSelection,
-  })  : _session = session,
-        _settings = settings,
-        bottomSheet = bottomSheet ?? EntryBottomSheetCubit(),
-        navigation = navigation ?? NavigationCubit(),
-        entriesSelection = entriesSelection ?? EntrySelectionCubit(),
-        passwordHasher = PasswordHasher(session),
-        super(ReposState()) {
+  }) : _session = session,
+       _settings = settings,
+       bottomSheet = bottomSheet ?? EntryBottomSheetCubit(),
+       navigation = navigation ?? NavigationCubit(),
+       entriesSelection = entriesSelection ?? EntrySelectionCubit(),
+       passwordHasher = PasswordHasher(session),
+       super(ReposState()) {
     unawaited(_init());
   }
 
@@ -87,8 +86,9 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
       await _addRepo(repo);
     }
 
-    final current =
-        _settings.defaultRepo?.let((location) => state.repos[location]);
+    final current = _settings.defaultRepo?.let(
+      (location) => state.repos[location],
+    );
     await setCurrent(current);
 
     emitUnlessClosed(state.copyWith(isLoading: false));
@@ -143,12 +143,10 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
 
     final unlock = switch (authMode) {
       AuthModeKeyStoredOnDevice(secureWithBiometrics: false) ||
-      AuthModePasswordStoredOnDevice(secureWithBiometrics: false) =>
-        true,
+      AuthModePasswordStoredOnDevice(secureWithBiometrics: false) => true,
       AuthModeKeyStoredOnDevice() ||
       AuthModePasswordStoredOnDevice() ||
-      AuthModeBlindOrManual() =>
-        false,
+      AuthModeBlindOrManual() => false,
     };
 
     if (unlock) {
@@ -159,7 +157,8 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
         await cubit.unlock(secret);
       } else {
         loggy.error(
-            'Failed to load secret key for ${cubit.state.location.path}');
+          'Failed to load secret key for ${cubit.state.location.path}',
+        );
       }
     }
 
@@ -183,13 +182,13 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
   }
 
   Future<RepoCubit> _createRepoCubit(Repository repo) => RepoCubit.create(
-        repo: repo,
-        session: _session,
-        navigation: navigation,
-        entrySelection: entriesSelection,
-        bottomSheet: bottomSheet,
-        cacheServers: cacheServers,
-      );
+    repo: repo,
+    session: _session,
+    navigation: navigation,
+    entrySelection: entriesSelection,
+    bottomSheet: bottomSheet,
+    cacheServers: cacheServers,
+  );
 
   @override
   Future<void> close() async {
@@ -223,7 +222,8 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
     } on AlreadyExists {
       showSnackBar(S.current.repositoryIsAlreadyImported);
       loggy.warning(
-          'Same repository but from different location is already loaded');
+        'Same repository but from different location is already loaded',
+      );
       return;
     } catch (e, st) {
       loggy.error('Failed to open repository ${location.path}:', e, st);
@@ -250,17 +250,15 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
 
     final localSecret = switch (setLocalSecret) {
       SetLocalSecretKeyAndSalt() => setLocalSecret,
-      SetLocalSecretPassword(value: final password) =>
-        await passwordHasher.hashPassword(password),
+      SetLocalSecretPassword(value: final password) => await passwordHasher
+          .hashPassword(password),
     };
 
     SetLocalSecret readSecret;
     SetLocalSecret writeSecret;
 
-    SetLocalSecretKeyAndSalt randomLocalSecret() => SetLocalSecretKeyAndSalt(
-          key: randomSecretKey(),
-          salt: randomSalt(),
-        );
+    SetLocalSecretKeyAndSalt randomLocalSecret() =>
+        SetLocalSecretKeyAndSalt(key: randomSecretKey(), salt: randomSalt());
 
     switch (await token?.let(session.getShareTokenAccessMode)) {
       case AccessMode.blind:
@@ -298,11 +296,11 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
     final authMode = switch (localSecretMode) {
       LocalSecretMode.manual => AuthModeBlindOrManual(),
       LocalSecretMode.manualStored => await AuthModeKeyStoredOnDevice.encrypt(
-          _settings.masterKey,
-          localSecret.key,
-          keyOrigin: SecretKeyOrigin.manual,
-          secureWithBiometrics: false,
-        ),
+        _settings.masterKey,
+        localSecret.key,
+        keyOrigin: SecretKeyOrigin.manual,
+        secureWithBiometrics: false,
+      ),
       LocalSecretMode.manualSecuredWithBiometrics =>
         await AuthModeKeyStoredOnDevice.encrypt(
           _settings.masterKey,
@@ -311,11 +309,11 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
           secureWithBiometrics: true,
         ),
       LocalSecretMode.randomStored => await AuthModeKeyStoredOnDevice.encrypt(
-          _settings.masterKey,
-          localSecret.key,
-          keyOrigin: SecretKeyOrigin.random,
-          secureWithBiometrics: false,
-        ),
+        _settings.masterKey,
+        localSecret.key,
+        keyOrigin: SecretKeyOrigin.random,
+        secureWithBiometrics: false,
+      ),
       LocalSecretMode.randomSecuredWithBiometrics =>
         await AuthModeKeyStoredOnDevice.encrypt(
           _settings.masterKey,
@@ -343,10 +341,12 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
       return;
     }
 
-    emitUnlessClosed(state.copyWith(
-      repos: state.repos.withRemoved(location),
-      current: state.current == entry ? None() : null,
-    ));
+    emitUnlessClosed(
+      state.copyWith(
+        repos: state.repos.withRemoved(location),
+        current: state.current == entry ? None() : null,
+      ),
+    );
 
     await entry.cubit?.delete();
   }

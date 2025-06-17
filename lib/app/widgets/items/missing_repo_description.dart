@@ -10,12 +10,12 @@ class MissingRepoDescription extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Fields.autosizeText(name),
-            Fields.autosizeText(S.current.messageRepoMissing)
-          ],
-        ),
-      );
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Fields.autosizeText(name),
+        Fields.autosizeText(S.current.messageRepoMissing),
+      ],
+    ),
+  );
 }

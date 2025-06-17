@@ -11,11 +11,7 @@ String formatSize(int bytes, {int decimals = 1}) {
   return '$value $unit';
 }
 
-String formatSizeProgress(
-  int totalBytes,
-  int soFarBytes, {
-  int decimals = 1,
-}) {
+String formatSizeProgress(int totalBytes, int soFarBytes, {int decimals = 1}) {
   final scale = _sizeScale(totalBytes);
   final totalValue = _formatSizeValue(totalBytes, scale, decimals: decimals);
   final soFarValue = _formatSizeValue(soFarBytes, scale, decimals: decimals);
@@ -35,11 +31,7 @@ String formatThroughput(int bytesPerSecond, {int decimals = 1}) {
 
 int _sizeScale(int bytes) => bytes > 0 ? (log(bytes) / log(1024)).floor() : 0;
 
-String _formatSizeValue(
-  int bytes,
-  int scale, {
-  int decimals = 2,
-}) =>
+String _formatSizeValue(int bytes, int scale, {int decimals = 2}) =>
     (bytes / pow(1024, scale)).toStringAsFixed(decimals);
 
 String _formatSizeUnit(int scale) {
@@ -52,7 +44,7 @@ String _formatSizeUnit(int scale) {
     "PiB",
     "EiB",
     "ZiB",
-    "YiB"
+    "YiB",
   ];
 
   return suffixes[scale];

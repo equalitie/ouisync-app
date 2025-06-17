@@ -12,11 +12,12 @@ class UpgradeExistsCubit extends Cubit<bool> with CubitActions, AppLogger {
   StreamSubscription? _subscription;
 
   UpgradeExistsCubit(Session session, Settings settings)
-      : _session = session,
-        _settings = settings,
-        super(false) {
+    : _session = session,
+      _settings = settings,
+      super(false) {
     unawaited(
-        _init().catchError((e, st) => loggy.error('During _init():', e, st)));
+      _init().catchError((e, st) => loggy.error('During _init():', e, st)),
+    );
   }
 
   @override
@@ -33,7 +34,8 @@ class UpgradeExistsCubit extends Cubit<bool> with CubitActions, AppLogger {
     }
 
     loggy.warning(
-        "Detected peer with higher protocol version (our:$current, their:$found)");
+      "Detected peer with higher protocol version (our:$current, their:$found)",
+    );
 
     await _settings.setHighestSeenProtocolNumber(found);
 

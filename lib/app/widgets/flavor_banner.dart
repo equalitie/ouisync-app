@@ -24,7 +24,7 @@ class FlavorBanner extends StatelessWidget {
 }
 
 Color _flavorColor(String flavor) => switch (flavor) {
-      'nightly' => const Color(0xFFE65100),
-      'unofficial' => const Color(0xFF0D47A1),
-      _ => Colors.grey,
-    };
+  'nightly' => const Color(0xFFE65100),
+  'unofficial' => const Color(0xFF0D47A1),
+  _ => Colors.grey,
+};

@@ -22,9 +22,7 @@ class FolderNavigationBar extends StatelessWidget {
         children: [
           Expanded(
             child: Row(
-              children: [
-                Expanded(child: _currentLocationBar(context, path)),
-              ],
+              children: [Expanded(child: _currentLocationBar(context, path))],
             ),
           ),
         ],
@@ -60,14 +58,16 @@ class FolderNavigationBar extends StatelessWidget {
     final target = repo_path.dirname(path);
 
     return GestureDetector(
-        onTap: () {
-          if (target != path) {
-            final parent = _repo.state.currentFolder.parent;
-            _repo.navigateTo(parent);
-          }
-        },
-        child: path == Strings.root
-            ? const Icon(Icons.lock_rounded)
-            : const Icon(Icons.arrow_back));
+      onTap: () {
+        if (target != path) {
+          final parent = _repo.state.currentFolder.parent;
+          _repo.navigateTo(parent);
+        }
+      },
+      child:
+          path == Strings.root
+              ? const Icon(Icons.lock_rounded)
+              : const Icon(Icons.arrow_back),
+    );
   }
 }

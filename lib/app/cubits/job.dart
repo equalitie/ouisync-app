@@ -10,10 +10,10 @@ class JobState {
   JobState({required this.soFar, required this.total, this.cancel = false});
 
   JobState copyWith({int? soFar, int? total, bool? cancel}) => JobState(
-        soFar: soFar ?? this.soFar,
-        total: total ?? this.total,
-        cancel: cancel ?? this.cancel,
-      );
+    soFar: soFar ?? this.soFar,
+    total: total ?? this.total,
+    cancel: cancel ?? this.cancel,
+  );
 }
 
 class Job extends Cubit<JobState> with CubitActions {

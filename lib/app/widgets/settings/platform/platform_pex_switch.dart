@@ -6,11 +6,12 @@ import '../../../cubits/cubits.dart';
 import '../../../utils/platform/platform.dart';
 
 class PlatformPexSwitch extends StatelessWidget {
-  const PlatformPexSwitch(
-      {required this.repository,
-      required this.title,
-      required this.icon,
-      required this.onToggle});
+  const PlatformPexSwitch({
+    required this.repository,
+    required this.title,
+    required this.icon,
+    required this.onToggle,
+  });
 
   final RepoCubit repository;
   final Widget title;
@@ -28,18 +29,22 @@ class PlatformPexSwitch extends StatelessWidget {
 
   Widget buildDesktopWidget(BuildContext context) =>
       BlocSelector<RepoCubit, RepoState, bool>(
-          bloc: repository,
-          selector: (state) => state.isPexEnabled,
-          builder: (context, value) => SwitchListTile.adaptive(
+        bloc: repository,
+        selector: (state) => state.isPexEnabled,
+        builder:
+            (context, value) => SwitchListTile.adaptive(
               value: value,
               title: title,
               secondary: Icon(icon),
-              onChanged: (value) => onToggle?.call(value)));
+              onChanged: (value) => onToggle?.call(value),
+            ),
+      );
 
   AbstractSettingsTile buildMobileWidget(BuildContext context) =>
       SettingsTile.switchTile(
-          initialValue: repository.state.isPexEnabled,
-          title: title,
-          leading: Icon(icon),
-          onToggle: (value) => onToggle?.call(value));
+        initialValue: repository.state.isPexEnabled,
+        title: title,
+        leading: Icon(icon),
+        onToggle: (value) => onToggle?.call(value),
+      );
 }

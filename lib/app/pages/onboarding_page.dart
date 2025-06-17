@@ -8,11 +8,7 @@ import '../cubits/locale.dart';
 import '../utils/utils.dart';
 
 class OnboardingPage extends StatefulWidget {
-  OnboardingPage(
-    this._localeCubit,
-    this.settings, {
-    required this.mainPage,
-  });
+  OnboardingPage(this._localeCubit, this.settings, {required this.mainPage});
 
   final LocaleCubit _localeCubit;
   final Settings settings;
@@ -21,14 +17,16 @@ class OnboardingPage extends StatefulWidget {
 
   @override
   State<OnboardingPage> createState() => _OnboardingPageState(
-        onboardingShown: !settings.getShowOnboarding(),
-        acceptedTerms: settings.getEqualitieValues(),
-      );
+    onboardingShown: !settings.getShowOnboarding(),
+    acceptedTerms: settings.getEqualitieValues(),
+  );
 }
 
 class _OnboardingPageState extends State<OnboardingPage> {
-  _OnboardingPageState(
-      {required this.onboardingShown, required this.acceptedTerms});
+  _OnboardingPageState({
+    required this.onboardingShown,
+    required this.acceptedTerms,
+  });
 
   final introKey = GlobalKey<IntroductionScreenState>();
   IntroductionScreenState? get intro => introKey.currentState;
@@ -60,31 +58,33 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
     if (_pageIndex == 0) {
       return LanguagePicker(
-          localeCubit: widget._localeCubit,
-          canPop: false,
-          onSelect: () {
-            setState(() {
-              _pageIndex += 1;
-            });
+        localeCubit: widget._localeCubit,
+        canPop: false,
+        onSelect: () {
+          setState(() {
+            _pageIndex += 1;
           });
+        },
+      );
     }
     if (_pageIndex == 1) {
       return _buildIntroduction(context);
     } else if (_pageIndex == 2) {
       return AcceptEqualitieValuesTermsPrivacyPage(
-          settings: widget.settings,
-          onAccept: () {
-            setState(() {
-              acceptedTerms = true;
-              _pageIndex += 1;
-            });
-          },
-          onBack: () {
-            setState(() {
-              _pageIndex -= 1;
-              _introPageIndex = _lastIntroPageIndex();
-            });
+        settings: widget.settings,
+        onAccept: () {
+          setState(() {
+            acceptedTerms = true;
+            _pageIndex += 1;
           });
+        },
+        onBack: () {
+          setState(() {
+            _pageIndex -= 1;
+            _introPageIndex = _lastIntroPageIndex();
+          });
+        },
+      );
     } else {
       return widget.mainPage;
     }
@@ -92,11 +92,12 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
   Widget _buildIntroduction(BuildContext context) {
     final pageDecoration = PageDecoration(
-        titleTextStyle: context.theme.appTextStyle.titleLarge,
-        bodyAlignment: Alignment.center,
-        bodyTextStyle: context.theme.appTextStyle.bodyMedium,
-        bodyPadding: EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 16.0),
-        imagePadding: EdgeInsets.zero);
+      titleTextStyle: context.theme.appTextStyle.titleLarge,
+      bodyAlignment: Alignment.center,
+      bodyTextStyle: context.theme.appTextStyle.bodyMedium,
+      bodyPadding: EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 16.0),
+      imagePadding: EdgeInsets.zero,
+    );
 
     return PopScope<Object?>(
       canPop: false,
@@ -183,10 +184,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
     });
   }
 
-  Widget _buildImage(String assetName) => Image.asset(
-        'assets/$assetName',
-        width: _imageWidth * 0.6,
-      );
+  Widget _buildImage(String assetName) =>
+      Image.asset('assets/$assetName', width: _imageWidth * 0.6);
 
   // For debugging
   //@override

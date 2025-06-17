@@ -29,35 +29,35 @@ class AppSettingsContainer extends StatefulHookWidget {
     required ReposCubit reposCubit,
     required this.upgradeExists,
   }) : sections = [
-          NetworkSection(
-            session,
-            connectivityInfo: connectivityInfo,
-            natDetection: natDetection,
-            peerSet: peerSet,
-            powerControl: powerControl,
-          ),
-          LogsSection(
-            mount: mount,
-            panicCounter: panicCounter,
-            powerControl: powerControl,
-            reposCubit: reposCubit,
-            connectivityInfo: connectivityInfo,
-            natDetection: natDetection,
-            checkForDokan: checkForDokan,
-            dirs: dirs,
-          ),
-          AboutSection(
-            session,
-            localeCubit: localeCubit,
-            powerControl: powerControl,
-            reposCubit: reposCubit,
-            connectivityInfo: connectivityInfo,
-            peerSet: peerSet,
-            natDetection: natDetection,
-            launchAtStartup: launchAtStartup,
-            upgradeExists: upgradeExists,
-          ),
-        ];
+         NetworkSection(
+           session,
+           connectivityInfo: connectivityInfo,
+           natDetection: natDetection,
+           peerSet: peerSet,
+           powerControl: powerControl,
+         ),
+         LogsSection(
+           mount: mount,
+           panicCounter: panicCounter,
+           powerControl: powerControl,
+           reposCubit: reposCubit,
+           connectivityInfo: connectivityInfo,
+           natDetection: natDetection,
+           checkForDokan: checkForDokan,
+           dirs: dirs,
+         ),
+         AboutSection(
+           session,
+           localeCubit: localeCubit,
+           powerControl: powerControl,
+           reposCubit: reposCubit,
+           connectivityInfo: connectivityInfo,
+           peerSet: peerSet,
+           natDetection: natDetection,
+           launchAtStartup: launchAtStartup,
+           upgradeExists: upgradeExists,
+         ),
+       ];
 
   final LocaleCubit localeCubit;
   final MountCubit mount;
@@ -83,27 +83,28 @@ class _AppSettingsContainerState extends State<AppSettingsContainer>
           Flexible(
             flex: 1,
             child: ListView(
-              children: widget.sections
-                  .mapIndexed(
-                    (index, section) => SettingsSectionTitleDesktop(
-                      mount: widget.mount,
-                      powerControl: widget.powerControl,
-                      panicCounter: widget.panicCounter,
-                      upgradeExists: widget.upgradeExists,
-                      section: section,
-                      selected: selected.value == index,
-                      onTap: () {
-                        selected.value = index;
+              children:
+                  widget.sections
+                      .mapIndexed(
+                        (index, section) => SettingsSectionTitleDesktop(
+                          mount: widget.mount,
+                          powerControl: widget.powerControl,
+                          panicCounter: widget.panicCounter,
+                          upgradeExists: widget.upgradeExists,
+                          section: section,
+                          selected: selected.value == index,
+                          onTap: () {
+                            selected.value = index;
 
-                        Scrollable.ensureVisible(
-                          section.key.currentContext!,
-                          duration: Duration(seconds: 1),
-                          curve: Curves.linearToEaseOut,
-                        );
-                      },
-                    ),
-                  )
-                  .toList(),
+                            Scrollable.ensureVisible(
+                              section.key.currentContext!,
+                              duration: Duration(seconds: 1),
+                              curve: Curves.linearToEaseOut,
+                            );
+                          },
+                        ),
+                      )
+                      .toList(),
             ),
           ),
         Flexible(
@@ -112,26 +113,31 @@ class _AppSettingsContainerState extends State<AppSettingsContainer>
             child: s.SettingsList(
               platform: s.PlatformUtils.detectPlatform(context),
               contentPadding: MediaQuery.paddingOf(context),
-              sections: widget.sections
-                  .map(
-                    (section) => s.SettingsSection(
-                      key: section.key,
-                      title: Text(section.title,
-                          style: context.theme.appTextStyle.titleMedium),
-                      tiles: section
-                          .buildTiles(context)
-                          .map(
-                            (tile) => (tile is s.AbstractSettingsTile)
-                                ? tile
-                                : s.CustomSettingsTile(child: tile),
-                          )
-                          .toList(),
-                    ),
-                  )
-                  .toList(),
+              sections:
+                  widget.sections
+                      .map(
+                        (section) => s.SettingsSection(
+                          key: section.key,
+                          title: Text(
+                            section.title,
+                            style: context.theme.appTextStyle.titleMedium,
+                          ),
+                          tiles:
+                              section
+                                  .buildTiles(context)
+                                  .map(
+                                    (tile) =>
+                                        (tile is s.AbstractSettingsTile)
+                                            ? tile
+                                            : s.CustomSettingsTile(child: tile),
+                                  )
+                                  .toList(),
+                        ),
+                      )
+                      .toList(),
             ),
-            onNotification: (notification) =>
-                _selectFromScroll(notification, selected),
+            onNotification:
+                (notification) => _selectFromScroll(notification, selected),
           ),
         ),
       ],
@@ -139,7 +145,9 @@ class _AppSettingsContainerState extends State<AppSettingsContainer>
   }
 
   bool _selectFromScroll(
-      ScrollEndNotification notification, ValueNotifier<int> selected) {
+    ScrollEndNotification notification,
+    ValueNotifier<int> selected,
+  ) {
     if (PlatformValues.isMobileDevice) return true;
 
     final networkKey = widget.sections.elementAt(0).key.currentContext;
@@ -158,13 +166,14 @@ class _AppSettingsContainerState extends State<AppSettingsContainer>
 
     final pixels = notification.metrics.pixels;
 
-    final index = pixels == 0 || pixels < networkSectionSize * 0.4
-        ? 0
-        : pixels > 0 && pixels == notification.metrics.maxScrollExtent
+    final index =
+        pixels == 0 || pixels < networkSectionSize * 0.4
+            ? 0
+            : pixels > 0 && pixels == notification.metrics.maxScrollExtent
             ? 2
             : pixels < (networkSectionSize + (logsSectionSize * 0.2))
-                ? 1
-                : 0;
+            ? 1
+            : 0;
 
     selected.value = index;
 
@@ -194,18 +203,18 @@ class SettingsSectionTitleDesktop extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ListTile(
-        title: Row(
-          children: [
-            // Need to put the badge in a row because wrapping the Text in Badge
-            // will make the text centered. Maybe there's a better solution
-            // though.
-            Text(section.title, style: _getStyle(context)),
-            _maybeBadge(section),
-          ],
-        ),
-        selected: selected,
-        onTap: onTap,
-      );
+    title: Row(
+      children: [
+        // Need to put the badge in a row because wrapping the Text in Badge
+        // will make the text centered. Maybe there's a better solution
+        // though.
+        Text(section.title, style: _getStyle(context)),
+        _maybeBadge(section),
+      ],
+    ),
+    selected: selected,
+    onTap: onTap,
+  );
 
   TextStyle? _getStyle(BuildContext context) {
     Color? color = Colors.black54;
@@ -216,8 +225,10 @@ class SettingsSectionTitleDesktop extends StatelessWidget {
       fontWeight = FontWeight.w500;
     }
 
-    return context.theme.appTextStyle.bodyMedium
-        .copyWith(color: color, fontWeight: fontWeight);
+    return context.theme.appTextStyle.bodyMedium.copyWith(
+      color: color,
+      fontWeight: fontWeight,
+    );
   }
 
   Widget _maybeBadge(SettingsSection section) {
@@ -236,7 +247,11 @@ class SettingsSectionTitleDesktop extends StatelessWidget {
       return dummy;
     }
 
-    return Fields.addBadge(dummy,
-        color: badgeColor, moveRight: 23, moveDownwards: 23);
+    return Fields.addBadge(
+      dummy,
+      color: badgeColor,
+      moveRight: 23,
+      moveDownwards: 23,
+    );
   }
 }

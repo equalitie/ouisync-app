@@ -67,11 +67,13 @@ class SettingsRoot {
       _highestSeenProtocolNumberKey: highestSeenProtocolNumber,
       _defaultRepoKey: defaultRepo?.path,
       _reposKey: <String, Object?>{
-        for (var kv in repos.entries) kv.key.toString(): kv.value.path
+        for (var kv in repos.entries) kv.key.toString(): kv.value.path,
       },
       _defaultRepositoriesDirVersionKey: defaultRepositoriesDirVersion,
-      _languageLocaleKey:
-          Option.andThen(locale, (locale) => locale.serialize()),
+      _languageLocaleKey: Option.andThen(
+        locale,
+        (locale) => locale.serialize(),
+      ),
     };
     return r;
   }
@@ -91,7 +93,7 @@ class SettingsRoot {
 
     final repos = {
       for (var kv in data[_reposKey]!.entries)
-        DatabaseId(kv.key): RepoLocation.fromDbPath(kv.value)
+        DatabaseId(kv.key): RepoLocation.fromDbPath(kv.value),
     };
 
     String? defaultRepo = data[_defaultRepoKey];
@@ -106,8 +108,10 @@ class SettingsRoot {
       repos: repos,
       defaultRepositoriesDirVersion:
           data[_defaultRepositoriesDirVersionKey] ?? 0,
-      locale:
-          Option.andThen(data[_languageLocaleKey], SettingsLocale.deserialize),
+      locale: Option.andThen(
+        data[_languageLocaleKey],
+        SettingsLocale.deserialize,
+      ),
     );
   }
 }
@@ -126,7 +130,9 @@ class Settings with AppLogger {
 
   Future<void> _storeRoot() async {
     await _prefs.setString(
-        atomicSharedPrefsSettingsKey, json.encode(_root.toJson()));
+      atomicSharedPrefsSettingsKey,
+      json.encode(_root.toJson()),
+    );
   }
 
   static Future<Settings> init(MasterKey masterKey) async {
@@ -229,15 +235,13 @@ class Settings with AppLogger {
     await _storeRoot();
   }
 
-  DatabaseId? findRepoByLocation(RepoLocation location) => _root.repos.entries
-      .where((entry) => entry.value == location)
-      .map((entry) => entry.key)
-      .firstOrNull;
+  DatabaseId? findRepoByLocation(RepoLocation location) =>
+      _root.repos.entries
+          .where((entry) => entry.value == location)
+          .map((entry) => entry.key)
+          .firstOrNull;
 
-  Future<void> renameRepo(
-    DatabaseId repoId,
-    RepoLocation newLocation,
-  ) async {
+  Future<void> renameRepo(DatabaseId repoId, RepoLocation newLocation) async {
     if (findRepoByLocation(newLocation) != null) {
       throw 'Failed to rename repo: "${newLocation.path}" already exists';
     }
@@ -309,11 +313,13 @@ sealed class SettingsLocale {
       if (languageCode == null || languageCode.isEmpty) {
         return null;
       }
-      return SettingsUserLocale(Locale.fromSubtags(
-        languageCode: languageCode,
-        countryCode: countryCode,
-        scriptCode: scriptCode,
-      ));
+      return SettingsUserLocale(
+        Locale.fromSubtags(
+          languageCode: languageCode,
+          countryCode: countryCode,
+          scriptCode: scriptCode,
+        ),
+      );
     }
     return null;
   }
@@ -330,10 +336,11 @@ class SettingsDefaultLocale implements SettingsLocale {
 
 class SettingsUserLocale extends Locale implements SettingsLocale {
   SettingsUserLocale(Locale locale)
-      : super.fromSubtags(
-            languageCode: locale.languageCode,
-            countryCode: locale.countryCode,
-            scriptCode: locale.scriptCode);
+    : super.fromSubtags(
+        languageCode: locale.languageCode,
+        countryCode: locale.countryCode,
+        scriptCode: locale.scriptCode,
+      );
 
   @override
   Object serialize() {

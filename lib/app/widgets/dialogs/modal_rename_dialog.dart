@@ -52,14 +52,16 @@ class RenameEntry extends HookWidget with AppLogger {
     selectEntryName(oldName, originalExtension, isFile);
 
     return Form(
-        key: formKey,
-        autovalidateMode: AutovalidateMode.onUserInteraction,
-        child: _buildRenameEntryWidget(context));
+      key: formKey,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
+      child: _buildRenameEntryWidget(context),
+    );
   }
 
   void initHooks() {
-    _newNameController =
-        useTextEditingController.fromValue(TextEditingValue.empty);
+    _newNameController = useTextEditingController.fromValue(
+      TextEditingValue.empty,
+    );
 
     _newNameController.addListener(() {
       if (_newNameController.text.isEmpty ||
@@ -82,46 +84,47 @@ class RenameEntry extends HookWidget with AppLogger {
   }
 
   Widget _buildRenameEntryWidget(BuildContext context) => Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.max,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Fields.constrainedText(
-              '"$oldName"',
-              flex: 0,
-              style: context.theme.appTextStyle.bodyMedium
-                  .copyWith(fontWeight: FontWeight.w400),
+    mainAxisAlignment: MainAxisAlignment.center,
+    mainAxisSize: MainAxisSize.max,
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      Fields.constrainedText(
+        '"$oldName"',
+        flex: 0,
+        style: context.theme.appTextStyle.bodyMedium.copyWith(
+          fontWeight: FontWeight.w400,
+        ),
+      ),
+      Dimensions.spacingVerticalDouble,
+      ValueListenableBuilder(
+        valueListenable: _errorMessage,
+        builder: (context, errorMessage, child) {
+          return Fields.formTextField(
+            context: context,
+            controller: _newNameController,
+            textInputAction: TextInputAction.done,
+            labelText: S.current.labelName,
+            hintText: hint,
+            errorText: _newNameController.text.isEmpty ? '' : errorMessage,
+            onFieldSubmitted: (newName) async {
+              final submitted = await _submitField(parent, newName);
+              if (submitted && PlatformValues.isDesktopDevice) {
+                await Navigator.of(context).maybePop(newName);
+              }
+            },
+            validator: validateNoEmptyMaybeRegExpr(
+              emptyError: S.current.messageErrorFormValidatorNameDefault,
+              regExp: Strings.entityNameRegExp,
+              regExpError: S.current.messageErrorCharactersNotAllowed,
             ),
-            Dimensions.spacingVerticalDouble,
-            ValueListenableBuilder(
-              valueListenable: _errorMessage,
-              builder: (context, errorMessage, child) {
-                return Fields.formTextField(
-                  context: context,
-                  controller: _newNameController,
-                  textInputAction: TextInputAction.done,
-                  labelText: S.current.labelName,
-                  hintText: hint,
-                  errorText:
-                      _newNameController.text.isEmpty ? '' : errorMessage,
-                  onFieldSubmitted: (newName) async {
-                    final submitted = await _submitField(parent, newName);
-                    if (submitted && PlatformValues.isDesktopDevice) {
-                      await Navigator.of(context).maybePop(newName);
-                    }
-                  },
-                  validator: validateNoEmptyMaybeRegExpr(
-                      emptyError:
-                          S.current.messageErrorFormValidatorNameDefault,
-                      regExp: Strings.entityNameRegExp,
-                      regExpError: S.current.messageErrorCharactersNotAllowed),
-                  focusNode: _nameTextFieldFocus,
-                  autofocus: true,
-                );
-              },
-            ),
-            Fields.dialogActions(buttons: _actions(context)),
-          ]);
+            focusNode: _nameTextFieldFocus,
+            autofocus: true,
+          );
+        },
+      ),
+      Fields.dialogActions(buttons: _actions(context)),
+    ],
+  );
 
   Future<bool> _submitField(String parent, String? newName) async {
     if (newName == null) return false;
@@ -185,23 +188,23 @@ class RenameEntry extends HookWidget with AppLogger {
 
     if (title.isEmpty) return true;
 
-    final continueAnyway = await Dialogs.alertDialogWithActions(parentContext,
-        title: title,
-        body: [
-          Text(message)
-        ],
-        actions: [
-          TextButton(
-            child: Text(S.current.actionRename.toUpperCase()),
-            onPressed: () async =>
-                await Navigator.of(parentContext).maybePop(true),
-          ),
-          TextButton(
-            child: Text(S.current.actionCancelCapital),
-            onPressed: () async =>
-                await Navigator.of(parentContext).maybePop(false),
-          )
-        ]);
+    final continueAnyway = await Dialogs.alertDialogWithActions(
+      parentContext,
+      title: title,
+      body: [Text(message)],
+      actions: [
+        TextButton(
+          child: Text(S.current.actionRename.toUpperCase()),
+          onPressed:
+              () async => await Navigator.of(parentContext).maybePop(true),
+        ),
+        TextButton(
+          child: Text(S.current.actionCancelCapital),
+          onPressed:
+              () async => await Navigator.of(parentContext).maybePop(false),
+        ),
+      ],
+    );
 
     return continueAnyway ?? false;
   }
@@ -222,15 +225,17 @@ class RenameEntry extends HookWidget with AppLogger {
   }
 
   List<Widget> _actions(BuildContext context) => [
-        NegativeButton(
-            text: S.current.actionCancel,
-            onPressed: () async => await Navigator.of(context).maybePop('')),
-        PositiveButton(
-            text: S.current.actionRename,
-            onPressed: () async =>
-                await _onSaved(context, parent, _newNameController.text),
-            focusNode: _positiveButtonFocus)
-      ];
+    NegativeButton(
+      text: S.current.actionCancel,
+      onPressed: () async => await Navigator.of(context).maybePop(''),
+    ),
+    PositiveButton(
+      text: S.current.actionRename,
+      onPressed:
+          () async => await _onSaved(context, parent, _newNameController.text),
+      focusNode: _positiveButtonFocus,
+    ),
+  ];
 
   Future<void> _onSaved(
     BuildContext context,

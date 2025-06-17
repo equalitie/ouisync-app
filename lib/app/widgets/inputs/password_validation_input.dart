@@ -5,10 +5,7 @@ import '../../../generated/l10n.dart';
 import '../../utils/utils.dart';
 
 class PasswordValidation extends StatefulWidget {
-  PasswordValidation({
-    required this.onChanged,
-    this.required = true,
-  });
+  PasswordValidation({required this.onChanged, this.required = true});
 
   final void Function(String?) onChanged;
   final bool required;
@@ -45,13 +42,13 @@ class _PasswordValidationState<PasswordResult> extends State<PasswordValidation>
                   hintText: S.current.messageRepositoryPassword,
                   suffixIcon: _passwordActions(),
                   onSaved: (_) {},
-                  onChanged: (value) =>
-                      _passwordChanged(value, _retypedPassword),
+                  onChanged:
+                      (value) => _passwordChanged(value, _retypedPassword),
                   validator: (password) => passwordValidator(password),
                   autovalidateMode: AutovalidateMode.onUserInteraction,
                   textInputAction: TextInputAction.next,
                 ),
-              )
+              ),
             ],
           ),
           Dimensions.spacingVertical,
@@ -67,10 +64,9 @@ class _PasswordValidationState<PasswordResult> extends State<PasswordValidation>
                   suffixIcon: _retypePasswordActions(),
                   onSaved: (_) {},
                   onChanged: (value) => _passwordChanged(_password, value),
-                  validator: (retypedPassword) => retypedPasswordValidator(
-                    _password,
-                    retypedPassword,
-                  ),
+                  validator:
+                      (retypedPassword) =>
+                          retypedPasswordValidator(_password, retypedPassword),
                   autovalidateMode: AutovalidateMode.onUserInteraction,
                   textInputAction: TextInputAction.next,
                 ),
@@ -82,15 +78,17 @@ class _PasswordValidationState<PasswordResult> extends State<PasswordValidation>
             children: [
               Text(
                 '${S.current.messagePasswordStrength}:',
-                style: context.theme.appTextStyle.bodySmall
-                    .copyWith(color: Colors.black54),
+                style: context.theme.appTextStyle.bodySmall.copyWith(
+                  color: Colors.black54,
+                ),
               ),
               Dimensions.spacingHorizontalHalf,
               Text(
                 _passwordStrength ?? '',
-                style: context.theme.appTextStyle.bodySmall
-                    .copyWith(color: _passwordStrengthColorValue),
-              )
+                style: context.theme.appTextStyle.bodySmall.copyWith(
+                  color: _passwordStrengthColorValue,
+                ),
+              ),
             ],
           ),
           Dimensions.spacingVertical,
@@ -106,8 +104,11 @@ class _PasswordValidationState<PasswordResult> extends State<PasswordValidation>
 
   void _updatePasswordStrengthMessage(double strength) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      setState(() => _passwordStrength =
-          strength > 0.0 ? _passwordStrengthString(strength) : '');
+      setState(
+        () =>
+            _passwordStrength =
+                strength > 0.0 ? _passwordStrengthString(strength) : '',
+      );
       _passwordStrengthColorValue =
           strength > 0.0 ? _passwordStrengthColor(strength) : null;
     });
@@ -137,48 +138,59 @@ class _PasswordValidationState<PasswordResult> extends State<PasswordValidation>
     }
   }
 
-  Widget _passwordActions() => Wrap(children: [
-        IconButton(
-            onPressed: () =>
-                setState(() => _obscurePassword = !_obscurePassword),
-            icon: _obscurePassword
+  Widget _passwordActions() => Wrap(
+    children: [
+      IconButton(
+        onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+        icon:
+            _obscurePassword
                 ? const Icon(Constants.iconVisibilityOff)
                 : const Icon(Constants.iconVisibilityOn),
-            padding: EdgeInsetsDirectional.zero,
-            visualDensity: VisualDensity.compact,
-            color: Colors.black),
-        IconButton(
-            onPressed: () async {
-              await copyStringToClipboard(_password ?? "");
-              showSnackBar(S.current.messagePasswordCopiedClipboard);
-            },
-            icon: const Icon(Icons.copy_rounded),
-            padding: EdgeInsetsDirectional.zero,
-            visualDensity: VisualDensity.compact,
-            color: Colors.black)
-      ]);
+        padding: EdgeInsetsDirectional.zero,
+        visualDensity: VisualDensity.compact,
+        color: Colors.black,
+      ),
+      IconButton(
+        onPressed: () async {
+          await copyStringToClipboard(_password ?? "");
+          showSnackBar(S.current.messagePasswordCopiedClipboard);
+        },
+        icon: const Icon(Icons.copy_rounded),
+        padding: EdgeInsetsDirectional.zero,
+        visualDensity: VisualDensity.compact,
+        color: Colors.black,
+      ),
+    ],
+  );
 
-  Widget _retypePasswordActions() => Wrap(children: [
-        IconButton(
-            onPressed: () => setState(
-                () => _obscureRetypePassword = !_obscureRetypePassword),
-            icon: _obscureRetypePassword
+  Widget _retypePasswordActions() => Wrap(
+    children: [
+      IconButton(
+        onPressed:
+            () => setState(
+              () => _obscureRetypePassword = !_obscureRetypePassword,
+            ),
+        icon:
+            _obscureRetypePassword
                 ? const Icon(Constants.iconVisibilityOff)
                 : const Icon(Constants.iconVisibilityOn),
-            padding: EdgeInsetsDirectional.zero,
-            visualDensity: VisualDensity.compact,
-            color: Colors.black),
-        IconButton(
-            onPressed: () async {
-              await copyStringToClipboard(_retypedPassword ?? "");
+        padding: EdgeInsetsDirectional.zero,
+        visualDensity: VisualDensity.compact,
+        color: Colors.black,
+      ),
+      IconButton(
+        onPressed: () async {
+          await copyStringToClipboard(_retypedPassword ?? "");
 
-              showSnackBar(S.current.messagePasswordCopiedClipboard);
-            },
-            icon: const Icon(Icons.copy_rounded),
-            padding: EdgeInsetsDirectional.zero,
-            visualDensity: VisualDensity.compact,
-            color: Colors.black)
-      ]);
+          showSnackBar(S.current.messagePasswordCopiedClipboard);
+        },
+        icon: const Icon(Icons.copy_rounded),
+        padding: EdgeInsetsDirectional.zero,
+        visualDensity: VisualDensity.compact,
+        color: Colors.black,
+      ),
+    ],
+  );
 
   String? passwordValidator(String? password) {
     if (widget.required && (password == null || password.isEmpty)) {

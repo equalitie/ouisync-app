@@ -20,14 +20,17 @@ Future<String?> findHotspotIp() async {
   const hotspotIpPrefix = "192.168";
 
   final stopwatch = Stopwatch()..start();
-  final timeout =
-      Duration(seconds: 5); // poll the interfaces for up to this time.
-  final delay =
-      Duration(milliseconds: 250); // wait this long between each poll.
+  final timeout = Duration(
+    seconds: 5,
+  ); // poll the interfaces for up to this time.
+  final delay = Duration(
+    milliseconds: 250,
+  ); // wait this long between each poll.
 
   while (stopwatch.elapsed < timeout) {
-    final interfaces =
-        await NetworkInterface.list(type: InternetAddressType.IPv4);
+    final interfaces = await NetworkInterface.list(
+      type: InternetAddressType.IPv4,
+    );
 
     for (var interface in interfaces) {
       for (var addr in interface.addresses) {
@@ -82,8 +85,9 @@ class LocalInterfaceWatch {
 Future<String?> getLocalInterface() async {
   const localIpPrefix = "192.168";
 
-  final interfaces =
-      await NetworkInterface.list(type: InternetAddressType.IPv4);
+  final interfaces = await NetworkInterface.list(
+    type: InternetAddressType.IPv4,
+  );
 
   for (var interface in interfaces) {
     for (var addr in interface.addresses) {

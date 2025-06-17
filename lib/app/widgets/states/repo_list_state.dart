@@ -18,8 +18,11 @@ class RepoListState extends StatelessWidget
   final ReposCubit reposCubit;
   final ValueNotifier<BottomSheetInfo> bottomSheetInfo;
 
-  final Future<void> Function(BuildContext context,
-      {required RepoCubit repoCubit}) onShowRepoSettings;
+  final Future<void> Function(
+    BuildContext context, {
+    required RepoCubit repoCubit,
+  })
+  onShowRepoSettings;
 
   @override
   Widget build(BuildContext context) {
@@ -51,19 +54,19 @@ class RepoListState extends StatelessWidget
     BuildContext parentContext,
     List<RepoEntry> reposList,
     String? currentRepoName,
-  ) =>
-      ValueListenableBuilder(
-        valueListenable: bottomSheetInfo,
-        builder: (context, btInfo, child) => ListView.separated(
+  ) => ValueListenableBuilder(
+    valueListenable: bottomSheetInfo,
+    builder:
+        (context, btInfo, child) => ListView.separated(
           padding: EdgeInsetsDirectional.only(
-            bottom: btInfo.neededPadding <= 0.0
-                ? Dimensions.defaultListBottomPadding
-                : btInfo.neededPadding,
+            bottom:
+                btInfo.neededPadding <= 0.0
+                    ? Dimensions.defaultListBottomPadding
+                    : btInfo.neededPadding,
           ),
-          separatorBuilder: (context, index) => const Divider(
-            height: 1,
-            color: Colors.transparent,
-          ),
+          separatorBuilder:
+              (context, index) =>
+                  const Divider(height: 1, color: Colors.transparent),
           itemCount: reposList.length,
           itemBuilder: (context, index) {
             final repoEntry = reposList.elementAt(index);
@@ -72,41 +75,40 @@ class RepoListState extends StatelessWidget
 
             if (repoCubit == null) {
               return MissingRepoListItem(
-                  location: repoEntry.location,
-                  mainAction: () {},
-                  verticalDotsAction: () async {
-                    final currentRepoEntry = reposCubit.state.current;
-                    if (currentRepoEntry == null) return;
+                location: repoEntry.location,
+                mainAction: () {},
+                verticalDotsAction: () async {
+                  final currentRepoEntry = reposCubit.state.current;
+                  if (currentRepoEntry == null) return;
 
-                    final repoName = currentRepoEntry.name;
-                    final location = currentRepoEntry.location;
-                    final deleteRepoFuture =
-                        reposCubit.deleteRepository(location);
+                  final repoName = currentRepoEntry.name;
+                  final location = currentRepoEntry.location;
+                  final deleteRepoFuture = reposCubit.deleteRepository(
+                    location,
+                  );
 
-                    final deleted = await deleteRepository(
-                      context,
-                      repoName: repoName,
-                      deleteRepoFuture: deleteRepoFuture,
-                    );
+                  final deleted = await deleteRepository(
+                    context,
+                    repoName: repoName,
+                    deleteRepoFuture: deleteRepoFuture,
+                  );
 
-                    if (deleted == true) {
-                      Navigator.of(context).pop();
-                      showSnackBar(
-                          S.current.messageRepositoryDeleted(repoName));
-                    }
-                  });
+                  if (deleted == true) {
+                    Navigator.of(context).pop();
+                    showSnackBar(S.current.messageRepositoryDeleted(repoName));
+                  }
+                },
+              );
             }
 
             return RepoListItem(
               repoCubit: repoCubit,
               isDefault: isDefault,
               mainAction: () => reposCubit.setCurrent(repoEntry),
-              verticalDotsAction: () => onShowRepoSettings(
-                parentContext,
-                repoCubit: repoCubit,
-              ),
+              verticalDotsAction:
+                  () => onShowRepoSettings(parentContext, repoCubit: repoCubit),
             );
           },
         ),
-      );
+  );
 }

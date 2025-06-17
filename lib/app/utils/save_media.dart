@@ -15,8 +15,8 @@ class SaveMedia with AppLogger {
     required RepoCubit repoCubit,
     required this.sourcePath,
     required this.type,
-  })  : _context = context,
-        _repoCubit = repoCubit;
+  }) : _context = context,
+       _repoCubit = repoCubit;
 
   final BuildContext _context;
   final RepoCubit _repoCubit;

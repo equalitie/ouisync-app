@@ -38,11 +38,11 @@ class LogsSection extends SettingsSection with AppLogger {
     required this.natDetection,
     required this.checkForDokan,
     required this.dirs,
-  })  : stateMonitor = reposCubit.rootStateMonitor,
-        super(
-          key: GlobalKey(debugLabel: 'key_logs_section'),
-          title: S.current.titleLogs,
-        );
+  }) : stateMonitor = reposCubit.rootStateMonitor,
+       super(
+         key: GlobalKey(debugLabel: 'key_logs_section'),
+         title: S.current.titleLogs,
+       );
 
   TextStyle? bodyStyle;
 
@@ -69,49 +69,60 @@ class LogsSection extends SettingsSection with AppLogger {
         onTap: () => _viewLogs(context),
       ),
       BlocBuilder<StateMonitorIntCubit, int?>(
-          bloc: panicCounter,
-          builder: (context, count) {
-            if ((count ?? 0) == 0) {
-              return SizedBox.shrink();
-            }
-            return _errorTile(context, S.current.messageLibraryPanic);
-          }),
+        bloc: panicCounter,
+        builder: (context, count) {
+          if ((count ?? 0) == 0) {
+            return SizedBox.shrink();
+          }
+          return _errorTile(context, S.current.messageLibraryPanic);
+        },
+      ),
       BlocBuilder<MountCubit, MountState>(
-          bloc: mount,
-          builder: (context, result) {
-            if (result is! MountStateFailure) {
-              return SizedBox.shrink();
-            }
+        bloc: mount,
+        builder: (context, result) {
+          if (result is! MountStateFailure) {
+            return SizedBox.shrink();
+          }
 
-            String reason;
-            Widget? trailing;
-            void Function()? onTap;
+          String reason;
+          Widget? trailing;
+          void Function()? onTap;
 
-            if (result.error is VfsDriverInstallError) {
-              reason = S.current.messageErrorDokanNotInstalled('');
-              trailing = Icon(Icons.open_in_browser);
-              onTap = () {
-                // unawaited(launchUrl(Uri.parse(Constants.dokanUrl)));
-                checkForDokan();
-              };
-            } else {
-              reason = result.error.toString();
-            }
+          if (result.error is VfsDriverInstallError) {
+            reason = S.current.messageErrorDokanNotInstalled('');
+            trailing = Icon(Icons.open_in_browser);
+            onTap = () {
+              // unawaited(launchUrl(Uri.parse(Constants.dokanUrl)));
+              checkForDokan();
+            };
+          } else {
+            reason = result.error.toString();
+          }
 
-            return _errorTile(context, S.current.messageFailedToMount(reason),
-                trailing: trailing, onTap: onTap);
-          })
+          return _errorTile(
+            context,
+            S.current.messageFailedToMount(reason),
+            trailing: trailing,
+            onTap: onTap,
+          );
+        },
+      ),
     ];
   }
 
-  Widget _errorTile(BuildContext context, String str,
-      {Widget? trailing, void Function()? onTap}) {
+  Widget _errorTile(
+    BuildContext context,
+    String str, {
+    Widget? trailing,
+    void Function()? onTap,
+  }) {
     final color = Theme.of(context).colorScheme.error;
     return SettingsTile(
-        title: Text(str, style: bodyStyle?.copyWith(color: color)),
-        leading: Icon(Icons.error, color: color),
-        trailing: trailing,
-        onTap: onTap);
+      title: Text(str, style: bodyStyle?.copyWith(color: color)),
+      leading: Icon(Icons.error, color: color),
+      trailing: trailing,
+      onTap: onTap,
+    );
   }
 
   @override
@@ -119,7 +130,9 @@ class LogsSection extends SettingsSection with AppLogger {
       (panicCounter.state ?? 0) > 0 || mount.state is MountStateFailure;
 
   Future<void> _saveLogs(
-      BuildContext context, NatDetection natDetection) async {
+    BuildContext context,
+    NatDetection natDetection,
+  ) async {
     final tempFile = await _dumpInfo(context, natDetection);
 
     loggy.debug('Saving logs');
@@ -144,7 +157,8 @@ class LogsSection extends SettingsSection with AppLogger {
         }
       } else {
         loggy.error(
-            'Cannot save logs - unsupported platform: ${Platform.operatingSystem}');
+          'Cannot save logs - unsupported platform: ${Platform.operatingSystem}',
+        );
       }
     } finally {
       await tempFile.delete();
@@ -152,7 +166,9 @@ class LogsSection extends SettingsSection with AppLogger {
   }
 
   Future<void> _shareLogs(
-      BuildContext context, NatDetection natDetection) async {
+    BuildContext context,
+    NatDetection natDetection,
+  ) async {
     final tempFile = await _dumpInfo(context, natDetection);
 
     try {
@@ -163,15 +179,11 @@ class LogsSection extends SettingsSection with AppLogger {
   }
 
   void _viewLogs(BuildContext context) => Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => LogViewPage(),
-      ));
+    context,
+    MaterialPageRoute(builder: (context) => LogViewPage()),
+  );
 
-  Future<File> _dumpInfo(
-    BuildContext context,
-    NatDetection natDetection,
-  ) =>
+  Future<File> _dumpInfo(BuildContext context, NatDetection natDetection) =>
       dumpAll(
         context,
         connectivityInfo: connectivityInfo,

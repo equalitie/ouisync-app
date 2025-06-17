@@ -27,11 +27,13 @@ class LockedRepositoryState extends HookWidget
 
   @override
   Widget build(BuildContext context) {
-    final lockedRepoImageHeight = MediaQuery.of(context).size.height *
+    final lockedRepoImageHeight =
+        MediaQuery.of(context).size.height *
         Constants.statePlaceholderImageHeightFactor;
 
-    final FocusNode unlockButtonFocus =
-        useFocusNode(debugLabel: 'unlock_button_focus');
+    final FocusNode unlockButtonFocus = useFocusNode(
+      debugLabel: 'unlock_button_focus',
+    );
 
     unlockButtonFocus.requestFocus();
 
@@ -44,46 +46,54 @@ class LockedRepositoryState extends HookWidget
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Align(
-                  alignment: AlignmentDirectional.center,
-                  child: Fields.placeholderWidget(
-                      assetName: Constants.assetLockedRepository,
-                      assetHeight: lockedRepoImageHeight)),
+                alignment: AlignmentDirectional.center,
+                child: Fields.placeholderWidget(
+                  assetName: Constants.assetLockedRepository,
+                  assetHeight: lockedRepoImageHeight,
+                ),
+              ),
               Dimensions.spacingVerticalDouble,
               Align(
-                  alignment: AlignmentDirectional.center,
-                  child: Fields.inPageMainMessage(
-                      S.current.messageLockedRepository,
-                      style: context.theme.appTextStyle.bodyLarge,
-                      tags: {
-                        Constants.inlineTextColor:
-                            InlineTextStyles.color(Colors.black),
-                        Constants.inlineTextSize: InlineTextStyles.size(),
-                        Constants.inlineTextBold: InlineTextStyles.bold
-                      })),
+                alignment: AlignmentDirectional.center,
+                child: Fields.inPageMainMessage(
+                  S.current.messageLockedRepository,
+                  style: context.theme.appTextStyle.bodyLarge,
+                  tags: {
+                    Constants.inlineTextColor: InlineTextStyles.color(
+                      Colors.black,
+                    ),
+                    Constants.inlineTextSize: InlineTextStyles.size(),
+                    Constants.inlineTextBold: InlineTextStyles.bold,
+                  },
+                ),
+              ),
               Dimensions.spacingVertical,
               Align(
-                  alignment: AlignmentDirectional.center,
-                  child: Fields.inPageSecondaryMessage(
-                      S.current.messageInputPasswordToUnlock,
-                      tags: {
-                        Constants.inlineTextSize: InlineTextStyles.size(),
-                        Constants.inlineTextBold: InlineTextStyles.bold,
-                      })),
+                alignment: AlignmentDirectional.center,
+                child: Fields.inPageSecondaryMessage(
+                  S.current.messageInputPasswordToUnlock,
+                  tags: {
+                    Constants.inlineTextSize: InlineTextStyles.size(),
+                    Constants.inlineTextBold: InlineTextStyles.bold,
+                  },
+                ),
+              ),
               Dimensions.spacingVerticalDouble,
               Fields.inPageButton(
-                  onPressed: () async {
-                    await unlockRepository(
-                      context,
-                      settings,
-                      session,
-                      repoCubit,
-                      passwordHasher,
-                    );
-                  },
-                  leadingIcon: const Icon(Icons.lock_open_rounded),
-                  text: S.current.actionUnlock,
-                  focusNode: unlockButtonFocus,
-                  autofocus: true)
+                onPressed: () async {
+                  await unlockRepository(
+                    context,
+                    settings,
+                    session,
+                    repoCubit,
+                    passwordHasher,
+                  );
+                },
+                leadingIcon: const Icon(Icons.lock_open_rounded),
+                text: S.current.actionUnlock,
+                focusNode: unlockButtonFocus,
+                autofocus: true,
+              ),
             ],
           ),
         ),

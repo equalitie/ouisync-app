@@ -20,52 +20,47 @@ class ThroughputDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => DefaultTextStyle.merge(
-        style: TextStyle(
-          fontSize: size,
-          fontFeatures: [FontFeature.tabularFigures()],
-        ),
-        child: Builder(
-          builder: (context) => IconTheme(
-              data: IconThemeData(
-                size: DefaultTextStyle.of(context).style.fontSize,
+    style: TextStyle(
+      fontSize: size,
+      fontFeatures: [FontFeature.tabularFigures()],
+    ),
+    child: Builder(
+      builder:
+          (context) => IconTheme(
+            data: IconThemeData(
+              size: DefaultTextStyle.of(context).style.fontSize,
+            ),
+            child: switch (orientation) {
+              Orientation.landscape => Row(children: _buildCells(context)),
+              Orientation.portrait => Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: _buildCells(context),
               ),
-              child: switch (orientation) {
-                Orientation.landscape => Row(children: _buildCells(context)),
-                Orientation.portrait => Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: _buildCells(context)),
-              }),
-        ),
-      );
+            },
+          ),
+    ),
+  );
 
   List<Widget> _buildCells(BuildContext context) => [
-        _buildCell(
-          context,
-          stats.throughputRx,
-          Icon(Icons.download, color: Colors.blue),
-        ),
-        _buildCell(
-          context,
-          stats.throughputTx,
-          Icon(Icons.upload, color: Colors.orange),
-        ),
-      ];
+    _buildCell(
+      context,
+      stats.throughputRx,
+      Icon(Icons.download, color: Colors.blue),
+    ),
+    _buildCell(
+      context,
+      stats.throughputTx,
+      Icon(Icons.upload, color: Colors.orange),
+    ),
+  ];
 
-  Widget _buildCell(
-    BuildContext context,
-    int value,
-    Icon icon,
-  ) =>
-      Padding(
-        padding: EdgeInsetsDirectional.symmetric(horizontal: 4.0),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text(formatThroughput(value)),
-            icon,
-          ],
-        ),
-      );
+  Widget _buildCell(BuildContext context, int value, Icon icon) => Padding(
+    padding: EdgeInsetsDirectional.symmetric(horizontal: 4.0),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [Text(formatThroughput(value)), icon],
+    ),
+  );
 }
 
 class LiveThroughputDisplay extends StatelessWidget {
@@ -82,17 +77,13 @@ class LiveThroughputDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => StreamBuilder<Stats>(
-        stream: stream,
-        builder: (context, snapshot) => ThroughputDisplay(
+    stream: stream,
+    builder:
+        (context, snapshot) => ThroughputDisplay(
           snapshot.data ??
-              Stats(
-                bytesRx: 0,
-                bytesTx: 0,
-                throughputTx: 0,
-                throughputRx: 0,
-              ),
+              Stats(bytesRx: 0, bytesTx: 0, throughputTx: 0, throughputRx: 0),
           size: size,
           orientation: orientation,
         ),
-      );
+  );
 }

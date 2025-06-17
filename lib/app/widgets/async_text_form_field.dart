@@ -50,21 +50,22 @@ class _State extends State<AsyncTextFormField> {
 
   @override
   Widget build(BuildContext context) => TextFormField(
-      controller: widget.controller,
-      initialValue: widget.initialValue,
-      enabled: widget.enabled,
-      onSaved: widget.onSaved,
-      onFieldSubmitted: widget.onFieldSubmitted,
-      autovalidateMode: widget.autovalidateMode,
-      autofocus: widget.autofocus,
-      focusNode: widget.focusNode,
-      obscureText: widget.obscureText,
-      textInputAction: widget.textInputAction,
-      keyboardType: widget.keyboardType,
-      decoration: widget.decoration,
-      style: widget.style,
-      validator: (_) => _validationResult,
-      onChanged: _onChanged);
+    controller: widget.controller,
+    initialValue: widget.initialValue,
+    enabled: widget.enabled,
+    onSaved: widget.onSaved,
+    onFieldSubmitted: widget.onFieldSubmitted,
+    autovalidateMode: widget.autovalidateMode,
+    autofocus: widget.autofocus,
+    focusNode: widget.focusNode,
+    obscureText: widget.obscureText,
+    textInputAction: widget.textInputAction,
+    keyboardType: widget.keyboardType,
+    decoration: widget.decoration,
+    style: widget.style,
+    validator: (_) => _validationResult,
+    onChanged: _onChanged,
+  );
 
   Future<void> _onChanged(String value) async {
     _validationInput = value;

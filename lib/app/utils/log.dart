@@ -21,11 +21,12 @@ class LogUtils {
   /// Dump all logs from the log folder to the given sink
   static Future<void> dump(IOSink sink) async {
     final main = File(await _current);
-    final all = await main.parent
-        .list()
-        .map((entry) => entry.absolute.path)
-        .where((path) => path.startsWith(main.path))
-        .toList();
+    final all =
+        await main.parent
+            .list()
+            .map((entry) => entry.absolute.path)
+            .where((path) => path.startsWith(main.path))
+            .toList();
 
     // The logs files are named 'ouisync.log', 'ouisync.log.1', 'ouisync.log.2',
     // etc. so sorting them in reverse lexigographical order yields them from
@@ -33,9 +34,11 @@ class LogUtils {
     all.sort((a, b) => b.compareTo(a));
 
     for (final path in all) {
-      await sink.addStream(File(path)
-          .openRead()
-          .map((chunk) => utf8.encode(removeAnsi(utf8.decode(chunk)))));
+      await sink.addStream(
+        File(path).openRead().map(
+          (chunk) => utf8.encode(removeAnsi(utf8.decode(chunk))),
+        ),
+      );
     }
   }
 
@@ -50,9 +53,9 @@ class LogUtils {
     // TODO: the correct solution is to just not do this and otherwise defer to
     // native to supply the path to all the (ideally compressed) logs to share
     Stream<List<int>> tail() => file.openRead(offset).map((chunk) {
-          offset += chunk.length;
-          return chunk;
-        });
+      offset += chunk.length;
+      return chunk;
+    });
 
     yield* tail(); // first yield the whole file as is right now then...
     await for (final _ in FileWatcher(file.path).events) {
@@ -134,7 +137,7 @@ class _FilePrinter extends LoggyPrinter {
   final IOSink _sink;
 
   _FilePrinter(String path)
-      : _sink = File(path).openWrite(mode: FileMode.append);
+    : _sink = File(path).openWrite(mode: FileMode.append);
 
   @override
   void onLog(LogRecord record) {
@@ -173,8 +176,9 @@ class _FanoutPrinter extends LoggyPrinter {
   }
 }
 
-final _levelPad =
-    ouisync.LogLevel.values.map((level) => level.name.length).reduce(max);
+final _levelPad = ouisync.LogLevel.values
+    .map((level) => level.name.length)
+    .reduce(max);
 
 String _formatRecord(LogRecord record) {
   final level = record.level.toOuisync();
@@ -213,21 +217,21 @@ const trace = LogLevel('Trace', 1);
 
 extension LoggyLogLevelExtension on LogLevel {
   ouisync.LogLevel toOuisync() => switch (this) {
-        LogLevel.error => ouisync.LogLevel.error,
-        LogLevel.warning => ouisync.LogLevel.warn,
-        LogLevel.info => ouisync.LogLevel.info,
-        LogLevel.debug => ouisync.LogLevel.debug,
-        trace => ouisync.LogLevel.trace,
-        _ => ouisync.LogLevel.trace,
-      };
+    LogLevel.error => ouisync.LogLevel.error,
+    LogLevel.warning => ouisync.LogLevel.warn,
+    LogLevel.info => ouisync.LogLevel.info,
+    LogLevel.debug => ouisync.LogLevel.debug,
+    trace => ouisync.LogLevel.trace,
+    _ => ouisync.LogLevel.trace,
+  };
 }
 
 extension OuisyncLogLevelExtension on ouisync.LogLevel {
   LogLevel toLoggy() => switch (this) {
-        ouisync.LogLevel.error => LogLevel.error,
-        ouisync.LogLevel.warn => LogLevel.warning,
-        ouisync.LogLevel.info => LogLevel.info,
-        ouisync.LogLevel.debug => LogLevel.debug,
-        ouisync.LogLevel.trace => trace,
-      };
+    ouisync.LogLevel.error => LogLevel.error,
+    ouisync.LogLevel.warn => LogLevel.warning,
+    ouisync.LogLevel.info => LogLevel.info,
+    ouisync.LogLevel.debug => LogLevel.debug,
+    ouisync.LogLevel.trace => trace,
+  };
 }

@@ -26,16 +26,15 @@ import 'utils.dart'
 enum FileDestination { device, ouisync }
 
 class FileIO with AppLogger {
-  const FileIO({
-    required this.context,
-    required this.repoCubit,
-  });
+  const FileIO({required this.context, required this.repoCubit});
 
   final BuildContext context;
   final RepoCubit repoCubit;
 
-  Future<void> addFileFromDevice(
-      {required FileType type, required Future<bool> popCallback}) async {
+  Future<void> addFileFromDevice({
+    required FileType type,
+    required Future<bool> popCallback,
+  }) async {
     final storagePermissionOk = await _maybeRequestPermission(context);
     if (storagePermissionOk == false) {
       return;
@@ -110,10 +109,10 @@ class FileIO with AppLogger {
   Future<DisambiguationAction?> _confirmKeepOrReplaceEntry(
     BuildContext context, {
     required String fileName,
-  }) async =>
-      showDialog<DisambiguationAction>(
-        context: context,
-        builder: (BuildContext context) => AlertDialog(
+  }) async => showDialog<DisambiguationAction>(
+    context: context,
+    builder:
+        (BuildContext context) => AlertDialog(
           title: Flex(
             direction: Axis.horizontal,
             children: [
@@ -121,12 +120,12 @@ class FileIO with AppLogger {
                 S.current.titleAddFile,
                 style: context.theme.appTextStyle.titleMedium,
                 maxLines: 2,
-              )
+              ),
             ],
           ),
           content: ReplaceKeepEntry(name: fileName, type: EntryType.file),
         ),
-      );
+  );
 
   Future<void> saveFileToDevice(
     FileEntry entry, [
@@ -162,8 +161,9 @@ class FileIO with AppLogger {
       destinationPath = paths.destinationPath;
     }
 
-    final destinationFile =
-        await io.File(destinationPath).create(recursive: true);
+    final destinationFile = await io.File(
+      destinationPath,
+    ).create(recursive: true);
 
     return repoCubit.downloadFile(
       sourcePath: path,
@@ -196,18 +196,16 @@ class FileIO with AppLogger {
       return true;
     }
 
-    loggy.debug('Error: STORAGE permission denied by the user '
-        '(SDK $androidSDK)');
+    loggy.debug(
+      'Error: STORAGE permission denied by the user '
+      '(SDK $androidSDK)',
+    );
 
     return false;
   }
 
-  Future<
-      ({
-        String parentPath,
-        String destinationPath,
-        bool canceled,
-      })> getDestinationPath(String defaultPath, [String? fileName]) async {
+  Future<({String parentPath, String destinationPath, bool canceled})>
+  getDestinationPath(String defaultPath, [String? fileName]) async {
     String parentPath = '';
     String? destinationFilePath = '';
 
@@ -218,9 +216,10 @@ class FileIO with AppLogger {
         return (parentPath: '', destinationPath: '', canceled: true);
       }
 
-      final dirName = fileName != null
-          ? p.dirname(destinationFilePath)
-          : destinationFilePath;
+      final dirName =
+          fileName != null
+              ? p.dirname(destinationFilePath)
+              : destinationFilePath;
       parentPath = p.basename(dirName);
     } else {
       parentPath = p.basename(defaultPath);
@@ -249,13 +248,15 @@ class FileIO with AppLogger {
   }
 
   Future<String?> _getDesktopPath(String parentPath, String? fileName) async {
-    final basePath = (fileName ?? '').isEmpty
-        ? await FilePicker.platform
-            .getDirectoryPath(initialDirectory: parentPath)
-        : await FilePicker.platform.saveFile(
-            fileName: fileName,
-            initialDirectory: parentPath,
-          );
+    final basePath =
+        (fileName ?? '').isEmpty
+            ? await FilePicker.platform.getDirectoryPath(
+              initialDirectory: parentPath,
+            )
+            : await FilePicker.platform.saveFile(
+              fileName: fileName,
+              initialDirectory: parentPath,
+            );
 
     return basePath;
   }
@@ -266,7 +267,8 @@ class FileIO with AppLogger {
     FileDestination destination,
   ) async {
     loggy.debug(
-        'File $fileName already exist on location $parentPath. Renaming...');
+      'File $fileName already exist on location $parentPath. Renaming...',
+    );
     fileName = await _renameFile(parentPath, fileName, destination, 0);
 
     loggy.debug('The new name is $fileName');
@@ -288,9 +290,10 @@ class FileIO with AppLogger {
     final newFileName = '$name (${versions += 1})$extension';
     final newDestinationPath = p.join(destinationPath, newFileName);
 
-    final exist = destination == FileDestination.device
-        ? io.File(newDestinationPath).exists()
-        : repoCubit.entryExists(newDestinationPath);
+    final exist =
+        destination == FileDestination.device
+            ? io.File(newDestinationPath).exists()
+            : repoCubit.entryExists(newDestinationPath);
 
     if (await exist) {
       return _renameFile(
