@@ -92,7 +92,7 @@ Future<String?> _getDefaultMountDir() async {
 
     return '$home/Ouisync';
   } else if (Platform.isWindows) {
-    return 'O:';
+    return 'O:\\';
   } else {
     return null;
   }
