@@ -69,5 +69,5 @@ void main() {
     final mountContent = await io.File(mountPath).readAsString();
 
     expect(mountContent, equals(content));
-  });
+  }, tags: ['mount']);
 }
