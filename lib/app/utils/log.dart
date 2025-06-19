@@ -158,7 +158,7 @@ class _NativePrinter extends LoggyPrinter {
 class _ConsolePrinter extends LoggyPrinter {
   @override
   void onLog(LogRecord record) {
-    stdout.writeln(_formatRecord(record));
+    print(_formatRecord(record));
   }
 }
 
