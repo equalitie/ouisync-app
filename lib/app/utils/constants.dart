@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+
+import 'flavor.dart';
 
 enum PasswordAction { add, change, remove, biometrics }
 
@@ -137,12 +138,10 @@ class Constants {
   static const String dokanUrl = "https://dokan-dev.github.io";
 
   // List of available cache servers.
-  static List<String> get cacheServers => _cacheServers[appFlavor] ?? [];
-
-  static const Map<String, List<String>> _cacheServers = {
-    'production': ['server-ca.ouisync.net'],
-    'unofficial': ['server-ca.ouisync.net'],
-    'nightly': ['server-ca.ouisync.net:22443'],
+  static List<String> get cacheServers => switch (Flavor.current) {
+    Flavor.production => ['server-ca.ouisync.net'],
+    Flavor.unofficial => ['server-ca.ouisync.net'],
+    Flavor.nightly => ['server-ca.ouisync.net:22443'],
   };
 
   static const int android12SDK = 32;

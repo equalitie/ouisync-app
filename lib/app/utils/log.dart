@@ -3,7 +3,6 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 import 'package:loggy/loggy.dart';
 import 'package:logtee/logtee.dart';
 import 'package:ouisync/ouisync.dart' as ouisync;
@@ -12,6 +11,7 @@ import 'package:path/path.dart';
 
 import 'constants.dart';
 import 'dirs.dart';
+import 'flavor.dart';
 import 'native.dart';
 
 File? _file;
@@ -26,7 +26,7 @@ Future<void> init(Dirs dirs) async {
   final package = await PackageInfo.fromPlatform();
   final header = '''
 -------------------- ${package.appName} Start --------------------
-version:  ${package.version} $appFlavor (build ${package.buildNumber})
+version:  ${package.version} ${Flavor.current} (build ${package.buildNumber})
 started:  ${_formatTimestamp(DateTime.now())}
 platform: ${Platform.operatingSystemVersion}
 root dir: ${dirs.root}
