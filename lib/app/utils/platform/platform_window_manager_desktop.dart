@@ -151,7 +151,7 @@ class PlatformWindowManagerDesktop
   }
 
   @override
-  void onWindowClose() async {
+  Future<void> onWindowClose() async {
     // By default (when state is `open`), closing the window only minimizes it to the tray. When
     // the user clicks "Exit" in the tray menu, state is switched to `closing` and the onClose
     // handler is called. Window close prevention is still enabled so the close handler can
@@ -160,7 +160,6 @@ class PlatformWindowManagerDesktop
     switch (_state) {
       case _State.open:
         await _toggleVisible(false);
-        break;
       case _State.closing:
         final onClose = _onClose;
         if (onClose != null) {
@@ -170,9 +169,8 @@ class PlatformWindowManagerDesktop
         _state = _State.closed;
         await windowManager.setPreventClose(false);
         await windowManager.close();
-        break;
       case _State.closed:
-        await windowManager.destroy();
+      // let the window manager destroy the window
     }
   }
 
