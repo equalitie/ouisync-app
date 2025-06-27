@@ -137,8 +137,7 @@ class Constants {
 
   static const String dokanUrl = "https://dokan-dev.github.io";
 
-  // List of available cache servers.
-  static List<String> get cacheServers => switch (Flavor.current) {
+  static List<String> get defaultCacheServers => switch (Flavor.current) {
     Flavor.production => ['server-ca.ouisync.net'],
     Flavor.unofficial => ['server-ca.ouisync.net'],
     Flavor.nightly => ['server-ca.ouisync.net:22443'],

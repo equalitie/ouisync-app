@@ -22,7 +22,6 @@ import 'utils/utils.dart'
         AppTextThemeExtension,
         AppTypography,
         CacheServers,
-        Constants,
         loadAndMigrateSettings,
         Settings;
 import 'widgets/flavor_banner.dart';
@@ -180,7 +179,7 @@ class _HomeWidgetState extends State<HomeWidget>
         );
 
     final cacheServers = CacheServers(widget.session);
-    unawaited(cacheServers.addAll(Constants.cacheServers));
+    unawaited(cacheServers.addAll(widget.settings.cacheServers));
 
     mountCubit = MountCubit(widget.session, widget.dirs)..init();
     reposCubit = ReposCubit(
