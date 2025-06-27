@@ -25,7 +25,10 @@ void main() {
     await server.start();
 
     session = await Session.create(configPath: dirs.config);
+
     settings = await Settings.init(MasterKey.random());
+    settings.cacheServers = [];
+
     localeCubit = LocaleCubit(settings);
   });
 

@@ -83,12 +83,9 @@ android {
                 'proguard-rules.pro',
             )
         }
-
-        debug {
-            android.packagingOptions.doNotStrip "**.so"
-        }
     }
 }
+
 
 // Generate launcher icons by invoking [icons_launcher](https://pub.dev/packages/icons_launcher)
 def isWindows = System.getProperty('os.name').toLowerCase().contains('windows')

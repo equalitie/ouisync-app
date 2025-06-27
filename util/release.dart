@@ -609,7 +609,7 @@ Future<File> buildWindowsInstaller(Version version, String? sentryDSN) async {
     buildName,
     // HACK: `flutter build windows` doesn't support --flavor yet. Pass it via env variable instead.
     '--dart-define',
-    'FLUTTER_APP_FLAVOR=${version.flavor}',
+    'OUISYNC_FLAVOR=${version.flavor}',
   ]);
 
   /// Download the Dokan MSI to be bundle with the Ouisync MSIX, into the source
@@ -752,7 +752,7 @@ Future<File> buildDebGUI({
     buildName,
     // HACK: `flutter build linux` doesn't support --flavor yet. Pass it via env variable instead.
     '--dart-define',
-    'FLUTTER_APP_FLAVOR=${version.flavor}',
+    'OUISYNC_FLAVOR=${version.flavor}',
   ]);
 
   final assetDesc = AssetDesc('$name-gui', version, 'deb', arch: 'amd64');
@@ -938,7 +938,6 @@ Future<File> buildAab(
     '--flavor=$flavor',
     '--build-name',
     version.toString(),
-    '--verbose',
   ], environment: env);
 
   return File(inputPath);

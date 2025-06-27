@@ -124,6 +124,11 @@ class Settings with AppLogger {
   final SettingsRoot _root;
   final SharedPreferences _prefs;
 
+  // List of available cache servers.
+  // Note that changes to this are currently not persisted. Changing it is currently only useful in
+  // tests. This might change in the future.
+  List<String> cacheServers = Constants.defaultCacheServers;
+
   //------------------------------------------------------------------
 
   Settings._(this._root, this._prefs, this.masterKey);
