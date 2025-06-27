@@ -3,7 +3,7 @@ import 'dart:collection';
 import 'dart:convert';
 
 import 'ansi_parser.dart';
-import 'log.dart';
+import 'log.dart' as log;
 
 class LogMessage {
   final List<AnsiSpan> content;
@@ -18,10 +18,8 @@ class LogMessage {
 class LogReader {
   final Stream<LogMessage> messages;
 
-  LogReader() : this._(LogUtils.watch);
-
-  LogReader._(Stream<List<int>> input)
-    : messages = input
+  LogReader()
+    : messages = log.watch
           .asBroadcastStream()
           .map((chunk) => utf8.decode(chunk))
           .map((chunk) => LogMessage.parse(chunk));

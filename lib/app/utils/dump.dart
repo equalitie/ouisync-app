@@ -11,7 +11,7 @@ import 'package:path_provider/path_provider.dart';
 import '../cubits/connectivity_info.dart';
 import '../cubits/nat_detection.dart';
 import '../cubits/power_control.dart';
-import 'log.dart';
+import 'log.dart' as log;
 
 Future<File> dumpAll(
   BuildContext context, {
@@ -59,7 +59,7 @@ Future<File> dumpAll(
     sink.writeln(
       "\n\n------------------------- Logs ----------------------------------\n\n",
     );
-    await LogUtils.dump(sink);
+    await log.dump(sink);
   } finally {
     await sink.close();
   }

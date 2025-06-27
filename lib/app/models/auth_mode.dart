@@ -8,8 +8,8 @@ import 'package:ouisync/ouisync.dart'
         LocalSecretSecretKey,
         Password,
         SecretKey;
-import 'package:ouisync_app/app/utils/log.dart';
 
+import '../utils/log.dart' as log;
 import '../utils/master_key.dart';
 
 const _keys = (
@@ -321,7 +321,7 @@ class AuthModeDecryptFailed extends AuthModeException {
 }
 
 AuthMode _decodeError(Object? data) {
-  appLogger("AuthMode").error('invalid auth mode data: `$data`');
+  log.named('AuthMode').error('invalid auth mode data: `$data`');
   throw AuthModeParseFailed();
 }
 
