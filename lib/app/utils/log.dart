@@ -108,10 +108,7 @@ Stream<List<int>> get watch async* {
   int offset = 0;
 
   // open `file` and tail (unix) from `offset` to eof, updating `offset` in
-  // the process; unfortunately, posix locks are per process so this results
-  // in lost data even when another isolate (or isolate) truncates the file
-  // TODO: the correct solution is to just not do this and otherwise defer to
-  // native to supply the path to all the (ideally compressed) logs to share
+  // the process.
   Stream<List<int>> tail() => file.openRead(offset).map((chunk) {
     offset += chunk.length;
     return chunk;
@@ -149,6 +146,7 @@ class _NativePrinter extends LoggyPrinter {
 class _ConsolePrinter extends LoggyPrinter {
   @override
   void onLog(LogRecord record) {
+    // ignore: avoid_print
     print(_formatRecord(record));
   }
 }
