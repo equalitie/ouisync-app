@@ -1,5 +1,7 @@
 FROM mcr.microsoft.com/windows/servercore:ltsc2022 as windows
 
+ENV FLUTTER_VERSION=3.32.4
+
 SHELL ["cmd", "/S", "/C"]
 
 ####################
@@ -45,7 +47,7 @@ RUN setx /M path "C:\MinGit\cmd;%path%"
 #########################
 #### Install Flutter ####
 #########################
-RUN git clone --filter=tree:0 -b 3.29.3 https://github.com/flutter/flutter.git C:\flutter
+RUN git clone --filter=tree:0 -b %FLUTTER_VERSION% https://github.com/flutter/flutter.git C:\flutter
 RUN setx /M path "C:\flutter\bin;C:\flutter\bin\cache\dart-sdk\bin;%path%"
 
 # Git doesn't like directories with dubious ownership, it's OK in a container

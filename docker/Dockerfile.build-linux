@@ -2,7 +2,7 @@
 # run in newer versions, but not vice versa.
 FROM ubuntu:22.04
 
-ENV FLUTTER_VERSION=3.29.3
+ENV FLUTTER_VERSION=3.32.4
 
 RUN apt-get update && apt-get upgrade -y
 RUN apt-get install -y \
