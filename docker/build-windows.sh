@@ -28,9 +28,11 @@ done
 
 if [ -z "$host"   ]; then echo "Missing --host";   print_help; exit 1; fi
 if [ -z "$commit" ]; then echo "Missing --commit"; print_help; exit 1; fi
-
 image_name=ouisync.windows-builder.$USER
 container_name="ouisync.windows-builder.$(date +'%Y-%m-%dT%H-%M-%S')"
+
+# BuildKit is not supported on Windows yet
+export DOCKER_BUILDKIT=0
 
 out_dir=${out_dir:=./releases/$container_name}
 
@@ -48,10 +50,12 @@ function exe {
 }
 
 # Build image
-dock build -t $image_name - < docker/Dockerfile.build-windows
+dock build -t $image_name $isolation - < docker/Dockerfile.build-windows
+
+host_core_count=$(ssh $host 'cmd /s /c echo %NUMBER_OF_PROCESSORS%' | tr -d '[:space:]')
 
 # Start container; Auto destroy on this script exit
-dock run -d --rm --name $container_name -p 22 $image_name \
+dock run -d --rm --name $container_name --cpus $host_core_count -p 22 $image_name \
     sh -c 'sleep 60; while [ -n "$(find /tmp/alive -cmin -10)" ]; do sleep 10; done'
 
 # Prevent the container from stopping

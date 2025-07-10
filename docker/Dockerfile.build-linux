@@ -10,7 +10,7 @@ RUN apt-get install -y \
     git xxd unzip \
     wget curl \
     libgtk-3-dev libfuse-dev libappindicator3-dev libsecret-1-dev libcurl4-openssl-dev \
-    python3-minimal \
+    python3-minimal python-is-python3 \
     openjdk-17-jdk
 
 # download and install sdkmanager
