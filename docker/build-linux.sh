@@ -4,10 +4,18 @@ set -e
 
 function print_help() {
     echo "Script for building Ouisync App in a Docker container"
-    echo "Usage: $0 --host <HOST> --commit <COMMIT> [--out <OUTPUT_DIRECTORY>]"
+    echo "Usage: $0 --host <HOST> (--commit <COMMIT> | --srcdir <SRCDIR>) [--out <OUTPUT_DIRECTORY>]"
     echo "  HOST:             IP or entry in ~/.ssh/config of machine running Docker"
     echo "  COMMIT:           Commit from which to build"
+    echo "  SRCDIR:           Source dir from which to build"
     echo "  OUTPUT_DIRECTORY: Directory where artifacts will be stored"
+}
+
+function error() {
+    echo "$1"
+    echo
+    print_help
+    exit 1
 }
 
 while [[ "$#" -gt 0 ]]; do
@@ -15,14 +23,22 @@ while [[ "$#" -gt 0 ]]; do
         -h) print_help; exit ;;
         --host) host="$2"; shift ;;
         --commit) commit="$2"; shift ;;
+        --srcdir) srcdir="$2"; shift ;;
         --out) dst_dir="$2"; shift ;;
-        *) echo "Unknown argument: $1"; print_help; exit 1 ;;
+        *) error "Unknown argument: $1" ;;
     esac
     shift
 done
 
-if [ -z "$host"   ]; then echo "Missing --host";   print_help; exit 1; fi
-if [ -z "$commit" ]; then echo "Missing --commit"; print_help; exit 1; fi
+if [ -z "$host"   ]; then error "Missing --host"; fi
+if [ -z "$commit" -a -z "$srcdir" ]; then error "Missing one of --commit or --srcdir"; fi
+if [ -n "$commit" -a -n "$srcdir" ]; then error "--commit and --srcdir are mutually exclusive"; fi
+
+if [ -n "$commit" ]; then
+    flavor=production
+elif [ -n "$srcdir" ]; then
+    flavor=unofficial
+fi
 
 image_name=ouisync.linux-builder.$USER
 container_name="ouisync.linux-builder.$(date +'%Y-%m-%dT%H-%M-%S')"
@@ -30,11 +46,13 @@ container_name="ouisync.linux-builder.$(date +'%Y-%m-%dT%H-%M-%S')"
 dst_dir=${dst_dir:=./releases/$container_name}
 
 # Collect secrets
-secretSentryDsn=$(pass cenoers/ouisync/app/production/sentry_dsn)
-secretStorePassword=$(pass cenoers/ouisync/app/production/android/storePassword)
-secretKeyAlias=$(pass cenoers/ouisync/app/production/android/keyAlias)
-secretKeyPassword=$(pass cenoers/ouisync/app/production/android/keyPassword)
-secretKeystoreHex=$(pass cenoers/ouisync/app/production/android/keystore.jks | xxd -p)
+if [ "$flavor" != unofficial ]; then
+    secretSentryDsn=$(pass cenoers/ouisync/app/$flavor/sentry_dsn)
+    secretStorePassword=$(pass cenoers/ouisync/app/$flavor/android/storePassword)
+    secretKeyAlias=$(pass cenoers/ouisync/app/$flavor/android/keyAlias)
+    secretKeyPassword=$(pass cenoers/ouisync/app/$flavor/android/keyPassword)
+    secretKeystoreHex=$(pass cenoers/ouisync/app/$flavor/android/keystore.jks | xxd -p)
+fi
 
 # Define shortcuts
 function dock() {
@@ -72,18 +90,30 @@ function on_exit() {
 }
 
 # Set up secrets inside the container
-exe / mkdir -p /opt/secrets
-echo "$secretKeystoreHex" | xxd -p -r      | exe_i dd of=/opt/secrets/keystore.jks
-echo "storePassword=$secretStorePassword"  | exe_i dd of=/opt/secrets/key.properties
-echo "keyPassword=$secretKeyPassword"      | exe_i dd of=/opt/secrets/key.properties oflag=append conv=notrunc
-echo "keyAlias=$secretKeyAlias"            | exe_i dd of=/opt/secrets/key.properties oflag=append conv=notrunc
-echo "storeFile=/opt/secrets/keystore.jks" | exe_i dd of=/opt/secrets/key.properties oflag=append conv=notrunc
-echo "$secretSentryDsn"                    | exe_i dd of=/opt/secrets/sentry_dsn
+if [ "$flavor" != unofficial ]; then
+    exe / mkdir -p /opt/secrets
+    echo "$secretKeystoreHex" | xxd -p -r      | exe_i dd of=/opt/secrets/keystore.jks
+    echo "storePassword=$secretStorePassword"  | exe_i dd of=/opt/secrets/key.properties
+    echo "keyPassword=$secretKeyPassword"      | exe_i dd of=/opt/secrets/key.properties oflag=append conv=notrunc
+    echo "keyAlias=$secretKeyAlias"            | exe_i dd of=/opt/secrets/key.properties oflag=append conv=notrunc
+    echo "storeFile=/opt/secrets/keystore.jks" | exe_i dd of=/opt/secrets/key.properties oflag=append conv=notrunc
+    echo "$secretSentryDsn"                    | exe_i dd of=/opt/secrets/sentry_dsn
+    arg_android_key_properties="--android-key-properties=/opt/secrets/key.properties"
+    arg_sentry="--sentry=/opt/secrets/sentry_dsn"
+fi
 
-# Checkout Ouisync sources
-exe /opt git clone --filter=tree:0 https://github.com/equalitie/ouisync-app
-exe /opt/ouisync-app git reset --hard $commit
-exe /opt/ouisync-app git submodule update --init --recursive
+# Checkout or copy Ouisync sources
+if [ -n "$commit" ]; then
+    exe /opt git clone --filter=tree:0 https://github.com/equalitie/ouisync-app
+    exe /opt/ouisync-app git reset --hard $commit
+    exe /opt/ouisync-app git submodule update --init --recursive
+else
+    rsync -e "docker --host ssh://$host exec -i" \
+        -av \
+        --exclude={'ouisync/.git','build','ouisync/target','releases','windows','.dart_tool','ios'} \
+        ${srcdir%/}/ $container_name:/opt/ouisync-app
+    exe / git config --global --add safe.directory /opt/ouisync-app
+fi
 
 # Generate bindings (TODO: This should be done automatically)
 exe /opt/ouisync-app/ouisync/bindings/dart dart pub get
@@ -92,9 +122,9 @@ exe /opt/ouisync-app/ouisync/bindings/dart dart tool/bindgen.dart
 # Build Ouisync app
 exe /opt/ouisync-app dart pub get
 exe /opt/ouisync-app dart run util/release.dart \
-    --android-key-properties=/opt/secrets/key.properties \
-    --flavor=production \
-    --sentry=/opt/secrets/sentry_dsn \
+    --flavor=$flavor \
+    $arg_android_key_properties \
+    $arg_sentry \
     --apk --aab --deb-gui --deb-cli
 
 # Collect artifacts
