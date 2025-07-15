@@ -25,6 +25,7 @@ class ElevatedAsyncButton extends StatefulWidget {
 
 class ElevatedAsyncButtonState extends State<ElevatedAsyncButton> {
   bool isExecuting = false;
+  int execCounter = 0;
 
   ElevatedAsyncButtonState();
 
@@ -42,6 +43,7 @@ class ElevatedAsyncButtonState extends State<ElevatedAsyncButton> {
                 widgetOnPressed().whenComplete(() {
                   setState(() {
                     isExecuting = false;
+                    execCounter += 1;
                   });
                 }),
               );

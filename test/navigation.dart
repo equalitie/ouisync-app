@@ -25,20 +25,23 @@ class MainPage {
     await tester.pumpWidget(testApp(deps.createMainPage()));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('CREATE REPOSITORY'));
+    await tester.anxiousTap(find.byKey(Key('create_first_repo')));
     await tester.pumpAndSettle();
 
     // Filling in the repo name triggers an async operation and so we must explicitly wait until
     // it completes.
     await tester.enterText(find.byKey(ValueKey('name')), 'my repo');
-    await repoCreationObserver
-        .waitUntil((state) => state.substate is RepoCreationValid);
+    await repoCreationObserver.waitUntil(
+      (state) => state.substate is RepoCreationValid,
+    );
     await tester.pump();
 
-    await tester.tap(find.descendant(
-      of: find.byKey(ValueKey('use-cache-servers')),
-      matching: find.byType(Switch),
-    ));
+    await tester.tap(
+      find.descendant(
+        of: find.byKey(ValueKey('use-cache-servers')),
+        matching: find.byType(Switch),
+      ),
+    );
     await tester.pump();
 
     // Verify that use cache servers is off:
@@ -46,13 +49,15 @@ class MainPage {
 
     await tester.tap(find.text('CREATE'));
 
-    await repoCreationObserver
-        .waitUntil((state) => state.substate is RepoCreationSuccess);
+    await repoCreationObserver.waitUntil(
+      (state) => state.substate is RepoCreationSuccess,
+    );
 
-    final repoCubit = deps.reposCubit.state.repos.values
-        .where((entry) => entry.name == 'my repo')
-        .first
-        .cubit!;
+    final repoCubit =
+        deps.reposCubit.state.repos.values
+            .where((entry) => entry.name == 'my repo')
+            .first
+            .cubit!;
 
     expect(repoCubit.state.accessMode, equals(AccessMode.write));
     expect(repoCubit.state.isCacheServersEnabled, isFalse);
@@ -84,8 +89,11 @@ class RepoPage {
   Future<RepoSettings> enterRepoSettings() async {
     final repoSettingsIcon = Icons.more_vert_rounded; // The three vertical dots
 
-    await tester.tap(await tester
-        .pumpUntilFound(find.widgetWithIcon(IconButton, repoSettingsIcon)));
+    await tester.anxiousTap(
+      await tester.pumpUntilFound(
+        find.widgetWithIcon(IconButton, repoSettingsIcon),
+      ),
+    );
 
     return RepoSettings(tester);
   }
@@ -94,7 +102,8 @@ class RepoPage {
   // read or write mode, clicking it will lock the repository.
   Future<void> tapAccessModeButton() async {
     await tester.tap(
-        await tester.pumpUntilFound(find.byKey(Key('access-mode-button'))));
+      await tester.pumpUntilFound(find.byKey(Key('access-mode-button'))),
+    );
     await tester.pumpAndSettle();
   }
 
@@ -112,10 +121,13 @@ class RepoSettings {
   RepoSettings(this.tester);
 
   Future<void> tapSecurityButton() async {
-    final findSecurityButton =
-        find.widgetWithIcon(EntryActionItem, Icons.password_outlined);
+    final findSecurityButton = find.widgetWithIcon(
+      EntryActionItem,
+      Icons.password_outlined,
+    );
     final found = await tester.pumpUntilFound(findSecurityButton);
 
+    // Not `anxiousTap` because tapping again will remove the `MockAuthDialog`.
     await tester.tap(found);
     await tester.pumpAndSettle();
   }
@@ -136,34 +148,45 @@ class SecurityPage {
   SecurityPage(this.tester);
 
   Future<RepoResetPage> enterRepoResetPage() async {
-    await tester.tap(await tester
-        .pumpUntilFound(find.byKey(Key('enter-repo-reset-screen'))));
+    await tester.anxiousTap(
+      await tester.pumpUntilFound(find.byKey(Key('enter-repo-reset-screen'))),
+    );
     await tester.pumpUntilFound(find.byType(RepoResetAccessPage));
     await tester.pumpAndSettle();
     return RepoResetPage(tester);
   }
 
   Future<void> tapUseLocalPasswordSwitch() async {
-    await tester.tap(find.descendant(
-      of: find.byKey(Key('use-local-password')),
-      matching: find.byType(Switch),
-    ));
+    // Not using `anxiousTab` because repeated tapping switches the state back
+    // and forth.
+    await tester.tap(
+      find.descendant(
+        of: find.byKey(Key('use-local-password')),
+        matching: find.byType(Switch),
+      ),
+    );
     await tester.pumpAndSettle();
   }
 
   Future<void> tapRememberPasswordSwitch() async {
-    await tester.tap(find.descendant(
-      of: find.byKey(Key('store-on-device')),
-      matching: find.byType(Switch),
-    ));
+    // Not using `anxiousTap` because the state would switch back and forth.
+    await tester.tap(
+      find.descendant(
+        of: find.byKey(Key('store-on-device')),
+        matching: find.byType(Switch),
+      ),
+    );
     await tester.pumpAndSettle();
   }
 
   bool getRememberPasswordValue() {
     return tester
-        .widget<Switch>(find.descendant(
+        .widget<Switch>(
+          find.descendant(
             of: find.byKey(Key('store-on-device')),
-            matching: find.byType(Switch)))
+            matching: find.byType(Switch),
+          ),
+        )
         .value;
   }
 
@@ -175,8 +198,11 @@ class SecurityPage {
 
   Future<void> submit() async {
     final updateButtonFinder = find.byKey(Key('security-update-button'));
-    final updateButtonState =
-        tester.state<ElevatedAsyncButtonState>(updateButtonFinder);
+    final updateButtonState = tester.state<ElevatedAsyncButtonState>(
+      updateButtonFinder,
+    );
+
+    final oldExecCount = updateButtonState.execCounter;
 
     // Hide the snackbar so we can tap on it.
     ScaffoldMessenger.of(updateButtonFinder.evaluate().single).clearSnackBars();
@@ -186,22 +212,25 @@ class SecurityPage {
     await tester.pumpAndSettle();
 
     // Dialog to confirm.
-    await tester.tap(find.text('Accept'));
+    await tester.anxiousTap(find.text('Accept'));
     await tester.pumpAndSettle();
 
     // Wait for the update to finish.
-    expect(updateButtonState.isExecuting, true);
     await tester.pumpUntil(() {
-      return updateButtonState.isExecuting == false;
+      return updateButtonState.execCounter == oldExecCount + 1;
     });
 
     // Ensure that after the submission the user may exit the page without
     // being prompted to discard pending changes.
-    final repoSecurityWidget =
-        tester.widget<RepoSecurityWidget>(find.byType(RepoSecurityWidget));
+    final repoSecurityWidget = tester.widget<RepoSecurityWidget>(
+      find.byType(RepoSecurityWidget),
+    );
 
-    expect(repoSecurityWidget.cubit.state.hasPendingChanges, false,
-        reason: "There should be no more pending changes");
+    expect(
+      repoSecurityWidget.cubit.state.hasPendingChanges,
+      false,
+      reason: "There should be no more pending changes",
+    );
   }
 }
 
@@ -219,17 +248,19 @@ class RepoResetPage {
   Future<void> submit() async {
     // TODO: Check that the button is enabled.
 
-    await tester
-        .tap(await tester.pumpUntilFound(find.byKey(Key('repo-reset-submit'))));
-    await tester.pumpAndSettle();
+    // Non `anxiousTap` because tapping again will remove the confirmation dialog.
+    await tester.tap(
+      await tester.pumpUntilFound(find.byKey(Key('repo-reset-submit'))),
+    );
 
     // Confirm
-    await tester.tap(find.text('YES'));
+    await tester.anxiousTap(await tester.pumpUntilFound(find.text('YES')));
     await tester.pumpAndSettle();
 
     // Await until finished submitting/updating.
-    final accessResetPage = tester
-        .state<RepoResetAccessPageState>(find.byType(RepoResetAccessPage));
+    final accessResetPage = tester.state<RepoResetAccessPageState>(
+      find.byType(RepoResetAccessPage),
+    );
 
     await tester.pumpUntil(() => accessResetPage.hasPendingChanges == false);
   }
@@ -240,9 +271,14 @@ class RepoResetPage {
 class MockAuthDialog {
   // Silly dialog that mimics the biometric test by asking if it's "me".
   static Future<void> confirm(WidgetTester tester) async {
-    if (await LocalAuth.canAuthenticate()) {
-      await tester.tap(find.text('Yes'));
-      await tester.pumpAndSettle();
+    try {
+      if (await LocalAuth.canAuthenticate()) {
+        await tester.anxiousTap(find.text('Yes'));
+        await tester.pumpAndSettle();
+      }
+    } catch (e) {
+      await tester.takeScreenshot(name: "MockAuthDialog_confirm");
+      rethrow;
     }
   }
 }
@@ -251,8 +287,9 @@ class MockAuthDialog {
 
 class UnlockDialog {
   static Future<RepoResetPage> enterRepoResetPage(WidgetTester tester) async {
-    await tester.tap(await tester
-        .pumpUntilFound(find.byKey(Key('enter-repo-reset-screen'))));
+    await tester.anxiousTap(
+      await tester.pumpUntilFound(find.byKey(Key('enter-repo-reset-screen'))),
+    );
     await tester.pumpAndSettle();
 
     await MockAuthDialog.confirm(tester);

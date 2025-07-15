@@ -63,6 +63,7 @@ class NoRepositoriesState extends HookWidget {
               Dimensions.spacingVerticalDouble,
               Dimensions.spacingVerticalDouble,
               Fields.inPageButton(
+                key: Key('create_first_repo'),
                 onPressed: onCreateRepoPressed,
                 text: S.current.actionCreateRepository,
                 size: Dimensions.sizeInPageButtonRegular,
