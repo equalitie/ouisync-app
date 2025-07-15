@@ -1,0 +1,67 @@
+name: "Setup Android tests"
+runs:
+  using: "composite"
+  steps:
+    - name: Free disk space
+      uses: jlumbroso/free-disk-space@v1.3.1
+      with:
+        android: false
+        tool-cache: true
+
+    - name: Setup cargo cache
+      id: cargo-cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/bin/
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+          ouisync/target/
+        key: ${{ runner.os }}-android-cargo-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: ${{ runner.os }}-android-cargo-
+
+    - name: Setup gradle cache
+      id: gradle-cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        channel: 'stable'
+        flutter-version-file: pubspec.yaml
+        cache: true
+
+    - name: Add rust targets
+      run: rustup target add x86_64-linux-android aarch64-linux-android armv7-linux-androideabi
+      shell: bash
+
+    - name: Set NDK ABI filter
+      run: echo "ndk.abiFilters=x86_64" >> android/local.properties
+      shell: bash
+
+    - name: Generate the Dart bindings for the Ouisync library
+      working-directory: ouisync/bindings/dart
+      run: dart tool/bindgen.dart
+      shell: bash
+
+    # HACK: This should not be necessary as the publication should happen automatically as part of
+    # building the dart bindings. This, however, doesn't always work for some reason. As a
+    # workaround, we build them explicitly here.
+    - name: Build kotlin bindings and publish them to Mavel local
+      working-directory: ouisync/bindings/kotlin
+      run: gradle -Prust-targets=x86_64 publishClientPublicationToMavenLocal publishDebugServerPublicationToMavenLocal
+      shell: bash

@@ -8,7 +8,7 @@ on:
     branches: [master]
 
 env:
-  cache_path: |
+  cargo_cache_path: |
     ~/.cargo/bin/
     ~/.cargo/registry/index/
     ~/.cargo/registry/cache/
@@ -33,7 +33,7 @@ jobs:
               abi: arm64-v8a
             build-args: --apk
             artifact-files: ouisync*.apk
-            test: true
+            test: false
             build: true
 
           - name: linux-test
@@ -84,7 +84,7 @@ jobs:
         id: cache-restore
         uses: actions/cache/restore@v4
         with:
-          path: ${{ env.cache_path }}
+          path: ${{ env.cargo_cache_path }}
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: ${{ runner.os }}-cargo-
 
@@ -244,5 +244,69 @@ jobs:
         uses: actions/cache/save@v4
         with:
           key: ${{ steps.cache-restore.outputs.cache-primary-key }}
-          path: ${{ env.cache_path }}
+          path: ${{ env.cargo_cache_path }}
+
+  integration_test_android:
+    name: run integration tests on android ${{ matrix.api-level }}
+    runs-on: ubuntu-24.04
+
+    strategy:
+      matrix:
+        api-level:
+          # These don't work due to various missing apis
+          # - 23
+          # - 24
+          # - 25
+
+          - 26
+          - 27
+          - 28
+          - 29
+          - 30
+          - 31
+          - 32
+          - 33
+          - 34
+          - 35
+        include:
+          - api_level: 26
+            target: google_apis
+          - api_level: 27
+            target: default
+          - api_level: 28
+            target: google_apis
+          - api_level: 29
+            target: google_apis
+          - api_level: 30
+            target: google_apis
+          - api_level: 31
+            target: google_apis
+          - api_level: 32
+            target: google_apis
+          - api_level: 33
+            target: google_apis
+          - api_level: 34
+            target: google_apis
+          - api_level: 35
+            target: google_apis
+    steps:
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: ./.github/actions/setup_android_tests
+
+      - name: Run tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api-level }}
+          target: google_apis
+          arch: x86_64
+          script: flutter test integration_test --flavor itest --ignore-timeouts
 
