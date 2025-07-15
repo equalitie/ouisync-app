@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update [Flutter](https://flutter.dev/) to [v3.32.4](https://github.com/flutter/flutter/blob/main/CHANGELOG.md#3324).
 - Improve logging: capture more relevant log messages and implement log rotation.
 - Fix segfault when exiting the app on linux.
+- Add more dependencies to the ouisync-gui Debian package.
 
 ## [v0.9.0](https://github.com/equalitie/ouisync-app/compare/v0.8.3-production...v0.9.0) - 2025-06-05
 
