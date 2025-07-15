@@ -8,7 +8,7 @@ RUN apt-get update && apt-get upgrade -y
 RUN apt-get install -y \
     build-essential cmake ninja-build clang pkg-config \
     git xxd unzip \
-    wget curl \
+    wget curl rsync \
     libgtk-3-dev libfuse-dev libappindicator3-dev libsecret-1-dev libcurl4-openssl-dev \
     python3-minimal python-is-python3 \
     openjdk-17-jdk
@@ -16,7 +16,7 @@ RUN apt-get install -y \
 # download and install sdkmanager
 # https://developer.android.com/studio#command-tools
 ARG ANDROID_SDK_VERSION=13114758
-ENV ANDROID_SDK_ROOT /opt/android-sdk
+ENV ANDROID_SDK_ROOT=/opt/android-sdk
 RUN mkdir -p ${ANDROID_SDK_ROOT}/cmdline-tools && \
     wget -q https://dl.google.com/android/repository/commandlinetools-linux-${ANDROID_SDK_VERSION}_latest.zip && \
     unzip *tools*linux*.zip -d ${ANDROID_SDK_ROOT}/cmdline-tools && \
@@ -26,7 +26,7 @@ RUN mkdir -p ${ANDROID_SDK_ROOT}/cmdline-tools && \
 # download and install Android SDK and NDK
 ENV PATH="${ANDROID_SDK_ROOT}/cmdline-tools/tools/bin:${PATH}"
 RUN yes | sdkmanager --licenses
-RUN sdkmanager --install 'ndk;27.2.12479018' 'platforms;android-36' 'build-tools;36.0.0' 'cmake;3.22.1'
+RUN sdkmanager --install 'ndk;27.2.12479018' 'platforms;android-36' 'build-tools;36.0.0' 'cmake;3.22.1' 'cmdline-tools;latest'
 
 # install flutter
 RUN wget https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_${FLUTTER_VERSION}-stable.tar.xz -P /tmp
@@ -34,13 +34,14 @@ RUN tar xf /tmp/flutter_linux_*-stable.tar.xz -C /opt
 RUN rm /tmp/flutter_linux_*-stable.tar.xz
 ENV PATH="/opt/flutter/bin:$PATH"
 
-# Git doesn't like directories with dubious ownership, it's OK in a container
+# Git doesn't like directories with "dubious ownership", it's OK in a container
 # https://nvd.nist.gov/vuln/detail/CVE-2022-24765
 RUN git config --global --add safe.directory /opt/flutter
 
 RUN flutter config --enable-android --enable-linux-desktop
 RUN flutter precache --linux
 RUN flutter config --no-analytics
+RUN yes | flutter doctor --android-licenses
 RUN flutter doctor -v
 
 # install rust

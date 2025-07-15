@@ -50,7 +50,7 @@ function exe {
 }
 
 # Build image
-dock build -t $image_name $isolation - < docker/Dockerfile.build-windows
+dock build -t $image_name $isolation -m 15G - < docker/Dockerfile.build-windows
 
 host_core_count=$(ssh $host 'cmd /s /c echo %NUMBER_OF_PROCESSORS%' | tr -d '[:space:]')
 
