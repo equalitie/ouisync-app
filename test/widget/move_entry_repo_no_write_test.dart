@@ -38,10 +38,7 @@ void main() {
       name: lockedRepoName,
     );
 
-    final readRepoLocation = RepoLocation(
-      dir: reposDir,
-      name: readRepoName,
-    );
+    final readRepoLocation = RepoLocation(dir: reposDir, name: readRepoName);
 
     await deps.reposCubit.createRepository(
       location: originRepoLocation,
@@ -84,136 +81,128 @@ void main() {
 
   testWidgets(
     'move file to a blind/locked repo and confirm that MOVE button is disabled',
-    (tester) => tester.runAsync(
-      () async {
-        await loadAppFonts();
+    (tester) => tester.runAsync(() async {
+      await loadAppFonts();
 
-        await tester.pumpWidget(testApp(deps.createMainPage()));
-        await tester.pumpAndSettle();
+      await tester.pumpWidget(testApp(deps.createMainPage()));
+      await tester.pumpAndSettle();
 
-        expect(find.text(originRepoName), findsOne);
-        expect(find.text(lockedRepoName), findsOne);
-        expect(find.text(readRepoName), findsOne);
+      expect(find.text(originRepoName), findsOne);
+      expect(find.text(lockedRepoName), findsOne);
+      expect(find.text(readRepoName), findsOne);
 
-        final originRepoCubit = deps.reposCubit.state.repos.values
-            .firstWhere((r) => r.name == originRepoName)
-            .cubit!;
+      final originRepoCubit =
+          deps.reposCubit.state.repos.values
+              .firstWhere((r) => r.name == originRepoName)
+              .cubit!;
 
-        await tester.tap(find.text(originRepoName));
-        await _waitForNavigationIntoRepoToEnd(deps, tester, originRepoCubit);
+      await tester.tap(find.text(originRepoName));
+      await _waitForNavigationIntoRepoToEnd(deps, tester, originRepoCubit);
 
-        final fileVert = find.byKey(ValueKey('file_vert'));
-        expect(fileVert, findsOne);
+      final fileVert = find.byKey(ValueKey('file_vert'));
+      expect(fileVert, findsOne);
 
-        await tester.tap(fileVert);
-        await tester.pumpAndSettle();
+      await tester.tap(fileVert);
+      await tester.pumpAndSettle();
 
-        final moveListTile = find.widgetWithText(ListTile, 'Move');
-        expect(moveListTile, findsOne);
+      final moveListTile = find.widgetWithText(ListTile, 'Move');
+      expect(moveListTile, findsOne);
 
-        await tester.tap(moveListTile);
-        await tester.pumpAndSettle();
+      await tester.tap(moveListTile);
+      await tester.pumpAndSettle();
 
-        final backButton = find.widgetWithIcon(
-          IconButton,
-          Icons.arrow_back_rounded,
-        );
-        expect(backButton, findsOne);
+      final backButton = find.widgetWithIcon(
+        IconButton,
+        Icons.arrow_back_rounded,
+      );
+      expect(backButton, findsOne);
 
-        await tester.tap(backButton);
-        await tester.pumpAndSettle();
+      await tester.tap(backButton);
+      await tester.pumpAndSettle();
 
-        final lockedRepoCubit = deps.reposCubit.state.repos.values
-            .firstWhere((r) => r.name == lockedRepoName)
-            .cubit!;
+      final lockedRepoCubit =
+          deps.reposCubit.state.repos.values
+              .firstWhere((r) => r.name == lockedRepoName)
+              .cubit!;
 
-        await tester.tap(find.text(lockedRepoName));
-        await _waitForNavigationIntoRepoToEnd(
-          deps,
-          tester,
-          lockedRepoCubit,
-        );
+      await tester.tap(find.text(lockedRepoName));
+      await _waitForNavigationIntoRepoToEnd(deps, tester, lockedRepoCubit);
 
-        final currentRepoEntry = deps.reposCubit.state.current;
-        expect(currentRepoEntry?.accessMode, equals(AccessMode.blind));
+      final currentRepoEntry = deps.reposCubit.state.current;
+      expect(currentRepoEntry?.accessMode, equals(AccessMode.blind));
 
-        final moveButton = find.descendant(
-          of: find.byKey(ValueKey('move_entry')),
-          matching: find.byWidgetPredicate(
-            (widget) => widget is RawMaterialButton,
-          ),
-        );
-        expect(moveButton, findsOne);
-        expect(tester.widget<RawMaterialButton>(moveButton).enabled, false);
-      },
-    ),
+      final moveButton = find.descendant(
+        of: find.byKey(ValueKey('move_entry')),
+        matching: find.byWidgetPredicate(
+          (widget) => widget is RawMaterialButton,
+        ),
+      );
+      expect(moveButton, findsOne);
+      expect(tester.widget<RawMaterialButton>(moveButton).enabled, false);
+    }),
   );
 
   testWidgets(
     'move file to a read repo and confirm that MOVE button is disabled',
-    (tester) => tester.runAsync(
-      () async {
-        await loadAppFonts();
+    (tester) => tester.runAsync(() async {
+      await loadAppFonts();
 
-        await tester.pumpWidget(testApp(deps.createMainPage()));
-        await tester.pumpAndSettle();
+      await tester.pumpWidget(testApp(deps.createMainPage()));
+      await tester.pumpAndSettle();
 
-        expect(find.text(originRepoName), findsOne);
-        expect(find.text(lockedRepoName), findsOne);
-        expect(find.text(readRepoName), findsOne);
+      expect(find.text(originRepoName), findsOne);
+      expect(find.text(lockedRepoName), findsOne);
+      expect(find.text(readRepoName), findsOne);
 
-        final originRepoCubit = deps.reposCubit.state.repos.values
-            .firstWhere((r) => r.name == originRepoName)
-            .cubit!;
+      final originRepoCubit =
+          deps.reposCubit.state.repos.values
+              .firstWhere((r) => r.name == originRepoName)
+              .cubit!;
 
-        await tester.tap(find.text(originRepoName));
-        await _waitForNavigationIntoRepoToEnd(deps, tester, originRepoCubit);
+      await tester.tap(find.text(originRepoName));
+      await _waitForNavigationIntoRepoToEnd(deps, tester, originRepoCubit);
 
-        final fileVert = find.byKey(ValueKey('file_vert'));
-        expect(fileVert, findsOne);
+      final fileVert = find.byKey(ValueKey('file_vert'));
+      expect(fileVert, findsOne);
 
-        await tester.tap(fileVert);
-        await tester.pumpAndSettle();
+      await tester.tap(fileVert);
+      await tester.pumpAndSettle();
 
-        final moveListTile = find.widgetWithText(ListTile, 'Move');
-        expect(moveListTile, findsOne);
+      final moveListTile = find.widgetWithText(ListTile, 'Move');
+      expect(moveListTile, findsOne);
 
-        await tester.tap(moveListTile);
-        await tester.pumpAndSettle();
+      await tester.tap(moveListTile);
+      await tester.pumpAndSettle();
 
-        final backButton = find.widgetWithIcon(
-          IconButton,
-          Icons.arrow_back_rounded,
-        );
-        expect(backButton, findsOne);
+      final backButton = find.widgetWithIcon(
+        IconButton,
+        Icons.arrow_back_rounded,
+      );
+      expect(backButton, findsOne);
 
-        await tester.tap(backButton);
-        await tester.pumpAndSettle();
+      await tester.tap(backButton);
+      await tester.pumpAndSettle();
 
-        final readRepoCubit = deps.reposCubit.state.repos.values
-            .firstWhere((r) => r.name == readRepoName)
-            .cubit!;
+      final readRepoCubit =
+          deps.reposCubit.state.repos.values
+              .firstWhere((r) => r.name == readRepoName)
+              .cubit!;
 
-        await tester.tap(find.text(readRepoName));
-        await _waitForNavigationIntoRepoToEnd(
-          deps,
-          tester,
-          readRepoCubit,
-        );
+      await tester.tap(find.text(readRepoName));
+      await _waitForNavigationIntoRepoToEnd(deps, tester, readRepoCubit);
 
-        final currentRepoEntry = deps.reposCubit.state.current;
-        expect(currentRepoEntry?.accessMode, equals(AccessMode.read));
+      final currentRepoEntry = deps.reposCubit.state.current;
+      expect(currentRepoEntry?.accessMode, equals(AccessMode.read));
 
-        final moveButton = find.descendant(
-          of: find.byKey(ValueKey('move_entry')),
-          matching: find.byWidgetPredicate(
-            (widget) => widget is RawMaterialButton,
-          ),
-        );
-        expect(moveButton, findsOne);
-        expect(tester.widget<RawMaterialButton>(moveButton).enabled, false);
-      },
-    ),
+      final moveButton = find.descendant(
+        of: find.byKey(ValueKey('move_entry')),
+        matching: find.byWidgetPredicate(
+          (widget) => widget is RawMaterialButton,
+        ),
+      );
+      expect(moveButton, findsOne);
+      expect(tester.widget<RawMaterialButton>(moveButton).enabled, false);
+    }),
   );
 }
 
@@ -227,8 +216,9 @@ Future<void> _waitForNavigationIntoRepoToEnd(
   );
   await tester.pump();
 
-  await deps.reposCubit.state.current?.cubit
-      ?.waitUntil((state) => !state.isLoading);
+  await deps.reposCubit.state.current?.cubit?.waitUntil(
+    (state) => !state.isLoading,
+  );
   await tester.pumpAndSettle();
   await tester.pump(Duration(seconds: 1));
 }

@@ -66,15 +66,19 @@ void main() {
       repoCreationCubit.state.substate,
       isA<RepoCreationPending>()
           .having((s) => s.location, 'location', isNull)
-          .having((s) => s.setLocalSecret, 'setLocalSecret',
-              isA<SetLocalSecretKeyAndSalt>())
+          .having(
+            (s) => s.setLocalSecret,
+            'setLocalSecret',
+            isA<SetLocalSecretKeyAndSalt>(),
+          )
           .having((s) => s.nameError, 'nameError', isNull),
     );
 
     repoCreationCubit.nameController.text = name;
 
-    await repoCreationCubit
-        .waitUntil((state) => state.substate is RepoCreationValid);
+    await repoCreationCubit.waitUntil(
+      (state) => state.substate is RepoCreationValid,
+    );
     expect(repoCreationCubit.state.name, equals(name));
 
     await repoCreationCubit.save();
@@ -93,10 +97,7 @@ void main() {
 
     final name = 'my repo';
     await reposCubit.createRepository(
-      location: RepoLocation(
-        dir: (await session.getStoreDir())!,
-        name: name,
-      ),
+      location: RepoLocation(dir: (await session.getStoreDir())!, name: name),
       setLocalSecret: SetLocalSecretKeyAndSalt(
         key: randomSecretKey(),
         salt: randomSalt(),
@@ -114,11 +115,10 @@ void main() {
     expect(
       repoCreationCubit.state.substate,
       isA<RepoCreationPending>().having(
-          (s) => s.nameError,
-          'nameError',
-          equals(
-            'There is already a repository with this name',
-          )),
+        (s) => s.nameError,
+        'nameError',
+        equals('There is already a repository with this name'),
+      ),
     );
   });
 
