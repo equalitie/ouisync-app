@@ -9,6 +9,7 @@ import 'package:ouisync_app/app/utils/share_token.dart';
 import 'package:ouisync/ouisync.dart' show AccessMode, Session, Server;
 import 'package:path/path.dart' show join;
 
+import '../sandbox.dart' show deleteTempDir;
 import '../utils.dart';
 
 void main() {
@@ -24,8 +25,8 @@ void main() {
   });
 
   testWidgets(
-    'create_repository_without_password',
-    (tester) => tester.runAsyncWithScreenshotOnFailure(() async {
+    'create repository without password',
+    (tester) => tester.runAsync(() async {
       final repoCreationObserver = StateObserver.install<RepoCreationState>();
 
       await tester.pumpWidget(testApp(deps.createMainPage()));

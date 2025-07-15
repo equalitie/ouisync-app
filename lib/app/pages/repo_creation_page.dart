@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync/ouisync.dart';
 import 'package:ouisync/ouisync.dart';
 
 import '../../generated/l10n.dart';
@@ -23,7 +21,6 @@ import '../widgets/widgets.dart'
     show
         BlocHolder,
         DirectionalAppBar,
-        RepoCreation,
         ContentWithStickyFooterState,
         CustomAdaptiveSwitch;
 
@@ -60,30 +57,27 @@ class RepoCreation extends StatelessWidget {
       // Handle substate changes
       BlocListener<RepoCreationCubit, RepoCreationState>(
         bloc: creationCubit,
-        listenWhen:
-            (previous, current) => current.substate != previous.substate,
+        listenWhen: (previous, current) =>
+            current.substate != previous.substate,
         listener: _handleSubstateChange,
       ),
       // Prefill suggested name on first load
       BlocListener<RepoCreationCubit, RepoCreationState>(
         bloc: creationCubit,
-        listenWhen:
-            (previous, current) =>
-                current.suggestedName.isNotEmpty &&
-                previous.suggestedName.isEmpty,
+        listenWhen: (previous, current) =>
+            current.suggestedName.isNotEmpty && previous.suggestedName.isEmpty,
         listener: _handlePrefillSuggestedName,
       ),
     ],
     child: BlocBuilder<RepoCreationCubit, RepoCreationState>(
       bloc: creationCubit,
-      builder:
-          (context, state) => ContentWithStickyFooterState(
-            content: _buildContent(context, state),
-            footer: Fields.dialogActions(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              buttons: _buildActions(context, state),
-            ),
-          ),
+      builder: (context, state) => ContentWithStickyFooterState(
+        content: _buildContent(context, state),
+        footer: Fields.dialogActions(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          buttons: _buildActions(context, state),
+        ),
+      ),
     ),
   );
 
@@ -109,14 +103,12 @@ class RepoCreation extends StatelessWidget {
     ),
     Fields.inPageAsyncButton(
       key: Key('create-repository'),
-      text:
-          creationState.token == null
-              ? S.current.actionCreate
-              : S.current.actionImport,
-      onPressed:
-          creationState.substate is RepoCreationValid
-              ? () => creationCubit.save()
-              : null,
+      text: creationState.token == null
+          ? S.current.actionCreate
+          : S.current.actionImport,
+      onPressed: creationState.substate is RepoCreationValid
+          ? () => creationCubit.save()
+          : null,
       autofocus: true,
       focusNode: creationCubit.positiveButtonFocusNode,
     ),
@@ -200,16 +192,15 @@ class RepoCreation extends StatelessWidget {
   Widget _buildUseCacheServersSwitch(
     BuildContext context,
     RepoCreationState state,
-  ) =>
-      state.accessMode == AccessMode.write
-          ? CustomAdaptiveSwitch(
-            key: ValueKey('use-cache-servers'),
-            value: state.useCacheServers,
-            title: S.current.messageUseCacheServers,
-            contentPadding: EdgeInsetsDirectional.zero,
-            onChanged: (value) => creationCubit.setUseCacheServers(value),
-          )
-          : SizedBox.shrink();
+  ) => state.accessMode == AccessMode.write
+      ? CustomAdaptiveSwitch(
+          key: ValueKey('use-cache-servers'),
+          value: state.useCacheServers,
+          title: S.current.messageUseCacheServers,
+          contentPadding: EdgeInsetsDirectional.zero,
+          onChanged: (value) => creationCubit.setUseCacheServers(value),
+        )
+      : SizedBox.shrink();
 
   TextStyle _smallMessageStyle(BuildContext context) =>
       context.theme.appTextStyle.bodySmall.copyWith(color: Colors.black54);

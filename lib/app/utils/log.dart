@@ -49,22 +49,29 @@ ${'-' * (48 + package.appName.length)}''';
 
   final logger = named('');
 
-  FlutterError.onError = (details) {
-    logger.error(
-      'Unhandled flutter exception: ',
-      details.exception,
-      details.stack,
-    );
-
-    FlutterError.presentError(details);
+  bool captureErrors = switch (Flavor.current) {
+    Flavor.production || Flavor.nightly || Flavor.unofficial => true,
+    Flavor.itest => false,
   };
 
-  // NOTE: if sentry is used, it will override these methods but still call
-  // them after processing the events, so they are not lost
-  PlatformDispatcher.instance.onError = (exception, stack) {
-    logger.error('Unhandled platform exception: ', exception, stack);
-    return true;
-  };
+  if (captureErrors) {
+    FlutterError.onError = (details) {
+      logger.error(
+        'Unhandled flutter exception: ',
+        details.exception,
+        details.stack,
+      );
+
+      FlutterError.presentError(details);
+    };
+
+    // NOTE: if sentry is used, it will override these methods but still call
+    // them after processing the events, so they are not lost
+    PlatformDispatcher.instance.onError = (exception, stack) {
+      logger.error('Unhandled platform exception: ', exception, stack);
+      return true;
+    };
+  }
 
   logger.info(header);
 }
