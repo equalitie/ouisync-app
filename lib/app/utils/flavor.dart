@@ -20,4 +20,11 @@ enum Flavor {
       parse(appFlavor ?? '') ??
       parse(String.fromEnvironment('OUISYNC_FLAVOR')) ??
       production;
+
+  @override
+  String toString() => switch (this) {
+    production => 'production',
+    nightly => 'nightly',
+    unofficial => 'unofficial',
+  };
 }
