@@ -36,6 +36,7 @@ class MainPage {
     );
     await tester.pump();
 
+    // Not using `anxiousTap` because it's a switch.
     await tester.tap(
       find.descendant(
         of: find.byKey(ValueKey('use-cache-servers')),

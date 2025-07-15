@@ -49,7 +49,7 @@ void main() {
       await tester.pumpWidget(testApp(deps.createMainPage()));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('IMPORT REPOSITORY'));
+      await tester.anxiousTap(find.text('IMPORT REPOSITORY'));
       await tester.pumpAndSettle();
 
       // Mock file picker
@@ -57,7 +57,7 @@ void main() {
 
       final locateButton = find.text('LOCATE');
       await tester.ensureVisible(locateButton);
-      await tester.tap(locateButton);
+      await tester.anxiousTap(locateButton);
       await deps.reposCubit.waitUntil((state) => state.repos.isNotEmpty);
       await deps.reposCubit.waitUntil(
         (state) => state.current?.location == location,
@@ -94,14 +94,14 @@ void main() {
       await tester.pumpWidget(testApp(deps.createMainPage()));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byIcon(Icons.add_rounded));
+      await tester.anxiousTap(find.byIcon(Icons.add_rounded));
       await tester.pumpAndSettle();
 
       final importButton = find.widgetWithText(
         GestureDetector,
         'Import repository',
       );
-      await tester.tap(importButton);
+      await tester.anxiousTap(importButton);
       await tester.pumpAndSettle();
 
       // Mock file picker

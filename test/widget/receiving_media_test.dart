@@ -81,7 +81,7 @@ void main() {
       // Cancel adding the file
       final cancelButton = find.widgetWithText(NegativeButton, 'CANCEL');
       expect(cancelButton, findsOne);
-      await tester.tap(cancelButton);
+      await tester.anxiousTap(cancelButton);
       await tester.pumpAndSettle();
       expect(find.text('Add file to Ouisync'), findsNothing);
     }),
@@ -113,7 +113,7 @@ void main() {
       ]);
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text(repoName));
+      await tester.anxiousTap(find.text(repoName));
       await deps.reposCubit.waitUntil(
         (state) => !state.isLoading && state.current == repoEntry,
       );
@@ -124,7 +124,7 @@ void main() {
       final saveButton = find.widgetWithText(PositiveButton, 'SAVE');
       expect(saveButton, findsOne);
 
-      await tester.tap(saveButton);
+      await tester.anxiousTap(saveButton);
       await repoCubit.waitUntil((state) => state.uploads.isNotEmpty);
       await repoCubit.waitUntil((state) => state.uploads.isEmpty);
 
@@ -173,7 +173,7 @@ void main() {
       await tester.pump();
 
       final saveButton = find.widgetWithText(PositiveButton, 'SAVE');
-      await tester.tap(saveButton);
+      await tester.anxiousTap(saveButton);
       await repoCubit.waitUntil((state) => state.uploads.isNotEmpty);
       await repoCubit.waitUntil((state) => state.uploads.isEmpty);
 
@@ -252,14 +252,14 @@ void main() {
         await tester.pumpAndSettle();
 
         // Apply the suggested name.
-        await tester.tap(find.textContaining('Suggested: $repoName'));
+        await tester.anxiousTap(find.textContaining('Suggested: $repoName'));
         await stateObserver.waitUntil(
           (state) => state.substate is RepoCreationValid,
         );
         await tester.pumpAndSettle();
 
         // Create the repo
-        await tester.tap(find.text('IMPORT'));
+        await tester.anxiousTap(find.text('IMPORT'));
         await stateObserver.waitUntil(
           (state) => state.substate is RepoCreationSuccess,
         );

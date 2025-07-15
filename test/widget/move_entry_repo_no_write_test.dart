@@ -8,7 +8,12 @@ import 'package:ouisync/ouisync.dart' show AccessMode, Repository;
 import 'package:ouisync_app/app/utils/share_token.dart';
 
 import '../utils.dart'
-    show BlocBaseExtension, TestDependencies, randomSetLocalSecret, testApp;
+    show
+        BlocBaseExtension,
+        TestDependencies,
+        randomSetLocalSecret,
+        testApp,
+        WidgetTesterExtension;
 
 void main() {
   late TestDependencies deps;
@@ -96,19 +101,19 @@ void main() {
               .firstWhere((r) => r.name == originRepoName)
               .cubit!;
 
-      await tester.tap(find.text(originRepoName));
+      await tester.anxiousTap(find.text(originRepoName));
       await _waitForNavigationIntoRepoToEnd(deps, tester, originRepoCubit);
 
       final fileVert = find.byKey(ValueKey('file_vert'));
       expect(fileVert, findsOne);
 
-      await tester.tap(fileVert);
+      await tester.anxiousTap(fileVert);
       await tester.pumpAndSettle();
 
       final moveListTile = find.widgetWithText(ListTile, 'Move');
       expect(moveListTile, findsOne);
 
-      await tester.tap(moveListTile);
+      await tester.anxiousTap(moveListTile);
       await tester.pumpAndSettle();
 
       final backButton = find.widgetWithIcon(
@@ -117,7 +122,7 @@ void main() {
       );
       expect(backButton, findsOne);
 
-      await tester.tap(backButton);
+      await tester.anxiousTap(backButton);
       await tester.pumpAndSettle();
 
       final lockedRepoCubit =
@@ -125,7 +130,7 @@ void main() {
               .firstWhere((r) => r.name == lockedRepoName)
               .cubit!;
 
-      await tester.tap(find.text(lockedRepoName));
+      await tester.anxiousTap(find.text(lockedRepoName));
       await _waitForNavigationIntoRepoToEnd(deps, tester, lockedRepoCubit);
 
       final currentRepoEntry = deps.reposCubit.state.current;
@@ -159,19 +164,19 @@ void main() {
               .firstWhere((r) => r.name == originRepoName)
               .cubit!;
 
-      await tester.tap(find.text(originRepoName));
+      await tester.anxiousTap(find.text(originRepoName));
       await _waitForNavigationIntoRepoToEnd(deps, tester, originRepoCubit);
 
       final fileVert = find.byKey(ValueKey('file_vert'));
       expect(fileVert, findsOne);
 
-      await tester.tap(fileVert);
+      await tester.anxiousTap(fileVert);
       await tester.pumpAndSettle();
 
       final moveListTile = find.widgetWithText(ListTile, 'Move');
       expect(moveListTile, findsOne);
 
-      await tester.tap(moveListTile);
+      await tester.anxiousTap(moveListTile);
       await tester.pumpAndSettle();
 
       final backButton = find.widgetWithIcon(
@@ -180,7 +185,7 @@ void main() {
       );
       expect(backButton, findsOne);
 
-      await tester.tap(backButton);
+      await tester.anxiousTap(backButton);
       await tester.pumpAndSettle();
 
       final readRepoCubit =
@@ -188,7 +193,7 @@ void main() {
               .firstWhere((r) => r.name == readRepoName)
               .cubit!;
 
-      await tester.tap(find.text(readRepoName));
+      await tester.anxiousTap(find.text(readRepoName));
       await _waitForNavigationIntoRepoToEnd(deps, tester, readRepoCubit);
 
       final currentRepoEntry = deps.reposCubit.state.current;

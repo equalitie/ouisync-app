@@ -72,7 +72,7 @@ void main() {
   );
 
   testWidgets(
-    'attempt to create repository with existing name',
+    'attempt_to_create_repository_with_existing_name',
     (tester) => tester.runAsync(() async {
       final name = 'le repo';
 
@@ -90,9 +90,9 @@ void main() {
       await tester.pumpWidget(testApp(deps.createMainPage()));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byIcon(Icons.add_rounded));
+      await tester.anxiousTap(find.byIcon(Icons.add_rounded));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Create repository'));
+      await tester.anxiousTap(find.text('Create repository'));
       await tester.pumpAndSettle();
 
       await tester.enterText(find.byKey(ValueKey('name')), name);
@@ -131,7 +131,7 @@ void main() {
       await tester.pumpWidget(testApp(deps.createMainPage()));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('IMPORT REPOSITORY'));
+      await tester.anxiousTap(find.text('IMPORT REPOSITORY'));
       await tester.pumpAndSettle();
 
       await tester.enterText(find.byKey(ValueKey('token')), token);
@@ -147,7 +147,7 @@ void main() {
         findsOne,
       );
 
-      await tester.tap(
+      await tester.anxiousTap(
         find.widgetWithText(ElevatedButton, 'IMPORT A REPOSITORY'),
       );
       await tester.pump();
@@ -187,7 +187,7 @@ void main() {
       expect(suggestedName, findsOne);
 
       // Tap on the suggested name and wait until it gets applied.
-      await tester.tap(suggestedName);
+      await tester.anxiousTap(suggestedName);
       await repoCreationObserver.waitUntil((state) => state.name == name);
 
       await tester.pumpAndSettle();
@@ -202,7 +202,7 @@ void main() {
       );
 
       // Tap the "IMPORT" button and wait until the repo gets created.
-      await tester.tap(find.text('IMPORT'));
+      await tester.anxiousTap(find.text('IMPORT'));
       await repoCreationObserver.waitUntil(
         (state) => state.substate is RepoCreationSuccess,
       );
