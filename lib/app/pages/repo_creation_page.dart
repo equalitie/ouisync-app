@@ -107,7 +107,8 @@ class RepoCreation extends StatelessWidget {
       text: S.current.actionCancel,
       onPressed: () async => await Navigator.of(context).maybePop(null),
     ),
-    Fields.inPageButton(
+    Fields.inPageAsyncButton(
+      key: Key('create-repository'),
       text:
           creationState.token == null
               ? S.current.actionCreate

@@ -47,7 +47,7 @@ class MainPage {
     // Verify that use cache servers is off:
     await repoCreationObserver.waitUntil((state) => !state.useCacheServers);
 
-    await tester.tap(find.text('CREATE'));
+    await tester.anxiousTap(find.byKey(Key('create-repository')));
 
     await repoCreationObserver.waitUntil(
       (state) => state.substate is RepoCreationSuccess,
