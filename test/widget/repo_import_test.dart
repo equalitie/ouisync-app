@@ -73,7 +73,7 @@ void main() {
   );
 
   testWidgets(
-    'import repo when some repos exists',
+    'import_repo_when_some_repos_exists',
     (tester) => tester.runAsync(() async {
       // Create existing repo
       final existingLocation = RepoLocation(
@@ -109,7 +109,7 @@ void main() {
 
       final locateButton = find.text('LOCATE');
       await tester.ensureVisible(locateButton);
-      await tester.tap(locateButton);
+      await tester.anxiousTap(locateButton);
 
       await deps.reposCubit.waitUntil((state) => state.repos.length == 2);
       await deps.reposCubit.waitUntil(
@@ -124,7 +124,7 @@ void main() {
   );
 
   testWidgets(
-    'lock and unlock imported repo without password',
+    'lock_and_unlock_imported_repo_without_password',
     (tester) => tester.runAsync(() async {
       final location = await createExportedRepo();
 

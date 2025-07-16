@@ -265,10 +265,11 @@ class RepoImportPage extends StatelessWidget {
     );
   }
 
-  Widget _buildButton(String text, void Function()? onPressed) => Padding(
-    padding: Dimensions.paddingVertical20,
-    child: Fields.inPageButton(onPressed: onPressed, text: text),
-  );
+  Widget _buildButton(String text, Future<void> Function()? onPressed) =>
+      Padding(
+        padding: Dimensions.paddingVertical20,
+        child: Fields.inPageAsyncButton(onPressed: onPressed, text: text),
+      );
 }
 
 sealed class RepoImportResult {
