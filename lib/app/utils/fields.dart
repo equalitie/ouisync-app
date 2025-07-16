@@ -73,6 +73,7 @@ class Fields {
   }) => _styledTextBase(message, textAlign, style, tags, padding);
 
   static Widget inPageButton({
+    Key? key,
     required void Function()? onPressed,
     Icon? leadingIcon,
     required String text,
@@ -83,6 +84,7 @@ class Fields {
     Color? backgroundColor,
     Color? foregroundColor,
   }) => ElevatedButton(
+    key: key,
     onPressed: onPressed,
     child: Row(
       mainAxisSize: MainAxisSize.min,

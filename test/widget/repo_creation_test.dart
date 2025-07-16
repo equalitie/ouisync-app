@@ -24,189 +24,197 @@ void main() {
   });
 
   testWidgets(
-    'create repository without password',
-    (tester) => tester.runAsync(
-      () async {
-        final repoCreationObserver = StateObserver.install<RepoCreationState>();
+    'create_repository_without_password',
+    (tester) => tester.runAsyncWithScreenshotOnFailure(() async {
+      final repoCreationObserver = StateObserver.install<RepoCreationState>();
 
-        await tester.pumpWidget(testApp(deps.createMainPage()));
-        await tester.pumpAndSettle();
+      await tester.pumpWidget(testApp(deps.createMainPage()));
+      await tester.pumpAndSettle();
 
-        await tester.tap(find.text('CREATE REPOSITORY'));
-        await tester.pumpAndSettle();
+      await tester.anxiousTap(find.byKey(Key('create_first_repo')));
+      await tester.pumpAndSettle();
 
-        // Filling in the repo name triggers an async operation and so we must explicitly wait until
-        // it completes.
-        await tester.enterText(find.byKey(ValueKey('name')), 'my repo');
-        await repoCreationObserver
-            .waitUntil((state) => state.substate is RepoCreationValid);
-        await tester.pump();
+      // Filling in the repo name triggers an async operation and so we must explicitly wait until
+      // it completes.
+      await tester.enterText(find.byKey(ValueKey('name')), 'my repo');
+      await repoCreationObserver.waitUntil(
+        (state) => state.substate is RepoCreationValid,
+      );
+      await tester.pump();
 
-        await tester.tap(find.descendant(
+      // Not using `anxiousTap` because it's a switch.
+      await tester.tap(
+        find.descendant(
           of: find.byKey(ValueKey('use-cache-servers')),
           matching: find.byType(Switch),
-        ));
-        await tester.pump();
+        ),
+      );
+      await tester.pump();
 
-        // Verify that use cache servers is off:
-        await repoCreationObserver.waitUntil((state) => !state.useCacheServers);
+      // Verify that use cache servers is off:
+      await repoCreationObserver.waitUntil((state) => !state.useCacheServers);
 
-        await tester.tap(find.text('CREATE'));
+      await tester.anxiousTap(find.text('CREATE'));
 
-        await repoCreationObserver
-            .waitUntil((state) => state.substate is RepoCreationSuccess);
+      await repoCreationObserver.waitUntil(
+        (state) => state.substate is RepoCreationSuccess,
+      );
 
-        final repoCubit = deps.reposCubit.state.repos.values
-            .where((entry) => entry.name == 'my repo')
-            .first
-            .cubit!;
+      final repoCubit =
+          deps.reposCubit.state.repos.values
+              .where((entry) => entry.name == 'my repo')
+              .first
+              .cubit!;
 
-        expect(repoCubit.state.accessMode, equals(AccessMode.write));
-        expect(repoCubit.state.isCacheServersEnabled, isFalse);
-      },
-    ),
+      expect(repoCubit.state.accessMode, equals(AccessMode.write));
+      expect(repoCubit.state.isCacheServersEnabled, isFalse);
+    }),
   );
 
   testWidgets(
-    'attempt to create repository with existing name',
-    (tester) => tester.runAsync(
-      () async {
-        final name = 'le repo';
+    'attempt_to_create_repository_with_existing_name',
+    (tester) => tester.runAsync(() async {
+      final name = 'le repo';
 
-        final repoCreationObserver = StateObserver.install<RepoCreationState>();
+      final repoCreationObserver = StateObserver.install<RepoCreationState>();
 
-        await deps.reposCubit.createRepository(
-          location: RepoLocation(
-            dir: (await deps.session.getStoreDir())!,
-            name: name,
-          ),
-          setLocalSecret: randomSetLocalSecret(),
-          localSecretMode: LocalSecretMode.randomStored,
-        );
+      await deps.reposCubit.createRepository(
+        location: RepoLocation(
+          dir: (await deps.session.getStoreDir())!,
+          name: name,
+        ),
+        setLocalSecret: randomSetLocalSecret(),
+        localSecretMode: LocalSecretMode.randomStored,
+      );
 
-        await tester.pumpWidget(testApp(deps.createMainPage()));
-        await tester.pumpAndSettle();
+      await tester.pumpWidget(testApp(deps.createMainPage()));
+      await tester.pumpAndSettle();
 
-        await tester.tap(find.byIcon(Icons.add_rounded));
-        await tester.pumpAndSettle();
-        await tester.tap(find.text('Create repository'));
-        await tester.pumpAndSettle();
+      await tester.anxiousTap(find.byIcon(Icons.add_rounded));
+      await tester.pumpAndSettle();
+      await tester.anxiousTap(find.text('Create repository'));
+      await tester.pumpAndSettle();
 
-        await tester.enterText(find.byKey(ValueKey('name')), name);
-        await repoCreationObserver
-            .waitUntil((state) => switch (state.substate) {
-                  RepoCreationPending(nameError: final nameError)
-                      when nameError != null && nameError.isNotEmpty =>
-                    true,
-                  _ => false,
-                });
+      await tester.enterText(find.byKey(ValueKey('name')), name);
+      await repoCreationObserver.waitUntil(
+        (state) => switch (state.substate) {
+          RepoCreationPending(nameError: final nameError)
+              when nameError != null && nameError.isNotEmpty =>
+            true,
+          _ => false,
+        },
+      );
 
-        await tester.pump();
+      await tester.pump();
 
-        expect(find.text('There is already a repository with this name'),
-            findsOne);
-      },
-    ),
+      expect(
+        find.text('There is already a repository with this name'),
+        findsOne,
+      );
+    }),
   );
 
   testWidgets(
     'import repository with token',
-    (tester) => tester.runAsync(
-      () async {
-        final name = 'le repo';
-        final token =
-            await _createShareToken(name: name, accessMode: AccessMode.read);
+    (tester) => tester.runAsync(() async {
+      final name = 'le repo';
+      final token = await _createShareToken(
+        name: name,
+        accessMode: AccessMode.read,
+      );
 
-        final repoCreationObserver = StateObserver.install<RepoCreationState>();
-        final repoImportObserver = StateObserver.install<ShareTokenResult?>();
+      final repoCreationObserver = StateObserver.install<RepoCreationState>();
+      final repoImportObserver = StateObserver.install<ShareTokenResult?>();
 
-        expect(deps.reposCubit.state.repos, isEmpty);
+      expect(deps.reposCubit.state.repos, isEmpty);
 
-        await tester.pumpWidget(testApp(deps.createMainPage()));
-        await tester.pumpAndSettle();
+      await tester.pumpWidget(testApp(deps.createMainPage()));
+      await tester.pumpAndSettle();
 
-        await tester.tap(find.text('IMPORT REPOSITORY'));
-        await tester.pumpAndSettle();
+      await tester.anxiousTap(find.text('IMPORT REPOSITORY'));
+      await tester.pumpAndSettle();
 
-        await tester.enterText(find.byKey(ValueKey('token')), token);
-        await repoImportObserver.waitUntil((state) => state is ShareTokenValid);
-        await tester.pumpAndSettle();
+      await tester.enterText(find.byKey(ValueKey('token')), token);
+      await repoImportObserver.waitUntil((state) => state is ShareTokenValid);
+      await tester.pumpAndSettle();
 
-        // The repo token is shown.
-        expect(
-          find.descendant(
-            of: find.widgetWithText(Container, 'Repository link: '),
-            matching: find.text(token),
-          ),
-          findsOne,
-        );
+      // The repo token is shown.
+      expect(
+        find.descendant(
+          of: find.widgetWithText(Container, 'Repository link: '),
+          matching: find.text(token),
+        ),
+        findsOne,
+      );
 
-        await tester
-            .tap(find.widgetWithText(ElevatedButton, 'IMPORT A REPOSITORY'));
-        await tester.pump();
+      await tester.anxiousTap(
+        find.widgetWithText(ElevatedButton, 'IMPORT A REPOSITORY'),
+      );
+      await tester.pump();
 
-        await repoCreationObserver.waitUntil((state) => state.token != null);
-        await tester.pump();
+      await repoCreationObserver.waitUntil((state) => state.token != null);
+      await tester.pump();
 
-        expect(find.widgetWithText(TextFormField, token), findsOne);
+      expect(find.widgetWithText(TextFormField, token), findsOne);
 
-        // The name field is autofilled with the suggested name.
-        expect(
-          find.descendant(
-            of: find.byKey(ValueKey('name')),
-            matching: find.text(name),
-          ),
-          findsOne,
-        );
-        await tester.pump();
+      // The name field is autofilled with the suggested name.
+      expect(
+        find.descendant(
+          of: find.byKey(ValueKey('name')),
+          matching: find.text(name),
+        ),
+        findsOne,
+      );
+      await tester.pump();
 
-        // Remove the suggested name before testing the tap function
-        await tester.enterText(find.byKey(ValueKey('name')), "");
-        await tester.pumpAndSettle();
+      // Remove the suggested name before testing the tap function
+      await tester.enterText(find.byKey(ValueKey('name')), "");
+      await tester.pumpAndSettle();
 
-        // The name field is empty.
-        expect(
-          find.descendant(
-            of: find.byKey(ValueKey('name')),
-            matching: find.text(""),
-          ),
-          findsOne,
-        );
+      // The name field is empty.
+      expect(
+        find.descendant(
+          of: find.byKey(ValueKey('name')),
+          matching: find.text(""),
+        ),
+        findsOne,
+      );
 
-        // The suggesten name is shown.
-        final suggestedName =
-            find.text('Suggested: $name\n(tap here to use this name)');
-        expect(suggestedName, findsOne);
+      // The suggesten name is shown.
+      final suggestedName = find.text(
+        'Suggested: $name\n(tap here to use this name)',
+      );
+      expect(suggestedName, findsOne);
 
-        // Tap on the suggested name and wait until it gets applied.
-        await tester.tap(suggestedName);
-        await repoCreationObserver.waitUntil((state) => state.name == name);
+      // Tap on the suggested name and wait until it gets applied.
+      await tester.anxiousTap(suggestedName);
+      await repoCreationObserver.waitUntil((state) => state.name == name);
 
-        await tester.pumpAndSettle();
+      await tester.pumpAndSettle();
 
-        // The name field is now filled with the suggested name.
-        expect(
-          find.descendant(
-            of: find.byKey(ValueKey('name')),
-            matching: find.text(name),
-          ),
-          findsOne,
-        );
+      // The name field is now filled with the suggested name.
+      expect(
+        find.descendant(
+          of: find.byKey(ValueKey('name')),
+          matching: find.text(name),
+        ),
+        findsOne,
+      );
 
-        // Tap the "IMPORT" button and wait until the repo gets created.
-        await tester.tap(find.text('IMPORT'));
-        await repoCreationObserver
-            .waitUntil((state) => state.substate is RepoCreationSuccess);
+      // Tap the "IMPORT" button and wait until the repo gets created.
+      await tester.anxiousTap(find.text('IMPORT'));
+      await repoCreationObserver.waitUntil(
+        (state) => state.substate is RepoCreationSuccess,
+      );
 
-        // The repo got created correctly.
-        final repoCubit = deps.reposCubit.state.repos.values.first.cubit!;
-        final actualMode = repoCubit.state.accessMode;
-        final actualToken = await repoCubit.createShareToken(AccessMode.read);
+      // The repo got created correctly.
+      final repoCubit = deps.reposCubit.state.repos.values.first.cubit!;
+      final actualMode = repoCubit.state.accessMode;
+      final actualToken = await repoCubit.createShareToken(AccessMode.read);
 
-        expect(actualMode, equals(AccessMode.read));
-        expect(actualToken.toString(), equals(token));
-      },
-    ),
+      expect(actualMode, equals(AccessMode.read));
+      expect(actualToken.toString(), equals(token));
+    }),
   );
 }
 

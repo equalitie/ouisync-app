@@ -76,9 +76,10 @@ void main() {
     // Create files and add to folders
     {
       for (var i = 0; i < 12; i++) {
-        final path = i < 4
-            ? 'folder1'
-            : i < 8
+        final path =
+            i < 4
+                ? 'folder1'
+                : i < 8
                 ? repo_path.join('folder1', 'folder2')
                 : repo_path.join('folder1', 'folder2', 'folder3');
 
@@ -97,8 +98,9 @@ void main() {
       final folder2Contents = await originRepo.readDirectory('folder1/folder2');
       expect(folder2Contents, hasLength(5));
 
-      final folder3Contents =
-          await originRepo.readDirectory('folder1/folder2/folder3');
+      final folder3Contents = await originRepo.readDirectory(
+        'folder1/folder2/folder3',
+      );
       expect(folder3Contents, hasLength(4));
     }
   });
@@ -112,66 +114,64 @@ void main() {
 
   testWidgets(
     'Check if an entry can be moved to the destination path',
-    (tester) => tester.runAsync(
-      () async {
-        await tester.pumpWidget(testApp(deps.createMainPage()));
+    (tester) => tester.runAsync(() async {
+      await tester.pumpWidget(testApp(deps.createMainPage()));
+      await tester.pumpAndSettle();
+      final BuildContext context = tester.element(find.byType(MainPage));
+
+      // Set originRepoCubit as current repo
+      {
+        final originRepoEntry = OpenRepoEntry(originRepoCubit);
+        await reposCubit.setCurrent(originRepoEntry);
         await tester.pumpAndSettle();
-        final BuildContext context = tester.element(find.byType(MainPage));
+      }
 
-        // Set originRepoCubit as current repo
-        {
-          final originRepoEntry = OpenRepoEntry(originRepoCubit);
-          await reposCubit.setCurrent(originRepoEntry);
-          await tester.pumpAndSettle();
-        }
+      // Navigate to /folder1,
+      {
+        await originRepoCubit.navigateTo('/folder1');
 
-        // Navigate to /folder1,
-        {
-          await originRepoCubit.navigateTo('/folder1');
+        final currentFolder = originRepoCubit.state.currentFolder;
+        expect(currentFolder.path, equals('/folder1'));
+      }
 
-          final currentFolder = originRepoCubit.state.currentFolder;
-          expect(currentFolder.path, equals('/folder1'));
-        }
+      // Start selection, then select /folder1/folder2/
+      {
+        await originRepoCubit.startEntriesSelection();
 
-        // Start selection, then select /folder1/folder2/
-        {
-          await originRepoCubit.startEntriesSelection();
+        final repoInfoHash = await originRepoCubit.infoHash;
+        await entrySelectionCubit.selectEntry(
+          repoInfoHash,
+          DirectoryEntry(path: '/folder1/folder2/'),
+        );
+      }
 
-          final repoInfoHash = await originRepoCubit.infoHash;
-          await entrySelectionCubit.selectEntry(
-            repoInfoHash,
-            DirectoryEntry(path: '/folder1/folder2/'),
-          );
-        }
+      final moveEntriesActions = MoveEntriesActions(
+        context,
+        reposCubit: reposCubit,
+        originRepoCubit: originRepoCubit,
+        sheetType: BottomSheetType.move,
+      );
 
-        final moveEntriesActions = MoveEntriesActions(
-          context,
-          reposCubit: reposCubit,
-          originRepoCubit: originRepoCubit,
-          sheetType: BottomSheetType.move,
+      final validation = entrySelectionCubit.validateDestination;
+
+      // Navigate to /folder1,
+      {
+        await originRepoCubit.navigateTo('/');
+
+        final currentFolder = originRepoCubit.state.currentFolder;
+        expect(currentFolder.path, equals('/'));
+      }
+
+      // Check moving /folder1/folder2/ to /
+      {
+        final currentRepo = reposCubit.state.current;
+        final canMove = moveEntriesActions.enableAction(
+          validation,
+          currentRepo,
         );
 
-        final validation = entrySelectionCubit.validateDestination;
-
-        // Navigate to /folder1,
-        {
-          await originRepoCubit.navigateTo('/');
-
-          final currentFolder = originRepoCubit.state.currentFolder;
-          expect(currentFolder.path, equals('/'));
-        }
-
-        // Check moving /folder1/folder2/ to /
-        {
-          final currentRepo = reposCubit.state.current;
-          final canMove = moveEntriesActions.enableAction(
-            validation,
-            currentRepo,
-          );
-
-          expect(canMove, equals(true));
-        }
-      },
-    ),
+        expect(canMove, equals(true));
+      }
+    }),
   );
 }

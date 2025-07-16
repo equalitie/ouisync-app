@@ -53,8 +53,10 @@ void main() {
   test('current repo', () async {
     expect(reposCubit.state.current, isNull);
 
-    final location =
-        RepoLocation(dir: (await session.getStoreDir())!, name: 'foo');
+    final location = RepoLocation(
+      dir: (await session.getStoreDir())!,
+      name: 'foo',
+    );
     final entry = await reposCubit.createRepository(
       location: location,
       setLocalSecret: SetLocalSecretKeyAndSalt(

@@ -6,6 +6,7 @@ import 'dart:ui';
 import 'package:connectivity_plus_platform_interface/connectivity_plus_platform_interface.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:loggy/loggy.dart';
@@ -426,6 +427,39 @@ extension WidgetTesterExtension on WidgetTester {
     }
 
     throw "pumpUntilNotNull timeout";
+  }
+
+  Future<void> anxiousTap(Finder finder) async {
+    await tap(finder);
+    await pump(Duration(milliseconds: 10));
+    if (wouldHit(finder)) {
+      await tap(finder);
+    }
+  }
+
+  // Check that the element represented by `finder` exists and tapping on it is
+  // not obstructed by other element
+  bool wouldHit(Finder finder) {
+    final Iterable<Element> elements = finder.evaluate();
+    if (elements.isEmpty) return false;
+    if (elements.length > 1) throw "More than one such element";
+    final element = elements.single;
+    final RenderBox box = element.renderObject! as RenderBox;
+    final viewId = viewOf(finder).viewId;
+    final location = getCenter(finder, warnIfMissed: false);
+    final result = hitTestOnBinding(location, viewId: viewId);
+    return result.path.any((HitTestEntry entry) => entry.target == box);
+  }
+
+  Future<void> runAsyncWithScreenshotOnFailure(Future<void> callback()) {
+    return runAsync(() async {
+      try {
+        await callback();
+      } catch (e) {
+        await takeScreenshot(name: testDescription);
+        rethrow;
+      }
+    });
   }
 }
 
