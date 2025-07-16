@@ -161,7 +161,7 @@ void main() {
       expect(blindIcon, findsOne);
 
       // Tap the repo to go to the unlock page.
-      await tester.tap(repoItem);
+      await tester.anxiousTap(repoItem);
       await deps.reposCubit.waitUntil((state) => state.current == repoEntry);
       await repoCubit.waitUntil((state) => !state.isLoading);
       await tester.pumpAndSettle();

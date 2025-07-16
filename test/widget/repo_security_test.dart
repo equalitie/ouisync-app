@@ -116,7 +116,7 @@ void main() {
       expect(passwordError, findsNothing);
       expect(retypePasswordError, findsNothing);
 
-      await tester.tap(find.text('UPDATE'));
+      await tester.anxiousTap(find.text('UPDATE'));
       await tester.pumpAndSettle();
 
       expect(
@@ -124,7 +124,7 @@ void main() {
         findsOne,
       );
 
-      await tester.tap(find.text('Accept'));
+      await tester.anxiousTap(find.text('Accept'));
       await repoCubit.waitUntil((state) {
         return state.authMode is AuthModeBlindOrManual;
       });
