@@ -67,6 +67,12 @@ class _EntryActionItemState extends State<EntryActionItem> {
     super.initState();
   }
 
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
   void _validateEnabledState({bool init = true}) {
     final isEnabled = widget.enabledValidation?.call() ?? true;
 
