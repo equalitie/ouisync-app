@@ -163,10 +163,9 @@ Future<void> main(List<String> args) async {
       stdin.readLineSync();
     }
 
-    final auth =
-        options.token != null
-            ? Authentication.withToken(options.token)
-            : Authentication.anonymous();
+    final auth = options.token != null
+        ? Authentication.withToken(options.token)
+        : Authentication.anonymous();
 
     await publishToGithub(outputDir, options.action!, options.slug, auth);
   }
@@ -195,9 +194,6 @@ Future<void> publishToGithub(
       case ReleaseAction.update:
         final release = await findLatestDraftRelease(client, slug);
         await uploadAssets(client, release, storedAssets);
-        break;
-
-      case null:
         break;
     }
   } finally {
@@ -375,21 +371,19 @@ class Options {
     }
 
     final tokenFilePath = results['token-file'];
-    final token =
-        (tokenFilePath != null)
-            ? await File(tokenFilePath).readAsString()
-            : null;
+    final token = (tokenFilePath != null)
+        ? await File(tokenFilePath).readAsString()
+        : null;
 
     final assetDirPath = results['asset-dir'];
 
     final slug = RepositorySlug.full(results['repo']!);
 
-    final action =
-        results['create']
-            ? ReleaseAction.create
-            : results['update']
-            ? ReleaseAction.update
-            : null;
+    final action = results['create']
+        ? ReleaseAction.create
+        : results['update']
+        ? ReleaseAction.update
+        : null;
 
     if (results['msix']) {
       if (results['identity-name'] == null || results['publisher'] == null) {
@@ -487,9 +481,9 @@ extension OuisyncVersion on Version {
     if (buildId != null && commit != null) {
       build = "$buildId.$commit";
     } else if (buildId != null && commit == null) {
-      build = "$buildId";
+      build = buildId;
     } else if (buildId == null && commit != null) {
-      build = "$commit";
+      build = commit;
     }
 
     return Version(major, minor, patch, build: build);
@@ -500,7 +494,7 @@ extension OuisyncVersion on Version {
     final commit = this.commit;
 
     if (commit != null) {
-      build = "$commit";
+      build = commit;
     }
 
     return Version(major, minor, patch, build: build);
@@ -525,25 +519,23 @@ class AssetDesc {
     this.extension, {
     this.arch = '',
     this.isChecksum = false,
-  }) {}
+  });
 
   static AssetDesc parse(String filename) {
     final (name, rest0) = _splitAt(filename, filename.indexOf('_'));
-    var (version_and_suffix, extension) = _splitAt(
-      rest0!,
-      rest0!.lastIndexOf('.'),
-    );
+    final rest = rest0 ?? '';
+    var (versionAndSuffix, extension) = _splitAt(rest, rest.lastIndexOf('.'));
     bool isChecksum = false;
     if (extension == checksumExtension) {
       isChecksum = true;
-      (version_and_suffix, extension) = _splitAt(
-        version_and_suffix,
-        version_and_suffix.lastIndexOf('.'),
+      (versionAndSuffix, extension) = _splitAt(
+        versionAndSuffix,
+        versionAndSuffix.lastIndexOf('.'),
       );
     }
     final (version, arch) = _splitAt(
-      version_and_suffix,
-      version_and_suffix.indexOf('_'),
+      versionAndSuffix,
+      versionAndSuffix.indexOf('_'),
     );
 
     return AssetDesc(
@@ -561,7 +553,7 @@ class AssetDesc {
   }
 
   String toStringWith(String version) {
-    return "${name}_${version}${_archTag}.$extension${_checksumExtTag}";
+    return "${name}_$version$_archTag.$extension$_checksumExtTag";
   }
 
   String gitHubName() {
@@ -616,8 +608,9 @@ Future<File> buildWindowsInstaller(Version version, String? sentryDSN) async {
   /// directory (releases/bundled-assets-windows)
   await prepareDokanBundle();
 
-  final innoScript =
-      await File("windows/inno-setup.iss.template").readAsString();
+  final innoScript = await File(
+    "windows/inno-setup.iss.template",
+  ).readAsString();
   await File(
     "build/inno-setup.iss",
   ).writeAsString(innoScript.replaceAll("<APP_VERSION>", buildName));
@@ -711,8 +704,9 @@ Future<void> prepareDokanBundle() async {
   }
 
   /// Move all additional assets to the data directory (Release/data)
-  final dataPath =
-      await Directory('$windowsArtifactDir/data/bundled-assets').create();
+  final dataPath = await Directory(
+    '$windowsArtifactDir/data/bundled-assets',
+  ).create();
 
   final msixAssetsPath = Directory('releases/bundled-assets-windows');
   await copyDirectory(msixAssetsPath, dataPath);
@@ -1090,10 +1084,9 @@ Future<void> uploadAssets(
     final fileName = p.basename(asset.path);
     AssetDesc dsc = AssetDesc.parse(fileName);
     final content = await asset.readAsBytes();
-    final contentType =
-        dsc.extension == ".$checksumExtension"
-            ? 'text/plain'
-            : 'application/octet-stream';
+    final contentType = dsc.extension == ".$checksumExtension"
+        ? 'text/plain'
+        : 'application/octet-stream';
 
     final dstFileName = dsc.gitHubName();
 
@@ -1162,10 +1155,8 @@ Future<String> buildReleaseNotes(Version version) async {
   var extracting = false;
   String? compareUrl;
 
-  await for (final line in input
-      .openRead()
-      .transform(utf8.decoder)
-      .transform(LineSplitter())) {
+  await for (final line
+      in input.openRead().transform(utf8.decoder).transform(LineSplitter())) {
     final match = headerRegexp.firstMatch(line);
 
     if (match == null) {
@@ -1231,7 +1222,6 @@ String buildTagName(Version version) {
 }
 
 String formatTimestamp(DateTime timestamp) {
-  final separator = '';
   return formatDate(timestamp, [
     yyyy,
     '-',
@@ -1247,11 +1237,11 @@ String formatTimestamp(DateTime timestamp) {
   ]).toString();
 }
 
-Future<Directory> createOutputDir(String? dir_path, Version version) async {
+Future<Directory> createOutputDir(String? dirPath, Version version) async {
   final timestamp = formatTimestamp(DateTime.now());
   final Directory dir;
-  if (dir_path != null) {
-    dir = Directory(dir_path);
+  if (dirPath != null) {
+    dir = Directory(dirPath);
   } else {
     dir = Directory('$rootWorkDir/release_${timestamp}_$version');
   }
@@ -1381,15 +1371,14 @@ Future<bool> checkWorkingTreeIsClean(GitDir git) async {
 }
 
 Future<void> createIcon(File src, File dst, int resolution) async {
-  final command =
-      image.Command()
-        ..decodeImageFile(src.path)
-        ..copyResize(
-          width: resolution,
-          height: resolution,
-          interpolation: image.Interpolation.cubic,
-        )
-        ..writeToFile(dst.path);
+  final command = image.Command()
+    ..decodeImageFile(src.path)
+    ..copyResize(
+      width: resolution,
+      height: resolution,
+      interpolation: image.Interpolation.cubic,
+    )
+    ..writeToFile(dst.path);
 
   await command.executeThread();
 }
@@ -1434,11 +1423,9 @@ class Pass {
 }
 
 Future<AndroidSecrets> prepareAndroidSecretsFromPass(Flavor flavor) async {
-  final dir =
-      await (await Directory(
-            '${Directory.systemTemp.path}/ouisync-android-secrets',
-          ).create())
-          .createTemp();
+  final dir = await (await Directory(
+    '${Directory.systemTemp.path}/ouisync-android-secrets',
+  ).create()).createTemp();
 
   Future<void> deleteSecrets() => dir.delete(recursive: true);
 

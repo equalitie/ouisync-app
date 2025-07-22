@@ -54,6 +54,12 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: ${{ runner.os }}-cargo-
 
+      - name: Install dependencies (linux)
+        run: |
+          sudo apt update -y
+          sudo apt-get install libfuse-dev
+        if: matrix.name == 'linux'
+
       # FIXME: when dokan is installed some tests fail with weird panic from the dokan-rust library.
       # Disabling for now. See also the comment for the `test-args` variable in the `windows`
       # strategy.
@@ -278,25 +284,25 @@ jobs:
           - 34
           - 35
         include:
-          - api_level: 26
+          - api-level: 26
             target: google_apis
-          - api_level: 27
+          - api-level: 27
             target: default
-          - api_level: 28
+          - api-level: 28
             target: google_apis
-          - api_level: 29
+          - api-level: 29
             target: google_apis
-          - api_level: 30
+          - api-level: 30
             target: google_apis
-          - api_level: 31
+          - api-level: 31
             target: google_apis
-          - api_level: 32
+          - api-level: 32
             target: google_apis
-          - api_level: 33
+          - api-level: 33
             target: google_apis
-          - api_level: 34
+          - api-level: 34
             target: google_apis
-          - api_level: 35
+          - api-level: 35
             target: google_apis
     steps:
       - name: Enable KVM
@@ -315,7 +321,7 @@ jobs:
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: ${{ matrix.api-level }}
-          target: google_apis
+          target: ${{ matrix.target }}
           arch: x86_64
           script: flutter test integration_test --flavor itest --ignore-timeouts
 
