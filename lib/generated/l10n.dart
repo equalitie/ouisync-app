@@ -28,10 +28,9 @@ class S {
   static const AppLocalizationDelegate delegate = AppLocalizationDelegate();
 
   static Future<S> load(Locale locale) {
-    final name =
-        (locale.countryCode?.isEmpty ?? false)
-            ? locale.languageCode
-            : locale.toString();
+    final name = (locale.countryCode?.isEmpty ?? false)
+        ? locale.languageCode
+        : locale.toString();
     final localeName = Intl.canonicalizedLocale(name);
     return initializeMessages(localeName).then((_) {
       Intl.defaultLocale = localeName;
@@ -4011,10 +4010,10 @@ class S {
     );
   }
 
-  /// `Authentication method`
+  /// `Repository is either blind or locked by a local password`
   String get repoResetAuthInfoBlindOrLocked {
     return Intl.message(
-      'Authentication method',
+      'Repository is either blind or locked by a local password',
       name: 'repoResetAuthInfoBlindOrLocked',
       desc: '',
       args: [],

@@ -1098,7 +1098,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "This action is irreversible without a write token link.",
     ),
     "repoResetAuthInfoBlindOrLocked": MessageLookupByLibrary.simpleMessage(
-      "Authentication method",
+      "Repository is either blind or locked by a local password",
     ),
     "repoResetAuthInfoBlindOrLockedWarn": MessageLookupByLibrary.simpleMessage(
       "The application cannot tell the difference.",

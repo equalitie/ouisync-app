@@ -622,7 +622,7 @@
   "repoResetTokenTypeLabel": "Token access type",
   "repoResetActionInfoLabel": "Action to be submitted",
   "repoResetAuthInfoLabel": "Authentication method",
-  "repoResetAuthInfoBlindOrLocked": "Authentication method",
+  "repoResetAuthInfoBlindOrLocked": "Repository is either blind or locked by a local password",
   "repoResetAuthInfoBlindOrLockedWarn": "The application cannot tell the difference.",
   "repoResetAuthInfoLocked": "Locked behind a local password.",
   "repoResetAuthInfoPasswordIsStored": "Password is stored on this device.",
