@@ -7,7 +7,7 @@ import 'v1.dart' as v1;
 import 'v2.dart' as v2;
 import '../files.dart';
 import '../log.dart' as log;
-import '../master_key.dart';
+import '../master_key.dart' show MasterKey;
 import '../native.dart';
 
 typedef DatabaseId = v2.DatabaseId;
