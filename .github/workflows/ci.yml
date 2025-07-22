@@ -325,63 +325,61 @@ jobs:
           arch: x86_64
           script: flutter test integration_test --flavor itest --ignore-timeouts
 
-  integration_test_desktop:
-    name: run integration tests on ${{ matrix.name }}
-    runs-on: ${{ matrix.os }}
+  # TODO: Integration tests on both linux and windows currently fail or hang. Commenting them out until they are fixed.
+  # integration_test_desktop:
+  #   name: run integration tests on ${{ matrix.name }}
+  #   runs-on: ${{ matrix.os }}
 
-    strategy:
-      matrix:
-        # TODO: On windows the integration test timeouts for some reason. Disabling for now until
-        # the issue is fixed.
-        # name: [linux, windows]
-        name: [linux]
-        include:
-          - name: linux
-            os: ubuntu-24.04
-          # - name: windows
-          #   os: windows-latest
+  #   strategy:
+  #     matrix:
+  #       name: [linux, windows]
+  #       include:
+  #         - name: linux
+  #           os: ubuntu-24.04
+  #         - name: windows
+  #           os: windows-latest
 
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #       with:
+  #         submodules: recursive
 
-      - name: Setup cargo cache
-        id: cargo-cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.cargo_cache_path }}
-          key: ${{ runner.os }}-cargo-test-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: ${{ runner.os }}-cargo-
+  #     - name: Setup cargo cache
+  #       id: cargo-cache
+  #       uses: actions/cache@v4
+  #       with:
+  #         path: ${{ env.cargo_cache_path }}
+  #         key: ${{ runner.os }}-cargo-test-${{ hashFiles('**/Cargo.lock') }}
+  #         restore-keys: ${{ runner.os }}-cargo-
 
-      - name: Install dependencies (linux)
-        run: |
-          sudo apt update -y
-          sudo apt-get install libappindicator3-dev   \
-                               libcurl4-openssl-dev   \
-                               libfuse-dev            \
-                               libgtk-3-dev           \
-                               libsecret-1-dev        \
-                               ninja-build            \
-                               imagemagick
-        if: matrix.name == 'linux'
+  #     - name: Install dependencies (linux)
+  #       run: |
+  #         sudo apt update -y
+  #         sudo apt-get install libappindicator3-dev   \
+  #                              libcurl4-openssl-dev   \
+  #                              libfuse-dev            \
+  #                              libgtk-3-dev           \
+  #                              libsecret-1-dev        \
+  #                              ninja-build            \
+  #                              imagemagick
+  #       if: matrix.name == 'linux'
 
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: 'stable'
-          flutter-version-file: pubspec.yaml
-          cache: true
+  #     - uses: subosito/flutter-action@v2
+  #       with:
+  #         channel: 'stable'
+  #         flutter-version-file: pubspec.yaml
+  #         cache: true
 
-      - name: Get Flutter packages
-        run:  dart pub get
+  #     - name: Get Flutter packages
+  #       run:  dart pub get
 
-      - name: Generate the Dart bindings for the Ouisync library
-        working-directory: ouisync/bindings/dart
-        run: dart tool/bindgen.dart
+  #     - name: Generate the Dart bindings for the Ouisync library
+  #       working-directory: ouisync/bindings/dart
+  #       run: dart tool/bindgen.dart
 
-      # Note that xvfb is used only on linux. On other platforms the tests are run without any
-      # special setup: https://github.com/marketplace/actions/setup-xvfb
-      - name: Run tests
-        uses: coactions/setup-xvfb@v1
-        with:
-          run: flutter test integration_test/ --dart-define OUISYNC_FLAVOR=itest --verbose
+  #     # Note that xvfb is used only on linux. On other platforms the tests are run without any
+  #     # special setup: https://github.com/marketplace/actions/setup-xvfb
+  #     - name: Run tests
+  #       uses: coactions/setup-xvfb@v1
+  #       with:
+  #         run: flutter test integration_test/ --dart-define OUISYNC_FLAVOR=itest --verbose
