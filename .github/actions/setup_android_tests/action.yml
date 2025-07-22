@@ -18,7 +18,7 @@ runs:
           ~/.cargo/registry/cache/
           ~/.cargo/git/db/
           ouisync/target/
-        key: ${{ runner.os }}-android-cargo-${{ hashFiles('**/Cargo.lock') }}
+        key: ${{ runner.os }}-android-cargo-test-${{ hashFiles('**/Cargo.lock') }}
         restore-keys: ${{ runner.os }}-android-cargo-
 
     - name: Setup gradle cache
