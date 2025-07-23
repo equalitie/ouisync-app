@@ -49,6 +49,10 @@ runs:
       run: rustup target add x86_64-linux-android aarch64-linux-android armv7-linux-androideabi
       shell: bash
 
+    - name: Install NDK
+      run: $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --install "ndk;27.2.12479018"
+      shell: bash
+
     - name: Set NDK ABI filter
       run: echo "ndk.abiFilters=x86_64" >> android/local.properties
       shell: bash

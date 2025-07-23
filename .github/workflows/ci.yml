@@ -195,6 +195,10 @@ jobs:
                                imagemagick
         if: matrix.name == 'linux'
 
+      - name: Install NDK
+        run: $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --install "ndk;27.2.12479018"
+        if: matrix.name == 'android'
+
       - name: Set NDK ABI filter
         run: echo "ndk.abiFilters=${{ matrix.ndk.abi }}" >> android/local.properties
         if: matrix.ndk.abi != ''
@@ -305,6 +309,7 @@ jobs:
           - api-level: 35
             target: google_apis
     steps:
+
       - name: Enable KVM
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules

@@ -274,10 +274,9 @@ extension WidgetTesterExtension on WidgetTester {
       }
 
       final image = await captureImage(element);
-      final bytes =
-          (await image.toByteData(
-            format: ImageByteFormat.png,
-          ))!.buffer.asUint8List();
+      final bytes = (await image.toByteData(
+        format: ImageByteFormat.png,
+      ))!.buffer.asUint8List();
 
       final path = join(_testDirPath, 'screenshots', '$name.png');
 
@@ -405,7 +404,9 @@ extension WidgetTesterExtension on WidgetTester {
     return result.path.any((HitTestEntry entry) => entry.target == box);
   }
 
-  Future<void> runAsyncWithScreenshotOnFailure(Future<void> callback()) {
+  Future<void> runAsyncWithScreenshotOnFailure(
+    Future<void> Function() callback,
+  ) {
     return runAsync(() async {
       try {
         await callback();
