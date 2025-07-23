@@ -25,10 +25,11 @@ import 'package:ouisync/ouisync.dart'
     show Session, SetLocalSecretKeyAndSalt, Server;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart';
-import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stack_trace/stack_trace.dart';
+
+import 'sandbox.dart';
 export 'package:flutter/foundation.dart' show debugPrint;
 
 final _loggy = log.named("TestHelper");
@@ -54,38 +55,12 @@ Future<void> testEnv(FutureOr<void> Function() callback) async {
 
   Loggy.initLoggy();
 
-  late Directory tempDir;
+  late Sandbox sandbox;
   late BlocObserver origBlocObserver;
 
   setUp(() async {
     origBlocObserver = Bloc.observer;
-
-    tempDir = await Directory.systemTemp.createTemp();
-
-    final platformDir = Directory(join(tempDir.path, 'platform'));
-    await platformDir.create();
-    PathProviderPlatform.instance = _FakePathProviderPlatform(platformDir);
-
-    final shared = Directory(join(tempDir.path, 'shared')).create();
-    final mount = Directory(join(tempDir.path, 'mount')).create();
-    final native =
-        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
-    native.setMockMethodCallHandler(
-      MethodChannel('org.equalitie.ouisync/native'),
-      (call) async {
-        switch (call.method) {
-          case 'getSharedDir':
-            return (await shared).path;
-          case 'getMountRootDirectory':
-            return (await mount).path;
-          default:
-            throw PlatformException(
-              code: 'OS06',
-              message: 'Method "${call.method}" not exported by host',
-            );
-        }
-      },
-    );
+    sandbox = await Sandbox.setUp();
 
     ConnectivityPlatform.instance = _FakeConnectivityPlatform();
 
@@ -95,8 +70,8 @@ Future<void> testEnv(FutureOr<void> Function() callback) async {
   });
 
   tearDown(() async {
+    await sandbox.tearDown();
     Bloc.observer = origBlocObserver;
-    await deleteTempDir(tempDir);
   });
 
   await callback();
@@ -183,27 +158,6 @@ class _FakeConnectivityPlatform extends ConnectivityPlatform {
   @override
   Future<List<ConnectivityResult>> checkConnectivity() =>
       Future.value([ConnectivityResult.none]);
-}
-
-class _FakePathProviderPlatform extends PathProviderPlatform {
-  final Directory root;
-
-  _FakePathProviderPlatform(this.root);
-
-  @override
-  Future<String?> getApplicationSupportPath() =>
-      Future.value(join(root.path, 'application-support'));
-
-  @override
-  Future<String?> getApplicationDocumentsPath() =>
-      Future.value(join(root.path, 'application-documents'));
-
-  @override
-  Future<String?> getDownloadsPath() => Future.value(null);
-
-  @override
-  Future<String?> getTemporaryPath() =>
-      Future.value(join(root.path, 'temporary'));
 }
 
 /// Build `MaterialApp` to host the widget under test.
@@ -320,10 +274,9 @@ extension WidgetTesterExtension on WidgetTester {
       }
 
       final image = await captureImage(element);
-      final bytes =
-          (await image.toByteData(
-            format: ImageByteFormat.png,
-          ))!.buffer.asUint8List();
+      final bytes = (await image.toByteData(
+        format: ImageByteFormat.png,
+      ))!.buffer.asUint8List();
 
       final path = join(_testDirPath, 'screenshots', '$name.png');
 
@@ -451,7 +404,9 @@ extension WidgetTesterExtension on WidgetTester {
     return result.path.any((HitTestEntry entry) => entry.target == box);
   }
 
-  Future<void> runAsyncWithScreenshotOnFailure(Future<void> callback()) {
+  Future<void> runAsyncWithScreenshotOnFailure(
+    Future<void> Function() callback,
+  ) {
     return runAsync(() async {
       try {
         await callback();
@@ -480,22 +435,6 @@ extension BlocBaseExtension<State> on BlocBase<State> {
 
 SetLocalSecretKeyAndSalt randomSetLocalSecret() =>
     SetLocalSecretKeyAndSalt(key: randomSecretKey(), salt: randomSalt());
-
-Future<void> deleteTempDir(Directory dir) async {
-  try {
-    await dir.delete(recursive: true);
-  } on PathAccessException {
-    // This sometimes happens on the CI on windows. It seems to be caused by another process
-    // accessing the temp directory for some reason. It probably doesn't indicate a problem in
-    // the code under test so it should be safe to ignore it.
-  } on PathNotFoundException {
-    // This shouldn't happen but it still sometimes does. Unknown why. It doesn't really affect
-    // the tests so we ignore it.
-  } catch (exception) {
-    _loggy.error("Exception during temporary directory removal: $exception");
-    rethrow;
-  }
-}
 
 String randomAsciiString(int length) {
   const chars =

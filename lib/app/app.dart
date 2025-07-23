@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -37,11 +36,10 @@ Future<Widget> initApp([List<String> args = const []]) async =>
         if (home != null) {
           return BlocBuilder<LocaleCubit, LocaleState>(
             bloc: home.localeCubit,
-            builder:
-                (context, localeState) => _buildMaterialApp(
-                  locale: localeState.currentLocale,
-                  home: home,
-                ),
+            builder: (context, localeState) => _buildMaterialApp(
+              locale: localeState.currentLocale,
+              home: home,
+            ),
           );
         } else {
           return _buildMaterialApp(home: LoadingScreen());

@@ -9,7 +9,7 @@ class FlavorBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) => switch (Flavor.current) {
     Flavor.production => child,
-    Flavor.nightly || Flavor.unofficial => Banner(
+    Flavor.nightly || Flavor.unofficial || Flavor.itest => Banner(
       location: BannerLocation.topEnd,
       message: Flavor.current.toString(),
       color: _flavorColor(Flavor.current),
@@ -22,4 +22,5 @@ Color _flavorColor(Flavor flavor) => switch (flavor) {
   Flavor.production => Colors.grey,
   Flavor.nightly => const Color(0xFFE65100),
   Flavor.unofficial => const Color(0xFF0D47A1),
+  Flavor.itest => Colors.green,
 };

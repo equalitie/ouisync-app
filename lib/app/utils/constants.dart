@@ -141,6 +141,7 @@ class Constants {
     Flavor.production => ['server-ca.ouisync.net'],
     Flavor.unofficial => ['server-ca.ouisync.net'],
     Flavor.nightly => ['server-ca.ouisync.net:22443'],
+    Flavor.itest => [],
   };
 
   static const int android12SDK = 32;

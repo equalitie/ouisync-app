@@ -7,12 +7,16 @@ import 'package:flutter/services.dart';
 enum Flavor {
   production,
   nightly,
-  unofficial;
+  unofficial,
+  // Used for integration tests (note, for some reason, product flavors on android can't
+  // start with "test").
+  itest;
 
   static Flavor? parse(String input) => switch (input.trim().toLowerCase()) {
     'production' => production,
     'nightly' => nightly,
     'unofficial' => unofficial,
+    'itest' || 'test' => itest,
     _ => null,
   };
 
@@ -20,4 +24,12 @@ enum Flavor {
       parse(appFlavor ?? '') ??
       parse(String.fromEnvironment('OUISYNC_FLAVOR')) ??
       production;
+
+  @override
+  String toString() => switch (this) {
+    production => 'production',
+    nightly => 'nightly',
+    unofficial => 'unofficial',
+    itest => 'itest',
+  };
 }
