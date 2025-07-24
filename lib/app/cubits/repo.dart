@@ -901,6 +901,8 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     final path = state.currentFolder.path;
     bool errorShown = false;
 
+    emitUnlessClosed(state.copyWith(isLoading: true));
+
     try {
       while (state.canRead) {
         bool success = await _currentFolder.refresh(
