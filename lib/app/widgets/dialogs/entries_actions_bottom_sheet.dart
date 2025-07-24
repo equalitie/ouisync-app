@@ -88,9 +88,9 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
   }
 
   @override
-  Widget build(BuildContext context) => BlocBuilder<ReposCubit, ReposState>(
+  Widget build(BuildContext _ctx) => BlocBuilder<ReposCubit, ReposState>(
     bloc: widget.reposCubit,
-    builder: (context, reposState) => Container(
+    builder: (_ctx, reposState) => Container(
       key: bodyKey,
       padding: Dimensions.paddingBottomSheet,
       decoration: Dimensions.decorationBottomSheetAlternative,
@@ -187,7 +187,7 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
     Dirs dirs,
   ) => BlocBuilder<NavigationCubit, NavigationState>(
     bloc: navigationCubit,
-    builder: (context, state) {
+    builder: (_ctx, state) {
       final moveEntriesActions = MoveEntriesActions(
         context,
         reposCubit: reposCubit,
