@@ -31,13 +31,12 @@ class PlatformPexSwitch extends StatelessWidget {
       BlocSelector<RepoCubit, RepoState, bool>(
         bloc: repository,
         selector: (state) => state.isPexEnabled,
-        builder:
-            (context, value) => SwitchListTile.adaptive(
-              value: value,
-              title: title,
-              secondary: Icon(icon),
-              onChanged: (value) => onToggle?.call(value),
-            ),
+        builder: (context, value) => SwitchListTile.adaptive(
+          value: value,
+          title: title,
+          secondary: Icon(icon),
+          onChanged: (value) => onToggle?.call(value),
+        ),
       );
 
   AbstractSettingsTile buildMobileWidget(BuildContext context) =>

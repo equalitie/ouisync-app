@@ -20,20 +20,17 @@ class ReplaceKeepEntry extends StatelessWidget {
   Widget build(BuildContext context) {
     final bodyStyle = context.theme.appTextStyle.bodyMedium;
 
-    final replaceMessage =
-        type == EntryType.file
-            ? S.current.messageReplaceExistingFile
-            : S.current.messageReplaceExistingFolder;
+    final replaceMessage = type == EntryType.file
+        ? S.current.messageReplaceExistingFile
+        : S.current.messageReplaceExistingFolder;
 
-    final keepMessage =
-        type == EntryType.file
-            ? S.current.messageKeepBothFiles
-            : S.current.messageKeepBothFolders;
+    final keepMessage = type == EntryType.file
+        ? S.current.messageKeepBothFiles
+        : S.current.messageKeepBothFolders;
 
-    _fileAction.value =
-        type == EntryType.file
-            ? DisambiguationAction.replace
-            : DisambiguationAction.keep;
+    _fileAction.value = type == EntryType.file
+        ? DisambiguationAction.replace
+        : DisambiguationAction.keep;
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -60,8 +57,9 @@ class ReplaceKeepEntry extends StatelessWidget {
                     title: Text(replaceMessage, style: bodyStyle),
                     value: DisambiguationAction.replace,
                     groupValue: value,
-                    onChanged:
-                        type == EntryType.file ? _onFileActionChanged : null,
+                    onChanged: type == EntryType.file
+                        ? _onFileActionChanged
+                        : null,
                   ),
                 ),
                 RadioListTile<DisambiguationAction>(
@@ -89,8 +87,8 @@ class ReplaceKeepEntry extends StatelessWidget {
     ),
     PositiveButton(
       text: S.current.actionAccept,
-      onPressed:
-          () async => await Navigator.of(context).maybePop(_fileAction.value),
+      onPressed: () async =>
+          await Navigator.of(context).maybePop(_fileAction.value),
     ),
   ];
 

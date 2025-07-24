@@ -65,11 +65,10 @@ mixin RepositoryActionsMixin on LoggyType {
     final newName =
         await showDialog<String>(
           context: context,
-          builder:
-              (BuildContext context) => ActionsDialog(
-                title: S.current.messageRenameRepository,
-                body: RenameRepository(repoCubit),
-              ),
+          builder: (BuildContext context) => ActionsDialog(
+            title: S.current.messageRenameRepository,
+            body: RenameRepository(repoCubit),
+          ),
         ) ??
         '';
 
@@ -81,28 +80,26 @@ mixin RepositoryActionsMixin on LoggyType {
     required RepoCubit repository,
   }) {
     final accessMode = repository.state.accessMode;
-    final accessModes =
-        accessMode == AccessMode.write
-            ? [AccessMode.blind, AccessMode.read, AccessMode.write]
-            : accessMode == AccessMode.read
-            ? [AccessMode.blind, AccessMode.read]
-            : [AccessMode.blind];
+    final accessModes = accessMode == AccessMode.write
+        ? [AccessMode.blind, AccessMode.read, AccessMode.write]
+        : accessMode == AccessMode.read
+        ? [AccessMode.blind, AccessMode.read]
+        : [AccessMode.blind];
 
     return showModalBottomSheet(
       isScrollControlled: true,
       context: context,
       shape: Dimensions.borderBottomSheetTop,
       constraints: BoxConstraints(maxHeight: 390.0),
-      builder:
-          (_) => ScaffoldMessenger(
-            child: Scaffold(
-              backgroundColor: Colors.transparent,
-              body: ShareRepository(
-                repository: repository,
-                availableAccessModes: accessModes,
-              ),
-            ),
+      builder: (_) => ScaffoldMessenger(
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: ShareRepository(
+            repository: repository,
+            availableAccessModes: accessModes,
           ),
+        ),
+      ),
     );
   }
 
@@ -224,46 +221,45 @@ mixin RepositoryActionsMixin on LoggyType {
   }) async {
     final deleteRepo = await showDialog<bool>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: Flex(
-              direction: Axis.horizontal,
-              children: [
-                Fields.constrainedText(
-                  S.current.titleDeleteRepository,
-                  style: context.theme.appTextStyle.titleMedium,
-                  maxLines: 2,
-                ),
-              ],
+      builder: (context) => AlertDialog(
+        title: Flex(
+          direction: Axis.horizontal,
+          children: [
+            Fields.constrainedText(
+              S.current.titleDeleteRepository,
+              style: context.theme.appTextStyle.titleMedium,
+              maxLines: 2,
             ),
-            content: SingleChildScrollView(
-              child: ListBody(
-                children: [
-                  Text(
-                    S.current.messageConfirmRepositoryDeletion,
-                    style: context.theme.appTextStyle.bodyMedium,
-                  ),
-                ],
-              ),
-            ),
-            actions: [
-              Fields.dialogActions(
-                buttons: [
-                  NegativeButton(
-                    text: S.current.actionCancelCapital,
-                    onPressed:
-                        () async => await Navigator.of(context).maybePop(false),
-                  ),
-                  PositiveButton(
-                    text: S.current.actionDeleteCapital,
-                    onPressed:
-                        () async => await Navigator.of(context).maybePop(true),
-                    isDangerButton: true,
-                  ),
-                ],
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: ListBody(
+            children: [
+              Text(
+                S.current.messageConfirmRepositoryDeletion,
+                style: context.theme.appTextStyle.bodyMedium,
               ),
             ],
           ),
+        ),
+        actions: [
+          Fields.dialogActions(
+            buttons: [
+              NegativeButton(
+                text: S.current.actionCancelCapital,
+                onPressed: () async =>
+                    await Navigator.of(context).maybePop(false),
+              ),
+              PositiveButton(
+                text: S.current.actionDeleteCapital,
+                onPressed: () async =>
+                    await Navigator.of(context).maybePop(true),
+                isDangerButton: true,
+              ),
+            ],
+          ),
+        ],
+      ),
     );
 
     if (deleteRepo == true) {
@@ -317,10 +313,9 @@ mixin RepositoryActionsMixin on LoggyType {
     } else {
       final bio = authMode.isSecuredWithBiometrics;
 
-      errorMessage =
-          bio
-              ? S.current.messageBiometricUnlockRepositoryFailed
-              : S.current.messageAutomaticUnlockRepositoryFailed;
+      errorMessage = bio
+          ? S.current.messageBiometricUnlockRepositoryFailed
+          : S.current.messageAutomaticUnlockRepositoryFailed;
 
       if (bio) {
         if (!await LocalAuth.authenticateIfPossible(
@@ -344,10 +339,9 @@ mixin RepositoryActionsMixin on LoggyType {
     await repoCubit.unlock(secret);
     final accessMode = repoCubit.accessMode;
 
-    final message =
-        (accessMode != AccessMode.blind)
-            ? S.current.messageUnlockRepoOk(accessMode.localized)
-            : S.current.messageUnlockRepoFailed;
+    final message = (accessMode != AccessMode.blind)
+        ? S.current.messageUnlockRepoOk(accessMode.localized)
+        : S.current.messageUnlockRepoFailed;
 
     showSnackBar(message);
   }

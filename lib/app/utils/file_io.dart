@@ -111,20 +111,19 @@ class FileIO with AppLogger {
     required String fileName,
   }) async => showDialog<DisambiguationAction>(
     context: context,
-    builder:
-        (BuildContext context) => AlertDialog(
-          title: Flex(
-            direction: Axis.horizontal,
-            children: [
-              Fields.constrainedText(
-                S.current.titleAddFile,
-                style: context.theme.appTextStyle.titleMedium,
-                maxLines: 2,
-              ),
-            ],
+    builder: (BuildContext context) => AlertDialog(
+      title: Flex(
+        direction: Axis.horizontal,
+        children: [
+          Fields.constrainedText(
+            S.current.titleAddFile,
+            style: context.theme.appTextStyle.titleMedium,
+            maxLines: 2,
           ),
-          content: ReplaceKeepEntry(name: fileName, type: EntryType.file),
-        ),
+        ],
+      ),
+      content: ReplaceKeepEntry(name: fileName, type: EntryType.file),
+    ),
   );
 
   Future<void> saveFileToDevice(
@@ -216,10 +215,9 @@ class FileIO with AppLogger {
         return (parentPath: '', destinationPath: '', canceled: true);
       }
 
-      final dirName =
-          fileName != null
-              ? p.dirname(destinationFilePath)
-              : destinationFilePath;
+      final dirName = fileName != null
+          ? p.dirname(destinationFilePath)
+          : destinationFilePath;
       parentPath = p.basename(dirName);
     } else {
       parentPath = p.basename(defaultPath);
@@ -248,15 +246,14 @@ class FileIO with AppLogger {
   }
 
   Future<String?> _getDesktopPath(String parentPath, String? fileName) async {
-    final basePath =
-        (fileName ?? '').isEmpty
-            ? await FilePicker.platform.getDirectoryPath(
-              initialDirectory: parentPath,
-            )
-            : await FilePicker.platform.saveFile(
-              fileName: fileName,
-              initialDirectory: parentPath,
-            );
+    final basePath = (fileName ?? '').isEmpty
+        ? await FilePicker.platform.getDirectoryPath(
+            initialDirectory: parentPath,
+          )
+        : await FilePicker.platform.saveFile(
+            fileName: fileName,
+            initialDirectory: parentPath,
+          );
 
     return basePath;
   }
@@ -290,10 +287,9 @@ class FileIO with AppLogger {
     final newFileName = '$name (${versions += 1})$extension';
     final newDestinationPath = p.join(destinationPath, newFileName);
 
-    final exist =
-        destination == FileDestination.device
-            ? io.File(newDestinationPath).exists()
-            : repoCubit.entryExists(newDestinationPath);
+    final exist = destination == FileDestination.device
+        ? io.File(newDestinationPath).exists()
+        : repoCubit.entryExists(newDestinationPath);
 
     if (await exist) {
       return _renameFile(

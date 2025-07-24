@@ -33,9 +33,8 @@ class LanguagePicker extends StatelessWidget {
       ),
       body: PopScope<Object?>(
         canPop: canPop,
-        onPopInvokedWithResult:
-            (bool didPop, Object? result) =>
-                _onBackPressed(context, didPop, result),
+        onPopInvokedWithResult: (bool didPop, Object? result) =>
+            _onBackPressed(context, didPop, result),
         child: Padding(
           padding: Dimensions.paddingActionBox,
           child: ContentWithStickyFooterState(
@@ -82,10 +81,9 @@ class LanguagePicker extends StatelessWidget {
             itemBuilder: (context, index) {
               final item = localeItems[index];
 
-              final selectionColor =
-                  item.isCurrent
-                      ? Theme.of(context).colorScheme.primaryContainer
-                      : null;
+              final selectionColor = item.isCurrent
+                  ? Theme.of(context).colorScheme.primaryContainer
+                  : null;
 
               final title = StringBuffer(item.locale.nativeDisplayLanguage);
 

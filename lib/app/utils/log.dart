@@ -24,7 +24,8 @@ Future<void> init(Dirs dirs) async {
   // our logs can contain data from multiple invocations, so to differentiate
   // we write this header every time the app starts
   final package = await PackageInfo.fromPlatform();
-  final header = '''
+  final header =
+      '''
 -------------------- ${package.appName} Start --------------------
 version:  ${package.version} ${Flavor.current} (build ${package.buildNumber})
 started:  ${_formatTimestamp(DateTime.now())}
@@ -88,12 +89,11 @@ Future<void> dump(IOSink sink) async {
     return;
   }
 
-  final all =
-      await file.parent
-          .list()
-          .map((entry) => entry.absolute.path)
-          .where((path) => path.startsWith(file.path))
-          .toList();
+  final all = await file.parent
+      .list()
+      .map((entry) => entry.absolute.path)
+      .where((path) => path.startsWith(file.path))
+      .toList();
 
   // The logs files are named 'ouisync.log', 'ouisync.log.1', 'ouisync.log.2',
   // etc. so sorting them in reverse lexigographical order yields them from

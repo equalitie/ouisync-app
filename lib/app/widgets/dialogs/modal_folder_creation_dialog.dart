@@ -140,12 +140,11 @@ class FolderCreation extends HookWidget {
     ),
     PositiveButton(
       text: S.current.actionCreate,
-      onPressed:
-          () async => await _onCreateButtonPress(
-            context,
-            parent: parent,
-            newFolderName: nameController.text,
-          ),
+      onPressed: () async => await _onCreateButtonPress(
+        context,
+        parent: parent,
+        newFolderName: nameController.text,
+      ),
       focusNode: positiveButtonFocus,
     ),
   ];

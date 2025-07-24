@@ -52,9 +52,8 @@ class DirectoryActions extends StatelessWidget with AppLogger {
                 _buildAction(
                   name: S.current.actionNewFolder,
                   icon: Icons.create_new_folder_outlined,
-                  action:
-                      () async =>
-                          await createFolderDialog(parentContext, repoCubit),
+                  action: () async =>
+                      await createFolderDialog(parentContext, repoCubit),
                 ),
                 _buildNewFileAction(parentContext, cubit: repoCubit),
               ],
@@ -105,28 +104,26 @@ class DirectoryActions extends StatelessWidget with AppLogger {
           _buildAction(
             name: S.current.actionNewFile,
             icon: Icons.upload_file_outlined,
-            action:
-                enable
-                    ? () async => await addFile(
-                      parentContext,
-                      repoCubit: cubit,
-                      type: FileType.any,
-                    )
-                    : null,
+            action: enable
+                ? () async => await addFile(
+                    parentContext,
+                    repoCubit: cubit,
+                    type: FileType.any,
+                  )
+                : null,
           ),
           if (io.Platform.isIOS)
             _buildAction(
               name: S.current.actionNewMediaFile,
               icon: Icons.photo_library_outlined,
-              action:
-                  enable
-                      ? () async => await addFile(
-                        parentContext,
-                        repoCubit: cubit,
-                        type: FileType.media,
-                      )
-                      : () async =>
-                          await _showNotAvailableAlertDialog(parentContext),
+              action: enable
+                  ? () async => await addFile(
+                      parentContext,
+                      repoCubit: cubit,
+                      type: FileType.media,
+                    )
+                  : () async =>
+                        await _showNotAvailableAlertDialog(parentContext),
             ),
         ],
       );
@@ -147,11 +144,10 @@ class DirectoryActions extends StatelessWidget with AppLogger {
         await showDialog<String>(
           context: context,
           barrierDismissible: false,
-          builder:
-              (BuildContext context) => ActionsDialog(
-                title: S.current.titleCreateFolder,
-                body: FolderCreation(cubit: cubit, parent: parent),
-              ),
+          builder: (BuildContext context) => ActionsDialog(
+            title: S.current.titleCreateFolder,
+            body: FolderCreation(cubit: cubit, parent: parent),
+          ),
         ) ??
         '';
 

@@ -19,27 +19,29 @@ class _State extends State<LinkStyleAsyncButton> {
     final asyncOnPressed = widget.onTap;
     final enabled = (asyncOnPressed != null && isRunning == false);
 
-    final onTap =
-        enabled
-            ? () {
-              unawaited(() async {
+    final onTap = enabled
+        ? () {
+            unawaited(() async {
+              setState(() {
+                isRunning = true;
+              });
+              try {
+                await asyncOnPressed();
+              } finally {
                 setState(() {
-                  isRunning = true;
+                  isRunning = false;
                 });
-                try {
-                  await asyncOnPressed();
-                } finally {
-                  setState(() {
-                    isRunning = false;
-                  });
-                }
-              }());
-            }
-            : null;
+              }
+            }());
+          }
+        : null;
 
     return InkWell(
       child: RichText(
-        text: TextSpan(text: widget.text, style: TextStyle(color: Colors.blue)),
+        text: TextSpan(
+          text: widget.text,
+          style: TextStyle(color: Colors.blue),
+        ),
       ),
       onTap: onTap,
     );

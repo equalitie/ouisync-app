@@ -65,34 +65,33 @@ class FileListItem extends StatelessWidget {
 
     return ValueListenableBuilder(
       valueListenable: _backgroundColor,
-      builder:
-          (context, stateColor, child) => _ListItemContainer(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                FileIconAnimated(downloadJob),
-                Expanded(
-                  child: Container(
-                    padding: Dimensions.paddingItem,
-                    child: FileDescription(repoCubit, entry, uploadJob),
-                  ),
-                ),
-                TrailAction(
-                  repoInfoHash,
-                  entry,
-                  entrySelectionCubit: entrySelectionCubit,
-                  selectedNotifier: _selected,
-                  backgroundColorNotifier: _backgroundColor,
-                  onSelectEntry: onSelectEntry,
-                  onClearEntry: onClearEntry,
-                  uploadJob: uploadJob,
-                  verticalDotsAction: verticalDotsAction,
-                ),
-              ],
+      builder: (context, stateColor, child) => _ListItemContainer(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            FileIconAnimated(downloadJob),
+            Expanded(
+              child: Container(
+                padding: Dimensions.paddingItem,
+                child: FileDescription(repoCubit, entry, uploadJob),
+              ),
             ),
-            mainAction: mainAction,
-            backgroundColor: stateColor,
-          ),
+            TrailAction(
+              repoInfoHash,
+              entry,
+              entrySelectionCubit: entrySelectionCubit,
+              selectedNotifier: _selected,
+              backgroundColorNotifier: _backgroundColor,
+              onSelectEntry: onSelectEntry,
+              onClearEntry: onClearEntry,
+              uploadJob: uploadJob,
+              verticalDotsAction: verticalDotsAction,
+            ),
+          ],
+        ),
+        mainAction: mainAction,
+        backgroundColor: stateColor,
+      ),
     );
   }
 }
@@ -140,39 +139,38 @@ class DirectoryListItem extends StatelessWidget {
 
     return ValueListenableBuilder(
       valueListenable: _backgroundColor,
-      builder:
-          (context, stateColor, child) => _ListItemContainer(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                Icon(
-                  Icons.folder_rounded,
-                  size: Dimensions.sizeIconAverage,
-                  color: Constants.folderIconColor,
-                ),
-                Expanded(
-                  child: Container(
-                    padding: Dimensions.paddingItem,
-                    child: ScrollableTextWidget(child: Text(entry.name)),
-                  ),
-                ),
-                TrailAction(
-                  repoInfoHash,
-                  entry,
-                  entrySelectionCubit: entrySelectionCubit,
-                  selectedNotifier: _selected,
-                  backgroundColorNotifier: _backgroundColor,
-                  onSelectEntry: onSelectEntry,
-                  onClearEntry: onClearEntry,
-                  uploadJob: null,
-                  verticalDotsAction: verticalDotsAction,
-                ),
-              ],
+      builder: (context, stateColor, child) => _ListItemContainer(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            Icon(
+              Icons.folder_rounded,
+              size: Dimensions.sizeIconAverage,
+              color: Constants.folderIconColor,
             ),
-            mainAction: mainAction,
-            backgroundColor: stateColor,
-          ),
+            Expanded(
+              child: Container(
+                padding: Dimensions.paddingItem,
+                child: ScrollableTextWidget(child: Text(entry.name)),
+              ),
+            ),
+            TrailAction(
+              repoInfoHash,
+              entry,
+              entrySelectionCubit: entrySelectionCubit,
+              selectedNotifier: _selected,
+              backgroundColorNotifier: _backgroundColor,
+              onSelectEntry: onSelectEntry,
+              onClearEntry: onClearEntry,
+              uploadJob: null,
+              verticalDotsAction: verticalDotsAction,
+            ),
+          ],
+        ),
+        mainAction: mainAction,
+        backgroundColor: stateColor,
+      ),
     );
   }
 }
@@ -195,30 +193,29 @@ class RepoListItem extends StatelessWidget {
   Widget build(BuildContext context) => _ListItemContainer(
     child: BlocBuilder<RepoCubit, RepoState>(
       bloc: repoCubit,
-      builder:
-          (context, state) => Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              IconButton(
-                key: Key('access-mode-button'),
-                icon: Icon(
-                  Fields.accessModeIcon(state.accessMode),
-                  size: Dimensions.sizeIconAverage,
-                ),
-                color: Constants.folderIconColor,
-                padding: EdgeInsets.all(0.0),
-                onPressed: () => repoCubit.lock(),
-              ),
-              Expanded(
-                child: Container(
-                  padding: Dimensions.paddingItem,
-                  child: RepoDescription(state, isDefault: isDefault),
-                ),
-              ),
-              RepoStatus(repoCubit),
-              _VerticalDotsButton(disable: false, action: verticalDotsAction),
-            ],
+      builder: (context, state) => Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          IconButton(
+            key: Key('access-mode-button'),
+            icon: Icon(
+              Fields.accessModeIcon(state.accessMode),
+              size: Dimensions.sizeIconAverage,
+            ),
+            color: Constants.folderIconColor,
+            padding: EdgeInsets.all(0.0),
+            onPressed: () => repoCubit.lock(),
           ),
+          Expanded(
+            child: Container(
+              padding: Dimensions.paddingItem,
+              child: RepoDescription(state, isDefault: isDefault),
+            ),
+          ),
+          RepoStatus(repoCubit),
+          _VerticalDotsButton(disable: false, action: verticalDotsAction),
+        ],
+      ),
     ),
     mainAction: mainAction,
   );
@@ -337,32 +334,30 @@ class TrailAction extends StatelessWidget {
         final isSelectable = state.isSelectable(repoInfoHash, parent);
         return isSelectable
             ? ValueListenableBuilder(
-              valueListenable: _selectedNotifier,
-              builder:
-                  (BuildContext context, bool? value, Widget? child) =>
-                      Checkbox.adaptive(
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(6.0)),
-                        ),
-                        visualDensity: VisualDensity.adaptivePlatformDensity,
-                        value: value,
-                        onChanged:
-                            (value) async => await _updateSelection(
-                              context,
-                              value ?? false,
-                              repoInfoHash: repoInfoHash,
-                              entry: entry,
-                              valueNotifier: _selectedNotifier,
-                              colorNotifier: _backgroundColorNotifier,
-                              onSelectEntry: onSelectEntry,
-                              onClearEntry: onClearEntry,
-                            ),
+                valueListenable: _selectedNotifier,
+                builder: (BuildContext context, bool? value, Widget? child) =>
+                    Checkbox.adaptive(
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(6.0)),
                       ),
-            )
+                      visualDensity: VisualDensity.adaptivePlatformDensity,
+                      value: value,
+                      onChanged: (value) async => await _updateSelection(
+                        context,
+                        value ?? false,
+                        repoInfoHash: repoInfoHash,
+                        entry: entry,
+                        valueNotifier: _selectedNotifier,
+                        colorNotifier: _backgroundColorNotifier,
+                        onSelectEntry: onSelectEntry,
+                        onClearEntry: onClearEntry,
+                      ),
+                    ),
+              )
             : _VerticalDotsButton(
-              disable: state.status == SelectionStatus.on,
-              action: uploadJob == null ? verticalDotsAction : null,
-            );
+                disable: state.status == SelectionStatus.on,
+                action: uploadJob == null ? verticalDotsAction : null,
+              );
       },
       listener: (context, state) async {
         if (repoInfoHash != state.originRepoInfoHash) return;
@@ -412,11 +407,10 @@ void _getBackgroundColor(
   BuildContext context, {
   required ValueNotifier<Color?> notifier,
   required bool value,
-}) =>
-    notifier.value = switch (value) {
-      true => context.theme.highlightColor,
-      false => Colors.white,
-    };
+}) => notifier.value = switch (value) {
+  true => context.theme.highlightColor,
+  false => Colors.white,
+};
 
 class _VerticalDotsButton extends StatelessWidget {
   _VerticalDotsButton({required this.disable, required this.action});

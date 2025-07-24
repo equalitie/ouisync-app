@@ -62,10 +62,9 @@ class PeerAddr {
   int get hashCode => Object.hash(proto, addr, port);
 
   @override
-  String toString() =>
-      addr.type == InternetAddressType.IPv6
-          ? '${proto.name}/[${addr.address}]:$port'
-          : '${proto.name}/${addr.address}:$port';
+  String toString() => addr.type == InternetAddressType.IPv6
+      ? '${proto.name}/[${addr.address}]:$port'
+      : '${proto.name}/${addr.address}:$port';
 }
 
 enum PeerProto { quic, tcp }

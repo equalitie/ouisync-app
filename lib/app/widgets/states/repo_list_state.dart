@@ -56,59 +56,54 @@ class RepoListState extends StatelessWidget
     String? currentRepoName,
   ) => ValueListenableBuilder(
     valueListenable: bottomSheetInfo,
-    builder:
-        (context, btInfo, child) => ListView.separated(
-          padding: EdgeInsetsDirectional.only(
-            bottom:
-                btInfo.neededPadding <= 0.0
-                    ? Dimensions.defaultListBottomPadding
-                    : btInfo.neededPadding,
-          ),
-          separatorBuilder:
-              (context, index) =>
-                  const Divider(height: 1, color: Colors.transparent),
-          itemCount: reposList.length,
-          itemBuilder: (context, index) {
-            final repoEntry = reposList.elementAt(index);
-            final isDefault = currentRepoName == repoEntry.name;
-            final repoCubit = repoEntry.cubit;
+    builder: (context, btInfo, child) => ListView.separated(
+      padding: EdgeInsetsDirectional.only(
+        bottom: btInfo.neededPadding <= 0.0
+            ? Dimensions.defaultListBottomPadding
+            : btInfo.neededPadding,
+      ),
+      separatorBuilder: (context, index) =>
+          const Divider(height: 1, color: Colors.transparent),
+      itemCount: reposList.length,
+      itemBuilder: (context, index) {
+        final repoEntry = reposList.elementAt(index);
+        final isDefault = currentRepoName == repoEntry.name;
+        final repoCubit = repoEntry.cubit;
 
-            if (repoCubit == null) {
-              return MissingRepoListItem(
-                location: repoEntry.location,
-                mainAction: () {},
-                verticalDotsAction: () async {
-                  final currentRepoEntry = reposCubit.state.current;
-                  if (currentRepoEntry == null) return;
+        if (repoCubit == null) {
+          return MissingRepoListItem(
+            location: repoEntry.location,
+            mainAction: () {},
+            verticalDotsAction: () async {
+              final currentRepoEntry = reposCubit.state.current;
+              if (currentRepoEntry == null) return;
 
-                  final repoName = currentRepoEntry.name;
-                  final location = currentRepoEntry.location;
-                  final deleteRepoFuture = reposCubit.deleteRepository(
-                    location,
-                  );
+              final repoName = currentRepoEntry.name;
+              final location = currentRepoEntry.location;
+              final deleteRepoFuture = reposCubit.deleteRepository(location);
 
-                  final deleted = await deleteRepository(
-                    context,
-                    repoName: repoName,
-                    deleteRepoFuture: deleteRepoFuture,
-                  );
-
-                  if (deleted == true) {
-                    Navigator.of(context).pop();
-                    showSnackBar(S.current.messageRepositoryDeleted(repoName));
-                  }
-                },
+              final deleted = await deleteRepository(
+                context,
+                repoName: repoName,
+                deleteRepoFuture: deleteRepoFuture,
               );
-            }
 
-            return RepoListItem(
-              repoCubit: repoCubit,
-              isDefault: isDefault,
-              mainAction: () => reposCubit.setCurrent(repoEntry),
-              verticalDotsAction:
-                  () => onShowRepoSettings(parentContext, repoCubit: repoCubit),
-            );
-          },
-        ),
+              if (deleted == true) {
+                Navigator.of(context).pop();
+                showSnackBar(S.current.messageRepositoryDeleted(repoName));
+              }
+            },
+          );
+        }
+
+        return RepoListItem(
+          repoCubit: repoCubit,
+          isDefault: isDefault,
+          mainAction: () => reposCubit.setCurrent(repoEntry),
+          verticalDotsAction: () =>
+              onShowRepoSettings(parentContext, repoCubit: repoCubit),
+        );
+      },
+    ),
   );
 }

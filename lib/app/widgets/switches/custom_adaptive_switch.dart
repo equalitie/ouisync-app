@@ -21,7 +21,10 @@ class CustomAdaptiveSwitch extends StatelessWidget {
     return Container(
       padding: contentPadding,
       child: InkWell(
-        onTap: onChanged?.let((onChanged) => () => onChanged(!value)),
+        onTap: onChanged?.let(
+          (onChanged) =>
+              () => onChanged(!value),
+        ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [

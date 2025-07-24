@@ -36,13 +36,8 @@ class InfoBuble extends StatelessWidget {
       children: [
         child,
         GestureDetector(
-          onTap:
-              () => _showInfoBubble(
-                title,
-                description,
-                focusableWidgetKey,
-                bgColor,
-              ),
+          onTap: () =>
+              _showInfoBubble(title, description, focusableWidgetKey, bgColor),
           child: Icon(
             Icons.info_outline_rounded,
             key: focusableWidgetKey,
@@ -64,17 +59,16 @@ class InfoBuble extends StatelessWidget {
     double bubbleTipHeight = 12.0,
   }) => showDialog(
     context: focusableWidgetKey.currentContext!,
-    builder:
-        (BuildContext context) => _InfoBubbleDialog(
-          focusableWidgetKey: focusableWidgetKey,
-          title: title,
-          description: description,
-          bgColor: bgColor,
-          bubbleWidth: bubbleWidth,
-          bubblePadding: bubblePadding,
-          bubbleTipWidth: bubbleTipWidth,
-          bubbleTipHeight: bubbleTipHeight,
-        ),
+    builder: (BuildContext context) => _InfoBubbleDialog(
+      focusableWidgetKey: focusableWidgetKey,
+      title: title,
+      description: description,
+      bgColor: bgColor,
+      bubbleWidth: bubbleWidth,
+      bubblePadding: bubblePadding,
+      bubbleTipWidth: bubbleTipWidth,
+      bubbleTipHeight: bubbleTipHeight,
+    ),
   );
 }
 
@@ -301,11 +295,10 @@ class TrianglePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    Paint paint =
-        Paint()
-          ..color = strokeColor
-          ..strokeWidth = strokeWidth
-          ..style = paintingStyle;
+    Paint paint = Paint()
+      ..color = strokeColor
+      ..strokeWidth = strokeWidth
+      ..style = paintingStyle;
 
     canvas.drawPath(getTrianglePath(size.width, size.height), paint);
   }

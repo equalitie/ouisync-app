@@ -26,15 +26,14 @@ class _SelectEntriesButtonState extends State<SelectEntriesButton> {
   Widget build(BuildContext context) =>
       BlocBuilder<EntrySelectionCubit, EntrySelectionState>(
         bloc: widget.repoCubit.entrySelectionCubit,
-        builder:
-            (context, state) => Container(
-              padding: EdgeInsetsDirectional.only(start: 6.0, end: 2.0),
-              child: _selectState(
-                widget.reposCubit,
-                widget.repoCubit,
-                state.status == SelectionStatus.on,
-              ),
-            ),
+        builder: (context, state) => Container(
+          padding: EdgeInsetsDirectional.only(start: 6.0, end: 2.0),
+          child: _selectState(
+            widget.reposCubit,
+            widget.repoCubit,
+            state.status == SelectionStatus.on,
+          ),
+        ),
       );
 
   Widget _selectState(
@@ -76,13 +75,12 @@ class EditState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => TextButton.icon(
-    onPressed:
-        () async => await showModalBottomSheet(
-          isScrollControlled: true,
-          context: context,
-          shape: Dimensions.borderBottomSheetTop,
-          builder: (context) => EntryActions(repoCubit: repoCubit),
-        ),
+    onPressed: () async => await showModalBottomSheet(
+      isScrollControlled: true,
+      context: context,
+      shape: Dimensions.borderBottomSheetTop,
+      builder: (context) => EntryActions(repoCubit: repoCubit),
+    ),
     label: Text(S.current.actionSelect),
     icon: const Icon(Icons.check),
     iconAlignment: IconAlignment.end,

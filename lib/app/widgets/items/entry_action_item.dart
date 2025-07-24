@@ -78,12 +78,11 @@ class _EntryActionItemState extends State<EntryActionItem> {
 
     setState(() {
       _enabled = isEnabled;
-      _itemColor =
-          isEnabled
-              ? widget.isDanger
-                  ? Constants.dangerColor
-                  : Colors.black
-              : Colors.grey;
+      _itemColor = isEnabled
+          ? widget.isDanger
+                ? Constants.dangerColor
+                : Colors.black
+          : Colors.grey;
 
       if (!init) {
         _message = widget.disabledMessage;
@@ -120,10 +119,9 @@ class _EntryActionItemState extends State<EntryActionItem> {
           dense: widget.dense,
           visualDensity: widget.visualDensity,
           minLeadingWidth: widget.minLeadingWidth,
-          leading:
-              widget.iconData != null
-                  ? Icon(widget.iconData, color: _itemColor)
-                  : null,
+          leading: widget.iconData != null
+              ? Icon(widget.iconData, color: _itemColor)
+              : null,
           title: Text(
             widget.title,
             textAlign: widget.textAlign,
@@ -131,15 +129,12 @@ class _EntryActionItemState extends State<EntryActionItem> {
             overflow: widget.textOverflow,
             style: widget.titleTextStyle?.copyWith(color: _itemColor),
           ),
-          subtitle:
-              widget.subtitle != null
-                  ? Text(
-                    widget.subtitle!,
-                    style: widget.subtitleTextStyle?.copyWith(
-                      color: _itemColor,
-                    ),
-                  )
-                  : null,
+          subtitle: widget.subtitle != null
+              ? Text(
+                  widget.subtitle!,
+                  style: widget.subtitleTextStyle?.copyWith(color: _itemColor),
+                )
+              : null,
         ),
         onTap: () {
           if (widget.onTap == null) return;

@@ -25,19 +25,16 @@ class ThroughputDisplay extends StatelessWidget {
       fontFeatures: [FontFeature.tabularFigures()],
     ),
     child: Builder(
-      builder:
-          (context) => IconTheme(
-            data: IconThemeData(
-              size: DefaultTextStyle.of(context).style.fontSize,
-            ),
-            child: switch (orientation) {
-              Orientation.landscape => Row(children: _buildCells(context)),
-              Orientation.portrait => Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: _buildCells(context),
-              ),
-            },
+      builder: (context) => IconTheme(
+        data: IconThemeData(size: DefaultTextStyle.of(context).style.fontSize),
+        child: switch (orientation) {
+          Orientation.landscape => Row(children: _buildCells(context)),
+          Orientation.portrait => Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: _buildCells(context),
           ),
+        },
+      ),
     ),
   );
 
@@ -78,12 +75,11 @@ class LiveThroughputDisplay extends StatelessWidget {
   @override
   Widget build(BuildContext context) => StreamBuilder<Stats>(
     stream: stream,
-    builder:
-        (context, snapshot) => ThroughputDisplay(
-          snapshot.data ??
-              Stats(bytesRx: 0, bytesTx: 0, throughputTx: 0, throughputRx: 0),
-          size: size,
-          orientation: orientation,
-        ),
+    builder: (context, snapshot) => ThroughputDisplay(
+      snapshot.data ??
+          Stats(bytesRx: 0, bytesTx: 0, throughputTx: 0, throughputRx: 0),
+      size: size,
+      orientation: orientation,
+    ),
   );
 }

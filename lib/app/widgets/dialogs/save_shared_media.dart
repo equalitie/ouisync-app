@@ -97,8 +97,8 @@ class _SaveSharedMediaState extends State<SaveSharedMedia> {
       ),
       child: ListView.separated(
         shrinkWrap: true,
-        separatorBuilder:
-            (context, index) => const Divider(height: 1, color: Colors.black12),
+        separatorBuilder: (context, index) =>
+            const Divider(height: 1, color: Colors.black12),
         itemCount: mediaPaths.length,
         itemBuilder: (context, index) {
           final path = mediaPaths[index];
@@ -110,8 +110,9 @@ class _SaveSharedMediaState extends State<SaveSharedMedia> {
 
   Widget _buildFilesCount() {
     final totalFiles = widget.sharedMediaPaths.length;
-    final pluralizedMessage =
-        totalFiles == 1 ? S.current.messageFile : S.current.messageFiles;
+    final pluralizedMessage = totalFiles == 1
+        ? S.current.messageFile
+        : S.current.messageFiles;
 
     return Padding(
       padding: EdgeInsetsDirectional.all(4.0),
@@ -121,12 +122,11 @@ class _SaveSharedMediaState extends State<SaveSharedMedia> {
 
   Widget _buildActions() => BlocBuilder<ReposCubit, ReposState>(
     bloc: widget.reposCubit,
-    builder:
-        (context, state) => Fields.dialogActions(
-          buttons: _actions(state),
-          padding: const EdgeInsetsDirectional.only(top: 20.0),
-          mainAxisAlignment: MainAxisAlignment.end,
-        ),
+    builder: (context, state) => Fields.dialogActions(
+      buttons: _actions(state),
+      padding: const EdgeInsetsDirectional.only(top: 20.0),
+      mainAxisAlignment: MainAxisAlignment.end,
+    ),
   );
 
   List<Widget> _actions(ReposState reposState) {
@@ -143,21 +143,20 @@ class _SaveSharedMediaState extends State<SaveSharedMedia> {
       ),
       PositiveButton(
         text: S.current.actionSave,
-        onPressed:
-            isRepoList
-                ? null
-                : () async {
-                  final canSaveMedia = await widget.canSaveMedia();
-                  if (!canSaveMedia) {
-                    return;
-                  }
-                  for (final path in widget.sharedMediaPaths) {
-                    await widget.onSaveFile(path);
-                  }
+        onPressed: isRepoList
+            ? null
+            : () async {
+                final canSaveMedia = await widget.canSaveMedia();
+                if (!canSaveMedia) {
+                  return;
+                }
+                for (final path in widget.sharedMediaPaths) {
+                  await widget.onSaveFile(path);
+                }
 
-                  widget.onUpdateBottomSheet(BottomSheetType.gone, 0.0, '');
-                  widget.reposCubit.bottomSheet.hide();
-                },
+                widget.onUpdateBottomSheet(BottomSheetType.gone, 0.0, '');
+                widget.reposCubit.bottomSheet.hide();
+              },
         buttonsAspectRatio: Dimensions.aspectRatioBottomDialogButton,
       ),
     ];

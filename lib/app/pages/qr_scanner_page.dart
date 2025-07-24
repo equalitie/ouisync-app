@@ -32,25 +32,24 @@ class _QRScannerState extends State<QRScanner> with AppLogger {
             color: Theme.of(context).primaryColorDark,
             icon: ValueListenableBuilder(
               valueListenable: cameraController,
-              builder:
-                  (context, state, child) => switch (state.torchState) {
-                    TorchState.off => const Icon(
-                      Icons.flash_off_outlined,
-                      color: Colors.grey,
-                    ),
-                    TorchState.on => Icon(
-                      Icons.flash_on_outlined,
-                      color: Colors.yellow[800],
-                    ),
-                    TorchState.auto => const Icon(
-                      Icons.flash_auto_outlined,
-                      color: Colors.grey,
-                    ),
-                    TorchState.unavailable => const Icon(
-                      Icons.flash_off_outlined,
-                      color: Colors.white54,
-                    ),
-                  },
+              builder: (context, state, child) => switch (state.torchState) {
+                TorchState.off => const Icon(
+                  Icons.flash_off_outlined,
+                  color: Colors.grey,
+                ),
+                TorchState.on => Icon(
+                  Icons.flash_on_outlined,
+                  color: Colors.yellow[800],
+                ),
+                TorchState.auto => const Icon(
+                  Icons.flash_auto_outlined,
+                  color: Colors.grey,
+                ),
+                TorchState.unavailable => const Icon(
+                  Icons.flash_off_outlined,
+                  color: Colors.white54,
+                ),
+              },
             ),
             iconSize: Dimensions.sizeIconAverage,
             onPressed: () => cameraController.toggleTorch(),
@@ -59,8 +58,8 @@ class _QRScannerState extends State<QRScanner> with AppLogger {
             color: Theme.of(context).primaryColorDark,
             icon: ValueListenableBuilder(
               valueListenable: cameraController,
-              builder:
-                  (context, state, child) => switch (state.cameraDirection) {
+              builder: (context, state, child) =>
+                  switch (state.cameraDirection) {
                     CameraFacing.front => const Icon(Icons.camera_front),
                     CameraFacing.back => const Icon(Icons.camera_rear),
                   },

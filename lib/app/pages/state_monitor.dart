@@ -76,11 +76,12 @@ class _NodeWidget extends StatelessWidget {
     },
   );
 
-  List<Widget> buildValuesAndChildren(StateMonitorNode node) =>
-      node.values.entries
-          .map((entry) => buildValue(entry.key, entry.value))
-          .followedBy(node.children.map((id) => buildChild(id)))
-          .toList();
+  List<Widget> buildValuesAndChildren(StateMonitorNode node) => node
+      .values
+      .entries
+      .map((entry) => buildValue(entry.key, entry.value))
+      .followedBy(node.children.map((id) => buildChild(id)))
+      .toList();
 
   Widget buildValue(String key, String value) {
     return Card(child: ListTile(title: Text("$key: $value")));

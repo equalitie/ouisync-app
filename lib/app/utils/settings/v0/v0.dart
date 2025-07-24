@@ -209,8 +209,8 @@ class Settings with AppLogger {
 
     // This path is not accessible by the user using a file explorer and it
     // also gets deleted when the app is un/re-installed.
-    final alternativeDir =
-        await path_provider.getApplicationDocumentsDirectory();
+    final alternativeDir = await path_provider
+        .getApplicationDocumentsDirectory();
 
     if (Platform.isAndroid) {
       return alternativeDir;

@@ -23,20 +23,19 @@ Future<DisambiguationAction?> pickEntryDisambiguationAction(
   EntryType entryType,
 ) async => await showDialog<DisambiguationAction?>(
   context: context,
-  builder:
-      (BuildContext context) => AlertDialog(
-        title: Flex(
-          direction: Axis.horizontal,
-          children: [
-            Fields.constrainedText(
-              S.current.titleMovingEntry,
-              style: context.theme.appTextStyle.titleMedium,
-              maxLines: 2,
-            ),
-          ],
+  builder: (BuildContext context) => AlertDialog(
+    title: Flex(
+      direction: Axis.horizontal,
+      children: [
+        Fields.constrainedText(
+          S.current.titleMovingEntry,
+          style: context.theme.appTextStyle.titleMedium,
+          maxLines: 2,
         ),
-        content: ReplaceKeepEntry(name: entryName, type: entryType),
-      ),
+      ],
+    ),
+    content: ReplaceKeepEntry(name: entryName, type: entryType),
+  ),
 );
 
 Future<String> disambiguateEntryName({
@@ -88,10 +87,9 @@ Future<void> viewFile({
       // which are not decoded back by the url_launcher plugin on Windows
       // before passing to the system for execution. Thus on Windows
       // we use the `launchUrlString` function instead of `launchUrl`.
-      final result =
-          Platform.isWindows
-              ? await launchUrlString(Uri.decodeFull(url.toString()))
-              : await launchUrl(url);
+      final result = Platform.isWindows
+          ? await launchUrlString(Uri.decodeFull(url.toString()))
+          : await launchUrl(url);
 
       if (!result) {
         throw _AppNotFound();

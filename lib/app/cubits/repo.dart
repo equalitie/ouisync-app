@@ -293,8 +293,9 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   }) async {
     return await _repo.share(
       accessMode: accessMode,
-      localSecret:
-          password != null ? LocalSecretPassword(Password(password)) : null,
+      localSecret: password != null
+          ? LocalSecretPassword(Password(password))
+          : null,
     );
   }
 
@@ -730,15 +731,14 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   }) async {
     emitUnlessClosed(state.copyWith(isLoading: true));
     try {
-      final result =
-          type == EntryType.file
-              ? await _copyFile(source, destination, destinationRepoCubit)
-              : await _copyFolder(
-                source,
-                destination,
-                destinationRepoCubit,
-                recursive,
-              );
+      final result = type == EntryType.file
+          ? await _copyFile(source, destination, destinationRepoCubit)
+          : await _copyFolder(
+              source,
+              destination,
+              destinationRepoCubit,
+              recursive,
+            );
 
       return result;
     } catch (e, st) {
@@ -782,10 +782,9 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
       for (var entry in contents) {
         final from = repo_path.join(source, entry.name);
         final to = repo_path.join(destination, entry.name);
-        final copyOk =
-            entry.entryType == EntryType.file
-                ? await _copyFile(from, to, destinationRepoCubit)
-                : await _copyFolder(from, to, destinationRepoCubit, recursive);
+        final copyOk = entry.entryType == EntryType.file
+            ? await _copyFile(from, to, destinationRepoCubit)
+            : await _copyFolder(from, to, destinationRepoCubit, recursive);
 
         if (!copyOk) return false;
       }

@@ -271,8 +271,8 @@ enum LocalSecretMode {
     manual => SecretKeyStore.notStored,
     manualStored || randomStored => SecretKeyStore.stored,
     LocalSecretMode.manualSecuredWithBiometrics ||
-    LocalSecretMode
-        .randomSecuredWithBiometrics => SecretKeyStore.securedWithBiometrics,
+    LocalSecretMode.randomSecuredWithBiometrics =>
+      SecretKeyStore.securedWithBiometrics,
   };
 }
 
@@ -302,10 +302,9 @@ class LocalSecretRandom extends LocalSecretInput {
   final bool secureWithBiometrics;
 
   @override
-  LocalSecretMode get mode =>
-      secureWithBiometrics
-          ? LocalSecretMode.randomSecuredWithBiometrics
-          : LocalSecretMode.randomStored;
+  LocalSecretMode get mode => secureWithBiometrics
+      ? LocalSecretMode.randomSecuredWithBiometrics
+      : LocalSecretMode.randomStored;
 }
 
 sealed class AuthModeException implements Exception {}

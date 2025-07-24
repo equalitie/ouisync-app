@@ -50,8 +50,9 @@ class PlatformWindowManagerDesktop
   Future<void> initSystemTray() async {
     await windowManager.setPreventClose(true);
 
-    String path =
-        Platform.isWindows ? Constants.windowsAppIcon : Constants.appIcon;
+    String path = Platform.isWindows
+        ? Constants.windowsAppIcon
+        : Constants.appIcon;
 
     // On Windows, the system tray title is shown only when howering over the
     // icon, but on Linux it is always visible next to it. That's in my

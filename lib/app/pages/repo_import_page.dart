@@ -41,14 +41,12 @@ class RepoImportPage extends StatelessWidget {
         padding: Dimensions.paddingAll20,
         child: BlocHolder<RepoImportCubit>(
           create: () => RepoImportCubit(reposCubit: reposCubit),
-          builder:
-              (context, cubit) =>
-                  BlocBuilder<RepoImportCubit, ShareTokenResult?>(
-                    bloc: cubit,
-                    builder:
-                        (context, state) =>
-                            _buildContent(context, cubit, state),
-                  ),
+          builder: (context, cubit) =>
+              BlocBuilder<RepoImportCubit, ShareTokenResult?>(
+                bloc: cubit,
+                builder: (context, state) =>
+                    _buildContent(context, cubit, state),
+              ),
         ),
       ),
     ),
@@ -113,35 +111,34 @@ class RepoImportPage extends StatelessWidget {
   /// We don't support QR reading for desktop at the moment, just mobile.
   /// TODO: Find a plugin for reading QR with support for Windows, Linux
   Widget _builScanQRButton(BuildContext context) => Fields.inPageButton(
-    onPressed:
-        PlatformValues.isDesktopDevice
-            ? null
-            : () async {
-              final permissionGranted = await _checkPermission(
-                context,
-                Permission.camera,
-              );
-              if (!permissionGranted) return;
+    onPressed: PlatformValues.isDesktopDevice
+        ? null
+        : () async {
+            final permissionGranted = await _checkPermission(
+              context,
+              Permission.camera,
+            );
+            if (!permissionGranted) return;
 
-              final data = await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => QRScanner(reposCubit.session),
-                ),
-              );
+            final data = await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => QRScanner(reposCubit.session),
+              ),
+            );
 
-              if (data == null) return;
+            if (data == null) return;
 
-              final result = await parseShareToken(reposCubit, data);
-              switch (result) {
-                case ShareTokenValid(value: final token):
-                  await Navigator.of(
-                    context,
-                  ).maybePop(RepoImportFromToken(token));
-                case ShareTokenInvalid(error: final error):
-                  showSnackBar(error.toString());
-              }
-            },
+            final result = await parseShareToken(reposCubit, data);
+            switch (result) {
+              case ShareTokenValid(value: final token):
+                await Navigator.of(
+                  context,
+                ).maybePop(RepoImportFromToken(token));
+              case ShareTokenInvalid(error: final error):
+                showSnackBar(error.toString());
+            }
+          },
     leadingIcon: const Icon(Icons.qr_code_2_outlined),
     text: S.current.actionScanQR.toUpperCase(),
   );
@@ -222,9 +219,9 @@ class RepoImportPage extends StatelessWidget {
     ShareTokenResult? state,
   ) =>
       _buildButton(S.current.actionAddRepository.toUpperCase(), switch (state) {
-        ShareTokenValid(value: final token) =>
-          () async =>
-              await Navigator.of(context).maybePop(RepoImportFromToken(token)),
+        ShareTokenValid(value: final token) => () async => await Navigator.of(
+          context,
+        ).maybePop(RepoImportFromToken(token)),
         ShareTokenInvalid() || null => null,
       });
 
@@ -251,11 +248,10 @@ class RepoImportPage extends StatelessWidget {
           );
           if (result == null) return;
 
-          final locations =
-              result.paths
-                  .whereType<String>()
-                  .map((path) => RepoLocation.fromDbPath(path))
-                  .toList();
+          final locations = result.paths
+              .whereType<String>()
+              .map((path) => RepoLocation.fromDbPath(path))
+              .toList();
 
           await Future.wait(locations.map(reposCubit.importRepoFromLocation));
 

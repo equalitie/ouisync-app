@@ -250,8 +250,8 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
 
     final localSecret = switch (setLocalSecret) {
       SetLocalSecretKeyAndSalt() => setLocalSecret,
-      SetLocalSecretPassword(value: final password) => await passwordHasher
-          .hashPassword(password),
+      SetLocalSecretPassword(value: final password) =>
+        await passwordHasher.hashPassword(password),
     };
 
     SetLocalSecret readSecret;
