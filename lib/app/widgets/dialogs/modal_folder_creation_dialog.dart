@@ -46,6 +46,7 @@ class FolderCreation extends HookWidget {
             valueListenable: errorMessage,
             builder: (context, errorMessage, child) {
               return Fields.formTextField(
+                key: Key('create_folder_name_input'),
                 context: context,
                 controller: nameController,
                 textInputAction: TextInputAction.done,
@@ -139,6 +140,7 @@ class FolderCreation extends HookWidget {
       onPressed: () async => await Navigator.of(context).maybePop(''),
     ),
     PositiveButton(
+      key: Key('create_folder_submit'),
       text: S.current.actionCreate,
       onPressed: () async => await _onCreateButtonPress(
         context,

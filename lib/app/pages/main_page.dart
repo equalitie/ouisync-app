@@ -367,10 +367,12 @@ class _MainPageState extends State<MainPage>
   Widget _buildFAB(BuildContext context, ReposState reposState) {
     final icon = const Icon(Icons.add_rounded);
     final current = reposState.current;
+    final fabKey = Key('repo_add_item_button');
 
     if (current == null) {
       if (reposState.repos.isNotEmpty) {
         return FloatingActionButton(
+          key: fabKey,
           mini: true,
           focusNode: _fabFocus,
           heroTag: Constants.heroTagRepoListActions,
@@ -512,6 +514,7 @@ class _MainPageState extends State<MainPage>
             },
             child: Container(
               child: ListView.separated(
+                key: Key('directory_entry_list'),
                 separatorBuilder: (context, index) =>
                     const Divider(height: 1, color: Colors.transparent),
                 itemCount: totalEntries,

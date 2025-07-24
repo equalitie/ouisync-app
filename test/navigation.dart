@@ -6,10 +6,18 @@ import 'package:ouisync_app/app/pages/repo_security_page.dart';
 import 'package:ouisync_app/app/pages/repo_reset_access.dart';
 import 'package:ouisync_app/app/utils/utils.dart';
 import 'package:ouisync_app/app/widgets/buttons/elevated_async_button.dart';
+import 'package:ouisync_app/app/widgets/items/list_item.dart'
+    show DirectoryListItem;
+import 'package:ouisync_app/app/widgets/bars/ouisync_bar.dart' show OuiSyncBar;
+import 'package:ouisync_app/app/widgets/bars/repositories_bar.dart'
+    show RepositoriesBar;
+import 'package:path/path.dart' as p;
 import 'package:ouisync_app/app/widgets/items/entry_action_item.dart'
     show EntryActionItem;
+import 'dart:io' as io;
 import 'package:ouisync/ouisync.dart';
 import 'utils.dart';
+import 'fake_file_picker.dart';
 
 //--------------------------------------------------------------------
 
@@ -54,11 +62,10 @@ class MainPage {
       (state) => state.substate is RepoCreationSuccess,
     );
 
-    final repoCubit =
-        deps.reposCubit.state.repos.values
-            .where((entry) => entry.name == 'my repo')
-            .first
-            .cubit!;
+    final repoCubit = deps.reposCubit.state.repos.values
+        .where((entry) => entry.name == 'my repo')
+        .first
+        .cubit!;
 
     expect(repoCubit.state.accessMode, equals(AccessMode.write));
     expect(repoCubit.state.isCacheServersEnabled, isFalse);
@@ -97,6 +104,86 @@ class RepoPage {
     );
 
     return RepoSettings(tester);
+  }
+
+  // Tap the `+` button for adding files or folders to a repo and add the file at `filePath`.
+  Future<void> addFile(String filePath) async {
+    final addItemFinder = find.byKey(Key('repo_add_item_button'));
+    final button = await tester.pumpUntilFound(addItemFinder);
+    await tester.anxiousTap(button);
+    await tester.pumpAndSettle();
+
+    final addFileFinder = find.byKey(Key('add_file_action'));
+    final addFileButton = await tester.pumpUntilFound(addFileFinder);
+
+    fakeFilePickerPicks(filePath);
+
+    await tester.anxiousTap(addFileButton);
+
+    await tester.pumpUntilNotFound(addFileFinder);
+    // Wait to get back to the repo screen
+    await tester.pumpUntilFound(addItemFinder);
+  }
+
+  // Create folder `folderName` in the current repo/folder. On success, the app
+  // will end up that folder.
+  Future<void> addFolder(String folderName) async {
+    final addItemFinder = find.byKey(Key('repo_add_item_button'));
+    final button = await tester.pumpUntilFound(addItemFinder);
+    await tester.anxiousTap(button);
+    await tester.pumpAndSettle();
+
+    final addFolderButton = await tester.pumpUntilFound(
+      find.byKey(Key('add_folder_action')),
+    );
+
+    await tester.anxiousTap(addFolderButton);
+
+    final findNameInput = find.byKey(Key('create_folder_name_input'));
+    final nameInput = await tester.pumpUntilFound(findNameInput);
+    await tester.enterText(nameInput, folderName);
+
+    // TODO: Anxious
+    await tester.tap(find.byKey(Key('create_folder_submit')));
+
+    // Wait for the dialog and bottom sheet to disappear.
+    // TODO: Could be more explicit rather than waiting for the one button to
+    // disappear.
+    await tester.pumpUntilNotFound(addFolderButton);
+  }
+
+  Finder findDirEntry(String name) {
+    return find.descendant(
+      of: find.byKey(Key('directory_entry_list')),
+      matching: find.byKey(Key(name)),
+    );
+  }
+
+  Future<void> tapFolder(String folderName) async {
+    final dirEntry = await tester.pumpUntilFound(findDirEntry(folderName));
+    expect(dirEntry, findsOneWidget);
+    await tester.anxiousTap(dirEntry);
+  }
+
+  Future<void> tapBackButton() async {
+    final appBar = find.byType(AppBar);
+    expect(appBar, findsOneWidget);
+
+    final findBackButton = find.descendant(
+      of: appBar,
+      matching: find.byIcon(Icons.arrow_back),
+    );
+    final backButton = await tester.pumpUntilFound(findBackButton);
+    await tester.anxiousTap(backButton);
+  }
+
+  Future<void> tapEntryActions(String entryName) async {
+    final entry = await tester.pumpUntilFound(find.byKey(Key(entryName)));
+    final actions = find.descendant(
+      of: entry,
+      matching: find.byKey(Key('file_vert')),
+    );
+    await tester.anxiousTap(actions);
   }
 
   // This is the button that shows which mode the repository is in. If it's in
@@ -158,7 +245,7 @@ class SecurityPage {
   }
 
   Future<void> tapUseLocalPasswordSwitch() async {
-    // Not using `anxiousTab` because repeated tapping switches the state back
+    // Not using `anxiousTap` because repeated tapping switches the state back
     // and forth.
     await tester.tap(
       find.descendant(
@@ -278,7 +365,7 @@ class MockAuthDialog {
         await tester.pumpAndSettle();
       }
     } catch (e) {
-      await tester.takeScreenshot(name: "MockAuthDialog_confirm");
+      await tester.takeScreenshot("MockAuthDialog_confirm");
       rethrow;
     }
   }

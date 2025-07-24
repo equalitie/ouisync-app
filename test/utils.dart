@@ -262,10 +262,7 @@ extension WidgetTesterExtension on WidgetTester {
   /// details.
   ///
   /// This Code is taken from https://github.com/flutter/flutter/issues/129623.
-  Future<void> takeScreenshot({
-    String name = 'screenshot',
-    Element? element,
-  }) async {
+  Future<void> takeScreenshot(String name, {Element? element}) async {
     try {
       if (element == null) {
         // If no element is given, take the screenshot of the topmost widget.
@@ -290,13 +287,27 @@ extension WidgetTesterExtension on WidgetTester {
   }
 
   // This is useful to observe the screen when things are still moving.
-  Future<void> takeNScreenshots(int n, String name) async {
+  Future<void> takeScreenshots(String name, int n) async {
     assert(n > 0 && n < 1000); // sanity
     for (int i = 0; i < n; i++) {
-      await takeScreenshot(name: "$name-$i");
-      await pump(Duration(milliseconds: 200));
-      await Future.delayed(Duration(milliseconds: 200));
+      await takeScreenshot("$name-$i");
+      await pump(Duration(milliseconds: 100));
+      await Future.delayed(Duration(milliseconds: 100));
     }
+  }
+
+  // Write the whole element tree to a file. Similar to
+  // https://api.flutter.dev/flutter/widgets/debugDumpApp.html
+  Future<void> dumpTree(String name) async {
+    final String tree;
+    if (WidgetsBinding.instance.rootElement != null) {
+      tree = WidgetsBinding.instance.rootElement!.toStringDeep();
+    } else {
+      tree = '<no tree currently mounted>';
+    }
+    final path = join(_testDirPath, 'screenshots', "$name.dump");
+    await File(path).writeAsString(tree);
+    _loggy.info('element tree dump saved to $path');
   }
 
   // Invoke this somewhere at the beginning of a test so that the above
@@ -339,6 +350,10 @@ extension WidgetTesterExtension on WidgetTester {
     // `pumpAndSettle` the widget finds its place inside the screen.
     await pumpAndSettle();
     return found;
+  }
+
+  Future<void> pumpUntilNotFound(Finder finder) async {
+    await pumpUntil(() => !finder.tryEvaluate());
   }
 
   Future<void> pumpUntil(
@@ -404,14 +419,15 @@ extension WidgetTesterExtension on WidgetTester {
     return result.path.any((HitTestEntry entry) => entry.target == box);
   }
 
-  Future<void> runAsyncWithScreenshotOnFailure(
-    Future<void> Function() callback,
-  ) {
+  Future<void> runAsyncDebug(Future<void> Function() callback) {
     return runAsync(() async {
+      WidgetController.hitTestWarningShouldBeFatal = true;
+
       try {
         await callback();
       } catch (e) {
-        await takeScreenshot(name: testDescription);
+        await dumpTree(testDescription);
+        await takeScreenshot(testDescription);
         rethrow;
       }
     });

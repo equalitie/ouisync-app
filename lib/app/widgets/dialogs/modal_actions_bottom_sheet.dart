@@ -50,6 +50,7 @@ class DirectoryActions extends StatelessWidget with AppLogger {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 _buildAction(
+                  key: Key('add_folder_action'),
                   name: S.current.actionNewFolder,
                   icon: Icons.create_new_folder_outlined,
                   action: () async =>
@@ -65,6 +66,7 @@ class DirectoryActions extends StatelessWidget with AppLogger {
   }
 
   Widget _buildAction({
+    required Key key,
     required String name,
     required IconData icon,
     required Function()? action,
@@ -74,6 +76,7 @@ class DirectoryActions extends StatelessWidget with AppLogger {
     return Padding(
       padding: Dimensions.paddingBottomSheetActions,
       child: GestureDetector(
+        key: key,
         behavior: HitTestBehavior.opaque,
         onTap: action,
         child: Column(
@@ -97,11 +100,13 @@ class DirectoryActions extends StatelessWidget with AppLogger {
       /// are not moving entries or adding media from the device,
       /// we disable the add File button.
       final enable = state is HideSheetState;
+      final key = Key('add_file_action');
 
       return Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           _buildAction(
+            key: key,
             name: S.current.actionNewFile,
             icon: Icons.upload_file_outlined,
             action: enable
@@ -114,6 +119,7 @@ class DirectoryActions extends StatelessWidget with AppLogger {
           ),
           if (io.Platform.isIOS)
             _buildAction(
+              key: key,
               name: S.current.actionNewMediaFile,
               icon: Icons.photo_library_outlined,
               action: enable

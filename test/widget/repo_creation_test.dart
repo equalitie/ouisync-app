@@ -27,7 +27,7 @@ void main() {
 
   testWidgets(
     'create_repository_without_password',
-    (tester) => tester.runAsyncWithScreenshotOnFailure(() async {
+    (tester) => tester.runAsyncDebug(() async {
       final mainPage = MainPage(tester, deps);
       await mainPage.createAndEnterRepository();
     }),

@@ -11,6 +11,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:styled_text/styled_text.dart';
 
 import '../utils.dart';
+import '../fake_file_picker.dart';
 
 void main() {
   late TestDependencies deps;
@@ -53,7 +54,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Mock file picker
-      FilePicker.platform = _FakeFilePicker(location.path);
+      fakeFilePickerPicks(location.path);
 
       final locateButton = find.text('LOCATE');
       await tester.ensureVisible(locateButton);
@@ -105,7 +106,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Mock file picker
-      FilePicker.platform = _FakeFilePicker(exportedLocation.path);
+      fakeFilePickerPicks(exportedLocation.path);
 
       final locateButton = find.text('LOCATE');
       await tester.ensureVisible(locateButton);
@@ -184,34 +185,4 @@ void main() {
       expect(find.widgetWithText(AppBar, location.name), findsOne);
     }),
   );
-}
-
-/// Fake FilePicker instance that simulates picking the given file.
-class _FakeFilePicker extends FilePicker {
-  _FakeFilePicker(this.pickedFile);
-
-  final String pickedFile;
-
-  @override
-  Future<FilePickerResult?> pickFiles({
-    String? dialogTitle,
-    String? initialDirectory,
-    FileType type = FileType.any,
-    List<String>? allowedExtensions,
-    dynamic Function(FilePickerStatus)? onFileLoading,
-    bool allowCompression = true,
-    int compressionQuality = 30,
-    bool allowMultiple = false,
-    bool withData = false,
-    bool withReadStream = false,
-    bool lockParentWindow = false,
-    bool readSequential = false,
-  }) async {
-    final name = basename(pickedFile);
-    final size = await io.File(pickedFile).length();
-
-    return FilePickerResult([
-      PlatformFile(path: pickedFile, name: name, size: size),
-    ]);
-  }
 }

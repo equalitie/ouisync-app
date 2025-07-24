@@ -17,7 +17,7 @@ void main() {
 
   testWidgets(
     'go to repo security while unlocked',
-    (tester) => tester.runAsyncWithScreenshotOnFailure(() async {
+    (tester) => tester.runAsyncDebug(() async {
       await tester.loadFonts();
 
       final mainPage = MainPage(tester, deps);
