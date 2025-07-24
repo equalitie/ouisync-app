@@ -242,12 +242,9 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
     Future<void> positiveAction() async {
       cancelAndDismiss(moveEntriesActions, originRepoCubit);
 
-      await Dialogs.executeFutureWithLoadingDialog(
-        null,
-        moveEntriesActions.copyOrMoveSingleEntry(
-          destinationRepoCubit: reposState.current!.cubit!,
-          entry: entry,
-        ),
+      await moveEntriesActions.copyOrMoveSingleEntry(
+        destinationRepoCubit: reposState.current!.cubit!,
+        entry: entry,
       );
     }
 
