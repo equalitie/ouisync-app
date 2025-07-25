@@ -87,6 +87,8 @@ void main() {
 
       // Wait until we get out of the folder
       await tester.pumpUntilFound(repoPage.findDirEntry(dstDir));
+      // Check we did not move the file
+      await tester.pumpUntilFound(repoPage.findDirEntry(srcFileName));
 
       await copyFile(srcFileName, dstDir);
 
@@ -113,10 +115,10 @@ void main() {
 
       await repoPage.tapBackButton();
 
-      // Wait until we get out of the folder
+      // Wait until we are back to root folder
       await tester.pumpUntilFound(repoPage.findDirEntry(dstDir));
-
-      // TODO: Test that the source file is still there.
+      // Check we did not move the file
+      await tester.pumpUntilFound(repoPage.findDirEntry(srcFileName));
     }),
   );
 }

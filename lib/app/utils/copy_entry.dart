@@ -51,9 +51,9 @@ class CopyEntry with AppLogger {
     final destinationRepoCubit = (currentRepoCubit ?? _originRepoCubit);
 
     final exist = await destinationRepoCubit.entryExists(newPath);
+
     if (!exist) {
       await _copyEntry(currentRepoCubit, path, newPath, type, recursive);
-
       return;
     }
 
@@ -71,7 +71,7 @@ class CopyEntry with AppLogger {
       case RenameOrReplaceResult.rename:
         await _renameAndCopy(currentRepoCubit, path, newPath, type, recursive);
         break;
-      default:
+      case null:
         break;
     }
   }
@@ -94,8 +94,6 @@ class CopyEntry with AppLogger {
         length: fileLength,
         fileByteStream: file.readStream(),
       );
-
-      await _originRepoCubit.deleteFile(sourcePath);
     } catch (e, st) {
       loggy.debug(e, st);
     }

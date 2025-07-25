@@ -62,11 +62,9 @@ class MoveEntry with AppLogger {
     switch (result) {
       case RenameOrReplaceResult.replace:
         await _moveAndReplaceFile(currentRepoCubit, path, newPath);
-        break;
       case RenameOrReplaceResult.rename:
         await _renameAndMove(currentRepoCubit, path, newPath, type, recursive);
-        break;
-      default:
+      case null:
         break;
     }
   }

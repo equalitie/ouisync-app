@@ -50,8 +50,6 @@ class SaveMedia with AppLogger {
     );
 
     switch (result) {
-      case null:
-        ;
       case RenameOrReplaceResult.replace:
         await _replaceFile(devicePath: sourcePath, toPath: newFilePath);
       case RenameOrReplaceResult.rename:
@@ -60,6 +58,8 @@ class SaveMedia with AppLogger {
           toPath: newFilePath,
           fileName: newFileName,
         );
+      case null:
+        break;
     }
   }
 
