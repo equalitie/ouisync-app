@@ -10,9 +10,9 @@ class RenameOrReplaceEntryDialog extends StatelessWidget {
   final String name;
   final EntryType type;
 
-  final _fileAction = ValueNotifier<RenameOrReplaceResult>(
-    RenameOrReplaceResult.replace,
-  );
+  static const _defaultAction = RenameOrReplaceResult.rename;
+
+  final _fileAction = ValueNotifier<RenameOrReplaceResult>(_defaultAction);
 
   static Future<RenameOrReplaceResult?> show(
     BuildContext context, {
@@ -48,13 +48,9 @@ class RenameOrReplaceEntryDialog extends StatelessWidget {
         ? S.current.messageReplaceExistingFile
         : S.current.messageReplaceExistingFolder;
 
-    final keepMessage = type == EntryType.file
+    final renameMessage = type == EntryType.file
         ? S.current.messageKeepBothFiles
         : S.current.messageKeepBothFolders;
-
-    _fileAction.value = type == EntryType.file
-        ? RenameOrReplaceResult.replace
-        : RenameOrReplaceResult.rename;
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -69,6 +65,15 @@ class RenameOrReplaceEntryDialog extends StatelessWidget {
           builder: (context, value, child) {
             return Column(
               children: [
+                RadioListTile<RenameOrReplaceResult>(
+                  key: Key('rename_entry_radio_tile'),
+                  dense: true,
+                  contentPadding: EdgeInsetsDirectional.zero,
+                  title: Text(renameMessage, style: bodyStyle),
+                  value: RenameOrReplaceResult.rename,
+                  groupValue: value,
+                  onChanged: _onFileActionChanged,
+                ),
                 GestureDetector(
                   onTap: () {
                     if (type == EntryType.directory) {
@@ -76,6 +81,7 @@ class RenameOrReplaceEntryDialog extends StatelessWidget {
                     }
                   },
                   child: RadioListTile<RenameOrReplaceResult>(
+                    key: Key('replace_entry_radio_tile'),
                     dense: true,
                     contentPadding: EdgeInsetsDirectional.zero,
                     title: Text(replaceMessage, style: bodyStyle),
@@ -85,14 +91,6 @@ class RenameOrReplaceEntryDialog extends StatelessWidget {
                         ? _onFileActionChanged
                         : null,
                   ),
-                ),
-                RadioListTile<RenameOrReplaceResult>(
-                  dense: true,
-                  contentPadding: EdgeInsetsDirectional.zero,
-                  title: Text(keepMessage, style: bodyStyle),
-                  value: RenameOrReplaceResult.rename,
-                  groupValue: value,
-                  onChanged: _onFileActionChanged,
                 ),
               ],
             );
@@ -117,7 +115,7 @@ class RenameOrReplaceEntryDialog extends StatelessWidget {
   ];
 
   void _onFileActionChanged(RenameOrReplaceResult? value) =>
-      _fileAction.value = value ?? RenameOrReplaceResult.replace;
+      _fileAction.value = value ?? _defaultAction;
 }
 
 enum RenameOrReplaceResult { rename, replace }

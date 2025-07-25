@@ -90,10 +90,22 @@ void main() {
 
       await copyFile(srcFileName, dstDir);
 
-      final alreadyExistsDialog = await tester.pumpUntilFound(
+      final dialogFinder = await tester.pumpUntilFound(
         find.byType(RenameOrReplaceEntryDialog),
       );
-      await tester.anxiousTap(find.byType(PositiveButton));
+
+      await tester.anxiousTap(
+        find.descendant(
+          of: dialogFinder,
+          matching: find.byKey(Key('replace_entry_radio_tile')),
+        ),
+      );
+      await tester.anxiousTap(
+        find.descendant(
+          of: dialogFinder,
+          matching: find.byType(PositiveButton),
+        ),
+      );
 
       await tester.pumpUntilNotFound(find.byType(RenameOrReplaceEntryDialog));
       await tester.pumpUntilNotFound(find.byType(EntryActions));
