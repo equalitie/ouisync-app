@@ -367,12 +367,10 @@ class _MainPageState extends State<MainPage>
   Widget _buildFAB(BuildContext context, ReposState reposState) {
     final icon = const Icon(Icons.add_rounded);
     final current = reposState.current;
-    final fabKey = Key('repo_add_item_button');
 
     if (current == null) {
       if (reposState.repos.isNotEmpty) {
         return FloatingActionButton(
-          key: fabKey,
           mini: true,
           focusNode: _fabFocus,
           heroTag: Constants.heroTagRepoListActions,
@@ -386,7 +384,6 @@ class _MainPageState extends State<MainPage>
         builder: (context, state) => Visibility(
           visible: state.canWrite,
           child: FloatingActionButton(
-            key: fabKey,
             mini: true,
             focusNode: _fabFocus,
             heroTag: Constants.heroTagMainPageActions,

@@ -9,6 +9,8 @@ import 'package:ouisync_app/app/widgets/buttons/elevated_async_button.dart';
 import 'package:ouisync_app/app/widgets/items/list_item.dart'
     show DirectoryListItem;
 import 'package:ouisync_app/app/widgets/bars/ouisync_bar.dart' show OuiSyncBar;
+import 'package:ouisync_app/app/widgets/dialogs/modal_actions_bottom_sheet.dart'
+    show DirectoryActions;
 import 'package:ouisync_app/app/widgets/bars/repositories_bar.dart'
     show RepositoriesBar;
 import 'package:path/path.dart' as p;
@@ -108,48 +110,50 @@ class RepoPage {
 
   // Tap the `+` button for adding files or folders to a repo and add the file at `filePath`.
   Future<void> addFile(String filePath) async {
-    final addItemFinder = find.byKey(Key('repo_add_item_button'));
-    final button = await tester.pumpUntilFound(addItemFinder);
-    await tester.anxiousTap(button);
+    final fab = await tester.pumpUntilFound(find.byType(FloatingActionButton));
+    await tester.anxiousTap(fab);
     await tester.pumpAndSettle();
-
-    final addFileFinder = find.byKey(Key('add_file_action'));
-    final addFileButton = await tester.pumpUntilFound(addFileFinder);
 
     fakeFilePickerPicks(filePath);
 
-    await tester.anxiousTap(addFileButton);
+    await tester.anxiousTap(
+      await tester.pumpUntilFound(
+        find.descendant(
+          of: find.byType(DirectoryActions),
+          matching: find.byKey(Key('add_file_action')),
+        ),
+      ),
+    );
 
-    await tester.pumpUntilNotFound(addFileFinder);
     // Wait to get back to the repo screen
-    await tester.pumpUntilFound(addItemFinder);
+    await tester.pumpUntilNotFound(find.byType(DirectoryActions));
   }
 
   // Create folder `folderName` in the current repo/folder. On success, the app
   // will end up that folder.
   Future<void> addFolder(String folderName) async {
-    final addItemFinder = find.byKey(Key('repo_add_item_button'));
-    final button = await tester.pumpUntilFound(addItemFinder);
-    await tester.anxiousTap(button);
+    final fab = await tester.pumpUntilFound(find.byType(FloatingActionButton));
+    await tester.anxiousTap(fab);
     await tester.pumpAndSettle();
 
-    final addFolderButton = await tester.pumpUntilFound(
-      find.byKey(Key('add_folder_action')),
+    await tester.anxiousTap(
+      await tester.pumpUntilFound(
+        find.descendant(
+          of: find.byType(DirectoryActions),
+          matching: find.byKey(Key('add_folder_action')),
+        ),
+      ),
     );
-
-    await tester.anxiousTap(addFolderButton);
 
     final findNameInput = find.byKey(Key('create_folder_name_input'));
     final nameInput = await tester.pumpUntilFound(findNameInput);
     await tester.enterText(nameInput, folderName);
 
-    // TODO: Anxious
+    // TODO: anxiousTap
     await tester.tap(find.byKey(Key('create_folder_submit')));
 
     // Wait for the dialog and bottom sheet to disappear.
-    // TODO: Could be more explicit rather than waiting for the one button to
-    // disappear.
-    await tester.pumpUntilNotFound(addFolderButton);
+    await tester.pumpUntilNotFound(find.byType(DirectoryActions));
   }
 
   Finder findDirEntry(String name) {
