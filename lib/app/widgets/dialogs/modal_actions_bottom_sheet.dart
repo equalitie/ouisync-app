@@ -13,7 +13,7 @@ import '../../cubits/cubits.dart'
         RepoCubit;
 import '../../utils/utils.dart'
     show AppLogger, Dialogs, Dimensions, Fields, FileIO, showSnackBar;
-import '../widgets.dart' show ActionsDialog, FolderCreation;
+import '../widgets.dart' show ActionsDialog, FolderCreationDialog;
 
 class DirectoryActions extends StatelessWidget with AppLogger {
   const DirectoryActions(
@@ -146,18 +146,13 @@ class DirectoryActions extends StatelessWidget with AppLogger {
   Future<void> createFolderDialog(BuildContext context, RepoCubit cubit) async {
     final parent = cubit.state.currentFolder.path;
 
-    final newFolderPath =
-        await showDialog<String>(
-          context: context,
-          barrierDismissible: false,
-          builder: (BuildContext context) => ActionsDialog(
-            title: S.current.titleCreateFolder,
-            body: FolderCreation(cubit: cubit, parent: parent),
-          ),
-        ) ??
-        '';
+    final newFolderPath = await FolderCreationDialog.show(
+      context,
+      repoCubit: cubit,
+      parent: parent,
+    );
 
-    if (newFolderPath.isEmpty) return;
+    if (newFolderPath == null || newFolderPath.isEmpty) return;
 
     final result = await Dialogs.executeWithLoadingDialog(
       null,

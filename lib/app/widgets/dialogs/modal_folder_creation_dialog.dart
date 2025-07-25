@@ -12,12 +12,10 @@ import '../../utils/utils.dart'
         Strings,
         TextEditingControllerExtension,
         validateNoEmptyMaybeRegExpr;
-import '../widgets.dart' show NegativeButton, PositiveButton;
+import '../widgets.dart' show ActionsDialog, NegativeButton, PositiveButton;
 
-class FolderCreation extends HookWidget {
-  FolderCreation({required this.cubit, required this.parent});
-
-  final RepoCubit cubit;
+class FolderCreationDialog extends HookWidget {
+  final RepoCubit repoCubit;
   final String parent;
 
   final formKey = GlobalKey<FormState>();
@@ -28,6 +26,22 @@ class FolderCreation extends HookWidget {
   late final FocusNode positiveButtonFocus;
 
   late final ValueNotifier<String> errorMessage;
+
+  static Future<String?> show(
+    BuildContext context, {
+    required RepoCubit repoCubit,
+    required String parent,
+  }) async {
+    return await showDialog<String>(
+      context: context,
+      builder: (BuildContext _) => ActionsDialog(
+        title: S.current.titleCreateFolder,
+        body: FolderCreationDialog._(repoCubit: repoCubit, parent: parent),
+      ),
+    );
+  }
+
+  FolderCreationDialog._({required this.repoCubit, required this.parent});
 
   @override
   Widget build(BuildContext context) {
@@ -54,14 +68,10 @@ class FolderCreation extends HookWidget {
                 hintText: S.current.messageFolderName,
                 errorText: nameController.text.isEmpty ? '' : errorMessage,
                 onFieldSubmitted: (String? newFolderName) async {
-                  if (newFolderName == null || newFolderName.isEmpty) {
-                    return;
-                  }
-
                   await _onCreateButtonPress(
                     context,
                     parent: parent,
-                    newFolderName: newFolderName,
+                    newFolderName: newFolderName ?? '',
                   );
                 },
                 validator: validateNoEmptyMaybeRegExpr(
@@ -95,45 +105,6 @@ class FolderCreation extends HookWidget {
     errorMessage = useValueNotifier('');
   }
 
-  void selectEntryName(String value) {
-    nameController.text = value;
-    nameController.selectAll();
-  }
-
-  Future<bool> submitField(String parent, String? newName) async {
-    final validationOk = await validateNewName(parent, newName ?? '');
-
-    if (!validationOk) {
-      selectEntryName(newName ?? '');
-      nameTextFieldFocus.requestFocus();
-
-      return false;
-    }
-
-    if (PlatformValues.isMobileDevice) {
-      positiveButtonFocus.requestFocus();
-    }
-
-    return true;
-  }
-
-  Future<bool> validateNewName(String parent, String newName) async {
-    if (newName.isEmpty) return false;
-
-    if (!(formKey.currentState?.validate() ?? false)) return false;
-
-    final newFolderPath = repo_path.join(parent, newName);
-    if (await cubit.entryExists(newFolderPath)) {
-      errorMessage.value = S.current.messageEntryAlreadyExist(newName);
-      return false;
-    } else {
-      errorMessage.value = '';
-    }
-
-    formKey.currentState!.save();
-    return true;
-  }
-
   List<Widget> _actions(BuildContext context, {required String parent}) => [
     NegativeButton(
       text: S.current.actionCancel,
@@ -156,11 +127,50 @@ class FolderCreation extends HookWidget {
     required String parent,
     required String newFolderName,
   }) async {
-    final submitted = await submitField(parent, newFolderName);
+    final submitted = await _submitField(parent, newFolderName);
 
     if (submitted) {
       final newFolderPath = repo_path.join(parent, newFolderName);
       await Navigator.of(context).maybePop(newFolderPath);
     }
+  }
+
+  Future<bool> _submitField(String parent, String newName) async {
+    final validationOk = await _validateNewName(parent, newName);
+
+    if (!validationOk) {
+      _selectEntryName(newName);
+      nameTextFieldFocus.requestFocus();
+
+      return false;
+    }
+
+    if (PlatformValues.isMobileDevice) {
+      positiveButtonFocus.requestFocus();
+    }
+
+    return true;
+  }
+
+  Future<bool> _validateNewName(String parent, String newName) async {
+    if (newName.isEmpty) return false;
+
+    if (!(formKey.currentState?.validate() ?? false)) return false;
+
+    final newFolderPath = repo_path.join(parent, newName);
+    if (await repoCubit.entryExists(newFolderPath)) {
+      errorMessage.value = S.current.messageEntryAlreadyExist(newName);
+      return false;
+    } else {
+      errorMessage.value = '';
+    }
+
+    formKey.currentState!.save();
+    return true;
+  }
+
+  void _selectEntryName(String value) {
+    nameController.text = value;
+    nameController.selectAll();
   }
 }
