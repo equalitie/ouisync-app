@@ -108,7 +108,9 @@ class FolderCreationDialog extends HookWidget {
   List<Widget> _actions(BuildContext context, {required String parent}) => [
     NegativeButton(
       text: S.current.actionCancel,
-      onPressed: () async => await Navigator.of(context).maybePop(''),
+      onPressed: () async {
+        await Navigator.of(context).maybePop('');
+      },
     ),
     PositiveButton(
       key: Key('create_folder_submit'),

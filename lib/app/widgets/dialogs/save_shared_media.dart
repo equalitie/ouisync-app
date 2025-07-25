@@ -136,7 +136,7 @@ class _SaveSharedMediaState extends State<SaveSharedMedia> {
       NegativeButton(
         text: S.current.actionCancel,
         buttonsAspectRatio: Dimensions.aspectRatioBottomDialogButton,
-        onPressed: () {
+        onPressed: () async {
           widget.onUpdateBottomSheet(BottomSheetType.gone, 0.0, '');
           widget.reposCubit.bottomSheet.hide();
         },

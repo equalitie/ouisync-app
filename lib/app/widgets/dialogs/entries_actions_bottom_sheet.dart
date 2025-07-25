@@ -347,9 +347,9 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
   List<Widget> _actions(
     bool enableAction,
     double aspectRatio,
-    void Function()? positiveAction,
+    Future<void> Function()? positiveAction,
     String positiveText,
-    void Function()? negativeAction,
+    void Function() negativeAction,
     String negativeText,
     bool isDangerButton,
   ) => [
@@ -357,7 +357,9 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
       buttonsAspectRatio: aspectRatio,
       buttonConstrains: Dimensions.sizeConstrainsBottomDialogAction,
       text: negativeText,
-      onPressed: negativeAction,
+      onPressed: () async {
+        negativeAction();
+      },
     ),
     PositiveButton(
       key: ValueKey('move_entry'),

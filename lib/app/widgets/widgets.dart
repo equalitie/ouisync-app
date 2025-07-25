@@ -9,8 +9,7 @@ export 'bars/search_bar.dart';
 export 'bars/sort_contents_bar.dart';
 
 export 'buttons/dialog_danger_button.dart';
-export 'buttons/dialog_negative_button.dart';
-export 'buttons/dialog_positive_button.dart';
+export 'buttons/dialog_action_button.dart';
 export 'buttons/select_entries_button.dart';
 export 'buttons/sort_by_button.dart';
 export 'buttons/sort_direction_button.dart';

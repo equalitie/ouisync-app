@@ -149,8 +149,7 @@ class RepoPage {
     final nameInput = await tester.pumpUntilFound(findNameInput);
     await tester.enterText(nameInput, folderName);
 
-    // TODO: anxiousTap
-    await tester.tap(find.byKey(Key('create_folder_submit')));
+    await tester.anxiousTap(find.byKey(Key('create_folder_submit')));
 
     // Wait for the dialog and bottom sheet to disappear.
     await tester.pumpUntilNotFound(find.byType(DirectoryActions));

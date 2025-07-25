@@ -12,7 +12,7 @@ import 'package:ouisync_app/app/widgets/items/entry_action_item.dart'
     show EntryActionItem;
 import 'package:ouisync_app/app/widgets/dialogs/entries_actions_bottom_sheet.dart'
     show EntriesActionsDialog;
-import 'package:ouisync_app/app/widgets/buttons/dialog_positive_button.dart'
+import 'package:ouisync_app/app/widgets/buttons/dialog_action_button.dart'
     show PositiveButton;
 import 'package:ouisync/ouisync.dart';
 import 'package:path/path.dart' as p;
