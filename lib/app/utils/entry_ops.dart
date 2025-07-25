@@ -13,30 +13,10 @@ import 'package:url_launcher/url_launcher_string.dart';
 import 'actions.dart';
 import 'log.dart';
 import 'utils.dart' show AppThemeExtension, Fields, ThemeGetter;
-import '../widgets/widgets.dart' show DisambiguationAction, ReplaceKeepEntry;
+import '../widgets/widgets.dart'
+    show RenameOrReplaceResult, RenameOrReplaceEntryDialog;
 import '../cubits/cubits.dart' show RepoCubit;
 import '../../generated/l10n.dart';
-
-Future<DisambiguationAction?> pickEntryDisambiguationAction(
-  BuildContext context,
-  String entryName,
-  EntryType entryType,
-) async => await showDialog<DisambiguationAction?>(
-  context: context,
-  builder: (BuildContext context) => AlertDialog(
-    title: Flex(
-      direction: Axis.horizontal,
-      children: [
-        Fields.constrainedText(
-          S.current.titleMovingEntry,
-          style: context.theme.appTextStyle.titleMedium,
-          maxLines: 2,
-        ),
-      ],
-    ),
-    content: ReplaceKeepEntry(name: entryName, type: entryType),
-  ),
-);
 
 Future<String> disambiguateEntryName({
   required RepoCubit repoCubit,

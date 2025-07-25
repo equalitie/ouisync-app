@@ -11,7 +11,8 @@ import 'package:permission_handler/permission_handler.dart';
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart' show RepoCubit;
 import '../models/models.dart' show FileEntry;
-import '../widgets/widgets.dart' show DisambiguationAction, ReplaceKeepEntry;
+import '../widgets/widgets.dart'
+    show RenameOrReplaceResult, RenameOrReplaceEntryDialog;
 import 'platform/platform.dart' show PlatformValues;
 import 'utils.dart'
     show
@@ -70,16 +71,18 @@ class FileIO with AppLogger {
           continue;
         }
 
-        final replaceOrKeepEntry = await _confirmKeepOrReplaceEntry(
+        final replaceOrKeepEntry = await RenameOrReplaceEntryDialog.show(
           context,
-          fileName: fileName,
+          title: S.current.titleAddFile,
+          entryName: fileName,
+          entryType: EntryType.file,
         );
 
         if (replaceOrKeepEntry == null) {
           continue;
         }
 
-        if (replaceOrKeepEntry == DisambiguationAction.replace) {
+        if (replaceOrKeepEntry == RenameOrReplaceResult.replace) {
           await repoCubit.replaceFile(
             filePath: destinationFilePath,
             length: srcFile.size,
@@ -89,7 +92,7 @@ class FileIO with AppLogger {
           continue;
         }
 
-        if (replaceOrKeepEntry == DisambiguationAction.keep) {
+        if (replaceOrKeepEntry == RenameOrReplaceResult.rename) {
           final newPath = await _renameFileWithVersion(
             fileName,
             parentPath,
@@ -105,26 +108,6 @@ class FileIO with AppLogger {
       }
     }
   }
-
-  Future<DisambiguationAction?> _confirmKeepOrReplaceEntry(
-    BuildContext context, {
-    required String fileName,
-  }) async => showDialog<DisambiguationAction>(
-    context: context,
-    builder: (BuildContext context) => AlertDialog(
-      title: Flex(
-        direction: Axis.horizontal,
-        children: [
-          Fields.constrainedText(
-            S.current.titleAddFile,
-            style: context.theme.appTextStyle.titleMedium,
-            maxLines: 2,
-          ),
-        ],
-      ),
-      content: ReplaceKeepEntry(name: fileName, type: EntryType.file),
-    ),
-  );
 
   Future<void> saveFileToDevice(
     FileEntry entry, [

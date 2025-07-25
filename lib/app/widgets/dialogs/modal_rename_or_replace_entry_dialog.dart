@@ -6,15 +6,39 @@ import '../../utils/utils.dart'
     show AppThemeExtension, Dimensions, Fields, showSnackBar, ThemeGetter;
 import '../widgets.dart' show NegativeButton, PositiveButton;
 
-class ReplaceKeepEntry extends StatelessWidget {
-  ReplaceKeepEntry({required this.name, required this.type});
-
+class RenameOrReplaceEntryDialog extends StatelessWidget {
   final String name;
   final EntryType type;
 
-  final _fileAction = ValueNotifier<DisambiguationAction>(
-    DisambiguationAction.replace,
+  final _fileAction = ValueNotifier<RenameOrReplaceResult>(
+    RenameOrReplaceResult.replace,
   );
+
+  static Future<RenameOrReplaceResult?> show(
+    BuildContext context, {
+    required String title,
+    required String entryName,
+    required EntryType entryType,
+  }) async => await showDialog<RenameOrReplaceResult?>(
+    context: context,
+    builder: (BuildContext _) => AlertDialog(
+      title: Flex(
+        direction: Axis.horizontal,
+        children: [
+          Fields.constrainedText(
+            title,
+            style: context.theme.appTextStyle.titleMedium,
+            maxLines: 2,
+          ),
+        ],
+      ),
+      content: RenameOrReplaceEntryDialog._(name: entryName, type: entryType),
+    ),
+  );
+
+  RenameOrReplaceEntryDialog._({required String name, required EntryType type})
+    : name = name,
+      type = type;
 
   @override
   Widget build(BuildContext context) {
@@ -29,8 +53,8 @@ class ReplaceKeepEntry extends StatelessWidget {
         : S.current.messageKeepBothFolders;
 
     _fileAction.value = type == EntryType.file
-        ? DisambiguationAction.replace
-        : DisambiguationAction.keep;
+        ? RenameOrReplaceResult.replace
+        : RenameOrReplaceResult.rename;
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -51,22 +75,22 @@ class ReplaceKeepEntry extends StatelessWidget {
                       showSnackBar(S.current.messageOnlyAvailableFiles);
                     }
                   },
-                  child: RadioListTile<DisambiguationAction>(
+                  child: RadioListTile<RenameOrReplaceResult>(
                     dense: true,
                     contentPadding: EdgeInsetsDirectional.zero,
                     title: Text(replaceMessage, style: bodyStyle),
-                    value: DisambiguationAction.replace,
+                    value: RenameOrReplaceResult.replace,
                     groupValue: value,
                     onChanged: type == EntryType.file
                         ? _onFileActionChanged
                         : null,
                   ),
                 ),
-                RadioListTile<DisambiguationAction>(
+                RadioListTile<RenameOrReplaceResult>(
                   dense: true,
                   contentPadding: EdgeInsetsDirectional.zero,
                   title: Text(keepMessage, style: bodyStyle),
-                  value: DisambiguationAction.keep,
+                  value: RenameOrReplaceResult.rename,
                   groupValue: value,
                   onChanged: _onFileActionChanged,
                 ),
@@ -92,8 +116,8 @@ class ReplaceKeepEntry extends StatelessWidget {
     ),
   ];
 
-  void _onFileActionChanged(DisambiguationAction? value) =>
-      _fileAction.value = value ?? DisambiguationAction.replace;
+  void _onFileActionChanged(RenameOrReplaceResult? value) =>
+      _fileAction.value = value ?? RenameOrReplaceResult.replace;
 }
 
-enum DisambiguationAction { replace, keep }
+enum RenameOrReplaceResult { rename, replace }

@@ -74,16 +74,6 @@ class S {
     );
   }
 
-  /// `Moving entry`
-  String get titleMovingEntry {
-    return Intl.message(
-      'Moving entry',
-      name: 'titleMovingEntry',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Add`
   String get titleFolderActions {
     return Intl.message('Add', name: 'titleFolderActions', desc: '', args: []);
@@ -774,12 +764,32 @@ class S {
     );
   }
 
+  /// `Copying entry`
+  String get titleCopyingEntry {
+    return Intl.message(
+      'Copying entry',
+      name: 'titleCopyingEntry',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Move`
   String get titleMoveEntries {
     return Intl.message(
       'Move',
       name: 'titleMoveEntries',
       desc: 'Title for the confirmation dialog when moving entries',
+      args: [],
+    );
+  }
+
+  /// `Moving entry`
+  String get titleMovingEntry {
+    return Intl.message(
+      'Moving entry',
+      name: 'titleMovingEntry',
+      desc: '',
       args: [],
     );
   }

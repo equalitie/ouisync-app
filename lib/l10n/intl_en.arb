@@ -6,8 +6,6 @@
   "@titleAppTitle": {},
   "titleAddFile": "Add file to Ouisync",
   "@titleAddFile": {},
-  "titleMovingEntry": "Moving entry",
-  "@titleMovingEntry": {},
   "titleFolderActions": "Add",
   "@titleFolderActions": {},
   "titleCreateFolder": "Create a folder",
@@ -114,10 +112,14 @@
   "@titleCopyEntries":{
     "description": "Title for the confirmation dialog when copying entries"
   },
+  "titleCopyingEntry": "Copying entry",
+  "@titleCopyingEntry": {},
   "titleMoveEntries":"Move",
   "@titleMoveEntries":{
     "description": "Title for the confirmation dialog when moving entries"
   },
+  "titleMovingEntry": "Moving entry",
+  "@titleMovingEntry": {},
   "titleSaveEntriesToDevice":"Save to device",
   "@titleSaveEntriesToDevice":{
     "description": "Title for the confirmation dialog when saving entries to device"	

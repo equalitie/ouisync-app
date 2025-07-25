@@ -6,8 +6,8 @@ import 'package:ouisync_app/app/models/auth_mode.dart';
 import 'package:ouisync_app/app/models/repo_location.dart';
 import 'package:ouisync_app/app/widgets/dialogs/modal_entry_actions_bottom_sheet.dart'
     show EntryActions;
-import 'package:ouisync_app/app/widgets/dialogs/modal_replace_keep_entry_dialog.dart'
-    show ReplaceKeepEntry;
+import 'package:ouisync_app/app/widgets/dialogs/modal_rename_or_replace_entry_dialog.dart'
+    show RenameOrReplaceEntryDialog;
 import 'package:ouisync_app/app/widgets/items/entry_action_item.dart'
     show EntryActionItem;
 import 'package:ouisync_app/app/widgets/dialogs/entries_actions_bottom_sheet.dart'
@@ -91,11 +91,11 @@ void main() {
       await copyFile(srcFileName, dstDir);
 
       final alreadyExistsDialog = await tester.pumpUntilFound(
-        find.byType(ReplaceKeepEntry),
+        find.byType(RenameOrReplaceEntryDialog),
       );
       await tester.anxiousTap(find.byType(PositiveButton));
 
-      await tester.pumpUntilNotFound(find.byType(ReplaceKeepEntry));
+      await tester.pumpUntilNotFound(find.byType(RenameOrReplaceEntryDialog));
       await tester.pumpUntilNotFound(find.byType(EntryActions));
       await tester.pumpUntilFound(repoPage.findDirEntry(srcFileName));
 
