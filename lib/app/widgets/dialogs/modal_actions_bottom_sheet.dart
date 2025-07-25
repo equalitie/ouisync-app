@@ -13,7 +13,7 @@ import '../../cubits/cubits.dart'
         RepoCubit;
 import '../../utils/utils.dart'
     show AppLogger, Dialogs, Dimensions, Fields, FileIO, showSnackBar;
-import '../widgets.dart' show ActionsDialog, FolderCreationDialog;
+import '../widgets.dart' show FolderCreationDialog;
 
 class DirectoryActions extends StatelessWidget with AppLogger {
   const DirectoryActions(

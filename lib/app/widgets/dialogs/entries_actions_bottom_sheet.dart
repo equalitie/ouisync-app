@@ -19,13 +19,7 @@ import '../../cubits/repos.dart';
 import '../../utils/dirs.dart';
 import '../../utils/repo_path.dart' as repo_path;
 import '../../utils/utils.dart'
-    show
-        AppLogger,
-        Dialogs,
-        Dimensions,
-        Fields,
-        MoveEntriesActions,
-        MultiEntryActions;
+    show AppLogger, Dimensions, Fields, MoveEntriesActions, MultiEntryActions;
 import '../widgets.dart' show NegativeButton, PositiveButton;
 
 class EntriesActionsDialog extends StatefulWidget {
@@ -88,9 +82,9 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
   }
 
   @override
-  Widget build(BuildContext _ctx) => BlocBuilder<ReposCubit, ReposState>(
+  Widget build(BuildContext ctx) => BlocBuilder<ReposCubit, ReposState>(
     bloc: widget.reposCubit,
-    builder: (_ctx, reposState) => Container(
+    builder: (ctx, reposState) => Container(
       key: bodyKey,
       padding: Dimensions.paddingBottomSheet,
       decoration: Dimensions.decorationBottomSheetAlternative,
@@ -187,7 +181,7 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
     Dirs dirs,
   ) => BlocBuilder<NavigationCubit, NavigationState>(
     bloc: navigationCubit,
-    builder: (_ctx, state) {
+    builder: (ctx, state) {
       final moveEntriesActions = MoveEntriesActions(
         context,
         reposCubit: reposCubit,

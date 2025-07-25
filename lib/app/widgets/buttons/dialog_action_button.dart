@@ -54,7 +54,7 @@ abstract class _ActionButton extends StatelessWidget {
   final ValueNotifier<bool> _enabled;
 
   _ActionButton(
-    _Type this._type, {
+    this._type, {
     required this.text,
     required this.onPressed,
     double? buttonsAspectRatio,
@@ -79,7 +79,7 @@ abstract class _ActionButton extends StatelessWidget {
                   margin: _margin(),
                   child: ValueListenableBuilder<bool>(
                     valueListenable: _enabled,
-                    builder: (BuildContext _, bool enabled, Widget? _child) =>
+                    builder: (BuildContext _, bool enabled, Widget? child) =>
                         RawMaterialButton(
                           onPressed: _getOnPressed(enabled),
                           focusNode: focusNode,

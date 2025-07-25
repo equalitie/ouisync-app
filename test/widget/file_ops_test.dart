@@ -2,8 +2,6 @@ import 'dart:io' as io;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:ouisync_app/app/models/auth_mode.dart';
-import 'package:ouisync_app/app/models/repo_location.dart';
 import 'package:ouisync_app/app/widgets/dialogs/modal_entry_actions_bottom_sheet.dart'
     show EntryActions;
 import 'package:ouisync_app/app/widgets/dialogs/modal_rename_or_replace_entry_dialog.dart'
@@ -14,14 +12,11 @@ import 'package:ouisync_app/app/widgets/dialogs/entries_actions_bottom_sheet.dar
     show EntriesActionsDialog;
 import 'package:ouisync_app/app/widgets/buttons/dialog_action_button.dart'
     show PositiveButton;
-import 'package:ouisync/ouisync.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
-import 'package:styled_text/styled_text.dart';
 
 import '../utils.dart';
 import '../navigation.dart';
-import '../fake_file_picker.dart';
 
 Future<io.File> _createTempFile(String name) async {
   final path = (await getTemporaryDirectory()).path;

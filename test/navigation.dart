@@ -6,17 +6,10 @@ import 'package:ouisync_app/app/pages/repo_security_page.dart';
 import 'package:ouisync_app/app/pages/repo_reset_access.dart';
 import 'package:ouisync_app/app/utils/utils.dart';
 import 'package:ouisync_app/app/widgets/buttons/elevated_async_button.dart';
-import 'package:ouisync_app/app/widgets/items/list_item.dart'
-    show DirectoryListItem;
-import 'package:ouisync_app/app/widgets/bars/ouisync_bar.dart' show OuiSyncBar;
 import 'package:ouisync_app/app/widgets/dialogs/modal_actions_bottom_sheet.dart'
     show DirectoryActions;
-import 'package:ouisync_app/app/widgets/bars/repositories_bar.dart'
-    show RepositoriesBar;
-import 'package:path/path.dart' as p;
 import 'package:ouisync_app/app/widgets/items/entry_action_item.dart'
     show EntryActionItem;
-import 'dart:io' as io;
 import 'package:ouisync/ouisync.dart';
 import 'utils.dart';
 import 'fake_file_picker.dart';

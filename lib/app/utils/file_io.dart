@@ -2,8 +2,7 @@ import 'dart:io' as io;
 
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/material.dart'
-    show AlertDialog, Axis, BuildContext, Flex, showDialog;
+import 'package:flutter/material.dart' show BuildContext;
 import 'package:ouisync/ouisync.dart' show EntryType;
 import 'package:path/path.dart' as p;
 import 'package:permission_handler/permission_handler.dart';
@@ -14,15 +13,7 @@ import '../models/models.dart' show FileEntry;
 import '../widgets/widgets.dart'
     show RenameOrReplaceResult, RenameOrReplaceEntryDialog;
 import 'platform/platform.dart' show PlatformValues;
-import 'utils.dart'
-    show
-        AppLogger,
-        AppThemeExtension,
-        Constants,
-        Fields,
-        Permissions,
-        showSnackBar,
-        ThemeGetter;
+import 'utils.dart' show AppLogger, Constants, Permissions, showSnackBar;
 
 enum FileDestination { device, ouisync }
 

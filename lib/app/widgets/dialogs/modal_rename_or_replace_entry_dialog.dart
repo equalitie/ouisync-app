@@ -36,9 +36,7 @@ class RenameOrReplaceEntryDialog extends StatelessWidget {
     ),
   );
 
-  RenameOrReplaceEntryDialog._({required String name, required EntryType type})
-    : name = name,
-      type = type;
+  RenameOrReplaceEntryDialog._({required this.name, required this.type});
 
   @override
   Widget build(BuildContext context) {

@@ -1,9 +1,7 @@
 import 'dart:io';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:loggy/loggy.dart';
-import 'package:ouisync/ouisync.dart';
 import 'package:ouisync/helpers.dart' as oui show viewFile, shareFile;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart' show posix;
@@ -12,9 +10,6 @@ import 'package:url_launcher/url_launcher_string.dart';
 
 import 'actions.dart';
 import 'log.dart';
-import 'utils.dart' show AppThemeExtension, Fields, ThemeGetter;
-import '../widgets/widgets.dart'
-    show RenameOrReplaceResult, RenameOrReplaceEntryDialog;
 import '../cubits/cubits.dart' show RepoCubit;
 import '../../generated/l10n.dart';
 
