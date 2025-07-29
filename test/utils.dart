@@ -427,8 +427,16 @@ extension WidgetTesterExtension on WidgetTester {
       try {
         await callback();
       } catch (e) {
-        await dumpTree(testDescription);
-        await takeScreenshot(testDescription);
+        try {
+          await dumpTree(testDescription);
+        } catch (de) {
+          _loggy.debug("Failed to write debug dump: $de");
+        }
+        try {
+          await takeScreenshot(testDescription);
+        } catch (se) {
+          _loggy.debug("Failed to take screenshot: $se");
+        }
         rethrow;
       }
     });
