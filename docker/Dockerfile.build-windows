@@ -1,6 +1,6 @@
 FROM mcr.microsoft.com/windows/servercore:ltsc2022 AS windows
 
-ENV FLUTTER_VERSION=3.32.4
+ENV FLUTTER_VERSION=3.32.5
 
 ####################
 # Use powershell by default. Setting the ProgressPreference to SilentlyContinue
