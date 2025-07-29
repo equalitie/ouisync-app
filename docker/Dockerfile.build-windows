@@ -88,7 +88,8 @@ RUN \
   msys ' '; \
   msys 'pacman --noconfirm -Syuu'; \
   msys 'pacman --noconfirm -Syuu'; \
-  msys 'pacman --noconfirm -Scc';
+  msys 'pacman --noconfirm -Scc'; \
+  msys 'pacman --noconfirm -S rsync';
 
 RUN cmd /c 'setx /M path "C:\msys64\usr\bin;C:\msys64\mingw64\bin;%path%"'
 

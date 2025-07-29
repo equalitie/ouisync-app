@@ -2,9 +2,11 @@
 
 set -e
 
+source $(dirname $0)/build-utils.sh
+
 function print_help() {
     echo "Script for building Ouisync App in a Docker container"
-    echo "Usage: $0 --host <HOST> --commit <COMMIT> [--out <OUTPUT_DIRECTORY>]"
+    echo "Usage: $0 --host <HOST> (--commit <COMMIT> | --srcdir <SRCDIR>) [--out <OUTPUT_DIRECTORY>]"
     echo "  HOST:             IP or entry in ~/.ssh/config of machine running Docker"
     echo "  COMMIT:           Commit from which to build"
     echo "  OUTPUT_DIRECTORY: Directory where artifacts will be stored"
@@ -17,17 +19,20 @@ while [[ "$#" -gt 0 ]]; do
     case $1 in
         -h) print_help; exit ;;
         --host) host="$2"; shift ;;
-        -c|--commit) commit="$2"; shift ;;
+        --commit) commit="$2"; shift ;;
+        --srcdir) srcdir="$2"; shift ;;
         --no-exe) build_exe='' ;;
         --no-msix) build_msix='' ;;
         --out) out_dir="$2"; shift ;;
-        *) echo "Unknown argument: $1"; print_help; exit 1 ;;
+        *) error "Unknown argument: $1" ;;
     esac
     shift
 done
 
-if [ -z "$host"   ]; then echo "Missing --host";   print_help; exit 1; fi
-if [ -z "$commit" ]; then echo "Missing --commit"; print_help; exit 1; fi
+if [ -z "$host"   ]; then error "Missing --host"; fi
+if [ -z "$commit" -a -z "$srcdir" ]; then error "Missing one of --commit or --srcdir"; fi
+if [ -n "$commit" -a -n "$srcdir" ]; then error "--commit and --srcdir are mutually exclusive"; fi
+
 image_name=ouisync.windows-builder.$USER
 container_name="ouisync.windows-builder.$(date +'%Y-%m-%dT%H-%M-%S')"
 
@@ -36,18 +41,15 @@ export DOCKER_BUILDKIT=0
 
 out_dir=${out_dir:=./releases/$container_name}
 
-# Collect secrets
-secretSentryDSN=$(pass cenoers/ouisync/app/production/sentry_dsn)
-
-# Define shortcuts
-function dock() {
-    docker --host ssh://$host "$@"
-}
-
-function exe {
-    local dir=$1; shift
-    dock exec -w $dir $container_name "$@"
-}
+# Collect secrets (only sentry DSN on Windows)
+if [ -n "$commit" ]; then
+    check_dependency git
+    secretSentryDSN=$(pass cenoers/ouisync/app/production/sentry_dsn)
+    flavor=production
+else
+    check_dependency rsync
+    flavor=unofficial
+fi
 
 # Build image
 dock build -t $image_name $isolation -m 15G - < docker/Dockerfile.build-windows
@@ -82,18 +84,22 @@ function container_ssh_port() {
 
 ssh_port=$(container_ssh_port)
 if [ -z "$ssh_port" ]; then
-    echo "Failed to determine container's SSH port"
-    exit 1
+    error "Failed to determine container's SSH port"
 fi
 
 # Prepare secrets
-exe / mkdir c:\\secrets
-exe / powershell -Command "Add-Content -Force -Path c:/secrets/sentry_dsn -Value \"$secretSentryDSN\""
+if [ "$flavor" = "production" ]; then
+    exe / mkdir c:\\secrets
+    exe / powershell -Command "Add-Content -Force -Path c:/secrets/sentry_dsn -Value \"$secretSentryDSN\""
+    sentry_arg='--sentry=C:/secrets/sentry_dsn'
+fi
 
-# Clone Ouisync sources
-exe / git clone --filter=tree:0 https://github.com/equalitie/ouisync-app
-exe c:/ouisync-app git reset --hard $commit
-exe c:/ouisync-app git submodule update --init --recursive
+# Checkout or copy Ouisync sources
+if [ -n "$commit" ]; then
+    get_sources_from_git $commit c:
+else
+    get_sources_from_local_dir $srcdir  /c
+fi
 
 # Generate bindings
 exe c:/ouisync-app/ouisync/bindings/dart dart pub get
@@ -101,7 +107,7 @@ exe c:/ouisync-app/ouisync/bindings/dart dart tool/bindgen.dart
 
 # Build Ouisync
 exe c:/ouisync-app dart pub get
-exe c:/ouisync-app dart run util/release.dart --flavor=production --sentry=C:/secrets/sentry_dsn $build_exe $build_msix
+exe c:/ouisync-app dart run util/release.dart --flavor=$flavor $sentry_arg $build_exe $build_msix
 
 # Collect artifacts. Hyper-V doesn't allow `docker cp` from a running container, so using scp
 function setup_sshd() {
