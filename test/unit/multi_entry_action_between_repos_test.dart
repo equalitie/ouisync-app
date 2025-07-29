@@ -10,7 +10,12 @@ import 'package:ouisync_app/app/utils/utils.dart' show CacheServers;
 import 'package:ouisync/ouisync.dart' show Repository;
 import 'package:ouisync_app/app/utils/repo_path.dart' as repo_path;
 import 'package:ouisync_app/app/cubits/cubits.dart'
-    show EntryBottomSheetCubit, EntrySelectionCubit, NavigationCubit, RepoCubit;
+    show
+        EntryBottomSheetCubit,
+        EntrySelectionCubit,
+        NavigationCubit,
+        RepoCubit,
+        MountCubit;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../utils.dart';
@@ -64,6 +69,8 @@ void main() {
 
     final cacheServers = CacheServers(deps.session);
 
+    final mountCubit = MountCubit(deps.session, deps.dirs)..init();
+
     originRepoCubit = await RepoCubit.create(
       repo: originRepo,
       session: deps.session,
@@ -71,6 +78,7 @@ void main() {
       entrySelection: EntrySelectionCubit(),
       bottomSheet: EntryBottomSheetCubit(),
       cacheServers: cacheServers,
+      mountCubit: mountCubit,
     );
 
     destinationRepoCubit = await RepoCubit.create(
@@ -80,6 +88,7 @@ void main() {
       entrySelection: EntrySelectionCubit(),
       bottomSheet: EntryBottomSheetCubit(),
       cacheServers: cacheServers,
+      mountCubit: mountCubit,
     );
 
     // Create 1 folder in originRepo

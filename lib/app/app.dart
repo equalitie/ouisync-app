@@ -185,6 +185,7 @@ class _HomeWidgetState extends State<HomeWidget>
       session: widget.session,
       settings: widget.settings,
       cacheServers: cacheServers,
+      mountCubit: mountCubit,
     );
 
     unawaited(_init());

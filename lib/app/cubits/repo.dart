@@ -107,6 +107,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   final Repository _repo;
   final cipher.SecretKey _pathSecretKey;
   final CacheServers _cacheServers;
+  final MountCubit _mountCubit;
 
   RepoCubit._(
     this._navigation,
@@ -115,6 +116,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     this._repo,
     this._pathSecretKey,
     this._cacheServers,
+    this._mountCubit,
     super.state,
   ) {
     _currentFolder.repo = this;
@@ -122,6 +124,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
 
   static Future<RepoCubit> create({
     required Repository repo,
+    required MountCubit mountCubit,
     required Session session,
     required NavigationCubit navigation,
     required EntrySelectionCubit entrySelection,
@@ -160,10 +163,11 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
       repo,
       pathSecretKey,
       cacheServers,
+      mountCubit,
       state,
     );
 
-    await cubit.mount();
+    await cubit._mount();
 
     // Fetching the cache server state involves network request which might take a long time. Using
     // `unawaited` to avoid blocking this function on it.
@@ -299,7 +303,14 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     );
   }
 
-  Future<void> mount() async {
+  Future<void> _mount() async {
+    await _mountCubit.initialized();
+
+    if (_mountCubit.state is! MountStateSuccess) {
+      emitUnlessClosed(state.copyWith(mountState: _mountCubit.state));
+      return;
+    }
+
     try {
       await _repo.mount();
       emitUnlessClosed(state.copyWith(mountState: const MountStateSuccess()));

@@ -53,6 +53,7 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
   final Session _session;
   StreamSubscription<void>? _subscription;
   final Settings _settings;
+  final MountCubit _mountCubit;
 
   final EntryBottomSheetCubit bottomSheet;
   final CacheServers cacheServers;
@@ -64,11 +65,13 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
     required session,
     required settings,
     required this.cacheServers,
+    required MountCubit mountCubit,
     EntryBottomSheetCubit? bottomSheet,
     NavigationCubit? navigation,
     EntrySelectionCubit? entriesSelection,
   }) : _session = session,
        _settings = settings,
+       _mountCubit = mountCubit,
        bottomSheet = bottomSheet ?? EntryBottomSheetCubit(),
        navigation = navigation ?? NavigationCubit(),
        entriesSelection = entriesSelection ?? EntrySelectionCubit(),
@@ -184,6 +187,7 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
   Future<RepoCubit> _createRepoCubit(Repository repo) => RepoCubit.create(
     repo: repo,
     session: _session,
+    mountCubit: _mountCubit,
     navigation: navigation,
     entrySelection: entriesSelection,
     bottomSheet: bottomSheet,

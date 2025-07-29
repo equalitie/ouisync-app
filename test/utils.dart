@@ -101,13 +101,14 @@ class TestDependencies {
     await session.setStoreDir(dirs.defaultStore);
 
     final settings = await Settings.init(MasterKey.random());
+    final mountCubit = MountCubit(session, dirs)..init();
     final reposCubit = ReposCubit(
       cacheServers: CacheServers(session),
       session: session,
       settings: settings,
+      mountCubit: mountCubit,
     );
 
-    final mountCubit = MountCubit(session, dirs);
     final localeCubit = LocaleCubit(settings);
 
     return TestDependencies._(
