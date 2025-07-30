@@ -124,7 +124,7 @@ jobs:
         with:
           # Name of the produced zip file
           name: test-artifacts-${{ matrix.name }}
-          path: test/widget/screenshots/*
+          path: test/widget/artifacts/*
           if-no-files-found: ignore
         # Upload even when tests fail
         if: always()

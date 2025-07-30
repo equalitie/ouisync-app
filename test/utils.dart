@@ -33,6 +33,7 @@ import 'sandbox.dart';
 export 'package:flutter/foundation.dart' show debugPrint;
 
 final _loggy = log.named("TestHelper");
+const String artifactsDirName = 'artifacts';
 
 /// Setup the test environment and run `callback` inside it.
 ///
@@ -276,7 +277,7 @@ extension WidgetTesterExtension on WidgetTester {
         format: ImageByteFormat.png,
       ))!.buffer.asUint8List();
 
-      final path = join(_testDirPath, 'screenshots', '$name.png');
+      final path = join(_testDirPath, artifactsDirName, '$name.png');
 
       await Directory(dirname(path)).create(recursive: true);
       await File(path).writeAsBytes(bytes);
@@ -306,7 +307,7 @@ extension WidgetTesterExtension on WidgetTester {
     } else {
       tree = '<no tree currently mounted>';
     }
-    final path = join(_testDirPath, 'screenshots', "$name.dump");
+    final path = join(_testDirPath, artifactsDirName, "$name.dump");
     await File(path).writeAsString(tree);
     _loggy.info('element tree dump saved to $path');
   }
