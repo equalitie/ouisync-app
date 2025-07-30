@@ -349,7 +349,11 @@ extension WidgetTesterExtension on WidgetTester {
     // Too often when the above first finds a widget it's outside of the screen
     // area and tapping on it would generate a warning. After this
     // `pumpAndSettle` the widget finds its place inside the screen.
-    await pumpAndSettle();
+    try {
+      await pumpAndSettle();
+    } catch (e) {
+      // There may still be some progress indicator moving, ignore it.
+    }
     return found;
   }
 

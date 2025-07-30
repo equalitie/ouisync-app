@@ -92,11 +92,11 @@ class RepoPage {
   Future<RepoSettings> enterRepoSettings() async {
     final repoSettingsIcon = Icons.more_vert_rounded; // The three vertical dots
 
-    await tester.anxiousTap(
-      await tester.pumpUntilFound(
-        find.widgetWithIcon(IconButton, repoSettingsIcon),
-      ),
+    final button = await tester.pumpUntilFound(
+      find.widgetWithIcon(IconButton, repoSettingsIcon),
     );
+
+    await tester.anxiousTap(button);
 
     return RepoSettings(tester);
   }
