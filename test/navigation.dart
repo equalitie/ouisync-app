@@ -330,12 +330,19 @@ class RepoResetPage {
   }
 
   Future<void> submit() async {
-    // TODO: Check that the button is enabled.
+    final submitButton = await tester.pumpUntilFound(
+      timeout: Duration(seconds: 30),
+      find.byKey(Key('repo-reset-submit')),
+    );
+
+    // Wait for the button to become enabled
+    await tester.pumpUntil(() {
+      final state = tester.state(submitButton) as ElevatedAsyncButtonState;
+      return state.widget.onPressed != null;
+    });
 
     // Non `anxiousTap` because tapping again will remove the confirmation dialog.
-    await tester.tap(
-      await tester.pumpUntilFound(find.byKey(Key('repo-reset-submit'))),
-    );
+    await tester.tap(submitButton);
 
     // Confirm
     await tester.anxiousTap(await tester.pumpUntilFound(find.text('YES')));
