@@ -211,7 +211,7 @@ class _MainPageState extends State<MainPage>
         // This one is mainly for when we're unlocking the repository,
         // because during that time the current repository is destroyed so we
         // can't show it's content.
-        return const Center(child: CircularProgressIndicator());
+        return Center(child: _progressIndicatorWidget());
       }
 
       if (currentRepoCubit != null) {
@@ -457,7 +457,7 @@ class _MainPageState extends State<MainPage>
 
     if (folder.content.isEmpty) {
       if (repo.state.isLoading) {
-        child = const Center(child: CircularProgressIndicator());
+        child = Center(child: _progressIndicatorWidget());
       } else {
         _fabFocus.requestFocus();
         child = NoContentsState(
@@ -1031,4 +1031,17 @@ class _MainPageState extends State<MainPage>
       reposCubit: widget.reposCubit,
     ),
   );
+}
+
+Widget _progressIndicatorWidget() {
+  // CircularProgressIndicator causes problems in tests making the
+  // `pumpAndSettle` function time out. Note that making the tests wait until
+  // the indicator disappears may not be ideal because we also want to test
+  // what happens when tapping on a button while the indicator is still
+  // spinning.
+  if (!io.Platform.environment.containsKey('FLUTTER_TEST')) {
+    return CircularProgressIndicator();
+  } else {
+    return Text("Working...");
+  }
 }
