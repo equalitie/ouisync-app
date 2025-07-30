@@ -28,7 +28,9 @@ class MainPage {
     await tester.pumpWidget(testApp(deps.createMainPage()));
     await tester.pumpAndSettle();
 
-    await tester.anxiousTap(find.byKey(Key('create_first_repo')));
+    await tester.anxiousTap(
+      await tester.pumpUntilFound(find.byKey(Key('create_first_repo'))),
+    );
     await tester.pumpAndSettle();
 
     // Filling in the repo name triggers an async operation and so we must explicitly wait until
