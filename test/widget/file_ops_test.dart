@@ -12,6 +12,7 @@ import 'package:ouisync_app/app/widgets/dialogs/entries_actions_bottom_sheet.dar
     show EntriesActionsDialog;
 import 'package:ouisync_app/app/widgets/buttons/dialog_action_button.dart'
     show PositiveButton;
+import 'package:ouisync_app/app/models/repo_entry.dart' show OpenRepoEntry;
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
@@ -50,9 +51,24 @@ void main() {
 
       final tempFile = await _createTempFile(srcFileName);
 
+      String? currentFolder() {
+        final state = deps.reposCubit.state;
+        final repoEntry = state.current;
+        if (repoEntry is! OpenRepoEntry) return null;
+        return repoEntry.cubit.state.currentFolder.path;
+      }
+
+      Future<void> enteredFolder(String absoluteDirPath) async {
+        await tester.pumpUntil(() {
+          return currentFolder() == absoluteDirPath;
+        });
+      }
+
       await repoPage.addFile(tempFile.path);
       await repoPage.addFolder(dstDir);
+      await enteredFolder("/folder");
       await repoPage.tapBackButton();
+      await enteredFolder("/");
 
       Future<void> copyFile(String file, String dstDir) async {
         await repoPage.tapEntryActions(file);
@@ -62,9 +78,11 @@ void main() {
           matching: find.byType(EntryActionItem),
         );
 
-        final copy = await tester.pumpUntilFound(findCopyButton);
-        await tester.anxiousTap(await tester.pumpUntilFound(copy));
+        final copyAction = await tester.pumpUntilFound(findCopyButton);
+        await tester.anxiousTap(copyAction);
         await repoPage.tapFolder(dstDir);
+
+        await enteredFolder("/$dstDir");
 
         final copyButton = await tester.pumpUntilFound(
           find.descendant(
@@ -72,16 +90,16 @@ void main() {
             matching: find.byType(PositiveButton),
           ),
         );
-        await tester.tap(copyButton);
+
+        await tester.anxiousTap(copyButton);
       }
 
       await copyFile(srcFileName, dstDir);
       await tester.pumpUntilNotFound(find.byType(EntryActions));
-      await tester.pumpUntilFound(repoPage.findDirEntry(srcFileName));
+      await enteredFolder("/$dstDir");
       await repoPage.tapBackButton();
+      await enteredFolder("/");
 
-      // Wait until we get out of the folder
-      await tester.pumpUntilFound(repoPage.findDirEntry(dstDir));
       // Check we did not move the file
       await tester.pumpUntilFound(repoPage.findDirEntry(srcFileName));
 
@@ -109,9 +127,8 @@ void main() {
       await tester.pumpUntilFound(repoPage.findDirEntry(srcFileName));
 
       await repoPage.tapBackButton();
+      await enteredFolder("/");
 
-      // Wait until we are back to root folder
-      await tester.pumpUntilFound(repoPage.findDirEntry(dstDir));
       // Check we did not move the file
       await tester.pumpUntilFound(repoPage.findDirEntry(srcFileName));
     }),
