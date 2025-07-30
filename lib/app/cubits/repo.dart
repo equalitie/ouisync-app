@@ -167,7 +167,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
       state,
     );
 
-    await cubit._mount();
+    unawaited(cubit._mount());
 
     // Fetching the cache server state involves network request which might take a long time. Using
     // `unawaited` to avoid blocking this function on it.
