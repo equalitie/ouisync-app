@@ -64,13 +64,12 @@ class _LogViewState extends State<LogView> {
 
   Widget _buildMessage(BuildContext context, LogMessage message) => Text.rich(
     TextSpan(
-      children:
-          message.content
-              .map(
-                (span) =>
-                    TextSpan(text: span.text, style: _resolveStyle(span.style)),
-              )
-              .toList(),
+      children: message.content
+          .map(
+            (span) =>
+                TextSpan(text: span.text, style: _resolveStyle(span.style)),
+          )
+          .toList(),
     ),
   );
 

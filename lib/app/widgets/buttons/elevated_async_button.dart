@@ -33,22 +33,21 @@ class ElevatedAsyncButtonState extends State<ElevatedAsyncButton> {
   Widget build(BuildContext context) {
     final widgetOnPressed = widget.onPressed;
 
-    final onPressed =
-        widgetOnPressed != null && isExecuting == false
-            ? () {
-              setState(() {
-                isExecuting = true;
-              });
-              unawaited(
-                widgetOnPressed().whenComplete(() {
-                  setState(() {
-                    isExecuting = false;
-                    execCounter += 1;
-                  });
-                }),
-              );
-            }
-            : null;
+    final onPressed = widgetOnPressed != null && isExecuting == false
+        ? () {
+            setState(() {
+              isExecuting = true;
+            });
+            unawaited(
+              widgetOnPressed().whenComplete(() {
+                setState(() {
+                  isExecuting = false;
+                  execCounter += 1;
+                });
+              }),
+            );
+          }
+        : null;
 
     return ElevatedButton(
       onPressed: onPressed,

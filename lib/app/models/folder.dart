@@ -198,10 +198,9 @@ class _Refresher {
     int sizeResult,
     FileSystemEntry a,
     FileSystemEntry b,
-  ) =>
-      sizeResult == 0
-          ? a.name.toLowerCase().compareTo(b.name.toLowerCase())
-          : sizeResult;
+  ) => sizeResult == 0
+      ? a.name.toLowerCase().compareTo(b.name.toLowerCase())
+      : sizeResult;
 
   int Function(FileSystemEntry, FileSystemEntry)? _sortByType(
     SortDirection direction,
@@ -212,9 +211,8 @@ class _Refresher {
   }
 
   int _typeComparator(FileSystemEntry a, FileSystemEntry b) => switch ((a, b)) {
-    (FileEntry(), FileEntry()) || (DirectoryEntry(), DirectoryEntry()) => a.name
-        .toLowerCase()
-        .compareTo(b.name.toLowerCase()),
+    (FileEntry(), FileEntry()) || (DirectoryEntry(), DirectoryEntry()) =>
+      a.name.toLowerCase().compareTo(b.name.toLowerCase()),
     (DirectoryEntry(), FileEntry()) => -1,
     (FileEntry(), DirectoryEntry()) => 1,
   };

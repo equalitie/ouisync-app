@@ -127,8 +127,8 @@ class PowerControl extends Cubit<PowerControlState>
     final userWantsLocalDiscoveryEnabled = _settings.getLocalDiscoveryEnabled();
 
     // TODO: We should be getting `userWantsPortForwardingEnabled` from `_settings`.
-    final userWantsPortForwardingEnabled =
-        await _session.isPortForwardingEnabled();
+    final userWantsPortForwardingEnabled = await _session
+        .isPortForwardingEnabled();
     final isLocalDiscoveryEnabled = await _session.isLocalDiscoveryEnabled();
 
     final connectivityType = (await _connectivity.checkConnectivity()).last;
@@ -272,8 +272,8 @@ class PowerControl extends Cubit<PowerControlState>
           final hotspotIp = localInterface;
           final hotspotAddr =
               hotspotIp != null && userWantsLocalDiscoveryEnabled
-                  ? "$hotspotIp:0"
-                  : null;
+              ? "$hotspotIp:0"
+              : null;
           newMode = NetworkModeSaving(hotspotAddr: hotspotAddr);
         }
         break;

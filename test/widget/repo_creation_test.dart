@@ -11,6 +11,7 @@ import 'package:path/path.dart' show join;
 
 import '../sandbox.dart' show deleteTempDir;
 import '../utils.dart';
+import '../navigation.dart';
 
 void main() {
   late TestDependencies deps;
@@ -25,50 +26,10 @@ void main() {
   });
 
   testWidgets(
-    'create repository without password',
-    (tester) => tester.runAsync(() async {
-      final repoCreationObserver = StateObserver.install<RepoCreationState>();
-
-      await tester.pumpWidget(testApp(deps.createMainPage()));
-      await tester.pumpAndSettle();
-
-      await tester.anxiousTap(find.byKey(Key('create_first_repo')));
-      await tester.pumpAndSettle();
-
-      // Filling in the repo name triggers an async operation and so we must explicitly wait until
-      // it completes.
-      await tester.enterText(find.byKey(ValueKey('name')), 'my repo');
-      await repoCreationObserver.waitUntil(
-        (state) => state.substate is RepoCreationValid,
-      );
-      await tester.pump();
-
-      // Not using `anxiousTap` because it's a switch.
-      await tester.tap(
-        find.descendant(
-          of: find.byKey(ValueKey('use-cache-servers')),
-          matching: find.byType(Switch),
-        ),
-      );
-      await tester.pump();
-
-      // Verify that use cache servers is off:
-      await repoCreationObserver.waitUntil((state) => !state.useCacheServers);
-
-      await tester.anxiousTap(find.text('CREATE'));
-
-      await repoCreationObserver.waitUntil(
-        (state) => state.substate is RepoCreationSuccess,
-      );
-
-      final repoCubit =
-          deps.reposCubit.state.repos.values
-              .where((entry) => entry.name == 'my repo')
-              .first
-              .cubit!;
-
-      expect(repoCubit.state.accessMode, equals(AccessMode.write));
-      expect(repoCubit.state.isCacheServersEnabled, isFalse);
+    'create_repository_without_password',
+    (tester) => tester.runAsyncDebug(() async {
+      final mainPage = MainPage(tester, deps);
+      await mainPage.createAndEnterRepository();
     }),
   );
 

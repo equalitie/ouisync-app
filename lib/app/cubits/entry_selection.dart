@@ -53,12 +53,11 @@ class EntrySelectionState extends Equatable {
     updating,
   ];
 
-  String get selectionOriginPath =>
-      singleEntry.path.isNotEmpty
-          ? p.dirname(singleEntry.path)
-          : selectedEntries.isNotEmpty
-          ? p.dirname(selectedEntries.first.path)
-          : '';
+  String get selectionOriginPath => singleEntry.path.isNotEmpty
+      ? p.dirname(singleEntry.path)
+      : selectedEntries.isNotEmpty
+      ? p.dirname(selectedEntries.first.path)
+      : '';
 
   bool isSelectable(String currentRepoInfoHash, String path) {
     if (status == SelectionStatus.off ||
@@ -202,8 +201,9 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
 
     try {
       await for (var entry in Stream.fromIterable(_entries)) {
-        final type =
-            entry is DirectoryEntry ? EntryType.directory : EntryType.file;
+        final type = entry is DirectoryEntry
+            ? EntryType.directory
+            : EntryType.file;
 
         final path = entry.path.replaceAll(libraryRootSymbol, deviceRootSymbol);
         final destinationPath = p.join(devicePath, path);
@@ -255,10 +255,9 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
     required String destinationPath,
   }) async {
     final destinationRepoInfoHash = await destinationRepoCubit.infoHash;
-    final toRepoCubit =
-        _originRepoInfoHash != destinationRepoInfoHash
-            ? destinationRepoCubit
-            : null;
+    final toRepoCubit = _originRepoInfoHash != destinationRepoInfoHash
+        ? destinationRepoCubit
+        : null;
 
     final sortedEntries = [..._entries];
     sortedEntries.sort((a, b) {

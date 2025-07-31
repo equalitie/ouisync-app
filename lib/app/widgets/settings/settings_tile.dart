@@ -19,10 +19,9 @@ class SettingsTile extends StatelessWidget {
   final VoidCallback? onTap;
 
   @override
-  Widget build(BuildContext context) =>
-      PlatformValues.isMobileDevice
-          ? _buildMobile(context)
-          : _buildDesktop(context);
+  Widget build(BuildContext context) => PlatformValues.isMobileDevice
+      ? _buildMobile(context)
+      : _buildDesktop(context);
 
   Widget _buildMobile(BuildContext context) => s.SettingsTile(
     title: title,
@@ -57,10 +56,9 @@ class SwitchSettingsTile extends StatelessWidget {
   final ValueChanged<bool>? onChanged;
 
   @override
-  Widget build(BuildContext context) =>
-      PlatformValues.isMobileDevice
-          ? _buildMobile(context)
-          : _buildDesktop(context);
+  Widget build(BuildContext context) => PlatformValues.isMobileDevice
+      ? _buildMobile(context)
+      : _buildDesktop(context);
 
   Widget _buildMobile(BuildContext context) => s.SettingsTile.switchTile(
     initialValue: value,
@@ -95,10 +93,9 @@ class NavigationTile extends StatelessWidget {
   }) : trailing = trailing ?? const Icon(Icons.navigate_next);
 
   @override
-  Widget build(BuildContext context) =>
-      PlatformValues.isMobileDevice
-          ? _buildMobile(context)
-          : _buildDesktop(context);
+  Widget build(BuildContext context) => PlatformValues.isMobileDevice
+      ? _buildMobile(context)
+      : _buildDesktop(context);
 
   Widget _buildMobile(BuildContext context) => s.SettingsTile.navigation(
     title: title,

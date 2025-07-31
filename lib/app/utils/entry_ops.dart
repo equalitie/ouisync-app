@@ -1,9 +1,7 @@
 import 'dart:io';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:loggy/loggy.dart';
-import 'package:ouisync/ouisync.dart';
 import 'package:ouisync/helpers.dart' as oui show viewFile, shareFile;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart' show posix;
@@ -12,32 +10,8 @@ import 'package:url_launcher/url_launcher_string.dart';
 
 import 'actions.dart';
 import 'log.dart';
-import 'utils.dart' show AppThemeExtension, Fields, ThemeGetter;
-import '../widgets/widgets.dart' show DisambiguationAction, ReplaceKeepEntry;
 import '../cubits/cubits.dart' show RepoCubit;
 import '../../generated/l10n.dart';
-
-Future<DisambiguationAction?> pickEntryDisambiguationAction(
-  BuildContext context,
-  String entryName,
-  EntryType entryType,
-) async => await showDialog<DisambiguationAction?>(
-  context: context,
-  builder:
-      (BuildContext context) => AlertDialog(
-        title: Flex(
-          direction: Axis.horizontal,
-          children: [
-            Fields.constrainedText(
-              S.current.titleMovingEntry,
-              style: context.theme.appTextStyle.titleMedium,
-              maxLines: 2,
-            ),
-          ],
-        ),
-        content: ReplaceKeepEntry(name: entryName, type: entryType),
-      ),
-);
 
 Future<String> disambiguateEntryName({
   required RepoCubit repoCubit,
@@ -88,10 +62,9 @@ Future<void> viewFile({
       // which are not decoded back by the url_launcher plugin on Windows
       // before passing to the system for execution. Thus on Windows
       // we use the `launchUrlString` function instead of `launchUrl`.
-      final result =
-          Platform.isWindows
-              ? await launchUrlString(Uri.decodeFull(url.toString()))
-              : await launchUrl(url);
+      final result = Platform.isWindows
+          ? await launchUrlString(Uri.decodeFull(url.toString()))
+          : await launchUrl(url);
 
       if (!result) {
         throw _AppNotFound();

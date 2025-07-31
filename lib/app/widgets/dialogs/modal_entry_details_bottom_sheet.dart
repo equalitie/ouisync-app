@@ -116,11 +116,10 @@ extension on _EntryDetailsState {
     iconData: _getIconForAction(type),
     title: _getTextForType(type),
     onTap: _getActionForType(type),
-    enabledValidation:
-        () => widget.isActionAvailableValidator(
-          widget.repoCubit.state.accessMode,
-          type,
-        ),
+    enabledValidation: () => widget.isActionAvailableValidator(
+      widget.repoCubit.state.accessMode,
+      type,
+    ),
     dense: true,
     isDanger: type == EntryAction.delete,
     disabledMessage: S.current.messageActionNotAvailable,
@@ -225,14 +224,14 @@ extension on _EntryDetailsState {
           builder: (BuildContext context) {
             final parent = p.dirname(entry.path);
             final oldName = p.basename(entry.path);
-            final originalExtension =
-                entry is FileEntry ? p.extension(entry.path) : '';
+            final originalExtension = entry is FileEntry
+                ? p.extension(entry.path)
+                : '';
 
             return ActionsDialog(
-              title:
-                  entry is FileEntry
-                      ? S.current.messageRenameFile
-                      : S.current.messageRenameFolder,
+              title: entry is FileEntry
+                  ? S.current.messageRenameFile
+                  : S.current.messageRenameFolder,
               body: RenameEntry(
                 parentContext: context,
                 repoCubit: widget.repoCubit,
@@ -240,10 +239,9 @@ extension on _EntryDetailsState {
                 oldName: oldName,
                 originalExtension: originalExtension,
                 isFile: entry is FileEntry,
-                hint:
-                    entry is FileEntry
-                        ? S.current.messageFileName
-                        : S.current.messageFolderName,
+                hint: entry is FileEntry
+                    ? S.current.messageFileName
+                    : S.current.messageFolderName,
               ),
             );
           },

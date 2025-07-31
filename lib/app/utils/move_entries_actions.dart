@@ -57,8 +57,8 @@ class MoveEntriesActions with AppLogger {
 
     final toRepoCubit =
         _originRepoCubit.location.compareTo(destinationRepoCubit.location) != 0
-            ? destinationRepoCubit
-            : null;
+        ? destinationRepoCubit
+        : null;
 
     final action = switch (_sheetType) {
       BottomSheetType.copy => copySingleEntry(

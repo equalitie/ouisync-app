@@ -82,8 +82,8 @@ class _ShareRepositoryState extends State<ShareRepository> with AppLogger {
               currentAccessMode: widget.repository.state.accessMode,
               availableAccessMode: widget.availableAccessModes,
               onChanged: _onChanged,
-              onDisabledMessage:
-                  (String message) => showSnackBar(message, context: context),
+              onDisabledMessage: (String message) =>
+                  showSnackBar(message, context: context),
             ),
             Dimensions.spacingVerticalHalf,
             _buildAccessModeDescription(_accessMode),

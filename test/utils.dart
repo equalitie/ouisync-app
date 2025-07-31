@@ -33,6 +33,7 @@ import 'sandbox.dart';
 export 'package:flutter/foundation.dart' show debugPrint;
 
 final _loggy = log.named("TestHelper");
+const String artifactsDirName = 'artifacts';
 
 /// Setup the test environment and run `callback` inside it.
 ///
@@ -101,13 +102,14 @@ class TestDependencies {
     await session.setStoreDir(dirs.defaultStore);
 
     final settings = await Settings.init(MasterKey.random());
+    final mountCubit = MountCubit(session, dirs)..init();
     final reposCubit = ReposCubit(
       cacheServers: CacheServers(session),
       session: session,
       settings: settings,
+      mountCubit: mountCubit,
     );
 
-    final mountCubit = MountCubit(session, dirs);
     final localeCubit = LocaleCubit(settings);
 
     return TestDependencies._(
@@ -262,10 +264,7 @@ extension WidgetTesterExtension on WidgetTester {
   /// details.
   ///
   /// This Code is taken from https://github.com/flutter/flutter/issues/129623.
-  Future<void> takeScreenshot({
-    String name = 'screenshot',
-    Element? element,
-  }) async {
+  Future<void> takeScreenshot(String name, {Element? element}) async {
     try {
       if (element == null) {
         // If no element is given, take the screenshot of the topmost widget.
@@ -278,7 +277,7 @@ extension WidgetTesterExtension on WidgetTester {
         format: ImageByteFormat.png,
       ))!.buffer.asUint8List();
 
-      final path = join(_testDirPath, 'screenshots', '$name.png');
+      final path = join(_testDirPath, artifactsDirName, '$name.png');
 
       await Directory(dirname(path)).create(recursive: true);
       await File(path).writeAsBytes(bytes);
@@ -290,13 +289,27 @@ extension WidgetTesterExtension on WidgetTester {
   }
 
   // This is useful to observe the screen when things are still moving.
-  Future<void> takeNScreenshots(int n, String name) async {
+  Future<void> takeScreenshots(String name, int n) async {
     assert(n > 0 && n < 1000); // sanity
     for (int i = 0; i < n; i++) {
-      await takeScreenshot(name: "$name-$i");
-      await pump(Duration(milliseconds: 200));
-      await Future.delayed(Duration(milliseconds: 200));
+      await takeScreenshot("$name-$i");
+      await pump(Duration(milliseconds: 100));
+      await Future.delayed(Duration(milliseconds: 100));
     }
+  }
+
+  // Write the whole element tree to a file. Similar to
+  // https://api.flutter.dev/flutter/widgets/debugDumpApp.html
+  Future<void> dumpTree(String name) async {
+    final String tree;
+    if (WidgetsBinding.instance.rootElement != null) {
+      tree = WidgetsBinding.instance.rootElement!.toStringDeep();
+    } else {
+      tree = '<no tree currently mounted>';
+    }
+    final path = join(_testDirPath, artifactsDirName, "$name.dump");
+    await File(path).writeAsString(tree);
+    _loggy.info('element tree dump saved to $path');
   }
 
   // Invoke this somewhere at the beginning of a test so that the above
@@ -337,8 +350,16 @@ extension WidgetTesterExtension on WidgetTester {
     // Too often when the above first finds a widget it's outside of the screen
     // area and tapping on it would generate a warning. After this
     // `pumpAndSettle` the widget finds its place inside the screen.
-    await pumpAndSettle();
+    try {
+      await pumpAndSettle();
+    } catch (e) {
+      // There may still be some progress indicator moving, ignore it.
+    }
     return found;
+  }
+
+  Future<void> pumpUntilNotFound(Finder finder) async {
+    await pumpUntil(() => !finder.tryEvaluate());
   }
 
   Future<void> pumpUntil(
@@ -404,14 +425,23 @@ extension WidgetTesterExtension on WidgetTester {
     return result.path.any((HitTestEntry entry) => entry.target == box);
   }
 
-  Future<void> runAsyncWithScreenshotOnFailure(
-    Future<void> Function() callback,
-  ) {
+  Future<void> runAsyncDebug(Future<void> Function() callback) {
     return runAsync(() async {
+      WidgetController.hitTestWarningShouldBeFatal = true;
+
       try {
         await callback();
       } catch (e) {
-        await takeScreenshot(name: testDescription);
+        try {
+          await dumpTree(testDescription);
+        } catch (de) {
+          _loggy.debug("Failed to write debug dump: $de");
+        }
+        try {
+          await takeScreenshot(testDescription);
+        } catch (se) {
+          _loggy.debug("Failed to take screenshot: $se");
+        }
         rethrow;
       }
     });

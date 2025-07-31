@@ -42,8 +42,8 @@ class _PasswordValidationState<PasswordResult> extends State<PasswordValidation>
                   hintText: S.current.messageRepositoryPassword,
                   suffixIcon: _passwordActions(),
                   onSaved: (_) {},
-                  onChanged:
-                      (value) => _passwordChanged(value, _retypedPassword),
+                  onChanged: (value) =>
+                      _passwordChanged(value, _retypedPassword),
                   validator: (password) => passwordValidator(password),
                   autovalidateMode: AutovalidateMode.onUserInteraction,
                   textInputAction: TextInputAction.next,
@@ -64,9 +64,8 @@ class _PasswordValidationState<PasswordResult> extends State<PasswordValidation>
                   suffixIcon: _retypePasswordActions(),
                   onSaved: (_) {},
                   onChanged: (value) => _passwordChanged(_password, value),
-                  validator:
-                      (retypedPassword) =>
-                          retypedPasswordValidator(_password, retypedPassword),
+                  validator: (retypedPassword) =>
+                      retypedPasswordValidator(_password, retypedPassword),
                   autovalidateMode: AutovalidateMode.onUserInteraction,
                   textInputAction: TextInputAction.next,
                 ),
@@ -105,12 +104,13 @@ class _PasswordValidationState<PasswordResult> extends State<PasswordValidation>
   void _updatePasswordStrengthMessage(double strength) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       setState(
-        () =>
-            _passwordStrength =
-                strength > 0.0 ? _passwordStrengthString(strength) : '',
+        () => _passwordStrength = strength > 0.0
+            ? _passwordStrengthString(strength)
+            : '',
       );
-      _passwordStrengthColorValue =
-          strength > 0.0 ? _passwordStrengthColor(strength) : null;
+      _passwordStrengthColorValue = strength > 0.0
+          ? _passwordStrengthColor(strength)
+          : null;
     });
   }
 
@@ -142,10 +142,9 @@ class _PasswordValidationState<PasswordResult> extends State<PasswordValidation>
     children: [
       IconButton(
         onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
-        icon:
-            _obscurePassword
-                ? const Icon(Constants.iconVisibilityOff)
-                : const Icon(Constants.iconVisibilityOn),
+        icon: _obscurePassword
+            ? const Icon(Constants.iconVisibilityOff)
+            : const Icon(Constants.iconVisibilityOn),
         padding: EdgeInsetsDirectional.zero,
         visualDensity: VisualDensity.compact,
         color: Colors.black,
@@ -166,14 +165,11 @@ class _PasswordValidationState<PasswordResult> extends State<PasswordValidation>
   Widget _retypePasswordActions() => Wrap(
     children: [
       IconButton(
-        onPressed:
-            () => setState(
-              () => _obscureRetypePassword = !_obscureRetypePassword,
-            ),
-        icon:
-            _obscureRetypePassword
-                ? const Icon(Constants.iconVisibilityOff)
-                : const Icon(Constants.iconVisibilityOn),
+        onPressed: () =>
+            setState(() => _obscureRetypePassword = !_obscureRetypePassword),
+        icon: _obscureRetypePassword
+            ? const Icon(Constants.iconVisibilityOff)
+            : const Icon(Constants.iconVisibilityOn),
         padding: EdgeInsetsDirectional.zero,
         visualDensity: VisualDensity.compact,
         color: Colors.black,

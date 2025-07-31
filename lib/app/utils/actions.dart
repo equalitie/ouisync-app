@@ -43,20 +43,14 @@ showSnackBar(
   SnackBarAction? action,
   bool showCloseIcon = true,
   SnackBarBehavior? behavior = SnackBarBehavior.floating,
-}) =>
-    context != null
-        ? _showSnackBar(context, message, action, showCloseIcon, behavior!)
-        : WidgetsBinding.instance.addPostFrameCallback(
-          (_) => BuildContextProvider().call(
-            (context) => _showSnackBar(
-              context,
-              message,
-              action,
-              showCloseIcon,
-              behavior!,
-            ),
-          ),
-        );
+}) => context != null
+    ? _showSnackBar(context, message, action, showCloseIcon, behavior!)
+    : WidgetsBinding.instance.addPostFrameCallback(
+        (_) => BuildContextProvider().call(
+          (context) =>
+              _showSnackBar(context, message, action, showCloseIcon, behavior!),
+        ),
+      );
 
 _showSnackBar(
   BuildContext context,

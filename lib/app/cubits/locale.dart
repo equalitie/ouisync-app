@@ -70,8 +70,8 @@ class LocaleCubit extends Cubit<LocaleState> with CubitActions<LocaleState> {
       ) {
     // TODO: If someone/something creates another `LocaleCubit`, will that replace
     // the `this._onLocaleChanged` causing `this` to no longer receive the events?
-    PlatformDispatcher.instance.onLocaleChanged =
-        () => _onSystemLocaleChanged();
+    PlatformDispatcher.instance.onLocaleChanged = () =>
+        _onSystemLocaleChanged();
   }
 
   Locale get currentLocale => state.currentLocale;
@@ -123,8 +123,9 @@ Locale? _closestWithin(Locale desired, List<Locale> within) {
     return desired;
   }
 
-  final candidates =
-      within.where((i) => i.languageCode == desired.languageCode).toList();
+  final candidates = within
+      .where((i) => i.languageCode == desired.languageCode)
+      .toList();
 
   if (candidates.isEmpty) {
     return null;

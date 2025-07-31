@@ -43,18 +43,17 @@ class _MediaReceiverState extends State<MediaReceiver> {
 
   @override
   Widget build(BuildContext context) => DropTarget(
-    onDragDone:
-        (detail) => onMediaReceived(
-          detail.files
-              .map(
-                (file) => SharedMediaFile(
-                  path: file.path,
-                  type: SharedMediaType.file,
-                  mimeType: file.mimeType,
-                ),
-              )
-              .toList(),
-        ),
+    onDragDone: (detail) => onMediaReceived(
+      detail.files
+          .map(
+            (file) => SharedMediaFile(
+              path: file.path,
+              type: SharedMediaType.file,
+              mimeType: file.mimeType,
+            ),
+          )
+          .toList(),
+    ),
     child: widget.child,
   );
 

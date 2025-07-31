@@ -119,6 +119,16 @@ jobs:
         run:
           flutter test ${{ matrix.test-args }}
 
+      - name: Upload test/debug artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          # Name of the produced zip file
+          name: test-artifacts-${{ matrix.name }}
+          path: test/widget/artifacts/*
+          if-no-files-found: ignore
+        # Upload even when tests fail
+        if: always()
+
   build:
     name: build on ${{ matrix.name }}
     runs-on: ${{ matrix.os }}

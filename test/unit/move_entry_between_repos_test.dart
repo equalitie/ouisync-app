@@ -19,6 +19,7 @@ void main() {
   late Repository originRepo;
   late Repository otherRepo;
 
+  late MountCubit mountCubit;
   late RepoCubit originRepoCubit;
   late RepoCubit otherRepoCubit;
 
@@ -49,6 +50,8 @@ void main() {
 
     final cacheServers = CacheServers(deps.session);
 
+    mountCubit = MountCubit(deps.session, deps.dirs)..init();
+
     originRepoCubit = await RepoCubit.create(
       repo: originRepo,
       navigation: navigationCubit,
@@ -56,6 +59,7 @@ void main() {
       bottomSheet: bottomSheetCubit,
       cacheServers: cacheServers,
       session: deps.session,
+      mountCubit: mountCubit,
     );
 
     otherRepoCubit = await RepoCubit.create(
@@ -65,6 +69,7 @@ void main() {
       bottomSheet: bottomSheetCubit,
       cacheServers: cacheServers,
       session: deps.session,
+      mountCubit: mountCubit,
     );
   });
 

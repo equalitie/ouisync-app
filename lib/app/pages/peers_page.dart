@@ -57,23 +57,21 @@ class _PeersPageState extends State<PeersPage> {
         IconButton(
           icon: const Icon(Icons.manage_accounts),
           tooltip: 'User provided peers',
-          onPressed:
-              () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => UserProvidedPeersPage(widget.session),
-                ),
-              ),
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => UserProvidedPeersPage(widget.session),
+            ),
+          ),
         ),
       ],
     ),
     body: BlocBuilder<PeerSetCubit, PeerSet>(
       bloc: widget.cubit,
-      builder:
-          (context, state) => ListView(
-            padding: Dimensions.paddingContents,
-            children: _buildItems(context, state),
-          ),
+      builder: (context, state) => ListView(
+        padding: Dimensions.paddingContents,
+        children: _buildItems(context, state),
+      ),
     ),
   );
 

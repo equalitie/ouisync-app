@@ -52,6 +52,8 @@ void main() {
 
     final cacheServers = CacheServers(deps.session);
 
+    final mountCubit = MountCubit(deps.session, deps.dirs)..init();
+
     originRepoCubit = await RepoCubit.create(
       repo: originRepo,
       navigation: navigationCubit,
@@ -59,12 +61,14 @@ void main() {
       bottomSheet: bottomSheetCubit,
       cacheServers: cacheServers,
       session: deps.session,
+      mountCubit: mountCubit,
     );
 
     reposCubit = ReposCubit(
       session: deps.session,
       settings: deps.settings,
       cacheServers: cacheServers,
+      mountCubit: mountCubit,
     );
 
     // Create 2 folders, 1 nested, in originRepo
@@ -76,12 +80,11 @@ void main() {
     // Create files and add to folders
     {
       for (var i = 0; i < 12; i++) {
-        final path =
-            i < 4
-                ? 'folder1'
-                : i < 8
-                ? repo_path.join('folder1', 'folder2')
-                : repo_path.join('folder1', 'folder2', 'folder3');
+        final path = i < 4
+            ? 'folder1'
+            : i < 8
+            ? repo_path.join('folder1', 'folder2')
+            : repo_path.join('folder1', 'folder2', 'folder3');
 
         final filePath = repo_path.join(path, 'file$i.txt');
         final file = await originRepo.createFile(filePath);

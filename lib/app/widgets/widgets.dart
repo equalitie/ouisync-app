@@ -9,8 +9,7 @@ export 'bars/search_bar.dart';
 export 'bars/sort_contents_bar.dart';
 
 export 'buttons/dialog_danger_button.dart';
-export 'buttons/dialog_negative_button.dart';
-export 'buttons/dialog_positive_button.dart';
+export 'buttons/dialog_action_button.dart';
 export 'buttons/select_entries_button.dart';
 export 'buttons/sort_by_button.dart';
 export 'buttons/sort_direction_button.dart';
@@ -30,7 +29,7 @@ export 'dialogs/modal_entry_details_bottom_sheet.dart';
 export 'dialogs/modal_folder_creation_dialog.dart';
 export 'dialogs/modal_rename_dialog.dart';
 export 'dialogs/modal_rename_repository_dialog.dart';
-export 'dialogs/modal_replace_keep_entry_dialog.dart';
+export 'dialogs/modal_rename_or_replace_entry_dialog.dart';
 export 'dialogs/modal_repo_list_actions_bottom_sheet.dart';
 export 'dialogs/modal_repo_settings_bottom_sheet.dart';
 export 'dialogs/modal_share_repository_bottom_sheet.dart';

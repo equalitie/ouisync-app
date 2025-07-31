@@ -2,6 +2,8 @@
 
 set -e
 
+source $(dirname $0)/build-utils.sh
+
 function print_help() {
     echo "Script for building Ouisync App in a Docker container"
     echo "Usage: $0 --host <HOST> (--commit <COMMIT> | --srcdir <SRCDIR>) [--out <OUTPUT_DIRECTORY>]"
@@ -9,13 +11,6 @@ function print_help() {
     echo "  COMMIT:           Commit from which to build"
     echo "  SRCDIR:           Source dir from which to build"
     echo "  OUTPUT_DIRECTORY: Directory where artifacts will be stored"
-}
-
-function error() {
-    echo "$1"
-    echo
-    print_help
-    exit 1
 }
 
 while [[ "$#" -gt 0 ]]; do
@@ -54,20 +49,6 @@ if [ "$flavor" != unofficial ]; then
     secretKeystoreHex=$(pass cenoers/ouisync/app/$flavor/android/keystore.jks | xxd -p)
 fi
 
-# Define shortcuts
-function dock() {
-    docker --host ssh://$host "$@"
-}
-
-function exe() {
-    local dir=$1; shift
-    dock exec -w $dir $container_name "$@"
-}
-
-function exe_i() {
-    dock exec -i $container_name "$@"
-}
-
 # Build docker image
 dock build -t $image_name - < docker/Dockerfile.build-linux
 
@@ -91,6 +72,7 @@ function on_exit() {
 
 # Set up secrets inside the container
 if [ "$flavor" != unofficial ]; then
+    function exe_i() { dock exec -i $container_name "$@"; }
     exe / mkdir -p /opt/secrets
     echo "$secretKeystoreHex" | xxd -p -r      | exe_i dd of=/opt/secrets/keystore.jks
     echo "storePassword=$secretStorePassword"  | exe_i dd of=/opt/secrets/key.properties
@@ -104,15 +86,9 @@ fi
 
 # Checkout or copy Ouisync sources
 if [ -n "$commit" ]; then
-    exe /opt git clone --filter=tree:0 https://github.com/equalitie/ouisync-app
-    exe /opt/ouisync-app git reset --hard $commit
-    exe /opt/ouisync-app git submodule update --init --recursive
+    get_sources_from_git $commit /opt
 else
-    rsync -e "docker --host ssh://$host exec -i" \
-        -av \
-        --exclude={'ouisync/.git','build','ouisync/target','releases','windows','.dart_tool','ios'} \
-        ${srcdir%/}/ $container_name:/opt/ouisync-app
-    exe / git config --global --add safe.directory /opt/ouisync-app
+    get_sources_from_local_dir $srcdir /opt
 fi
 
 # Generate bindings (TODO: This should be done automatically)

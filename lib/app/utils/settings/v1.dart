@@ -400,11 +400,10 @@ class Settings with AppLogger {
     await _storeRoot();
   }
 
-  DatabaseId? findRepoByLocation(RepoLocation location) =>
-      _root.repos.entries
-          .where((entry) => entry.value == location)
-          .map((entry) => entry.key)
-          .firstOrNull;
+  DatabaseId? findRepoByLocation(RepoLocation location) => _root.repos.entries
+      .where((entry) => entry.value == location)
+      .map((entry) => entry.key)
+      .firstOrNull;
 
   Future<void> renameRepo(DatabaseId repoId, RepoLocation newLocation) async {
     if (findRepoByLocation(newLocation) != null) {

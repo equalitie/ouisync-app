@@ -41,8 +41,8 @@ extension ToBoolean on String {
     return (toLowerCase() == "true" || toLowerCase() == "1")
         ? true
         : (toLowerCase() == "false" || toLowerCase() == "0"
-            ? false
-            : throw UnsupportedError('The string is not a bool value'));
+              ? false
+              : throw UnsupportedError('The string is not a bool value'));
   }
 }
 
@@ -132,10 +132,9 @@ extension RepositoryExtension on Repository {
   static const _authModeKey = 'authMode';
 
   Future<AuthMode> getAuthMode() => getMetadata(_authModeKey).then(
-    (data) =>
-        data != null
-            ? AuthMode.fromJson(json.decode(data))
-            : AuthModeBlindOrManual(),
+    (data) => data != null
+        ? AuthMode.fromJson(json.decode(data))
+        : AuthModeBlindOrManual(),
   );
 
   Future<void> setAuthMode(AuthMode authMode) async {

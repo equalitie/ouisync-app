@@ -1181,6 +1181,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "titleContactUs": MessageLookupByLibrary.simpleMessage("Contact Us"),
     "titleCookies": MessageLookupByLibrary.simpleMessage("Cookies"),
     "titleCopyEntries": MessageLookupByLibrary.simpleMessage("Copy"),
+    "titleCopyingEntry": MessageLookupByLibrary.simpleMessage("Copying entry"),
     "titleCreateFolder": MessageLookupByLibrary.simpleMessage(
       "Create a folder",
     ),

@@ -64,15 +64,14 @@ class FileDescription extends StatelessWidget with AppLogger {
   Widget _buildUploadDetails(BuildContext context, Job job) =>
       BlocBuilder<Job, JobState>(
         bloc: job,
-        builder:
-            (context, state) => Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildSizeWidget(context, formatSize(state.soFar), false),
-                Dimensions.spacingVerticalHalf,
-                _buildUploadProgress(context, job),
-              ],
-            ),
+        builder: (context, state) => Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildSizeWidget(context, formatSize(state.soFar), false),
+            Dimensions.spacingVerticalHalf,
+            _buildUploadProgress(context, job),
+          ],
+        ),
       );
 
   Widget _buildUploadProgress(BuildContext context, Job job) => Row(

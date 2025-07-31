@@ -17,6 +17,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   late TestDependencies deps;
+  late MountCubit mountCubit;
   late RepoCubit repoCubit;
 
   setUp(() async {
@@ -31,6 +32,8 @@ void main() {
     FlutterSecureStorage.setMockInitialValues({});
     SharedPreferences.setMockInitialValues({});
 
+    mountCubit = MountCubit(deps.session, deps.dirs)..init();
+
     repoCubit = await RepoCubit.create(
       repo: repo,
       session: deps.session,
@@ -38,10 +41,12 @@ void main() {
       entrySelection: EntrySelectionCubit(),
       bottomSheet: EntryBottomSheetCubit(),
       cacheServers: CacheServers(deps.session),
+      mountCubit: mountCubit,
     );
   });
 
   tearDown(() async {
+    await mountCubit.close();
     await repoCubit.close();
     await deps.dispose();
   });

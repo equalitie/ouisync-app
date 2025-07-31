@@ -47,11 +47,8 @@ class _RepoProgressBuilderState extends State<RepoProgressBuilder> {
   @override
   Widget build(BuildContext context) => StreamBuilder(
     stream: stream,
-    builder:
-        (context, snapshot) => widget.builder(
-          context,
-          snapshot.data ?? Progress(value: 0, total: 1),
-        ),
+    builder: (context, snapshot) =>
+        widget.builder(context, snapshot.data ?? Progress(value: 0, total: 1)),
   );
 }
 
@@ -63,11 +60,9 @@ class _Progress extends StatelessWidget {
   @override
   Widget build(BuildContext context) => RepoProgressBuilder(
     repoCubit: repoCubit,
-    builder:
-        (context, progress) =>
-            progress.isComplete
-                ? _buildCompleteIcon()
-                : _buildIndicator(progress.fraction),
+    builder: (context, progress) => progress.isComplete
+        ? _buildCompleteIcon()
+        : _buildIndicator(progress.fraction),
   );
 
   Widget _buildIndicator(double fraction) => Container(

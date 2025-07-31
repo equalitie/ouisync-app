@@ -28,29 +28,26 @@ class OuiSyncBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) => BlocBuilder<ReposCubit, ReposState>(
     bloc: reposCubit,
     builder: (context, state) {
-      final leadingWidget =
-          state.current == null
-              ? Padding(
-                padding: const EdgeInsetsDirectional.only(start: 8.0),
-                child: ouisyncLogo,
-              )
-              : null;
+      final leadingWidget = state.current == null
+          ? Padding(
+              padding: const EdgeInsetsDirectional.only(start: 8.0),
+              child: ouisyncLogo,
+            )
+          : null;
 
       final cubit = state.current?.cubit;
 
-      final titleWidget =
-          cubit != null
-              ? getTitleWidget(cubit, repoPicker)
-              : const SizedBox.shrink();
+      final titleWidget = cubit != null
+          ? getTitleWidget(cubit, repoPicker)
+          : const SizedBox.shrink();
 
-      final settingsButton =
-          cubit != null
-              ? getSettingsAction(
-                cubit: cubit,
-                appSettingsButton: appSettingsButton,
-                repoSettingsButton: repoSettingsButton,
-              )
-              : appSettingsButton;
+      final settingsButton = cubit != null
+          ? getSettingsAction(
+              cubit: cubit,
+              appSettingsButton: appSettingsButton,
+              repoSettingsButton: repoSettingsButton,
+            )
+          : appSettingsButton;
 
       final actionsList = <Widget>[];
 
@@ -76,13 +73,12 @@ class OuiSyncBar extends StatelessWidget implements PreferredSizeWidget {
   Widget getTitleWidget(RepoCubit cubit, PreferredSizeWidget repoPicker) =>
       BlocBuilder<RepoCubit, RepoState>(
         bloc: cubit,
-        builder:
-            (_, state) => _selectWidget(
-              type: AppBarWidgetType.title,
-              isFolderRoot: state.currentFolder.isRoot,
-              repoListWidget: repoPicker,
-              folderContentWidget: FolderNavigationBar(cubit),
-            ),
+        builder: (_, state) => _selectWidget(
+          type: AppBarWidgetType.title,
+          isFolderRoot: state.currentFolder.isRoot,
+          repoListWidget: repoPicker,
+          folderContentWidget: FolderNavigationBar(cubit),
+        ),
       );
 
   Widget getSettingsAction({
@@ -91,13 +87,12 @@ class OuiSyncBar extends StatelessWidget implements PreferredSizeWidget {
     required Widget appSettingsButton,
   }) => BlocBuilder<RepoCubit, RepoState>(
     bloc: cubit,
-    builder:
-        (_, state) => _selectWidget(
-          type: AppBarWidgetType.action,
-          isFolderRoot: state.currentFolder.isRoot,
-          repoListWidget: repoSettingsButton,
-          folderContentWidget: appSettingsButton,
-        ),
+    builder: (_, state) => _selectWidget(
+      type: AppBarWidgetType.action,
+      isFolderRoot: state.currentFolder.isRoot,
+      repoListWidget: repoSettingsButton,
+      folderContentWidget: appSettingsButton,
+    ),
   );
 
   Widget _selectWidget({

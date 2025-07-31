@@ -32,45 +32,42 @@ class NotificationBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) => BlocBuilder<MountCubit, MountState>(
     bloc: mount,
-    builder:
-        (context, mountState) => BlocBuilder<StateMonitorIntCubit, int?>(
-          bloc: panicCounter,
-          builder:
-              (context, panicCounterState) =>
-                  BlocBuilder<PowerControl, PowerControlState>(
-                    bloc: powerControl,
-                    builder:
-                        (context, powerControlState) =>
-                            BlocBuilder<UpgradeExistsCubit, bool>(
-                              bloc: upgradeExists,
-                              builder: (context, upgradeExistsState) {
-                                Color? color;
+    builder: (context, mountState) => BlocBuilder<StateMonitorIntCubit, int?>(
+      bloc: panicCounter,
+      builder: (context, panicCounterState) =>
+          BlocBuilder<PowerControl, PowerControlState>(
+            bloc: powerControl,
+            builder: (context, powerControlState) =>
+                BlocBuilder<UpgradeExistsCubit, bool>(
+                  bloc: upgradeExists,
+                  builder: (context, upgradeExistsState) {
+                    Color? color;
 
-                                if (upgradeExistsState) {
-                                  color = Constants.errorColor;
-                                } else if ((panicCounterState ?? 0) > 0) {
-                                  color = Constants.errorColor;
-                                } else if (mountState is MountStateFailure) {
-                                  color = Constants.errorColor;
-                                } else if (!(powerControlState
-                                        .isInternetConnectivityEnabled ??
-                                    true)) {
-                                  color = Constants.warningColor;
-                                }
+                    if (upgradeExistsState) {
+                      color = Constants.errorColor;
+                    } else if ((panicCounterState ?? 0) > 0) {
+                      color = Constants.errorColor;
+                    } else if (mountState is MountStateFailure) {
+                      color = Constants.errorColor;
+                    } else if (!(powerControlState
+                            .isInternetConnectivityEnabled ??
+                        true)) {
+                      color = Constants.warningColor;
+                    }
 
-                                if (color != null) {
-                                  return Fields.addBadge(
-                                    child,
-                                    color: color,
-                                    moveDownwards: moveDownwards,
-                                    moveRight: moveRight,
-                                  );
-                                } else {
-                                  return child;
-                                }
-                              },
-                            ),
-                  ),
-        ),
+                    if (color != null) {
+                      return Fields.addBadge(
+                        child,
+                        color: color,
+                        moveDownwards: moveDownwards,
+                        moveRight: moveRight,
+                      );
+                    } else {
+                      return child;
+                    }
+                  },
+                ),
+          ),
+    ),
   );
 }
