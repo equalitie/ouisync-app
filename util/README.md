@@ -48,9 +48,8 @@ Pass path to the `key.properties` file as `--android-key-properties` argument to
 
 Create a [GitHub access token](https://docs.github.com/en/rest/guides/getting-started-with-the-rest-api?apiVersion=2022-11-28#about-tokens)
 
-Click on your profile icon > Settings > Developer settings > Personal access
-tokens > Tokens. Check the `write:packages` and `delete:packages` scopes
-(the latter is needed to `--update` packages once a release is created).
+Click on your profile icon > `Settings` > `Developer settings` > `Personal access
+tokens` > `Tokens` and check the `write:packages` scope.
 
 Write it to a file and pass it to `release.dart` as the `--token-file` argument.
 
