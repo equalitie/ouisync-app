@@ -27,33 +27,29 @@ class _SortContentsBarState extends State<SortContentsBar> {
   Widget build(BuildContext context) =>
       BlocBuilder<SortListCubit, SortListState>(
         bloc: widget.sortListCubit,
-        builder:
-            (context, state) =>
-                widget.reposState.current == null
-                    ? SizedBox.shrink()
-                    : Container(
-                      alignment: AlignmentDirectional.centerStart,
-                      padding: Dimensions.paddingActionBox,
-                      child: Row(
-                        children: [
-                          SortByButton(
-                            sortBy: state.sortBy,
-                            sort: _showSortByDialog,
-                          ),
-                          const VerticalDivider(width: 6.0),
-                          SortDirectionButton(
-                            direction: state.direction,
-                            sortBy: state.sortBy,
-                            sort: _updateSortDirection,
-                          ),
-                        ],
-                      ),
+        builder: (context, state) => widget.reposState.current == null
+            ? SizedBox.shrink()
+            : Container(
+                alignment: AlignmentDirectional.centerStart,
+                padding: Dimensions.paddingActionBox,
+                child: Row(
+                  children: [
+                    SortByButton(sortBy: state.sortBy, sort: _showSortByDialog),
+                    const VerticalDivider(width: 6.0),
+                    SortDirectionButton(
+                      direction: state.direction,
+                      sortBy: state.sortBy,
+                      sort: _updateSortDirection,
                     ),
+                  ],
+                ),
+              ),
       );
 
   void _updateSortDirection(SortDirection direction, SortBy sortBy) {
-    final newDirection =
-        direction == SortDirection.asc ? SortDirection.desc : SortDirection.asc;
+    final newDirection = direction == SortDirection.asc
+        ? SortDirection.desc
+        : SortDirection.asc;
 
     widget.sortListCubit.switchSortDirection(newDirection);
 
@@ -127,10 +123,9 @@ class _SortByList extends StatelessWidget with AppLogger {
 
       final settingStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
         color: sortByItem.name == sortBy.name ? Colors.black87 : Colors.black54,
-        fontWeight:
-            sortByItem.name == sortBy.name
-                ? FontWeight.bold
-                : FontWeight.normal,
+        fontWeight: sortByItem.name == sortBy.name
+            ? FontWeight.bold
+            : FontWeight.normal,
       );
 
       return Row(

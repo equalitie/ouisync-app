@@ -73,6 +73,7 @@ class Fields {
   }) => _styledTextBase(message, textAlign, style, tags, padding);
 
   static Widget inPageButton({
+    Key? key,
     required void Function()? onPressed,
     Icon? leadingIcon,
     required String text,
@@ -83,6 +84,7 @@ class Fields {
     Color? backgroundColor,
     Color? foregroundColor,
   }) => ElevatedButton(
+    key: key,
     onPressed: onPressed,
     child: Row(
       mainAxisSize: MainAxisSize.min,
@@ -95,14 +97,12 @@ class Fields {
     style: ButtonStyle(
       alignment: alignment,
       minimumSize: WidgetStateProperty.all<Size?>(size),
-      backgroundColor:
-          backgroundColor != null
-              ? WidgetStateProperty.all<Color>(backgroundColor)
-              : null,
-      foregroundColor:
-          foregroundColor != null
-              ? WidgetStateProperty.all<Color>(foregroundColor)
-              : null,
+      backgroundColor: backgroundColor != null
+          ? WidgetStateProperty.all<Color>(backgroundColor)
+          : null,
+      foregroundColor: foregroundColor != null
+          ? WidgetStateProperty.all<Color>(foregroundColor)
+          : null,
     ),
     autofocus: autofocus,
     focusNode: focusNode,
@@ -133,14 +133,12 @@ class Fields {
     style: ButtonStyle(
       alignment: alignment,
       minimumSize: WidgetStateProperty.all<Size?>(size),
-      backgroundColor:
-          backgroundColor != null
-              ? WidgetStateProperty.all<Color>(backgroundColor)
-              : null,
-      foregroundColor:
-          foregroundColor != null
-              ? WidgetStateProperty.all<Color>(foregroundColor)
-              : null,
+      backgroundColor: backgroundColor != null
+          ? WidgetStateProperty.all<Color>(backgroundColor)
+          : null,
+      foregroundColor: foregroundColor != null
+          ? WidgetStateProperty.all<Color>(foregroundColor)
+          : null,
     ),
     autofocus: autofocus,
     focusNode: focusNode,
@@ -439,10 +437,9 @@ class Fields {
       dense: dense,
       contentPadding: EdgeInsetsDirectional.zero,
       minLeadingWidth: 20.0,
-      leading:
-          (icon != null)
-              ? _iconBase(icon, size: iconSize, color: iconColor)
-              : const SizedBox(),
+      leading: (icon != null)
+          ? _iconBase(icon, size: iconSize, color: iconColor)
+          : const SizedBox(),
       title: Text(
         text,
         textAlign: textAlign,
@@ -494,42 +491,41 @@ class Fields {
       errorMaxLines: 2,
     );
 
-    final widget =
-        (validator is Future<String?> Function(String?))
-            ? AsyncTextFormField(
-              key: key,
-              controller: controller,
-              enabled: enabled,
-              autovalidateMode: autovalidateMode,
-              autofocus: autofocus,
-              focusNode: focusNode,
-              obscureText: obscureText,
-              textInputAction: textInputAction,
-              keyboardType: TextInputType.text,
-              decoration: decoration,
-              style: style,
-              validator: validator,
-              onSaved: onSaved,
-              onChanged: onChanged,
-              onFieldSubmitted: onFieldSubmitted,
-            )
-            : TextFormField(
-              key: key,
-              controller: controller,
-              enabled: enabled,
-              autovalidateMode: autovalidateMode,
-              autofocus: autofocus,
-              focusNode: focusNode,
-              obscureText: obscureText,
-              textInputAction: textInputAction,
-              keyboardType: TextInputType.text,
-              decoration: decoration,
-              style: style,
-              validator: validator as String? Function(String?)?,
-              onSaved: onSaved,
-              onChanged: onChanged,
-              onFieldSubmitted: onFieldSubmitted,
-            );
+    final widget = (validator is Future<String?> Function(String?))
+        ? AsyncTextFormField(
+            key: key,
+            controller: controller,
+            enabled: enabled,
+            autovalidateMode: autovalidateMode,
+            autofocus: autofocus,
+            focusNode: focusNode,
+            obscureText: obscureText,
+            textInputAction: textInputAction,
+            keyboardType: TextInputType.text,
+            decoration: decoration,
+            style: style,
+            validator: validator,
+            onSaved: onSaved,
+            onChanged: onChanged,
+            onFieldSubmitted: onFieldSubmitted,
+          )
+        : TextFormField(
+            key: key,
+            controller: controller,
+            enabled: enabled,
+            autovalidateMode: autovalidateMode,
+            autofocus: autofocus,
+            focusNode: focusNode,
+            obscureText: obscureText,
+            textInputAction: textInputAction,
+            keyboardType: TextInputType.text,
+            decoration: decoration,
+            style: style,
+            validator: validator as String? Function(String?)?,
+            onSaved: onSaved,
+            onChanged: onChanged,
+            onFieldSubmitted: onFieldSubmitted,
+          );
 
     return Padding(
       padding: Dimensions.paddingFormTextField,
@@ -630,7 +626,10 @@ class Fields {
         style: TextStyle(fontSize: fontSize),
         children: [
           italicTextSpan(quote, fontSize: fontSize),
-          TextSpan(text: author, style: TextStyle(fontSize: fontSize)),
+          TextSpan(
+            text: author,
+            style: TextStyle(fontSize: fontSize),
+          ),
         ],
       ),
       style: TextStyle(fontSize: fontSize),

@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:ouisync/ouisync.dart' show EntryType;
 
+import '../../generated/l10n.dart';
 import '../cubits/cubits.dart' show RepoCubit;
 import '../models/models.dart' show FileEntry, FileSystemEntry;
-import '../widgets/widgets.dart' show DisambiguationAction;
+import '../widgets/widgets.dart'
+    show RenameOrReplaceResult, RenameOrReplaceEntryDialog;
 import 'repo_path.dart' as repo_path;
 import 'utils.dart'
-    show
-        AppLogger,
-        FileReadStream,
-        StringExtension,
-        pickEntryDisambiguationAction,
-        disambiguateEntryName;
+    show AppLogger, FileReadStream, StringExtension, disambiguateEntryName;
 
 class CopyEntry with AppLogger {
   CopyEntry(
@@ -54,25 +51,27 @@ class CopyEntry with AppLogger {
     final destinationRepoCubit = (currentRepoCubit ?? _originRepoCubit);
 
     final exist = await destinationRepoCubit.entryExists(newPath);
+
     if (!exist) {
       await _copyEntry(currentRepoCubit, path, newPath, type, recursive);
-
       return;
     }
 
-    final disambiguationAction = await pickEntryDisambiguationAction(
+    final result = await RenameOrReplaceEntryDialog.show(
       _context,
-      newPath,
-      type,
+      title: S.current.titleCopyingEntry,
+      entryName: newPath,
+      entryType: type,
     );
-    switch (disambiguationAction) {
-      case DisambiguationAction.replace:
+
+    switch (result) {
+      case RenameOrReplaceResult.replace:
         await _copyAndReplaceFile(currentRepoCubit, path, newPath);
         break;
-      case DisambiguationAction.keep:
+      case RenameOrReplaceResult.rename:
         await _renameAndCopy(currentRepoCubit, path, newPath, type, recursive);
         break;
-      default:
+      case null:
         break;
     }
   }
@@ -95,8 +94,6 @@ class CopyEntry with AppLogger {
         length: fileLength,
         fileByteStream: file.readStream(),
       );
-
-      await _originRepoCubit.deleteFile(sourcePath);
     } catch (e, st) {
       loggy.debug(e, st);
     }

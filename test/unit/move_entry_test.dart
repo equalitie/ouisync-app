@@ -63,7 +63,7 @@ void main() {
       expect(folder1Contents, hasLength(1));
 
       final expectedFolder1Contents = <DirectoryEntry>[
-        DirectoryEntry(name: 'file1.txt', entryType: EntryType.file)
+        DirectoryEntry(name: 'file1.txt', entryType: EntryType.file),
       ];
       expect(folder1Contents, dirEntryComparator(expectedFolder1Contents));
     }
@@ -96,7 +96,7 @@ void main() {
       expect(folder1Contents, hasLength(1));
 
       final expectedFolder1Contents = <DirectoryEntry>[
-        DirectoryEntry(name: 'folder2', entryType: EntryType.directory)
+        DirectoryEntry(name: 'folder2', entryType: EntryType.directory),
       ];
       expect(folder1Contents, dirEntryComparator(expectedFolder1Contents));
     }
@@ -125,7 +125,7 @@ void main() {
       expect(rootContents, dirEntryComparator(expectedRoot));
 
       final expectedFolder2 = <DirectoryEntry>[
-        DirectoryEntry(name: 'file1.txt', entryType: EntryType.file)
+        DirectoryEntry(name: 'file1.txt', entryType: EntryType.file),
       ];
       expect(folder2Contents, dirEntryComparator(expectedFolder2));
     }
@@ -142,7 +142,7 @@ void main() {
       expect(folder1Contents, hasLength(1));
 
       final expectedFolder1Contents = <DirectoryEntry>[
-        DirectoryEntry(name: 'folder2', entryType: EntryType.directory)
+        DirectoryEntry(name: 'folder2', entryType: EntryType.directory),
       ];
       expect(folder1Contents, dirEntryComparator(expectedFolder1Contents));
 
@@ -150,7 +150,7 @@ void main() {
       expect(folder2Contents, hasLength(1));
 
       final expectedFolder2 = <DirectoryEntry>[
-        DirectoryEntry(name: 'file1.txt', entryType: EntryType.file)
+        DirectoryEntry(name: 'file1.txt', entryType: EntryType.file),
       ];
       expect(folder2Contents, dirEntryComparator(expectedFolder2));
     }

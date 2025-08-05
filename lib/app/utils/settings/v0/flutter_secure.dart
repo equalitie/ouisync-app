@@ -53,5 +53,10 @@ class FlutterSecure {
   }
 }
 
-AndroidOptions _getAndroidOptions() =>
-    const AndroidOptions(encryptedSharedPreferences: true);
+AndroidOptions _getAndroidOptions() => const AndroidOptions(
+  // TODO: the default value of this if `false` so we can't remove it yet. Ignoring the lint for now
+  // but we should revisit when `flutter_secure_storage` gets bumped.
+  //
+  // ignore: deprecated_member_use
+  encryptedSharedPreferences: true,
+);

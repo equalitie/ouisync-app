@@ -4,11 +4,13 @@ import 'package:ouisync/ouisync.dart';
 import 'package:ouisync_app/app/cubits/entry_bottom_sheet.dart';
 import 'package:ouisync_app/app/cubits/navigation.dart';
 import 'package:ouisync_app/app/cubits/repos.dart';
+import 'package:ouisync_app/app/cubits/mount.dart';
 import 'package:ouisync_app/app/models/auth_mode.dart';
 import 'package:ouisync_app/app/models/repo_location.dart';
 import 'package:ouisync_app/app/utils/cache_servers.dart';
 import 'package:ouisync_app/app/utils/master_key.dart';
 import 'package:ouisync_app/app/utils/random.dart';
+import 'package:ouisync_app/app/utils/dirs.dart';
 import 'package:ouisync_app/app/utils/settings/settings.dart';
 import 'package:path/path.dart' show join;
 import 'package:path_provider/path_provider.dart';
@@ -19,6 +21,7 @@ void main() {
 
   late Server server;
   late Session session;
+  late MountCubit mountCubit;
   late ReposCubit reposCubit;
 
   setUp(() async {
@@ -35,17 +38,21 @@ void main() {
 
     final settings = await Settings.init(MasterKey.random());
 
+    mountCubit = MountCubit(session, await Dirs.init())..init();
+
     reposCubit = ReposCubit(
       session: session,
       settings: settings,
       navigation: NavigationCubit(),
       bottomSheet: EntryBottomSheetCubit(),
       cacheServers: CacheServers(session),
+      mountCubit: mountCubit,
     );
   });
 
   tearDown(() async {
     await reposCubit.close();
+    await mountCubit.close();
     await session.close();
     await server.stop();
   });
@@ -53,8 +60,10 @@ void main() {
   test('current repo', () async {
     expect(reposCubit.state.current, isNull);
 
-    final location =
-        RepoLocation(dir: (await session.getStoreDir())!, name: 'foo');
+    final location = RepoLocation(
+      dir: (await session.getStoreDir())!,
+      name: 'foo',
+    );
     final entry = await reposCubit.createRepository(
       location: location,
       setLocalSecret: SetLocalSecretKeyAndSalt(

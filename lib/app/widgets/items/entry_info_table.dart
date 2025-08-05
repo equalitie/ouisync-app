@@ -37,10 +37,9 @@ class EntryInfoTable extends StatelessWidget {
   Table _getInfoTable(Map<String, String> entryInfo) {
     return Table(
       columnWidths: {0: IntrinsicColumnWidth(), 2: IntrinsicColumnWidth()},
-      children:
-          entryInfo.entries
-              .map((info) => _getInfoItem(info.key, info.value))
-              .toList(),
+      children: entryInfo.entries
+          .map((info) => _getInfoItem(info.key, info.value))
+          .toList(),
     );
   }
 

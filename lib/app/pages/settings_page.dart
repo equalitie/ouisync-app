@@ -7,7 +7,7 @@ import 'package:stream_transform/stream_transform.dart';
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
 import '../utils/dirs.dart';
-import '../widgets/widgets.dart';
+import '../widgets/widgets.dart' show AppSettingsContainer, DirectionalAppBar;
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({

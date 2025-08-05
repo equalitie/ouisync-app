@@ -83,28 +83,27 @@ class _AppSettingsContainerState extends State<AppSettingsContainer>
           Flexible(
             flex: 1,
             child: ListView(
-              children:
-                  widget.sections
-                      .mapIndexed(
-                        (index, section) => SettingsSectionTitleDesktop(
-                          mount: widget.mount,
-                          powerControl: widget.powerControl,
-                          panicCounter: widget.panicCounter,
-                          upgradeExists: widget.upgradeExists,
-                          section: section,
-                          selected: selected.value == index,
-                          onTap: () {
-                            selected.value = index;
+              children: widget.sections
+                  .mapIndexed(
+                    (index, section) => SettingsSectionTitleDesktop(
+                      mount: widget.mount,
+                      powerControl: widget.powerControl,
+                      panicCounter: widget.panicCounter,
+                      upgradeExists: widget.upgradeExists,
+                      section: section,
+                      selected: selected.value == index,
+                      onTap: () {
+                        selected.value = index;
 
-                            Scrollable.ensureVisible(
-                              section.key.currentContext!,
-                              duration: Duration(seconds: 1),
-                              curve: Curves.linearToEaseOut,
-                            );
-                          },
-                        ),
-                      )
-                      .toList(),
+                        Scrollable.ensureVisible(
+                          section.key.currentContext!,
+                          duration: Duration(seconds: 1),
+                          curve: Curves.linearToEaseOut,
+                        );
+                      },
+                    ),
+                  )
+                  .toList(),
             ),
           ),
         Flexible(
@@ -113,31 +112,28 @@ class _AppSettingsContainerState extends State<AppSettingsContainer>
             child: s.SettingsList(
               platform: s.PlatformUtils.detectPlatform(context),
               contentPadding: MediaQuery.paddingOf(context),
-              sections:
-                  widget.sections
-                      .map(
-                        (section) => s.SettingsSection(
-                          key: section.key,
-                          title: Text(
-                            section.title,
-                            style: context.theme.appTextStyle.titleMedium,
-                          ),
-                          tiles:
-                              section
-                                  .buildTiles(context)
-                                  .map(
-                                    (tile) =>
-                                        (tile is s.AbstractSettingsTile)
-                                            ? tile
-                                            : s.CustomSettingsTile(child: tile),
-                                  )
-                                  .toList(),
-                        ),
-                      )
-                      .toList(),
+              sections: widget.sections
+                  .map(
+                    (section) => s.SettingsSection(
+                      key: section.key,
+                      title: Text(
+                        section.title,
+                        style: context.theme.appTextStyle.titleMedium,
+                      ),
+                      tiles: section
+                          .buildTiles(context)
+                          .map(
+                            (tile) => (tile is s.AbstractSettingsTile)
+                                ? tile
+                                : s.CustomSettingsTile(child: tile),
+                          )
+                          .toList(),
+                    ),
+                  )
+                  .toList(),
             ),
-            onNotification:
-                (notification) => _selectFromScroll(notification, selected),
+            onNotification: (notification) =>
+                _selectFromScroll(notification, selected),
           ),
         ),
       ],
@@ -166,14 +162,13 @@ class _AppSettingsContainerState extends State<AppSettingsContainer>
 
     final pixels = notification.metrics.pixels;
 
-    final index =
-        pixels == 0 || pixels < networkSectionSize * 0.4
-            ? 0
-            : pixels > 0 && pixels == notification.metrics.maxScrollExtent
-            ? 2
-            : pixels < (networkSectionSize + (logsSectionSize * 0.2))
-            ? 1
-            : 0;
+    final index = pixels == 0 || pixels < networkSectionSize * 0.4
+        ? 0
+        : pixels > 0 && pixels == notification.metrics.maxScrollExtent
+        ? 2
+        : pixels < (networkSectionSize + (logsSectionSize * 0.2))
+        ? 1
+        : 0;
 
     selected.value = index;
 

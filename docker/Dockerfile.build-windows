@@ -1,19 +1,26 @@
-FROM mcr.microsoft.com/windows/servercore:ltsc2022 as windows
+FROM mcr.microsoft.com/windows/servercore:ltsc2022 AS windows
 
-SHELL ["cmd", "/S", "/C"]
+ENV FLUTTER_VERSION=3.32.5
+
+####################
+# Use powershell by default. Setting the ProgressPreference to SilentlyContinue
+# should speed up Invoke-WebRequest
+# https://stackoverflow.com/a/43477248/273348
+SHELL ["powershell", "-Command", "$ProgressPreference = 'SilentlyContinue';"]
 
 ####################
 #### Install VS ####
 ####################
 RUN mkdir C:\TEMP
-RUN powershell Invoke-WebRequest https://aka.ms/vs/17/release/channel -OutFile C:/TEMP/VisualStudio.chman
-RUN powershell Invoke-WebRequest https://aka.ms/vs/17/release/vs_buildtools.exe -OutFile C:/TEMP/vs_buildtools.exe
+RUN Invoke-WebRequest https://aka.ms/vs/17/release/channel -OutFile C:/TEMP/VisualStudio.chman
+RUN Invoke-WebRequest https://aka.ms/vs/17/release/vs_buildtools.exe -OutFile C:/TEMP/vs_buildtools.exe
 
 # https://docs.microsoft.com/en-us/visualstudio/install/build-tools-container?view=vs-2019
 # When installing Visual Studio, we need Desktop development with C++ components.
 # For that we need to add: Microsoft.VisualStudio.ComponentGroup.NativeDesktop.Core
 # Info on individual components:
 # https://docs.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-build-tools?view=vs-2019
+SHELL ["cmd", "/S", "/C"]
 RUN C:\TEMP\vs_buildtools.exe --quiet --wait --norestart --nocache \
     --channelUri C:\TEMP\VisualStudio.chman \
     --installChannelUri C:\TEMP\VisualStudio.chman \
@@ -29,24 +36,27 @@ RUN C:\TEMP\vs_buildtools.exe --quiet --wait --norestart --nocache \
     --installPath C:\BuildTools \
      || IF "%ERRORLEVEL%"=="3010" EXIT 0
 
+# Back to using powershell
+SHELL ["powershell", "-Command", "$ProgressPreference = 'SilentlyContinue';"]
+
 ######################
 #### Install Rust ####
 ######################
-RUN powershell Invoke-WebRequest https://static.rust-lang.org/rustup/dist/x86_64-pc-windows-msvc/rustup-init.exe -OutFile C:/TEMP/rustup-init.exe
-RUN powershell -Command C:\TEMP\rustup-init.exe -y
+RUN Invoke-WebRequest https://static.rust-lang.org/rustup/dist/x86_64-pc-windows-msvc/rustup-init.exe -OutFile C:/TEMP/rustup-init.exe
+RUN C:\TEMP\rustup-init.exe -y
 
 #####################
 #### Install Git ####
 #####################
-RUN powershell Invoke-WebRequest https://github.com/git-for-windows/git/releases/download/v2.49.0.windows.1/MinGit-2.49.0-64-bit.zip -OutFile C:/TEMP/MinGit.zip
-RUN powershell -Command Expand-Archive c:\TEMP\MinGit.zip -DestinationPath c:\MinGit
-RUN setx /M path "C:\MinGit\cmd;%path%"
+RUN Invoke-WebRequest https://github.com/git-for-windows/git/releases/download/v2.49.0.windows.1/MinGit-2.49.0-64-bit.zip -OutFile C:/TEMP/MinGit.zip
+RUN Expand-Archive c:\TEMP\MinGit.zip -DestinationPath c:\MinGit
+RUN cmd /c 'setx /M path "C:\MinGit\cmd;%path%"'
 
 #########################
 #### Install Flutter ####
 #########################
-RUN git clone --filter=tree:0 -b 3.29.3 https://github.com/flutter/flutter.git C:\flutter
-RUN setx /M path "C:\flutter\bin;C:\flutter\bin\cache\dart-sdk\bin;%path%"
+RUN git clone --filter=tree:0 -b $env:FLUTTER_VERSION https://github.com/flutter/flutter.git C:\flutter
+RUN cmd /c 'setx /M path "C:\flutter\bin;C:\flutter\bin\cache\dart-sdk\bin;%path%"'
 
 # Git doesn't like directories with dubious ownership, it's OK in a container
 # https://nvd.nist.gov/vuln/detail/CVE-2022-24765
@@ -59,23 +69,29 @@ RUN flutter precache --windows
 RUN flutter doctor -v 
 
 #######################
+##### Install Inno ####
+#######################
+RUN Invoke-WebRequest https://files.jrsoftware.org/is/6/innosetup-6.4.3.exe -OutFile C:/TEMP/innosetup.exe
+# https://jrsoftware.org/ishelp/index.php?topic=setupcmdline
+RUN C:/TEMP/innosetup.exe /SP- /VERYSILENT /ALLUSERS /SUPPRESSMSGBOXES
+
+#######################
 #### Install MSYS2 ####
 #######################
-RUN powershell -Command [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; \
+RUN \
+  [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; \
   Invoke-WebRequest -UseBasicParsing -uri \
   "https://github.com/msys2/msys2-installer/releases/download/nightly-x86_64/msys2-base-x86_64-latest.sfx.exe" \
   -OutFile msys2.exe; \
   .\msys2.exe -y -oC:\; \
-  Remove-Item msys2.exe ;
+  function msys() { C:\msys64\usr\bin\bash.exe @('-lc') + @Args; } \
+  msys ' '; \
+  msys 'pacman --noconfirm -Syuu'; \
+  msys 'pacman --noconfirm -Syuu'; \
+  msys 'pacman --noconfirm -Scc'; \
+  msys 'pacman --noconfirm -S rsync';
 
-RUN setx /M path "C:\msys64\usr\bin;C:\msys64\mingw64\bin;%path%"
-
-#######################
-##### Install Inno ####
-#######################
-RUN powershell Invoke-WebRequest https://files.jrsoftware.org/is/6/innosetup-6.4.3.exe -OutFile C:/TEMP/innosetup.exe
-# https://jrsoftware.org/ishelp/index.php?topic=setupcmdline
-RUN C:/TEMP/innosetup.exe /SP- /VERYSILENT /ALLUSERS /SUPPRESSMSGBOXES
+RUN cmd /c 'setx /M path "C:\msys64\usr\bin;C:\msys64\mingw64\bin;%path%"'
 
 #######################
 #### Install SSHD #####
@@ -88,7 +104,8 @@ RUN C:/TEMP/innosetup.exe /SP- /VERYSILENT /ALLUSERS /SUPPRESSMSGBOXES
 
 # Add local user "ssh" with password "Passw0rd", note that the password access is removed
 # below.
-RUN cmd /C net USER ssh "Passw0rd" /ADD && net localgroup "Administrators" "ssh" /ADD
+SHELL ["cmd", "/c"]
+RUN net USER ssh "Passw0rd" /ADD && net localgroup "Administrators" "ssh" /ADD
 
 # Switch to using powershell.
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]

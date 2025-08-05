@@ -8,8 +8,8 @@ import 'package:ouisync/ouisync.dart'
         LocalSecretSecretKey,
         Password,
         SecretKey;
-import 'package:ouisync_app/app/utils/log.dart';
 
+import '../utils/log.dart' as log;
 import '../utils/master_key.dart';
 
 const _keys = (
@@ -271,8 +271,8 @@ enum LocalSecretMode {
     manual => SecretKeyStore.notStored,
     manualStored || randomStored => SecretKeyStore.stored,
     LocalSecretMode.manualSecuredWithBiometrics ||
-    LocalSecretMode
-        .randomSecuredWithBiometrics => SecretKeyStore.securedWithBiometrics,
+    LocalSecretMode.randomSecuredWithBiometrics =>
+      SecretKeyStore.securedWithBiometrics,
   };
 }
 
@@ -302,10 +302,9 @@ class LocalSecretRandom extends LocalSecretInput {
   final bool secureWithBiometrics;
 
   @override
-  LocalSecretMode get mode =>
-      secureWithBiometrics
-          ? LocalSecretMode.randomSecuredWithBiometrics
-          : LocalSecretMode.randomStored;
+  LocalSecretMode get mode => secureWithBiometrics
+      ? LocalSecretMode.randomSecuredWithBiometrics
+      : LocalSecretMode.randomStored;
 }
 
 sealed class AuthModeException implements Exception {}
@@ -321,7 +320,7 @@ class AuthModeDecryptFailed extends AuthModeException {
 }
 
 AuthMode _decodeError(Object? data) {
-  appLogger("AuthMode").error('invalid auth mode data: `$data`');
+  log.named('AuthMode').error('invalid auth mode data: `$data`');
   throw AuthModeParseFailed();
 }
 

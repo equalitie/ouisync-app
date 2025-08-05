@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
-import 'app/app.dart';
+import 'app/app.dart' show initApp;
 
 // Set this when making a release by passing `--dart-define=SENTRY_DSN=***...***`
 // to the `flutter build` or the `flutter run` commands.

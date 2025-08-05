@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:ouisync/ouisync.dart' show NetworkDefaults, Server, Session;
-import 'package:package_info_plus/package_info_plus.dart';
+import 'package:package_info_plus/package_info_plus.dart' show PackageInfo;
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:stream_transform/stream_transform.dart';
@@ -14,7 +14,7 @@ import 'cubits/cubits.dart'
     show LocaleCubit, LocaleState, MountCubit, ReposCubit;
 import 'pages/pages.dart';
 import 'utils/dirs.dart';
-import 'utils/log.dart';
+import 'utils/log.dart' as log;
 import 'utils/platform/platform.dart' show PlatformWindowManager;
 import 'utils/utils.dart'
     show
@@ -22,7 +22,6 @@ import 'utils/utils.dart'
         AppTextThemeExtension,
         AppTypography,
         CacheServers,
-        Constants,
         loadAndMigrateSettings,
         Settings;
 import 'widgets/flavor_banner.dart';
@@ -37,11 +36,10 @@ Future<Widget> initApp([List<String> args = const []]) async =>
         if (home != null) {
           return BlocBuilder<LocaleCubit, LocaleState>(
             bloc: home.localeCubit,
-            builder:
-                (context, localeState) => _buildMaterialApp(
-                  locale: localeState.currentLocale,
-                  home: home,
-                ),
+            builder: (context, localeState) => _buildMaterialApp(
+              locale: localeState.currentLocale,
+              home: home,
+            ),
           );
         } else {
           return _buildMaterialApp(home: LoadingScreen());
@@ -72,8 +70,8 @@ Future<HomeWidget> _initHomeWidget(List<String> args) async {
     packageInfo.appName,
   );
 
-  var dirs = await Dirs.init();
-  await LogUtils.init(dirs);
+  final dirs = await Dirs.init();
+  await log.init(dirs);
 
   final (server, session) = await _initServerAndSession(dirs, windowManager);
   final settings = await loadAndMigrateSettings(session);
@@ -94,12 +92,10 @@ Future<(Server, Session)> _initServerAndSession(
   Dirs dirs,
   PlatformWindowManager windowManager,
 ) async {
-  final logger = appLogger('');
+  final logger = log.named('');
 
   final server = Server.create(configPath: dirs.config);
-  server.initLog(
-    callback: (level, message) => logger.log(level.toLoggy(), message),
-  );
+  await server.initLog();
 
   try {
     await server.start();
@@ -182,13 +178,14 @@ class _HomeWidgetState extends State<HomeWidget>
         );
 
     final cacheServers = CacheServers(widget.session);
-    unawaited(cacheServers.addAll(Constants.cacheServers));
+    unawaited(cacheServers.addAll(widget.settings.cacheServers));
 
     mountCubit = MountCubit(widget.session, widget.dirs)..init();
     reposCubit = ReposCubit(
       session: widget.session,
       settings: widget.settings,
       cacheServers: cacheServers,
+      mountCubit: mountCubit,
     );
 
     unawaited(_init());

@@ -124,6 +124,11 @@ class Settings with AppLogger {
   final SettingsRoot _root;
   final SharedPreferences _prefs;
 
+  // List of available cache servers.
+  // Note that changes to this are currently not persisted. Changing it is currently only useful in
+  // tests. This might change in the future.
+  List<String> cacheServers = Constants.defaultCacheServers;
+
   //------------------------------------------------------------------
 
   Settings._(this._root, this._prefs, this.masterKey);
@@ -235,11 +240,10 @@ class Settings with AppLogger {
     await _storeRoot();
   }
 
-  DatabaseId? findRepoByLocation(RepoLocation location) =>
-      _root.repos.entries
-          .where((entry) => entry.value == location)
-          .map((entry) => entry.key)
-          .firstOrNull;
+  DatabaseId? findRepoByLocation(RepoLocation location) => _root.repos.entries
+      .where((entry) => entry.value == location)
+      .map((entry) => entry.key)
+      .firstOrNull;
 
   Future<void> renameRepo(DatabaseId repoId, RepoLocation newLocation) async {
     if (findRepoByLocation(newLocation) != null) {
@@ -278,8 +282,9 @@ class Settings with AppLogger {
 
   // `null` means the user wants to use the default system locale.
   Future<void> setLocale(Locale? locale) async {
-    _root.locale =
-        locale != null ? SettingsUserLocale(locale) : SettingsDefaultLocale();
+    _root.locale = locale != null
+        ? SettingsUserLocale(locale)
+        : SettingsDefaultLocale();
 
     await _storeRoot();
   }

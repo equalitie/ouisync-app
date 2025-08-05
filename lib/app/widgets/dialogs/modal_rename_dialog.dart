@@ -195,13 +195,13 @@ class RenameEntry extends HookWidget with AppLogger {
       actions: [
         TextButton(
           child: Text(S.current.actionRename.toUpperCase()),
-          onPressed:
-              () async => await Navigator.of(parentContext).maybePop(true),
+          onPressed: () async =>
+              await Navigator.of(parentContext).maybePop(true),
         ),
         TextButton(
           child: Text(S.current.actionCancelCapital),
-          onPressed:
-              () async => await Navigator.of(parentContext).maybePop(false),
+          onPressed: () async =>
+              await Navigator.of(parentContext).maybePop(false),
         ),
       ],
     );
@@ -231,8 +231,8 @@ class RenameEntry extends HookWidget with AppLogger {
     ),
     PositiveButton(
       text: S.current.actionRename,
-      onPressed:
-          () async => await _onSaved(context, parent, _newNameController.text),
+      onPressed: () async =>
+          await _onSaved(context, parent, _newNameController.text),
       focusNode: _positiveButtonFocus,
     ),
   ];

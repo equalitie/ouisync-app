@@ -20,10 +20,9 @@ class _ActionsDialogState extends State<ActionsDialog> {
     child: Stack(
       children: <Widget>[
         Container(
-          width:
-              Platform.isAndroid
-                  ? null
-                  : Dimensions.sizeModalDialogWidthDesktop,
+          width: Platform.isAndroid
+              ? null
+              : Dimensions.sizeModalDialogWidthDesktop,
           padding: Dimensions.paddingDialog,
           decoration: BoxDecoration(
             shape: BoxShape.rectangle,
@@ -40,34 +39,32 @@ class _ActionsDialogState extends State<ActionsDialog> {
             ],
           ),
           child: LayoutBuilder(
-            builder: (
-              BuildContext context,
-              BoxConstraints viewportConstraints,
-            ) {
-              return SingleChildScrollView(
-                reverse: true,
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minHeight: viewportConstraints.minHeight,
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Fields.constrainedText(
-                        widget.title,
-                        flex: 0,
-                        style: context.theme.appTextStyle.titleMedium,
-                        maxLines: 2,
+            builder:
+                (BuildContext context, BoxConstraints viewportConstraints) {
+                  return SingleChildScrollView(
+                    reverse: true,
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minHeight: viewportConstraints.minHeight,
                       ),
-                      Dimensions.spacingVertical,
-                      widget.body!,
-                    ],
-                  ),
-                ),
-              );
-            },
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Fields.constrainedText(
+                            widget.title,
+                            flex: 0,
+                            style: context.theme.appTextStyle.titleMedium,
+                            maxLines: 2,
+                          ),
+                          Dimensions.spacingVertical,
+                          widget.body!,
+                        ],
+                      ),
+                    ),
+                  );
+                },
           ),
         ),
       ],

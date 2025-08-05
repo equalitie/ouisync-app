@@ -188,8 +188,9 @@ void main() {
     //  debugPrint("encrypted: $encrypted");
     //}
 
-    final key =
-        MasterKey.initWithKey("eZcpF/CdFblXXhFP4LHk49lGtDEY4c1Gn/qQKBU0QmA=");
+    final key = MasterKey.initWithKey(
+      "eZcpF/CdFblXXhFP4LHk49lGtDEY4c1Gn/qQKBU0QmA=",
+    );
     final encrypted = "cKMbibnjHsni8olld2sUXjxNsAroR/DOKNj3rUOOrFtUrA==";
 
     final decrypted = await key.decrypt(base64.decode(encrypted));

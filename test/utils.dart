@@ -6,6 +6,7 @@ import 'dart:ui';
 import 'package:connectivity_plus_platform_interface/connectivity_plus_platform_interface.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:loggy/loggy.dart';
@@ -14,22 +15,25 @@ import 'package:ouisync_app/app/cubits/mount.dart';
 import 'package:ouisync_app/app/cubits/repos.dart';
 import 'package:ouisync_app/app/pages/main_page.dart';
 import 'package:ouisync_app/app/utils/dirs.dart';
+import 'package:ouisync_app/app/utils/log.dart' as log;
 import 'package:ouisync_app/app/utils/platform/platform.dart';
 import 'package:ouisync_app/app/utils/random.dart';
 import 'package:ouisync_app/app/utils/utils.dart'
-    show CacheServers, MasterKey, Settings, appLogger;
+    show CacheServers, MasterKey, Settings;
 import 'package:ouisync_app/generated/l10n.dart';
 import 'package:ouisync/ouisync.dart'
     show Session, SetLocalSecretKeyAndSalt, Server;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart';
-import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stack_trace/stack_trace.dart';
+
+import 'sandbox.dart';
 export 'package:flutter/foundation.dart' show debugPrint;
 
-final _loggy = appLogger("TestHelper");
+final _loggy = log.named("TestHelper");
+const String artifactsDirName = 'artifacts';
 
 /// Setup the test environment and run `callback` inside it.
 ///
@@ -52,38 +56,12 @@ Future<void> testEnv(FutureOr<void> Function() callback) async {
 
   Loggy.initLoggy();
 
-  late Directory tempDir;
+  late Sandbox sandbox;
   late BlocObserver origBlocObserver;
 
   setUp(() async {
     origBlocObserver = Bloc.observer;
-
-    tempDir = await Directory.systemTemp.createTemp();
-
-    final platformDir = Directory(join(tempDir.path, 'platform'));
-    await platformDir.create();
-    PathProviderPlatform.instance = _FakePathProviderPlatform(platformDir);
-
-    final shared = Directory(join(tempDir.path, 'shared')).create();
-    final mount = Directory(join(tempDir.path, 'mount')).create();
-    final native =
-        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
-    native.setMockMethodCallHandler(
-      MethodChannel('org.equalitie.ouisync/native'),
-      (call) async {
-        switch (call.method) {
-          case 'getSharedDir':
-            return (await shared).path;
-          case 'getMountRootDirectory':
-            return (await mount).path;
-          default:
-            throw PlatformException(
-              code: 'OS06',
-              message: 'Method "${call.method}" not exported by host',
-            );
-        }
-      },
-    );
+    sandbox = await Sandbox.setUp();
 
     ConnectivityPlatform.instance = _FakeConnectivityPlatform();
 
@@ -93,8 +71,8 @@ Future<void> testEnv(FutureOr<void> Function() callback) async {
   });
 
   tearDown(() async {
+    await sandbox.tearDown();
     Bloc.observer = origBlocObserver;
-    await deleteTempDir(tempDir);
   });
 
   await callback();
@@ -115,8 +93,8 @@ class TestDependencies {
   static Future<TestDependencies> create() async {
     final dirs = await Dirs.init();
 
-    final server = Server.create(configPath: dirs.config)
-      ..initLog(stdout: true);
+    final server = Server.create(configPath: dirs.config);
+    await server.initLog();
     await server.start();
 
     final session = await Session.create(configPath: dirs.config);
@@ -124,13 +102,14 @@ class TestDependencies {
     await session.setStoreDir(dirs.defaultStore);
 
     final settings = await Settings.init(MasterKey.random());
+    final mountCubit = MountCubit(session, dirs)..init();
     final reposCubit = ReposCubit(
       cacheServers: CacheServers(session),
       session: session,
       settings: settings,
+      mountCubit: mountCubit,
     );
 
-    final mountCubit = MountCubit(session, dirs);
     final localeCubit = LocaleCubit(settings);
 
     return TestDependencies._(
@@ -181,27 +160,6 @@ class _FakeConnectivityPlatform extends ConnectivityPlatform {
   @override
   Future<List<ConnectivityResult>> checkConnectivity() =>
       Future.value([ConnectivityResult.none]);
-}
-
-class _FakePathProviderPlatform extends PathProviderPlatform {
-  final Directory root;
-
-  _FakePathProviderPlatform(this.root);
-
-  @override
-  Future<String?> getApplicationSupportPath() =>
-      Future.value(join(root.path, 'application-support'));
-
-  @override
-  Future<String?> getApplicationDocumentsPath() =>
-      Future.value(join(root.path, 'application-documents'));
-
-  @override
-  Future<String?> getDownloadsPath() => Future.value(null);
-
-  @override
-  Future<String?> getTemporaryPath() =>
-      Future.value(join(root.path, 'temporary'));
 }
 
 /// Build `MaterialApp` to host the widget under test.
@@ -306,10 +264,7 @@ extension WidgetTesterExtension on WidgetTester {
   /// details.
   ///
   /// This Code is taken from https://github.com/flutter/flutter/issues/129623.
-  Future<void> takeScreenshot({
-    String name = 'screenshot',
-    Element? element,
-  }) async {
+  Future<void> takeScreenshot(String name, {Element? element}) async {
     try {
       if (element == null) {
         // If no element is given, take the screenshot of the topmost widget.
@@ -318,12 +273,11 @@ extension WidgetTesterExtension on WidgetTester {
       }
 
       final image = await captureImage(element);
-      final bytes =
-          (await image.toByteData(
-            format: ImageByteFormat.png,
-          ))!.buffer.asUint8List();
+      final bytes = (await image.toByteData(
+        format: ImageByteFormat.png,
+      ))!.buffer.asUint8List();
 
-      final path = join(_testDirPath, 'screenshots', '$name.png');
+      final path = join(_testDirPath, artifactsDirName, '$name.png');
 
       await Directory(dirname(path)).create(recursive: true);
       await File(path).writeAsBytes(bytes);
@@ -335,13 +289,27 @@ extension WidgetTesterExtension on WidgetTester {
   }
 
   // This is useful to observe the screen when things are still moving.
-  Future<void> takeNScreenshots(int n, String name) async {
+  Future<void> takeScreenshots(String name, int n) async {
     assert(n > 0 && n < 1000); // sanity
     for (int i = 0; i < n; i++) {
-      await takeScreenshot(name: "$name-$i");
-      await pump(Duration(milliseconds: 200));
-      await Future.delayed(Duration(milliseconds: 200));
+      await takeScreenshot("$name-$i");
+      await pump(Duration(milliseconds: 100));
+      await Future.delayed(Duration(milliseconds: 100));
     }
+  }
+
+  // Write the whole element tree to a file. Similar to
+  // https://api.flutter.dev/flutter/widgets/debugDumpApp.html
+  Future<void> dumpTree(String name) async {
+    final String tree;
+    if (WidgetsBinding.instance.rootElement != null) {
+      tree = WidgetsBinding.instance.rootElement!.toStringDeep();
+    } else {
+      tree = '<no tree currently mounted>';
+    }
+    final path = join(_testDirPath, artifactsDirName, "$name.dump");
+    await File(path).writeAsString(tree);
+    _loggy.info('element tree dump saved to $path');
   }
 
   // Invoke this somewhere at the beginning of a test so that the above
@@ -382,8 +350,16 @@ extension WidgetTesterExtension on WidgetTester {
     // Too often when the above first finds a widget it's outside of the screen
     // area and tapping on it would generate a warning. After this
     // `pumpAndSettle` the widget finds its place inside the screen.
-    await pumpAndSettle();
+    try {
+      await pumpAndSettle();
+    } catch (e) {
+      // There may still be some progress indicator moving, ignore it.
+    }
     return found;
+  }
+
+  Future<void> pumpUntilNotFound(Finder finder) async {
+    await pumpUntil(() => !finder.tryEvaluate());
   }
 
   Future<void> pumpUntil(
@@ -426,6 +402,50 @@ extension WidgetTesterExtension on WidgetTester {
 
     throw "pumpUntilNotNull timeout";
   }
+
+  Future<void> anxiousTap(Finder finder) async {
+    await tap(finder);
+    await pump(Duration(milliseconds: 10));
+    if (wouldHit(finder)) {
+      await tap(finder);
+    }
+  }
+
+  // Check that the element represented by `finder` exists and tapping on it is
+  // not obstructed by other element
+  bool wouldHit(Finder finder) {
+    final Iterable<Element> elements = finder.evaluate();
+    if (elements.isEmpty) return false;
+    if (elements.length > 1) throw "More than one such element";
+    final element = elements.single;
+    final RenderBox box = element.renderObject! as RenderBox;
+    final viewId = viewOf(finder).viewId;
+    final location = getCenter(finder, warnIfMissed: false);
+    final result = hitTestOnBinding(location, viewId: viewId);
+    return result.path.any((HitTestEntry entry) => entry.target == box);
+  }
+
+  Future<void> runAsyncDebug(Future<void> Function() callback) {
+    return runAsync(() async {
+      WidgetController.hitTestWarningShouldBeFatal = true;
+
+      try {
+        await callback();
+      } catch (e) {
+        try {
+          await dumpTree(testDescription);
+        } catch (de) {
+          _loggy.debug("Failed to write debug dump: $de");
+        }
+        try {
+          await takeScreenshot(testDescription);
+        } catch (se) {
+          _loggy.debug("Failed to take screenshot: $se");
+        }
+        rethrow;
+      }
+    });
+  }
 }
 
 extension BlocBaseExtension<State> on BlocBase<State> {
@@ -445,22 +465,6 @@ extension BlocBaseExtension<State> on BlocBase<State> {
 
 SetLocalSecretKeyAndSalt randomSetLocalSecret() =>
     SetLocalSecretKeyAndSalt(key: randomSecretKey(), salt: randomSalt());
-
-Future<void> deleteTempDir(Directory dir) async {
-  try {
-    await dir.delete(recursive: true);
-  } on PathAccessException {
-    // This sometimes happens on the CI on windows. It seems to be caused by another process
-    // accessing the temp directory for some reason. It probably doesn't indicate a problem in
-    // the code under test so it should be safe to ignore it.
-  } on PathNotFoundException {
-    // This shouldn't happen but it still sometimes does. Unknown why. It doesn't really affect
-    // the tests so we ignore it.
-  } catch (exception) {
-    _loggy.error("Exception during temporary directory removal: $exception");
-    rethrow;
-  }
-}
 
 String randomAsciiString(int length) {
   const chars =

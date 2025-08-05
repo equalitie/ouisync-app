@@ -25,7 +25,10 @@ void main() {
     await server.start();
 
     session = await Session.create(configPath: dirs.config);
+
     settings = await Settings.init(MasterKey.random());
+    settings.cacheServers = [];
+
     localeCubit = LocaleCubit(settings);
   });
 
@@ -55,21 +58,20 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final englishItem = find.text('English').first;
-      await tester.tap(englishItem);
+      await tester.anxiousTap(find.text('English'));
       await tester.pumpAndSettle();
 
       // Go to the second onboarding page
-      await tester.tap(find.byIcon(Icons.arrow_forward));
+      await tester.anxiousTap(find.byIcon(Icons.arrow_forward));
       await tester
           .pumpAndSettle(); // TODO: Do we need to call this after every interaction?
 
       // Go to the third onboarding page
-      await tester.tap(find.byIcon(Icons.arrow_forward));
+      await tester.anxiousTap(find.byIcon(Icons.arrow_forward));
       await tester.pumpAndSettle();
 
       // Go to the accept terms & conditions page
-      await tester.tap(find.byIcon(Icons.arrow_forward));
+      await tester.anxiousTap(find.byIcon(Icons.arrow_forward));
       await tester.pumpAndSettle();
 
       expect(
@@ -81,7 +83,7 @@ void main() {
       );
 
       // Agree with the T&C and go to the main page
-      await tester.tap(find.text('I AGREE'));
+      await tester.anxiousTap(find.text('I AGREE'));
       await reposObserver.waitUntil((state) => !state.isLoading);
       await tester.pumpAndSettle();
 

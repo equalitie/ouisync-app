@@ -19,6 +19,7 @@ void main() {
   late Repository originRepo;
   late Repository otherRepo;
 
+  late MountCubit mountCubit;
   late RepoCubit originRepoCubit;
   late RepoCubit otherRepoCubit;
 
@@ -49,6 +50,8 @@ void main() {
 
     final cacheServers = CacheServers(deps.session);
 
+    mountCubit = MountCubit(deps.session, deps.dirs)..init();
+
     originRepoCubit = await RepoCubit.create(
       repo: originRepo,
       navigation: navigationCubit,
@@ -56,6 +59,7 @@ void main() {
       bottomSheet: bottomSheetCubit,
       cacheServers: cacheServers,
       session: deps.session,
+      mountCubit: mountCubit,
     );
 
     otherRepoCubit = await RepoCubit.create(
@@ -65,6 +69,7 @@ void main() {
       bottomSheet: bottomSheetCubit,
       cacheServers: cacheServers,
       session: deps.session,
+      mountCubit: mountCubit,
     );
   });
 
@@ -111,7 +116,7 @@ void main() {
 
   test('Move empty folder to other repo', () async {
     final expectedFolder1 = <DirectoryEntry>[
-      DirectoryEntry(name: 'folder1', entryType: EntryType.directory)
+      DirectoryEntry(name: 'folder1', entryType: EntryType.directory),
     ];
 
     // Create empty folder to move
@@ -146,7 +151,7 @@ void main() {
 
   test('Move folder with one file to other repo', () async {
     final expectedFile1 = [
-      DirectoryEntry(name: 'file1.txt', entryType: EntryType.file)
+      DirectoryEntry(name: 'file1.txt', entryType: EntryType.file),
     ];
     // Create folder with one file to move
     {
@@ -167,11 +172,12 @@ void main() {
     // Move folder worth one file to other repo
     {
       final result = await originRepoCubit.moveEntryToRepo(
-          destinationRepoCubit: otherRepoCubit,
-          type: EntryType.directory,
-          source: '/folder1',
-          destination: '/folder1',
-          recursive: true);
+        destinationRepoCubit: otherRepoCubit,
+        type: EntryType.directory,
+        source: '/folder1',
+        destination: '/folder1',
+        recursive: true,
+      );
 
       expect(result, equals(true));
 
@@ -180,7 +186,7 @@ void main() {
       expect(originContentsPost, hasLength(0));
 
       final expectedFolder1 = [
-        DirectoryEntry(name: 'folder1', entryType: EntryType.directory)
+        DirectoryEntry(name: 'folder1', entryType: EntryType.directory),
       ];
       expect(otherContents, hasLength(1));
       expect(otherContents, dirEntryComparator(expectedFolder1));

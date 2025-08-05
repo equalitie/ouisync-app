@@ -15,14 +15,11 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 0.9.0+72
+version: 0.9.1+73
 
 environment:
-  sdk: ^3.7.2
-  # FIXME: on v3.32 `flutter build appbundle` fails with "Release app bundle failed to strip debug
-  # symbols from native libraries". Issue is reported on github but none of the proposed
-  # workarounds work for us. Pinning to the previous stable version for now.
-  flutter: 3.29.3
+  sdk: 3.8.1
+  flutter: 3.32.5
 
 dependencies:
   archive: ^4.0.7
@@ -42,7 +39,7 @@ dependencies:
   equatable: ^2.0.3
   ffi: ^2.0.1
   file: ^7.0.0
-  file_picker: ^8.1.2
+  file_picker: ^10.2.0
   flutter:
     sdk: flutter
   flutter_bloc: ^8.0.1
@@ -56,13 +53,15 @@ dependencies:
   flutter_password_strength: ^0.1.6
   flutter_secure_storage: ^10.0.0-beta.4
   hex: ^0.2.0
-  intl: ^0.19.0
+  intl: ^0.20.2
   intro_slider: ^4.2.0
   introduction_screen: ^3.1.14
   launch_at_startup: ^0.5.1
   local_auth: ^2.3.0
   locale_names: ^1.1.1
   loggy: ^2.0.1+1
+  logtee:
+    path: ouisync/logtee/dart
   meta: ^1.10.0
   mime: ^1.0.6
   mobile_scanner: ^5.2.1
@@ -70,7 +69,7 @@ dependencies:
   network_info_plus: ^6.0.1
   ouisync:
     path: ouisync/bindings/dart
-  package_info_plus: ^8.0.1
+  package_info_plus: ^8.3.0
   path: ^1.8.2
   path_provider: ^2.1.2
   percent_indicator: ^4.2.2
@@ -89,7 +88,6 @@ dependencies:
   system_tray: ^2.0.3
   udp: ^5.0.3
   url_launcher: ^6.2.6
-  watcher: ^1.1.0
   webview_flutter: ^4.10.0
   webview_flutter_android: ^4.0.2
   webview_flutter_wkwebview: ^3.16.2

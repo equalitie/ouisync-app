@@ -4,10 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:ouisync/ouisync.dart' show EntryType;
 import 'package:path/path.dart' as p;
 
+import '../../generated/l10n.dart';
 import '../cubits/cubits.dart' show RepoCubit;
-import '../widgets/widgets.dart' show DisambiguationAction;
-import 'utils.dart'
-    show AppLogger, pickEntryDisambiguationAction, disambiguateEntryName;
+import '../widgets/widgets.dart'
+    show RenameOrReplaceResult, RenameOrReplaceEntryDialog;
+import 'utils.dart' show AppLogger, disambiguateEntryName;
 
 class SaveMedia with AppLogger {
   SaveMedia(
@@ -41,24 +42,24 @@ class SaveMedia with AppLogger {
       return;
     }
 
-    final fileAction = await pickEntryDisambiguationAction(
+    final result = await RenameOrReplaceEntryDialog.show(
       _context,
-      newFileName,
-      EntryType.file,
+      title: S.current.actionSave,
+      entryName: newFileName,
+      entryType: EntryType.file,
     );
 
-    if (fileAction == null) return;
-
-    if (fileAction == DisambiguationAction.replace) {
-      await _replaceFile(devicePath: sourcePath, toPath: newFilePath);
-    }
-
-    if (fileAction == DisambiguationAction.keep) {
-      await _renameAndSaveFile(
-        devicePath: sourcePath,
-        toPath: newFilePath,
-        fileName: newFileName,
-      );
+    switch (result) {
+      case RenameOrReplaceResult.replace:
+        await _replaceFile(devicePath: sourcePath, toPath: newFilePath);
+      case RenameOrReplaceResult.rename:
+        await _renameAndSaveFile(
+          devicePath: sourcePath,
+          toPath: newFilePath,
+          fileName: newFileName,
+        );
+      case null:
+        break;
     }
   }
 

@@ -83,14 +83,12 @@ class AboutSection extends SettingsSection with AppLogger {
       if (PlatformValues.isDesktopDevice)
         BlocBuilder<LaunchAtStartupCubit, bool>(
           bloc: launchAtStartup,
-          builder:
-              (context, state) => SwitchSettingsTile(
-                value: state,
-                onChanged:
-                    (value) => unawaited(launchAtStartup.setEnabled(value)),
-                title: Text(S.current.messageLaunchAtStartup, style: bodyStyle),
-                leading: Icon(Icons.rocket_launch_sharp),
-              ),
+          builder: (context, state) => SwitchSettingsTile(
+            value: state,
+            onChanged: (value) => unawaited(launchAtStartup.setEnabled(value)),
+            title: Text(S.current.messageLaunchAtStartup, style: bodyStyle),
+            leading: Icon(Icons.rocket_launch_sharp),
+          ),
         ),
       NavigationTile(
         title: Text(S.current.titleApplicationLanguage, style: bodyStyle),
@@ -104,30 +102,30 @@ class AboutSection extends SettingsSection with AppLogger {
       NavigationTile(
         title: Text(S.current.titleFAQShort, style: bodyStyle),
         leading: Icon(Icons.question_answer_rounded),
-        trailing:
-            PlatformValues.isDesktopDevice ? _externalNavigationIcon : null,
+        trailing: PlatformValues.isDesktopDevice
+            ? _externalNavigationIcon
+            : null,
         value: Text(
           S.current.messageFAQ,
           style: context.theme.appTextStyle.bodySmall,
         ),
-        onTap:
-            () => unawaited(
-              _openUrl(context, S.current.titleFAQShort, Constants.faqUrl),
-            ),
+        onTap: () => unawaited(
+          _openUrl(context, S.current.titleFAQShort, Constants.faqUrl),
+        ),
       ),
       NavigationTile(
         title: Text(S.current.titlePrivacyPolicy, style: bodyStyle),
         leading: Icon(Icons.privacy_tip_rounded),
-        trailing:
-            PlatformValues.isDesktopDevice ? _externalNavigationIcon : null,
-        onTap:
-            () => unawaited(
-              _openUrl(
-                context,
-                S.current.titlePrivacyPolicy,
-                Constants.eqPrivacyPolicy,
-              ),
-            ),
+        trailing: PlatformValues.isDesktopDevice
+            ? _externalNavigationIcon
+            : null,
+        onTap: () => unawaited(
+          _openUrl(
+            context,
+            S.current.titlePrivacyPolicy,
+            Constants.eqPrivacyPolicy,
+          ),
+        ),
       ),
       if (PlatformValues.isMobileDevice)
         NavigationTile(
@@ -146,10 +144,8 @@ class AboutSection extends SettingsSection with AppLogger {
         title: Text(Constants.supportEmail, style: bodyStyle),
         leading: Icon(Icons.mail_rounded),
         trailing: _externalNavigationIcon,
-        onTap:
-            () => unawaited(
-              launchUrl(Uri.parse('mailto:${Constants.supportEmail}')),
-            ),
+        onTap: () =>
+            unawaited(launchUrl(Uri.parse('mailto:${Constants.supportEmail}'))),
       ),
       NavigationTile(
         title: Text(S.current.titleIssueTracker, style: bodyStyle),
@@ -166,22 +162,18 @@ class AboutSection extends SettingsSection with AppLogger {
       SettingsTile(
         title: BlocBuilder<PeerSetCubit, PeerSet>(
           bloc: peerSet,
-          builder:
-              (context, state) => InfoBuble(
-                child: Text(
-                  S.current.messageSettingsRuntimeID,
-                  style: bodyStyle,
-                ),
-                title: S.current.messageSettingsRuntimeID,
-                description: [
-                  TextSpan(text: S.current.messageInfoRuntimeID),
-                  Fields.linkTextSpan(
-                    context,
-                    '\n\n${S.current.messageGoToPeers}',
-                    _navigateToPeers,
-                  ),
-                ],
+          builder: (context, state) => InfoBuble(
+            child: Text(S.current.messageSettingsRuntimeID, style: bodyStyle),
+            title: S.current.messageSettingsRuntimeID,
+            description: [
+              TextSpan(text: S.current.messageInfoRuntimeID),
+              Fields.linkTextSpan(
+                context,
+                '\n\n${S.current.messageGoToPeers}',
+                _navigateToPeers,
               ),
+            ],
+          ),
         ),
         leading: Icon(Icons.person_rounded),
         value: _getRuntimeIdForOS(),
@@ -219,8 +211,8 @@ class AboutSection extends SettingsSection with AppLogger {
         await Navigator.push(
           context,
           MaterialPageRoute(
-            builder:
-                (context) => WebViewPage(title: pageTitle, content: content),
+            builder: (context) =>
+                WebViewPage(title: pageTitle, content: content),
           ),
         );
       });
@@ -348,8 +340,8 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
           ),
           PositiveButton(
             text: S.current.actionOK,
-            onPressed:
-                () async => await Navigator.of(context).maybePop(attachments),
+            onPressed: () async =>
+                await Navigator.of(context).maybePop(attachments),
           ),
         ],
       ),

@@ -31,13 +31,12 @@ class RepoResetAccessPage extends StatefulWidget {
     required Access startAccess,
   }) async {
     final route = MaterialPageRoute<Access>(
-      builder:
-          (context) => RepoResetAccessPage._(
-            session: session,
-            settings: settings,
-            repo: repo,
-            startAccess: startAccess,
-          ),
+      builder: (context) => RepoResetAccessPage._(
+        session: session,
+        settings: settings,
+        repo: repo,
+        startAccess: startAccess,
+      ),
     );
 
     return (await Navigator.push(context, route)) ?? startAccess;
@@ -330,39 +329,36 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
   Future<bool> _confirmUpdateDialog() async {
     final bool? confirmed = await showDialog<bool>(
       context: context,
-      builder:
-          (BuildContext context) => ActionsDialog(
-            title: S.current.repoResetConfirmUpdateTitle,
-            body: ListBody(
-              children: <Widget>[
-                const SizedBox(height: 20.0),
-                Text(
-                  S.current.repoResetConfirmUpdateMessage,
-                  style: context.theme.appTextStyle.bodyMedium.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+      builder: (BuildContext context) => ActionsDialog(
+        title: S.current.repoResetConfirmUpdateTitle,
+        body: ListBody(
+          children: <Widget>[
+            const SizedBox(height: 20.0),
+            Text(
+              S.current.repoResetConfirmUpdateMessage,
+              style: context.theme.appTextStyle.bodyMedium.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 20.0),
+            Fields.dialogActions(
+              buttons: [
+                NegativeButton(
+                  text: S.current.actionCancel,
+                  onPressed: () async =>
+                      await Navigator.of(context).maybePop(false),
                 ),
-                const SizedBox(height: 20.0),
-                Fields.dialogActions(
-                  buttons: [
-                    NegativeButton(
-                      text: S.current.actionCancel,
-                      onPressed:
-                          () async =>
-                              await Navigator.of(context).maybePop(false),
-                    ),
-                    PositiveButton(
-                      text: S.current.actionYes,
-                      isDangerButton: true,
-                      onPressed:
-                          () async =>
-                              await Navigator.of(context).maybePop(true),
-                    ),
-                  ],
+                PositiveButton(
+                  text: S.current.actionYes,
+                  isDangerButton: true,
+                  onPressed: () async =>
+                      await Navigator.of(context).maybePop(true),
                 ),
               ],
             ),
-          ),
+          ],
+        ),
+      ),
     );
     return confirmed ?? false;
   }

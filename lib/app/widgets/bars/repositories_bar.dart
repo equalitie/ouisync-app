@@ -67,23 +67,22 @@ class RepositoriesBar extends StatelessWidget
 
   Widget _buildStats(BuildContext context, RepoEntry? repo) =>
       repo is OpenRepoEntry
-          ? Padding(
-            padding: EdgeInsets.only(right: 10.0),
-            child: LiveThroughputDisplay(
-              _repoStatsStream(repo.cubit),
-              size: Theme.of(context).textTheme.labelSmall?.fontSize,
-              orientation: Orientation.portrait,
-            ),
-          )
-          : SizedBox.shrink();
+      ? Padding(
+          padding: EdgeInsets.only(right: 10.0),
+          child: LiveThroughputDisplay(
+            _repoStatsStream(repo.cubit),
+            size: Theme.of(context).textTheme.labelSmall?.fontSize,
+            orientation: Orientation.portrait,
+          ),
+        )
+      : SizedBox.shrink();
 
-  Widget _buildStatus(RepoEntry? repo) =>
-      repo is OpenRepoEntry
-          ? Padding(
-            padding: EdgeInsets.only(right: 10.0),
-            child: RepoStatus(repo.cubit),
-          )
-          : SizedBox.shrink();
+  Widget _buildStatus(RepoEntry? repo) => repo is OpenRepoEntry
+      ? Padding(
+          padding: EdgeInsets.only(right: 10.0),
+          child: RepoStatus(repo.cubit),
+        )
+      : SizedBox.shrink();
 
   Widget _buildLockButton(RepoEntry? repo) {
     final repoCubit = repo?.cubit;

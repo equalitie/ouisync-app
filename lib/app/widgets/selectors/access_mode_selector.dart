@@ -68,44 +68,41 @@ class _AccessModeSelectorState extends State<AccessModeSelector>
     ],
   );
 
-  List<Widget> _buildAccessModeOptions() =>
-      AccessMode.values
-          .map(
-            (mode) => Expanded(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Radio(
-                    value: mode,
-                    groupValue: _selectedMode,
-                    toggleable: true,
-                    onChanged: (current) async {
-                      loggy.debug('Access mode: $current');
+  List<Widget> _buildAccessModeOptions() => AccessMode.values
+      .map(
+        (mode) => Expanded(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Radio(
+                value: mode,
+                groupValue: _selectedMode,
+                toggleable: true,
+                onChanged: (current) async {
+                  loggy.debug('Access mode: $current');
 
-                      if (!widget.availableAccessMode.contains(mode)) {
-                        final message = S.current.messageAccessModeDisabled(
-                          widget.currentAccessMode.localized,
-                        );
-                        widget.onDisabledMessage(message);
-                        return;
-                      }
+                  if (!widget.availableAccessMode.contains(mode)) {
+                    final message = S.current.messageAccessModeDisabled(
+                      widget.currentAccessMode.localized,
+                    );
+                    widget.onDisabledMessage(message);
+                    return;
+                  }
 
-                      setState(() => _selectedMode = current);
-                      await widget.onChanged(current);
-                    },
-                  ),
-                  Text(
-                    mode.localized,
-                    textAlign: TextAlign.start,
-                    style: TextStyle().copyWith(
-                      color: _getModeStateColor(mode),
-                    ),
-                  ),
-                ],
+                  setState(() => _selectedMode = current);
+                  await widget.onChanged(current);
+                },
               ),
-            ),
-          )
-          .toList();
+              Text(
+                mode.localized,
+                textAlign: TextAlign.start,
+                style: TextStyle().copyWith(color: _getModeStateColor(mode)),
+              ),
+            ],
+          ),
+        ),
+      )
+      .toList();
 
   Color _getModeStateColor(AccessMode accessMode) {
     if (widget.availableAccessMode.contains(accessMode)) {

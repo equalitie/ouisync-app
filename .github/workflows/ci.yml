@@ -8,7 +8,7 @@ on:
     branches: [master]
 
 env:
-  cache_path: |
+  cargo_cache_path: |
     ~/.cargo/bin/
     ~/.cargo/registry/index/
     ~/.cargo/registry/cache/
@@ -16,48 +16,18 @@ env:
     ouisync/target/
 
 jobs:
-  build_and_test:
-    name: build and/or test on ${{ matrix.name }}
+  test:
+    name: test on ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
-
     strategy:
       matrix:
-        name: [android, linux-test, linux-build, windows]
+        name: [linux, windows]
         include:
-          - name: android
+          - name: linux
             os: ubuntu-24.04
             env:
               OUISYNC_LIB: ouisync/target/debug/libouisync_service.so
-            target: aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
-            ndk:
-              abi: arm64-v8a
-            build-args: --apk
-            artifact-files: ouisync*.apk
-            test: true
-            build: true
-
-          - name: linux-test
-            os: ubuntu-24.04
-            env:
-              OUISYNC_LIB: ouisync/target/debug/libouisync_service.so
-            # TODO: enable analysis
-            # analyze: true
-            build-args: --deb-gui --deb-cli
-            artifact-files: ouisync*.deb
-            test: true
-            build: false
-
-          # For GLIBC and GLIBCXX compatibility we build on not-the-most-recent Ubuntu version
-          - name: linux-build
-            os: ubuntu-22.04
-            env:
-              OUISYNC_LIB: ouisync/target/debug/libouisync_service.so
-            # TODO: enable analysis
-            # analyze: true
-            build-args: --deb-gui --deb-cli
-            artifact-files: ouisync*.deb
-            test: false
-            build: true
+            analyze: true
 
           - name: windows
             os: windows-latest
@@ -65,13 +35,9 @@ jobs:
               # Install Dokan2.dll to where `flutter test` can find it
               DOKAN_DLL_OUTPUT_PATH: C:\Windows\System32
               OUISYNC_LIB: ouisync\target\debug\ouisync_service.dll
-            build-args: --exe
             # FIXME: The mount test fails on windows CI with a panic somewhere in the dokan-rust
             # crate. Disabling for now but it needs to be looked into.
             test-args: --exclude-tags mount
-            artifact-files: ouisync*.exe
-            test: true
-            build: true
 
     env: ${{ matrix.env }}
 
@@ -80,44 +46,19 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Restore cache
-        id: cache-restore
-        uses: actions/cache/restore@v4
+      - name: Setup cargo cache
+        id: cargo-cache
+        uses: actions/cache@v4
         with:
-          path: ${{ env.cache_path }}
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          path: ${{ env.cargo_cache_path }}
+          key: ${{ runner.os }}-cargo-test-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: ${{ runner.os }}-cargo-
-
-      - name: Add rust target
-        run: rustup target add ${{ matrix.target }}
-        if: matrix.target != ''
-
-      - name: Setup Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-        if: matrix.name == 'android'
 
       - name: Install dependencies (linux)
         run: |
-          # https://github.com/orgs/community/discussions/109146
           sudo apt update -y
-          sudo apt-get install libappindicator3-dev   \
-                               libcurl4-openssl-dev   \
-                               libfuse-dev            \
-                               libgtk-3-dev           \
-                               libsecret-1-dev        \
-                               ninja-build            \
-                               imagemagick
-        if: matrix.name == 'linux-test' || matrix.name == 'linux-build'
-
-      - name: Install dependencies (android)
-        # Note that libfuse-dev is not required to build the Android app, but
-        # later in this CI script we also run tests on Linux which do require
-        # it.
-        run: sudo apt-get install libfuse-dev imagemagick
-        if: matrix.name == 'android'
+          sudo apt-get install libfuse-dev
+        if: matrix.name == 'linux'
 
       # FIXME: when dokan is installed some tests fail with weird panic from the dokan-rust library.
       # Disabling for now. See also the comment for the `test-args` variable in the `windows`
@@ -126,14 +67,10 @@ jobs:
       #   run: choco install dokany2
       #   if: matrix.name == 'windows'
 
-      - name: Set NDK ABI filter
-        run: echo "ndk.abiFilters=${{ matrix.ndk.abi }}" >> android/local.properties
-        if: matrix.ndk.abi != ''
-
       - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          flutter-version: 3.29.3
+          flutter-version-file: pubspec.yaml
           cache: true
 
       - name: Run Flutter doctor
@@ -160,12 +97,9 @@ jobs:
           flutter analyze
           popd
 
-        if: matrix.analyze
-
       - name: Test util
         run: |
           dart util/test.dart
-        if: matrix.name == 'linux-test'
 
       # HACK: dokan-sys puts Dokan2.dll to C:\Windows\System but not if it's cached (the crate
       # doesn't rebuild itself when the dll is missing likely due to missing
@@ -180,12 +114,117 @@ jobs:
       - name: Build Ouisync service library for tests
         working-directory: ouisync
         run: cargo build --package ouisync-service --lib
-        if: matrix.test
 
       - name: Run tests
         run:
           flutter test ${{ matrix.test-args }}
-        if: matrix.test
+
+      - name: Upload test/debug artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          # Name of the produced zip file
+          name: test-artifacts-${{ matrix.name }}
+          path: test/widget/artifacts/*
+          if-no-files-found: ignore
+        # Upload even when tests fail
+        if: always()
+
+  build:
+    name: build on ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        name: [android, linux, windows]
+        include:
+          - name: android
+            os: ubuntu-24.04
+            target: aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
+            ndk:
+              abi: arm64-v8a
+            build-args: --apk
+            artifact-files: ouisync*.apk
+
+          # For GLIBC and GLIBCXX compatibility we build on not-the-most-recent Ubuntu version
+          - name: linux
+            os: ubuntu-22.04
+            build-args: --deb-gui --deb-cli
+            artifact-files: ouisync*.deb
+
+          - name: windows
+            os: windows-latest
+            build-args: --exe
+            artifact-files: ouisync*.exe
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup cargo cache
+        id: cargo-cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.cargo_cache_path }}
+          key: ${{ runner.os }}${{ matrix.name == 'android' && '-android' || '' }}-cargo-release-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-
+
+      - name: Setup gradle cache
+        id: gradle-cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+        if: matrix.name == 'android'
+
+      - name: Add rust target
+        run: rustup target add ${{ matrix.target }}
+        if: matrix.target != ''
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+        if: matrix.name == 'android'
+
+      - name: Install dependencies (linux)
+        run: |
+          # https://github.com/orgs/community/discussions/109146
+          sudo apt update -y
+          sudo apt-get install libappindicator3-dev   \
+                               libcurl4-openssl-dev   \
+                               libfuse-dev            \
+                               libgtk-3-dev           \
+                               libsecret-1-dev        \
+                               ninja-build            \
+                               imagemagick
+        if: matrix.name == 'linux'
+
+      - name: Install NDK
+        run: $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --install "ndk;27.2.12479018"
+        if: matrix.name == 'android'
+
+      - name: Set NDK ABI filter
+        run: echo "ndk.abiFilters=${{ matrix.ndk.abi }}" >> android/local.properties
+        if: matrix.ndk.abi != ''
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          flutter-version-file: pubspec.yaml
+          cache: true
+
+      - name: Get Flutter packages
+        run:  dart pub get
+
+      - name: Generate the Dart bindings for the Ouisync library
+        working-directory: ouisync/bindings/dart
+        run: dart tool/bindgen.dart
 
       - name: Setup Sentry DSN for artifact build (different from the production releases)
         run: |
@@ -194,7 +233,7 @@ jobs:
         shell: bash
         env:
           NIGHTLY_SENTRY_DSN : ${{ secrets.NIGHTLY_SENTRY_DSN }}
-        if: matrix.build && env.NIGHTLY_SENTRY_DSN != null
+        if: env.NIGHTLY_SENTRY_DSN != null
 
       - name: Setup secrets for artifact signing (different from the production releases)
         run: |
@@ -215,7 +254,7 @@ jobs:
         env:
           NIGHTLY_KEYSTORE_JKS_HEX : ${{ secrets.NIGHTLY_KEYSTORE_JKS_HEX }}
           NIGHTLY_KEYSTORE_PASSWORD : ${{ secrets.NIGHTLY_KEYSTORE_PASSWORD }}
-        if: matrix.build && env.NIGHTLY_KEYSTORE_JKS_HEX != null && env.NIGHTLY_KEYSTORE_PASSWORD != null
+        if: env.NIGHTLY_KEYSTORE_JKS_HEX != null && env.NIGHTLY_KEYSTORE_PASSWORD != null
 
       - name: Build artifacts
         run: |
@@ -228,7 +267,6 @@ jobs:
 
           dart run util/release.dart --flavor=$flavor $keystore $sentry ${{ matrix.build-args }}
         shell: bash
-        if: matrix.build
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -236,13 +274,127 @@ jobs:
           # Name of the produced zip file
           name: ${{ matrix.name }}
           path: releases/release_*/${{ matrix.artifact-files }}
-        if: matrix.build
 
-      - name: Save cache
-        id: cache-save
-        if: always() && steps.cache-restore.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v4
+  integration_test_android:
+    name: run integration tests on android ${{ matrix.api-level }}
+    runs-on: ubuntu-24.04
+
+    strategy:
+      matrix:
+        api-level:
+          # These don't work due to various missing apis
+          # - 23
+          # - 24
+          # - 25
+
+          - 26
+          - 27
+          - 28
+          - 29
+          - 30
+          - 31
+          - 32
+          - 33
+          - 34
+          - 35
+        include:
+          - api-level: 26
+            target: google_apis
+          - api-level: 27
+            target: default
+          - api-level: 28
+            target: google_apis
+          - api-level: 29
+            target: google_apis
+          - api-level: 30
+            target: google_apis
+          - api-level: 31
+            target: google_apis
+          - api-level: 32
+            target: google_apis
+          - api-level: 33
+            target: google_apis
+          - api-level: 34
+            target: google_apis
+          - api-level: 35
+            target: google_apis
+    steps:
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - uses: actions/checkout@v4
         with:
-          key: ${{ steps.cache-restore.outputs.cache-primary-key }}
-          path: ${{ env.cache_path }}
+          submodules: recursive
 
+      - uses: ./.github/actions/setup_android_tests
+
+      - name: Run tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api-level }}
+          target: ${{ matrix.target }}
+          arch: x86_64
+          script: flutter test integration_test --flavor itest --ignore-timeouts
+
+  # TODO: Integration tests on both linux and windows currently fail or hang. Commenting them out until they are fixed.
+  # integration_test_desktop:
+  #   name: run integration tests on ${{ matrix.name }}
+  #   runs-on: ${{ matrix.os }}
+
+  #   strategy:
+  #     matrix:
+  #       name: [linux, windows]
+  #       include:
+  #         - name: linux
+  #           os: ubuntu-24.04
+  #         - name: windows
+  #           os: windows-latest
+
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #       with:
+  #         submodules: recursive
+
+  #     - name: Setup cargo cache
+  #       id: cargo-cache
+  #       uses: actions/cache@v4
+  #       with:
+  #         path: ${{ env.cargo_cache_path }}
+  #         key: ${{ runner.os }}-cargo-test-${{ hashFiles('**/Cargo.lock') }}
+  #         restore-keys: ${{ runner.os }}-cargo-
+
+  #     - name: Install dependencies (linux)
+  #       run: |
+  #         sudo apt update -y
+  #         sudo apt-get install libappindicator3-dev   \
+  #                              libcurl4-openssl-dev   \
+  #                              libfuse-dev            \
+  #                              libgtk-3-dev           \
+  #                              libsecret-1-dev        \
+  #                              ninja-build            \
+  #                              imagemagick
+  #       if: matrix.name == 'linux'
+
+  #     - uses: subosito/flutter-action@v2
+  #       with:
+  #         channel: 'stable'
+  #         flutter-version-file: pubspec.yaml
+  #         cache: true
+
+  #     - name: Get Flutter packages
+  #       run:  dart pub get
+
+  #     - name: Generate the Dart bindings for the Ouisync library
+  #       working-directory: ouisync/bindings/dart
+  #       run: dart tool/bindgen.dart
+
+  #     # Note that xvfb is used only on linux. On other platforms the tests are run without any
+  #     # special setup: https://github.com/marketplace/actions/setup-xvfb
+  #     - name: Run tests
+  #       uses: coactions/setup-xvfb@v1
+  #       with:
+  #         run: flutter test integration_test/ --dart-define OUISYNC_FLAVOR=itest --verbose

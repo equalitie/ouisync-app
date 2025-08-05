@@ -267,8 +267,8 @@ class RepoSecurityCubit extends Cubit<RepoSecurityState>
 
       Option<Password> newLocalPassword =
           newLocalSecretInput is LocalSecretManual
-              ? Some(newLocalSecretInput.password)
-              : None<Password>();
+          ? Some(newLocalSecretInput.password)
+          : None<Password>();
 
       emitUnlessClosed(
         state.copyWith(

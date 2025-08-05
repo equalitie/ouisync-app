@@ -31,15 +31,14 @@ class PlatformDhtSwitch extends StatelessWidget {
       BlocSelector<RepoCubit, RepoState, bool>(
         bloc: repository,
         selector: (state) => state.isDhtEnabled,
-        builder:
-            (context, value) => SwitchListTile.adaptive(
-              value: repository.state.isDhtEnabled,
-              title: title,
-              secondary: Icon(icon),
-              onChanged: (value) {
-                onToggle?.call(value);
-              },
-            ),
+        builder: (context, value) => SwitchListTile.adaptive(
+          value: repository.state.isDhtEnabled,
+          title: title,
+          secondary: Icon(icon),
+          onChanged: (value) {
+            onToggle?.call(value);
+          },
+        ),
       );
 
   AbstractSettingsTile buildMobileWidget(BuildContext context) =>

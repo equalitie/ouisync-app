@@ -60,95 +60,86 @@ class NetworkSection extends SettingsSection {
   Widget _buildConnectivityTypeTile(BuildContext context) =>
       BlocBuilder<PowerControl, PowerControlState>(
         bloc: powerControl,
-        builder:
-            (context, state) => SettingsTile(
-              leading: Icon(Icons.wifi),
-              title: Text(S.current.labelConnectionType, style: bodyStyle),
-              value: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    _connectivityTypeName(state.connectivityType),
-                    style: subtitleStyle,
-                  ),
-                  if (state.internetConnectivityDisabledReason != null)
-                    Text(
-                      state.internetConnectivityDisabledReason!,
-                      style: subtitleWarningStyle,
-                    ),
-                ],
+        builder: (context, state) => SettingsTile(
+          leading: Icon(Icons.wifi),
+          title: Text(S.current.labelConnectionType, style: bodyStyle),
+          value: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                _connectivityTypeName(state.connectivityType),
+                style: subtitleStyle,
               ),
-              trailing:
-                  (state.isInternetConnectivityEnabled ?? true)
-                      ? null
-                      : Icon(Icons.warning, color: Constants.warningColor),
-            ),
+              if (state.internetConnectivityDisabledReason != null)
+                Text(
+                  state.internetConnectivityDisabledReason!,
+                  style: subtitleWarningStyle,
+                ),
+            ],
+          ),
+          trailing: (state.isInternetConnectivityEnabled ?? true)
+              ? null
+              : Icon(Icons.warning, color: Constants.warningColor),
+        ),
       );
 
   Widget _buildPortForwardingTile(BuildContext context) =>
       BlocSelector<PowerControl, PowerControlState, bool>(
         bloc: powerControl,
         selector: (state) => state.userWantsPortForwardingEnabled,
-        builder:
-            (context, value) => SwitchSettingsTile(
-              value: value,
-              onChanged: (value) {
-                unawaited(powerControl.setPortForwardingEnabled(value));
-              },
-              title: InfoBuble(
-                child: Text(Strings.upNP, style: bodyStyle),
-                title: S.current.titleUPnP,
-                description: [TextSpan(text: S.current.messageInfoUPnP)],
-              ),
-              leading: Icon(Icons.router),
-            ),
+        builder: (context, value) => SwitchSettingsTile(
+          value: value,
+          onChanged: (value) {
+            unawaited(powerControl.setPortForwardingEnabled(value));
+          },
+          title: InfoBuble(
+            child: Text(Strings.upNP, style: bodyStyle),
+            title: S.current.titleUPnP,
+            description: [TextSpan(text: S.current.messageInfoUPnP)],
+          ),
+          leading: Icon(Icons.router),
+        ),
       );
 
   Widget _buildLocalDiscoveryTile(BuildContext context) =>
       BlocBuilder<PowerControl, PowerControlState>(
         bloc: powerControl,
-        builder:
-            (context, state) => SwitchSettingsTile(
-              value: state.userWantsLocalDiscoveryEnabled,
-              onChanged: (value) {
-                unawaited(powerControl.setLocalDiscoveryEnabled(value));
-              },
-              title: InfoBuble(
-                child: Text(S.current.messageLocalDiscovery, style: bodyStyle),
-                title: S.current.messageLocalDiscovery,
-                description: [
-                  TextSpan(text: S.current.messageInfoLocalDiscovery),
-                ],
-              ),
-              subtitle: () {
-                final text = powerControl.state.localDiscoveryDisabledReason;
-                return text != null
-                    ? Text(text, style: subtitleWarningStyle)
-                    : null;
-              }(),
-              leading: Icon(Icons.broadcast_on_personal),
-            ),
+        builder: (context, state) => SwitchSettingsTile(
+          value: state.userWantsLocalDiscoveryEnabled,
+          onChanged: (value) {
+            unawaited(powerControl.setLocalDiscoveryEnabled(value));
+          },
+          title: InfoBuble(
+            child: Text(S.current.messageLocalDiscovery, style: bodyStyle),
+            title: S.current.messageLocalDiscovery,
+            description: [TextSpan(text: S.current.messageInfoLocalDiscovery)],
+          ),
+          subtitle: () {
+            final text = powerControl.state.localDiscoveryDisabledReason;
+            return text != null
+                ? Text(text, style: subtitleWarningStyle)
+                : null;
+          }(),
+          leading: Icon(Icons.broadcast_on_personal),
+        ),
       );
 
   Widget _buildSyncOnMobileSwitch(BuildContext context) =>
       BlocSelector<PowerControl, PowerControlState, bool>(
         bloc: powerControl,
         selector: (state) => state.userWantsSyncOnMobileEnabled,
-        builder:
-            (context, value) => SwitchSettingsTile(
-              value: value,
-              onChanged: (value) {
-                unawaited(powerControl.setSyncOnMobileEnabled(value));
-              },
-              title: InfoBuble(
-                child: Text(S.current.messageSyncMobileData, style: bodyStyle),
-                title: S.current.messageSyncMobileData,
-                description: [
-                  TextSpan(text: S.current.messageInfoSyncMobileData),
-                ],
-              ),
-              leading: Icon(Icons.mobile_screen_share),
-            ),
+        builder: (context, value) => SwitchSettingsTile(
+          value: value,
+          onChanged: (value) {
+            unawaited(powerControl.setSyncOnMobileEnabled(value));
+          },
+          title: InfoBuble(
+            child: Text(S.current.messageSyncMobileData, style: bodyStyle),
+            title: S.current.messageSyncMobileData,
+            description: [TextSpan(text: S.current.messageInfoSyncMobileData)],
+          ),
+          leading: Icon(Icons.mobile_screen_share),
+        ),
       );
 
   List<Widget> _buildConnectivityInfoTiles(BuildContext context) => [
@@ -255,42 +246,40 @@ class NetworkSection extends SettingsSection {
   Widget _buildPeerListTile(BuildContext context) =>
       BlocBuilder<PeerSetCubit, PeerSet>(
         bloc: peerSet,
-        builder:
-            (context, state) => NavigationTile(
-              leading: Icon(Icons.people),
-              title: Text(S.current.labelPeers, style: bodyStyle),
-              value: Text(state.numConnected.toString(), style: subtitleStyle),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => PeersPage(session, peerSet),
-                  ),
-                );
-              },
-            ),
+        builder: (context, state) => NavigationTile(
+          leading: Icon(Icons.people),
+          title: Text(S.current.labelPeers, style: bodyStyle),
+          value: Text(state.numConnected.toString(), style: subtitleStyle),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => PeersPage(session, peerSet),
+              ),
+            );
+          },
+        ),
       );
 
   Widget _buildNatDetectionTile(BuildContext context) =>
       BlocBuilder<NatDetection, NatBehavior>(
         bloc: natDetection,
-        builder:
-            (context, state) => SettingsTile(
-              leading: Icon(Icons.nat),
-              title: InfoBuble(
-                child: Text(S.current.messageNATType, style: bodyStyle),
-                title: S.current.messageNATType,
-                description: [
-                  TextSpan(text: S.current.messageInfoNATType),
-                  Fields.linkTextSpan(
-                    context,
-                    '\n\n${S.current.messageNATOnWikipedia}',
-                    _launchNATOnWikipedia,
-                  ),
-                ],
+        builder: (context, state) => SettingsTile(
+          leading: Icon(Icons.nat),
+          title: InfoBuble(
+            child: Text(S.current.messageNATType, style: bodyStyle),
+            title: S.current.messageNATType,
+            description: [
+              TextSpan(text: S.current.messageInfoNATType),
+              Fields.linkTextSpan(
+                context,
+                '\n\n${S.current.messageNATOnWikipedia}',
+                _launchNATOnWikipedia,
               ),
-              value: Text(_natBehaviorText(state), style: subtitleStyle),
-            ),
+            ],
+          ),
+          value: Text(_natBehaviorText(state), style: subtitleStyle),
+        ),
       );
 
   void _launchNATOnWikipedia(BuildContext context) async {

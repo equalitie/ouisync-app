@@ -77,17 +77,16 @@ class PeerSet extends Equatable {
   }
 
   /// Number of connected peers
-  int get numConnected =>
-      peers
-          .map(
-            (peer) => switch (peer.state) {
-              PeerStateActive(id: final id) => id,
-              _ => null,
-            },
-          )
-          .nonNulls
-          .toSet()
-          .length;
+  int get numConnected => peers
+      .map(
+        (peer) => switch (peer.state) {
+          PeerStateActive(id: final id) => id,
+          _ => null,
+        },
+      )
+      .nonNulls
+      .toSet()
+      .length;
 
   @override
   List<Object> get props => [peers];

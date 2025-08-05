@@ -27,14 +27,12 @@ class _RepositorySecurityDesktopState extends State<RepositorySecurityDesktop> {
         ),
         ListTile(
           leading: const Icon(Icons.password_rounded),
-          title:
-              _isPasswordAvailable(_password)
-                  ? Text(S.current.messagePassword)
-                  : null,
-          subtitle:
-              _isPasswordAvailable(_password)
-                  ? _passwordLabel(context)
-                  : _authenticationPlaceholder(context),
+          title: _isPasswordAvailable(_password)
+              ? Text(S.current.messagePassword)
+              : null,
+          subtitle: _isPasswordAvailable(_password)
+              ? _passwordLabel(context)
+              : _authenticationPlaceholder(context),
         ),
       ],
     );
@@ -70,17 +68,14 @@ class _RepositorySecurityDesktopState extends State<RepositorySecurityDesktop> {
             Expanded(
               flex: 0,
               child: IconButton(
-                icon:
-                    _previewPassword
-                        ? const Icon(Constants.iconVisibilityOff)
-                        : const Icon(Constants.iconVisibilityOn),
+                icon: _previewPassword
+                    ? const Icon(Constants.iconVisibilityOff)
+                    : const Icon(Constants.iconVisibilityOn),
                 padding: EdgeInsetsDirectional.zero,
                 color: Theme.of(context).primaryColor,
-                onPressed:
-                    _isPasswordAvailable(_password)
-                        ? () =>
-                            setState(() => _previewPassword = !_previewPassword)
-                        : null,
+                onPressed: _isPasswordAvailable(_password)
+                    ? () => setState(() => _previewPassword = !_previewPassword)
+                    : null,
               ),
             ),
           ],
@@ -95,27 +90,26 @@ class _RepositorySecurityDesktopState extends State<RepositorySecurityDesktop> {
       PopupMenuButton(
         icon: const Icon(Icons.more_horiz_rounded),
         position: PopupMenuPosition.under,
-        itemBuilder:
-            (context) => <PopupMenuEntry<PasswordItem>>[
-              PopupMenuItem<PasswordItem>(
-                value: PasswordItem.copy,
-                child: Text(S.current.popupMenuItemCopyPassword),
-                onTap: () async {
-                  if (_password == null) return;
+        itemBuilder: (context) => <PopupMenuEntry<PasswordItem>>[
+          PopupMenuItem<PasswordItem>(
+            value: PasswordItem.copy,
+            child: Text(S.current.popupMenuItemCopyPassword),
+            onTap: () async {
+              if (_password == null) return;
 
-                  if (_password!.isEmpty) return;
+              if (_password!.isEmpty) return;
 
-                  await copyStringToClipboard(_password!);
-                  showSnackBar(S.current.messagePasswordCopiedClipboard);
-                },
-              ),
-              const PopupMenuDivider(),
-              PopupMenuItem<PasswordItem>(
-                value: PasswordItem.change,
-                child: Text(S.current.popupMenuItemChangePassword),
-                onTap: () {},
-              ),
-            ],
+              await copyStringToClipboard(_password!);
+              showSnackBar(S.current.messagePasswordCopiedClipboard);
+            },
+          ),
+          const PopupMenuDivider(),
+          PopupMenuItem<PasswordItem>(
+            value: PasswordItem.change,
+            child: Text(S.current.popupMenuItemChangePassword),
+            onTap: () {},
+          ),
+        ],
       ),
     ],
   );

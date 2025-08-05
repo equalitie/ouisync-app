@@ -19,13 +19,7 @@ import '../../cubits/repos.dart';
 import '../../utils/dirs.dart';
 import '../../utils/repo_path.dart' as repo_path;
 import '../../utils/utils.dart'
-    show
-        AppLogger,
-        Dialogs,
-        Dimensions,
-        Fields,
-        MoveEntriesActions,
-        MultiEntryActions;
+    show AppLogger, Dimensions, Fields, MoveEntriesActions, MultiEntryActions;
 import '../widgets.dart' show NegativeButton, PositiveButton;
 
 class EntriesActionsDialog extends StatefulWidget {
@@ -88,70 +82,71 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
   }
 
   @override
-  Widget build(BuildContext context) => BlocBuilder<ReposCubit, ReposState>(
+  Widget build(BuildContext ctx) => BlocBuilder<ReposCubit, ReposState>(
     bloc: widget.reposCubit,
-    builder:
-        (context, reposState) => Container(
-          key: bodyKey,
-          padding: Dimensions.paddingBottomSheet,
-          decoration: Dimensions.decorationBottomSheetAlternative,
-          child: IntrinsicHeight(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Dimensions.spacingVertical,
-                ..._getLayout(widget.originRepoCubit.entrySelectionCubit),
-                _selectActions(
-                  widget.parentContext,
-                  widget.reposCubit,
-                  widget.originRepoCubit,
-                  reposState,
-                  widget.reposCubit.navigation,
-                  widget.originRepoCubit.entrySelectionCubit,
-                  widget.entry,
-                  widget.sheetType,
-                  widget.dirs,
-                ),
-              ],
+    builder: (ctx, reposState) => Container(
+      key: bodyKey,
+      padding: Dimensions.paddingBottomSheet,
+      decoration: Dimensions.decorationBottomSheetAlternative,
+      child: IntrinsicHeight(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Dimensions.spacingVertical,
+            ..._getLayout(widget.originRepoCubit.entrySelectionCubit),
+            _selectActions(
+              widget.parentContext,
+              widget.reposCubit,
+              widget.originRepoCubit,
+              reposState,
+              widget.reposCubit.navigation,
+              widget.originRepoCubit.entrySelectionCubit,
+              widget.entry,
+              widget.sheetType,
+              widget.dirs,
             ),
-          ),
+          ],
         ),
+      ),
+    ),
   );
 
   List<Widget> _getLayout(EntrySelectionCubit entrySelectionCubit) =>
       widget.entry == null
-          ? [
-            _entriesCountLabel(entrySelectionCubit),
-            _sourceLabel(entrySelectionCubit),
-          ]
-          : [
-            Fields.iconLabel(
-              icon: Icons.drive_file_move_outlined,
-              text: repo_path.basename(widget.entry!.path),
+      ? [
+          _entriesCountLabel(entrySelectionCubit),
+          _sourceLabel(entrySelectionCubit),
+        ]
+      : [
+          Fields.iconLabel(
+            icon: Icons.drive_file_move_outlined,
+            text: repo_path.basename(widget.entry!.path),
+          ),
+          Text(
+            S.current.messageMoveEntryOrigin(
+              repo_path.dirname(widget.entry!.path),
             ),
-            Text(
-              S.current.messageMoveEntryOrigin(
-                repo_path.dirname(widget.entry!.path),
-              ),
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w800),
-              maxLines: 1,
-              softWrap: true,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ];
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w800),
+            maxLines: 1,
+            softWrap: true,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ];
 
   Widget _entriesCountLabel(EntrySelectionCubit entrySelectionCubit) =>
       BlocBuilder<EntrySelectionCubit, EntrySelectionState>(
         bloc: entrySelectionCubit,
         builder: (context, state) {
-          final totalDirs =
-              state.selectedEntries.whereType<DirectoryEntry>().length;
-          final totalFiles =
-              state.selectedEntries.whereType<FileEntry>().length;
+          final totalDirs = state.selectedEntries
+              .whereType<DirectoryEntry>()
+              .length;
+          final totalFiles = state.selectedEntries
+              .whereType<FileEntry>()
+              .length;
 
           return Fields.iconLabel(
             icon: Icons.folder_copy,
@@ -163,16 +158,15 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
   Widget _sourceLabel(EntrySelectionCubit entrySelectionCubit) =>
       BlocBuilder<EntrySelectionCubit, EntrySelectionState>(
         bloc: entrySelectionCubit,
-        builder:
-            (context, state) => Text(
-              S.current.messageMoveEntryOrigin(state.selectionOriginPath),
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w800),
-              maxLines: 1,
-              softWrap: true,
-              overflow: TextOverflow.ellipsis,
-            ),
+        builder: (context, state) => Text(
+          S.current.messageMoveEntryOrigin(state.selectionOriginPath),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w800),
+          maxLines: 1,
+          softWrap: true,
+          overflow: TextOverflow.ellipsis,
+        ),
       );
 
   Widget _selectActions(
@@ -187,7 +181,7 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
     Dirs dirs,
   ) => BlocBuilder<NavigationCubit, NavigationState>(
     bloc: navigationCubit,
-    builder: (context, state) {
+    builder: (ctx, state) {
       final moveEntriesActions = MoveEntriesActions(
         context,
         reposCubit: reposCubit,
@@ -197,26 +191,26 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
 
       return entry == null
           ? _multipleEntriesActions(
-            context,
-            entrySelectionCubit!,
-            reposCubit,
-            originRepoCubit,
-            reposState,
-            moveEntriesActions,
-            sheetType,
-            dirs,
-          )
+              context,
+              entrySelectionCubit!,
+              reposCubit,
+              originRepoCubit,
+              reposState,
+              moveEntriesActions,
+              sheetType,
+              dirs,
+            )
           : _singleEntryActions(
-            context,
-            state,
-            entrySelectionCubit!,
-            reposCubit,
-            originRepoCubit,
-            reposState,
-            moveEntriesActions,
-            sheetType,
-            entry,
-          );
+              context,
+              state,
+              entrySelectionCubit!,
+              reposCubit,
+              originRepoCubit,
+              reposState,
+              moveEntriesActions,
+              sheetType,
+              entry,
+            );
     },
   );
 
@@ -242,12 +236,9 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
     Future<void> positiveAction() async {
       cancelAndDismiss(moveEntriesActions, originRepoCubit);
 
-      await Dialogs.executeFutureWithLoadingDialog(
-        null,
-        moveEntriesActions.copyOrMoveSingleEntry(
-          destinationRepoCubit: reposState.current!.cubit!,
-          entry: entry,
-        ),
+      await moveEntriesActions.copyOrMoveSingleEntry(
+        destinationRepoCubit: reposState.current!.cubit!,
+        entry: entry,
       );
     }
 
@@ -350,9 +341,9 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
   List<Widget> _actions(
     bool enableAction,
     double aspectRatio,
-    void Function()? positiveAction,
+    Future<void> Function()? positiveAction,
     String positiveText,
-    void Function()? negativeAction,
+    void Function() negativeAction,
     String negativeText,
     bool isDangerButton,
   ) => [
@@ -360,7 +351,9 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
       buttonsAspectRatio: aspectRatio,
       buttonConstrains: Dimensions.sizeConstrainsBottomDialogAction,
       text: negativeText,
-      onPressed: negativeAction,
+      onPressed: () async {
+        negativeAction();
+      },
     ),
     PositiveButton(
       key: ValueKey('move_entry'),

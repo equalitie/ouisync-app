@@ -33,59 +33,53 @@ class FolderContentsBar extends StatefulWidget {
 
 class _FolderContentsBarState extends State<FolderContentsBar> {
   @override
-  Widget build(BuildContext context) =>
-      BlocBuilder<EntrySelectionCubit, EntrySelectionState>(
-        bloc: widget.entrySelectionCubit,
-        builder:
-            (context, state) => Container(
-              padding: EdgeInsetsDirectional.symmetric(
-                vertical: 4.0,
-                horizontal: 2.0,
-              ),
-              decoration: _getDecorator(state),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  if (widget.hasContents)
-                    SortContentsBar(
-                      sortListCubit: widget.sortListCubit,
-                      reposState: widget.reposCubit.state,
-                    ),
-                  Expanded(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        if (widget.hasContents ||
-                            state.status == SelectionStatus.on)
-                          SelectEntriesButton(
-                            repoCubit: widget.repoCubit,
-                            reposCubit: widget.reposCubit,
-                          ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+  Widget build(
+    BuildContext context,
+  ) => BlocBuilder<EntrySelectionCubit, EntrySelectionState>(
+    bloc: widget.entrySelectionCubit,
+    builder: (context, state) => Container(
+      padding: EdgeInsetsDirectional.symmetric(vertical: 4.0, horizontal: 2.0),
+      decoration: _getDecorator(state),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          if (widget.hasContents)
+            SortContentsBar(
+              sortListCubit: widget.sortListCubit,
+              reposState: widget.reposCubit.state,
             ),
-      );
+          Expanded(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                if (widget.hasContents || state.status == SelectionStatus.on)
+                  SelectEntriesButton(
+                    repoCubit: widget.repoCubit,
+                    reposCubit: widget.reposCubit,
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
 
   Decoration _getDecorator(EntrySelectionState state) => BoxDecoration(
     borderRadius: BorderRadius.only(
       bottomLeft: Radius.circular(8.0),
       bottomRight: Radius.circular(8.0),
     ),
-    border:
-        state.status == SelectionStatus.on
-            ? Border(
-              bottom: BorderSide(
-                color: Colors.black26,
-                strokeAlign: BorderSide.strokeAlignInside,
-              ),
-            )
-            : null,
-    color:
-        state.status == SelectionStatus.on
-            ? context.theme.secondaryHeaderColor
-            : null,
+    border: state.status == SelectionStatus.on
+        ? Border(
+            bottom: BorderSide(
+              color: Colors.black26,
+              strokeAlign: BorderSide.strokeAlignInside,
+            ),
+          )
+        : null,
+    color: state.status == SelectionStatus.on
+        ? context.theme.secondaryHeaderColor
+        : null,
   );
 }
