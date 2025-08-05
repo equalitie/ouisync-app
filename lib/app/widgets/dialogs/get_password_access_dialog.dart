@@ -37,20 +37,19 @@ class GetPasswordAccessDialog extends StatefulWidget {
   ) async {
     return await showDialog<Access>(
       context: context,
-      builder:
-          (BuildContext context) => ScaffoldMessenger(
-            child: Scaffold(
-              backgroundColor: Colors.transparent,
-              body: ActionsDialog(
-                title: S.current.messageUnlockRepository(repoCubit.name),
-                body: GetPasswordAccessDialog(
-                  repoCubit: repoCubit,
-                  settings: settings,
-                  session: session,
-                ),
-              ),
+      builder: (BuildContext context) => ScaffoldMessenger(
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: ActionsDialog(
+            title: S.current.messageUnlockRepository(repoCubit.name),
+            body: GetPasswordAccessDialog(
+              repoCubit: repoCubit,
+              settings: settings,
+              session: session,
             ),
           ),
+        ),
+      ),
     );
   }
 
@@ -121,10 +120,9 @@ class _State extends State<GetPasswordAccessDialog> with AppLogger {
         size: Dimensions.sizeIconSmall,
       ),
       color: Colors.black,
-      onPressed:
-          () => setState(() {
-            obscurePassword = !obscurePassword;
-          }),
+      onPressed: () => setState(() {
+        obscurePassword = !obscurePassword;
+      }),
     ),
     validator: validateNoEmptyMaybeRegExpr(
       emptyError: S.current.messageErrorRepositoryPasswordValidation,

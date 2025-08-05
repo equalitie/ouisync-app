@@ -24,26 +24,29 @@ void main() {
     await File(p.join(src.path, 'dir/b.txt')).create(recursive: true);
     await Directory(p.join(src.path, 'empty')).create(recursive: true);
     await Link(p.join(src.path, 'inside-rel')).create('a.txt');
-    await Link(p.join(src.path, 'inside-abs'))
-        .create(p.join(src.path, 'a.txt'));
+    await Link(
+      p.join(src.path, 'inside-abs'),
+    ).create(p.join(src.path, 'a.txt'));
     await Link(p.join(src.path, 'outside-rel')).create('../c.txt');
-    await Link(p.join(src.path, 'outside-abs'))
-        .create(p.join(temp.path, 'c.txt'));
+    await Link(
+      p.join(src.path, 'outside-abs'),
+    ).create(p.join(temp.path, 'c.txt'));
 
     await migrateFiles(src, dst);
 
     expect(
-        await _collectContent(dst),
-        equals([
-          Entity('a.txt'),
-          Entity('dir'),
-          Entity(p.join('dir', 'b.txt')),
-          Entity('empty'),
-          Entity('inside-abs', p.join(dst.path, 'a.txt')),
-          Entity('inside-rel', 'a.txt'),
-          Entity('outside-abs', p.join(temp.path, 'c.txt')),
-          Entity('outside-rel', p.join(temp.path, 'c.txt')),
-        ]));
+      await _collectContent(dst),
+      equals([
+        Entity('a.txt'),
+        Entity('dir'),
+        Entity(p.join('dir', 'b.txt')),
+        Entity('empty'),
+        Entity('inside-abs', p.join(dst.path, 'a.txt')),
+        Entity('inside-rel', 'a.txt'),
+        Entity('outside-abs', p.join(temp.path, 'c.txt')),
+        Entity('outside-rel', p.join(temp.path, 'c.txt')),
+      ]),
+    );
 
     expect(await src.exists(), isFalse);
   });
@@ -68,18 +71,17 @@ class Entity {
   String toString() => target.isNotEmpty ? '$path -> $target' : path;
 }
 
-Future<List<Entity>> _collectContent(
-  Directory dir,
-) async {
-  final content = await dir
-      .list(recursive: true, followLinks: false)
-      .asyncMap(
-        (e) async => Entity(
-          p.relative(e.path, from: dir.path),
-          (e is Link) ? await e.target() : '',
-        ),
-      )
-      .toList();
+Future<List<Entity>> _collectContent(Directory dir) async {
+  final content =
+      await dir
+          .list(recursive: true, followLinks: false)
+          .asyncMap(
+            (e) async => Entity(
+              p.relative(e.path, from: dir.path),
+              (e is Link) ? await e.target() : '',
+            ),
+          )
+          .toList();
   content.sort((a, b) => a.path.compareTo(b.path));
 
   return content;

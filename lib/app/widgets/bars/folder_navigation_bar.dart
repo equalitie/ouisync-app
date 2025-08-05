@@ -64,10 +64,9 @@ class FolderNavigationBar extends StatelessWidget {
           _repo.navigateTo(parent);
         }
       },
-      child:
-          path == Strings.root
-              ? const Icon(Icons.lock_rounded)
-              : const Icon(Icons.arrow_back),
+      child: path == Strings.root
+          ? const Icon(Icons.lock_rounded)
+          : const Icon(Icons.arrow_back),
     );
   }
 }

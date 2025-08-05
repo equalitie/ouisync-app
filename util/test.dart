@@ -1,4 +1,3 @@
-import 'package:pub_semver/pub_semver.dart';
 import 'package:test/test.dart';
 import 'release.dart';
 

@@ -12,4 +12,5 @@ key.properties
 **/*.keystore
 **/*.jks
 
+build
 .cxx

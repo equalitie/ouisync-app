@@ -28,32 +28,39 @@ void main() {
   test('create repository with blind token', () async {
     final token = await parseShareToken(deps.reposCubit, tokenString);
     expect(
-        token,
-        isA<ShareTokenValid>()
-            .having((t) => t.value, 'value', isNotNull)
-            .having((t) => t.error, 'error', isNull));
+      token,
+      isA<ShareTokenValid>()
+          .having((t) => t.value, 'value', isNotNull)
+          .having((t) => t.error, 'error', isNull),
+    );
 
-    final tokenAccessMode = await deps.session
-        .getShareTokenAccessMode((token as ShareTokenValid).value);
+    final tokenAccessMode = await deps.session.getShareTokenAccessMode(
+      (token as ShareTokenValid).value,
+    );
     expect(tokenAccessMode, equals(AccessMode.blind));
 
-    final suggestedRepoName =
-        await deps.session.getShareTokenSuggestedName(token.value);
+    final suggestedRepoName = await deps.session.getShareTokenSuggestedName(
+      token.value,
+    );
 
     expect(
       repoCreationCubit.state.substate,
       isA<RepoCreationPending>()
           .having((s) => s.location, 'location', isNull)
-          .having((s) => s.setLocalSecret, 'setLocalSecret',
-              isA<SetLocalSecretKeyAndSalt>())
+          .having(
+            (s) => s.setLocalSecret,
+            'setLocalSecret',
+            isA<SetLocalSecretKeyAndSalt>(),
+          )
           .having((s) => s.nameError, 'nameError', isNull),
     );
 
     await repoCreationCubit.setToken(token.value);
 
     repoCreationCubit.nameController.text = suggestedRepoName;
-    await repoCreationCubit
-        .waitUntil((state) => state.substate is RepoCreationValid);
+    await repoCreationCubit.waitUntil(
+      (state) => state.substate is RepoCreationValid,
+    );
 
     expect(repoCreationCubit.state.substate, isA<RepoCreationValid>());
     expect(repoCreationCubit.state.name, equals(suggestedRepoName));

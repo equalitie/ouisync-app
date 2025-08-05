@@ -2,8 +2,7 @@ import 'dart:io' as io;
 
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/material.dart'
-    show AlertDialog, Axis, BuildContext, Flex, showDialog;
+import 'package:flutter/material.dart' show BuildContext;
 import 'package:ouisync/ouisync.dart' show EntryType;
 import 'package:path/path.dart' as p;
 import 'package:permission_handler/permission_handler.dart';
@@ -11,17 +10,10 @@ import 'package:permission_handler/permission_handler.dart';
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart' show RepoCubit;
 import '../models/models.dart' show FileEntry;
-import '../widgets/widgets.dart' show DisambiguationAction, ReplaceKeepEntry;
+import '../widgets/widgets.dart'
+    show RenameOrReplaceResult, RenameOrReplaceEntryDialog;
 import 'platform/platform.dart' show PlatformValues;
-import 'utils.dart'
-    show
-        AppLogger,
-        AppThemeExtension,
-        Constants,
-        Fields,
-        Permissions,
-        showSnackBar,
-        ThemeGetter;
+import 'utils.dart' show AppLogger, Constants, Permissions, showSnackBar;
 
 enum FileDestination { device, ouisync }
 
@@ -70,16 +62,18 @@ class FileIO with AppLogger {
           continue;
         }
 
-        final replaceOrKeepEntry = await _confirmKeepOrReplaceEntry(
+        final replaceOrKeepEntry = await RenameOrReplaceEntryDialog.show(
           context,
-          fileName: fileName,
+          title: S.current.titleAddFile,
+          entryName: fileName,
+          entryType: EntryType.file,
         );
 
         if (replaceOrKeepEntry == null) {
           continue;
         }
 
-        if (replaceOrKeepEntry == DisambiguationAction.replace) {
+        if (replaceOrKeepEntry == RenameOrReplaceResult.replace) {
           await repoCubit.replaceFile(
             filePath: destinationFilePath,
             length: srcFile.size,
@@ -89,7 +83,7 @@ class FileIO with AppLogger {
           continue;
         }
 
-        if (replaceOrKeepEntry == DisambiguationAction.keep) {
+        if (replaceOrKeepEntry == RenameOrReplaceResult.rename) {
           final newPath = await _renameFileWithVersion(
             fileName,
             parentPath,
@@ -105,27 +99,6 @@ class FileIO with AppLogger {
       }
     }
   }
-
-  Future<DisambiguationAction?> _confirmKeepOrReplaceEntry(
-    BuildContext context, {
-    required String fileName,
-  }) async => showDialog<DisambiguationAction>(
-    context: context,
-    builder:
-        (BuildContext context) => AlertDialog(
-          title: Flex(
-            direction: Axis.horizontal,
-            children: [
-              Fields.constrainedText(
-                S.current.titleAddFile,
-                style: context.theme.appTextStyle.titleMedium,
-                maxLines: 2,
-              ),
-            ],
-          ),
-          content: ReplaceKeepEntry(name: fileName, type: EntryType.file),
-        ),
-  );
 
   Future<void> saveFileToDevice(
     FileEntry entry, [
@@ -216,10 +189,9 @@ class FileIO with AppLogger {
         return (parentPath: '', destinationPath: '', canceled: true);
       }
 
-      final dirName =
-          fileName != null
-              ? p.dirname(destinationFilePath)
-              : destinationFilePath;
+      final dirName = fileName != null
+          ? p.dirname(destinationFilePath)
+          : destinationFilePath;
       parentPath = p.basename(dirName);
     } else {
       parentPath = p.basename(defaultPath);
@@ -248,15 +220,14 @@ class FileIO with AppLogger {
   }
 
   Future<String?> _getDesktopPath(String parentPath, String? fileName) async {
-    final basePath =
-        (fileName ?? '').isEmpty
-            ? await FilePicker.platform.getDirectoryPath(
-              initialDirectory: parentPath,
-            )
-            : await FilePicker.platform.saveFile(
-              fileName: fileName,
-              initialDirectory: parentPath,
-            );
+    final basePath = (fileName ?? '').isEmpty
+        ? await FilePicker.platform.getDirectoryPath(
+            initialDirectory: parentPath,
+          )
+        : await FilePicker.platform.saveFile(
+            fileName: fileName,
+            initialDirectory: parentPath,
+          );
 
     return basePath;
   }
@@ -290,10 +261,9 @@ class FileIO with AppLogger {
     final newFileName = '$name (${versions += 1})$extension';
     final newDestinationPath = p.join(destinationPath, newFileName);
 
-    final exist =
-        destination == FileDestination.device
-            ? io.File(newDestinationPath).exists()
-            : repoCubit.entryExists(newDestinationPath);
+    final exist = destination == FileDestination.device
+        ? io.File(newDestinationPath).exists()
+        : repoCubit.entryExists(newDestinationPath);
 
     if (await exist) {
       return _renameFile(

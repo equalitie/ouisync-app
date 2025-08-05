@@ -10,7 +10,12 @@ import 'package:ouisync_app/app/utils/utils.dart' show CacheServers;
 import 'package:ouisync/ouisync.dart' show Repository;
 import 'package:ouisync_app/app/utils/repo_path.dart' as repo_path;
 import 'package:ouisync_app/app/cubits/cubits.dart'
-    show EntryBottomSheetCubit, EntrySelectionCubit, NavigationCubit, RepoCubit;
+    show
+        EntryBottomSheetCubit,
+        EntrySelectionCubit,
+        NavigationCubit,
+        RepoCubit,
+        MountCubit;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../utils.dart';
@@ -64,6 +69,8 @@ void main() {
 
     final cacheServers = CacheServers(deps.session);
 
+    final mountCubit = MountCubit(deps.session, deps.dirs)..init();
+
     originRepoCubit = await RepoCubit.create(
       repo: originRepo,
       session: deps.session,
@@ -71,6 +78,7 @@ void main() {
       entrySelection: EntrySelectionCubit(),
       bottomSheet: EntryBottomSheetCubit(),
       cacheServers: cacheServers,
+      mountCubit: mountCubit,
     );
 
     destinationRepoCubit = await RepoCubit.create(
@@ -80,6 +88,7 @@ void main() {
       entrySelection: EntrySelectionCubit(),
       bottomSheet: EntryBottomSheetCubit(),
       cacheServers: cacheServers,
+      mountCubit: mountCubit,
     );
 
     // Create 1 folder in originRepo
@@ -168,379 +177,367 @@ void main() {
 
   testWidgets(
     'Copy all entries from one repo root to another repo root',
-    (tester) => tester.runAsync(
-      () async {
-        await tester.pumpWidget(testApp(deps.createMainPage()));
-        await tester.pumpAndSettle();
-        final BuildContext context = tester.element(find.byType(MainPage));
+    (tester) => tester.runAsync(() async {
+      await tester.pumpWidget(testApp(deps.createMainPage()));
+      await tester.pumpAndSettle();
+      final BuildContext context = tester.element(find.byType(MainPage));
 
-        // All contents selected
-        {
-          await _selectEntries(
-            originRepoCubit,
-            [file0, file1, file2, file3, folder1],
-          );
+      // All contents selected
+      {
+        await _selectEntries(originRepoCubit, [
+          file0,
+          file1,
+          file2,
+          file3,
+          folder1,
+        ]);
 
-          final selectedEntries = originRepoCubit.entrySelectionCubit.entries;
+        final selectedEntries = originRepoCubit.entrySelectionCubit.entries;
 
-          // Expect 5 selected
-          expect(selectedEntries, hasLength(5));
+        // Expect 5 selected
+        expect(selectedEntries, hasLength(5));
 
-          // Expect all selected: /file0-3.txt, /folder1
-          expect(selectedEntries, equals(expectedAllSelected));
-        }
+        // Expect all selected: /file0-3.txt, /folder1
+        expect(selectedEntries, equals(expectedAllSelected));
+      }
 
-        // Copy all entries form origin to destination root
-        {
-          final result =
-              await originRepoCubit.entrySelectionCubit.copyEntriesTo(
-            context,
-            destinationRepoCubit: destinationRepoCubit,
-            destinationPath: '/',
-          );
-          expect(result, equals(true));
+      // Copy all entries form origin to destination root
+      {
+        final result = await originRepoCubit.entrySelectionCubit.copyEntriesTo(
+          context,
+          destinationRepoCubit: destinationRepoCubit,
+          destinationPath: '/',
+        );
+        expect(result, equals(true));
 
-          final destinationContents = await _getPathContents(
-            destinationRepoCubit,
-            '/',
-            <FileSystemEntry>[],
-          ).then((value) => value.map((e) => e.path).toList());
+        final destinationContents = await _getPathContents(
+          destinationRepoCubit,
+          '/',
+          <FileSystemEntry>[],
+        ).then((value) => value.map((e) => e.path).toList());
 
-          // Expect all the contents copied to destination root
-          expect(destinationContents, expectedAllContents);
+        // Expect all the contents copied to destination root
+        expect(destinationContents, expectedAllContents);
 
-          final originContents = await _getPathContents(
-            originRepoCubit,
-            '/',
-            <FileSystemEntry>[],
-          ).then((value) => value.map((e) => e.path).toList());
+        final originContents = await _getPathContents(
+          originRepoCubit,
+          '/',
+          <FileSystemEntry>[],
+        ).then((value) => value.map((e) => e.path).toList());
 
-          // Expect all the original contents still in origin
-          expect(originContents, expectedAllContents);
-        }
-      },
-    ),
+        // Expect all the original contents still in origin
+        expect(originContents, expectedAllContents);
+      }
+    }),
   );
 
   testWidgets(
     'Move all entries from one repo root to another repo root, then copy them back',
-    (tester) => tester.runAsync(
-      () async {
-        await tester.pumpWidget(testApp(deps.createMainPage()));
-        await tester.pumpAndSettle();
-        final BuildContext context = tester.element(find.byType(MainPage));
+    (tester) => tester.runAsync(() async {
+      await tester.pumpWidget(testApp(deps.createMainPage()));
+      await tester.pumpAndSettle();
+      final BuildContext context = tester.element(find.byType(MainPage));
 
-        //Select all entries in root
-        {
-          await _selectEntries(
-            originRepoCubit,
-            [file0, file1, file2, file3, folder1],
-          );
+      //Select all entries in root
+      {
+        await _selectEntries(originRepoCubit, [
+          file0,
+          file1,
+          file2,
+          file3,
+          folder1,
+        ]);
 
-          final selectedEntries = originRepoCubit.entrySelectionCubit.entries;
+        final selectedEntries = originRepoCubit.entrySelectionCubit.entries;
 
-          // Expect 10 selected: /folder1, /folder1/file0-3.txt, /folder1/folder2, /folder1/folder2/file4-7.txt
-          expect(selectedEntries, hasLength(5));
+        // Expect 10 selected: /folder1, /folder1/file0-3.txt, /folder1/folder2, /folder1/folder2/file4-7.txt
+        expect(selectedEntries, hasLength(5));
 
-          // Expect all selected: /folder1, /folder1/file0-3.txt, /folder1/folder2, /folder1/folder2/file4-7.txt
-          expect(selectedEntries, equals(expectedAllSelected));
-        }
+        // Expect all selected: /folder1, /folder1/file0-3.txt, /folder1/folder2, /folder1/folder2/file4-7.txt
+        expect(selectedEntries, equals(expectedAllSelected));
+      }
 
-        // Move all entries form origin root to destination root
-        {
-          final result =
-              await originRepoCubit.entrySelectionCubit.moveEntriesTo(
-            context,
-            destinationRepoCubit: destinationRepoCubit,
-            destinationPath: '/',
-          );
-          expect(result, equals(true));
+      // Move all entries form origin root to destination root
+      {
+        final result = await originRepoCubit.entrySelectionCubit.moveEntriesTo(
+          context,
+          destinationRepoCubit: destinationRepoCubit,
+          destinationPath: '/',
+        );
+        expect(result, equals(true));
 
-          final destinationContents = await _getPathContents(
-            destinationRepoCubit,
-            '/',
-            <FileSystemEntry>[],
-          ).then((value) => value.map((e) => e.path).toList());
+        final destinationContents = await _getPathContents(
+          destinationRepoCubit,
+          '/',
+          <FileSystemEntry>[],
+        ).then((value) => value.map((e) => e.path).toList());
 
-          // Expect all the contents moved to destination root
-          expect(destinationContents, expectedAllContents);
+        // Expect all the contents moved to destination root
+        expect(destinationContents, expectedAllContents);
 
-          final originContents = await _getPathContents(
-            originRepoCubit,
-            '/',
-            <FileSystemEntry>[],
-          );
+        final originContents = await _getPathContents(
+          originRepoCubit,
+          '/',
+          <FileSystemEntry>[],
+        );
 
-          // Expect no entries left in origin after moving to destination
-          expect(originContents.isEmpty, equals(true));
-        }
+        // Expect no entries left in origin after moving to destination
+        expect(originContents.isEmpty, equals(true));
+      }
 
-        // Select all the entries in the destination
-        {
-          await destinationRepoCubit.navigateTo('/');
+      // Select all the entries in the destination
+      {
+        await destinationRepoCubit.navigateTo('/');
 
-          await _selectEntries(
-            destinationRepoCubit,
-            [file0, file1, file2, file3, folder1],
-          );
+        await _selectEntries(destinationRepoCubit, [
+          file0,
+          file1,
+          file2,
+          file3,
+          folder1,
+        ]);
 
-          final selectedEntries =
-              destinationRepoCubit.entrySelectionCubit.entries;
+        final selectedEntries =
+            destinationRepoCubit.entrySelectionCubit.entries;
 
-          // Expect 10 selected: /folder1, /folder1/file0-3.txt, /folder1/folder2, /folder1/folder2/file4-7.txt
-          expect(selectedEntries, hasLength(5));
+        // Expect 10 selected: /folder1, /folder1/file0-3.txt, /folder1/folder2, /folder1/folder2/file4-7.txt
+        expect(selectedEntries, hasLength(5));
 
-          // Expect all selected: /folder1, /folder1/file0-3.txt, /folder1/folder2, /folder1/folder2/file4-7.txt
-          expect(selectedEntries, equals(expectedAllSelected));
-        }
+        // Expect all selected: /folder1, /folder1/file0-3.txt, /folder1/folder2, /folder1/folder2/file4-7.txt
+        expect(selectedEntries, equals(expectedAllSelected));
+      }
 
-        // Copy all entries form destination back to origin root
-        {
-          final result =
-              await destinationRepoCubit.entrySelectionCubit.copyEntriesTo(
-            context,
-            destinationRepoCubit: originRepoCubit,
-            destinationPath: '/',
-          );
-          expect(result, equals(true));
+      // Copy all entries form destination back to origin root
+      {
+        final result = await destinationRepoCubit.entrySelectionCubit
+            .copyEntriesTo(
+              context,
+              destinationRepoCubit: originRepoCubit,
+              destinationPath: '/',
+            );
+        expect(result, equals(true));
 
-          final destinationContents = await _getPathContents(
-            originRepoCubit,
-            '/',
-            <FileSystemEntry>[],
-          ).then((value) => value.map((e) => e.path).toList());
+        final destinationContents = await _getPathContents(
+          originRepoCubit,
+          '/',
+          <FileSystemEntry>[],
+        ).then((value) => value.map((e) => e.path).toList());
 
-          // Expect all the contents copied back to origin root
-          expect(destinationContents, expectedAllContents);
+        // Expect all the contents copied back to origin root
+        expect(destinationContents, expectedAllContents);
 
-          final originContents = await _getPathContents(
-            destinationRepoCubit,
-            '/',
-            <FileSystemEntry>[],
-          ).then((value) => value.map((e) => e.path).toList());
+        final originContents = await _getPathContents(
+          destinationRepoCubit,
+          '/',
+          <FileSystemEntry>[],
+        ).then((value) => value.map((e) => e.path).toList());
 
-          // Expect all the original contents still in destination
-          expect(originContents, expectedAllContents);
-        }
-      },
-    ),
+        // Expect all the original contents still in destination
+        expect(originContents, expectedAllContents);
+      }
+    }),
   );
 
   testWidgets(
     'Copy one file from one repo to another repo, no folder selected',
-    (tester) => tester.runAsync(
-      () async {
-        await tester.pumpWidget(testApp(deps.createMainPage()));
-        await tester.pumpAndSettle();
-        final BuildContext context = tester.element(find.byType(MainPage));
+    (tester) => tester.runAsync(() async {
+      await tester.pumpWidget(testApp(deps.createMainPage()));
+      await tester.pumpAndSettle();
+      final BuildContext context = tester.element(find.byType(MainPage));
 
-        // Select just /folder1/file7.txt
-        {
-          await originRepoCubit.navigateTo('/folder1');
-          await _selectEntries(originRepoCubit, [folder1file7]);
+      // Select just /folder1/file7.txt
+      {
+        await originRepoCubit.navigateTo('/folder1');
+        await _selectEntries(originRepoCubit, [folder1file7]);
 
-          final selectedEntries = originRepoCubit.entrySelectionCubit.entries;
+        final selectedEntries = originRepoCubit.entrySelectionCubit.entries;
 
-          // Expect 1 selected: /folder1/file7.txt
-          expect(selectedEntries, hasLength(1));
+        // Expect 1 selected: /folder1/file7.txt
+        expect(selectedEntries, hasLength(1));
 
-          // Expect selected: /folder1/file7.txt
-          expect(selectedEntries, equals(expectedFolder1File7Selected));
-        }
+        // Expect selected: /folder1/file7.txt
+        expect(selectedEntries, equals(expectedFolder1File7Selected));
+      }
 
-        // Move just /folder1/file7.txt
-        {
-          final result =
-              await originRepoCubit.entrySelectionCubit.copyEntriesTo(
-            context,
-            destinationRepoCubit: destinationRepoCubit,
-            destinationPath: '/',
-          );
-          expect(result, equals(true));
+      // Move just /folder1/file7.txt
+      {
+        final result = await originRepoCubit.entrySelectionCubit.copyEntriesTo(
+          context,
+          destinationRepoCubit: destinationRepoCubit,
+          destinationPath: '/',
+        );
+        expect(result, equals(true));
 
-          final destinationContents = await _getPathContents(
-            destinationRepoCubit,
-            '/',
-            <FileSystemEntry>[],
-          ).then((value) => value.map((e) => e.path).toList());
+        final destinationContents = await _getPathContents(
+          destinationRepoCubit,
+          '/',
+          <FileSystemEntry>[],
+        ).then((value) => value.map((e) => e.path).toList());
 
-          // Expect only file7.txt copied to destination root
-          expect(destinationContents, expectedFolder1File7Contents);
+        // Expect only file7.txt copied to destination root
+        expect(destinationContents, expectedFolder1File7Contents);
 
-          final originContents = await _getPathContents(
-            originRepoCubit,
-            '/',
-            <FileSystemEntry>[],
-          ).then((value) => value.map((e) => e.path).toList());
+        final originContents = await _getPathContents(
+          originRepoCubit,
+          '/',
+          <FileSystemEntry>[],
+        ).then((value) => value.map((e) => e.path).toList());
 
-          // Expect all the original contents still in origin
-          expect(originContents, expectedAllContents);
-        }
-      },
-    ),
+        // Expect all the original contents still in origin
+        expect(originContents, expectedAllContents);
+      }
+    }),
   );
 
   testWidgets(
     'Move one file from one repo to another repo, no folder selected',
-    (tester) => tester.runAsync(
-      () async {
-        await tester.pumpWidget(testApp(deps.createMainPage()));
-        await tester.pumpAndSettle();
-        final BuildContext context = tester.element(find.byType(MainPage));
+    (tester) => tester.runAsync(() async {
+      await tester.pumpWidget(testApp(deps.createMainPage()));
+      await tester.pumpAndSettle();
+      final BuildContext context = tester.element(find.byType(MainPage));
 
-        // Select just /folder1/file7.txt
-        {
-          await originRepoCubit.navigateTo('/folder1');
-          await _selectEntries(originRepoCubit, [folder1file7]);
+      // Select just /folder1/file7.txt
+      {
+        await originRepoCubit.navigateTo('/folder1');
+        await _selectEntries(originRepoCubit, [folder1file7]);
 
-          final selectedEntries = originRepoCubit.entrySelectionCubit.entries;
+        final selectedEntries = originRepoCubit.entrySelectionCubit.entries;
 
-          // Expect 1 selected: /folder1/file7.txt
-          expect(selectedEntries, hasLength(1));
+        // Expect 1 selected: /folder1/file7.txt
+        expect(selectedEntries, hasLength(1));
 
-          // Expect selected: /folder1/file7.txt
-          expect(selectedEntries, equals(expectedFolder1File7Selected));
-        }
+        // Expect selected: /folder1/file7.txt
+        expect(selectedEntries, equals(expectedFolder1File7Selected));
+      }
 
-        // Move just /folder1/file7.txt
-        {
-          final result =
-              await originRepoCubit.entrySelectionCubit.moveEntriesTo(
-            context,
-            destinationRepoCubit: destinationRepoCubit,
-            destinationPath: '/',
-          );
-          expect(result, equals(true));
+      // Move just /folder1/file7.txt
+      {
+        final result = await originRepoCubit.entrySelectionCubit.moveEntriesTo(
+          context,
+          destinationRepoCubit: destinationRepoCubit,
+          destinationPath: '/',
+        );
+        expect(result, equals(true));
 
-          final destinationContents = await _getPathContents(
-            destinationRepoCubit,
-            '/',
-            <FileSystemEntry>[],
-          ).then((value) => value.map((e) => e.path).toList());
+        final destinationContents = await _getPathContents(
+          destinationRepoCubit,
+          '/',
+          <FileSystemEntry>[],
+        ).then((value) => value.map((e) => e.path).toList());
 
-          // Expect only file7.txt moved to destination root
-          expect(
-            destinationContents,
-            expectedFolder1File7Contents,
-          );
+        // Expect only file7.txt moved to destination root
+        expect(destinationContents, expectedFolder1File7Contents);
 
-          final originContents = await _getPathContents(
-            originRepoCubit,
-            '/',
-            <FileSystemEntry>[],
-          ).then((value) => value.map((e) => e.path).toList());
+        final originContents = await _getPathContents(
+          originRepoCubit,
+          '/',
+          <FileSystemEntry>[],
+        ).then((value) => value.map((e) => e.path).toList());
 
-          // Expect only /folder1/file7.txt removed from origin contents
-          expect(originContents, expectedFolder1File7OriginContents);
-        }
-      },
-    ),
+        // Expect only /folder1/file7.txt removed from origin contents
+        expect(originContents, expectedFolder1File7OriginContents);
+      }
+    }),
   );
 
   testWidgets(
     'Copy one folder from one repo to another repo, all contents are copyed',
-    (tester) => tester.runAsync(
-      () async {
-        await tester.pumpWidget(testApp(deps.createMainPage()));
-        await tester.pumpAndSettle();
-        final BuildContext context = tester.element(find.byType(MainPage));
+    (tester) => tester.runAsync(() async {
+      await tester.pumpWidget(testApp(deps.createMainPage()));
+      await tester.pumpAndSettle();
+      final BuildContext context = tester.element(find.byType(MainPage));
 
-        // Select /folder1
-        {
-          await _selectEntries(originRepoCubit, [folder1]);
+      // Select /folder1
+      {
+        await _selectEntries(originRepoCubit, [folder1]);
 
-          final selectedEntries = originRepoCubit.entrySelectionCubit.entries;
+        final selectedEntries = originRepoCubit.entrySelectionCubit.entries;
 
-          // Expect 1 selected: /folder1
-          expect(selectedEntries, hasLength(1));
+        // Expect 1 selected: /folder1
+        expect(selectedEntries, hasLength(1));
 
-          // Expect selected: /folder1
-          expect(selectedEntries, equals(expectedFolder1Selected));
-        }
+        // Expect selected: /folder1
+        expect(selectedEntries, equals(expectedFolder1Selected));
+      }
 
-        // Move /folder1/ and its contents
-        {
-          final result =
-              await originRepoCubit.entrySelectionCubit.copyEntriesTo(
-            context,
-            destinationRepoCubit: destinationRepoCubit,
-            destinationPath: '/',
-          );
-          expect(result, equals(true));
+      // Move /folder1/ and its contents
+      {
+        final result = await originRepoCubit.entrySelectionCubit.copyEntriesTo(
+          context,
+          destinationRepoCubit: destinationRepoCubit,
+          destinationPath: '/',
+        );
+        expect(result, equals(true));
 
-          final destinationContents = await _getPathContents(
-            destinationRepoCubit,
-            '/',
-            <FileSystemEntry>[],
-          ).then((value) => value.map((e) => e.path).toList());
+        final destinationContents = await _getPathContents(
+          destinationRepoCubit,
+          '/',
+          <FileSystemEntry>[],
+        ).then((value) => value.map((e) => e.path).toList());
 
-          // Expect /folder1 and its contents copied to destination root
-          expect(destinationContents, expectedFolder1Contents);
+        // Expect /folder1 and its contents copied to destination root
+        expect(destinationContents, expectedFolder1Contents);
 
-          final originContents = await _getPathContents(
-            originRepoCubit,
-            '/',
-            <FileSystemEntry>[],
-          ).then((value) => value.map((e) => e.path).toList());
+        final originContents = await _getPathContents(
+          originRepoCubit,
+          '/',
+          <FileSystemEntry>[],
+        ).then((value) => value.map((e) => e.path).toList());
 
-          // Expect all the original contents still in origin
-          expect(originContents, expectedAllContents);
-        }
-      },
-    ),
+        // Expect all the original contents still in origin
+        expect(originContents, expectedAllContents);
+      }
+    }),
   );
 
   testWidgets(
     'Move one folder from one repo to another repo, all contents are moved',
-    (tester) => tester.runAsync(
-      () async {
-        await tester.pumpWidget(testApp(deps.createMainPage()));
-        await tester.pumpAndSettle();
-        final BuildContext context = tester.element(find.byType(MainPage));
+    (tester) => tester.runAsync(() async {
+      await tester.pumpWidget(testApp(deps.createMainPage()));
+      await tester.pumpAndSettle();
+      final BuildContext context = tester.element(find.byType(MainPage));
 
-        // Select /folder1
-        {
-          await _selectEntries(originRepoCubit, [folder1]);
+      // Select /folder1
+      {
+        await _selectEntries(originRepoCubit, [folder1]);
 
-          final selectedEntries = originRepoCubit.entrySelectionCubit.entries;
+        final selectedEntries = originRepoCubit.entrySelectionCubit.entries;
 
-          // Expect 1 selected: /folder1
-          expect(selectedEntries, hasLength(1));
+        // Expect 1 selected: /folder1
+        expect(selectedEntries, hasLength(1));
 
-          // Expect selected: /folder1
-          expect(selectedEntries, equals(expectedFolder1Selected));
-        }
+        // Expect selected: /folder1
+        expect(selectedEntries, equals(expectedFolder1Selected));
+      }
 
-        // Move just /folder1/file7.txt
-        {
-          final result =
-              await originRepoCubit.entrySelectionCubit.moveEntriesTo(
-            context,
-            destinationRepoCubit: destinationRepoCubit,
-            destinationPath: '/',
-          );
-          expect(result, equals(true));
+      // Move just /folder1/file7.txt
+      {
+        final result = await originRepoCubit.entrySelectionCubit.moveEntriesTo(
+          context,
+          destinationRepoCubit: destinationRepoCubit,
+          destinationPath: '/',
+        );
+        expect(result, equals(true));
 
-          final destinationContents = await _getPathContents(
-            destinationRepoCubit,
-            '/',
-            <FileSystemEntry>[],
-          ).then((value) => value.map((e) => e.path).toList());
+        final destinationContents = await _getPathContents(
+          destinationRepoCubit,
+          '/',
+          <FileSystemEntry>[],
+        ).then((value) => value.map((e) => e.path).toList());
 
-          // Expect only /folder1 and its contents moved to destination root
-          expect(destinationContents, expectedFolder1Contents);
+        // Expect only /folder1 and its contents moved to destination root
+        expect(destinationContents, expectedFolder1Contents);
 
-          final originContents = await _getPathContents(
-            originRepoCubit,
-            '/',
-            <FileSystemEntry>[],
-          ).then((value) => value.map((e) => e.path).toList());
+        final originContents = await _getPathContents(
+          originRepoCubit,
+          '/',
+          <FileSystemEntry>[],
+        ).then((value) => value.map((e) => e.path).toList());
 
-          // Expect only /folder1 and its contents removed from origin contents
-          expect(originContents, expectedFolder1OriginContents);
-        }
-      },
-    ),
+        // Expect only /folder1 and its contents removed from origin contents
+        expect(originContents, expectedFolder1OriginContents);
+      }
+    }),
   );
 }
 

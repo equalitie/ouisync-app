@@ -61,8 +61,9 @@ class _RenameRepository extends State<RenameRepository> {
           textInputAction: TextInputAction.done,
           labelText: S.current.labelRenameRepository,
           hintText: S.current.messageRepositoryNewName,
-          errorText:
-              nameTaken ? S.current.messageErrorRepositoryNameExist : null,
+          errorText: nameTaken
+              ? S.current.messageErrorRepositoryNameExist
+              : null,
           validator: validateNoEmptyMaybeRegExpr(
             emptyError: S.current.messageErrorFormValidatorNameDefault,
             regExp: Strings.entityNameRegExp,

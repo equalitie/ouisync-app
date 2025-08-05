@@ -4,6 +4,7 @@ import 'package:ouisync_app/app/cubits/entry_bottom_sheet.dart';
 import 'package:ouisync_app/app/cubits/navigation.dart';
 import 'package:ouisync_app/app/cubits/repo_creation.dart';
 import 'package:ouisync_app/app/cubits/repos.dart';
+import 'package:ouisync_app/app/cubits/mount.dart';
 import 'package:ouisync_app/app/models/auth_mode.dart';
 import 'package:ouisync_app/app/models/repo_entry.dart';
 import 'package:ouisync_app/app/models/repo_location.dart';
@@ -11,6 +12,7 @@ import 'package:ouisync_app/app/utils/cache_servers.dart';
 import 'package:ouisync_app/app/utils/master_key.dart';
 import 'package:ouisync_app/app/utils/random.dart';
 import 'package:ouisync_app/app/utils/settings/settings.dart';
+import 'package:ouisync_app/app/utils/dirs.dart';
 import 'package:ouisync_app/generated/l10n.dart';
 import 'package:ouisync/ouisync.dart';
 import 'package:path/path.dart' as p;
@@ -25,6 +27,7 @@ void main() {
   late Server server;
   late Session session;
   late ReposCubit reposCubit;
+  late MountCubit mountCubit;
   late RepoCreationCubit repoCreationCubit;
 
   setUp(() async {
@@ -41,12 +44,15 @@ void main() {
 
     final settings = await Settings.init(MasterKey.random());
 
+    mountCubit = MountCubit(session, await Dirs.init())..init();
+
     reposCubit = ReposCubit(
       session: session,
       settings: settings,
       navigation: NavigationCubit(),
       bottomSheet: EntryBottomSheetCubit(),
       cacheServers: CacheServers(session),
+      mountCubit: mountCubit,
     );
 
     repoCreationCubit = RepoCreationCubit(reposCubit: reposCubit);
@@ -55,6 +61,7 @@ void main() {
   tearDown(() async {
     await repoCreationCubit.close();
     await reposCubit.close();
+    await mountCubit.close();
     await session.close();
     await server.stop();
   });
@@ -66,15 +73,19 @@ void main() {
       repoCreationCubit.state.substate,
       isA<RepoCreationPending>()
           .having((s) => s.location, 'location', isNull)
-          .having((s) => s.setLocalSecret, 'setLocalSecret',
-              isA<SetLocalSecretKeyAndSalt>())
+          .having(
+            (s) => s.setLocalSecret,
+            'setLocalSecret',
+            isA<SetLocalSecretKeyAndSalt>(),
+          )
           .having((s) => s.nameError, 'nameError', isNull),
     );
 
     repoCreationCubit.nameController.text = name;
 
-    await repoCreationCubit
-        .waitUntil((state) => state.substate is RepoCreationValid);
+    await repoCreationCubit.waitUntil(
+      (state) => state.substate is RepoCreationValid,
+    );
     expect(repoCreationCubit.state.name, equals(name));
 
     await repoCreationCubit.save();
@@ -93,10 +104,7 @@ void main() {
 
     final name = 'my repo';
     await reposCubit.createRepository(
-      location: RepoLocation(
-        dir: (await session.getStoreDir())!,
-        name: name,
-      ),
+      location: RepoLocation(dir: (await session.getStoreDir())!, name: name),
       setLocalSecret: SetLocalSecretKeyAndSalt(
         key: randomSecretKey(),
         salt: randomSalt(),
@@ -114,11 +122,10 @@ void main() {
     expect(
       repoCreationCubit.state.substate,
       isA<RepoCreationPending>().having(
-          (s) => s.nameError,
-          'nameError',
-          equals(
-            'There is already a repository with this name',
-          )),
+        (s) => s.nameError,
+        'nameError',
+        equals('There is already a repository with this name'),
+      ),
     );
   });
 

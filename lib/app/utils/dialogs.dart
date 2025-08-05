@@ -41,33 +41,30 @@ abstract class Dialogs {
     }
   }
 
-  static void _showLoadingDialog(BuildContext? context) =>
-      context != null
-          ? unawaited(_loadingDialog(context))
-          : WidgetsBinding.instance.addPostFrameCallback(
-            (_) => BuildContextProvider()((c) => unawaited(_loadingDialog(c))),
-          );
+  static void _showLoadingDialog(BuildContext? context) => context != null
+      ? unawaited(_loadingDialog(context))
+      : WidgetsBinding.instance.addPostFrameCallback(
+          (_) => BuildContextProvider()((c) => unawaited(_loadingDialog(c))),
+        );
 
   static Future<void> _loadingDialog(BuildContext context) async => showDialog(
     context: context,
     barrierDismissible: false,
-    builder:
-        (BuildContext context) => PopScope(
-          canPop: false,
-          child: Center(
-            child: const CircularProgressIndicator.adaptive(
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-            ),
-          ),
+    builder: (BuildContext context) => PopScope(
+      canPop: false,
+      child: Center(
+        child: const CircularProgressIndicator.adaptive(
+          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
         ),
+      ),
+    ),
   );
 
   static void _hideLoadingDialog(BuildContext? context) =>
       WidgetsBinding.instance.addPostFrameCallback(
-        (_) =>
-            context != null
-                ? _popDialog(context)
-                : BuildContextProvider().call((c) => _popDialog(c)),
+        (_) => context != null
+            ? _popDialog(context)
+            : BuildContextProvider().call((c) => _popDialog(c)),
       );
 
   static void _popDialog(BuildContext context) =>
@@ -81,8 +78,8 @@ abstract class Dialogs {
   }) => showDialog<bool>(
     context: context,
     barrierDismissible: false,
-    builder:
-        (BuildContext context) => _alertDialog(context, title, body, actions),
+    builder: (BuildContext context) =>
+        _alertDialog(context, title, body, actions),
   );
 
   static Future<bool?> simpleAlertDialog(
@@ -102,11 +99,10 @@ abstract class Dialogs {
             [
               TextButton(
                 child: Text(S.current.actionCloseCapital),
-                onPressed:
-                    () async => await Navigator.of(
-                      context,
-                      rootNavigator: true,
-                    ).maybePop(false),
+                onPressed: () async => await Navigator.of(
+                  context,
+                  rootNavigator: true,
+                ).maybePop(false),
               ),
             ],
       );
@@ -143,54 +139,48 @@ abstract class Dialogs {
       fontWeight: FontWeight.bold,
     );
 
-    final validationMessage =
-        entry is FileEntry
-            ? S.current.messageConfirmFileDeletion
-            : (isDirEmpty ?? false)
-            ? S.current.messageConfirmFolderDeletion
-            : S.current.messageConfirmNotEmptyFolderDeletion;
+    final validationMessage = entry is FileEntry
+        ? S.current.messageConfirmFileDeletion
+        : (isDirEmpty ?? false)
+        ? S.current.messageConfirmFolderDeletion
+        : S.current.messageConfirmNotEmptyFolderDeletion;
 
-    final fileParentPath =
-        entry is FileEntry ? repo_path.dirname(entry.path) : '';
+    final fileParentPath = entry is FileEntry
+        ? repo_path.dirname(entry.path)
+        : '';
 
-    final title =
-        entry is FileEntry
-            ? S.current.titleDeleteFile
-            : S.current.titleDeleteFolder;
+    final title = entry is FileEntry
+        ? S.current.titleDeleteFile
+        : S.current.titleDeleteFolder;
 
-    final body =
-        entry is FileEntry
-            ? [
-              Text(entry.name, style: bodyStyle),
-              Text('${Strings.atSymbol} $fileParentPath', style: bodyStyle),
-              Dimensions.spacingVerticalDouble,
-              Text(validationMessage),
-            ]
-            : [
-              Text(entry.path, style: bodyStyle),
-              Dimensions.spacingVerticalDouble,
-              Text(validationMessage),
-            ];
+    final body = entry is FileEntry
+        ? [
+            Text(entry.name, style: bodyStyle),
+            Text('${Strings.atSymbol} $fileParentPath', style: bodyStyle),
+            Dimensions.spacingVerticalDouble,
+            Text(validationMessage),
+          ]
+        : [
+            Text(entry.path, style: bodyStyle),
+            Dimensions.spacingVerticalDouble,
+            Text(validationMessage),
+          ];
 
     final actions = [
       Row(
         children: [
           NegativeButton(
             text: S.current.actionCancel,
-            onPressed:
-                () async => await Navigator.of(
-                  context,
-                  rootNavigator: true,
-                ).maybePop(false),
+            onPressed: () async => await Navigator.of(
+              context,
+              rootNavigator: true,
+            ).maybePop(false),
           ),
           PositiveButton(
             text: S.current.actionDelete,
             isDangerButton: true,
-            onPressed:
-                () async => await Navigator.of(
-                  context,
-                  rootNavigator: true,
-                ).maybePop(true),
+            onPressed: () async =>
+                await Navigator.of(context, rootNavigator: true).maybePop(true),
           ),
         ],
       ),

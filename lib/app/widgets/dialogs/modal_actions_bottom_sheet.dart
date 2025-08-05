@@ -13,7 +13,7 @@ import '../../cubits/cubits.dart'
         RepoCubit;
 import '../../utils/utils.dart'
     show AppLogger, Dialogs, Dimensions, Fields, FileIO, showSnackBar;
-import '../widgets.dart' show ActionsDialog, FolderCreation;
+import '../widgets.dart' show FolderCreationDialog;
 
 class DirectoryActions extends StatelessWidget with AppLogger {
   const DirectoryActions(
@@ -50,11 +50,11 @@ class DirectoryActions extends StatelessWidget with AppLogger {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 _buildAction(
+                  key: Key('add_folder_action'),
                   name: S.current.actionNewFolder,
                   icon: Icons.create_new_folder_outlined,
-                  action:
-                      () async =>
-                          await createFolderDialog(parentContext, repoCubit),
+                  action: () async =>
+                      await createFolderDialog(parentContext, repoCubit),
                 ),
                 _buildNewFileAction(parentContext, cubit: repoCubit),
               ],
@@ -66,6 +66,7 @@ class DirectoryActions extends StatelessWidget with AppLogger {
   }
 
   Widget _buildAction({
+    required Key key,
     required String name,
     required IconData icon,
     required Function()? action,
@@ -75,6 +76,7 @@ class DirectoryActions extends StatelessWidget with AppLogger {
     return Padding(
       padding: Dimensions.paddingBottomSheetActions,
       child: GestureDetector(
+        key: key,
         behavior: HitTestBehavior.opaque,
         onTap: action,
         child: Column(
@@ -98,35 +100,36 @@ class DirectoryActions extends StatelessWidget with AppLogger {
       /// are not moving entries or adding media from the device,
       /// we disable the add File button.
       final enable = state is HideSheetState;
+      final key = Key('add_file_action');
 
       return Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           _buildAction(
+            key: key,
             name: S.current.actionNewFile,
             icon: Icons.upload_file_outlined,
-            action:
-                enable
-                    ? () async => await addFile(
-                      parentContext,
-                      repoCubit: cubit,
-                      type: FileType.any,
-                    )
-                    : null,
+            action: enable
+                ? () async => await addFile(
+                    parentContext,
+                    repoCubit: cubit,
+                    type: FileType.any,
+                  )
+                : null,
           ),
           if (io.Platform.isIOS)
             _buildAction(
+              key: key,
               name: S.current.actionNewMediaFile,
               icon: Icons.photo_library_outlined,
-              action:
-                  enable
-                      ? () async => await addFile(
-                        parentContext,
-                        repoCubit: cubit,
-                        type: FileType.media,
-                      )
-                      : () async =>
-                          await _showNotAvailableAlertDialog(parentContext),
+              action: enable
+                  ? () async => await addFile(
+                      parentContext,
+                      repoCubit: cubit,
+                      type: FileType.media,
+                    )
+                  : () async =>
+                        await _showNotAvailableAlertDialog(parentContext),
             ),
         ],
       );
@@ -143,19 +146,13 @@ class DirectoryActions extends StatelessWidget with AppLogger {
   Future<void> createFolderDialog(BuildContext context, RepoCubit cubit) async {
     final parent = cubit.state.currentFolder.path;
 
-    final newFolderPath =
-        await showDialog<String>(
-          context: context,
-          barrierDismissible: false,
-          builder:
-              (BuildContext context) => ActionsDialog(
-                title: S.current.titleCreateFolder,
-                body: FolderCreation(cubit: cubit, parent: parent),
-              ),
-        ) ??
-        '';
+    final newFolderPath = await FolderCreationDialog.show(
+      context,
+      repoCubit: cubit,
+      parent: parent,
+    );
 
-    if (newFolderPath.isEmpty) return;
+    if (newFolderPath == null || newFolderPath.isEmpty) return;
 
     final result = await Dialogs.executeWithLoadingDialog(
       null,

@@ -8,10 +8,9 @@ abstract class PlatformWindowManager {
   static Future<PlatformWindowManager> create(
     List<String> args,
     String appName,
-  ) =>
-      (Platform.isAndroid || Platform.isIOS)
-          ? Future.value(PlatformWindowManagerMobile())
-          : PlatformWindowManagerDesktop.create(args, appName);
+  ) => (Platform.isAndroid || Platform.isIOS)
+      ? Future.value(PlatformWindowManagerMobile())
+      : PlatformWindowManagerDesktop.create(args, appName);
 
   /// Sets the function to be called when the app is about to be closed.
   void onClose(CloseHandler handler);

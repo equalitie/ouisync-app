@@ -30,11 +30,10 @@ class _UserProvidedPeersState extends State<UserProvidedPeersPage> {
     appBar: DirectionalAppBar(title: Text(S.current.titleUserProvidedPeers)),
     body: BlocBuilder<UserProvidedPeersCubit, List<String>>(
       bloc: _cubit,
-      builder:
-          (context, state) => ListView(
-            padding: Dimensions.paddingContents,
-            children: _buildPeers(context, state),
-          ),
+      builder: (context, state) => ListView(
+        padding: Dimensions.paddingContents,
+        children: _buildPeers(context, state),
+      ),
     ),
     floatingActionButton: FloatingActionButton(
       child: const Icon(Icons.add_rounded),

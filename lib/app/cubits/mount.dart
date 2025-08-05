@@ -61,12 +61,15 @@ class MountCubit extends Cubit<MountState> with CubitActions, AppLogger {
     }
   }
 
-  @override
-  Future<void> close() async {
+  Future<void> initialized() async {
     if (state is MountStateMounting) {
       await stream.where((state) => state is! MountStateMounting).first;
     }
+  }
 
+  @override
+  Future<void> close() async {
+    await initialized();
     await super.close();
   }
 }

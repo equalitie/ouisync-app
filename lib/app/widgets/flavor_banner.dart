@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:ouisync_app/app/utils/flavor.dart';
 
 class FlavorBanner extends StatelessWidget {
   final Widget child;
@@ -7,24 +7,20 @@ class FlavorBanner extends StatelessWidget {
   FlavorBanner({required this.child, super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final flavor = appFlavor;
-
-    if (flavor == null || flavor == 'production') {
-      return child;
-    } else {
-      return Banner(
-        location: BannerLocation.topEnd,
-        message: flavor,
-        color: _flavorColor(flavor),
-        child: child,
-      );
-    }
-  }
+  Widget build(BuildContext context) => switch (Flavor.current) {
+    Flavor.production => child,
+    Flavor.nightly || Flavor.unofficial || Flavor.itest => Banner(
+      location: BannerLocation.topEnd,
+      message: Flavor.current.toString(),
+      color: _flavorColor(Flavor.current),
+      child: child,
+    ),
+  };
 }
 
-Color _flavorColor(String flavor) => switch (flavor) {
-  'nightly' => const Color(0xFFE65100),
-  'unofficial' => const Color(0xFF0D47A1),
-  _ => Colors.grey,
+Color _flavorColor(Flavor flavor) => switch (flavor) {
+  Flavor.production => Colors.grey,
+  Flavor.nightly => const Color(0xFFE65100),
+  Flavor.unofficial => const Color(0xFF0D47A1),
+  Flavor.itest => Colors.green,
 };

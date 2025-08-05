@@ -9,6 +9,8 @@ class WebViewPage extends StatelessWidget {
   final Widget content;
 
   @override
-  Widget build(BuildContext context) =>
-      Scaffold(appBar: DirectionalAppBar(title: title), body: content);
+  Widget build(BuildContext context) => Scaffold(
+    appBar: DirectionalAppBar(title: title),
+    body: content,
+  );
 }

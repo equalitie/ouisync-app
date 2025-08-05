@@ -28,10 +28,9 @@ class S {
   static const AppLocalizationDelegate delegate = AppLocalizationDelegate();
 
   static Future<S> load(Locale locale) {
-    final name =
-        (locale.countryCode?.isEmpty ?? false)
-            ? locale.languageCode
-            : locale.toString();
+    final name = (locale.countryCode?.isEmpty ?? false)
+        ? locale.languageCode
+        : locale.toString();
     final localeName = Intl.canonicalizedLocale(name);
     return initializeMessages(localeName).then((_) {
       Intl.defaultLocale = localeName;
@@ -70,16 +69,6 @@ class S {
     return Intl.message(
       'Add file to Ouisync',
       name: 'titleAddFile',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Moving entry`
-  String get titleMovingEntry {
-    return Intl.message(
-      'Moving entry',
-      name: 'titleMovingEntry',
       desc: '',
       args: [],
     );
@@ -775,12 +764,32 @@ class S {
     );
   }
 
+  /// `Copying entry`
+  String get titleCopyingEntry {
+    return Intl.message(
+      'Copying entry',
+      name: 'titleCopyingEntry',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Move`
   String get titleMoveEntries {
     return Intl.message(
       'Move',
       name: 'titleMoveEntries',
       desc: 'Title for the confirmation dialog when moving entries',
+      args: [],
+    );
+  }
+
+  /// `Moving entry`
+  String get titleMovingEntry {
+    return Intl.message(
+      'Moving entry',
+      name: 'titleMovingEntry',
+      desc: '',
       args: [],
     );
   }
@@ -4011,10 +4020,10 @@ class S {
     );
   }
 
-  /// `Authentication method`
+  /// `Repository is either blind or locked by a local password`
   String get repoResetAuthInfoBlindOrLocked {
     return Intl.message(
-      'Authentication method',
+      'Repository is either blind or locked by a local password',
       name: 'repoResetAuthInfoBlindOrLocked',
       desc: '',
       args: [],

@@ -41,14 +41,13 @@ class RepoSecurityPage extends StatefulWidget {
   ) => Navigator.push(
     context,
     MaterialPageRoute(
-      builder:
-          (context) => RepoSecurityPage(
-            settings,
-            session,
-            repo,
-            originalAccess,
-            passwordHasher,
-          ),
+      builder: (context) => RepoSecurityPage(
+        settings,
+        session,
+        repo,
+        originalAccess,
+        passwordHasher,
+      ),
     ),
   );
 
@@ -81,11 +80,10 @@ class _State extends State<RepoSecurityPage> {
   Widget build(BuildContext context) => Scaffold(
     appBar: DirectionalAppBar(title: Text(S.current.titleSecurity)),
     body: BlocHolder(
-      create:
-          () => RepoSecurityCubit(
-            currentLocalSecretMode: widget.repo.state.authMode.localSecretMode,
-            currentAccess: access,
-          ),
+      create: () => RepoSecurityCubit(
+        currentLocalSecretMode: widget.repo.state.authMode.localSecretMode,
+        currentAccess: access,
+      ),
       builder: _buildContent,
     ),
   );
@@ -96,8 +94,8 @@ class _State extends State<RepoSecurityPage> {
   ) => ContentWithStickyFooterState(
     content: PopScope(
       canPop: false,
-      onPopInvokedWithResult:
-          (didPop, _) => _onPopInvoked(context, didPop, cubit.state),
+      onPopInvokedWithResult: (didPop, _) =>
+          _onPopInvoked(context, didPop, cubit.state),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -110,15 +108,13 @@ class _State extends State<RepoSecurityPage> {
     ),
     footer: BlocBuilder<RepoSecurityCubit, RepoSecurityState>(
       bloc: cubit,
-      builder:
-          (context, state) => Fields.inPageAsyncButton(
-            key: Key('security-update-button'),
-            text: S.current.actionUpdate,
-            onPressed:
-                state.hasPendingChanges && state.isValid
-                    ? () => _onSubmit(context, cubit)
-                    : null,
-          ),
+      builder: (context, state) => Fields.inPageAsyncButton(
+        key: Key('security-update-button'),
+        text: S.current.actionUpdate,
+        onPressed: state.hasPendingChanges && state.isValid
+            ? () => _onSubmit(context, cubit)
+            : null,
+      ),
     ),
   );
 
@@ -239,49 +235,47 @@ class RepoSecurityWidget extends StatelessWidget {
 
     return BlocBuilder<RepoSecurityCubit, RepoSecurityState>(
       bloc: cubit,
-      builder:
-          (context, state) => Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildOriginSwitch(state),
-              _buildPasswordFields(state),
-              _buildStoreSwitch(state),
-              _buildSecureWithBiometricsSwitch(state),
-              _buildManualPasswordWarning(state, warningStyle),
-            ],
-          ),
+      builder: (context, state) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildOriginSwitch(state),
+          _buildPasswordFields(state),
+          _buildStoreSwitch(state),
+          _buildSecureWithBiometricsSwitch(state),
+          _buildManualPasswordWarning(state, warningStyle),
+        ],
+      ),
     );
   }
 
-  Widget _buildPasswordFields(RepoSecurityState state) => switch (state
-      .plannedOrigin) {
-    SecretKeyOrigin.manual => PasswordValidation(
-      onChanged: cubit.setLocalPassword,
-      required: state.isLocalPasswordRequired,
-    ),
-    SecretKeyOrigin.random => SizedBox.shrink(),
-  };
+  Widget _buildPasswordFields(RepoSecurityState state) =>
+      switch (state.plannedOrigin) {
+        SecretKeyOrigin.manual => PasswordValidation(
+          onChanged: cubit.setLocalPassword,
+          required: state.isLocalPasswordRequired,
+        ),
+        SecretKeyOrigin.random => SizedBox.shrink(),
+      };
 
   Widget _buildOriginSwitch(RepoSecurityState state) => _buildSwitch(
     key: Key('use-local-password'), // Used in tests
     value: state.plannedOrigin == SecretKeyOrigin.manual,
     title: S.current.messageUseLocalPassword,
-    onChanged:
-        (value) => cubit.setOrigin(
-          value ? SecretKeyOrigin.manual : SecretKeyOrigin.random,
-        ),
+    onChanged: (value) => cubit.setOrigin(
+      value ? SecretKeyOrigin.manual : SecretKeyOrigin.random,
+    ),
   );
 
-  Widget _buildStoreSwitch(RepoSecurityState state) => switch (state
-      .plannedOrigin) {
-    SecretKeyOrigin.manual => _buildSwitch(
-      key: Key('store-on-device'),
-      value: state.secretWillBeStored,
-      title: S.current.labelRememberPassword,
-      onChanged: cubit.setStore,
-    ),
-    SecretKeyOrigin.random => SizedBox.shrink(),
-  };
+  Widget _buildStoreSwitch(RepoSecurityState state) =>
+      switch (state.plannedOrigin) {
+        SecretKeyOrigin.manual => _buildSwitch(
+          key: Key('store-on-device'),
+          value: state.secretWillBeStored,
+          title: S.current.labelRememberPassword,
+          onChanged: cubit.setStore,
+        ),
+        SecretKeyOrigin.random => SizedBox.shrink(),
+      };
 
   // On desktops the keyring is accessible to any application once the user is
   // logged in into their account and thus giving the user the option to protect
@@ -290,15 +284,14 @@ class RepoSecurityWidget extends StatelessWidget {
   // not supported on these systems.
   Widget _buildSecureWithBiometricsSwitch(RepoSecurityState state) =>
       state.isBiometricsAvailable
-          ? _buildSwitch(
-            value: state.plannedWithBiometrics.toBool,
-            title: S.current.messageSecureUsingBiometrics,
-            onChanged:
-                state.isSecureWithBiometricsEnabled
-                    ? cubit.setSecureWithBiometrics
-                    : null,
-          )
-          : SizedBox.shrink();
+      ? _buildSwitch(
+          value: state.plannedWithBiometrics.toBool,
+          title: S.current.messageSecureUsingBiometrics,
+          onChanged: state.isSecureWithBiometricsEnabled
+              ? cubit.setSecureWithBiometrics
+              : null,
+        )
+      : SizedBox.shrink();
 
   Widget _buildManualPasswordWarning(
     RepoSecurityState state,

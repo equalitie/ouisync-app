@@ -6,7 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-<!-- ## [Unreleased](https://github.com/equalitie/ouisync-app/compare/v0.9.0...master) -->
+## [Unreleased](https://github.com/equalitie/ouisync-app/compare/v0.9.0...master)
+
+- Update [Ouisync library](https://github.com/equalitie/ouisync) to [v0.9.2](https://github.com/equalitie/ouisync/blob/master/CHANGELOG.md#v0.9.2) (no protocol change).
+- Update [Flutter](https://flutter.dev/) to [v3.32.4](https://github.com/flutter/flutter/blob/main/CHANGELOG.md#3324).
+- Improve logging: capture more relevant log messages and implement log rotation.
+- Fix segfault when exiting the app on linux.
+- Add more dependencies to the ouisync-gui Debian package.
+- Fix a number of issues related to double clicking on action buttons (repo import, back buttons, file copy/move,...)
+- Fix file being moved instead of copied when a file with the same name already existed in the destination folder
+- Improve and add tests
 
 ## [v0.9.0](https://github.com/equalitie/ouisync-app/compare/v0.8.3-production...v0.9.0) - 2025-06-05
 

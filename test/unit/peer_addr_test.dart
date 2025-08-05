@@ -7,41 +7,49 @@ void main() {
   test('parse', () {
     expect(
       PeerAddr.parse('quic/127.0.0.1:12345'),
-      equals(PeerAddr(
-        PeerProto.quic,
-        InternetAddress('127.0.0.1', type: InternetAddressType.IPv4),
-        12345,
-      )),
+      equals(
+        PeerAddr(
+          PeerProto.quic,
+          InternetAddress('127.0.0.1', type: InternetAddressType.IPv4),
+          12345,
+        ),
+      ),
     );
 
     expect(
       PeerAddr.parse('tcp/127.0.0.1:12346'),
-      equals(PeerAddr(
-        PeerProto.tcp,
-        InternetAddress('127.0.0.1', type: InternetAddressType.IPv4),
-        12346,
-      )),
+      equals(
+        PeerAddr(
+          PeerProto.tcp,
+          InternetAddress('127.0.0.1', type: InternetAddressType.IPv4),
+          12346,
+        ),
+      ),
     );
 
     expect(
       PeerAddr.parse('quic/[::]:12347'),
-      equals(PeerAddr(
-        PeerProto.quic,
-        InternetAddress('::', type: InternetAddressType.IPv6),
-        12347,
-      )),
+      equals(
+        PeerAddr(
+          PeerProto.quic,
+          InternetAddress('::', type: InternetAddressType.IPv6),
+          12347,
+        ),
+      ),
     );
 
     expect(
       PeerAddr.parse('quic/[2345:0425:2CA1:0000:0000:0567:5673:23b5]:12348'),
-      equals(PeerAddr(
-        PeerProto.quic,
-        InternetAddress(
-          '2345:0425:2CA1:0000:0000:0567:5673:23b5',
-          type: InternetAddressType.IPv6,
+      equals(
+        PeerAddr(
+          PeerProto.quic,
+          InternetAddress(
+            '2345:0425:2CA1:0000:0000:0567:5673:23b5',
+            type: InternetAddressType.IPv6,
+          ),
+          12348,
         ),
-        12348,
-      )),
+      ),
     );
   });
 

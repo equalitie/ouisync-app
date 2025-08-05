@@ -75,8 +75,8 @@ class DokanValidation {
         await showDialog<bool?>(
           context: _context,
           barrierDismissible: false,
-          builder:
-              (BuildContext context) => ActionsDialog(title: title, body: body),
+          builder: (BuildContext context) =>
+              ActionsDialog(title: title, body: body),
         ) ??
         false;
 

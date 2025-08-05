@@ -189,8 +189,8 @@ class MultiEntryActions {
           children: [
             NegativeButton(
               text: S.current.actionCancel,
-              onPressed:
-                  () async => await Navigator.of(context).maybePop(false),
+              onPressed: () async =>
+                  await Navigator.of(context).maybePop(false),
               buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
             ),
             PositiveButton(

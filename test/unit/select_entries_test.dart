@@ -6,7 +6,12 @@ import 'package:ouisync_app/app/models/folder.dart';
 import 'package:ouisync_app/app/utils/utils.dart' show CacheServers;
 import 'package:ouisync/ouisync.dart';
 import 'package:ouisync_app/app/cubits/cubits.dart'
-    show EntryBottomSheetCubit, EntrySelectionCubit, NavigationCubit, RepoCubit;
+    show
+        EntryBottomSheetCubit,
+        EntrySelectionCubit,
+        NavigationCubit,
+        RepoCubit,
+        MountCubit;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../utils.dart';
@@ -38,6 +43,8 @@ void main() {
     entrySelectionCubit = EntrySelectionCubit();
     bottomSheetCubit = EntryBottomSheetCubit();
 
+    final mountCubit = MountCubit(deps.session, deps.dirs)..init();
+
     repoCubit = await RepoCubit.create(
       repo: repo,
       session: deps.session,
@@ -45,6 +52,7 @@ void main() {
       entrySelection: entrySelectionCubit,
       bottomSheet: bottomSheetCubit,
       cacheServers: CacheServers(deps.session),
+      mountCubit: mountCubit,
     );
 
     // Create 1 nested folder

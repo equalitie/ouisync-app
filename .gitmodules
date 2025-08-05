@@ -1,4 +1,4 @@
 [submodule "ouisync"]
 	url = https://github.com/equalitie/ouisync.git
 	path = ouisync
-	branch = master
+	branch = prerelease

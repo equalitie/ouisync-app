@@ -5,7 +5,7 @@ import '../utils/utils.dart' show Dimensions, LogReader;
 import '../widgets/widgets.dart' show DirectionalAppBar, LogView, LogViewTheme;
 
 class LogViewPage extends StatelessWidget {
-  final LogReader reader = LogReader();
+  final reader = LogReader();
 
   LogViewPage();
 

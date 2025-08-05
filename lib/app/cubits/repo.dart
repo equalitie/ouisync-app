@@ -107,6 +107,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   final Repository _repo;
   final cipher.SecretKey _pathSecretKey;
   final CacheServers _cacheServers;
+  final MountCubit _mountCubit;
 
   RepoCubit._(
     this._navigation,
@@ -115,6 +116,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     this._repo,
     this._pathSecretKey,
     this._cacheServers,
+    this._mountCubit,
     super.state,
   ) {
     _currentFolder.repo = this;
@@ -122,6 +124,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
 
   static Future<RepoCubit> create({
     required Repository repo,
+    required MountCubit mountCubit,
     required Session session,
     required NavigationCubit navigation,
     required EntrySelectionCubit entrySelection,
@@ -160,10 +163,11 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
       repo,
       pathSecretKey,
       cacheServers,
+      mountCubit,
       state,
     );
 
-    await cubit.mount();
+    unawaited(cubit._mount());
 
     // Fetching the cache server state involves network request which might take a long time. Using
     // `unawaited` to avoid blocking this function on it.
@@ -293,12 +297,20 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   }) async {
     return await _repo.share(
       accessMode: accessMode,
-      localSecret:
-          password != null ? LocalSecretPassword(Password(password)) : null,
+      localSecret: password != null
+          ? LocalSecretPassword(Password(password))
+          : null,
     );
   }
 
-  Future<void> mount() async {
+  Future<void> _mount() async {
+    await _mountCubit.initialized();
+
+    if (_mountCubit.state is! MountStateSuccess) {
+      emitUnlessClosed(state.copyWith(mountState: _mountCubit.state));
+      return;
+    }
+
     try {
       await _repo.mount();
       emitUnlessClosed(state.copyWith(mountState: const MountStateSuccess()));
@@ -730,15 +742,14 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   }) async {
     emitUnlessClosed(state.copyWith(isLoading: true));
     try {
-      final result =
-          type == EntryType.file
-              ? await _copyFile(source, destination, destinationRepoCubit)
-              : await _copyFolder(
-                source,
-                destination,
-                destinationRepoCubit,
-                recursive,
-              );
+      final result = type == EntryType.file
+          ? await _copyFile(source, destination, destinationRepoCubit)
+          : await _copyFolder(
+              source,
+              destination,
+              destinationRepoCubit,
+              recursive,
+            );
 
       return result;
     } catch (e, st) {
@@ -782,10 +793,9 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
       for (var entry in contents) {
         final from = repo_path.join(source, entry.name);
         final to = repo_path.join(destination, entry.name);
-        final copyOk =
-            entry.entryType == EntryType.file
-                ? await _copyFile(from, to, destinationRepoCubit)
-                : await _copyFolder(from, to, destinationRepoCubit, recursive);
+        final copyOk = entry.entryType == EntryType.file
+            ? await _copyFile(from, to, destinationRepoCubit)
+            : await _copyFolder(from, to, destinationRepoCubit, recursive);
 
         if (!copyOk) return false;
       }
@@ -901,6 +911,8 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   }) async {
     final path = state.currentFolder.path;
     bool errorShown = false;
+
+    emitUnlessClosed(state.copyWith(isLoading: true));
 
     try {
       while (state.canRead) {
