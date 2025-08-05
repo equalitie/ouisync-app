@@ -1104,7 +1104,7 @@
   "@repoResetAccessTypeInfoWrite": {},
   "repoResetActionInfoLabel": "Дія, яку потрібно подати",
   "@repoResetActionInfoLabel": {},
-  "repoResetAuthInfoBlindOrLocked": "Метод автентифікації",
+  "repoResetAuthInfoBlindOrLocked": "Репозиторій або прихований, або заблокований локальним паролем",
   "@repoResetAuthInfoBlindOrLocked": {},
   "repoResetAuthInfoBlindOrLockedWarn": "Додаток не може розпізнати різницю.",
   "@repoResetAuthInfoBlindOrLockedWarn": {},
@@ -1189,5 +1189,7 @@
   "repoResetActionAnyToWrite": "Репозиторій отримає доступ для запису.",
   "@repoResetActionAnyToWrite": {},
   "repoResetActionReadToBlind": "Репозиторій втратить доступ для читання.",
-  "@repoResetActionReadToBlind": {}
+  "@repoResetActionReadToBlind": {},
+  "titleCopyingEntry": "Копіювання запису",
+  "@titleCopyingEntry": {}
 }
