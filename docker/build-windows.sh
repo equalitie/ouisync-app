@@ -74,19 +74,6 @@ function on_exit() {
     dock container stop $container_name
 }
 
-# Determine container's SSH port
-function container_ssh_port() {
-    dock port $container_name | while read port_map; do
-        ssh_port=${port_map#'22/tcp -> 0.0.0.0:'}
-        [[ "$ssh_port" =~ ^[0-9]+$ ]] && echo $ssh_port && break || true
-    done
-}
-
-ssh_port=$(container_ssh_port)
-if [ -z "$ssh_port" ]; then
-    error "Failed to determine container's SSH port"
-fi
-
 # Prepare secrets
 if [ "$flavor" = "production" ]; then
     exe / mkdir c:\\secrets
@@ -109,18 +96,11 @@ exe c:/ouisync-app/ouisync/bindings/dart dart tool/bindgen.dart
 exe c:/ouisync-app dart pub get
 exe c:/ouisync-app dart run util/release.dart --flavor=$flavor $sentry_arg $build_exe $build_msix
 
-# Collect artifacts. Hyper-V doesn't allow `docker cp` from a running container, so using scp
-function setup_sshd() {
-    local public_key=$(cat ~/.ssh/id_ed25519.pub)
-    exe / powershell Add-Content -Force -Path c:/ProgramData/ssh/administrators_authorized_keys -Value "'$public_key'"
-    exe / powershell Start-Service sshd
+function dock_rsync() {
+    rsync -e "docker -H ssh://$host exec -i" "$@"
 }
 
-setup_sshd
-
 mkdir -p $out_dir
-scp -P $ssh_port -r \
-    -o "ProxyJump ${host}" \
-    -o 'UserKnownHostsFile /dev/null' \
-    -o 'StrictHostKeyChecking no' \
-    ssh@localhost:'c:/ouisync-app/releases/latest/*' $out_dir
+for asset in $(exe c:/ouisync-app/releases/latest ls); do
+    dock_rsync -av $container_name:/c/ouisync-app/releases/latest/$asset $out_dir
+done
