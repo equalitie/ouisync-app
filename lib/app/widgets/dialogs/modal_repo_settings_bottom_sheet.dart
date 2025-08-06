@@ -90,6 +90,7 @@ class _RepositorySettingsState extends State<RepositorySettings>
                   final newName = await renameRepository(
                     context,
                     repoCubit: widget.repoCubit,
+                    reposCubit: widget.reposCubit,
                   );
 
                   if (newName.isNotEmpty) {

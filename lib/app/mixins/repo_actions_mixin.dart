@@ -41,15 +41,15 @@ import '../widgets/widgets.dart'
 mixin RepositoryActionsMixin on LoggyType {
   Future<String> renameRepository(
     BuildContext context, {
+    required ReposCubit reposCubit,
     required RepoCubit repoCubit,
   }) async {
     final newName = await _getRepositoryNewName(context, repoCubit: repoCubit);
-    final newLocation = repoCubit.location.rename(newName);
 
     if (newName.isNotEmpty) {
       await Dialogs.executeFutureWithLoadingDialog(
         context,
-        repoCubit.move(newLocation.path),
+        reposCubit.renameRepo(repoCubit.location, newName),
       );
 
       return newName;
