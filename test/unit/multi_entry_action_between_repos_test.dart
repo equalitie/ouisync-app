@@ -549,7 +549,7 @@ Future<void> _selectEntries(
   await cubit.startEntriesSelection();
 
   for (var entry in entries) {
-    await cubit.entrySelectionCubit.selectEntry(repoInfoHash, entry);
+    cubit.entrySelectionCubit.selectEntry(repoInfoHash, entry);
   }
 }
 

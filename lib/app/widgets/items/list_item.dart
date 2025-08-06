@@ -6,8 +6,7 @@ import '../../cubits/cubits.dart'
     show EntrySelectionCubit, EntrySelectionState, Job, RepoCubit, RepoState;
 import '../../models/models.dart'
     show DirectoryEntry, FileEntry, FileSystemEntry, RepoLocation;
-import '../../utils/utils.dart'
-    show Constants, Dialogs, Dimensions, Fields, ThemeGetter;
+import '../../utils/utils.dart' show Constants, Dimensions, Fields, ThemeGetter;
 import '../widgets.dart'
     show
         FileDescription,
@@ -312,8 +311,8 @@ class TrailAction extends StatelessWidget {
   final ValueNotifier<bool?> _selectedNotifier;
   final ValueNotifier<Color?> _backgroundColorNotifier;
 
-  final Future<void> Function(String, FileSystemEntry) onSelectEntry;
-  final Future<void> Function(String, FileSystemEntry) onClearEntry;
+  final void Function(String, FileSystemEntry) onSelectEntry;
+  final void Function(String, FileSystemEntry) onClearEntry;
 
   final Job? uploadJob;
   final void Function() verticalDotsAction;
@@ -342,7 +341,7 @@ class TrailAction extends StatelessWidget {
                       ),
                       visualDensity: VisualDensity.adaptivePlatformDensity,
                       value: value,
-                      onChanged: (value) async => await _updateSelection(
+                      onChanged: (value) => _updateSelection(
                         context,
                         value ?? false,
                         repoInfoHash: repoInfoHash,
@@ -359,11 +358,11 @@ class TrailAction extends StatelessWidget {
                 action: uploadJob == null ? verticalDotsAction : null,
               );
       },
-      listener: (context, state) async {
+      listener: (context, state) {
         if (repoInfoHash != state.originRepoInfoHash) return;
 
         if (state.status == SelectionStatus.off) {
-          await _updateSelection(
+          _updateSelection(
             context,
             false,
             repoInfoHash: repoInfoHash,
@@ -379,26 +378,25 @@ class TrailAction extends StatelessWidget {
   }
 }
 
-Future<void> _updateSelection(
+void _updateSelection(
   BuildContext context,
   bool value, {
   required String repoInfoHash,
   required FileSystemEntry entry,
   required ValueNotifier<bool?> valueNotifier,
   required ValueNotifier<Color?> colorNotifier,
-  required Future<void> Function(String, FileSystemEntry) onSelectEntry,
-  required Future<void> Function(String, FileSystemEntry) onClearEntry,
+  required void Function(String, FileSystemEntry) onSelectEntry,
+  required void Function(String, FileSystemEntry) onClearEntry,
 }) async {
   if (valueNotifier.value == value) return;
 
   valueNotifier.value = value;
 
-  await Dialogs.executeFutureWithLoadingDialog(
-    null,
-    value
-        ? onSelectEntry(repoInfoHash, entry)
-        : onClearEntry(repoInfoHash, entry),
-  );
+  if (value) {
+    onSelectEntry(repoInfoHash, entry);
+  } else {
+    onClearEntry(repoInfoHash, entry);
+  }
 
   _getBackgroundColor(context, notifier: colorNotifier, value: value);
 }

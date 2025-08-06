@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:build_context_provider/build_context_provider.dart';
 import 'package:flutter/material.dart';
 
 import '../../generated/l10n.dart';
@@ -14,19 +13,12 @@ import 'utils.dart'
 abstract class Dialogs {
   static int _loadingInvocations = 0;
 
-  static Future<T> executeWithLoadingDialog<T>(
-    BuildContext? context,
-    Future<T> Function() func,
-  ) {
-    return executeFutureWithLoadingDialog(context, func());
-  }
-
   static Future<T> executeFutureWithLoadingDialog<T>(
-    BuildContext? context,
+    BuildContext context,
     Future<T> future,
   ) async {
     if (_loadingInvocations == 0) {
-      _showLoadingDialog(context);
+      unawaited(_showLoadingDialog(context));
     }
 
     _loadingInvocations += 1;
@@ -41,13 +33,7 @@ abstract class Dialogs {
     }
   }
 
-  static void _showLoadingDialog(BuildContext? context) => context != null
-      ? unawaited(_loadingDialog(context))
-      : WidgetsBinding.instance.addPostFrameCallback(
-          (_) => BuildContextProvider()((c) => unawaited(_loadingDialog(c))),
-        );
-
-  static Future<void> _loadingDialog(BuildContext context) async => showDialog(
+  static Future<void> _showLoadingDialog(BuildContext context) => showDialog(
     context: context,
     barrierDismissible: false,
     builder: (BuildContext context) => PopScope(
@@ -60,14 +46,7 @@ abstract class Dialogs {
     ),
   );
 
-  static void _hideLoadingDialog(BuildContext? context) =>
-      WidgetsBinding.instance.addPostFrameCallback(
-        (_) => context != null
-            ? _popDialog(context)
-            : BuildContextProvider().call((c) => _popDialog(c)),
-      );
-
-  static void _popDialog(BuildContext context) =>
+  static void _hideLoadingDialog(BuildContext context) =>
       Navigator.of(context, rootNavigator: true).pop();
 
   static Future<bool?> alertDialogWithActions<bool>(

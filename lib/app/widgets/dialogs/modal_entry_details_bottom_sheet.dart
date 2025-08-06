@@ -288,7 +288,7 @@ extension on _EntryDetailsState {
     if (deleteEntry == false) return;
 
     final deleteEntryOk = await Dialogs.executeFutureWithLoadingDialog<bool>(
-      null,
+      context,
       isFile ? repo.deleteFile(path) : repo.deleteFolder(path, recursive),
     );
 

@@ -154,9 +154,9 @@ class DirectoryActions extends StatelessWidget with AppLogger {
 
     if (newFolderPath == null || newFolderPath.isEmpty) return;
 
-    final result = await Dialogs.executeWithLoadingDialog(
-      null,
-      () async => await cubit.createFolder(newFolderPath),
+    final result = await Dialogs.executeFutureWithLoadingDialog(
+      context,
+      cubit.createFolder(newFolderPath),
     );
 
     if (!result) {

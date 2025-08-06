@@ -205,17 +205,20 @@ class AboutSection extends SettingsSection with AppLogger {
     if (PlatformValues.isMobileDevice) {
       final pageTitle = Text(title);
 
-      await Dialogs.executeWithLoadingDialog(null, () async {
-        final content = await webView.loadUrl(context, url);
+      await Dialogs.executeFutureWithLoadingDialog(
+        context,
+        Future(() async {
+          final content = await webView.loadUrl(context, url);
 
-        await Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) =>
-                WebViewPage(title: pageTitle, content: content),
-          ),
-        );
-      });
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) =>
+                  WebViewPage(title: pageTitle, content: content),
+            ),
+          );
+        }),
+      );
     } else {
       await webView.launchUrl(url);
     }
