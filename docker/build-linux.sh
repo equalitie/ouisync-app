@@ -67,7 +67,7 @@ function on_exit() {
     dock exec -it $container_name bash
     echo "Stopping the container"
     kill $keep_alive_pid
-    dock container stop $container_name
+    dock container rm -f $container_name
 }
 
 # Set up secrets inside the container
