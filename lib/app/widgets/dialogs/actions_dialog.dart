@@ -4,17 +4,12 @@ import 'package:flutter/material.dart';
 
 import '../../utils/utils.dart';
 
-class ActionsDialog extends StatefulWidget {
-  const ActionsDialog({required this.title, this.body});
+class ActionsDialog extends StatelessWidget {
+  const ActionsDialog({required this.title, required this.body});
 
   final String title;
-  final Widget? body;
+  final Widget body;
 
-  @override
-  State<ActionsDialog> createState() => _ActionsDialogState();
-}
-
-class _ActionsDialogState extends State<ActionsDialog> {
   @override
   Widget build(BuildContext context) => Dialog(
     child: Stack(
@@ -53,13 +48,13 @@ class _ActionsDialogState extends State<ActionsDialog> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Fields.constrainedText(
-                            widget.title,
+                            title,
                             flex: 0,
                             style: context.theme.appTextStyle.titleMedium,
                             maxLines: 2,
                           ),
                           Dimensions.spacingVertical,
-                          widget.body!,
+                          body,
                         ],
                       ),
                     ),

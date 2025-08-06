@@ -142,7 +142,7 @@ void main() {
         await originRepoCubit.startEntriesSelection();
 
         final repoInfoHash = await originRepoCubit.infoHash;
-        await entrySelectionCubit.selectEntry(
+        entrySelectionCubit.selectEntry(
           repoInfoHash,
           DirectoryEntry(path: '/folder1/folder2/'),
         );

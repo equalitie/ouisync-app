@@ -48,7 +48,7 @@ mixin RepositoryActionsMixin on LoggyType {
 
     if (newName.isNotEmpty) {
       await Dialogs.executeFutureWithLoadingDialog(
-        null,
+        context,
         repoCubit.move(newLocation.path),
       );
 
@@ -263,7 +263,7 @@ mixin RepositoryActionsMixin on LoggyType {
     );
 
     if (deleteRepo == true) {
-      await Dialogs.executeFutureWithLoadingDialog(null, deleteRepoFuture);
+      await Dialogs.executeFutureWithLoadingDialog(context, deleteRepoFuture);
 
       return true;
     }

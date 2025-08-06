@@ -139,7 +139,7 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
     );
   }
 
-  Future<void> selectEntry(String repoInfoHash, FileSystemEntry entry) async {
+  void selectEntry(String repoInfoHash, FileSystemEntry entry) {
     if (_originRepoInfoHash.isEmpty || _originRepoInfoHash != repoInfoHash) {
       emitUnlessClosed(state);
       return;
@@ -161,7 +161,7 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
     );
   }
 
-  Future<void> clearEntry(String repoInfoHash, FileSystemEntry entry) async {
+  void clearEntry(String repoInfoHash, FileSystemEntry entry) {
     if (_originRepoInfoHash != repoInfoHash) {
       emitUnlessClosed(state);
       return;

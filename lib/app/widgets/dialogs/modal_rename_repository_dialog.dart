@@ -80,7 +80,7 @@ class _RenameRepository extends State<RenameRepository> {
   List<Widget> buildActions(BuildContext context) => [
     NegativeButton(
       text: S.current.actionCancel,
-      onPressed: () async => await Navigator.of(context).maybePop(null),
+      onPressed: () => Navigator.of(context).maybePop(null),
     ),
     PositiveButton(
       text: S.current.actionRename,
@@ -110,7 +110,7 @@ class _RenameRepository extends State<RenameRepository> {
       newNameController.text,
     );
     final exists = await Dialogs.executeFutureWithLoadingDialog(
-      null,
+      context,
       File(newLocation.path).exists(),
     );
 

@@ -150,7 +150,7 @@ class _SortByList extends StatelessWidget with AppLogger {
 
                 if (current is OpenRepoEntry) {
                   await Dialogs.executeFutureWithLoadingDialog(
-                    null,
+                    context,
                     current.cubit.refresh(
                       sortBy: sortByItem,
                       sortDirection: direction,

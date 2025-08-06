@@ -93,8 +93,8 @@ void main() {
 
     await repoCubit.startEntriesSelection();
 
-    await repoCubit.entrySelectionCubit.selectEntry(repoInfoHash, file1);
-    await repoCubit.entrySelectionCubit.selectEntry(repoInfoHash, file5);
+    repoCubit.entrySelectionCubit.selectEntry(repoInfoHash, file1);
+    repoCubit.entrySelectionCubit.selectEntry(repoInfoHash, file5);
 
     final selectedEntries = repoCubit.entrySelectionCubit.entries;
 
@@ -118,7 +118,7 @@ void main() {
     // Try to select entries without starting selection in the repoCubit
     // does not select any entry
 
-    await repoCubit.entrySelectionCubit.selectEntry(repoInfoHash, file1);
+    repoCubit.entrySelectionCubit.selectEntry(repoInfoHash, file1);
 
     final selectedEntries = repoCubit.entrySelectionCubit.entries;
 
