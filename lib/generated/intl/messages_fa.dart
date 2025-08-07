@@ -672,17 +672,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageLogDataP3": MessageLookupByLibrary.simpleMessage(
       "هیچ‌یک از این اطلاعات با هیچ طرف شخص ثالثی به‌اشتراک گذاشته نمی‌شود",
     ),
-    "messageLogLevelAll": MessageLookupByLibrary.simpleMessage("همه"),
-    "messageLogLevelError": MessageLookupByLibrary.simpleMessage("فقط خطا"),
-    "messageLogLevelErrorWarn": MessageLookupByLibrary.simpleMessage(
-      "خطا و هشدار",
-    ),
-    "messageLogLevelErrorWarnInfo": MessageLookupByLibrary.simpleMessage(
-      "خطا، هشدار و اطلاعات",
-    ),
-    "messageLogViewer": MessageLookupByLibrary.simpleMessage(
-      "نمایشگر ثبت گزارش",
-    ),
     "messageMedium": MessageLookupByLibrary.simpleMessage("متوسط"),
     "messageMissingBackgroundServicePermission":
         MessageLookupByLibrary.simpleMessage(
@@ -854,9 +843,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "بازنشانی رمز محلی",
     ),
     "messageRousseau": MessageLookupByLibrary.simpleMessage("ژان ژاک روسو"),
-    "messageSaveLogFile": MessageLookupByLibrary.simpleMessage(
-      "ذخیره فایل گزارش",
-    ),
     "messageSaveToLocation": MessageLookupByLibrary.simpleMessage(
       "فایل مورد نظر را در این پوشه ذخیره کنید",
     ),
@@ -985,9 +971,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageVPN": MessageLookupByLibrary.simpleMessage("وی‌پی‌ان"),
     "messageValidateLocalPassword": MessageLookupByLibrary.simpleMessage(
       "تایید رمز عبور محلی",
-    ),
-    "messageVerbosity": MessageLookupByLibrary.simpleMessage(
-      "سطح جزئیات گزارش",
     ),
     "messageView": MessageLookupByLibrary.simpleMessage("مشاهده"),
     "messageWeak": MessageLookupByLibrary.simpleMessage("ضعیف"),

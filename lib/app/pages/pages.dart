@@ -1,6 +1,5 @@
 export 'accept_eq_values_terms_privacy_page.dart';
 export 'language_picker_page.dart';
-export 'log_view_page.dart';
 export 'main_page.dart';
 export 'onboarding_page.dart';
 export 'peers_page.dart';

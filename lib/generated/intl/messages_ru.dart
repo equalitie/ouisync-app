@@ -631,20 +631,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageLogDataP3": MessageLookupByLibrary.simpleMessage(
       "Никакие из этих данных не передаются третьим лицам",
     ),
-    "messageLogLevelAll": MessageLookupByLibrary.simpleMessage("Всё"),
-    "messageLogLevelError": MessageLookupByLibrary.simpleMessage(
-      "Только ошибки",
-    ),
-    "messageLogLevelErrorWarn": MessageLookupByLibrary.simpleMessage(
-      "Ошибки и предупреждения",
-    ),
-    "messageLogLevelErrorWarnInfo": MessageLookupByLibrary.simpleMessage(
-      "Ошибки, предупреждения и информация",
-    ),
-    "messageLogLevelErrorWarnInfoDebug": MessageLookupByLibrary.simpleMessage(
-      "Ошибки, предупреждения, информация и отладка",
-    ),
-    "messageLogViewer": MessageLookupByLibrary.simpleMessage("Просмотр логов"),
     "messageMedium": MessageLookupByLibrary.simpleMessage("Нормально"),
     "messageMissingBackgroundServicePermission":
         MessageLookupByLibrary.simpleMessage(
@@ -801,7 +787,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "Скопируйте ссылку сюда",
     ),
     "messageRousseau": MessageLookupByLibrary.simpleMessage("Жан-Жак Руссо"),
-    "messageSaveLogFile": MessageLookupByLibrary.simpleMessage("Сохранить лог"),
     "messageSaveToLocation": MessageLookupByLibrary.simpleMessage(
       "Сохранить файл в эту папку",
     ),
@@ -910,9 +895,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageVPN": MessageLookupByLibrary.simpleMessage("ВПН"),
     "messageValidateLocalPassword": MessageLookupByLibrary.simpleMessage(
       "Подтвердить локальный пароль",
-    ),
-    "messageVerbosity": MessageLookupByLibrary.simpleMessage(
-      "Выбор детализации логов",
     ),
     "messageView": MessageLookupByLibrary.simpleMessage("Посмотреть"),
     "messageWeak": MessageLookupByLibrary.simpleMessage("Слабо"),

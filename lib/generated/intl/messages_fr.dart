@@ -432,19 +432,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageLockingAllRepos": MessageLookupByLibrary.simpleMessage(
       "Verrouillage de tous les dépôts ouverts…",
     ),
-    "messageLogLevelAll": MessageLookupByLibrary.simpleMessage("Tout"),
-    "messageLogLevelError": MessageLookupByLibrary.simpleMessage(
-      "Erreurs uniquement",
-    ),
-    "messageLogLevelErrorWarn": MessageLookupByLibrary.simpleMessage(
-      "Erreurs et avertissements",
-    ),
-    "messageLogLevelErrorWarnInfo": MessageLookupByLibrary.simpleMessage(
-      "Erreurs, avertissements et informations",
-    ),
-    "messageLogViewer": MessageLookupByLibrary.simpleMessage(
-      "Visionneuse de journaux",
-    ),
     "messageMobile": MessageLookupByLibrary.simpleMessage("Mobile"),
     "messageMoveEntryOrigin": m23,
     "messageMovingEntry": MessageLookupByLibrary.simpleMessage(
@@ -554,9 +541,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageRepositoryToken": MessageLookupByLibrary.simpleMessage(
       "Collez le lien ici",
     ),
-    "messageSaveLogFile": MessageLookupByLibrary.simpleMessage(
-      "Enregistrer le fichier des journaux",
-    ),
     "messageSaveToLocation": MessageLookupByLibrary.simpleMessage(
       "Enregistrer le fichier dans ce dossier",
     ),
@@ -612,9 +596,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageVPN": MessageLookupByLibrary.simpleMessage("VPN"),
     "messageValidateLocalPassword": MessageLookupByLibrary.simpleMessage(
       "Valider le mot de passe local",
-    ),
-    "messageVerbosity": MessageLookupByLibrary.simpleMessage(
-      "Verbosité des journaux",
     ),
     "messageView": MessageLookupByLibrary.simpleMessage("Voir"),
     "messageWiFi": MessageLookupByLibrary.simpleMessage("Wi-Fi"),

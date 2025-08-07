@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix a number of issues related to double clicking on action buttons (repo import, back buttons, file copy/move,...)
 - Fix file being moved instead of copied when a file with the same name already existed in the destination folder
 - Improve and add tests
+- Remove the embedded log viewer
 
 ## [v0.9.0](https://github.com/equalitie/ouisync-app/compare/v0.8.3-production...v0.9.0) - 2025-06-05
 

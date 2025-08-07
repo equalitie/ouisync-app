@@ -68,7 +68,6 @@ export 'switches/custom_adaptive_switch.dart';
 export 'eq_terms_privacy.dart';
 export 'eq_values.dart';
 export 'holder.dart';
-export 'log_view.dart';
 export 'long_text.dart';
 export 'repo_status.dart';
 export 'throughput_display.dart';

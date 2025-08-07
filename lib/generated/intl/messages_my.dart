@@ -706,22 +706,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageLogDataP3": MessageLookupByLibrary.simpleMessage(
       "ဤဒေတာကို မည်သည့်ပြင်ပအဖွဲ့အစည်းနှင့်မျှ မျှဝေခြင်းမပြုပါ",
     ),
-    "messageLogLevelAll": MessageLookupByLibrary.simpleMessage("အားလုံး"),
-    "messageLogLevelError": MessageLookupByLibrary.simpleMessage(
-      "မှားယွင်းမှုများသာ",
-    ),
-    "messageLogLevelErrorWarn": MessageLookupByLibrary.simpleMessage(
-      "မှားယွင်းမှုနှင့် သတိပေးမှု",
-    ),
-    "messageLogLevelErrorWarnInfo": MessageLookupByLibrary.simpleMessage(
-      "မှားယွင်းမှု၊ သတိပေးမှုနှင့် အချက်အလက်များ",
-    ),
-    "messageLogLevelErrorWarnInfoDebug": MessageLookupByLibrary.simpleMessage(
-      "မှားယွင်းမှု၊ သတိပေးမှု၊ အချက်အလက်နှင့် အမှားအယွင်းများ",
-    ),
-    "messageLogViewer": MessageLookupByLibrary.simpleMessage(
-      "စာရင်းကြည့်ရှုသူ",
-    ),
     "messageMedium": MessageLookupByLibrary.simpleMessage("အသင့်အတင့်"),
     "messageMissingBackgroundServicePermission":
         MessageLookupByLibrary.simpleMessage(
@@ -891,9 +875,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageRousseau": MessageLookupByLibrary.simpleMessage(
       "Jean-Jacques Rousseau",
     ),
-    "messageSaveLogFile": MessageLookupByLibrary.simpleMessage(
-      "စာရင်းဖိုင်ကို သိမ်းဆည်းမည်",
-    ),
     "messageSaveToLocation": MessageLookupByLibrary.simpleMessage(
       "ဖိုင်ကို ထိုဖိုဒါထဲသို့ သိမ်းပါ",
     ),
@@ -1016,7 +997,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageValidateLocalPassword": MessageLookupByLibrary.simpleMessage(
       "စက်တွင်းစကားဝှက်ကို အတည်ပြုပါ",
     ),
-    "messageVerbosity": MessageLookupByLibrary.simpleMessage("စကားလုံးစာရင်း"),
     "messageView": MessageLookupByLibrary.simpleMessage("ကြည့်ရှုမှု"),
     "messageWeak": MessageLookupByLibrary.simpleMessage("အားနည်းသည်"),
     "messageWiFi": MessageLookupByLibrary.simpleMessage("ဝိုင်ဖိုင်"),
