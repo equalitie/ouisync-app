@@ -71,6 +71,7 @@ class _RenameRepository extends State<RenameRepository> {
           ),
           focusNode: newNameFocus,
           autofocus: true,
+          key: ValueKey('new-name'),
         ),
         Fields.dialogActions(buttons: buildActions(context)),
       ],

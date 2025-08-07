@@ -26,7 +26,6 @@ import 'package:ouisync/ouisync.dart'
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stack_trace/stack_trace.dart';
 
 import 'sandbox.dart';
@@ -66,8 +65,6 @@ Future<void> testEnv(FutureOr<void> Function() callback) async {
     ConnectivityPlatform.instance = _FakeConnectivityPlatform();
 
     // TODO: add mock for 'org.equalitie.ouisync/backend' once the tests are updated to use channels
-
-    SharedPreferences.setMockInitialValues({});
   });
 
   tearDown(() async {

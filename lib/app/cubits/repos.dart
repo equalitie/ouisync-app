@@ -155,9 +155,11 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
 
     try {
       await prevEntry.cubit.move(newLocation.path);
-    } catch (e) {
+    } catch (e, st) {
       loggy.error(
-        "Failed to move repository from $oldLocation to $newLocation",
+        "Failed to move repository from $oldLocation to $newLocation: ",
+        e,
+        st,
       );
       // We don't know whether it was moved and then opening failed or whether
       // it wasn't moved at all. So we need to re-read the repos in the repo db
