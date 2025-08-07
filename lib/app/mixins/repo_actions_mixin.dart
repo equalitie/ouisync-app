@@ -6,7 +6,7 @@ import 'package:path/path.dart' as p;
 import 'package:url_launcher/url_launcher.dart' as launcher;
 
 import '../../generated/l10n.dart';
-import '../cubits/cubits.dart' show RepoCubit;
+import '../cubits/cubits.dart' show ReposCubit, RepoCubit;
 import '../models/models.dart'
     show
         Access,
@@ -213,11 +213,10 @@ mixin RepositoryActionsMixin on LoggyType {
     ],
   );
 
-  /// delete => ReposCubit.deleteRepository
-  Future<bool> deleteRepository(
+  Future<bool> showDeleteRepositoryDialog(
     BuildContext context, {
-    required String repoName,
-    required Future deleteRepoFuture,
+    required ReposCubit reposCubit,
+    required RepoLocation repoLocation,
   }) async {
     final deleteRepo = await showDialog<bool>(
       context: context,
@@ -263,7 +262,10 @@ mixin RepositoryActionsMixin on LoggyType {
     );
 
     if (deleteRepo == true) {
-      await Dialogs.executeFutureWithLoadingDialog(context, deleteRepoFuture);
+      await Dialogs.executeFutureWithLoadingDialog(
+        context,
+        reposCubit.deleteRepository(repoLocation),
+      );
 
       return true;
     }

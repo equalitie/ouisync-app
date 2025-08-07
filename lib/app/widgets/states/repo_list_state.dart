@@ -80,12 +80,11 @@ class RepoListState extends StatelessWidget
 
               final repoName = currentRepoEntry.name;
               final location = currentRepoEntry.location;
-              final deleteRepoFuture = reposCubit.deleteRepository(location);
 
-              final deleted = await deleteRepository(
+              final deleted = await showDeleteRepositoryDialog(
                 context,
-                repoName: repoName,
-                deleteRepoFuture: deleteRepoFuture,
+                repoLocation: location,
+                reposCubit: reposCubit,
               );
 
               if (deleted == true) {

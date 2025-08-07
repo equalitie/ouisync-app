@@ -155,14 +155,11 @@ class _RepositorySettingsState extends State<RepositorySettings>
                 onTap: () async {
                   final repoName = widget.repoCubit.name;
                   final location = widget.repoCubit.location;
-                  final deleteRepoFuture = widget.reposCubit.deleteRepository(
-                    location,
-                  );
 
-                  final deleted = await deleteRepository(
+                  final deleted = await showDeleteRepositoryDialog(
                     context,
-                    repoName: repoName,
-                    deleteRepoFuture: deleteRepoFuture,
+                    reposCubit: widget.reposCubit,
+                    repoLocation: location,
                   );
 
                   if (deleted == true) {
