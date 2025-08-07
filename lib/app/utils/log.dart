@@ -105,30 +105,6 @@ Future<void> dump(IOSink sink) async {
   }
 }
 
-/// Watch the log file for changes.
-Stream<List<int>> get watch async* {
-  final file = _file;
-  if (file == null) {
-    return;
-  }
-
-  int offset = 0;
-
-  // open `file` and tail (unix) from `offset` to eof, updating `offset` in
-  // the process.
-  Stream<List<int>> tail() => file.openRead(offset).map((chunk) {
-    offset += chunk.length;
-    return chunk;
-  });
-
-  yield* tail(); // first yield the whole file as is right now then...
-
-  // watch for changes
-  await for (final _ in file.watch()) {
-    yield* tail(); // ...and yield them as they come
-  }
-}
-
 /// Adds a getter for a (cached) loggy instance tagged with the name of the
 /// class it's mixed into.
 mixin AppLogger implements LoggyType {

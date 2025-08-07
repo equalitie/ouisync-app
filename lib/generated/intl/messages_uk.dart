@@ -708,20 +708,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageLogDataP3": MessageLookupByLibrary.simpleMessage(
       "Жодні з цих даних не передаються третім особам",
     ),
-    "messageLogLevelAll": MessageLookupByLibrary.simpleMessage("Все"),
-    "messageLogLevelError": MessageLookupByLibrary.simpleMessage(
-      "Тільки помилки",
-    ),
-    "messageLogLevelErrorWarn": MessageLookupByLibrary.simpleMessage(
-      "Помилки та попередження",
-    ),
-    "messageLogLevelErrorWarnInfo": MessageLookupByLibrary.simpleMessage(
-      "Помилки, попередження та інформація",
-    ),
-    "messageLogLevelErrorWarnInfoDebug": MessageLookupByLibrary.simpleMessage(
-      "Помилки, попередження, інформація та дебаг",
-    ),
-    "messageLogViewer": MessageLookupByLibrary.simpleMessage("Перегляд логів"),
     "messageMedium": MessageLookupByLibrary.simpleMessage(
       "Середньої складності",
     ),
@@ -893,9 +879,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "Відновити місцевий секрет",
     ),
     "messageRousseau": MessageLookupByLibrary.simpleMessage("Жан-Жак Руссо"),
-    "messageSaveLogFile": MessageLookupByLibrary.simpleMessage(
-      "Зберегти файл журналу",
-    ),
     "messageSaveToLocation": MessageLookupByLibrary.simpleMessage(
       "Зберегти файл в цю папку",
     ),
@@ -1024,9 +1007,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageVPN": MessageLookupByLibrary.simpleMessage("ВПН"),
     "messageValidateLocalPassword": MessageLookupByLibrary.simpleMessage(
       "Підтвердити локальний пароль",
-    ),
-    "messageVerbosity": MessageLookupByLibrary.simpleMessage(
-      "Багатослівність журналу",
     ),
     "messageView": MessageLookupByLibrary.simpleMessage("Переглянути"),
     "messageWeak": MessageLookupByLibrary.simpleMessage("Cлабкий"),

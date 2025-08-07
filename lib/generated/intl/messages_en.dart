@@ -708,18 +708,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageLogDataP3": MessageLookupByLibrary.simpleMessage(
       "None of this data is shared with any third parties",
     ),
-    "messageLogLevelAll": MessageLookupByLibrary.simpleMessage("All"),
-    "messageLogLevelError": MessageLookupByLibrary.simpleMessage("Only Error"),
-    "messageLogLevelErrorWarn": MessageLookupByLibrary.simpleMessage(
-      "Error and Warn",
-    ),
-    "messageLogLevelErrorWarnInfo": MessageLookupByLibrary.simpleMessage(
-      "Error, Warn and Info",
-    ),
-    "messageLogLevelErrorWarnInfoDebug": MessageLookupByLibrary.simpleMessage(
-      "Error, Warn, Info and Debug",
-    ),
-    "messageLogViewer": MessageLookupByLibrary.simpleMessage("Log viewer"),
     "messageMedium": MessageLookupByLibrary.simpleMessage("Medium"),
     "messageMissingBackgroundServicePermission":
         MessageLookupByLibrary.simpleMessage(
@@ -896,7 +884,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "Jean-Jacques Rousseau",
     ),
     "messageSaveEntriesToDevice": m34,
-    "messageSaveLogFile": MessageLookupByLibrary.simpleMessage("Save log file"),
     "messageSaveToLocation": MessageLookupByLibrary.simpleMessage(
       "Save the file to this folder",
     ),
@@ -1026,7 +1013,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageValidateLocalPassword": MessageLookupByLibrary.simpleMessage(
       "Validate local password",
     ),
-    "messageVerbosity": MessageLookupByLibrary.simpleMessage("Log verbosity"),
     "messageView": MessageLookupByLibrary.simpleMessage("View"),
     "messageWeak": MessageLookupByLibrary.simpleMessage("Weak"),
     "messageWiFi": MessageLookupByLibrary.simpleMessage("Wi-Fi"),

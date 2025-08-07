@@ -710,20 +710,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageLogDataP3": MessageLookupByLibrary.simpleMessage(
       "Ninguno de estos datos se comparte con terceros",
     ),
-    "messageLogLevelAll": MessageLookupByLibrary.simpleMessage("Todos"),
-    "messageLogLevelError": MessageLookupByLibrary.simpleMessage("Solo error"),
-    "messageLogLevelErrorWarn": MessageLookupByLibrary.simpleMessage(
-      "Error y Alerta",
-    ),
-    "messageLogLevelErrorWarnInfo": MessageLookupByLibrary.simpleMessage(
-      "Error, Alerta e Información",
-    ),
-    "messageLogLevelErrorWarnInfoDebug": MessageLookupByLibrary.simpleMessage(
-      "Errores, advertencias, información y depuración",
-    ),
-    "messageLogViewer": MessageLookupByLibrary.simpleMessage(
-      "Visor de registro",
-    ),
     "messageMedium": MessageLookupByLibrary.simpleMessage("Mediana"),
     "messageMissingBackgroundServicePermission":
         MessageLookupByLibrary.simpleMessage(
@@ -895,9 +881,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageRousseau": MessageLookupByLibrary.simpleMessage(
       "Jean-Jacques Rousseau",
     ),
-    "messageSaveLogFile": MessageLookupByLibrary.simpleMessage(
-      "Guardar el archivo de registro",
-    ),
     "messageSaveToLocation": MessageLookupByLibrary.simpleMessage(
       "Guardar el archivo en este directorio",
     ),
@@ -1025,9 +1008,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageVPN": MessageLookupByLibrary.simpleMessage("VPN"),
     "messageValidateLocalPassword": MessageLookupByLibrary.simpleMessage(
       "Validar la contraseña localmente",
-    ),
-    "messageVerbosity": MessageLookupByLibrary.simpleMessage(
-      "Detalle del registro",
     ),
     "messageView": MessageLookupByLibrary.simpleMessage("Ver"),
     "messageWeak": MessageLookupByLibrary.simpleMessage("Débil"),
