@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improve logging: capture more relevant log messages and implement log rotation.
 - Fix segfault when exiting the app on linux.
 - Add more dependencies to the ouisync-gui Debian package.
+- Fix repository being deleted prior to confirmation.
 - Fix a number of issues related to double clicking on action buttons (repo import, back buttons, file copy/move,...)
 - Fix file being moved instead of copied when a file with the same name already existed in the destination folder
 - Improve and add tests
