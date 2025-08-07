@@ -618,8 +618,8 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   }
 
   /// Move this repo to another location on the filesystem.
-  Future<void> move(String to) async {
-    await _repo.move(to);
+  Future<void> move(String dstPath) async {
+    await _repo.move(dstPath);
     final path = await _repo.getPath();
 
     emitUnlessClosed(state.copyWith(location: RepoLocation.fromDbPath(path)));
