@@ -11,7 +11,6 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
-import '../../pages/log_view_page.dart';
 import '../../utils/dirs.dart';
 import '../../utils/platform/platform.dart';
 import '../../utils/utils.dart';
@@ -63,11 +62,6 @@ class LogsSection extends SettingsSection with AppLogger {
           leading: Icon(Icons.share),
           onTap: () => unawaited(_shareLogs(context, natDetection)),
         ),
-      NavigationTile(
-        title: Text(S.current.messageView, style: bodyStyle),
-        leading: Icon(Icons.visibility),
-        onTap: () => _viewLogs(context),
-      ),
       BlocBuilder<StateMonitorIntCubit, int?>(
         bloc: panicCounter,
         builder: (context, count) {
@@ -179,11 +173,6 @@ class LogsSection extends SettingsSection with AppLogger {
       await tempFile.delete();
     }
   }
-
-  void _viewLogs(BuildContext context) => Navigator.push(
-    context,
-    MaterialPageRoute(builder: (context) => LogViewPage()),
-  );
 
   Future<File> _dumpInfo(BuildContext context, NatDetection natDetection) =>
       dumpAll(
