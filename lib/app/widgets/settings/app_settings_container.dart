@@ -23,7 +23,7 @@ class AppSettingsContainer extends StatefulHookWidget {
     required this.localeCubit,
     required this.mount,
     required NatDetection natDetection,
-    required this.panicCounter,
+    required this.errorCubit,
     required PeerSetCubit peerSet,
     required this.powerControl,
     required ReposCubit reposCubit,
@@ -38,7 +38,7 @@ class AppSettingsContainer extends StatefulHookWidget {
          ),
          LogsSection(
            mount: mount,
-           panicCounter: panicCounter,
+           errorCubit: errorCubit,
            powerControl: powerControl,
            reposCubit: reposCubit,
            connectivityInfo: connectivityInfo,
@@ -61,7 +61,7 @@ class AppSettingsContainer extends StatefulHookWidget {
 
   final LocaleCubit localeCubit;
   final MountCubit mount;
-  final StateMonitorIntCubit panicCounter;
+  final ErrorCubit errorCubit;
   final PowerControl powerControl;
   final UpgradeExistsCubit upgradeExists;
 
@@ -88,7 +88,6 @@ class _AppSettingsContainerState extends State<AppSettingsContainer>
                     (index, section) => SettingsSectionTitleDesktop(
                       mount: widget.mount,
                       powerControl: widget.powerControl,
-                      panicCounter: widget.panicCounter,
                       upgradeExists: widget.upgradeExists,
                       section: section,
                       selected: selected.value == index,
@@ -179,7 +178,6 @@ class _AppSettingsContainerState extends State<AppSettingsContainer>
 class SettingsSectionTitleDesktop extends StatelessWidget {
   const SettingsSectionTitleDesktop({
     required this.mount,
-    required this.panicCounter,
     required this.powerControl,
     required this.upgradeExists,
     required this.section,
@@ -189,7 +187,6 @@ class SettingsSectionTitleDesktop extends StatelessWidget {
 
   final MountCubit mount;
   final PowerControl powerControl;
-  final StateMonitorIntCubit panicCounter;
   final UpgradeExistsCubit upgradeExists;
 
   final SettingsSection section;
