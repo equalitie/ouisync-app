@@ -8,9 +8,18 @@ import 'utils.dart' show CubitActions;
 import '../utils/log.dart' show AppLogger;
 
 // Watch if an error happened in different parts of the app and the ouisync library.
+// Only captures errors that can't be gracefuly handled, the cubit indicates to
+// the user that the log should be captured.
 class ErrorCubit extends Cubit<ErrorCubitState> with CubitActions, AppLogger {
   ErrorCubit({required native.StateMonitor nativeOuisyncRootStateMonitor})
     : super(ErrorCubitState(false)) {
+    // TODO: This may no longer be useful. Previously, when we were
+    // communicating with the library over FFI  we could detect panics through
+    // the state monitor. But now that we communicate with the service over the
+    // socket, when a panic happens the socket disconnects and thus we no
+    // longer receive events over it. However, we now receive
+    // `native.ClientException`s when the socket disconnects which is handled
+    // below.
     unawaited(
       _RustPanicDetectionRunner(
         this,
