@@ -20,7 +20,7 @@ import 'settings_tile.dart';
 class LogsSection extends SettingsSection with AppLogger {
   final StateMonitor stateMonitor;
   final MountCubit mount;
-  final StateMonitorIntCubit panicCounter;
+  final ErrorCubit errorCubit;
   final PowerControl powerControl;
   final ReposCubit reposCubit;
   final ConnectivityInfo connectivityInfo;
@@ -30,7 +30,7 @@ class LogsSection extends SettingsSection with AppLogger {
 
   LogsSection({
     required this.mount,
-    required this.panicCounter,
+    required this.errorCubit,
     required this.powerControl,
     required this.reposCubit,
     required this.connectivityInfo,
@@ -62,13 +62,14 @@ class LogsSection extends SettingsSection with AppLogger {
           leading: Icon(Icons.share),
           onTap: () => unawaited(_shareLogs(context, natDetection)),
         ),
-      BlocBuilder<StateMonitorIntCubit, int?>(
-        bloc: panicCounter,
-        builder: (context, count) {
-          if ((count ?? 0) == 0) {
+      BlocBuilder<ErrorCubit, ErrorCubitState>(
+        bloc: errorCubit,
+        builder: (context, state) {
+          if (state.errorHappened) {
+            return _errorTile(context, S.current.messageLibraryPanic);
+          } else {
             return SizedBox.shrink();
           }
-          return _errorTile(context, S.current.messageLibraryPanic);
         },
       ),
       BlocBuilder<MountCubit, MountState>(
@@ -121,7 +122,7 @@ class LogsSection extends SettingsSection with AppLogger {
 
   @override
   bool containsErrorNotification() =>
-      (panicCounter.state ?? 0) > 0 || mount.state is MountStateFailure;
+      errorCubit.state.errorHappened || mount.state is MountStateFailure;
 
   Future<void> _saveLogs(
     BuildContext context,
