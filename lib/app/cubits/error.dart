@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync/ouisync.dart' as native;
 import 'package:loggy/loggy.dart' show Loggy;
+import 'package:flutter/foundation.dart' show FlutterError, PlatformDispatcher;
 import 'utils.dart' show CubitActions;
 import '../utils/log.dart' show AppLogger;
 
@@ -17,6 +18,33 @@ class ErrorCubit extends Cubit<ErrorCubitState> with CubitActions, AppLogger {
         nativeOuisyncRootStateMonitor,
       ).init(),
     );
+
+    // These are printed in utils/log.dart. Here we just mark the state with
+    // error for the error badge indicator to light up.
+    final defaultFlutterOnError = FlutterError.onError;
+    FlutterError.onError = (details) {
+      _emitError();
+
+      if (defaultFlutterOnError != null) {
+        defaultFlutterOnError(details);
+      }
+    };
+
+    final defaultPlatformOnError = PlatformDispatcher.instance.onError;
+    PlatformDispatcher.instance.onError = (exception, stack) {
+      _emitError();
+
+      if (defaultPlatformOnError != null) {
+        return defaultPlatformOnError(exception, stack);
+      } else {
+        // We're not writing the log, returning `false` means someone else will.
+        return false;
+      }
+    };
+  }
+
+  void _emitError() {
+    emitUnlessClosed(ErrorCubitState(true));
   }
 }
 
@@ -48,7 +76,7 @@ class _RustPanicDetectionRunner {
       }
     } catch (e) {
       _loggy.error("Rust panic detection: $e");
-      _errorCubit.emitUnlessClosed(ErrorCubitState(true));
+      _errorCubit._emitError();
     }
   }
 

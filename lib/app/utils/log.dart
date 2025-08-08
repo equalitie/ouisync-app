@@ -56,6 +56,7 @@ ${'-' * (48 + package.appName.length)}''';
   };
 
   if (captureErrors) {
+    final defaultFlutterOnError = FlutterError.onError;
     FlutterError.onError = (details) {
       logger.error(
         'Unhandled flutter exception: ',
@@ -63,13 +64,24 @@ ${'-' * (48 + package.appName.length)}''';
         details.stack,
       );
 
-      FlutterError.presentError(details);
+      if (defaultFlutterOnError != null) {
+        defaultFlutterOnError(details);
+      } else {
+        FlutterError.presentError(details);
+      }
     };
 
     // NOTE: if sentry is used, it will override these methods but still call
     // them after processing the events, so they are not lost
+    final defaultPlatformOnError = PlatformDispatcher.instance.onError;
     PlatformDispatcher.instance.onError = (exception, stack) {
-      logger.error('Unhandled platform exception: ', exception, stack);
+      bool captured = false;
+      if (defaultPlatformOnError != null) {
+        captured = defaultPlatformOnError(exception, stack);
+      }
+      if (!captured) {
+        logger.error('Unhandled platform exception: ', exception, stack);
+      }
       return true;
     };
   }

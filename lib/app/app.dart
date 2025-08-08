@@ -74,9 +74,11 @@ Future<HomeWidget> _initHomeWidget(List<String> args) async {
   await log.init(dirs);
 
   final (server, session) = await _initServerAndSession(dirs, windowManager);
+
   final errorCubit = ErrorCubit(
     nativeOuisyncRootStateMonitor: session.rootStateMonitor,
   );
+
   final settings = await loadAndMigrateSettings(session);
   final localeCubit = LocaleCubit(settings);
 
