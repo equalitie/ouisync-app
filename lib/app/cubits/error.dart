@@ -64,9 +64,9 @@ class ErrorCubitState {
 }
 
 class _RustPanicDetectionRunner {
-  ErrorCubit _errorCubit;
-  Loggy _loggy;
-  native.StateMonitor _serviceStateMonitor;
+  final ErrorCubit _errorCubit;
+  final Loggy _loggy;
+  final native.StateMonitor _serviceStateMonitor;
 
   _RustPanicDetectionRunner(
     this._errorCubit,
