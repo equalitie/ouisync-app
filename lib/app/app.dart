@@ -75,9 +75,7 @@ Future<HomeWidget> _initHomeWidget(List<String> args) async {
 
   final (server, session) = await _initServerAndSession(dirs, windowManager);
 
-  final errorCubit = ErrorCubit(
-    nativeOuisyncRootStateMonitor: session.rootStateMonitor,
-  );
+  final errorCubit = ErrorCubit(session);
 
   final settings = await loadAndMigrateSettings(session);
   final localeCubit = LocaleCubit(settings);
@@ -209,7 +207,6 @@ class _HomeWidgetState extends State<HomeWidget>
   void dispose() {
     unawaited(reposCubit.close());
     unawaited(mountCubit.close());
-    unawaited(widget.errorCubit.close());
     unawaited(receivedMediaController.close());
     //widget.appRouteObserver.unsubscribe(this);
 
