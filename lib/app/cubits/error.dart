@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:equatable/equatable.dart';
 import 'package:ouisync/ouisync.dart' as native;
 import 'package:loggy/loggy.dart' show Loggy;
 import 'package:flutter/foundation.dart' show FlutterError, PlatformDispatcher;
@@ -11,8 +12,7 @@ import '../utils/log.dart' show AppLogger;
 // Only captures errors that can't be gracefuly handled, the cubit indicates to
 // the user that the log should be captured.
 class ErrorCubit extends Cubit<ErrorCubitState> with CubitActions, AppLogger {
-  ErrorCubit({required native.StateMonitor nativeOuisyncRootStateMonitor})
-    : super(ErrorCubitState(false)) {
+  ErrorCubit(native.Session session) : super(ErrorCubitState(false)) {
     // TODO: This may no longer be useful. Previously, when we were
     // communicating with the library over FFI  we could detect panics through
     // the state monitor. But now that we communicate with the service over the
@@ -21,11 +21,7 @@ class ErrorCubit extends Cubit<ErrorCubitState> with CubitActions, AppLogger {
     // `native.ClientException`s when the socket disconnects which is handled
     // below.
     unawaited(
-      _RustPanicDetectionRunner(
-        this,
-        loggy,
-        nativeOuisyncRootStateMonitor,
-      ).init(),
+      _RustPanicDetectionRunner(this, loggy, session.rootStateMonitor).init(),
     );
 
     // These are printed in utils/log.dart. Here we just mark the state with
@@ -57,10 +53,13 @@ class ErrorCubit extends Cubit<ErrorCubitState> with CubitActions, AppLogger {
   }
 }
 
-class ErrorCubitState {
-  bool errorHappened = false;
+class ErrorCubitState extends Equatable {
+  final bool errorHappened;
 
   ErrorCubitState(this.errorHappened);
+
+  @override
+  List<Object> get props => [errorHappened];
 }
 
 class _RustPanicDetectionRunner {
