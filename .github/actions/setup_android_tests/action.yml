@@ -67,5 +67,5 @@ runs:
     # workaround, we build them explicitly here.
     - name: Build kotlin bindings and publish them to Mavel local
       working-directory: ouisync/bindings/kotlin
-      run: gradle -Prust-targets=x86_64 publishClientPublicationToMavenLocal publishDebugServerPublicationToMavenLocal
+      run: ./gradlew --info -Prust-targets=x86_64 publishClientPublicationToMavenLocal publishDebugServerPublicationToMavenLocal
       shell: bash

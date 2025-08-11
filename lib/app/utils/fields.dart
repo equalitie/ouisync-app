@@ -404,6 +404,7 @@ class Fields {
     bool autofocus = false,
     String? tooltip,
     BoxConstraints? constraints,
+    Key? key,
   }) => IconButton(
     icon: icon,
     iconSize: size,
@@ -415,6 +416,7 @@ class Fields {
     tooltip: tooltip,
     onPressed: onPressed,
     constraints: constraints,
+    key: key,
   );
 
   static Widget actionListTile(
