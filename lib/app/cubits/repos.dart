@@ -7,6 +7,7 @@ import 'package:ouisync/ouisync.dart';
 
 import '../../generated/l10n.dart';
 import '../models/models.dart';
+import '../utils/option.dart';
 import '../utils/random.dart' show randomSalt, randomSecretKey;
 import '../utils/utils.dart'
     show
@@ -80,23 +81,25 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
     unawaited(_init());
   }
 
-  Future<void> _init({bool makeDefaultRepoCurrent = true}) async {
+  Future<void> _init() async {
     emitUnlessClosed(state.copyWith(isLoading: true));
 
+    await _load();
+
+    final current = _settings.defaultRepo?.let(
+      (location) => state.repos[location],
+    );
+    await setCurrent(current);
+
+    emitUnlessClosed(state.copyWith(isLoading: false));
+  }
+
+  Future<void> _load() async {
     final repos = await _session.listRepositories();
 
     for (final repo in repos.values) {
       await _addRepo(repo);
     }
-
-    if (makeDefaultRepoCurrent) {
-      final current = _settings.defaultRepo?.let(
-        (location) => state.repos[location],
-      );
-      await setCurrent(current);
-    }
-
-    emitUnlessClosed(state.copyWith(isLoading: false));
   }
 
   Session get session => _session;
@@ -106,82 +109,81 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
   Future<ShareToken> createToken(String tokenString) =>
       session.validateShareToken(tokenString);
 
-  Future<void> renameRepo(RepoLocation oldLocation, String newName) async {
+  Future<void> renameRepository(
+    RepoLocation oldLocation,
+    String newName,
+  ) async {
     // The checks here should have been caught before calling this function,
     // thus only logging here.
     if (newName.isEmpty) {
-      loggy.error("Can't rename repository to an empty string");
+      loggy.error("Not renaming: new name can't be empty");
       return;
     }
 
-    final prevEntry = state.repos[oldLocation];
+    final oldEntry = state.repos[oldLocation];
 
-    if (prevEntry == null) {
-      loggy.error("Renaming a repository which doesn't exist ($oldLocation)");
+    if (oldEntry == null) {
+      loggy.error("Not renaming: repository doesn't exist: $oldLocation");
       return;
     }
 
-    final newLocation = prevEntry.location.rename(newName);
+    if (oldEntry is! OpenRepoEntry) {
+      loggy.error("Not renaming: repository is not open: $oldLocation");
+      return;
+    }
+
+    final newLocation = oldEntry.location.rename(newName);
 
     if (newLocation == oldLocation) {
-      loggy.warning(
-        "Not renaming because the location is the same $oldLocation",
-      );
+      loggy.error("Not renaming: new name same as old name: $oldLocation");
       return;
     }
 
     if (state.repos[newLocation] != null) {
-      loggy.error("Repo at location $newLocation already exists");
+      loggy.error("Not renaming: repository at $newLocation already exists");
       return;
     }
 
-    if (prevEntry is! OpenRepoEntry) {
-      loggy.error("Can't rename repository which is not open");
-      return;
-    }
+    RepoEntry newEntry = LoadingRepoEntry(newLocation);
+    var newCurrent = state.current == oldEntry ? Some(newEntry) : null;
 
-    final loadingRepos = {...state.repos};
-    loadingRepos.remove(oldLocation);
-    final loadingRepoEntry = LoadingRepoEntry(newLocation);
-    loadingRepos[newLocation] = loadingRepoEntry;
-
-    var newCurrent = Option.from(state.current);
-
-    if (state.current?.location == oldLocation) {
-      newCurrent = Option.from(loadingRepoEntry);
-    }
-
-    emit(state.copyWith(repos: loadingRepos, current: newCurrent));
+    emitUnlessClosed(
+      state.copyWith(
+        repos: state.repos
+            .withRemoved(oldLocation)
+            .withAdded(newLocation, newEntry),
+        current: newCurrent,
+      ),
+    );
 
     try {
-      await prevEntry.cubit.move(newLocation.path);
-    } catch (e) {
+      await oldEntry.cubit.move(newLocation.path);
+    } catch (e, st) {
       loggy.error(
-        "Failed to move repository from $oldLocation to $newLocation",
+        "Failed to move repository from $oldLocation to $newLocation: ",
+        e,
+        st,
       );
+
       // We don't know whether it was moved and then opening failed or whether
       // it wasn't moved at all. So we need to re-read the repos in the repo db
       // folder.
-      _reInitialize();
-      return;
+      emitUnlessClosed(ReposState(isLoading: true));
+      await _load();
+      emitUnlessClosed(state.copyWith(isLoading: false));
+
+      rethrow;
     }
 
-    final newRepos = {...state.repos};
-    final newEntry = OpenRepoEntry(prevEntry.cubit);
-    newRepos[newLocation] = newEntry;
+    newEntry = OpenRepoEntry(oldEntry.cubit);
+    newCurrent = newCurrent != null ? Some(newEntry) : null;
 
-    newCurrent = Option.from(state.current);
-
-    if (state.current?.location == newLocation) {
-      newCurrent = Option.from(newEntry);
-    }
-
-    emitUnlessClosed(state.copyWith(repos: newRepos, current: newCurrent));
-  }
-
-  void _reInitialize() {
-    emitUnlessClosed(ReposState(repos: {}, current: null, isLoading: true));
-    unawaited(_init(makeDefaultRepoCurrent: false));
+    emitUnlessClosed(
+      state.copyWith(
+        repos: state.repos.withAdded(newLocation, newEntry),
+        current: newCurrent,
+      ),
+    );
   }
 
   Future<void> setCurrent(RepoEntry? entry) async {

@@ -89,8 +89,8 @@ class _RepositorySettingsState extends State<RepositorySettings>
                 onTap: () async {
                   final newName = await renameRepository(
                     context,
-                    repoCubit: widget.repoCubit,
                     reposCubit: widget.reposCubit,
+                    location: widget.repoCubit.location,
                   );
 
                   if (newName.isNotEmpty) {

@@ -1,4 +1,5 @@
 import 'package:flutter/services.dart';
+import 'package:meta/meta.dart';
 
 /// Application flavor. This is set to the current [android]
 /// (https://docs.flutter.dev/deployment/flavors) or [ios/macos]
@@ -20,10 +21,17 @@ enum Flavor {
     _ => null,
   };
 
-  static final current =
+  static Flavor _current =
       parse(appFlavor ?? '') ??
       parse(String.fromEnvironment('OUISYNC_FLAVOR')) ??
       production;
+
+  static Flavor get current => _current;
+
+  @visibleForTesting
+  static set current(value) {
+    _current = value;
+  }
 
   @override
   String toString() => switch (this) {
