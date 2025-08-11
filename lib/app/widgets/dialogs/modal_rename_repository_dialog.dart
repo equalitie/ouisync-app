@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import '../../../generated/l10n.dart';
-import '../../cubits/cubits.dart' show RepoCubit;
+import '../../models/repo_location.dart';
 import '../../utils/utils.dart'
     show
         AppThemeExtension,
@@ -16,9 +16,9 @@ import '../../utils/utils.dart'
 import '../widgets.dart' show NegativeButton, PositiveButton;
 
 class RenameRepository extends StatefulWidget {
-  RenameRepository(this.repoCubit, {super.key});
+  RenameRepository(this.location, {super.key});
 
-  final RepoCubit repoCubit;
+  final RepoLocation location;
 
   @override
   State<RenameRepository> createState() => _RenameRepository();
@@ -35,7 +35,7 @@ class _RenameRepository extends State<RenameRepository> {
   void initState() {
     super.initState();
 
-    newNameController.text = widget.repoCubit.name;
+    newNameController.text = widget.location.name;
     newNameController.selectAll();
   }
 
@@ -49,7 +49,7 @@ class _RenameRepository extends State<RenameRepository> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Fields.constrainedText(
-          '"${widget.repoCubit.name}"',
+          '"${widget.location.name}"',
           flex: 0,
           style: context.theme.appTextStyle.bodyMedium.copyWith(
             fontWeight: FontWeight.w400,
@@ -107,9 +107,7 @@ class _RenameRepository extends State<RenameRepository> {
     }
 
     // Check if name is already taken
-    final newLocation = widget.repoCubit.location.rename(
-      newNameController.text,
-    );
+    final newLocation = widget.location.rename(newNameController.text);
     final exists = await Dialogs.executeFutureWithLoadingDialog(
       context,
       File(newLocation.path).exists(),
