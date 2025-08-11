@@ -3,8 +3,21 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:ouisync_app/app/app.dart';
 
+import '../test/sandbox.dart';
+
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+
+  Sandbox? sandbox;
+
+  setUp(() async {
+    sandbox = await Sandbox.setUp();
+  });
+
+  tearDown(() async {
+    await sandbox?.tearDown();
+    sandbox = null;
+  });
 
   testWidgets('sanity check', (tester) async {
     await init(tester);
