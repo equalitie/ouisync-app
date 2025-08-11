@@ -42,14 +42,14 @@ mixin RepositoryActionsMixin on LoggyType {
   Future<String> renameRepository(
     BuildContext context, {
     required ReposCubit reposCubit,
-    required RepoCubit repoCubit,
+    required RepoLocation location,
   }) async {
-    final newName = await _getRepositoryNewName(context, repoCubit: repoCubit);
+    final newName = await _getRepositoryNewName(context, location);
 
     if (newName.isNotEmpty) {
       await Dialogs.executeFutureWithLoadingDialog(
         context,
-        reposCubit.renameRepo(repoCubit.location, newName),
+        reposCubit.renameRepository(location, newName),
       );
 
       return newName;
@@ -59,15 +59,15 @@ mixin RepositoryActionsMixin on LoggyType {
   }
 
   Future<String> _getRepositoryNewName(
-    BuildContext context, {
-    required RepoCubit repoCubit,
-  }) async {
+    BuildContext context,
+    RepoLocation location,
+  ) async {
     final newName =
         await showDialog<String>(
           context: context,
           builder: (BuildContext context) => ActionsDialog(
             title: S.current.messageRenameRepository,
-            body: RenameRepository(repoCubit),
+            body: RenameRepository(location),
           ),
         ) ??
         '';

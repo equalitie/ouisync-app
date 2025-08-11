@@ -2,10 +2,13 @@ import 'dart:io';
 
 import 'package:path/path.dart' show join;
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Sandboxed environment for the app when running under tests.
 abstract class Sandbox {
   static Future<Sandbox> setUp() async {
+    SharedPreferences.setMockInitialValues({});
+
     if (Platform.isAndroid || Platform.isIOS) {
       return _NativeSandbox();
     } else {
