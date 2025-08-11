@@ -119,6 +119,7 @@ class RepositoriesBar extends StatelessWidget
       const Icon(Icons.arrow_back_rounded),
       onPressed: () => reposCubit.showRepoList(),
       size: Dimensions.sizeIconSmall,
+      key: StandardComponentType.backButton.key,
     ),
   );
 

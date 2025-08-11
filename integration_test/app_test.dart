@@ -4,6 +4,7 @@ import 'package:integration_test/integration_test.dart';
 import 'package:ouisync_app/app/app.dart';
 
 import '../test/sandbox.dart';
+import '../test/utils.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -38,6 +39,8 @@ void main() {
       of: find.bySubtype<AppBar>(),
       matching: find.byIcon(Icons.more_vert_rounded),
     );
+    await tester.pumpUntilFound(settingButton);
+
     await tester.tap(settingButton);
     await tester.pumpAndSettle();
 
@@ -63,7 +66,7 @@ void main() {
     expect(find.text(oldName), findsNothing);
 
     // Go back to the repo list page
-    await tester.tap(find.byIcon(Icons.arrow_back_rounded));
+    await tester.tap(find.backButton());
     await tester.pumpAndSettle();
 
     // Verify the repo has the new name in the list
