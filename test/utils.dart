@@ -25,6 +25,7 @@ import 'package:ouisync/ouisync.dart'
     show Session, SetLocalSecretKeyAndSalt, Server;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:stack_trace/stack_trace.dart';
 
@@ -88,7 +89,11 @@ class TestDependencies {
   );
 
   static Future<TestDependencies> create() async {
-    final dirs = await Dirs.init();
+    final defaultMountDir = await getTemporaryDirectory().then(
+      (dir) => join(dir.path, 'mount'),
+    );
+
+    final dirs = await Dirs.init(defaultMount: defaultMountDir);
 
     final server = Server.create(configPath: dirs.config);
     await server.initLog();

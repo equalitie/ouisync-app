@@ -33,13 +33,14 @@ class Dirs {
 
   /// Initialize the `Dirs` with default directories. Specify `root` to override the default data
   /// root directory. `root` can also be overriden using the `OUISYNC_ROOT_DIR` env variable.
-  static Future<Dirs> init({String? root}) async {
+  static Future<Dirs> init({String? root, String? defaultMount}) async {
     root ??= await _getDefaultRootDir();
+    defaultMount ??= await _getDefaultMountDir();
 
     return Dirs._(
       root: root,
       defaultStore: await _getDefaultStoreDir(root),
-      defaultMount: await _getDefaultMountDir(),
+      defaultMount: defaultMount,
       download: await _getDownloadDir(),
     );
   }

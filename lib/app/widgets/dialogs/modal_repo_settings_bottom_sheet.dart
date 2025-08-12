@@ -6,7 +6,8 @@ import 'package:ouisync/ouisync.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart' show RepoCubit, ReposCubit, RepoState;
-import '../../mixins/mixins.dart' show RepositoryActionsMixin;
+import '../../mixins/mixins.dart'
+    show RenameCanceled, RenameFailed, RenameSucceeded, RepositoryActionsMixin;
 import '../../utils/utils.dart'
     show
         AppLogger,
@@ -93,7 +94,7 @@ class _RepositorySettingsState extends State<RepositorySettings>
                     location: widget.repoCubit.location,
                   );
 
-                  if (newName.isNotEmpty) {
+                  if (newName != null) {
                     Navigator.of(context).pop();
                     showSnackBar(S.current.messageRepositoryRenamed(newName));
                   }
