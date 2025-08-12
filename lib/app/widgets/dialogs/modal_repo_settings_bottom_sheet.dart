@@ -6,8 +6,7 @@ import 'package:ouisync/ouisync.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart' show RepoCubit, ReposCubit, RepoState;
-import '../../mixins/mixins.dart'
-    show RenameCanceled, RenameFailed, RenameSucceeded, RepositoryActionsMixin;
+import '../../mixins/mixins.dart' show RepositoryActionsMixin;
 import '../../utils/utils.dart'
     show
         AppLogger,
