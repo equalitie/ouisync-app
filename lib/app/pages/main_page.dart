@@ -340,6 +340,7 @@ class _MainPageState extends State<MainPage>
       const Icon(Icons.settings_outlined),
       onPressed: _showAppSettings,
       size: Dimensions.sizeIconSmall,
+      key: ValueKey('settings'),
     ),
   );
 
@@ -354,6 +355,7 @@ class _MainPageState extends State<MainPage>
       await _showRepoSettings(context, repoCubit: repoCubit);
     },
     size: Dimensions.sizeIconSmall,
+    key: ValueKey('settings'),
   );
 
   Widget _buildSearchIcon() => Fields.actionIcon(

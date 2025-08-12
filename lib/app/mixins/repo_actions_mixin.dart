@@ -39,7 +39,7 @@ import '../widgets/widgets.dart'
         ShareRepository;
 
 mixin RepositoryActionsMixin on LoggyType {
-  Future<String> renameRepository(
+  Future<String?> renameRepository(
     BuildContext context, {
     required ReposCubit reposCubit,
     required RepoLocation location,
@@ -55,7 +55,7 @@ mixin RepositoryActionsMixin on LoggyType {
       return newName;
     }
 
-    return '';
+    return null;
   }
 
   Future<String> _getRepositoryNewName(
