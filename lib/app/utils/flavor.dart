@@ -23,7 +23,13 @@ enum Flavor {
 
   static Flavor _current =
       parse(appFlavor ?? '') ??
-      parse(String.fromEnvironment('OUISYNC_FLAVOR')) ??
+      // Note the `const` is crucial here. According to the [docs]
+      // (https://api.flutter.dev/flutter/dart-core/String/String.fromEnvironment.html):
+      //
+      // > This constructor is only guaranteed to work when invoked as const. It may work as a
+      // > non-constant invocation on some platforms which have access to compiler options at
+      // > run-time, but most ahead-of-time compiled platforms will not have this information.
+      parse(const String.fromEnvironment('OUISYNC_FLAVOR')) ??
       production;
 
   static Flavor get current => _current;
