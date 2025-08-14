@@ -24,7 +24,6 @@ import 'package:ouisync_app/app/utils/utils.dart'
 import 'package:ouisync_app/generated/l10n.dart';
 import 'package:ouisync/ouisync.dart'
     show Session, SetLocalSecretKeyAndSalt, Server;
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
@@ -142,7 +141,6 @@ class TestDependencies {
       MainPage(
         localeCubit: localeCubit,
         mountCubit: mountCubit,
-        packageInfo: fakePackageInfo,
         receivedMedia: receivedMedia ?? Stream.empty(),
         reposCubit: reposCubit,
         errorCubit: errorCubit,
@@ -192,15 +190,6 @@ class FakeWindowManager extends PlatformWindowManager {
   @override
   Future<void> initSystemTray() => Future.value();
 }
-
-/// Fake PackageInfo
-PackageInfo fakePackageInfo = PackageInfo(
-  appName: 'ouisync.test',
-  packageName: 'org.equalitie.ouisync.test',
-  version: '1.0.0',
-  buildNumber: '42',
-  buildSignature: '',
-);
 
 /// Observer for bloc/cubit state. Useful when we don't have direct access to the bloc/cubit we
 /// want to observe. If we do have access, prefer to use `BlocBaseExtension.waitUntil`.

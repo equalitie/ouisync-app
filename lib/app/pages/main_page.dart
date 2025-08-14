@@ -6,7 +6,6 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync/ouisync.dart' show EntryType, Session;
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart' as system_path;
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
@@ -33,7 +32,6 @@ class MainPage extends StatefulWidget {
   const MainPage({
     required this.localeCubit,
     required this.mountCubit,
-    required this.packageInfo,
     required this.receivedMedia,
     required this.reposCubit,
     required this.errorCubit,
@@ -46,7 +44,6 @@ class MainPage extends StatefulWidget {
   final PlatformWindowManager windowManager;
   final Session session;
   final Settings settings;
-  final PackageInfo packageInfo;
   final Stream<List<SharedMediaFile>> receivedMedia;
   final ReposCubit reposCubit;
   final ErrorCubit errorCubit;
@@ -581,12 +578,7 @@ class _MainPageState extends State<MainPage>
     bool isSelected = false,
   ]) async {
     if (entry is FileEntry) {
-      return viewFile(
-        repo: currentRepoCubit,
-        path: entry.path,
-        packageInfo: widget.packageInfo,
-        loggy: loggy,
-      );
+      return viewFile(repo: currentRepoCubit, path: entry.path, loggy: loggy);
     }
 
     if (isSelected) {
@@ -634,14 +626,9 @@ class _MainPageState extends State<MainPage>
             context,
             repoCubit: repoCubit,
             entry: entry,
-            onPreviewFile: (cubit, data) => viewFile(
-              repo: cubit,
-              path: data.path,
-              packageInfo: widget.packageInfo,
-              loggy: loggy,
-            ),
+            onPreviewFile: (cubit, data) =>
+                viewFile(repo: cubit, path: data.path, loggy: loggy),
             isActionAvailableValidator: _isEntryActionAvailable,
-            packageInfo: widget.packageInfo,
             dirs: widget.dirs,
           )
         : EntryDetails.folder(

@@ -2,7 +2,6 @@ import 'dart:io' as io;
 
 import 'package:flutter/material.dart';
 import 'package:ouisync/ouisync.dart' show AccessMode;
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart' as p;
 
 import '../../../generated/l10n.dart';
@@ -39,7 +38,6 @@ class EntryDetails extends StatefulWidget {
     required this.entry,
     required this.isActionAvailableValidator,
     required this.onPreviewFile,
-    required this.packageInfo,
     required this.dirs,
   }) : assert(entry is FileEntry);
 
@@ -50,15 +48,13 @@ class EntryDetails extends StatefulWidget {
     required this.isActionAvailableValidator,
     required this.dirs,
   }) : assert(entry is DirectoryEntry),
-       onPreviewFile = null,
-       packageInfo = null;
+       onPreviewFile = null;
 
   final BuildContext context;
   final RepoCubit repoCubit;
   final FileSystemEntry entry;
   final bool Function(AccessMode, EntryAction) isActionAvailableValidator;
   final PreviewFileCallback? onPreviewFile;
-  final PackageInfo? packageInfo;
   final Dirs dirs;
 
   @override
@@ -263,11 +259,8 @@ extension on _EntryDetailsState {
     ).saveFileToDevice(widget.entry as FileEntry, defaultDirectoryPath);
   }
 
-  Future<void> _onShareTap() async => shareFile(
-    repo: widget.repoCubit,
-    path: widget.entry.path,
-    packageInfo: widget.packageInfo!,
-  );
+  Future<void> _onShareTap() async =>
+      shareFile(repo: widget.repoCubit, path: widget.entry.path);
 
   Future<void> _onDeleteTap() async =>
       _deleteEntryWithValidation(widget.repoCubit, widget.entry);
