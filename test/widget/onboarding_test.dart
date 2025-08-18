@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:ouisync_app/app/app.dart';
 import 'package:ouisync_app/app/cubits/locale.dart';
 import 'package:ouisync_app/app/cubits/repos.dart';
+import 'package:ouisync_app/app/cubits/error.dart';
 import 'package:ouisync_app/app/pages/main_page.dart';
 import 'package:ouisync_app/app/utils/dirs.dart';
 import 'package:ouisync_app/app/utils/master_key.dart';
@@ -17,6 +18,7 @@ void main() {
   late Session session;
   late Settings settings;
   late LocaleCubit localeCubit;
+  late ErrorCubit errorCubit;
 
   setUp(() async {
     dirs = await Dirs.init();
@@ -26,6 +28,8 @@ void main() {
 
     session = await Session.create(configPath: dirs.config);
 
+    errorCubit = ErrorCubit(session);
+
     settings = await Settings.init(MasterKey.random());
     settings.cacheServers = [];
 
@@ -34,6 +38,7 @@ void main() {
 
   tearDown(() async {
     await localeCubit.close();
+    await errorCubit.close();
     await session.close();
     await server.stop();
   });
@@ -47,6 +52,7 @@ void main() {
         testApp(
           HomeWidget(
             localeCubit: localeCubit,
+            errorCubit: errorCubit,
             packageInfo: fakePackageInfo,
             server: server,
             session: session,

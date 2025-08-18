@@ -14,7 +14,7 @@ class SettingsPage extends StatefulWidget {
     required this.session,
     required this.localeCubit,
     required this.mount,
-    required this.panicCounter,
+    required this.errorCubit,
     required this.powerControl,
     required this.reposCubit,
     required this.upgradeExists,
@@ -25,7 +25,7 @@ class SettingsPage extends StatefulWidget {
   final Session session;
   final LocaleCubit localeCubit;
   final MountCubit mount;
-  final StateMonitorIntCubit panicCounter;
+  final ErrorCubit errorCubit;
   final PowerControl powerControl;
   final ReposCubit reposCubit;
   final UpgradeExistsCubit upgradeExists;
@@ -73,7 +73,7 @@ class _SettingsPageState extends State<SettingsPage> {
       widget.session,
       localeCubit: widget.localeCubit,
       mount: widget.mount,
-      panicCounter: widget.panicCounter,
+      errorCubit: widget.errorCubit,
       powerControl: widget.powerControl,
       reposCubit: widget.reposCubit,
       connectivityInfo: connectivityInfo,

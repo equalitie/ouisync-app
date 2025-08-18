@@ -11,7 +11,7 @@ import 'package:stream_transform/stream_transform.dart';
 
 import '../generated/l10n.dart';
 import 'cubits/cubits.dart'
-    show LocaleCubit, LocaleState, MountCubit, ReposCubit;
+    show LocaleCubit, LocaleState, MountCubit, ReposCubit, ErrorCubit;
 import 'pages/pages.dart';
 import 'utils/dirs.dart';
 import 'utils/log.dart' as log;
@@ -74,6 +74,9 @@ Future<HomeWidget> _initHomeWidget(List<String> args) async {
   await log.init(dirs);
 
   final (server, session) = await _initServerAndSession(dirs, windowManager);
+
+  final errorCubit = ErrorCubit(session);
+
   final settings = await loadAndMigrateSettings(session);
   final localeCubit = LocaleCubit(settings);
 
@@ -85,6 +88,7 @@ Future<HomeWidget> _initHomeWidget(List<String> args) async {
     settings: settings,
     packageInfo: packageInfo,
     localeCubit: localeCubit,
+    errorCubit: errorCubit,
   );
 }
 
@@ -141,6 +145,7 @@ class HomeWidget extends StatefulWidget {
     required this.settings,
     required this.packageInfo,
     required this.localeCubit,
+    required this.errorCubit,
     super.key,
   });
 
@@ -151,6 +156,7 @@ class HomeWidget extends StatefulWidget {
   final Settings settings;
   final PackageInfo packageInfo;
   final LocaleCubit localeCubit;
+  final ErrorCubit errorCubit;
 
   @override
   State<HomeWidget> createState() => _HomeWidgetState();
@@ -218,6 +224,7 @@ class _HomeWidgetState extends State<HomeWidget>
       mainPage: MainPage(
         localeCubit: widget.localeCubit,
         mountCubit: mountCubit,
+        errorCubit: widget.errorCubit,
         packageInfo: widget.packageInfo,
         receivedMedia: receivedMediaController.stream,
         reposCubit: reposCubit,
