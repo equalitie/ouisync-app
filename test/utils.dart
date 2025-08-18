@@ -13,6 +13,7 @@ import 'package:loggy/loggy.dart';
 import 'package:ouisync_app/app/cubits/locale.dart';
 import 'package:ouisync_app/app/cubits/mount.dart';
 import 'package:ouisync_app/app/cubits/repos.dart';
+import 'package:ouisync_app/app/cubits/error.dart';
 import 'package:ouisync_app/app/pages/main_page.dart';
 import 'package:ouisync_app/app/utils/dirs.dart';
 import 'package:ouisync_app/app/utils/log.dart' as log;
@@ -85,6 +86,7 @@ class TestDependencies {
     this.reposCubit,
     this.mountCubit,
     this.localeCubit,
+    this.errorCubit,
     this.dirs,
   );
 
@@ -103,6 +105,7 @@ class TestDependencies {
 
     await session.setStoreDir(dirs.defaultStore);
 
+    final errorCubit = ErrorCubit(session);
     final settings = await Settings.init(MasterKey.random());
     final mountCubit = MountCubit(session, dirs)..init();
     final reposCubit = ReposCubit(
@@ -121,6 +124,7 @@ class TestDependencies {
       reposCubit,
       mountCubit,
       localeCubit,
+      errorCubit,
       dirs,
     );
   }
@@ -129,6 +133,7 @@ class TestDependencies {
     await localeCubit.close();
     await mountCubit.close();
     await reposCubit.close();
+    await errorCubit.close();
     await session.close();
     await server.stop();
   }
@@ -140,6 +145,7 @@ class TestDependencies {
         packageInfo: fakePackageInfo,
         receivedMedia: receivedMedia ?? Stream.empty(),
         reposCubit: reposCubit,
+        errorCubit: errorCubit,
         session: session,
         settings: settings,
         windowManager: FakeWindowManager(),
@@ -152,6 +158,7 @@ class TestDependencies {
   final ReposCubit reposCubit;
   final MountCubit mountCubit;
   final LocaleCubit localeCubit;
+  final ErrorCubit errorCubit;
   final Dirs dirs;
 }
 

@@ -5,7 +5,7 @@ import 'package:build_context_provider/build_context_provider.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync/ouisync.dart' show EntryType, MonitorId, Session;
+import 'package:ouisync/ouisync.dart' show EntryType, Session;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart' as system_path;
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
@@ -36,6 +36,7 @@ class MainPage extends StatefulWidget {
     required this.packageInfo,
     required this.receivedMedia,
     required this.reposCubit,
+    required this.errorCubit,
     required this.session,
     required this.settings,
     required this.windowManager,
@@ -48,6 +49,7 @@ class MainPage extends StatefulWidget {
   final PackageInfo packageInfo;
   final Stream<List<SharedMediaFile>> receivedMedia;
   final ReposCubit reposCubit;
+  final ErrorCubit errorCubit;
   final MountCubit mountCubit;
   final LocaleCubit localeCubit;
   final Dirs dirs;
@@ -58,7 +60,6 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage>
     with TickerProviderStateMixin, AppLogger {
-  late final StateMonitorIntCubit panicCounter;
   late final PowerControl powerControl = PowerControl(
     widget.session,
     widget.settings,
@@ -84,13 +85,6 @@ class _MainPageState extends State<MainPage>
   @override
   void initState() {
     super.initState();
-
-    panicCounter = StateMonitorIntCubit(
-      widget.reposCubit.rootStateMonitor.child(
-        MonitorId.expectUnique("Service"),
-      ),
-      "panic_counter",
-    );
 
     upgradeExists = UpgradeExistsCubit(widget.session, widget.settings);
 
@@ -121,7 +115,6 @@ class _MainPageState extends State<MainPage>
     unawaited(upgradeExists.close());
     unawaited(sortListCubit.close());
     unawaited(powerControl.close());
-    unawaited(panicCounter.close());
 
     super.dispose();
   }
@@ -319,7 +312,7 @@ class _MainPageState extends State<MainPage>
     reposCubit: widget.reposCubit,
     repoPicker: RepositoriesBar(
       mount: widget.mountCubit,
-      panicCounter: panicCounter,
+      errorCubit: widget.errorCubit,
       powerControl: powerControl,
       reposCubit: widget.reposCubit,
       upgradeExists: upgradeExists,
@@ -331,7 +324,7 @@ class _MainPageState extends State<MainPage>
 
   Widget _buildAppSettingsIcon() => NotificationBadge(
     mount: widget.mountCubit,
-    panicCounter: panicCounter,
+    errorCubit: widget.errorCubit,
     powerControl: powerControl,
     upgradeExists: upgradeExists,
     moveDownwards: 5,
@@ -1009,7 +1002,7 @@ class _MainPageState extends State<MainPage>
         session: widget.session,
         localeCubit: widget.localeCubit,
         mount: widget.mountCubit,
-        panicCounter: panicCounter,
+        errorCubit: widget.errorCubit,
         powerControl: powerControl,
         reposCubit: widget.reposCubit,
         upgradeExists: upgradeExists,

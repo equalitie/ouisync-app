@@ -4,15 +4,15 @@ import 'package:ouisync_app/app/utils/constants.dart';
 
 import '../cubits/mount.dart';
 import '../cubits/power_control.dart';
-import '../cubits/state_monitor.dart';
 import '../cubits/upgrade_exists.dart';
+import '../cubits/error.dart' show ErrorCubit, ErrorCubitState;
 import '../utils/fields.dart';
 
 class NotificationBadge extends StatelessWidget {
   const NotificationBadge({
     required this.child,
     required this.mount,
-    required this.panicCounter,
+    required this.errorCubit,
     required this.powerControl,
     required this.upgradeExists,
     this.moveDownwards = 0,
@@ -25,16 +25,16 @@ class NotificationBadge extends StatelessWidget {
   final double moveRight;
 
   final MountCubit mount;
-  final StateMonitorIntCubit panicCounter;
+  final ErrorCubit errorCubit;
   final PowerControl powerControl;
   final UpgradeExistsCubit upgradeExists;
 
   @override
   Widget build(BuildContext context) => BlocBuilder<MountCubit, MountState>(
     bloc: mount,
-    builder: (context, mountState) => BlocBuilder<StateMonitorIntCubit, int?>(
-      bloc: panicCounter,
-      builder: (context, panicCounterState) =>
+    builder: (context, mountState) => BlocBuilder<ErrorCubit, ErrorCubitState>(
+      bloc: errorCubit,
+      builder: (context, errorCubitState) =>
           BlocBuilder<PowerControl, PowerControlState>(
             bloc: powerControl,
             builder: (context, powerControlState) =>
@@ -45,7 +45,7 @@ class NotificationBadge extends StatelessWidget {
 
                     if (upgradeExistsState) {
                       color = Constants.errorColor;
-                    } else if ((panicCounterState ?? 0) > 0) {
+                    } else if (errorCubitState.errorHappened) {
                       color = Constants.errorColor;
                     } else if (mountState is MountStateFailure) {
                       color = Constants.errorColor;
