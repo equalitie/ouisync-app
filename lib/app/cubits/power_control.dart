@@ -278,11 +278,9 @@ class PowerControl extends Cubit<PowerControlState>
         }
         break;
       case ConnectivityResult.none:
-        // For now we keep the network enabled. It is because when we're tethering and
-        // mobile internet is not enabled we get here as well. Ideally we would have
-        // also the information about whether tethering is enabled and only in such case
-        // we'd keep the connection going.
-        newMode = NetworkModeFull();
+        // There is no *internet* connection but local syncing over WiFi may
+        // still work if WiFi is enabled.
+        newMode = NetworkModeNoInternet();
         break;
       case ConnectivityResult.other:
     }
@@ -313,6 +311,11 @@ class PowerControl extends Cubit<PowerControlState>
 
     switch (mode) {
       case NetworkModeFull():
+        addrs = ['quic/0.0.0.0:0', 'quic/[::]:0'];
+        break;
+      // If WiFi is ON we can still do local syncing. Note that the binding
+      // below will fail on Linux but on Android it'll succeed.
+      case NetworkModeNoInternet():
         addrs = ['quic/0.0.0.0:0', 'quic/[::]:0'];
         break;
       case NetworkModeSaving(hotspotAddr: final hotspotAddr):
@@ -351,9 +354,6 @@ sealed class NetworkMode extends Equatable {
 
   String? get disallowsInternetConnectivityReason;
   String? get disallowsLocalConnectivityReason;
-
-  @override
-  List<Object> get props => [];
 }
 
 /// Unrestricted network - any internet connection is enabled
@@ -409,6 +409,30 @@ class NetworkModeSaving extends NetworkMode {
   String toString() => "NetworkModeSaving(hotspotAddr: $hotspotAddr)";
 }
 
+class NetworkModeNoInternet extends NetworkMode {
+  NetworkModeNoInternet();
+
+  @override
+  bool get allowsInternetConnections => false;
+
+  // TODO: Check if WiFi is enabled
+  @override
+  bool get allowsLocalConnections => true;
+
+  @override
+  String get disallowsInternetConnectivityReason =>
+      S.current.messageNetworkNoInternet;
+
+  @override
+  String? get disallowsLocalConnectivityReason => null;
+
+  @override
+  List<Object> get props => [];
+
+  @override
+  String toString() => "NetworkModeNoInternet()";
+}
+
 /// Network is disabled
 class NetworkModeDisabled extends NetworkMode {
   @override
@@ -426,6 +450,9 @@ class NetworkModeDisabled extends NetworkMode {
 
   @override
   String toString() => "NetworkModeDisabled()";
+
+  @override
+  List<Object> get props => [];
 }
 
 enum _Transition { none, ongoing, queued }
