@@ -13,13 +13,10 @@ import '../utils/log.dart' show AppLogger;
 // the user that the log should be captured.
 class ErrorCubit extends Cubit<ErrorCubitState> with CubitActions, AppLogger {
   ErrorCubit(native.Session session) : super(ErrorCubitState(false)) {
-    // TODO: This may no longer be useful. Previously, when we were
-    // communicating with the library over FFI  we could detect panics through
-    // the state monitor. But now that we communicate with the service over the
-    // socket, when a panic happens the socket disconnects and thus we no
-    // longer receive events over it. However, we now receive
-    // `native.ClientException`s when the socket disconnects which is handled
-    // below.
+    // NOTE: Depending on where a panic happens inside the Rust code, we either
+    // can detect it through the state monitor, or the server/service closes
+    // the connection and we disconnect. The latter is caught through the
+    // `onError` handlers set up below.
     unawaited(
       _RustPanicDetectionRunner(this, loggy, session.rootStateMonitor).init(),
     );

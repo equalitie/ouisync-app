@@ -19,7 +19,7 @@ class CacheServers with AppLogger {
   final _mutex = Mutex();
 
   /// Add the specified host as cache server.
-  Future<void> add(String host) async {
+  Future<void> _add(String host) async {
     if (_hosts.contains(host)) {
       return;
     }
@@ -45,7 +45,7 @@ class CacheServers with AppLogger {
     }
 
     // Resolve the ip addresses of the host
-    final addrs = await InternetAddress.lookup(_stripPort(host));
+    final addrs = await _dnsLookupWithRetry(host);
     loggy.debug('resolved $host: $addrs');
 
     final peers = addrs
@@ -65,9 +65,39 @@ class CacheServers with AppLogger {
     _hosts.add(host);
   }
 
+  // DNS lookup can fail either when the DNS servers return an error but also
+  // when the device is not connected to the internet. In both cases we want to
+  // keep retrying.
+  // TODO: Ideally we'd want to re-do the lookup periodically to account for
+  // the case the IP address of the cache server changes over time.
+  Future<List<InternetAddress>> _dnsLookupWithRetry(String host) async {
+    final retryDuration = const Duration(seconds: 5);
+    host = _stripPort(host);
+    bool errorShown = false;
+    while (true) {
+      final stopwatch = Stopwatch();
+      stopwatch.start();
+      try {
+        final addrs = await InternetAddress.lookup(host);
+        stopwatch.stop();
+        return addrs;
+      } catch (e) {
+        if (!errorShown) {
+          loggy.warning('failed to resolve host "$host", will retry: $e');
+          errorShown = true;
+        }
+        stopwatch.stop();
+        final Duration elapsed = stopwatch.elapsed;
+        if (elapsed < retryDuration) {
+          await Future.delayed(retryDuration - elapsed);
+        }
+      }
+    }
+  }
+
   /// Add all the specified hosts as cache servers.
-  Future<void> addAll(Iterable<String> hosts) =>
-      Future.wait(hosts.map((host) => add(host)));
+  void addAll(Iterable<String> hosts) =>
+      unawaited(Future.wait(hosts.map((host) => _add(host))));
 
   /// Enable or disable cache servers for the specified repo. Note that currently this
   /// enables/disables all defined cache servers together.
