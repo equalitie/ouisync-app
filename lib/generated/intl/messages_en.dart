@@ -726,6 +726,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageNetworkIsUnavailable": MessageLookupByLibrary.simpleMessage(
       "Network is unavailable",
     ),
+    "messageNetworkNoInternet": MessageLookupByLibrary.simpleMessage(
+      "No internet, you may still sync locally if WiFi is ON",
+    ),
     "messageNewFileError": m24,
     "messageNewPasswordCopiedClipboard": MessageLookupByLibrary.simpleMessage(
       "New password copied to the clipboard",

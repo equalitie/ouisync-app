@@ -205,6 +205,8 @@
   "@messageSyncingIsDisabledOnMobileInternet": {},
   "messageNetworkIsUnavailable": "Network is unavailable",
   "@messageNetworkIsUnavailable": {},
+  "messageNetworkNoInternet": "No internet, you may still sync locally if WiFi is ON",
+  "@messageNetworkNoInternet": {},
   "messageNewVersionIsAvailable": "A new version is available.",
   "@messageNewVersionIsAvailable": {},
   "messageErrorDefault": "Something went wrong. Please try again.",

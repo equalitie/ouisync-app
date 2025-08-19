@@ -1234,6 +1234,16 @@ class S {
     );
   }
 
+  /// `No internet, you may still sync locally if WiFi is ON`
+  String get messageNetworkNoInternet {
+    return Intl.message(
+      'No internet, you may still sync locally if WiFi is ON',
+      name: 'messageNetworkNoInternet',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `A new version is available.`
   String get messageNewVersionIsAvailable {
     return Intl.message(
