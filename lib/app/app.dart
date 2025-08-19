@@ -184,7 +184,7 @@ class _HomeWidgetState extends State<HomeWidget>
         );
 
     final cacheServers = CacheServers(widget.session);
-    unawaited(cacheServers.addAll(widget.settings.cacheServers));
+    cacheServers.addAll(widget.settings.cacheServers);
 
     mountCubit = MountCubit(widget.session, widget.dirs)..init();
     reposCubit = ReposCubit(
