@@ -44,6 +44,8 @@ class _ScrollableTextWidgetState extends State<ScrollableTextWidget> {
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
       final extentTotal = _scrollController.position.extentTotal;
       final viewPort = _scrollController.position.extentInside;
 
