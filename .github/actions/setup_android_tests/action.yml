@@ -61,11 +61,3 @@ runs:
       working-directory: ouisync/bindings/dart
       run: dart tool/bindgen.dart
       shell: bash
-
-    # HACK: This should not be necessary as the publication should happen automatically as part of
-    # building the dart bindings. This, however, doesn't always work for some reason. As a
-    # workaround, we build them explicitly here.
-    - name: Build kotlin bindings and publish them to Mavel local
-      working-directory: ouisync/bindings/kotlin
-      run: ./gradlew --info -Prust-targets=x86_64 publishClientPublicationToMavenLocal publishDebugServerPublicationToMavenLocal
-      shell: bash
