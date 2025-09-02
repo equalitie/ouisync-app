@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:loggy/loggy.dart';
 import 'package:ouisync/helpers.dart' as oui show viewFile, shareFile;
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart' show posix;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -12,6 +11,7 @@ import 'actions.dart';
 import 'log.dart';
 import '../cubits/cubits.dart' show RepoCubit;
 import '../../generated/l10n.dart';
+import 'native.dart';
 
 Future<String> disambiguateEntryName({
   required RepoCubit repoCubit,
@@ -38,12 +38,11 @@ Future<String> disambiguateEntryName({
 Future<void> viewFile({
   required RepoCubit repo,
   required String path,
-  required PackageInfo packageInfo,
   required Loggy<AppLogger> loggy,
 }) async {
   Future<void> view() async {
     if (Platform.isAndroid) {
-      final uri = _makeAndroidUri(repo, path, packageInfo);
+      final uri = await Native.getDocumentUri("${repo.name}$path");
 
       // TODO: consider using launchUrl here as well
       if (!await oui.viewFile(uri)) {
@@ -100,24 +99,13 @@ Future<void> viewFile({
   }
 }
 
-Future<void> shareFile({
-  required RepoCubit repo,
-  required String path,
-  required PackageInfo packageInfo,
-}) async {
+Future<void> shareFile({required RepoCubit repo, required String path}) async {
   if (Platform.isAndroid) {
-    await oui.shareFile(_makeAndroidUri(repo, path, packageInfo));
+    await oui.shareFile(await Native.getDocumentUri("${repo.name}$path"));
   } else {
     throw UnsupportedError('sharing files is supported only on Android');
   }
 }
-
-Uri _makeAndroidUri(RepoCubit repo, String path, PackageInfo packageInfo) =>
-    Uri(
-      scheme: 'content',
-      host: '${packageInfo.packageName}.provider',
-      path: '${repo.name}$path',
-    );
 
 class _RepoNotMounted implements Exception {}
 

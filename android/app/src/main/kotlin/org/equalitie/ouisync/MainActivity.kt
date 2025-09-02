@@ -1,6 +1,9 @@
 package org.equalitie.ouisync
 
+import android.net.Uri
+import android.os.Bundle
 import android.os.Environment
+import android.provider.DocumentsContract
 import android.util.Log
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -22,6 +25,11 @@ class MainActivity : FlutterFragmentActivity() {
                         val downloadPath = getDownloadPath()
                         result.success(downloadPath)
                     }
+                    "getDocumentUri" -> {
+                        val args = call.arguments as List<Any>
+                        val path = args[0] as String
+                        result.success(getDocumentUri(path).toString())
+                    }
                     "log" -> {
                         val args = call.arguments as List<Any>
                         log(args[0] as Int, args[1] as String)
@@ -33,6 +41,9 @@ class MainActivity : FlutterFragmentActivity() {
                 }
             }
     }
+
+    private fun getDocumentUri(path: String): Uri =
+        DocumentsContract.buildDocumentUri("$packageName.provider", path)
 
     private fun getDownloadPath(): String? {
         val downloadDirectory =

@@ -6,7 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-<!-- ## [Unreleased](https://github.com/equalitie/ouisync-app/compare/v0.9.1...master) -->
+## [Unreleased](https://github.com/equalitie/ouisync-app/compare/v0.9.1...master)
+
+- Update [Ouisync library](https://github.com/equalitie/ouisync) to [v0.9.3](https://github.com/equalitie/ouisync/blob/master/CHANGELOG.md#v0.9.3) which adds support for [Storage Access Framework](https://developer.android.com/guide/topics/providers/document-provider) on Android.
 
 ## [v0.9.1](https://github.com/equalitie/ouisync-app/compare/v0.9.0...v0.9.1) - 2025-08-05
 

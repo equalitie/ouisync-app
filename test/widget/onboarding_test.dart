@@ -53,7 +53,6 @@ void main() {
           HomeWidget(
             localeCubit: localeCubit,
             errorCubit: errorCubit,
-            packageInfo: fakePackageInfo,
             server: server,
             session: session,
             settings: settings,

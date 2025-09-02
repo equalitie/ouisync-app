@@ -86,7 +86,6 @@ Future<HomeWidget> _initHomeWidget(List<String> args) async {
     session: session,
     windowManager: windowManager,
     settings: settings,
-    packageInfo: packageInfo,
     localeCubit: localeCubit,
     errorCubit: errorCubit,
   );
@@ -143,7 +142,6 @@ class HomeWidget extends StatefulWidget {
     required this.server,
     required this.session,
     required this.settings,
-    required this.packageInfo,
     required this.localeCubit,
     required this.errorCubit,
     super.key,
@@ -154,7 +152,6 @@ class HomeWidget extends StatefulWidget {
   final Server server;
   final Session session;
   final Settings settings;
-  final PackageInfo packageInfo;
   final LocaleCubit localeCubit;
   final ErrorCubit errorCubit;
 
@@ -225,7 +222,6 @@ class _HomeWidgetState extends State<HomeWidget>
         localeCubit: widget.localeCubit,
         mountCubit: mountCubit,
         errorCubit: widget.errorCubit,
-        packageInfo: widget.packageInfo,
         receivedMedia: receivedMediaController.stream,
         reposCubit: reposCubit,
         session: widget.session,
