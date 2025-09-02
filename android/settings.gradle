@@ -18,8 +18,27 @@ pluginManagement {
 
 plugins {
     id "dev.flutter.flutter-plugin-loader" version "1.0.0"
-    id "com.android.application" version '8.7.2' apply false
+    id "com.android.application" version '8.10.0' apply false
     id "org.jetbrains.kotlin.android" version "2.0.20" apply false
 }
 
 include ":app"
+
+// Substitute the dependencies on the ouisync kotlin bindings for the local ones (in the `ousiync`
+// subdirectory) instead of the published ones. This is to make local development easier as any
+// change in the kotlin bindings is immediatelly picked up when building this app.
+//
+// Ideally, this substitution would be done in the Ouisync dart bindings project but its
+// `settings.gradle` file seems to be ignored when building this app.
+includeBuild('../ouisync/bindings/kotlin') {
+    dependencySubstitution {
+        substitute module('ie.equalit.ouinet:ouisync-android')       using project(':ouisync-android')
+        substitute module('ie.equalit.ouinet:ouisync-android-debug') using project(':ouisync-android')
+
+        substitute module('ie.equalit.ouinet:ouisync-client')        using project(':ouisync-client')
+
+        substitute module('ie.equalit.ouinet:ouisync-server')        using project(':ouisync-server')
+        substitute module('ie.equalit.ouinet:ouisync-server-debug')  using project(':ouisync-server')
+    }
+}
+

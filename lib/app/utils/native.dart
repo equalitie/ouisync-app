@@ -55,4 +55,8 @@ class Native {
       return getApplicationSupportDirectory();
     }
   }
+
+  static Future<Uri> getDocumentUri(String path) => _channel
+      .invokeMethod<String>('getDocumentUri', [path])
+      .then((uri) => Uri.parse(uri!));
 }
