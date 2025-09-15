@@ -43,7 +43,7 @@ class MainActivity : FlutterFragmentActivity() {
     }
 
     private fun getDocumentUri(path: String): Uri =
-        DocumentsContract.buildDocumentUri("$packageName.provider", path)
+        DocumentsContract.buildDocumentUri("$packageName.provider", path.replace('/', ':'))
 
     private fun getDownloadPath(): String? {
         val downloadDirectory =
