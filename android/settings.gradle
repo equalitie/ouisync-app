@@ -19,7 +19,7 @@ pluginManagement {
 plugins {
     id "dev.flutter.flutter-plugin-loader" version "1.0.0"
     id "com.android.application" version '8.10.0' apply false
-    id "org.jetbrains.kotlin.android" version "2.0.20" apply false
+    id "org.jetbrains.kotlin.android" version "2.2.10" apply false
 }
 
 include ":app"
@@ -35,10 +35,10 @@ includeBuild('../ouisync/bindings/kotlin') {
         substitute module('ie.equalit.ouinet:ouisync-android')       using project(':ouisync-android')
         substitute module('ie.equalit.ouinet:ouisync-android-debug') using project(':ouisync-android')
 
-        substitute module('ie.equalit.ouinet:ouisync-client')        using project(':ouisync-client')
+        substitute module('ie.equalit.ouinet:ouisync-session')       using project(':ouisync-session')
 
-        substitute module('ie.equalit.ouinet:ouisync-server')        using project(':ouisync-server')
-        substitute module('ie.equalit.ouinet:ouisync-server-debug')  using project(':ouisync-server')
+        substitute module('ie.equalit.ouinet:ouisync-service')       using project(':ouisync-service')
+        substitute module('ie.equalit.ouinet:ouisync-service-debug') using project(':ouisync-service')
     }
 }
 

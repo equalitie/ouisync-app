@@ -25,12 +25,6 @@ xmlns:tools="http://schemas.android.com/tools">
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round">
 
-<!--         <provider
-            tools:replace="android:authorities"
-            android:name="org.equalitie.ouisync.dart.PipeProvider"
-            android:authorities="${applicationId}.pipe"
-            android:exported="true"/>
- -->
         <!--
         NOTE: Forcing single Ouisync instance in its own task with launchMode="singleInstance". 
         This is because Ouisync doesn't currently support multiple instances well. 
