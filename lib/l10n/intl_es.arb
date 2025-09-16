@@ -1043,5 +1043,19 @@
   "messageLogLevelErrorWarnInfoDebug": "Errores, advertencias, información y depuración",
   "@messageLogLevelErrorWarnInfoDebug": {},
   "titleFreedomExpressionAccessInfo": "Libertad de expresión y acceso a la información",
-  "@titleFreedomExpressionAccessInfo": {}
+  "@titleFreedomExpressionAccessInfo": {},
+  "sortByNameLabel": "Nombre",
+  "@sortByNameLabel": {},
+  "sortBySizeLabel": "Tamaño",
+  "@sortBySizeLabel": {},
+  "sortByTypeLabel": "Tipo",
+  "@sortByTypeLabel": {},
+  "accessModeReadLabel": "lectura",
+  "@accessModeReadLabel": {},
+  "accessModeWriteLabel": "escritura",
+  "@accessModeWriteLabel": {},
+  "accessModeBlindLabel": "oculto",
+  "@accessModeBlindLabel": {},
+  "labelSynced": "Sincronizado",
+  "@labelSynced": {}
 }
