@@ -3,6 +3,7 @@
 FROM ubuntu:22.04
 
 ENV FLUTTER_VERSION=3.32.5
+ENV RUST_VERSION=1.89.0
 
 RUN apt-get update && apt-get upgrade -y
 RUN apt-get install -y \
@@ -26,7 +27,11 @@ RUN mkdir -p ${ANDROID_SDK_ROOT}/cmdline-tools && \
 # download and install Android SDK and NDK
 ENV PATH="${ANDROID_SDK_ROOT}/cmdline-tools/tools/bin:${PATH}"
 RUN yes | sdkmanager --licenses
-RUN sdkmanager --install 'ndk;27.2.12479018' 'platforms;android-36' 'build-tools;36.0.0' 'cmake;3.22.1' 'cmdline-tools;latest'
+RUN sdkmanager --install \
+    'ndk;26.3.11579264' 'ndk;27.2.12479018' \
+    'platforms;android-35' 'platforms;android-36' \
+    'build-tools;36.0.0' \
+    'cmake;3.22.1' 'cmdline-tools;latest'
 
 # install flutter
 RUN wget https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_${FLUTTER_VERSION}-stable.tar.xz -P /tmp
@@ -45,8 +50,14 @@ RUN yes | flutter doctor --android-licenses
 RUN flutter doctor -v
 
 # install rust
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --default-toolchain=${RUST_VERSION} -y
 ENV PATH="/root/.cargo/bin:$PATH"
 RUN rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
+
+# Expose Java
+# Sentry started to require JDK even for non Android builds. This requirement
+# might be removed in the future.
+# https://github.com/getsentry/sentry-dart/issues/3033#issuecomment-3140320200
+ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 
 WORKDIR /opt

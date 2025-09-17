@@ -9,6 +9,7 @@ function print_help() {
     echo "Usage: $0 --host <HOST> (--commit <COMMIT> | --srcdir <SRCDIR>) [--out <OUTPUT_DIRECTORY>]"
     echo "  HOST:             IP or entry in ~/.ssh/config of machine running Docker"
     echo "  COMMIT:           Commit from which to build"
+    echo "  SRCDIR:           Source dir from which to build"
     echo "  OUTPUT_DIRECTORY: Directory where artifacts will be stored"
 }
 
