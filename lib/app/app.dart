@@ -116,9 +116,7 @@ Future<(Server, Session)> _initServerAndSession(
       await server.stop();
     });
 
-    if (await session.getStoreDir() == null) {
-      await session.setStoreDir(dirs.defaultStore);
-    }
+    await session.insertStoreDirs(dirs.defaultStore);
 
     await session.initNetwork(
       NetworkDefaults(

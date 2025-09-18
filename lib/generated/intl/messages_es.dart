@@ -107,7 +107,7 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m47(status) => "${status}";
 
-  static String m48(name) => "Compartir repositorio \"${name}\"";
+  static String m49(name) => "Compartir repositorio \"${name}\"";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -159,9 +159,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "actionInstallDokan": MessageLookupByLibrary.simpleMessage(
       "Instalar Dokan",
-    ),
-    "actionLocateRepo": MessageLookupByLibrary.simpleMessage(
-      "Localizar repositorio",
     ),
     "actionLockCapital": MessageLookupByLibrary.simpleMessage("BLOQUEAR"),
     "actionMove": MessageLookupByLibrary.simpleMessage("Mover"),
@@ -300,9 +297,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "labelTypePassword": MessageLookupByLibrary.simpleMessage(
       "Ingrese la clave: ",
-    ),
-    "labelUseExternalStorage": MessageLookupByLibrary.simpleMessage(
-      "Usar almacenamiento externo",
     ),
     "languageIsNotAvailable": MessageLookupByLibrary.simpleMessage(
       "no disponible",
@@ -1209,7 +1203,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Establecer una contraseña para",
     ),
     "titleSettings": MessageLookupByLibrary.simpleMessage("Configuraciones"),
-    "titleShareRepository": m48,
+    "titleShareRepository": m49,
     "titleSortBy": MessageLookupByLibrary.simpleMessage("Ordenar por"),
     "titleStateMonitor": MessageLookupByLibrary.simpleMessage(
       "Monitor de Estado",

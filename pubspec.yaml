@@ -43,7 +43,6 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_bloc: ^8.0.1
-  flutter_breadcrumb: ^1.0.1
   flutter_email_sender: ^6.0.0
   flutter_file_dialog: ^3.0.2
   flutter_hooks: ^0.20.0

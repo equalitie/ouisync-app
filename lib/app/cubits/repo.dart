@@ -13,6 +13,7 @@ import '../../generated/l10n.dart';
 import '../models/models.dart';
 import '../utils/cipher.dart' as cipher;
 import '../utils/repo_path.dart' as repo_path;
+import '../utils/storage.dart';
 import '../utils/utils.dart';
 import 'cubits.dart';
 
@@ -30,6 +31,7 @@ class RepoState extends Equatable {
   final String infoHash;
   final FolderState currentFolder;
   final MountState mountState;
+  final Storage? storage;
 
   RepoState({
     this.isLoading = false,
@@ -45,6 +47,7 @@ class RepoState extends Equatable {
     this.accessMode = AccessMode.blind,
     this.currentFolder = const FolderState(),
     this.mountState = const MountStateDisabled(),
+    this.storage,
   });
 
   RepoState copyWith({
@@ -62,6 +65,7 @@ class RepoState extends Equatable {
     String? infoHash,
     FolderState? currentFolder,
     MountState? mountState,
+    Option<Storage>? storage,
   }) => RepoState(
     isLoading: isLoading ?? this.isLoading,
     uploads: uploads ?? this.uploads,
@@ -76,6 +80,7 @@ class RepoState extends Equatable {
     infoHash: infoHash ?? this.infoHash,
     currentFolder: currentFolder ?? this.currentFolder,
     mountState: mountState ?? this.mountState,
+    storage: storage != null ? storage.value : this.storage,
   );
 
   @override
@@ -93,6 +98,7 @@ class RepoState extends Equatable {
     infoHash,
     currentFolder,
     mountState,
+    storage,
   ];
 
   bool get canRead => accessMode != AccessMode.blind;
@@ -125,6 +131,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   static Future<RepoCubit> create({
     required Repository repo,
     required MountCubit mountCubit,
+    // TODO: session is not used
     required Session session,
     required NavigationCubit navigation,
     required EntrySelectionCubit entrySelection,
@@ -132,16 +139,16 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     required CacheServers cacheServers,
   }) async {
     final path = await repo.getPath();
+    final location = RepoLocation.fromDbPath(path);
     final authMode = await repo.getAuthMode();
 
-    var state = RepoState(
-      location: RepoLocation.fromDbPath(path),
-      authMode: authMode,
-    );
+    var state = RepoState(location: location, authMode: authMode);
+
+    final storage = await Storage.forPath(location.dir).then(Option.from);
+    state = state.copyWith(storage: storage);
 
     final infoHash = await repo.getInfoHash();
     final accessMode = await repo.getAccessMode();
-
     state = state.copyWith(infoHash: infoHash, accessMode: accessMode);
 
     if (await repo.isSyncEnabled()) {
@@ -620,9 +627,12 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   /// Move this repo to another location on the filesystem.
   Future<void> move(String dstPath) async {
     await _repo.move(dstPath);
-    final path = await _repo.getPath();
 
-    emitUnlessClosed(state.copyWith(location: RepoLocation.fromDbPath(path)));
+    final path = await _repo.getPath();
+    final location = RepoLocation.fromDbPath(path);
+    final storage = await Storage.forPath(location.dir).then(Option.from);
+
+    emitUnlessClosed(state.copyWith(location: location, storage: storage));
   }
 
   Future<int?> _getFileSize(String path) async {

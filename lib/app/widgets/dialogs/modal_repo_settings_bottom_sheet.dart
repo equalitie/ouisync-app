@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync/ouisync.dart';
@@ -7,6 +5,8 @@ import 'package:ouisync/ouisync.dart';
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart' show RepoCubit, ReposCubit, RepoState;
 import '../../mixins/mixins.dart' show RepositoryActionsMixin;
+import '../../utils/extensions.dart';
+import '../../utils/themes/app_typography.dart' show AppTypography;
 import '../../utils/utils.dart'
     show
         AppLogger,
@@ -17,8 +17,10 @@ import '../../utils/utils.dart'
         Settings,
         showSnackBar,
         ThemeGetter;
+import '../storage.dart';
 import '../widgets.dart' show EntryActionItem, RepoProgressBuilder;
 
+// TODO: this doesn't need to be stateful
 class RepositorySettings extends StatefulWidget {
   const RepositorySettings({
     required this.settings,
@@ -138,15 +140,22 @@ class _RepositorySettingsState extends State<RepositorySettings>
               //            .ejectRepository(widget.cubit.location);
               //        Navigator.of(context).pop();
               //      }),
-              EntryActionItem(
-                iconData: Icons.snippet_folder_outlined,
-                title: S.current.actionLocateRepo,
-                dense: true,
-                onTap: () async => await locateRepository(
-                  context,
-                  repoLocation: widget.repoCubit.location,
-                  windows: Platform.isWindows,
+              ListTile(
+                leading: Icon(state.storage?.let(storageIcon) ?? Icons.storage),
+                title: Text(
+                  S.current.messageStorage,
+                  style: AppTypography.bodyMedium,
                 ),
+                subtitle: state.storage?.let(
+                  (storage) => Text(storage.description),
+                ),
+                onTap: () => showRepositoryStorageDialog(
+                  context,
+                  session: widget.session,
+                  repoCubit: widget.repoCubit,
+                ),
+                contentPadding: EdgeInsets.zero,
+                visualDensity: VisualDensity.compact,
               ),
               EntryActionItem(
                 iconData: Icons.delete_outline,

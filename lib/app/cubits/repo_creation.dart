@@ -77,6 +77,11 @@ class RepoCreationState {
     _ => null,
   };
 
+  String? get dir => switch (substate) {
+    RepoCreationPending(dir: final dir) => dir,
+    _ => location?.dir,
+  };
+
   @override
   String toString() =>
       '$runtimeType(substate: $substate, suggestedName: $suggestedName, useCacheServers: $useCacheServers, ..)';
@@ -88,14 +93,28 @@ sealed class RepoCreationSubstate {
 
 class RepoCreationPending extends RepoCreationSubstate {
   const RepoCreationPending({
-    this.location,
-    this.setLocalSecret,
+    this.name,
     this.nameError,
+    this.dir,
+    this.setLocalSecret,
   });
 
+  final String? name;
   final String? nameError;
-  final RepoLocation? location;
+  final String? dir;
   final SetLocalSecret? setLocalSecret;
+
+  RepoLocation? get location => (name != null && dir != null)
+      ? RepoLocation(dir: dir!, name: name!)
+      : null;
+
+  RepoCreationPending copyWith({String? dir, SetLocalSecret? setLocalSecret}) =>
+      RepoCreationPending(
+        name: name,
+        nameError: nameError,
+        dir: dir ?? this.dir,
+        setLocalSecret: setLocalSecret ?? this.setLocalSecret,
+      );
 
   @override
   String toString() =>
@@ -110,6 +129,14 @@ class RepoCreationValid extends RepoCreationSubstate {
 
   final RepoLocation location;
   final SetLocalSecret setLocalSecret;
+
+  RepoCreationValid copyWith({
+    RepoLocation? location,
+    SetLocalSecret? setLocalSecret,
+  }) => RepoCreationValid(
+    location: location ?? this.location,
+    setLocalSecret: setLocalSecret ?? this.setLocalSecret,
+  );
 
   @override
   String toString() =>
@@ -127,14 +154,43 @@ class RepoCreationFailure extends RepoCreationSubstate {
 
   final RepoLocation location;
   final String error;
+
+  RepoCreationFailure copyWith({RepoLocation? location, String? error}) =>
+      RepoCreationFailure(
+        location: location ?? this.location,
+        error: error ?? this.error,
+      );
 }
 
 class RepoCreationCubit extends Cubit<RepoCreationState>
     with CubitActions, AppLogger {
   RepoCreationCubit({required this.reposCubit}) : super(RepoCreationState()) {
-    nameController.addListener(_onNameChangedUnawaited);
+    nameController.addListener(_onLocationChangedUnawaited);
 
     setLocalSecret(LocalSecretRandom());
+
+    // Set initial dir to the first store dir
+    unawaited(
+      reposCubit.session
+          .getStoreDirs()
+          .then((dirs) {
+            final substate = state.substate;
+            final dir = dirs.firstOrNull;
+
+            if (dir == null) {
+              return;
+            }
+
+            if (substate is! RepoCreationPending || substate.dir != null) {
+              return;
+            }
+
+            emitUnlessClosed(
+              state.copyWith(substate: substate.copyWith(dir: dir)),
+            );
+          })
+          .then((_) => _onLocationChanged()),
+    );
   }
 
   final ReposCubit reposCubit;
@@ -189,22 +245,14 @@ class RepoCreationCubit extends Cubit<RepoCreationState>
         SetLocalSecretPassword(password),
     };
 
-    RepoCreationSubstate substate;
-
-    substate = switch (state.substate) {
+    final oldSubstate = state.substate;
+    final newSubstate = switch (oldSubstate) {
       RepoCreationPending(location: final location) when location != null =>
         RepoCreationValid(location: location, setLocalSecret: setLocalSecret),
-      RepoCreationPending(
-        location: final location,
-        nameError: final nameError,
-      ) =>
-        RepoCreationPending(
-          location: location,
-          nameError: nameError,
-          setLocalSecret: setLocalSecret,
-        ),
-      RepoCreationValid(location: final location) => RepoCreationValid(
-        location: location,
+      RepoCreationPending() => oldSubstate.copyWith(
+        setLocalSecret: setLocalSecret,
+      ),
+      RepoCreationValid() => oldSubstate.copyWith(
         setLocalSecret: setLocalSecret,
       ),
       RepoCreationSuccess(entry: final entry) => RepoCreationValid(
@@ -218,17 +266,33 @@ class RepoCreationCubit extends Cubit<RepoCreationState>
     };
 
     emitUnlessClosed(
-      state.copyWith(substate: substate, localSecretMode: input.mode),
+      state.copyWith(substate: newSubstate, localSecretMode: input.mode),
     );
   }
 
+  void setDir(String dir) {
+    final oldSubstate = state.substate;
+    final newSubstate = switch (oldSubstate) {
+      RepoCreationPending() => oldSubstate.copyWith(dir: dir),
+      RepoCreationValid(location: final location) => oldSubstate.copyWith(
+        location: location.relocate(dir),
+      ),
+      RepoCreationSuccess() => oldSubstate,
+      RepoCreationFailure(location: final location) => oldSubstate.copyWith(
+        location: location.relocate(dir),
+      ),
+    };
+
+    emitUnlessClosed(state.copyWith(substate: newSubstate));
+  }
+
   Future<void> save() async {
-    // On some devices the `_onNameChangedUnawaited` listener is still called
+    // On some devices the `_onLocationChangedUnawaited` listener is still called
     // after this `save` function is called. When that happens and we already
     // created the repository, it'll complain that the repository with the name
     // in the `nameController` already exists, even though it's this cubit that
     // created it. So we remove the listener to not pester the user.
-    nameController.removeListener(_onNameChangedUnawaited);
+    nameController.removeListener(_onLocationChangedUnawaited);
 
     final substate = state.substate;
     if (substate is! RepoCreationValid) {
@@ -269,11 +333,11 @@ class RepoCreationCubit extends Cubit<RepoCreationState>
     }
   }
 
-  void _onNameChangedUnawaited() {
-    unawaited(_onNameChanged());
+  void _onLocationChangedUnawaited() {
+    unawaited(_onLocationChanged());
   }
 
-  Future<void> _onNameChanged() async {
+  Future<void> _onLocationChanged() async {
     final name = nameController.text.trim();
 
     if (name.isEmpty) {
@@ -289,10 +353,13 @@ class RepoCreationCubit extends Cubit<RepoCreationState>
       return;
     }
 
-    // `storeDir` should be not-null at this point.
-    final storeDir = await reposCubit.session.getStoreDir();
-    final location = RepoLocation(dir: storeDir!, name: name);
+    final dir = state.dir;
+    if (dir == null) {
+      return;
+    }
 
+    // Check whether repo with this name already exists in this store dir
+    final location = RepoLocation(dir: dir, name: name);
     final exists = await File(location.path).exists();
 
     if (exists) {
@@ -300,20 +367,26 @@ class RepoCreationCubit extends Cubit<RepoCreationState>
       return;
     }
 
-    _setValidName(location);
+    _setLocation(location);
   }
 
-  void _setValidName(RepoLocation location) {
+  void _setLocation(RepoLocation location) {
     final substate = switch (state.substate) {
       RepoCreationPending(setLocalSecret: final setLocalSecret)
           when setLocalSecret != null =>
         RepoCreationValid(location: location, setLocalSecret: setLocalSecret),
       RepoCreationPending(setLocalSecret: final setLocalSecret) =>
-        RepoCreationPending(setLocalSecret: setLocalSecret, location: location),
+        RepoCreationPending(
+          setLocalSecret: setLocalSecret,
+          name: location.name,
+          dir: location.dir,
+        ),
       RepoCreationValid(setLocalSecret: final setLocalSecret) =>
         RepoCreationValid(location: location, setLocalSecret: setLocalSecret),
-      RepoCreationSuccess() ||
-      RepoCreationFailure() => RepoCreationPending(location: location),
+      RepoCreationSuccess() || RepoCreationFailure() => RepoCreationPending(
+        name: location.name,
+        dir: location.dir,
+      ),
     };
 
     emitUnlessClosed(state.copyWith(substate: substate));

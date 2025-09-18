@@ -3,11 +3,14 @@ package org.equalitie.ouisync
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
+import android.os.storage.StorageManager
+import android.os.storage.StorageVolume
 import android.provider.DocumentsContract
 import android.util.Log
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
+import java.io.File
 
 class MainActivity : FlutterFragmentActivity() {
     companion object {
@@ -30,6 +33,11 @@ class MainActivity : FlutterFragmentActivity() {
                         val path = args[0] as String
                         result.success(getDocumentUri(path).toString())
                     }
+                    "getStorageProperties" -> {
+                        val args = call.arguments as List<Any>
+                        val path = args[0] as String
+                        result.success(getStorageVolume(path)?.toMap())
+                    }
                     "log" -> {
                         val args = call.arguments as List<Any>
                         log(args[0] as Int, args[1] as String)
@@ -51,6 +59,11 @@ class MainActivity : FlutterFragmentActivity() {
         return downloadDirectory.toString()
     }
 
+    private fun getStorageVolume(path: String): StorageVolume? {
+        val storageManager = getSystemService(STORAGE_SERVICE) as StorageManager
+        return storageManager.getStorageVolume(File(path))
+    }
+
     private fun log(
         level: Int,
         message: String,
@@ -67,4 +80,14 @@ class MainActivity : FlutterFragmentActivity() {
 
         Log.println(priority, TAG, message)
     }
+
+    private fun StorageVolume.toMap(): Map<String, Any> = mapOf(
+        "primary" to isPrimary() as Any,
+        "removable" to isRemovable() as Any,
+        "description" to getDescription(this@MainActivity) as Any,
+        "mountPoint" to getDirectory()?.getPath() as Any,
+    )
 }
+
+
+

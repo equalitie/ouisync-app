@@ -59,4 +59,20 @@ class Native {
   static Future<Uri> getDocumentUri(String path) => _channel
       .invokeMethod<String>('getDocumentUri', [path])
       .then((uri) => Uri.parse(uri!));
+
+  static Future<
+    ({String description, String mountPoint, bool primary, bool removable})?
+  >
+  getStorageProperties(String path) => _channel
+      .invokeMapMethod<String, Object>('getStorageProperties', [path])
+      .then(
+        (map) => map != null
+            ? (
+                description: map['description'] as String,
+                mountPoint: map['mountPoint'] as String,
+                primary: map['primary'] as bool,
+                removable: map['removable'] as bool,
+              )
+            : null,
+      );
 }

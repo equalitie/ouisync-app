@@ -164,8 +164,6 @@
   "@labelPeers": {},
   "labelDestination": "Destination",
   "@labelDestination": {},
-  "labelUseExternalStorage": "Use external storage",
-  "@labelUseExternalStorage": {},
   "labelDownloadedTo": "Downloaded to:",
   "@labelDownloadedTo": {},
   "labelSetPermission": "Set permission",
@@ -783,7 +781,6 @@
   "actionNewMediaFile":"Media",
   "actionInstallDokan":"Install Dokan",
   "actionUpdateDokan":"Update Dokan",
-  "actionLocateRepo":"Locate repository",
   "actionSelect":"Select",
   "actionDownload":"Download",
   "actionCopy":"Copy",
@@ -814,5 +811,24 @@
   "messageRepositoryRenamed":"Repository renamed as {name}",
   "messageFileRenamed":"File renamed as {name}",
   "messageErrorCreatingFolder":"Error creating folder {name}",
-  "messageFolderRenamed":"Folder renamed as {name}"
+  "messageFolderRenamed":"Folder renamed as {name}",
+
+  "repoStorageLocation":"Location",
+  "@repoStorageLocation": {
+    "description": "Location on the filesystem where the repository data is stored"
+  },
+  "repoStorageMoveTitle":"Move repository",
+  "@repoStorageMoveTitle": {
+    "description": "Title for the dialog for changing repository storage"
+  },
+  "repoStorageMovePrompt":"Do you want to move the repository to {storage}?",
+  "@repoStorageMovePrompt": {
+    "placeholders": {
+      "storage": {
+        "type": "String",
+        "description": "Name of the storage to move the repository to"
+      }
+    },
+    "description": "Confirmation before moving the repository to a different storage"
+  }
 }

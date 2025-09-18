@@ -335,18 +335,14 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
       },
     ),
     actions: [
-      Fields.dialogActions(
-        buttons: [
-          NegativeButton(
-            text: S.current.actionCancel,
-            onPressed: () async => await Navigator.of(context).maybePop(null),
-          ),
-          PositiveButton(
-            text: S.current.actionOK,
-            onPressed: () async =>
-                await Navigator.of(context).maybePop(attachments),
-          ),
-        ],
+      NegativeButton(
+        text: S.current.actionCancel,
+        onPressed: () async => await Navigator.of(context).maybePop(null),
+      ),
+      PositiveButton(
+        text: S.current.actionOK,
+        onPressed: () async =>
+            await Navigator.of(context).maybePop(attachments),
       ),
     ],
   );

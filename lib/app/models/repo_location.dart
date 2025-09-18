@@ -26,6 +26,8 @@ class RepoLocation implements Comparable<RepoLocation> {
   RepoLocation rename(String newName) =>
       RepoLocation(dir: dir, name: newName, ext: ext);
 
+  RepoLocation relocate(String newDir) => RepoLocation(dir: newDir, name: name);
+
   @override
   bool operator ==(Object other) =>
       other is RepoLocation && p.equals(path, other.path);

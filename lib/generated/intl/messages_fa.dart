@@ -100,7 +100,7 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m47(status) => "${status}";
 
-  static String m48(name) => "اشتراک‌گذاری مخزن \"${name}\"";
+  static String m49(name) => "اشتراک‌گذاری مخزن \"${name}\"";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -147,9 +147,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "actionImportRepo": MessageLookupByLibrary.simpleMessage("وارد کردن مخزن"),
     "actionInstallDokan": MessageLookupByLibrary.simpleMessage(
       "نصب رابط کاربری Dokan",
-    ),
-    "actionLocateRepo": MessageLookupByLibrary.simpleMessage(
-      "موقعیت‌یابی مخزن",
     ),
     "actionLockCapital": MessageLookupByLibrary.simpleMessage("قفل کردن"),
     "actionMove": MessageLookupByLibrary.simpleMessage("انتقال"),
@@ -273,9 +270,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "labelTypePassword": MessageLookupByLibrary.simpleMessage(
       "رمز عبور را بنویسید: ",
-    ),
-    "labelUseExternalStorage": MessageLookupByLibrary.simpleMessage(
-      "استفاده از حافظه خارجی",
     ),
     "languageIsNotAvailable": MessageLookupByLibrary.simpleMessage(
       "در دسترس نیست",
@@ -1145,7 +1139,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "انتخاب رمز عبور",
     ),
     "titleSettings": MessageLookupByLibrary.simpleMessage("تنظیمات"),
-    "titleShareRepository": m48,
+    "titleShareRepository": m49,
     "titleSortBy": MessageLookupByLibrary.simpleMessage("مرتب‌سازی بر اساس"),
     "titleStateMonitor": MessageLookupByLibrary.simpleMessage("نظارت بر وضعیت"),
     "titleTermsOfUse": MessageLookupByLibrary.simpleMessage("۲. شرایط استفاده"),

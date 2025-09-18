@@ -87,7 +87,7 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m47(status) => "${status}";
 
-  static String m48(name) => "Partager le dépôt « ${name} »";
+  static String m49(name) => "Partager le dépôt « ${name} »";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -232,9 +232,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "labelTypePassword": MessageLookupByLibrary.simpleMessage(
       "Entrez le mot de passe : ",
-    ),
-    "labelUseExternalStorage": MessageLookupByLibrary.simpleMessage(
-      "Utiliser le stockage externe",
     ),
     "menuItemAbout": MessageLookupByLibrary.simpleMessage("À propos"),
     "menuItemLogs": MessageLookupByLibrary.simpleMessage("Journaux"),
@@ -703,7 +700,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Définir un mot de passe pour",
     ),
     "titleSettings": MessageLookupByLibrary.simpleMessage("Paramètres"),
-    "titleShareRepository": m48,
+    "titleShareRepository": m49,
     "titleStateMonitor": MessageLookupByLibrary.simpleMessage(
       "Moniteur d\'état",
     ),
