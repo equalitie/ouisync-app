@@ -219,6 +219,13 @@ jobs:
           flutter-version-file: pubspec.yaml
           cache: true
 
+      - name: Install Inno Setup (Windows exe installation builder)
+        run: |
+          Invoke-WebRequest https://files.jrsoftware.org/is/6/innosetup-6.4.3.exe -OutFile C:/TEMP/innosetup.exe
+          C:/TEMP/innosetup.exe /SP- /VERYSILENT /ALLUSERS /SUPPRESSMSGBOXES
+        shell: pwsh
+        if: matrix.name == 'windows'
+
       - name: Get Flutter packages
         run:  dart pub get
 
