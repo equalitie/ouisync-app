@@ -98,20 +98,15 @@ class StorageLabel extends StatelessWidget {
   );
 }
 
-class StorageDialog extends StatefulWidget {
+class StorageDialog extends StatelessWidget with AppLogger {
   StorageDialog({required this.session, required this.repoCubit, super.key});
 
   final Session session;
   final RepoCubit repoCubit;
 
   @override
-  State<StorageDialog> createState() => _StorageDialogState();
-}
-
-class _StorageDialogState extends State<StorageDialog> with AppLogger {
-  @override
   Widget build(BuildContext context) => BlocBuilder<RepoCubit, RepoState>(
-    bloc: widget.repoCubit,
+    bloc: repoCubit,
     builder: (context, state) => AlertDialog(
       content: Column(
         mainAxisSize: MainAxisSize.min,
@@ -149,7 +144,7 @@ class _StorageDialogState extends State<StorageDialog> with AppLogger {
             style: context.theme.appTextStyle.titleMedium,
           ),
           StorageSelector(
-            session: widget.session,
+            session: session,
             value: state.storage,
             onChanged: (newStorage) =>
                 _selectStorage(context, state, newStorage),
@@ -171,7 +166,7 @@ class _StorageDialogState extends State<StorageDialog> with AppLogger {
   }
 
   Future<void> _openDirectory(RepoState state) =>
-      viewFile(repo: widget.repoCubit, path: state.location.path, loggy: loggy);
+      viewFile(repo: repoCubit, path: state.location.path, loggy: loggy);
 
   Future<void> _selectStorage(
     BuildContext context,
@@ -207,7 +202,7 @@ class _StorageDialogState extends State<StorageDialog> with AppLogger {
       final newPath = state.location.relocate(newStorage.path).path;
       await Dialogs.executeFutureWithLoadingDialog(
         context,
-        widget.repoCubit.move(newPath),
+        repoCubit.move(newPath),
       );
     }
   }

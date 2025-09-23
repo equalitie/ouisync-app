@@ -131,8 +131,6 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   static Future<RepoCubit> create({
     required Repository repo,
     required MountCubit mountCubit,
-    // TODO: session is not used
-    required Session session,
     required NavigationCubit navigation,
     required EntrySelectionCubit entrySelection,
     required EntryBottomSheetCubit bottomSheet,

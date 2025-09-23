@@ -20,8 +20,8 @@ import '../../utils/utils.dart'
 import '../storage.dart';
 import '../widgets.dart' show EntryActionItem, RepoProgressBuilder;
 
-// TODO: this doesn't need to be stateful
-class RepositorySettings extends StatefulWidget {
+class RepositorySettings extends StatelessWidget
+    with AppLogger, RepositoryActionsMixin {
   const RepositorySettings({
     required this.settings,
     required this.session,
@@ -35,14 +35,8 @@ class RepositorySettings extends StatefulWidget {
   final ReposCubit reposCubit;
 
   @override
-  State<RepositorySettings> createState() => _RepositorySettingsState();
-}
-
-class _RepositorySettingsState extends State<RepositorySettings>
-    with AppLogger, RepositoryActionsMixin {
-  @override
   Widget build(BuildContext context) => BlocBuilder<RepoCubit, RepoState>(
-    bloc: widget.repoCubit,
+    bloc: repoCubit,
     builder: (c, state) => SingleChildScrollView(
       child: Container(
         padding: Dimensions.paddingBottomSheet,
@@ -57,32 +51,31 @@ class _RepositorySettingsState extends State<RepositorySettings>
                 children: [
                   Expanded(
                     child: Fields.bottomSheetTitle(
-                      widget.repoCubit.name,
+                      repoCubit.name,
                       style: context.theme.appTextStyle.titleMedium,
                     ),
                   ),
-                  _Progress(widget.repoCubit),
+                  _Progress(repoCubit),
                 ],
               ),
               _SwitchItem(
                 title: S.current.labelBitTorrentDHT,
                 icon: Icons.hub_outlined,
                 value: state.isDhtEnabled,
-                onChanged: (value) => widget.repoCubit.setDhtEnabled(value),
+                onChanged: (value) => repoCubit.setDhtEnabled(value),
               ),
               _SwitchItem(
                 title: S.current.messagePeerExchange,
                 icon: Icons.group_add_outlined,
                 value: state.isPexEnabled,
-                onChanged: (value) => widget.repoCubit.setPexEnabled(value),
+                onChanged: (value) => repoCubit.setPexEnabled(value),
               ),
               if (state.accessMode == AccessMode.write)
                 _SwitchItem(
                   title: S.current.messageUseCacheServers,
                   icon: Icons.cloud_outlined,
                   value: state.isCacheServersEnabled,
-                  onChanged: (value) =>
-                      widget.repoCubit.setCacheServersEnabled(value),
+                  onChanged: (value) => repoCubit.setCacheServersEnabled(value),
                 ),
               EntryActionItem(
                 iconData: Icons.edit_outlined,
@@ -91,8 +84,8 @@ class _RepositorySettingsState extends State<RepositorySettings>
                 onTap: () async {
                   final newName = await renameRepository(
                     context,
-                    reposCubit: widget.reposCubit,
-                    location: widget.repoCubit.location,
+                    reposCubit: reposCubit,
+                    location: repoCubit.location,
                   );
 
                   if (newName != null) {
@@ -107,7 +100,7 @@ class _RepositorySettingsState extends State<RepositorySettings>
                 dense: true,
                 onTap: () async {
                   await Navigator.of(context).maybePop();
-                  await shareRepository(context, repository: widget.repoCubit);
+                  await shareRepository(context, repository: repoCubit);
                 },
               ),
               EntryActionItem(
@@ -116,10 +109,10 @@ class _RepositorySettingsState extends State<RepositorySettings>
                 dense: true,
                 onTap: () async => await navigateToRepositorySecurity(
                   context,
-                  settings: widget.settings,
-                  session: widget.session,
-                  repoCubit: widget.repoCubit,
-                  passwordHasher: widget.reposCubit.passwordHasher,
+                  settings: settings,
+                  session: session,
+                  repoCubit: repoCubit,
+                  passwordHasher: reposCubit.passwordHasher,
                   popDialog: () => Navigator.of(context).pop(),
                 ),
               ),
@@ -151,8 +144,8 @@ class _RepositorySettingsState extends State<RepositorySettings>
                 ),
                 onTap: () => showRepositoryStorageDialog(
                   context,
-                  session: widget.session,
-                  repoCubit: widget.repoCubit,
+                  session: session,
+                  repoCubit: repoCubit,
                 ),
                 contentPadding: EdgeInsets.zero,
                 visualDensity: VisualDensity.compact,
@@ -163,12 +156,12 @@ class _RepositorySettingsState extends State<RepositorySettings>
                 dense: true,
                 isDanger: true,
                 onTap: () async {
-                  final repoName = widget.repoCubit.name;
-                  final location = widget.repoCubit.location;
+                  final repoName = repoCubit.name;
+                  final location = repoCubit.location;
 
                   final deleted = await showDeleteRepositoryDialog(
                     context,
-                    reposCubit: widget.reposCubit,
+                    reposCubit: reposCubit,
                     repoLocation: location,
                   );
 
