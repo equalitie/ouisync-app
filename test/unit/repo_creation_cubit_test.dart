@@ -40,7 +40,7 @@ void main() {
     await server.start();
 
     session = await Session.create(configPath: configPath);
-    await session.setStoreDir(p.join(appDir.path, 'store'));
+    await session.setStoreDirs([p.join(appDir.path, 'store')]);
 
     final settings = await Settings.init(MasterKey.random());
 
@@ -103,8 +103,9 @@ void main() {
     await S.load(Locale.fromSubtags(languageCode: 'en'));
 
     final name = 'my repo';
+    final dir = await session.getStoreDirs().then((dirs) => dirs.first);
     await reposCubit.createRepository(
-      location: RepoLocation(dir: (await session.getStoreDir())!, name: name),
+      location: RepoLocation(dir: dir, name: name),
       setLocalSecret: SetLocalSecretKeyAndSalt(
         key: randomSecretKey(),
         salt: randomSalt(),

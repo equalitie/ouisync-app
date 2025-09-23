@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+
 import 'package:ouisync/ouisync.dart' show Session;
 
 import 'native.dart';
@@ -17,18 +19,19 @@ class Storage {
   final bool primary;
   final bool removable;
 
-  static Future<Storage?> forPath(String path) =>
-      Native.getStorageProperties(path).then(
-        (props) => props != null
-            ? Storage(
-                path: path,
-                description: props.description,
-                mountPoint: props.mountPoint,
-                primary: props.primary,
-                removable: props.removable,
-              )
-            : null,
-      );
+  static Future<Storage?> forPath(String path) => Platform.isAndroid
+      ? Native.getStorageProperties(path).then(
+          (props) => props != null
+              ? Storage(
+                  path: path,
+                  description: props.description,
+                  mountPoint: props.mountPoint,
+                  primary: props.primary,
+                  removable: props.removable,
+                )
+              : null,
+        )
+      : Future.value(null);
 
   static Future<List<Storage>> all(Session session) => session
       .getStoreDirs()

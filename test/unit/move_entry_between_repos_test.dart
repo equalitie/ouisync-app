@@ -58,7 +58,6 @@ void main() {
       entrySelection: entrySelectionCubit,
       bottomSheet: bottomSheetCubit,
       cacheServers: cacheServers,
-      session: deps.session,
       mountCubit: mountCubit,
     );
 
@@ -68,7 +67,6 @@ void main() {
       entrySelection: entrySelectionCubit,
       bottomSheet: bottomSheetCubit,
       cacheServers: cacheServers,
-      session: deps.session,
       mountCubit: mountCubit,
     );
   });

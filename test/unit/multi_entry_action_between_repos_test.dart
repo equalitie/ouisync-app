@@ -73,7 +73,6 @@ void main() {
 
     originRepoCubit = await RepoCubit.create(
       repo: originRepo,
-      session: deps.session,
       navigation: NavigationCubit(),
       entrySelection: EntrySelectionCubit(),
       bottomSheet: EntryBottomSheetCubit(),
@@ -83,7 +82,6 @@ void main() {
 
     destinationRepoCubit = await RepoCubit.create(
       repo: destinationRepo,
-      session: deps.session,
       navigation: NavigationCubit(),
       entrySelection: EntrySelectionCubit(),
       bottomSheet: EntryBottomSheetCubit(),
