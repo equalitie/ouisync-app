@@ -124,7 +124,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m47(status) => "${status}";
 
   static String m48(storage) =>
-      "Do you want to move the repository to ${storage}?";
+      "Do you want to move the repository to <bold>${storage}</bold>?";
 
   static String m49(name) => "Share repository \"${name}\"";
 
@@ -218,6 +218,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "actionUpdateDokan": MessageLookupByLibrary.simpleMessage("Update Dokan"),
     "actionYes": MessageLookupByLibrary.simpleMessage("Yes"),
     "buttonLocateRepository": MessageLookupByLibrary.simpleMessage("Locate"),
+    "copyToClipboard": MessageLookupByLibrary.simpleMessage(
+      "Copy to clipboard",
+    ),
     "iconAccessMode": MessageLookupByLibrary.simpleMessage("Access Mode"),
     "iconAddExistingRepository": MessageLookupByLibrary.simpleMessage(
       "Import a repository",
@@ -1021,6 +1024,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "messageWritingFileCanceled": m38,
     "messageWritingFileError": m39,
+    "openFolder": MessageLookupByLibrary.simpleMessage("Open folder"),
     "popupMenuItemChangePassword": MessageLookupByLibrary.simpleMessage(
       "Change password",
     ),

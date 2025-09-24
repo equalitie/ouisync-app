@@ -5025,13 +5025,28 @@ class S {
     );
   }
 
-  /// `Do you want to move the repository to {storage}?`
+  /// `Do you want to move the repository to <bold>{storage}</bold>?`
   String repoStorageMovePrompt(String storage) {
     return Intl.message(
-      'Do you want to move the repository to $storage?',
+      'Do you want to move the repository to <bold>$storage</bold>?',
       name: 'repoStorageMovePrompt',
       desc: 'Confirmation before moving the repository to a different storage',
       args: [storage],
+    );
+  }
+
+  /// `Open folder`
+  String get openFolder {
+    return Intl.message('Open folder', name: 'openFolder', desc: '', args: []);
+  }
+
+  /// `Copy to clipboard`
+  String get copyToClipboard {
+    return Intl.message(
+      'Copy to clipboard',
+      name: 'copyToClipboard',
+      desc: '',
+      args: [],
     );
   }
 }

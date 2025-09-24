@@ -821,7 +821,7 @@
   "@repoStorageMoveTitle": {
     "description": "Title for the dialog for changing repository storage"
   },
-  "repoStorageMovePrompt":"Do you want to move the repository to {storage}?",
+  "repoStorageMovePrompt":"Do you want to move the repository to <bold>{storage}</bold>?",
   "@repoStorageMovePrompt": {
     "placeholders": {
       "storage": {
@@ -830,5 +830,7 @@
       }
     },
     "description": "Confirmation before moving the repository to a different storage"
-  }
+  },
+  "openFolder":"Open folder",
+  "copyToClipboard":"Copy to clipboard"
 }

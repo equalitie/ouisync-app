@@ -235,9 +235,8 @@ class RepoCreation extends StatelessWidget with AppLogger {
           ),
           StorageSelector(
             session: creationCubit.reposCubit.session,
-            onChanged: (storage) {
-              creationCubit.setDir(storage.path);
-            },
+            value: state.dir,
+            onChanged: creationCubit.setDir,
           ),
         ],
       );

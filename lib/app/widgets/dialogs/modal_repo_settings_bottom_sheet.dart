@@ -133,22 +133,25 @@ class RepositorySettings extends StatelessWidget
               //            .ejectRepository(widget.cubit.location);
               //        Navigator.of(context).pop();
               //      }),
-              ListTile(
-                leading: Icon(state.storage?.let(storageIcon) ?? Icons.storage),
-                title: Text(
-                  S.current.messageStorage,
-                  style: AppTypography.bodyMedium,
+              StorageBuilder(
+                path: state.location.dir,
+                builder: (context, storage) => ListTile(
+                  leading: Icon(storage?.let(storageIcon) ?? Icons.storage),
+                  title: Text(
+                    S.current.messageStorage,
+                    style: AppTypography.bodyMedium,
+                  ),
+                  subtitle: storage?.let(
+                    (storage) => Text(storage.description),
+                  ),
+                  onTap: () => showRepositoryStorageDialog(
+                    context,
+                    session: session,
+                    repoCubit: repoCubit,
+                  ),
+                  contentPadding: EdgeInsets.zero,
+                  visualDensity: VisualDensity.compact,
                 ),
-                subtitle: state.storage?.let(
-                  (storage) => Text(storage.description),
-                ),
-                onTap: () => showRepositoryStorageDialog(
-                  context,
-                  session: session,
-                  repoCubit: repoCubit,
-                ),
-                contentPadding: EdgeInsets.zero,
-                visualDensity: VisualDensity.compact,
               ),
               EntryActionItem(
                 iconData: Icons.delete_outline,

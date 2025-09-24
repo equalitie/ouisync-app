@@ -5,18 +5,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync/ouisync.dart' show Session;
+import 'package:path/path.dart' show equals, isWithin;
+import 'package:styled_text/styled_text.dart';
+import 'package:url_launcher/url_launcher.dart' show launchUrl;
 
 import '../../generated/l10n.dart';
 import '../cubits/repo.dart';
 import '../utils/actions.dart' show showSnackBar;
 import '../utils/dialogs.dart' show Dialogs;
 import '../utils/dimensions.dart';
-import '../utils/entry_ops.dart' show viewFile;
 import '../utils/extensions.dart';
 import '../utils/log.dart' show AppLogger;
 import '../utils/storage.dart';
 import 'buttons/dialog_action_button.dart';
 
+/// Widget for selecting the directory to store a repository in.
 class StorageSelector extends StatefulWidget {
   StorageSelector({
     required this.session,
@@ -26,40 +29,46 @@ class StorageSelector extends StatefulWidget {
   });
 
   final Session session;
-  final ValueChanged<Storage> onChanged;
-  final Storage? value;
+  final ValueChanged<String> onChanged;
+  final String? value;
 
   @override
   State<StorageSelector> createState() => _StorageSelectorState();
 }
 
 class _StorageSelectorState extends State<StorageSelector> with AppLogger {
-  late final storages = Storage.all(widget.session);
+  late final entries = _getStorages();
 
   @override
   Widget build(BuildContext context) => FutureBuilder(
-    future: storages,
+    future: entries,
     builder: (context, snapshot) {
-      final storages = snapshot.data ?? [];
+      final entries = snapshot.data ?? [];
 
-      if (storages.length < 2) {
+      if (entries.length < 2) {
         return SizedBox.shrink();
       }
 
-      final value =
-          widget.value ?? storages.firstWhere((storage) => storage.primary);
+      final selectedPath = widget.value;
+      final selectedEntry = selectedPath != null
+          ? entries.firstWhere(
+              (entry) =>
+                  equals(entry.path, selectedPath) ||
+                  isWithin(entry.path, selectedPath),
+            )
+          : entries.firstWhere((entry) => entry.storage.primary);
 
       return Column(
-        children: storages
+        children: entries
             .map(
-              (storage) => RadioListTile(
-                title: StorageLabel(storage),
+              (entry) => RadioListTile(
+                title: StorageLabel(entry.storage),
                 subtitle: Text(
-                  storage.mountPoint,
+                  entry.storage.mountPoint,
                   overflow: TextOverflow.ellipsis,
                 ),
-                value: storage,
-                groupValue: value,
+                value: entry.path,
+                groupValue: selectedEntry.path,
                 onChanged: _change,
                 visualDensity: VisualDensity.compact,
                 contentPadding: EdgeInsets.zero,
@@ -70,16 +79,41 @@ class _StorageSelectorState extends State<StorageSelector> with AppLogger {
     },
   );
 
-  void _change(Storage? value) {
-    if (value != null) {
-      widget.onChanged(value);
+  void _change(String? path) {
+    if (path != null) {
+      widget.onChanged(path);
     }
   }
+
+  Future<List<_StorageEntry>> _getStorages() => widget.session
+      .getStoreDirs()
+      .then(
+        (dirs) => Future.wait(
+          dirs.map(
+            (dir) => Storage.forPath(dir).then(
+              (storage) => storage != null ? _StorageEntry(dir, storage) : null,
+            ),
+          ),
+        ),
+      )
+      .then((entries) => entries.nonNulls.toList());
 }
 
+class _StorageEntry {
+  final String path;
+  final Storage storage;
+
+  const _StorageEntry(this.path, this.storage);
+
+  @override
+  String toString() => '$runtimeType(path: $path, storage: $storage)';
+}
+
+/// Returns icon for the given storage.
 IconData storageIcon(Storage storage) =>
     storage.removable ? Icons.sd_card : Icons.smartphone;
 
+/// Label for the given storage: consists of the storage description and icon.
 class StorageLabel extends StatelessWidget {
   final Storage storage;
 
@@ -98,6 +132,7 @@ class StorageLabel extends StatelessWidget {
   );
 }
 
+/// Dialog for changing repository storage
 class StorageDialog extends StatelessWidget with AppLogger {
   StorageDialog({required this.session, required this.repoCubit, super.key});
 
@@ -130,11 +165,13 @@ class StorageDialog extends StatelessWidget with AppLogger {
               IconButton(
                 icon: Icon(Icons.copy),
                 onPressed: () => _copyToClipboard(context, state),
+                tooltip: S.current.copyToClipboard,
               ),
               if (Platform.isLinux || Platform.isWindows)
                 IconButton(
                   icon: Icon(Icons.folder_open),
                   onPressed: () => _openDirectory(state),
+                  tooltip: S.current.openFolder,
                 ),
             ],
           ),
@@ -145,9 +182,8 @@ class StorageDialog extends StatelessWidget with AppLogger {
           ),
           StorageSelector(
             session: session,
-            value: state.storage,
-            onChanged: (newStorage) =>
-                _selectStorage(context, state, newStorage),
+            value: state.location.dir,
+            onChanged: (path) => _selectStorage(context, state, path),
           ),
         ],
       ),
@@ -166,17 +202,18 @@ class StorageDialog extends StatelessWidget with AppLogger {
   }
 
   Future<void> _openDirectory(RepoState state) =>
-      viewFile(repo: repoCubit, path: state.location.path, loggy: loggy);
+      launchUrl(Uri.file(state.location.dir));
 
   Future<void> _selectStorage(
     BuildContext context,
     RepoState state,
-    Storage newStorage,
+    String path,
   ) async {
-    if (newStorage == state.storage) {
+    if (state.location.dir == path) {
       return;
     }
 
+    final storage = await Storage.forPath(path);
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -184,7 +221,10 @@ class StorageDialog extends StatelessWidget with AppLogger {
           S.current.repoStorageMoveTitle,
           style: context.theme.appTextStyle.titleMedium,
         ),
-        content: _formatPrompt(newStorage.description),
+        content: StyledText(
+          text: S.current.repoStorageMovePrompt(storage?.description ?? path),
+          tags: tags,
+        ),
         actions: [
           NegativeButton(
             text: S.current.actionCancel,
@@ -199,33 +239,50 @@ class StorageDialog extends StatelessWidget with AppLogger {
     );
 
     if (confirm ?? false) {
-      final newPath = state.location.relocate(newStorage.path).path;
       await Dialogs.executeFutureWithLoadingDialog(
         context,
-        repoCubit.move(newPath),
+        repoCubit.move(state.location.relocate(path).path),
       );
     }
   }
 
-  // Apply rich formatting to the prompt text.
-  Widget _formatPrompt(String storageName) {
-    final separator = '\u0000';
-    final template = S.current.repoStorageMovePrompt(separator);
-    final spans = <TextSpan>[];
+  static final tags = {
+    'bold': StyledTextTag(style: const TextStyle(fontWeight: FontWeight.bold)),
+  };
+}
 
-    for (final part in template.split(separator)) {
-      if (spans.isNotEmpty) {
-        spans.add(
-          TextSpan(
-            text: storageName,
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-        );
-      }
+/// Widget that builds itself based on the `Storage` containing the given path.
+class StorageBuilder extends StatefulWidget {
+  const StorageBuilder({required this.path, required this.builder, super.key});
 
-      spans.add(TextSpan(text: part));
-    }
+  final String path;
+  final Widget Function(BuildContext, Storage?) builder;
 
-    return Text.rich(TextSpan(children: spans));
+  @override
+  State<StorageBuilder> createState() => _StorageBuilderState();
+}
+
+class _StorageBuilderState extends State<StorageBuilder> {
+  Future<Storage?> storage = Future.value(null);
+
+  @override
+  void initState() {
+    super.initState();
+    storage = Storage.forPath(widget.path);
   }
+
+  @override
+  void didUpdateWidget(StorageBuilder oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.path != widget.path) {
+      storage = Storage.forPath(widget.path);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => FutureBuilder<Storage?>(
+    future: storage,
+    builder: (context, snapshot) => widget.builder(context, snapshot.data),
+  );
 }
