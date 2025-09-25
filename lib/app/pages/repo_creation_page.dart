@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync/ouisync.dart';
-import 'package:ouisync_app/app/widgets/storage.dart';
+import 'package:ouisync_app/app/widgets/store_dir.dart';
 
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart'
@@ -223,22 +223,27 @@ class RepoCreation extends StatelessWidget with AppLogger {
       : SizedBox.shrink();
 
   Widget _buildStorageSelector(BuildContext context, RepoCreationState state) =>
-      Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Divider(),
-          Text(
-            S.current.messageStorage,
-            style: TextStyle(
-              fontSize: context.theme.appTextStyle.titleMedium.fontSize,
-            ),
-          ),
-          StorageSelector(
-            session: creationCubit.reposCubit.session,
-            value: state.dir,
-            onChanged: creationCubit.setDir,
-          ),
-        ],
+      StoreDirsBuilder(
+        session: creationCubit.reposCubit.session,
+        builder: (context, storeDirs) => storeDirs.length > 1
+            ? Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Divider(),
+                  Text(
+                    S.current.messageStorage,
+                    style: TextStyle(
+                      fontSize: context.theme.appTextStyle.titleMedium.fontSize,
+                    ),
+                  ),
+                  StoreDirSelector(
+                    storeDirs: storeDirs,
+                    value: state.dir,
+                    onChanged: creationCubit.setDir,
+                  ),
+                ],
+              )
+            : SizedBox.shrink(),
       );
 
   TextStyle _smallMessageStyle(BuildContext context) =>

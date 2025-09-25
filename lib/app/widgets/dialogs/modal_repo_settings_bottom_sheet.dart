@@ -17,7 +17,7 @@ import '../../utils/utils.dart'
         Settings,
         showSnackBar,
         ThemeGetter;
-import '../storage.dart';
+import '../store_dir.dart';
 import '../widgets.dart' show EntryActionItem, RepoProgressBuilder;
 
 class RepositorySettings extends StatelessWidget
@@ -133,10 +133,10 @@ class RepositorySettings extends StatelessWidget
               //            .ejectRepository(widget.cubit.location);
               //        Navigator.of(context).pop();
               //      }),
-              StorageBuilder(
+              StorageVolumeBuilder(
                 path: state.location.dir,
                 builder: (context, storage) => ListTile(
-                  leading: Icon(storage?.let(storageIcon) ?? Icons.storage),
+                  leading: Icon(storage?.icon ?? Icons.storage),
                   title: Text(
                     S.current.messageStorage,
                     style: AppTypography.bodyMedium,

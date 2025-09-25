@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:ouisync_app/app/app.dart';
-import 'package:ouisync_app/app/utils/storage.dart' show Storage;
+import 'package:ouisync_app/app/utils/storage_volume.dart' show StorageVolume;
 
 import '../test/sandbox.dart';
 import '../test/utils.dart';
@@ -100,7 +100,7 @@ void main() {
     expect(removable, isNot(isChecked));
 
     // Verify the storage really is removable.
-    final removableStorage = await Storage.forPath(
+    final removableStorage = await StorageVolume.forPath(
       tester.firstWidget<RadioListTile<String>>(removable).value,
     ).then((storage) => storage!);
     expect(removableStorage.removable, isTrue);
@@ -144,7 +144,7 @@ void main() {
     expect(internal, isNot(isChecked));
 
     // Verify the storage is really internal (not removable)
-    final internalStorage = await Storage.forPath(
+    final internalStorage = await StorageVolume.forPath(
       tester.firstWidget<RadioListTile<String>>(internal).value,
     ).then((storage) => storage!);
     expect(internalStorage.removable, isFalse);

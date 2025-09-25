@@ -25,7 +25,7 @@ import '../utils/utils.dart'
         Settings,
         ThemeGetter,
         showSnackBar;
-import '../widgets/storage.dart' show StorageDialog;
+import '../widgets/store_dir.dart' show StoreDirDialog;
 import '../widgets/widgets.dart'
     show
         ActionsDialog,
@@ -161,7 +161,8 @@ mixin RepositoryActionsMixin on LoggyType {
     required RepoCubit repoCubit,
   }) => showDialog<void>(
     context: context,
-    builder: (context) => StorageDialog(session: session, repoCubit: repoCubit),
+    builder: (context) =>
+        StoreDirDialog(session: session, repoCubit: repoCubit),
   );
 
   Future<bool> showDeleteRepositoryDialog(

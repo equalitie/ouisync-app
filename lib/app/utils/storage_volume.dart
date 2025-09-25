@@ -2,8 +2,9 @@ import 'dart:io' show Platform;
 
 import 'native.dart';
 
-class Storage {
-  const Storage({
+/// Information about a storage volume on the device.
+class StorageVolume {
+  const StorageVolume({
     required this.description,
     required this.mountPoint,
     required this.primary,
@@ -15,10 +16,13 @@ class Storage {
   final bool primary;
   final bool removable;
 
-  static Future<Storage?> forPath(String path) => Platform.isAndroid
+  /// Retrieve storage volume that contains the given path.
+  ///
+  /// Note this currently works only on Android (returns `null` on other platforms).
+  static Future<StorageVolume?> forPath(String path) => Platform.isAndroid
       ? Native.getStorageProperties(path).then(
           (props) => props != null
-              ? Storage(
+              ? StorageVolume(
                   description: props.description,
                   mountPoint: props.mountPoint,
                   primary: props.primary,
@@ -30,7 +34,7 @@ class Storage {
 
   @override
   bool operator ==(Object other) =>
-      other is Storage &&
+      other is StorageVolume &&
       description == other.description &&
       mountPoint == other.mountPoint &&
       primary == other.primary &&
