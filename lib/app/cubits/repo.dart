@@ -681,55 +681,62 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
       return;
     }
 
-    final ouisyncFile = await _repo.openFile(sourcePath);
-    final length = await ouisyncFile.getLength();
-
-    final newFile = io.File(destinationPath);
-
-    // TODO: This fails if the file exists, we should ask the user to confirm if they want to overwrite
-    // the existing file.
-    final sink = newFile.openWrite();
-    int offset = 0;
-
-    final job = Job(0, length);
-    emitUnlessClosed(
-      state.copyWith(downloads: state.downloads.withAdded(sourcePath, job)),
-    );
-
     try {
-      while (job.state.cancel == false) {
-        late List<int> chunk;
+      final src = await _repo.openFile(sourcePath);
 
-        await Future.wait([
-          ouisyncFile.read(offset, Constants.bufferSize).then((ch) {
-            chunk = ch;
-          }),
-          sink.flush(),
-        ]);
+      try {
+        final length = await src.getLength();
 
-        offset += chunk.length;
+        final dst = io.File(destinationPath);
+        await dst.parent.create(recursive: true);
 
-        sink.add(chunk);
+        // TODO: This fails if the file exists, we should ask the user to confirm if they want to overwrite
+        // the existing file.
+        final sink = dst.openWrite();
 
-        if (chunk.length < Constants.bufferSize) {
-          break;
+        try {
+          int offset = 0;
+
+          final job = Job(0, length);
+          emitUnlessClosed(
+            state.copyWith(
+              downloads: state.downloads.withAdded(sourcePath, job),
+            ),
+          );
+
+          try {
+            while (!job.state.cancel) {
+              final chunk = await src.read(offset, Constants.bufferSize);
+
+              offset += chunk.length;
+
+              sink.add(chunk);
+
+              if (chunk.length < Constants.bufferSize) {
+                break;
+              }
+
+              job.update(offset);
+            }
+          } finally {
+            emitUnlessClosed(
+              state.copyWith(
+                downloads: state.downloads.withRemoved(sourcePath),
+              ),
+            );
+          }
+
+          showSnackBar(S.current.messageDownloadFileLocation(parentPath));
+        } finally {
+          await sink.flush();
+          await sink.close();
         }
-
-        job.update(offset);
+      } finally {
+        await src.close();
       }
     } catch (e, st) {
-      loggy.debug('Download file $sourcePath exception', e, st);
+      loggy.error('Download file $sourcePath exception: ', e, st);
       showSnackBar(S.current.messageDownloadingFileError(sourcePath));
-    } finally {
-      showSnackBar(S.current.messageDownloadFileLocation(parentPath));
-      emitUnlessClosed(
-        state.copyWith(downloads: state.downloads.withRemoved(sourcePath)),
-      );
-
-      await Future.wait([
-        sink.flush().then((_) => sink.close()),
-        ouisyncFile.close(),
-      ]);
     }
   }
 

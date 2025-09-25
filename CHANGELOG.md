@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased](https://github.com/equalitie/ouisync-app/compare/v0.9.2...master)
 
 - Fix generating invalid content URI, breaking file preview and share on Android.
+- Fix crash when downloading incomplete file
 
 ## [v0.9.2](https://github.com/equalitie/ouisync-app/compare/v0.9.1...v0.9.2)
 

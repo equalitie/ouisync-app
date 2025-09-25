@@ -134,14 +134,10 @@ class FileIO with AppLogger {
       destinationPath = paths.destinationPath;
     }
 
-    final destinationFile = await io.File(
-      destinationPath,
-    ).create(recursive: true);
-
     return repoCubit.downloadFile(
       sourcePath: path,
       parentPath: parentPath,
-      destinationPath: destinationFile.path,
+      destinationPath: destinationPath,
     );
   }
 
