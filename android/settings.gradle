@@ -9,6 +9,11 @@ pluginManagement {
 
     includeBuild("$flutterSdkPath/packages/flutter_tools/gradle")
 
+    includeBuild('../ouisync/bindings/kotlin/ouisync-convention') {
+        // Need to give this a unique name otherwise the build fails for some reason.
+        name = 'ouisync-convention-app'
+    }
+
     repositories {
         google()
         mavenCentral()

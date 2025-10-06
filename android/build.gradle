@@ -1,50 +1,57 @@
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-    }
+rootProject.buildDir = "../build"
 
-    subprojects {
-        afterEvaluate { project ->
-            if (project.hasProperty('android')) {
-                project.android {
-                    // Fix for:
-                    //
-                    // Namespace not specified. Specify a namespace in the module's build file.
-                    //
-                    // Source: https://stackoverflow.com/questions/76108428/how-do-i-fix-namespace-not-specified-error-in-android-studio
-                    if (namespace == null) {
-                        namespace project.group
-                    }
+subprojects {
+    afterEvaluate { subproject ->
+        if (subproject.hasProperty('android')) {
+            subproject.android {
+                // Fix for:
+                //
+                // Namespace not specified. Specify a namespace in the module's build file.
+                //
+                // Source: https://stackoverflow.com/questions/76108428/how-do-i-fix-namespace-not-specified-error-in-android-studio
+                if (namespace == null) {
+                    namespace project.group
                 }
             }
+        }
 
-            // Fix for this exception in the receive_sharing_intent plugin:
-            //
-            // Inconsistent JVM-target compatibility detected for
-            // tasks 'compileDebugJavaWithJavac' (1.8) and 'compileDebugKotlin' (17).
-            //
-            // TODO: remove when receive_sharing_intent publishes a version that does this by
-            //       itself.
-            if (project.name == 'receive_sharing_intent') {
-                project.android {
-                    kotlin {
-                        jvmToolchain(17)
-                    }
+        // Fix for this exception in the receive_sharing_intent plugin:
+        //
+        // Inconsistent JVM-target compatibility detected for
+        // tasks 'compileDebugJavaWithJavac' (1.8) and 'compileDebugKotlin' (17).
+        //
+        // TODO: remove when receive_sharing_intent publishes a version that does this by
+        //       itself.
+        if (subproject.name == 'receive_sharing_intent') {
+            subproject.android {
+                kotlin {
+                    jvmToolchain(17)
+                }
+            }
+        }
+
+        // The 'app' and 'ouisync' projects set their NDK version using the ouisync convention
+        // plugin. Force all the other packages to use the same NDK version.
+        if (subproject.name != 'ouisync' && subproject.name != 'app') {
+            if (subproject.hasProperty('android')) {
+                subproject.android {
+                    ndkVersion = rootProject.project('ouisync').android.ndkVersion
                 }
             }
         }
     }
 }
 
-rootProject.buildDir = "../build"
-subprojects {
-    project.buildDir = "${rootProject.buildDir}/${project.name}"
-}
-subprojects {
-    project.evaluationDependsOn(":app")
+subprojects { subproject ->
+    subproject.buildDir = "${rootProject.buildDir}/${project.name}"
+    subproject.evaluationDependsOn(":app")
+
+    if (subproject.name != "app") {
+        subproject.evaluationDependsOn(":ouisync")
+    }
 }
 
 tasks.register("clean", Delete) {
     delete rootProject.buildDir
 }
+

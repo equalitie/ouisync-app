@@ -8,6 +8,7 @@ plugins {
     id "dev.flutter.flutter-gradle-plugin"
     id "com.starter.easylauncher" version "6.4.0"
     id "com.diffplug.spotless" version "7.0.2"
+    id 'org.equalitie.ouisync.convention'
 }
 
 def localProperties = new Properties()
@@ -17,7 +18,6 @@ android {
     namespace = "org.equalitie.ouisync"
 
     compileSdk = 35
-    ndkVersion = '27.2.12479018'
 
     kotlin {
         jvmToolchain(17)
