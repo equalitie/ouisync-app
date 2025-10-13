@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix generating invalid content URI, breaking file preview and share on Android.
 - Fix crash when downloading incomplete file
 - Fix app becoming unresponsive after resume from long sleep on Android 15 or later
+- Support [16KB page sizes](https://developer.android.com/guide/practices/page-sizes) on Android
 
 ## [v0.9.1](https://github.com/equalitie/ouisync-app/compare/v0.9.0...v0.9.1) - 2025-08-05
 
