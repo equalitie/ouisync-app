@@ -459,8 +459,19 @@ class Options {
 
 enum ReleaseAction { create, update }
 
+// "0.9.0-nightly+70.2a5e03d5"
+// |-|-|-|-------|-----------|
+//  | | |    |       |
+//  | | |    |       build = `buildId`.`commit`
+//  | | |    pre = flavor
+//  | | patch
+//  | minor
+//  major
+//
+// https://pub.dev/documentation/pub_semver/latest/pub_semver/Version-class.html
 extension OuisyncVersion on Version {
   Flavor get flavor => Flavor.fromString(preRelease.first.toString());
+  // Note: `build` is of type `List<Object>`
   String? get buildId => build.elementAtOrNull(0)?.toString();
   String? get commit => build.elementAtOrNull(1)?.toString();
 
@@ -473,20 +484,46 @@ extension OuisyncVersion on Version {
     );
   }
 
+  Version withShortCommit() {
+    final commit_obj = build.elementAtOrNull(1);
+    if (commit_obj == null) {
+      throw 'Version $this does not contain commit';
+    }
+    final commit_str = commit_obj.toString();
+    final short_len = 8;
+    if (commit_str.length <= short_len) {
+      return Version(major, minor, patch, pre: preStr(), build: buildStr());
+    }
+    return Version(
+      major,
+      minor,
+      patch,
+      pre: preStr(),
+      build: "$buildId.${commit_str.substring(0, short_len)}",
+    );
+  }
+
+  String? buildStr() {
+    if (buildId != null && commit != null) {
+      return "$buildId.$commit";
+    } else if (buildId != null && commit == null) {
+      return buildId;
+    } else if (buildId == null && commit != null) {
+      return commit;
+    } else {
+      return null;
+    }
+  }
+
+  String? preStr() {
+    return preRelease.first.toString();
+  }
+
   Version withoutFlavor() {
-    String? build;
     final buildId = this.buildId;
     final commit = this.commit;
 
-    if (buildId != null && commit != null) {
-      build = "$buildId.$commit";
-    } else if (buildId != null && commit == null) {
-      build = buildId;
-    } else if (buildId == null && commit != null) {
-      build = commit;
-    }
-
-    return Version(major, minor, patch, build: build);
+    return Version(major, minor, patch, build: buildStr());
   }
 
   Version withoutBuildId() {
@@ -497,7 +534,7 @@ extension OuisyncVersion on Version {
       build = commit;
     }
 
-    return Version(major, minor, patch, build: build);
+    return Version(major, minor, patch, pre: preStr(), build: build);
   }
 }
 
@@ -559,10 +596,14 @@ class AssetDesc {
   String gitHubName() {
     if (version.flavor == Flavor.production) {
       return toStringWith(
-        version.withoutFlavor().withoutBuildMetadata().toString(),
+        version
+            .withoutFlavor()
+            .withoutBuildMetadata()
+            .withShortCommit()
+            .toString(),
       );
     } else {
-      return toStringWith(version.commit!);
+      return toStringWith(version.withShortCommit().commit!);
     }
   }
 
@@ -1207,7 +1248,6 @@ Future<String> buildReleaseNotes(
 
 Future<String> getCommit([String? workingDirectory]) => runCapture('git', [
   'rev-parse',
-  '--short',
   'HEAD',
 ], workingDirectory: workingDirectory);
 
