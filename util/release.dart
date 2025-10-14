@@ -1053,6 +1053,7 @@ Future<Release> createRelease(
     CreateRelease(tagName)
       ..name = 'Ouisync $tagName'
       ..body = body
+      ..targetCommitish = version.commit
       ..isDraft = true
       ..isPrerelease = false,
   );
