@@ -29,11 +29,20 @@ RUN mkdir -p ${ANDROID_SDK_ROOT}/cmdline-tools && \
 # download and install Android SDK and NDK
 ENV PATH="${ANDROID_SDK_ROOT}/cmdline-tools/tools/bin:${PATH}"
 RUN yes | sdkmanager --licenses
+
+# These would be installed automatically, but good to have them in the image.
+# TODO: Why do we need different versions of `build-tools` and `platforms`?
 RUN sdkmanager --install \
     "ndk;$NDK_VERSION" \
-    'platforms;android-35' 'platforms;android-36' \
+    'build-tools;35.0.0' \
     'build-tools;36.0.0' \
-    'cmake;3.22.1' 'cmdline-tools;latest'
+    'platform-tools' \
+    'platforms;android-31' \
+    'platforms;android-33' \
+    'platforms;android-34' \
+    'platforms;android-35' \
+    'cmake;3.22.1' \
+    'cmdline-tools;latest'
 
 # install flutter
 RUN wget https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_${FLUTTER_VERSION}-stable.tar.xz -P /tmp
