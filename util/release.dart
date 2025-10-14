@@ -593,11 +593,7 @@ class AssetDesc {
   String gitHubName() {
     if (version.flavor == Flavor.production) {
       return toStringWith(
-        version
-            .withoutFlavor()
-            .withoutBuildMetadata()
-            .withShortCommit()
-            .toString(),
+        version.withoutFlavor().withoutBuildMetadata().toString(),
       );
     } else {
       return toStringWith(version.withShortCommit().commit!);
