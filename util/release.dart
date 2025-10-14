@@ -485,13 +485,13 @@ extension OuisyncVersion on Version {
   }
 
   Version withShortCommit() {
-    final commit_obj = build.elementAtOrNull(1);
-    if (commit_obj == null) {
+    final commitObj = build.elementAtOrNull(1);
+    if (commitObj == null) {
       throw 'Version $this does not contain commit';
     }
-    final commit_str = commit_obj.toString();
-    final short_len = 8;
-    if (commit_str.length <= short_len) {
+    final commitStr = commitObj.toString();
+    final shortLen = 8;
+    if (commitStr.length <= shortLen) {
       return Version(major, minor, patch, pre: preStr(), build: buildStr());
     }
     return Version(
@@ -499,7 +499,7 @@ extension OuisyncVersion on Version {
       minor,
       patch,
       pre: preStr(),
-      build: "$buildId.${commit_str.substring(0, short_len)}",
+      build: "$buildId.${commitStr.substring(0, shortLen)}",
     );
   }
 
@@ -520,9 +520,6 @@ extension OuisyncVersion on Version {
   }
 
   Version withoutFlavor() {
-    final buildId = this.buildId;
-    final commit = this.commit;
-
     return Version(major, minor, patch, build: buildStr());
   }
 
