@@ -49,8 +49,10 @@ if [ "$flavor" != unofficial ]; then
     secretKeystoreHex=$(pass cenoers/ouisync/app/$flavor/android/keystore.jks | xxd -p)
 fi
 
+ndk_version=$(cat ndk-version.txt)
+
 # Build docker image
-dock build -t $image_name - < docker/Dockerfile.build-linux
+dock build -t $image_name --build-arg NDK_VERSION=$ndk_version - < docker/Dockerfile.build-linux
 
 # Run the container for as long as this script is running
 dock run -d --rm --name $container_name $image_name \

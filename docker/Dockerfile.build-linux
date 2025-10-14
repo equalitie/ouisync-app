@@ -2,6 +2,8 @@
 # run in newer versions, but not vice versa.
 FROM ubuntu:22.04
 
+ARG NDK_VERSION
+
 ENV FLUTTER_VERSION=3.32.5
 ENV RUST_VERSION=1.89.0
 
@@ -28,7 +30,7 @@ RUN mkdir -p ${ANDROID_SDK_ROOT}/cmdline-tools && \
 ENV PATH="${ANDROID_SDK_ROOT}/cmdline-tools/tools/bin:${PATH}"
 RUN yes | sdkmanager --licenses
 RUN sdkmanager --install \
-    'ndk;26.3.11579264' 'ndk;27.2.12479018' \
+    "ndk;$NDK_VERSION" \
     'platforms;android-35' 'platforms;android-36' \
     'build-tools;36.0.0' \
     'cmake;3.22.1' 'cmdline-tools;latest'

@@ -459,8 +459,19 @@ class Options {
 
 enum ReleaseAction { create, update }
 
+// "0.9.0-nightly+70.2a5e03d5"
+// |-|-|-|-------|-----------|
+//  | | |    |       |
+//  | | |    |       build = `buildId`.`commit`
+//  | | |    pre = flavor
+//  | | patch
+//  | minor
+//  major
+//
+// https://pub.dev/documentation/pub_semver/latest/pub_semver/Version-class.html
 extension OuisyncVersion on Version {
   Flavor get flavor => Flavor.fromString(preRelease.first.toString());
+  // Note: `build` is of type `List<Object>`
   String? get buildId => build.elementAtOrNull(0)?.toString();
   String? get commit => build.elementAtOrNull(1)?.toString();
 
@@ -473,20 +484,46 @@ extension OuisyncVersion on Version {
     );
   }
 
+  Version withShortCommit() {
+    final commit_obj = build.elementAtOrNull(1);
+    if (commit_obj == null) {
+      throw 'Version $this does not contain commit';
+    }
+    final commit_str = commit_obj.toString();
+    final short_len = 8;
+    if (commit_str.length <= short_len) {
+      return Version(major, minor, patch, pre: preStr(), build: buildStr());
+    }
+    return Version(
+      major,
+      minor,
+      patch,
+      pre: preStr(),
+      build: "$buildId.${commit_str.substring(0, short_len)}",
+    );
+  }
+
+  String? buildStr() {
+    if (buildId != null && commit != null) {
+      return "$buildId.$commit";
+    } else if (buildId != null && commit == null) {
+      return buildId;
+    } else if (buildId == null && commit != null) {
+      return commit;
+    } else {
+      return null;
+    }
+  }
+
+  String? preStr() {
+    return preRelease.first.toString();
+  }
+
   Version withoutFlavor() {
-    String? build;
     final buildId = this.buildId;
     final commit = this.commit;
 
-    if (buildId != null && commit != null) {
-      build = "$buildId.$commit";
-    } else if (buildId != null && commit == null) {
-      build = buildId;
-    } else if (buildId == null && commit != null) {
-      build = commit;
-    }
-
-    return Version(major, minor, patch, build: build);
+    return Version(major, minor, patch, build: buildStr());
   }
 
   Version withoutBuildId() {
@@ -497,7 +534,7 @@ extension OuisyncVersion on Version {
       build = commit;
     }
 
-    return Version(major, minor, patch, build: build);
+    return Version(major, minor, patch, pre: preStr(), build: build);
   }
 }
 
@@ -559,10 +596,14 @@ class AssetDesc {
   String gitHubName() {
     if (version.flavor == Flavor.production) {
       return toStringWith(
-        version.withoutFlavor().withoutBuildMetadata().toString(),
+        version
+            .withoutFlavor()
+            .withoutBuildMetadata()
+            .withShortCommit()
+            .toString(),
       );
     } else {
-      return toStringWith(version.commit!);
+      return toStringWith(version.withShortCommit().commit!);
     }
   }
 
@@ -1046,13 +1087,14 @@ Future<Release> createRelease(
 
   print('Creating release $tagName ...');
 
-  final body = await buildReleaseNotes(version);
+  final body = await buildReleaseNotes(client, slug, tagName);
 
   final release = await client.repositories.createRelease(
     slug,
     CreateRelease(tagName)
       ..name = 'Ouisync $tagName'
       ..body = body
+      ..targetCommitish = version.commit
       ..isDraft = true
       ..isPrerelease = false,
   );
@@ -1144,39 +1186,60 @@ Future<File> computeChecksum(File input) async {
 }
 
 /// Create release notes by extracting the latest entry from the changelog.
-Future<String> buildReleaseNotes(Version version) async {
-  final headerRegexp = RegExp(r'^\s*##\s+\[(.*)\]\((.*)\)\s+\-\s+(.*)\s*$');
+Future<String> buildReleaseNotes(
+  GitHub client,
+  RepositorySlug slug,
+  String tagName,
+) async {
+  final releasedHeaderRegexp = RegExp(
+    r'^\s*##\s+\[(.*)\]\((.*)\)\s+\-\s+(.*)\s*$',
+  );
+  final unreleasedHeaderRegexp = RegExp(r'^\s*##\s+\[Unreleased]\((.*)\)\s*$');
 
   final input = File('CHANGELOG.md');
   final output = StringBuffer()..writeln('## What\'s new');
 
-  final expectedVersionString =
-      'v${version.major}.${version.minor}.${version.patch}';
   var extracting = false;
-  String? compareUrl;
+  String? prevVersionTag;
 
   await for (final line
       in input.openRead().transform(utf8.decoder).transform(LineSplitter())) {
-    final match = headerRegexp.firstMatch(line);
+    final unreleasedMatch = unreleasedHeaderRegexp.firstMatch(line);
+    final releasedMatch = releasedHeaderRegexp.firstMatch(line);
 
-    if (match == null) {
-      if (extracting) {
-        output.writeln(line);
-      }
-
+    if (unreleasedMatch != null) {
+      extracting = true;
       continue;
     }
 
-    if (extracting) {
+    if (releasedMatch != null) {
+      if (!extracting) {
+        throw 'Found a release section in changelog before [Unreleased] section';
+      }
+      prevVersionTag = releasedMatch.group(1);
       break;
     }
 
-    if (match.group(1) == expectedVersionString) {
-      extracting = true;
-      compareUrl = match.group(2);
-      continue;
+    if (extracting) {
+      output.writeln(line);
     }
   }
+
+  if (extracting == false) {
+    throw 'Could not find [Unreleased] section in changelog';
+  }
+
+  if (prevVersionTag == null) {
+    // TODO: This shouldn't happen because we've already made releases, but
+    // wouldn't work on a new project.
+    throw 'Failed to find the tag for previous version';
+  }
+
+  // Throws if the previous release doesn't exist
+  // TODO: Need to update `github` dependency for this, but there are conflicts with `dns_client`.
+  //if (await client.getReleaseByTagName(slug, prevVersionTag)) {}
+
+  final compareUrl = changelogUrl(slug, prevVersionTag, tagName);
 
   output.writeln('[All changes]($compareUrl)');
 
@@ -1185,7 +1248,6 @@ Future<String> buildReleaseNotes(Version version) async {
 
 Future<String> getCommit([String? workingDirectory]) => runCapture('git', [
   'rev-parse',
-  '--short',
   'HEAD',
 ], workingDirectory: workingDirectory);
 
