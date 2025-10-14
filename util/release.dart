@@ -1046,7 +1046,7 @@ Future<Release> createRelease(
 
   print('Creating release $tagName ...');
 
-  final body = await buildReleaseNotes(version);
+  final body = await buildReleaseNotes(client, slug, tagName);
 
   final release = await client.repositories.createRelease(
     slug,
@@ -1145,39 +1145,60 @@ Future<File> computeChecksum(File input) async {
 }
 
 /// Create release notes by extracting the latest entry from the changelog.
-Future<String> buildReleaseNotes(Version version) async {
-  final headerRegexp = RegExp(r'^\s*##\s+\[(.*)\]\((.*)\)\s+\-\s+(.*)\s*$');
+Future<String> buildReleaseNotes(
+  GitHub client,
+  RepositorySlug slug,
+  String tagName,
+) async {
+  final releasedHeaderRegexp = RegExp(
+    r'^\s*##\s+\[(.*)\]\((.*)\)\s+\-\s+(.*)\s*$',
+  );
+  final unreleasedHeaderRegexp = RegExp(r'^\s*##\s+\[Unreleased]\((.*)\)\s*$');
 
   final input = File('CHANGELOG.md');
   final output = StringBuffer()..writeln('## What\'s new');
 
-  final expectedVersionString =
-      'v${version.major}.${version.minor}.${version.patch}';
   var extracting = false;
-  String? compareUrl;
+  String? prevVersionTag;
 
   await for (final line
       in input.openRead().transform(utf8.decoder).transform(LineSplitter())) {
-    final match = headerRegexp.firstMatch(line);
+    final unreleasedMatch = unreleasedHeaderRegexp.firstMatch(line);
+    final releasedMatch = releasedHeaderRegexp.firstMatch(line);
 
-    if (match == null) {
-      if (extracting) {
-        output.writeln(line);
-      }
-
+    if (unreleasedMatch != null) {
+      extracting = true;
       continue;
     }
 
-    if (extracting) {
+    if (releasedMatch != null) {
+      if (!extracting) {
+        throw 'Found a release section in changelog before [Unreleased] section';
+      }
+      prevVersionTag = releasedMatch.group(1);
       break;
     }
 
-    if (match.group(1) == expectedVersionString) {
-      extracting = true;
-      compareUrl = match.group(2);
-      continue;
+    if (extracting) {
+      output.writeln(line);
     }
   }
+
+  if (extracting == false) {
+    throw 'Could not find [Unreleased] section in changelog';
+  }
+
+  if (prevVersionTag == null) {
+    // TODO: This shouldn't happen because we've already made releases, but
+    // wouldn't work on a new project.
+    throw 'Failed to find the tag for previous version';
+  }
+
+  // Throws if the previous release doesn't exist
+  // TODO: Need to update `github` dependency for this, but there are conflicts with `dns_client`.
+  //if (await client.getReleaseByTagName(slug, prevVersionTag)) {}
+
+  final compareUrl = changelogUrl(slug, prevVersionTag, tagName);
 
   output.writeln('[All changes]($compareUrl)');
 
