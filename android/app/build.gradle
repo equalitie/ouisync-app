@@ -17,7 +17,7 @@ rootProject.file("local.properties").withInputStream { localProperties.load(it) 
 android {
     namespace = "org.equalitie.ouisync"
 
-    compileSdk = 35
+    compileSdk = 36
 
     kotlin {
         jvmToolchain(17)

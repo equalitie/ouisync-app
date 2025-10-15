@@ -64,7 +64,7 @@ dependencies:
     path: ouisync/logtee/dart
   meta: ^1.10.0
   mime: ^1.0.6
-  mobile_scanner: ^5.2.1
+  mobile_scanner: ^7.1.2
   mutex: ^3.1.0
   network_info_plus: ^6.0.1
   ouisync:

@@ -21,59 +21,67 @@ class _QRScannerState extends State<QRScanner> with AppLogger {
   );
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: DirectionalAppBar(
-        title: Text(S.current.titleScanRepoQR),
-        backgroundColor: Colors.transparent,
-        foregroundColor: Colors.black87,
-        actions: [
-          IconButton(
-            color: Theme.of(context).primaryColorDark,
-            icon: ValueListenableBuilder(
-              valueListenable: cameraController,
-              builder: (context, state, child) => switch (state.torchState) {
-                TorchState.off => const Icon(
-                  Icons.flash_off_outlined,
-                  color: Colors.grey,
-                ),
-                TorchState.on => Icon(
-                  Icons.flash_on_outlined,
-                  color: Colors.yellow[800],
-                ),
-                TorchState.auto => const Icon(
-                  Icons.flash_auto_outlined,
-                  color: Colors.grey,
-                ),
-                TorchState.unavailable => const Icon(
-                  Icons.flash_off_outlined,
-                  color: Colors.white54,
-                ),
-              },
-            ),
-            iconSize: Dimensions.sizeIconAverage,
-            onPressed: () => cameraController.toggleTorch(),
+  Widget build(BuildContext context) => Scaffold(
+    appBar: DirectionalAppBar(
+      title: Text(S.current.titleScanRepoQR),
+      backgroundColor: Colors.transparent,
+      foregroundColor: Colors.black87,
+      actions: [
+        IconButton(
+          color: Theme.of(context).primaryColorDark,
+          icon: ValueListenableBuilder(
+            valueListenable: cameraController,
+            builder: (context, state, child) => switch (state.torchState) {
+              TorchState.off => const Icon(
+                Icons.flash_off_outlined,
+                color: Colors.grey,
+              ),
+              TorchState.on => Icon(
+                Icons.flash_on_outlined,
+                color: Colors.yellow[800],
+              ),
+              TorchState.auto => const Icon(
+                Icons.flash_auto_outlined,
+                color: Colors.grey,
+              ),
+              TorchState.unavailable => const Icon(
+                Icons.flash_off_outlined,
+                color: Colors.white54,
+              ),
+            },
           ),
-          IconButton(
-            color: Theme.of(context).primaryColorDark,
-            icon: ValueListenableBuilder(
-              valueListenable: cameraController,
-              builder: (context, state, child) =>
-                  switch (state.cameraDirection) {
-                    CameraFacing.front => const Icon(Icons.camera_front),
-                    CameraFacing.back => const Icon(Icons.camera_rear),
-                  },
-            ),
-            iconSize: Dimensions.sizeIconAverage,
-            onPressed: () => cameraController.switchCamera(),
-          ),
-        ],
-      ),
-      body: oneTimeScanner(),
-    );
+          iconSize: Dimensions.sizeIconAverage,
+          onPressed: () => cameraController.toggleTorch(),
+        ),
+        ValueListenableBuilder(
+          valueListenable: cameraController,
+          builder: (context, state, child) => _buildCameraSwitch(state),
+        ),
+      ],
+    ),
+    body: _buildScanner(),
+  );
+
+  Widget _buildCameraSwitch(MobileScannerState state) {
+    final icon = switch (state.cameraDirection) {
+      CameraFacing.front => Icons.camera_front,
+      CameraFacing.back => Icons.camera_rear,
+      CameraFacing.external || CameraFacing.unknown => null,
+    };
+
+    if (icon != null) {
+      return IconButton(
+        color: Theme.of(context).primaryColorDark,
+        icon: Icon(icon),
+        iconSize: Dimensions.sizeIconAverage,
+        onPressed: () => cameraController.switchCamera(),
+      );
+    } else {
+      return SizedBox.shrink();
+    }
   }
 
-  MobileScanner oneTimeScanner() {
+  MobileScanner _buildScanner() {
     var scanned = false;
 
     return MobileScanner(
