@@ -62,7 +62,7 @@ dock run -d --rm --name $container_name --cpus $host_core_count -p 22 $image_nam
     sh -c 'sleep 60; while [ -n "$(find /tmp/alive -cmin -10)" ]; do sleep 10; done'
 
 # Prevent the container from stopping
-while true; do exe / touch /tmp/alive || true; sleep 14; done &
+while true; do exe touch /tmp/alive || true; sleep 14; done &
 keep_alive_pid=$!
 
 # Enter the container on exit
@@ -77,8 +77,8 @@ function on_exit() {
 
 # Prepare secrets
 if [ "$flavor" = "production" ]; then
-    exe / mkdir c:\\secrets
-    exe / powershell -Command "Add-Content -Force -Path c:/secrets/sentry_dsn -Value \"$secretSentryDSN\""
+    exe mkdir c:\\secrets
+    exe powershell -Command "Add-Content -Force -Path c:/secrets/sentry_dsn -Value \"$secretSentryDSN\""
     sentry_arg='--sentry=C:/secrets/sentry_dsn'
 fi
 
@@ -90,18 +90,18 @@ else
 fi
 
 # Generate bindings
-exe c:/ouisync-app/ouisync/bindings/dart dart pub get
-exe c:/ouisync-app/ouisync/bindings/dart dart tool/bindgen.dart
+exe -d c:/ouisync-app/ouisync/bindings/dart dart pub get
+exe -d c:/ouisync-app/ouisync/bindings/dart dart tool/bindgen.dart
 
 # Build Ouisync
-exe c:/ouisync-app dart pub get
-exe c:/ouisync-app dart run util/release.dart --flavor=$flavor $sentry_arg $build_exe $build_msix
+exe -d c:/ouisync-app dart pub get
+exe -d c:/ouisync-app dart run util/release.dart --flavor=$flavor $sentry_arg $build_exe $build_msix
 
 function dock_rsync() {
     rsync -e "docker -H ssh://$host exec -i" "$@"
 }
 
 mkdir -p $out_dir
-for asset in $(exe c:/ouisync-app/releases/latest ls); do
+for asset in $(exe -d c:/ouisync-app/releases/latest ls); do
     dock_rsync -av $container_name:/c/ouisync-app/releases/latest/$asset $out_dir
 done

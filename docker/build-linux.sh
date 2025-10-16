@@ -59,7 +59,7 @@ dock run -d --rm --name $container_name $image_name \
     sh -c 'sleep 60; while [ -n "$(find /tmp/alive -cmin -10)" ]; do sleep 10; done'
 
 # Prevent the container from stopping
-while true; do exe / touch /tmp/alive || true; sleep 14; done &
+while true; do exe touch /tmp/alive || true; sleep 14; done &
 keep_alive_pid=$!
 
 # Enter the container on exit
@@ -75,7 +75,7 @@ function on_exit() {
 # Set up secrets inside the container
 if [ "$flavor" != unofficial ]; then
     function exe_i() { dock exec -i $container_name "$@"; }
-    exe / mkdir -p /opt/secrets
+    exe mkdir -p /opt/secrets
     echo "$secretKeystoreHex" | xxd -p -r      | exe_i dd of=/opt/secrets/keystore.jks
     echo "storePassword=$secretStorePassword"  | exe_i dd of=/opt/secrets/key.properties
     echo "keyPassword=$secretKeyPassword"      | exe_i dd of=/opt/secrets/key.properties oflag=append conv=notrunc
@@ -94,12 +94,12 @@ else
 fi
 
 # Generate bindings (TODO: This should be done automatically)
-exe /opt/ouisync-app/ouisync/bindings/dart dart pub get
-exe /opt/ouisync-app/ouisync/bindings/dart dart tool/bindgen.dart
+exe -d /opt/ouisync-app/ouisync/bindings/dart dart pub get
+exe -d /opt/ouisync-app/ouisync/bindings/dart dart tool/bindgen.dart
 
 # Build Ouisync app
-exe /opt/ouisync-app dart pub get
-exe /opt/ouisync-app dart run util/release.dart \
+exe -d /opt/ouisync-app dart pub get
+exe -d /opt/ouisync-app dart run util/release.dart \
     --flavor=$flavor \
     $arg_android_key_properties \
     $arg_sentry \
@@ -108,6 +108,6 @@ exe /opt/ouisync-app dart run util/release.dart \
 # Collect artifacts
 mkdir -p $dst_dir
 src_dir=/opt/ouisync-app/releases/latest
-for artifact in $(exe $src_dir ls); do
+for artifact in $(exe -d $src_dir ls); do
     dock cp $container_name:$src_dir/$artifact $dst_dir/
 done
