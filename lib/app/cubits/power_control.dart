@@ -4,6 +4,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync/ouisync.dart' as oui;
+import 'package:ouisync_app/app/utils/constants.dart';
 
 import '../../generated/l10n.dart';
 import '../utils/utils.dart'
@@ -311,12 +312,12 @@ class PowerControl extends Cubit<PowerControlState>
 
     switch (mode) {
       case NetworkModeFull():
-        addrs = ['quic/0.0.0.0:0', 'quic/[::]:0'];
+        addrs = Constants.defaultBindAddrs;
         break;
       // If WiFi is ON we can still do local syncing. Note that the binding
       // below will fail on Linux but on Android it'll succeed.
       case NetworkModeNoInternet():
-        addrs = ['quic/0.0.0.0:0', 'quic/[::]:0'];
+        addrs = Constants.defaultBindAddrs;
         break;
       case NetworkModeSaving(hotspotAddr: final hotspotAddr):
         addrs = hotspotAddr != null ? ['quic/$hotspotAddr'] : [];

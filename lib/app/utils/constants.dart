@@ -148,4 +148,20 @@ class Constants {
 
   static const String dokanMayorRequired = '2';
   static const String dokanMinimumVersion = '2.1.0.1000';
+
+  static const defaultBindAddrs = [
+    'quic/0.0.0.0:0',
+    'quic/[::]:0',
+
+    // HACK: Bind also to TCP, but only on loopback. This is so that we can still establish outgoing
+    // TCP connections peers over TCP (*) (which is mostly useful for connecting to cache servers)
+    // while effectively blocking any incoming TCP connections. This is because there are still some
+    // issues around TCP connections and until they are resolved we don't want any peers to be
+    // connecting to each other over TCP.
+    //
+    // *) Currently TCP connector and acceptor are tied together so it's not possible to allow
+    //    outgoing connections without also allowing incoming ones. This is a limitation of the
+    //    current implementation and might be changed in the future.
+    'tcp/127.0.0.1:0',
+  ];
 }

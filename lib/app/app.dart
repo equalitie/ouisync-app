@@ -13,6 +13,7 @@ import '../generated/l10n.dart';
 import 'cubits/cubits.dart'
     show LocaleCubit, LocaleState, MountCubit, ReposCubit, ErrorCubit;
 import 'pages/pages.dart';
+import 'utils/constants.dart' show Constants;
 import 'utils/dirs.dart';
 import 'utils/log.dart' as log;
 import 'utils/platform/platform.dart' show PlatformWindowManager;
@@ -121,7 +122,7 @@ Future<(Server, Session)> _initServerAndSession(
 
     await session.initNetwork(
       NetworkDefaults(
-        bind: ['quic/0.0.0.0:0', 'quic/[::]:0'],
+        bind: Constants.defaultBindAddrs,
         portForwardingEnabled: true,
         localDiscoveryEnabled: true,
       ),
