@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync/ouisync.dart';
@@ -7,6 +5,8 @@ import 'package:ouisync/ouisync.dart';
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart' show RepoCubit, ReposCubit, RepoState;
 import '../../mixins/mixins.dart' show RepositoryActionsMixin;
+import '../../utils/extensions.dart';
+import '../../utils/themes/app_typography.dart' show AppTypography;
 import '../../utils/utils.dart'
     show
         AppLogger,
@@ -17,9 +17,11 @@ import '../../utils/utils.dart'
         Settings,
         showSnackBar,
         ThemeGetter;
+import '../store_dir.dart';
 import '../widgets.dart' show EntryActionItem, RepoProgressBuilder;
 
-class RepositorySettings extends StatefulWidget {
+class RepositorySettings extends StatelessWidget
+    with AppLogger, RepositoryActionsMixin {
   const RepositorySettings({
     required this.settings,
     required this.session,
@@ -33,14 +35,8 @@ class RepositorySettings extends StatefulWidget {
   final ReposCubit reposCubit;
 
   @override
-  State<RepositorySettings> createState() => _RepositorySettingsState();
-}
-
-class _RepositorySettingsState extends State<RepositorySettings>
-    with AppLogger, RepositoryActionsMixin {
-  @override
   Widget build(BuildContext context) => BlocBuilder<RepoCubit, RepoState>(
-    bloc: widget.repoCubit,
+    bloc: repoCubit,
     builder: (c, state) => SingleChildScrollView(
       child: Container(
         padding: Dimensions.paddingBottomSheet,
@@ -55,32 +51,31 @@ class _RepositorySettingsState extends State<RepositorySettings>
                 children: [
                   Expanded(
                     child: Fields.bottomSheetTitle(
-                      widget.repoCubit.name,
+                      repoCubit.name,
                       style: context.theme.appTextStyle.titleMedium,
                     ),
                   ),
-                  _Progress(widget.repoCubit),
+                  _Progress(repoCubit),
                 ],
               ),
               _SwitchItem(
                 title: S.current.labelBitTorrentDHT,
                 icon: Icons.hub_outlined,
                 value: state.isDhtEnabled,
-                onChanged: (value) => widget.repoCubit.setDhtEnabled(value),
+                onChanged: (value) => repoCubit.setDhtEnabled(value),
               ),
               _SwitchItem(
                 title: S.current.messagePeerExchange,
                 icon: Icons.group_add_outlined,
                 value: state.isPexEnabled,
-                onChanged: (value) => widget.repoCubit.setPexEnabled(value),
+                onChanged: (value) => repoCubit.setPexEnabled(value),
               ),
               if (state.accessMode == AccessMode.write)
                 _SwitchItem(
                   title: S.current.messageUseCacheServers,
                   icon: Icons.cloud_outlined,
                   value: state.isCacheServersEnabled,
-                  onChanged: (value) =>
-                      widget.repoCubit.setCacheServersEnabled(value),
+                  onChanged: (value) => repoCubit.setCacheServersEnabled(value),
                 ),
               EntryActionItem(
                 iconData: Icons.edit_outlined,
@@ -89,8 +84,8 @@ class _RepositorySettingsState extends State<RepositorySettings>
                 onTap: () async {
                   final newName = await renameRepository(
                     context,
-                    reposCubit: widget.reposCubit,
-                    location: widget.repoCubit.location,
+                    reposCubit: reposCubit,
+                    location: repoCubit.location,
                   );
 
                   if (newName != null) {
@@ -105,7 +100,7 @@ class _RepositorySettingsState extends State<RepositorySettings>
                 dense: true,
                 onTap: () async {
                   await Navigator.of(context).maybePop();
-                  await shareRepository(context, repository: widget.repoCubit);
+                  await shareRepository(context, repository: repoCubit);
                 },
               ),
               EntryActionItem(
@@ -114,10 +109,10 @@ class _RepositorySettingsState extends State<RepositorySettings>
                 dense: true,
                 onTap: () async => await navigateToRepositorySecurity(
                   context,
-                  settings: widget.settings,
-                  session: widget.session,
-                  repoCubit: widget.repoCubit,
-                  passwordHasher: widget.reposCubit.passwordHasher,
+                  settings: settings,
+                  session: session,
+                  repoCubit: repoCubit,
+                  passwordHasher: reposCubit.passwordHasher,
                   popDialog: () => Navigator.of(context).pop(),
                 ),
               ),
@@ -138,14 +133,24 @@ class _RepositorySettingsState extends State<RepositorySettings>
               //            .ejectRepository(widget.cubit.location);
               //        Navigator.of(context).pop();
               //      }),
-              EntryActionItem(
-                iconData: Icons.snippet_folder_outlined,
-                title: S.current.actionLocateRepo,
-                dense: true,
-                onTap: () async => await locateRepository(
-                  context,
-                  repoLocation: widget.repoCubit.location,
-                  windows: Platform.isWindows,
+              StorageVolumeBuilder(
+                path: state.location.dir,
+                builder: (context, storage) => ListTile(
+                  leading: Icon(storage?.icon ?? Icons.storage),
+                  title: Text(
+                    S.current.messageStorage,
+                    style: AppTypography.bodyMedium,
+                  ),
+                  subtitle: storage?.let(
+                    (storage) => Text(storage.description),
+                  ),
+                  onTap: () => showRepositoryStorageDialog(
+                    context,
+                    session: session,
+                    repoCubit: repoCubit,
+                  ),
+                  contentPadding: EdgeInsets.zero,
+                  visualDensity: VisualDensity.compact,
                 ),
               ),
               EntryActionItem(
@@ -154,12 +159,12 @@ class _RepositorySettingsState extends State<RepositorySettings>
                 dense: true,
                 isDanger: true,
                 onTap: () async {
-                  final repoName = widget.repoCubit.name;
-                  final location = widget.repoCubit.location;
+                  final repoName = repoCubit.name;
+                  final location = repoCubit.location;
 
                   final deleted = await showDeleteRepositoryDialog(
                     context,
-                    reposCubit: widget.reposCubit,
+                    reposCubit: reposCubit,
                     repoLocation: location,
                   );
 

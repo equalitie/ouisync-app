@@ -104,7 +104,7 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m47(status) => "${status}";
 
-  static String m48(name) => "Поділитися репозиторієм \"${name}\"";
+  static String m49(name) => "Поділитися репозиторієм \"${name}\"";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -157,9 +157,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "actionInstallDokan": MessageLookupByLibrary.simpleMessage(
       "Встановити Dokan",
-    ),
-    "actionLocateRepo": MessageLookupByLibrary.simpleMessage(
-      "Репозиторій локації",
     ),
     "actionLockCapital": MessageLookupByLibrary.simpleMessage("ЗАБЛОКУВАТИ"),
     "actionMove": MessageLookupByLibrary.simpleMessage("Перемістити"),
@@ -302,9 +299,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "labelTypePassword": MessageLookupByLibrary.simpleMessage(
       "Введіть пароль: ",
-    ),
-    "labelUseExternalStorage": MessageLookupByLibrary.simpleMessage(
-      "Використовувати зовнішній накопичувач",
     ),
     "languageIsNotAvailable": MessageLookupByLibrary.simpleMessage(
       "недоступно",
@@ -1201,7 +1195,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Встановіть пароль для",
     ),
     "titleSettings": MessageLookupByLibrary.simpleMessage("Налаштування"),
-    "titleShareRepository": m48,
+    "titleShareRepository": m49,
     "titleSortBy": MessageLookupByLibrary.simpleMessage("Відсортовано"),
     "titleStateMonitor": MessageLookupByLibrary.simpleMessage(
       "Моніторинг статусу",

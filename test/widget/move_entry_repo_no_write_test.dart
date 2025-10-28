@@ -31,7 +31,9 @@ void main() {
   setUp(() async {
     deps = await TestDependencies.create();
 
-    final reposDir = (await deps.session.getStoreDir())!;
+    final reposDir = await deps.session.getStoreDirs().then(
+      (dirs) => dirs.first,
+    );
 
     final originRepoLocation = RepoLocation(
       dir: reposDir,
@@ -96,10 +98,9 @@ void main() {
       expect(find.text(lockedRepoName), findsOne);
       expect(find.text(readRepoName), findsOne);
 
-      final originRepoCubit =
-          deps.reposCubit.state.repos.values
-              .firstWhere((r) => r.name == originRepoName)
-              .cubit!;
+      final originRepoCubit = deps.reposCubit.state.repos.values
+          .firstWhere((r) => r.name == originRepoName)
+          .cubit!;
 
       await tester.anxiousTap(find.text(originRepoName));
       await _waitForNavigationIntoRepoToEnd(deps, tester, originRepoCubit);
@@ -125,10 +126,9 @@ void main() {
       await tester.anxiousTap(backButton);
       await tester.pumpAndSettle();
 
-      final lockedRepoCubit =
-          deps.reposCubit.state.repos.values
-              .firstWhere((r) => r.name == lockedRepoName)
-              .cubit!;
+      final lockedRepoCubit = deps.reposCubit.state.repos.values
+          .firstWhere((r) => r.name == lockedRepoName)
+          .cubit!;
 
       await tester.anxiousTap(find.text(lockedRepoName));
       await _waitForNavigationIntoRepoToEnd(deps, tester, lockedRepoCubit);
@@ -159,10 +159,9 @@ void main() {
       expect(find.text(lockedRepoName), findsOne);
       expect(find.text(readRepoName), findsOne);
 
-      final originRepoCubit =
-          deps.reposCubit.state.repos.values
-              .firstWhere((r) => r.name == originRepoName)
-              .cubit!;
+      final originRepoCubit = deps.reposCubit.state.repos.values
+          .firstWhere((r) => r.name == originRepoName)
+          .cubit!;
 
       await tester.anxiousTap(find.text(originRepoName));
       await _waitForNavigationIntoRepoToEnd(deps, tester, originRepoCubit);
@@ -188,10 +187,9 @@ void main() {
       await tester.anxiousTap(backButton);
       await tester.pumpAndSettle();
 
-      final readRepoCubit =
-          deps.reposCubit.state.repos.values
-              .firstWhere((r) => r.name == readRepoName)
-              .cubit!;
+      final readRepoCubit = deps.reposCubit.state.repos.values
+          .firstWhere((r) => r.name == readRepoName)
+          .cubit!;
 
       await tester.anxiousTap(find.text(readRepoName));
       await _waitForNavigationIntoRepoToEnd(deps, tester, readRepoCubit);

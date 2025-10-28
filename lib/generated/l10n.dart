@@ -964,16 +964,6 @@ class S {
     );
   }
 
-  /// `Use external storage`
-  String get labelUseExternalStorage {
-    return Intl.message(
-      'Use external storage',
-      name: 'labelUseExternalStorage',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Downloaded to:`
   String get labelDownloadedTo {
     return Intl.message(
@@ -4840,16 +4830,6 @@ class S {
     );
   }
 
-  /// `Locate repository`
-  String get actionLocateRepo {
-    return Intl.message(
-      'Locate repository',
-      name: 'actionLocateRepo',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Select`
   String get actionSelect {
     return Intl.message('Select', name: 'actionSelect', desc: '', args: []);
@@ -5022,6 +5002,51 @@ class S {
       name: 'messageFolderRenamed',
       desc: '',
       args: [name],
+    );
+  }
+
+  /// `Location`
+  String get repoStorageLocation {
+    return Intl.message(
+      'Location',
+      name: 'repoStorageLocation',
+      desc: 'Location on the filesystem where the repository data is stored',
+      args: [],
+    );
+  }
+
+  /// `Move repository`
+  String get repoStorageMoveTitle {
+    return Intl.message(
+      'Move repository',
+      name: 'repoStorageMoveTitle',
+      desc: 'Title for the dialog for changing repository storage',
+      args: [],
+    );
+  }
+
+  /// `Do you want to move the repository to <bold>{storage}</bold>?`
+  String repoStorageMovePrompt(String storage) {
+    return Intl.message(
+      'Do you want to move the repository to <bold>$storage</bold>?',
+      name: 'repoStorageMovePrompt',
+      desc: 'Confirmation before moving the repository to a different storage',
+      args: [storage],
+    );
+  }
+
+  /// `Open folder`
+  String get openFolder {
+    return Intl.message('Open folder', name: 'openFolder', desc: '', args: []);
+  }
+
+  /// `Copy to clipboard`
+  String get copyToClipboard {
+    return Intl.message(
+      'Copy to clipboard',
+      name: 'copyToClipboard',
+      desc: '',
+      args: [],
     );
   }
 }

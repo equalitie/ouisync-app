@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../utils/utils.dart';
 
-typedef _GestureTapAsyncCallback = Future<void> Function();
+typedef _GestureTapAsyncCallback = FutureOr<void> Function();
 
 class PositiveButton extends _ActionButton {
   PositiveButton({
@@ -66,39 +66,23 @@ abstract class _ActionButton extends StatelessWidget {
        _enabled = ValueNotifier<bool>(onPressed != null);
 
   @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Row(
-        children: [
-          Expanded(
-            child: Align(
-              alignment: AlignmentDirectional.bottomEnd,
-              child: AspectRatio(
-                aspectRatio: buttonsAspectRatio,
-                child: Container(
-                  margin: _margin(),
-                  child: ValueListenableBuilder<bool>(
-                    valueListenable: _enabled,
-                    builder: (BuildContext _, bool enabled, Widget? child) =>
-                        RawMaterialButton(
-                          onPressed: _getOnPressed(enabled),
-                          focusNode: focusNode,
-                          child: Text((text ?? '').toUpperCase()),
-                          constraints: buttonConstrains,
-                          elevation: Dimensions.elevationDialogAction,
-                          fillColor: _fillColor(context),
-                          shape: _shape(context),
-                          textStyle: _textStyle(context),
-                        ),
-                  ),
-                ),
-              ),
-            ),
+  Widget build(BuildContext context) => Container(
+    margin: _margin(),
+    child: ValueListenableBuilder<bool>(
+      valueListenable: _enabled,
+      builder: (BuildContext _, bool enabled, Widget? child) =>
+          RawMaterialButton(
+            onPressed: _getOnPressed(enabled),
+            focusNode: focusNode,
+            child: Text((text ?? '').toUpperCase()),
+            constraints: buttonConstrains,
+            elevation: Dimensions.elevationDialogAction,
+            fillColor: _fillColor(context),
+            shape: _shape(context),
+            textStyle: _textStyle(context),
           ),
-        ],
-      ),
-    );
-  }
+    ),
+  );
 
   // Disables the button while the async `onPressed` is executing
   GestureTapCallback? _getOnPressed(bool enabled) {

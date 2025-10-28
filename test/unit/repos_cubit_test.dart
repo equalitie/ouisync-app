@@ -34,7 +34,7 @@ void main() {
     await server.start();
 
     session = await Session.create(configPath: configPath);
-    await session.setStoreDir(join(appDir.path, 'store'));
+    await session.setStoreDirs([join(appDir.path, 'store')]);
 
     final settings = await Settings.init(MasterKey.random());
 
@@ -61,7 +61,7 @@ void main() {
     expect(reposCubit.state.current, isNull);
 
     final location = RepoLocation(
-      dir: (await session.getStoreDir())!,
+      dir: await session.getStoreDirs().then((dirs) => dirs.first),
       name: 'foo',
     );
     final entry = await reposCubit.createRepository(

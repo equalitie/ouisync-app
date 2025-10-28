@@ -42,7 +42,7 @@ void main() {
 
       await deps.reposCubit.createRepository(
         location: RepoLocation(
-          dir: (await deps.session.getStoreDir())!,
+          dir: await deps.session.getStoreDirs().then((dirs) => dirs.first),
           name: name,
         ),
         setLocalSecret: randomSetLocalSecret(),

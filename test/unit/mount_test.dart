@@ -36,7 +36,6 @@ void main() {
 
     repoCubit = await RepoCubit.create(
       repo: repo,
-      session: deps.session,
       navigation: NavigationCubit(),
       entrySelection: EntrySelectionCubit(),
       bottomSheet: EntryBottomSheetCubit(),

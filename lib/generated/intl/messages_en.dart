@@ -123,7 +123,10 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m47(status) => "${status}";
 
-  static String m48(name) => "Share repository \"${name}\"";
+  static String m48(storage) =>
+      "Do you want to move the repository to <bold>${storage}</bold>?";
+
+  static String m49(name) => "Share repository \"${name}\"";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -178,9 +181,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "Import repository",
     ),
     "actionInstallDokan": MessageLookupByLibrary.simpleMessage("Install Dokan"),
-    "actionLocateRepo": MessageLookupByLibrary.simpleMessage(
-      "Locate repository",
-    ),
     "actionLockCapital": MessageLookupByLibrary.simpleMessage("LOCK"),
     "actionMove": MessageLookupByLibrary.simpleMessage("Move"),
     "actionNewFile": MessageLookupByLibrary.simpleMessage("File"),
@@ -218,6 +218,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "actionUpdateDokan": MessageLookupByLibrary.simpleMessage("Update Dokan"),
     "actionYes": MessageLookupByLibrary.simpleMessage("Yes"),
     "buttonLocateRepository": MessageLookupByLibrary.simpleMessage("Locate"),
+    "copyToClipboard": MessageLookupByLibrary.simpleMessage(
+      "Copy to clipboard",
+    ),
     "iconAccessMode": MessageLookupByLibrary.simpleMessage("Access Mode"),
     "iconAddExistingRepository": MessageLookupByLibrary.simpleMessage(
       "Import a repository",
@@ -301,9 +304,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "labelTypePassword": MessageLookupByLibrary.simpleMessage(
       "Type password: ",
-    ),
-    "labelUseExternalStorage": MessageLookupByLibrary.simpleMessage(
-      "Use external storage",
     ),
     "languageIsNotAvailable": MessageLookupByLibrary.simpleMessage(
       "not available",
@@ -1024,6 +1024,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "messageWritingFileCanceled": m38,
     "messageWritingFileError": m39,
+    "openFolder": MessageLookupByLibrary.simpleMessage("Open folder"),
     "popupMenuItemChangePassword": MessageLookupByLibrary.simpleMessage(
       "Change password",
     ),
@@ -1135,6 +1136,11 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "repoResetTokenTypeLabel": MessageLookupByLibrary.simpleMessage(
       "Token access type",
+    ),
+    "repoStorageLocation": MessageLookupByLibrary.simpleMessage("Location"),
+    "repoStorageMovePrompt": m48,
+    "repoStorageMoveTitle": MessageLookupByLibrary.simpleMessage(
+      "Move repository",
     ),
     "repositoryIsAlreadyImported": MessageLookupByLibrary.simpleMessage(
       "Repository is already imported",
@@ -1306,7 +1312,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Set password for",
     ),
     "titleSettings": MessageLookupByLibrary.simpleMessage("Settings"),
-    "titleShareRepository": m48,
+    "titleShareRepository": m49,
     "titleSortBy": MessageLookupByLibrary.simpleMessage("Sort by"),
     "titleStateMonitor": MessageLookupByLibrary.simpleMessage("State Monitor"),
     "titleTermsOfUse": MessageLookupByLibrary.simpleMessage("2. Terms of Use"),

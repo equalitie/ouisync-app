@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:path/path.dart' show join;
+import 'package:path_provider/path_provider.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -19,11 +20,22 @@ abstract class Sandbox {
   Future<void> tearDown();
 }
 
-// Dummy implementation that does nothing. Used on platforms that already natively sanbox their
-// apps.
+// Implementation used on platforms that already natively sanbox their apps.
+// Clears all app files on teardown.
 class _NativeSandbox extends Sandbox {
   @override
-  Future<void> tearDown() => Future.value();
+  Future<void> tearDown() async {
+    final storageDirs = await getExternalStorageDirectories();
+    if (storageDirs == null) {
+      return;
+    }
+
+    for (final storageDir in storageDirs) {
+      await for (final entry in storageDir.list()) {
+        await entry.delete(recursive: true);
+      }
+    }
+  }
 }
 
 // Implementation that puts all files in a temporary directory wich is removed on teardown.

@@ -20,7 +20,7 @@ void main() {
 
     final repoEntry = await deps.reposCubit.createRepository(
       location: RepoLocation(
-        dir: (await deps.session.getStoreDir())!,
+        dir: await deps.session.getStoreDirs().then((dirs) => dirs.first),
         name: 'my repo',
       ),
       setLocalSecret: randomSetLocalSecret(),
@@ -30,8 +30,9 @@ void main() {
 
     final authMode = repoCubit.state.authMode;
 
-    localSecret =
-        (await authMode.storedLocalSecret!.decrypt(deps.settings.masterKey))!;
+    localSecret = (await authMode.storedLocalSecret!.decrypt(
+      deps.settings.masterKey,
+    ))!;
   });
 
   tearDown(() async {

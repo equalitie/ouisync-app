@@ -6,7 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-<!-- ## [Unreleased](https://github.com/equalitie/ouisync-app/compare/v0.9.2...master) -->
+## [Unreleased](https://github.com/equalitie/ouisync-app/compare/v0.9.2...master)
+
+- Update [Ouisync library](https://github.com/equalitie/ouisync) to [v0.9.4](https://github.com/equalitie/ouisync/blob/master/CHANGELOG.md#v0.9.4)
+- Support storing repositories on SD cards on Android.
 
 ## [v0.9.2](https://github.com/equalitie/ouisync-app/compare/v0.9.1...v0.9.2) - 2025-10-27
 

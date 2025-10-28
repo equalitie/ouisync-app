@@ -96,7 +96,7 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m47(status) => "${status}";
 
-  static String m48(name) => "Поделиться хранилищем \"${name}\"";
+  static String m49(name) => "Поделиться хранилищем \"${name}\"";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -271,9 +271,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "labelTypePassword": MessageLookupByLibrary.simpleMessage(
       "Введите пароль: ",
-    ),
-    "labelUseExternalStorage": MessageLookupByLibrary.simpleMessage(
-      "Использовать внешнее хранилище",
     ),
     "menuItemAbout": MessageLookupByLibrary.simpleMessage("О программе"),
     "menuItemLogs": MessageLookupByLibrary.simpleMessage("Логи"),
@@ -1075,7 +1072,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Поставить пароль для",
     ),
     "titleSettings": MessageLookupByLibrary.simpleMessage("Настройки"),
-    "titleShareRepository": m48,
+    "titleShareRepository": m49,
     "titleSortBy": MessageLookupByLibrary.simpleMessage("Отсортировать по"),
     "titleStateMonitor": MessageLookupByLibrary.simpleMessage(
       "Анализ состояния",

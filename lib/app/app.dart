@@ -28,68 +28,146 @@ import 'utils/utils.dart'
 import 'widgets/flavor_banner.dart';
 import 'widgets/media_receiver.dart';
 
-Future<Widget> initApp([List<String> args = const []]) async =>
-    FutureBuilder<HomeWidget>(
-      future: _initHomeWidget(args),
-      builder: (context, snapshot) {
-        final home = snapshot.data;
+/// The top level widget
+class App extends StatefulWidget {
+  const App([List<String> args = const []]) : this._(args, null);
 
-        if (home != null) {
-          return BlocBuilder<LocaleCubit, LocaleState>(
-            bloc: home.localeCubit,
-            builder: (context, localeState) => _buildMaterialApp(
-              locale: localeState.currentLocale,
-              home: home,
-            ),
-          );
-        } else {
-          return _buildMaterialApp(home: LoadingScreen());
-        }
-      },
+  /// Create App for testing. Accepts `AppController` which can be used to explicitly stop the
+  /// Ouisync service and await until the stop fully competes. Useful mainly for integration
+  /// testing.
+  @visibleForTesting
+  const App.test({List<String> args = const [], AppController? controller})
+    : this._(args, controller);
+
+  const App._(this.args, this.controller);
+
+  final List<String> args;
+
+  @visibleForTesting
+  final AppController? controller;
+
+  @override
+  State<App> createState() => _AppState();
+}
+
+class _AppState extends State<App> {
+  late final components = _AppComponents.create(widget.args).then((components) {
+    widget.controller?._stopListener = () => components.destroy();
+    return components;
+  });
+
+  @override
+  Widget build(BuildContext context) => FutureBuilder<_AppComponents>(
+    future: components,
+    builder: (context, snapshot) {
+      final components = snapshot.data;
+
+      if (components != null) {
+        return BlocBuilder<LocaleCubit, LocaleState>(
+          bloc: components.localeCubit,
+          builder: (context, localeState) => _buildMaterialApp(
+            locale: localeState.currentLocale,
+            home: _buildHomeWidget(components),
+          ),
+        );
+      } else {
+        return _buildMaterialApp(home: LoadingScreen());
+      }
+    },
+  );
+
+  Widget _buildMaterialApp({required Widget home, Locale? locale}) =>
+      MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: _setupAppThemeData(),
+        locale: locale,
+        localizationsDelegates: const [
+          S.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: S.delegate.supportedLocales,
+        home: home,
+        builder: (context, child) =>
+            FlavorBanner(child: child ?? SizedBox.shrink()),
+        navigatorObservers: [_AppNavigatorObserver()],
+      );
+
+  Widget _buildHomeWidget(_AppComponents components) => HomeWidget(
+    dirs: components.dirs,
+    server: components.server,
+    session: components.session,
+    windowManager: components.windowManager,
+    settings: components.settings,
+    localeCubit: components.localeCubit,
+    errorCubit: components.errorCubit,
+  );
+}
+
+@visibleForTesting
+class AppController {
+  Future<void> Function()? _stopListener;
+
+  Future<void> stop() => _stopListener?.call() ?? Future.value();
+
+  void dispose() {
+    _stopListener = null;
+  }
+}
+
+class _AppComponents {
+  final PlatformWindowManager windowManager;
+  final Dirs dirs;
+  final Server server;
+  final Session session;
+  final Settings settings;
+  final ErrorCubit errorCubit;
+  final LocaleCubit localeCubit;
+
+  _AppComponents._(
+    this.windowManager,
+    this.dirs,
+    this.server,
+    this.session,
+    this.settings,
+    this.errorCubit,
+    this.localeCubit,
+  );
+
+  static Future<_AppComponents> create(List<String> args) async {
+    final packageInfo = await PackageInfo.fromPlatform();
+    final windowManager = await PlatformWindowManager.create(
+      args,
+      packageInfo.appName,
     );
 
-Widget _buildMaterialApp({required Widget home, Locale? locale}) => MaterialApp(
-  debugShowCheckedModeBanner: false,
-  theme: _setupAppThemeData(),
-  locale: locale,
-  localizationsDelegates: const [
-    S.delegate,
-    GlobalMaterialLocalizations.delegate,
-    GlobalWidgetsLocalizations.delegate,
-    GlobalCupertinoLocalizations.delegate,
-  ],
-  supportedLocales: S.delegate.supportedLocales,
-  home: home,
-  builder: (context, child) => FlavorBanner(child: child ?? SizedBox.shrink()),
-  navigatorObservers: [_AppNavigatorObserver()],
-);
+    final dirs = await Dirs.init();
+    await log.init(dirs);
 
-Future<HomeWidget> _initHomeWidget(List<String> args) async {
-  final packageInfo = await PackageInfo.fromPlatform();
-  final windowManager = await PlatformWindowManager.create(
-    args,
-    packageInfo.appName,
-  );
+    final (server, session) = await _initServerAndSession(dirs, windowManager);
+    final errorCubit = ErrorCubit(session);
+    final settings = await loadAndMigrateSettings(session);
+    final localeCubit = LocaleCubit(settings);
 
-  final dirs = await Dirs.init();
-  await log.init(dirs);
+    return _AppComponents._(
+      windowManager,
+      dirs,
+      server,
+      session,
+      settings,
+      errorCubit,
+      localeCubit,
+    );
+  }
 
-  final (server, session) = await _initServerAndSession(dirs, windowManager);
+  Future<void> destroy() async {
+    await localeCubit.close();
+    await errorCubit.close();
 
-  final errorCubit = ErrorCubit(session);
-
-  final settings = await loadAndMigrateSettings(session);
-  final localeCubit = LocaleCubit(settings);
-
-  return HomeWidget(
-    dirs: dirs,
-    server: server,
-    session: session,
-    windowManager: windowManager,
-    settings: settings,
-    localeCubit: localeCubit,
-    errorCubit: errorCubit,
-  );
+    await session.close();
+    await server.stop();
+  }
 }
 
 Future<(Server, Session)> _initServerAndSession(
@@ -116,9 +194,7 @@ Future<(Server, Session)> _initServerAndSession(
       await server.stop();
     });
 
-    if (await session.getStoreDir() == null) {
-      await session.setStoreDir(dirs.defaultStore);
-    }
+    await session.insertStoreDirs(dirs.defaultStore);
 
     await session.initNetwork(
       NetworkDefaults(

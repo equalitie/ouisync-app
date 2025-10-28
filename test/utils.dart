@@ -102,7 +102,7 @@ class TestDependencies {
 
     final session = await Session.create(configPath: dirs.config);
 
-    await session.setStoreDir(dirs.defaultStore);
+    await session.setStoreDirs(dirs.defaultStore);
 
     final errorCubit = ErrorCubit(session);
     final settings = await Settings.init(MasterKey.random());

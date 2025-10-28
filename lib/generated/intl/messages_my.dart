@@ -105,7 +105,7 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m47(status) => "${status}";
 
-  static String m48(name) => "repository \"${name}\" ကို မျှဝေမည်";
+  static String m49(name) => "repository \"${name}\" ကို မျှဝေမည်";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -299,9 +299,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "labelTypePassword": MessageLookupByLibrary.simpleMessage(
       "စကားဝှက်ကို ရေးပါ ",
-    ),
-    "labelUseExternalStorage": MessageLookupByLibrary.simpleMessage(
-      "ပြင်ပသိုလှောင်မှုကို အသုံးပြုပါ",
     ),
     "menuItemAbout": MessageLookupByLibrary.simpleMessage("အကြောင်းအရာ"),
     "menuItemLogs": MessageLookupByLibrary.simpleMessage("မှတ်တမ်းများ"),
@@ -1189,7 +1186,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "စကားဝှက်ကို သတ်မှတ်မည်",
     ),
     "titleSettings": MessageLookupByLibrary.simpleMessage("ဆက်တင်များ"),
-    "titleShareRepository": m48,
+    "titleShareRepository": m49,
     "titleSortBy": MessageLookupByLibrary.simpleMessage("အစီအစဥ်"),
     "titleStateMonitor": MessageLookupByLibrary.simpleMessage(""),
     "titleTermsOfUse": MessageLookupByLibrary.simpleMessage(

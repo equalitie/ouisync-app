@@ -14,8 +14,8 @@ class Dirs {
   /// Ouisync config directory (subdirectory of `root`).
   String get config => join(root, 'configs');
 
-  /// Default directory for storing repositories (subdirectory of `root`).
-  final String defaultStore;
+  /// Default directories for storing repositories.
+  final List<String> defaultStore;
 
   /// Default directory for mounting repositories (if mounting is supported on the platform)
   final String? defaultMount;
@@ -25,11 +25,13 @@ class Dirs {
 
   Dirs._({
     required String root,
-    String? defaultStore,
+    List<String> defaultStore = const [],
     this.defaultMount,
     this.download,
   }) : root = canonicalize(root),
-       defaultStore = defaultStore ?? join(root, 'repositories');
+       defaultStore = defaultStore.isNotEmpty
+           ? defaultStore
+           : [join(root, _storeDirName)];
 
   /// Initialize the `Dirs` with default directories. Specify `root` to override the default data
   /// root directory. `root` can also be overriden using the `OUISYNC_ROOT_DIR` env variable.
@@ -39,7 +41,7 @@ class Dirs {
 
     return Dirs._(
       root: root,
-      defaultStore: await _getDefaultStoreDir(root),
+      defaultStore: await _getDefaultStoreDirs(root),
       defaultMount: defaultMount,
       download: await _getDownloadDir(),
     );
@@ -52,14 +54,16 @@ Future<String> _getDefaultRootDir() async =>
 
 const _storeDirName = 'repositories';
 
-Future<String> _getDefaultStoreDir(String root) async {
-  final base =
+Future<List<String>> _getDefaultStoreDirs(String root) async {
+  final bases =
       (Platform.isAndroid
-          ? await getExternalStorageDirectory().then((dir) => dir?.path)
+          ? await getExternalStorageDirectories().then(
+              (dirs) => dirs?.map((dir) => dir.path),
+            )
           : null) ??
-      root;
+      [root];
 
-  return join(base, _storeDirName);
+  return bases.map((base) => join(base, _storeDirName)).toList();
 }
 
 Future<String?> _getDownloadDir() async {

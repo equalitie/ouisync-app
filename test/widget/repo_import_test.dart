@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ouisync_app/app/models/auth_mode.dart';
@@ -75,7 +74,7 @@ void main() {
     (tester) => tester.runAsync(() async {
       // Create existing repo
       final existingLocation = RepoLocation(
-        dir: (await deps.session.getStoreDir())!,
+        dir: await deps.session.getStoreDirs().then((dirs) => dirs.first),
         name: 'some repo',
       );
       await deps.reposCubit.createRepository(

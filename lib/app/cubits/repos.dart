@@ -268,7 +268,6 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
 
   Future<RepoCubit> _createRepoCubit(Repository repo) => RepoCubit.create(
     repo: repo,
-    session: _session,
     mountCubit: _mountCubit,
     navigation: navigation,
     entrySelection: entriesSelection,

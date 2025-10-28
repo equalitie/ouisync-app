@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_breadcrumb/flutter_breadcrumb.dart';
 import 'package:loggy/loggy.dart';
 import 'package:ouisync/ouisync.dart';
-import 'package:path/path.dart' as p;
-import 'package:url_launcher/url_launcher.dart' as launcher;
 
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart' show ReposCubit, RepoCubit;
@@ -17,7 +14,6 @@ import '../models/models.dart'
         UnlockedAccess,
         WriteAccess;
 import '../pages/pages.dart' show RepoSecurityPage;
-import '../utils/platform/platform.dart' show PlatformValues;
 import '../utils/utils.dart'
     show
         AppThemeExtension,
@@ -29,6 +25,7 @@ import '../utils/utils.dart'
         Settings,
         ThemeGetter,
         showSnackBar;
+import '../widgets/store_dir.dart' show StoreDirDialog;
 import '../widgets/widgets.dart'
     show
         ActionsDialog,
@@ -158,59 +155,14 @@ mixin RepositoryActionsMixin on LoggyType {
     );
   }
 
-  Future<void> locateRepository(
+  Future<void> showRepositoryStorageDialog(
     BuildContext context, {
-    required RepoLocation repoLocation,
-    required bool windows,
-  }) async {
-    final uri = Uri.directory(repoLocation.dir, windows: windows);
-    if (PlatformValues.isDesktopDevice) {
-      await launcher.launchUrl(uri);
-      return;
-    }
-
-    final dbFile = p.basename(repoLocation.path);
-    final segments = p.split(repoLocation.dir);
-
-    final breadcrumbs = BreadCrumb.builder(
-      itemCount: segments.length,
-      divider: const Icon(Icons.chevron_right_rounded),
-      builder: (index) {
-        final crumb = Text(segments[index]);
-        return BreadCrumbItem(content: crumb);
-      },
-    );
-
-    await _showRepoLocationDialog(
-      context,
-      dbFile: dbFile,
-      breadcrumbs: breadcrumbs,
-    );
-  }
-
-  Future<void> _showRepoLocationDialog(
-    BuildContext context, {
-    required String dbFile,
-    required BreadCrumb breadcrumbs,
-  }) async => Dialogs.alertDialogWithActions(
-    context,
-    title: S.current.actionLocateRepo,
-    body: [
-      Text(
-        dbFile,
-        style: context.theme.appTextStyle.bodyMedium.copyWith(
-          fontWeight: FontWeight.w400,
-        ),
-      ),
-      Dimensions.spacingVerticalDouble,
-      breadcrumbs,
-    ],
-    actions: [
-      TextButton(
-        child: Text(S.current.actionCloseCapital),
-        onPressed: () async => await Navigator.of(context).maybePop(false),
-      ),
-    ],
+    required Session session,
+    required RepoCubit repoCubit,
+  }) => showDialog<void>(
+    context: context,
+    builder: (context) =>
+        StoreDirDialog(session: session, repoCubit: repoCubit),
   );
 
   Future<bool> showDeleteRepositoryDialog(
@@ -242,20 +194,14 @@ mixin RepositoryActionsMixin on LoggyType {
           ),
         ),
         actions: [
-          Fields.dialogActions(
-            buttons: [
-              NegativeButton(
-                text: S.current.actionCancelCapital,
-                onPressed: () async =>
-                    await Navigator.of(context).maybePop(false),
-              ),
-              PositiveButton(
-                text: S.current.actionDeleteCapital,
-                onPressed: () async =>
-                    await Navigator.of(context).maybePop(true),
-                isDangerButton: true,
-              ),
-            ],
+          NegativeButton(
+            text: S.current.actionCancelCapital,
+            onPressed: () async => await Navigator.of(context).maybePop(false),
+          ),
+          PositiveButton(
+            text: S.current.actionDeleteCapital,
+            onPressed: () async => await Navigator.of(context).maybePop(true),
+            isDangerButton: true,
           ),
         ],
       ),
