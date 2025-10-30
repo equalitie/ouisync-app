@@ -16,267 +16,267 @@ env:
     ouisync/target/
 
 jobs:
-  test:
-    name: test on ${{ matrix.name }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        name: [linux, windows]
-        include:
-          - name: linux
-            os: ubuntu-24.04
-            env:
-              OUISYNC_LIB: ouisync/target/debug/libouisync_service.so
-            analyze: true
+  # test:
+  #   name: test on ${{ matrix.name }}
+  #   runs-on: ${{ matrix.os }}
+  #   strategy:
+  #     matrix:
+  #       name: [linux, windows]
+  #       include:
+  #         - name: linux
+  #           os: ubuntu-24.04
+  #           env:
+  #             OUISYNC_LIB: ouisync/target/debug/libouisync_service.so
+  #           analyze: true
 
-          - name: windows
-            os: windows-latest
-            env:
-              # Install Dokan2.dll to where `flutter test` can find it
-              DOKAN_DLL_OUTPUT_PATH: C:\Windows\System32
-              OUISYNC_LIB: ouisync\target\debug\ouisync_service.dll
-            # FIXME: The mount test fails on windows CI with a panic somewhere in the dokan-rust
-            # crate. Disabling for now but it needs to be looked into.
-            test-args: --exclude-tags mount
+  #         - name: windows
+  #           os: windows-latest
+  #           env:
+  #             # Install Dokan2.dll to where `flutter test` can find it
+  #             DOKAN_DLL_OUTPUT_PATH: C:\Windows\System32
+  #             OUISYNC_LIB: ouisync\target\debug\ouisync_service.dll
+  #           # FIXME: The mount test fails on windows CI with a panic somewhere in the dokan-rust
+  #           # crate. Disabling for now but it needs to be looked into.
+  #           test-args: --exclude-tags mount
 
-    env: ${{ matrix.env }}
+  #   env: ${{ matrix.env }}
 
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #       with:
+  #         submodules: recursive
 
-      - name: Setup cargo cache
-        id: cargo-cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.cargo_cache_path }}
-          key: ${{ runner.os }}-cargo-test-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: ${{ runner.os }}-cargo-
+  #     - name: Setup cargo cache
+  #       id: cargo-cache
+  #       uses: actions/cache@v4
+  #       with:
+  #         path: ${{ env.cargo_cache_path }}
+  #         key: ${{ runner.os }}-cargo-test-${{ hashFiles('**/Cargo.lock') }}
+  #         restore-keys: ${{ runner.os }}-cargo-
 
-      - name: Install dependencies (linux)
-        run: |
-          sudo apt update -y
-          sudo apt-get install libfuse-dev
-        if: matrix.name == 'linux'
+  #     - name: Install dependencies (linux)
+  #       run: |
+  #         sudo apt update -y
+  #         sudo apt-get install libfuse-dev
+  #       if: matrix.name == 'linux'
 
-      # FIXME: when dokan is installed some tests fail with weird panic from the dokan-rust library.
-      # Disabling for now. See also the comment for the `test-args` variable in the `windows`
-      # strategy.
-      # - name: Install dependencies (windows)
-      #   run: choco install dokany2
-      #   if: matrix.name == 'windows'
+  #     # FIXME: when dokan is installed some tests fail with weird panic from the dokan-rust library.
+  #     # Disabling for now. See also the comment for the `test-args` variable in the `windows`
+  #     # strategy.
+  #     # - name: Install dependencies (windows)
+  #     #   run: choco install dokany2
+  #     #   if: matrix.name == 'windows'
 
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: 'stable'
-          flutter-version-file: pubspec.yaml
-          cache: true
+  #     - uses: subosito/flutter-action@v2
+  #       with:
+  #         channel: 'stable'
+  #         flutter-version-file: pubspec.yaml
+  #         cache: true
 
-      - name: Run Flutter doctor
-        run: flutter doctor -v
+  #     - name: Run Flutter doctor
+  #       run: flutter doctor -v
 
-      - name: Get Flutter packages
-        run:  dart pub get
+  #     - name: Get Flutter packages
+  #       run:  dart pub get
 
-      - name: Generate the Dart bindings for the Ouisync library
-        working-directory: ouisync/bindings/dart
-        run: dart tool/bindgen.dart
+  #     - name: Generate the Dart bindings for the Ouisync library
+  #       working-directory: ouisync/bindings/dart
+  #       run: dart tool/bindgen.dart
 
-      - name: Analyze
-        run: |
-          pushd lib
-          flutter analyze
-          popd
+  #     - name: Analyze
+  #       run: |
+  #         pushd lib
+  #         flutter analyze
+  #         popd
 
-          pushd test
-          flutter analyze
-          popd
+  #         pushd test
+  #         flutter analyze
+  #         popd
 
-          pushd util
-          flutter analyze
-          popd
+  #         pushd util
+  #         flutter analyze
+  #         popd
 
-      - name: Test util
-        run: |
-          dart util/test.dart
+  #     - name: Test util
+  #       run: |
+  #         dart util/test.dart
 
-      # HACK: dokan-sys puts Dokan2.dll to C:\Windows\System but not if it's cached (the crate
-      # doesn't rebuild itself when the dll is missing likely due to missing
-      # `cargo:rerun-if-changed` directive in its build.rs). Clean the cached version to force
-      # rebuild.
-      # TODO: We should patch dokan-sys to rebuild itself when the dll is missing.
-      - name: "[HACK] Force dokan-sys to build"
-        run: cargo clean --package dokan-sys
-        working-directory: ouisync
-        if: matrix.name == 'windows'
+  #     # HACK: dokan-sys puts Dokan2.dll to C:\Windows\System but not if it's cached (the crate
+  #     # doesn't rebuild itself when the dll is missing likely due to missing
+  #     # `cargo:rerun-if-changed` directive in its build.rs). Clean the cached version to force
+  #     # rebuild.
+  #     # TODO: We should patch dokan-sys to rebuild itself when the dll is missing.
+  #     - name: "[HACK] Force dokan-sys to build"
+  #       run: cargo clean --package dokan-sys
+  #       working-directory: ouisync
+  #       if: matrix.name == 'windows'
 
-      - name: Build Ouisync service library for tests
-        working-directory: ouisync
-        run: cargo build --package ouisync-service --lib
+  #     - name: Build Ouisync service library for tests
+  #       working-directory: ouisync
+  #       run: cargo build --package ouisync-service --lib
 
-      - name: Run tests
-        run:
-          flutter test ${{ matrix.test-args }}
+  #     - name: Run tests
+  #       run:
+  #         flutter test ${{ matrix.test-args }}
 
-      - name: Upload test/debug artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          # Name of the produced zip file
-          name: test-artifacts-${{ matrix.name }}
-          path: test/widget/artifacts/*
-          if-no-files-found: ignore
-        # Upload even when tests fail
-        if: always()
+  #     - name: Upload test/debug artifacts
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         # Name of the produced zip file
+  #         name: test-artifacts-${{ matrix.name }}
+  #         path: test/widget/artifacts/*
+  #         if-no-files-found: ignore
+  #       # Upload even when tests fail
+  #       if: always()
 
-  build:
-    name: build on ${{ matrix.name }}
-    runs-on: ${{ matrix.os }}
+  # build:
+  #   name: build on ${{ matrix.name }}
+  #   runs-on: ${{ matrix.os }}
 
-    strategy:
-      matrix:
-        name: [android, linux, windows]
-        include:
-          - name: android
-            os: ubuntu-24.04
-            target: aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
-            ndk:
-              abi: arm64-v8a
-            build-args: --apk
-            artifact-files: ouisync*.apk
+  #   strategy:
+  #     matrix:
+  #       name: [android, linux, windows]
+  #       include:
+  #         - name: android
+  #           os: ubuntu-24.04
+  #           target: aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
+  #           ndk:
+  #             abi: arm64-v8a
+  #           build-args: --apk
+  #           artifact-files: ouisync*.apk
 
-          # For GLIBC and GLIBCXX compatibility we build on not-the-most-recent Ubuntu version
-          - name: linux
-            os: ubuntu-22.04
-            build-args: --deb-gui --deb-cli
-            artifact-files: ouisync*.deb
+  #         # For GLIBC and GLIBCXX compatibility we build on not-the-most-recent Ubuntu version
+  #         - name: linux
+  #           os: ubuntu-22.04
+  #           build-args: --deb-gui --deb-cli
+  #           artifact-files: ouisync*.deb
 
-          - name: windows
-            os: windows-latest
-            build-args: --exe
-            artifact-files: ouisync*.exe
+  #         - name: windows
+  #           os: windows-latest
+  #           build-args: --exe
+  #           artifact-files: ouisync*.exe
 
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #       with:
+  #         submodules: recursive
 
-      - name: Setup cargo cache
-        id: cargo-cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.cargo_cache_path }}
-          key: ${{ runner.os }}${{ matrix.name == 'android' && '-android' || '' }}-cargo-release-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: ${{ runner.os }}-cargo-
+  #     - name: Setup cargo cache
+  #       id: cargo-cache
+  #       uses: actions/cache@v4
+  #       with:
+  #         path: ${{ env.cargo_cache_path }}
+  #         key: ${{ runner.os }}${{ matrix.name == 'android' && '-android' || '' }}-cargo-release-${{ hashFiles('**/Cargo.lock') }}
+  #         restore-keys: ${{ runner.os }}-cargo-
 
-      - name: Setup gradle cache
-        id: gradle-cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
-        if: matrix.name == 'android'
+  #     - name: Setup gradle cache
+  #       id: gradle-cache
+  #       uses: actions/cache@v4
+  #       with:
+  #         path: |
+  #           ~/.gradle/caches
+  #           ~/.gradle/wrapper
+  #         key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+  #         restore-keys: |
+  #           ${{ runner.os }}-gradle-
+  #       if: matrix.name == 'android'
 
-      - name: Add rust target
-        run: rustup target add ${{ matrix.target }}
-        if: matrix.target != ''
+  #     - name: Add rust target
+  #       run: rustup target add ${{ matrix.target }}
+  #       if: matrix.target != ''
 
-      - name: Setup Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-        if: matrix.name == 'android'
+  #     - name: Setup Java
+  #       uses: actions/setup-java@v3
+  #       with:
+  #         distribution: 'temurin'
+  #         java-version: '17'
+  #       if: matrix.name == 'android'
 
-      - name: Install dependencies (linux)
-        run: |
-          # https://github.com/orgs/community/discussions/109146
-          sudo apt update -y
-          sudo apt-get install libappindicator3-dev   \
-                               libcurl4-openssl-dev   \
-                               libfuse-dev            \
-                               libgtk-3-dev           \
-                               libsecret-1-dev        \
-                               ninja-build            \
-                               imagemagick
-        if: matrix.name == 'linux'
+  #     - name: Install dependencies (linux)
+  #       run: |
+  #         # https://github.com/orgs/community/discussions/109146
+  #         sudo apt update -y
+  #         sudo apt-get install libappindicator3-dev   \
+  #                              libcurl4-openssl-dev   \
+  #                              libfuse-dev            \
+  #                              libgtk-3-dev           \
+  #                              libsecret-1-dev        \
+  #                              ninja-build            \
+  #                              imagemagick
+  #       if: matrix.name == 'linux'
 
-      - name: Set NDK ABI filter
-        run: echo "ndk.abiFilters=${{ matrix.ndk.abi }}" >> android/local.properties
-        if: matrix.ndk.abi != ''
+  #     - name: Set NDK ABI filter
+  #       run: echo "ndk.abiFilters=${{ matrix.ndk.abi }}" >> android/local.properties
+  #       if: matrix.ndk.abi != ''
 
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: 'stable'
-          flutter-version-file: pubspec.yaml
-          cache: true
+  #     - uses: subosito/flutter-action@v2
+  #       with:
+  #         channel: 'stable'
+  #         flutter-version-file: pubspec.yaml
+  #         cache: true
 
-      - name: Install Inno Setup (Windows exe installation builder)
-        run: |
-          Invoke-WebRequest https://files.jrsoftware.org/is/6/innosetup-6.4.3.exe -OutFile C:/TEMP/innosetup.exe
-          C:/TEMP/innosetup.exe /SP- /VERYSILENT /ALLUSERS /SUPPRESSMSGBOXES
-        shell: pwsh
-        if: matrix.name == 'windows'
+  #     - name: Install Inno Setup (Windows exe installation builder)
+  #       run: |
+  #         Invoke-WebRequest https://files.jrsoftware.org/is/6/innosetup-6.4.3.exe -OutFile C:/TEMP/innosetup.exe
+  #         C:/TEMP/innosetup.exe /SP- /VERYSILENT /ALLUSERS /SUPPRESSMSGBOXES
+  #       shell: pwsh
+  #       if: matrix.name == 'windows'
 
-      - name: Get Flutter packages
-        run:  dart pub get
+  #     - name: Get Flutter packages
+  #       run:  dart pub get
 
-      - name: Generate the Dart bindings for the Ouisync library
-        working-directory: ouisync/bindings/dart
-        run: dart tool/bindgen.dart
+  #     - name: Generate the Dart bindings for the Ouisync library
+  #       working-directory: ouisync/bindings/dart
+  #       run: dart tool/bindgen.dart
 
-      - name: Setup Sentry DSN for artifact build (different from the production releases)
-        run: |
-          mkdir -p secrets/
-          echo $NIGHTLY_SENTRY_DSN > secrets/sentry_dsn
-        shell: bash
-        env:
-          NIGHTLY_SENTRY_DSN : ${{ secrets.NIGHTLY_SENTRY_DSN }}
-        if: env.NIGHTLY_SENTRY_DSN != null
+  #     - name: Setup Sentry DSN for artifact build (different from the production releases)
+  #       run: |
+  #         mkdir -p secrets/
+  #         echo $NIGHTLY_SENTRY_DSN > secrets/sentry_dsn
+  #       shell: bash
+  #       env:
+  #         NIGHTLY_SENTRY_DSN : ${{ secrets.NIGHTLY_SENTRY_DSN }}
+  #       if: env.NIGHTLY_SENTRY_DSN != null
 
-      - name: Setup secrets for artifact signing (different from the production releases)
-        run: |
-          dir=secrets/android
-          mkdir -p $dir
-          echo $NIGHTLY_KEYSTORE_JKS_HEX > $dir/keystore.jks.hex
-          # Use `keytool` to generate the `keystore.jks` keystore.
-          # The keystore.jks.hex file can then be generated by
-          #
-          # $ xxd -p keystore.jks keystore.jks.hex
-          #
-          xxd -r -p $dir/keystore.jks.hex $dir/keystore.jks
-          echo "storePassword=$NIGHTLY_KEYSTORE_PASSWORD" > $dir/key.properties
-          echo "keyPassword=$NIGHTLY_KEYSTORE_PASSWORD" >> $dir/key.properties
-          echo "keyAlias=nightly" >> $dir/key.properties
-          echo "storeFile=../../$dir/keystore.jks" >> $dir/key.properties
-        shell: bash
-        env:
-          NIGHTLY_KEYSTORE_JKS_HEX : ${{ secrets.NIGHTLY_KEYSTORE_JKS_HEX }}
-          NIGHTLY_KEYSTORE_PASSWORD : ${{ secrets.NIGHTLY_KEYSTORE_PASSWORD }}
-        if: env.NIGHTLY_KEYSTORE_JKS_HEX != null && env.NIGHTLY_KEYSTORE_PASSWORD != null
+  #     - name: Setup secrets for artifact signing (different from the production releases)
+  #       run: |
+  #         dir=secrets/android
+  #         mkdir -p $dir
+  #         echo $NIGHTLY_KEYSTORE_JKS_HEX > $dir/keystore.jks.hex
+  #         # Use `keytool` to generate the `keystore.jks` keystore.
+  #         # The keystore.jks.hex file can then be generated by
+  #         #
+  #         # $ xxd -p keystore.jks keystore.jks.hex
+  #         #
+  #         xxd -r -p $dir/keystore.jks.hex $dir/keystore.jks
+  #         echo "storePassword=$NIGHTLY_KEYSTORE_PASSWORD" > $dir/key.properties
+  #         echo "keyPassword=$NIGHTLY_KEYSTORE_PASSWORD" >> $dir/key.properties
+  #         echo "keyAlias=nightly" >> $dir/key.properties
+  #         echo "storeFile=../../$dir/keystore.jks" >> $dir/key.properties
+  #       shell: bash
+  #       env:
+  #         NIGHTLY_KEYSTORE_JKS_HEX : ${{ secrets.NIGHTLY_KEYSTORE_JKS_HEX }}
+  #         NIGHTLY_KEYSTORE_PASSWORD : ${{ secrets.NIGHTLY_KEYSTORE_PASSWORD }}
+  #       if: env.NIGHTLY_KEYSTORE_JKS_HEX != null && env.NIGHTLY_KEYSTORE_PASSWORD != null
 
-      - name: Build artifacts
-        run: |
-          key_properties_path=secrets/android/key.properties
-          sentry_dsn_path=secrets/sentry_dsn
+  #     - name: Build artifacts
+  #       run: |
+  #         key_properties_path=secrets/android/key.properties
+  #         sentry_dsn_path=secrets/sentry_dsn
 
-          flavor=$([ -f $key_properties_path ] && echo 'nightly' || echo 'unofficial' )
-          keystore=$([ "$flavor" = 'nightly' ] && echo "--android-key-properties=$key_properties_path" || true)
-          sentry=$([ -f $sentry_dsn_path ] && echo "--sentry=$sentry_dsn_path" || true)
+  #         flavor=$([ -f $key_properties_path ] && echo 'nightly' || echo 'unofficial' )
+  #         keystore=$([ "$flavor" = 'nightly' ] && echo "--android-key-properties=$key_properties_path" || true)
+  #         sentry=$([ -f $sentry_dsn_path ] && echo "--sentry=$sentry_dsn_path" || true)
 
-          dart run util/release.dart --flavor=$flavor $keystore $sentry ${{ matrix.build-args }}
-        shell: bash
+  #         dart run util/release.dart --flavor=$flavor $keystore $sentry ${{ matrix.build-args }}
+  #       shell: bash
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          # Name of the produced zip file
-          name: ${{ matrix.name }}
-          path: releases/release_*/${{ matrix.artifact-files }}
+  #     - name: Upload artifacts
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         # Name of the produced zip file
+  #         name: ${{ matrix.name }}
+  #         path: releases/release_*/${{ matrix.artifact-files }}
 
   integration_test_android:
     name: run integration tests on android ${{ matrix.api-level }}
@@ -336,6 +336,9 @@ jobs:
 
       - uses: ./.github/actions/setup_android_tests
 
+      - name: Prebuild
+        run: flutter build apk --debug --flavor itest --target-platform android-x64
+
       - name: Run tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -343,7 +346,21 @@ jobs:
           target: ${{ matrix.target }}
           arch: x86_64
           sdcard-path-or-size: 16M
-          script: flutter test integration_test --flavor itest --ignore-timeouts
+          script: |
+            adb logcat -c
+            adb logcat > logcat.txt &
+            flutter test integration_test --flavor itest --ignore-timeouts
+
+      - name: Upload logcat
+        uses: actions/upload-artifact@v4
+        with:
+          # Name of the produced zip file
+          name: logcat-${{ matrix.api-level }}
+          path: logcat.txt
+          if-no-files-found: ignore
+        # Upload only when the tests fail
+        if: failure()
+
 
   # TODO: Integration tests on both linux and windows currently fail or hang. Commenting them out until they are fixed.
   # integration_test_desktop:

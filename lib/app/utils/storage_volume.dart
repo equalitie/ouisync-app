@@ -12,7 +12,10 @@ class StorageVolume {
   });
 
   final String description;
-  final String mountPoint;
+
+  // This property is only supported on Android 30 or later. On older versions it's always `null`.
+  final String? mountPoint;
+
   final bool primary;
   final bool removable;
 

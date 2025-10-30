@@ -1,6 +1,7 @@
 package org.equalitie.ouisync
 
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.os.storage.StorageManager
@@ -81,11 +82,15 @@ class MainActivity : FlutterFragmentActivity() {
         Log.println(priority, TAG, message)
     }
 
-    private fun StorageVolume.toMap(): Map<String, Any> = mapOf(
+    private fun StorageVolume.toMap(): Map<String, Any?> = mapOf(
         "primary" to isPrimary() as Any,
         "removable" to isRemovable() as Any,
         "description" to getDescription(this@MainActivity) as Any,
-        "mountPoint" to getDirectory()?.getPath() as Any,
+        "mountPoint" to if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            getDirectory()?.getPath() as Any?
+        } else {
+            null
+        }
     )
 }
 
