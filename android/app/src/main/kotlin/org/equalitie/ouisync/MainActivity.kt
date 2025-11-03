@@ -23,7 +23,7 @@ class MainActivity : FlutterFragmentActivity() {
         super.configureFlutterEngine(flutterEngine)
 
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)
-            .setMethodCallHandler handler@{ call, result ->
+            .setMethodCallHandler { call, result ->
                 when (call.method) {
                     "getDownloadPath" -> {
                         val downloadPath = getDownloadPath()
@@ -60,10 +60,8 @@ class MainActivity : FlutterFragmentActivity() {
         return downloadDirectory.toString()
     }
 
-    private fun getStorageVolume(path: String): StorageVolume? {
-        val storageManager = getSystemService(STORAGE_SERVICE) as StorageManager
-        return storageManager.getStorageVolume(File(path))
-    }
+    private fun getStorageVolume(path: String): StorageVolume? =
+        storageManager.getStorageVolume(File(path))
 
     private fun log(
         level: Int,
@@ -92,6 +90,9 @@ class MainActivity : FlutterFragmentActivity() {
             null
         }
     )
+
+    private val storageManager: StorageManager
+        get() = getSystemService(STORAGE_SERVICE) as StorageManager
 }
 
 

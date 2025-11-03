@@ -347,8 +347,9 @@ jobs:
           arch: x86_64
           sdcard-path-or-size: 16M
           script: |
-            adb logcat -c
+            adb logcat -c || true
             adb logcat > logcat.txt &
+            yes | ./util/adb-format-sdcard.sh
             flutter test integration_test --flavor itest --ignore-timeouts
 
       - name: Upload logcat
