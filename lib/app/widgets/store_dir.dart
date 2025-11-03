@@ -132,7 +132,9 @@ class StorageVolumeLabel extends StatelessWidget {
     children: [
       Icon(storage.icon),
       Dimensions.spacingHorizontalHalf,
-      Text(storage.description, overflow: TextOverflow.ellipsis),
+      Expanded(
+        child: Text(storage.description, overflow: TextOverflow.ellipsis),
+      ),
     ],
     mainAxisAlignment: MainAxisAlignment.start,
     mainAxisSize: MainAxisSize.min,
