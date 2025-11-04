@@ -6,18 +6,15 @@ import 'native.dart';
 class StorageVolume {
   const StorageVolume({
     required this.description,
-    required this.mountPoint,
     required this.primary,
     required this.removable,
+    required this.state,
   });
 
   final String description;
-
-  // This property is only supported on Android 30 or later. On older versions it's always `null`.
-  final String? mountPoint;
-
   final bool primary;
   final bool removable;
+  final StorageVolumeState state;
 
   /// Retrieve storage volume that contains the given path.
   ///
@@ -27,9 +24,11 @@ class StorageVolume {
           (props) => props != null
               ? StorageVolume(
                   description: props.description,
-                  mountPoint: props.mountPoint,
                   primary: props.primary,
                   removable: props.removable,
+                  state: props.mounted
+                      ? StorageVolumeMounted(mountPoint: props.mountPoint)
+                      : StorageVolumeUnmounted(),
                 )
               : null,
         )
@@ -39,14 +38,45 @@ class StorageVolume {
   bool operator ==(Object other) =>
       other is StorageVolume &&
       description == other.description &&
-      mountPoint == other.mountPoint &&
       primary == other.primary &&
-      removable == other.removable;
+      removable == other.removable &&
+      state == other.state;
 
   @override
-  int get hashCode => Object.hash(description, mountPoint, primary, removable);
+  int get hashCode => Object.hash(description, primary, removable, state);
 
   @override
   String toString() =>
-      '$runtimeType(description: $description, mountPoint: $mountPoint, primary: $primary, removable: $removable)';
+      '$runtimeType(description: $description, primary: $primary, removable: $removable, state: $state)';
+}
+
+sealed class StorageVolumeState {}
+
+class StorageVolumeMounted extends StorageVolumeState {
+  // This property is only supported on Android 30 or later. On older versions it's always `null`.
+  final String? mountPoint;
+
+  StorageVolumeMounted({required this.mountPoint});
+
+  @override
+  String toString() =>
+      mountPoint != null ? 'mounted at $mountPoint' : 'mounted';
+
+  @override
+  bool operator ==(Object other) =>
+      other is StorageVolumeMounted && mountPoint == other.mountPoint;
+
+  @override
+  int get hashCode => mountPoint.hashCode;
+}
+
+class StorageVolumeUnmounted extends StorageVolumeState {
+  @override
+  String toString() => 'unmounted';
+
+  @override
+  bool operator ==(Object other) => other is StorageVolumeUnmounted;
+
+  @override
+  int get hashCode => 0;
 }

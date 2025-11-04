@@ -61,7 +61,13 @@ class Native {
       .then((uri) => Uri.parse(uri!));
 
   static Future<
-    ({String description, String? mountPoint, bool primary, bool removable})?
+    ({
+      String description,
+      String? mountPoint,
+      bool primary,
+      bool removable,
+      bool mounted,
+    })?
   >
   getStorageProperties(String path) => _channel
       .invokeMapMethod<String, Object?>('getStorageProperties', [path])
@@ -72,6 +78,7 @@ class Native {
                 mountPoint: map['mountPoint'] as String?,
                 primary: map['primary'] as bool,
                 removable: map['removable'] as bool,
+                mounted: map['mounted'] as bool,
               )
             : null,
       );

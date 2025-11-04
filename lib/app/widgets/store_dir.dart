@@ -75,10 +75,12 @@ class _StoreDirSelectorState extends State<StoreDirSelector> with AppLogger {
             .map(
               (entry) => RadioListTile(
                 title: StorageVolumeLabel(entry.storage),
-                subtitle: entry.storage.mountPoint?.let(
-                  (mountPoint) =>
-                      Text(mountPoint, overflow: TextOverflow.ellipsis),
-                ),
+                subtitle: switch (entry.storage.state) {
+                  StorageVolumeMounted(mountPoint: final mountPoint)
+                      when mountPoint != null =>
+                    Text(mountPoint, overflow: TextOverflow.ellipsis),
+                  StorageVolumeMounted() || StorageVolumeUnmounted() => null,
+                },
                 value: entry.path,
                 groupValue: selectedEntry?.path,
                 onChanged: _change,

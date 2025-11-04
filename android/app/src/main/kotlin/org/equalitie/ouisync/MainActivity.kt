@@ -19,36 +19,64 @@ class MainActivity : FlutterFragmentActivity() {
         private val TAG = "ouisync"
     }
 
+    private var storageVolumeCallback: StorageManager.StorageVolumeCallback? = null
+
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
 
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)
-            .setMethodCallHandler { call, result ->
-                when (call.method) {
-                    "getDownloadPath" -> {
-                        val downloadPath = getDownloadPath()
-                        result.success(downloadPath)
-                    }
-                    "getDocumentUri" -> {
-                        val args = call.arguments as List<Any>
-                        val path = args[0] as String
-                        result.success(getDocumentUri(path).toString())
-                    }
-                    "getStorageProperties" -> {
-                        val args = call.arguments as List<Any>
-                        val path = args[0] as String
-                        result.success(getStorageVolume(path)?.toMap())
-                    }
-                    "log" -> {
-                        val args = call.arguments as List<Any>
-                        log(args[0] as Int, args[1] as String)
-                        result.success(null)
-                    }
-                    else -> {
-                        result.notImplemented()
-                    }
+        val methodChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)
+
+        methodChannel.setMethodCallHandler { call, result ->
+            when (call.method) {
+                "getDownloadPath" -> {
+                    val downloadPath = getDownloadPath()
+                    result.success(downloadPath)
+                }
+                "getDocumentUri" -> {
+                    val args = call.arguments as List<Any>
+                    val path = args[0] as String
+                    result.success(getDocumentUri(path).toString())
+                }
+                "getStorageProperties" -> {
+                    val args = call.arguments as List<Any>
+                    val path = args[0] as String
+                    result.success(getStorageVolume(path)?.toMap())
+                }
+                "log" -> {
+                    val args = call.arguments as List<Any>
+                    log(args[0] as Int, args[1] as String)
+                    result.success(null)
+                }
+                else -> {
+                    result.notImplemented()
                 }
             }
+        }
+
+        storageManager.let { storageManager ->
+            storageVolumeCallback?.let {
+                storageManager.unregisterStorageVolumeCallback(it)
+            }
+            storageVolumeCallback = object : StorageManager.StorageVolumeCallback() {
+                override fun onStateChanged(volume: StorageVolume) {
+                    Log.v(TAG, "storage volume state changed: ${volume.getDescription(this@MainActivity)}, state: ${volume.state}")
+
+                    // TODO
+                    // methodChannel.invokeMethod("")
+                }
+            }.also {
+                storageManager.registerStorageVolumeCallback(mainExecutor, it)
+            }
+        }
+    }
+
+    override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {
+        storageVolumeCallback?.let {
+            storageManager.unregisterStorageVolumeCallback(it)
+        }
+        storageVolumeCallback = null
+
+        super.cleanUpFlutterEngine(flutterEngine)
     }
 
     private fun getDocumentUri(path: String): Uri =
@@ -83,6 +111,7 @@ class MainActivity : FlutterFragmentActivity() {
     private fun StorageVolume.toMap(): Map<String, Any?> = mapOf(
         "primary" to isPrimary() as Any,
         "removable" to isRemovable() as Any,
+        "mounted" to (state == Environment.MEDIA_MOUNTED) as Any,
         "description" to getDescription(this@MainActivity) as Any,
         "mountPoint" to if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             getDirectory()?.getPath() as Any?
