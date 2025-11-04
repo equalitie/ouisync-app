@@ -279,7 +279,7 @@ jobs:
           path: releases/release_*/${{ matrix.artifact-files }}
 
   integration_test_android:
-    name: run integration tests on android ${{ matrix.api-level }}
+    name: "run integration tests on android ${{ matrix.api-level }}"
     runs-on: ubuntu-24.04
 
     strategy:
@@ -292,7 +292,10 @@ jobs:
           # - 25
 
           - 26
-          - 27
+
+          # This uses different target so it's included explicitly
+          # - 27
+
           - 28
           - 29
           - 30
@@ -301,27 +304,12 @@ jobs:
           - 33
           - 34
           - 35
+          - 36
+        target:
+          - google_apis
         include:
-          - api-level: 26
-            target: google_apis
           - api-level: 27
             target: default
-          - api-level: 28
-            target: google_apis
-          - api-level: 29
-            target: google_apis
-          - api-level: 30
-            target: google_apis
-          - api-level: 31
-            target: google_apis
-          - api-level: 32
-            target: google_apis
-          - api-level: 33
-            target: google_apis
-          - api-level: 34
-            target: google_apis
-          - api-level: 35
-            target: google_apis
     steps:
 
       - name: Enable KVM
