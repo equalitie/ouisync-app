@@ -79,13 +79,17 @@ class _RenameRepository extends State<RenameRepository> {
   );
 
   List<Widget> buildActions(BuildContext context) => [
-    NegativeButton(
-      text: S.current.actionCancel,
-      onPressed: () => Navigator.of(context).maybePop(null),
+    Expanded(
+      child: NegativeButton(
+        text: S.current.actionCancel,
+        onPressed: () => Navigator.of(context).maybePop(null),
+      ),
     ),
-    PositiveButton(
-      text: S.current.actionRename,
-      onPressed: () => onSubmit(context),
+    Expanded(
+      child: PositiveButton(
+        text: S.current.actionRename,
+        onPressed: () => onSubmit(context),
+      ),
     ),
   ];
 

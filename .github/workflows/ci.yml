@@ -279,10 +279,11 @@ jobs:
           path: releases/release_*/${{ matrix.artifact-files }}
 
   integration_test_android:
-    name: run integration tests on android ${{ matrix.api-level }}
+    name: "run integration tests on android ${{ matrix.api-level }}"
     runs-on: ubuntu-24.04
 
     strategy:
+      fail-fast: false
       matrix:
         api-level:
           # These don't work due to various missing apis
@@ -291,7 +292,10 @@ jobs:
           # - 25
 
           - 26
-          - 27
+
+          # This uses different target so it's included explicitly
+          # - 27
+
           - 28
           - 29
           - 30
@@ -300,27 +304,12 @@ jobs:
           - 33
           - 34
           - 35
+          - 36
+        target:
+          - google_apis
         include:
-          - api-level: 26
-            target: google_apis
           - api-level: 27
             target: default
-          - api-level: 28
-            target: google_apis
-          - api-level: 29
-            target: google_apis
-          - api-level: 30
-            target: google_apis
-          - api-level: 31
-            target: google_apis
-          - api-level: 32
-            target: google_apis
-          - api-level: 33
-            target: google_apis
-          - api-level: 34
-            target: google_apis
-          - api-level: 35
-            target: google_apis
     steps:
 
       - name: Enable KVM
@@ -335,13 +324,32 @@ jobs:
 
       - uses: ./.github/actions/setup_android_tests
 
+      - name: Prebuild
+        run: flutter build apk --debug --flavor itest --target-platform android-x64
+
       - name: Run tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: ${{ matrix.api-level }}
           target: ${{ matrix.target }}
           arch: x86_64
-          script: flutter test integration_test --flavor itest --ignore-timeouts
+          sdcard-path-or-size: 16M
+          script: |
+            adb logcat -c || true
+            adb logcat > logcat.txt &
+            yes | ./util/adb-format-sdcard.sh
+            flutter test integration_test --flavor itest --ignore-timeouts
+
+      - name: Upload logcat
+        uses: actions/upload-artifact@v4
+        with:
+          # Name of the produced zip file
+          name: logcat-${{ matrix.api-level }}
+          path: logcat.txt
+          if-no-files-found: ignore
+        # Upload only when the tests fail
+        if: failure()
+
 
   # TODO: Integration tests on both linux and windows currently fail or hang. Commenting them out until they are fixed.
   # integration_test_desktop:

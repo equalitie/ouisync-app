@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:ouisync_app/app/app.dart';
 import 'package:ouisync_app/app/utils/storage_volume.dart' show StorageVolume;
+import 'package:path_provider/path_provider.dart'
+    show getExternalStorageDirectories;
 
 import '../test/sandbox.dart';
 import '../test/utils.dart';
@@ -84,6 +86,25 @@ void main() {
   });
 
   testWidgets('create repo on removable storage', (tester) async {
+    // Precondition: check there is at least one removable storage volume
+    final volumes = await getExternalStorageDirectories().then(
+      (dirs) => Future.wait(
+        dirs?.map((dir) => StorageVolume.forPath(dir.path)) ?? [],
+      ),
+    );
+
+    expect(volumes.length, greaterThan(1));
+    expect(
+      volumes,
+      contains(
+        isA<StorageVolume>().having(
+          (volume) => volume.removable,
+          "removable",
+          isTrue,
+        ),
+      ),
+    );
+
     await init(tester);
     await onboard(tester);
 
@@ -110,7 +131,9 @@ void main() {
 
     expect(removable, isChecked);
 
-    await tester.tap(find.text('CREATE'));
+    final createButton = find.text('CREATE');
+    await tester.ensureVisible(createButton);
+    await tester.tap(createButton);
     await tester.pumpAndSettle();
 
     // Open the repo settings
@@ -194,7 +217,9 @@ Future<void> createRepo(WidgetTester tester, {required String name}) async {
   await tester.enterText(find.byKey(ValueKey('name')), name);
   await tester.pumpAndSettle();
 
-  await tester.tap(find.text('CREATE'));
+  final createButton = find.text('CREATE');
+  await tester.ensureVisible(createButton);
+  await tester.tap(createButton);
   await tester.pumpAndSettle();
 }
 

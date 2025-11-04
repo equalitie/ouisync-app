@@ -75,9 +75,9 @@ class _StoreDirSelectorState extends State<StoreDirSelector> with AppLogger {
             .map(
               (entry) => RadioListTile(
                 title: StorageVolumeLabel(entry.storage),
-                subtitle: Text(
-                  entry.storage.mountPoint,
-                  overflow: TextOverflow.ellipsis,
+                subtitle: entry.storage.mountPoint?.let(
+                  (mountPoint) =>
+                      Text(mountPoint, overflow: TextOverflow.ellipsis),
                 ),
                 value: entry.path,
                 groupValue: selectedEntry?.path,
@@ -132,7 +132,9 @@ class StorageVolumeLabel extends StatelessWidget {
     children: [
       Icon(storage.icon),
       Dimensions.spacingHorizontalHalf,
-      Text(storage.description, overflow: TextOverflow.ellipsis),
+      Expanded(
+        child: Text(storage.description, overflow: TextOverflow.ellipsis),
+      ),
     ],
     mainAxisAlignment: MainAxisAlignment.start,
     mainAxisSize: MainAxisSize.min,
