@@ -2,7 +2,6 @@ package org.equalitie.ouisync
 
 import android.net.Uri
 import android.os.Build
-import android.os.Bundle
 import android.os.Environment
 import android.os.storage.StorageManager
 import android.os.storage.StorageVolume
@@ -12,6 +11,8 @@ import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import java.io.File
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executors
 
 class MainActivity : FlutterFragmentActivity() {
     companion object {
@@ -19,6 +20,7 @@ class MainActivity : FlutterFragmentActivity() {
         private val TAG = "ouisync"
     }
 
+    private val storageVolumeExecutor = Executors.newSingleThreadExecutor()
     private var storageVolumeCallback: StorageManager.StorageVolumeCallback? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
@@ -54,31 +56,56 @@ class MainActivity : FlutterFragmentActivity() {
         }
 
         storageManager.let { storageManager ->
-            storageVolumeCallback?.let {
-                storageManager.unregisterStorageVolumeCallback(it)
-            }
-            storageVolumeCallback = object : StorageManager.StorageVolumeCallback() {
-                override fun onStateChanged(volume: StorageVolume) {
-                    Log.v(TAG, "storage volume state changed: ${volume.getDescription(this@MainActivity)}, state: ${volume.state}")
-                    methodChannel.invokeMethod("storageVolumeChanged", null)
-                }
-            }.also {
-                storageManager.registerStorageVolumeCallback(mainExecutor, it)
-            }
+            storageVolumeCallback?.let { storageManager.unregisterStorageVolumeCallback(it) }
+
+            storageVolumeCallback =
+                object : StorageManager.StorageVolumeCallback() {
+                    override fun onStateChanged(volume: StorageVolume) {
+                        Log.v(
+                            TAG,
+                            "storage volume state changed: ${volume.getDescription(this@MainActivity)}, state: ${volume.state}",
+                        )
+
+                        // Not 100% sure about this, but it seems that if a removable storage is being
+                        // ejected and there are some repos (or any open files) on it, we need to close
+                        // them before this callback returns, otherwise the os kills the app
+                        // (possibly after a short delay).
+                        val latch = CountDownLatch(1)
+                        val result =
+                            object : MethodChannel.Result {
+                                override fun success(result: Any?) {
+                                    latch.countDown()
+                                }
+
+                                override fun error(
+                                    errorCode: String,
+                                    errorMessage: String?,
+                                    errorDetails: Any?,
+                                ) {
+                                    latch.countDown()
+                                }
+
+                                override fun notImplemented() {
+                                    latch.countDown()
+                                }
+                            }
+
+                        runOnUiThread { methodChannel.invokeMethod("storageVolumeChanged", null, result) }
+
+                        latch.await()
+                    }
+                }.also { storageManager.registerStorageVolumeCallback(storageVolumeExecutor, it) }
         }
     }
 
     override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {
-        storageVolumeCallback?.let {
-            storageManager.unregisterStorageVolumeCallback(it)
-        }
+        storageVolumeCallback?.let { storageManager.unregisterStorageVolumeCallback(it) }
         storageVolumeCallback = null
 
         super.cleanUpFlutterEngine(flutterEngine)
     }
 
-    private fun getDocumentUri(path: String): Uri =
-        DocumentsContract.buildDocumentUri("$packageName.provider", path)
+    private fun getDocumentUri(path: String): Uri = DocumentsContract.buildDocumentUri("$packageName.provider", path)
 
     private fun getDownloadPath(): String? {
         val downloadDirectory =
@@ -86,8 +113,7 @@ class MainActivity : FlutterFragmentActivity() {
         return downloadDirectory.toString()
     }
 
-    private fun getStorageVolume(path: String): StorageVolume? =
-        storageManager.getStorageVolume(File(path))
+    private fun getStorageVolume(path: String): StorageVolume? = storageManager.getStorageVolume(File(path))
 
     private fun log(
         level: Int,
@@ -106,21 +132,20 @@ class MainActivity : FlutterFragmentActivity() {
         Log.println(priority, TAG, message)
     }
 
-    private fun StorageVolume.toMap(): Map<String, Any?> = mapOf(
-        "isPrimary" to isPrimary() as Any,
-        "isRemovable" to isRemovable() as Any,
-        "isMounted" to (state == Environment.MEDIA_MOUNTED) as Any,
-        "description" to getDescription(this@MainActivity) as Any,
-        "mountPoint" to if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            getDirectory()?.getPath() as Any?
-        } else {
-            null
-        }
-    )
+    private fun StorageVolume.toMap(): Map<String, Any?> =
+        mapOf(
+            "isPrimary" to isPrimary() as Any,
+            "isRemovable" to isRemovable() as Any,
+            "isMounted" to (state == Environment.MEDIA_MOUNTED) as Any,
+            "description" to getDescription(this@MainActivity) as Any,
+            "mountPoint" to
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    getDirectory()?.getPath() as Any?
+                } else {
+                    null
+                },
+        )
 
     private val storageManager: StorageManager
         get() = getSystemService(STORAGE_SERVICE) as StorageManager
 }
-
-
-

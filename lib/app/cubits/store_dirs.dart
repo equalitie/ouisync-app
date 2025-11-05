@@ -6,7 +6,6 @@ import 'package:ouisync/ouisync.dart' show Session;
 import 'package:path/path.dart' show join;
 import 'package:path_provider/path_provider.dart'
     show getExternalStorageDirectories;
-import 'package:stream_transform/stream_transform.dart';
 
 import '../utils/dirs.dart';
 import '../utils/native.dart';
@@ -32,34 +31,36 @@ class StoreDir {
 }
 
 class StoreDirsCubit extends Cubit<List<StoreDir>> {
-  StreamSubscription? _subscription;
+  final Session _session;
+  final Dirs _dirs;
 
-  StoreDirsCubit(Session session, Dirs dirs) : super([]) {
-    _subscription = Native.instance.storageVolumeChanged
-        .startWith(null)
-        .asyncMapSample((_) => _update(session, dirs))
-        .listen(null);
+  StoreDirsCubit(this._session, this._dirs) : super([]) {
+    unawaited(_update());
+    Native.instance.registerStorageVolumeCallback(_update);
   }
 
   @override
   Future<void> close() async {
-    await _subscription?.cancel();
-    _subscription = null;
-
+    Native.instance.unregisterStorageVolumeCallback(_update);
     await super.close();
   }
 
-  Future<void> _update(Session session, Dirs dirs) async {
+  Future<void> _update() async {
     List<StoreDir> storeDirs;
 
     if (Platform.isAndroid) {
       storeDirs = await getExternalStorageDirectories()
           .then((dirs) => (dirs ?? []).map((dir) => join(dir.path, _name)))
-          .then(_fromPaths);
+          .then(_fromPaths)
+          .then(
+            (dirs) => dirs
+                .where((dir) => dir.volume.state is StorageVolumeMounted)
+                .toList(),
+          );
 
-      await session.setStoreDirs(storeDirs.paths);
+      await _session.setStoreDirs(storeDirs.paths);
     } else {
-      final path = join(dirs.root, _name);
+      final path = join(_dirs.root, _name);
       final volume = StorageVolume(
         description: '',
         isPrimary: false,
@@ -71,7 +72,7 @@ class StoreDirsCubit extends Cubit<List<StoreDir>> {
 
       // Using `insertStoreDirs` so that any custom dirs (set via the CLI app or other means) are
       // preserved.
-      await session.insertStoreDirs(storeDirs.paths);
+      await _session.insertStoreDirs(storeDirs.paths);
     }
 
     if (!isClosed) {

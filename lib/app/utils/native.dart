@@ -1,8 +1,9 @@
-import 'dart:async' show StreamController;
 import 'dart:io' as io;
 import 'package:flutter/services.dart';
 import 'package:ouisync/ouisync.dart';
 import 'package:path_provider/path_provider.dart';
+
+typedef StorageVolumeCallback = Future<void> Function();
 
 /// One of the MethodChannel handlers used for calling functions implemented
 /// natively, and viceversa. See also ouisync/bindings/dart/native_channels and
@@ -16,10 +17,17 @@ class Native {
   static final instance = Native._();
 
   final _channel = MethodChannel('org.equalitie.ouisync/native');
-  final _storageVolumeChangedController = StreamController<void>.broadcast();
+  final Set<StorageVolumeCallback> _storageVolumeCallbacks = {};
 
-  Stream<void> get storageVolumeChanged =>
-      _storageVolumeChangedController.stream;
+  /// Registers a callback that gets called when a storage volume state changes (e.g., mounts,
+  /// unmounts, etc...).
+  void registerStorageVolumeCallback(StorageVolumeCallback cb) {
+    _storageVolumeCallbacks.add(cb);
+  }
+
+  void unregisterStorageVolumeCallback(StorageVolumeCallback cb) {
+    _storageVolumeCallbacks.remove(cb);
+  }
 
   Future<void> log(LogLevel level, String message) =>
       _channel.invokeMethod('log', [level.toInt(), message]);
@@ -83,7 +91,9 @@ class Native {
   Future<dynamic> _methodHandler(MethodCall call) async {
     switch (call.method) {
       case 'storageVolumeChanged':
-        _storageVolumeChangedController.add(null);
+        for (final cb in _storageVolumeCallbacks) {
+          await cb();
+        }
       default:
         throw PlatformException(
           code: '0',
