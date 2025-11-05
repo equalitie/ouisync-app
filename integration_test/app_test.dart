@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:ouisync_app/app/app.dart';
+import 'package:ouisync_app/app/cubits/store_dirs.dart';
 import 'package:ouisync_app/app/utils/storage_volume.dart' show StorageVolume;
 import 'package:path_provider/path_provider.dart'
     show getExternalStorageDirectories;
@@ -98,7 +99,7 @@ void main() {
       volumes,
       contains(
         isA<StorageVolume>().having(
-          (volume) => volume.removable,
+          (volume) => volume.isRemovable,
           "removable",
           isTrue,
         ),
@@ -117,14 +118,17 @@ void main() {
 
     // Find the radio tile with the "sd_card" icon which should correspond to the removable
     // storage.
-    final removable = find.widgetWithIcon(RadioListTile<String>, Icons.sd_card);
+    final removable = find.widgetWithIcon(
+      RadioListTile<StoreDir>,
+      Icons.sd_card,
+    );
     expect(removable, isNot(isChecked));
 
     // Verify the storage really is removable.
-    final removableStorage = await StorageVolume.forPath(
-      tester.firstWidget<RadioListTile<String>>(removable).value,
-    ).then((storage) => storage!);
-    expect(removableStorage.removable, isTrue);
+    final removableDir = tester
+        .firstWidget<RadioListTile<StoreDir>>(removable)
+        .value;
+    expect(removableDir.volume.isRemovable, isTrue);
 
     await tester.tap(removable);
     await tester.pumpAndSettle();
@@ -147,7 +151,7 @@ void main() {
     expect(
       find.descendant(
         of: storageTile,
-        matching: find.text(removableStorage.description),
+        matching: find.text(removableDir.volume.description),
       ),
       findsOne,
     );
@@ -161,16 +165,16 @@ void main() {
     // Find the radio tile with the "smartphone" icon which should correspond to the internal
     // storage.
     final internal = find.widgetWithIcon(
-      RadioListTile<String>,
+      RadioListTile<StoreDir>,
       Icons.smartphone,
     );
     expect(internal, isNot(isChecked));
 
     // Verify the storage is really internal (not removable)
-    final internalStorage = await StorageVolume.forPath(
-      tester.firstWidget<RadioListTile<String>>(internal).value,
-    ).then((storage) => storage!);
-    expect(internalStorage.removable, isFalse);
+    final internalDir = tester
+        .firstWidget<RadioListTile<StoreDir>>(internal)
+        .value;
+    expect(internalDir.volume.isRemovable, isFalse);
 
     // Select it and confirm the move.
     await tester.tap(internal);
@@ -190,7 +194,7 @@ void main() {
     expect(
       find.descendant(
         of: storageTile,
-        matching: find.text(internalStorage.description),
+        matching: find.text(internalDir.volume.description),
       ),
       findsOne,
     );

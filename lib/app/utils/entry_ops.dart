@@ -42,7 +42,7 @@ Future<void> viewFile({
 }) async {
   Future<void> view() async {
     if (Platform.isAndroid) {
-      final uri = await Native.getDocumentUri("${repo.name}$path");
+      final uri = await Native.instance.getDocumentUri("${repo.name}$path");
 
       // TODO: consider using launchUrl here as well
       if (!await oui.viewFile(uri)) {
@@ -101,7 +101,9 @@ Future<void> viewFile({
 
 Future<void> shareFile({required RepoCubit repo, required String path}) async {
   if (Platform.isAndroid) {
-    await oui.shareFile(await Native.getDocumentUri("${repo.name}$path"));
+    await oui.shareFile(
+      await Native.instance.getDocumentUri("${repo.name}$path"),
+    );
   } else {
     throw UnsupportedError('sharing files is supported only on Android');
   }

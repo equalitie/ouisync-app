@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync/ouisync.dart';
@@ -15,6 +16,7 @@ import '../cubits/cubits.dart'
         RepoCreationValid,
         ReposCubit;
 
+import '../cubits/store_dirs.dart';
 import '../utils/log.dart' show AppLogger;
 import '../utils/utils.dart'
     show AppThemeExtension, Constants, Dialogs, Dimensions, Fields, ThemeGetter;
@@ -27,9 +29,15 @@ import '../widgets/widgets.dart'
         CustomAdaptiveSwitch;
 
 class RepoCreationPage extends StatelessWidget {
-  RepoCreationPage({super.key, required this.reposCubit, this.token});
+  RepoCreationPage({
+    super.key,
+    required this.reposCubit,
+    required this.storeDirsCubit,
+    this.token,
+  });
 
   final ReposCubit reposCubit;
+  final StoreDirsCubit storeDirsCubit;
   final ShareToken? token;
 
   @override
@@ -43,7 +51,10 @@ class RepoCreationPage extends StatelessWidget {
     ),
     body: BlocHolder(
       create: () => _createCubit(context),
-      builder: (context, cubit) => RepoCreation(cubit),
+      builder: (context, creationCubit) => RepoCreation(
+        creationCubit: creationCubit,
+        storeDirsCubit: storeDirsCubit,
+      ),
     ),
   );
 
@@ -66,9 +77,14 @@ class RepoCreationPage extends StatelessWidget {
 }
 
 class RepoCreation extends StatelessWidget with AppLogger {
-  RepoCreation(this.creationCubit, {super.key});
+  RepoCreation({
+    required this.creationCubit,
+    required this.storeDirsCubit,
+    super.key,
+  });
 
   final RepoCreationCubit creationCubit;
+  final StoreDirsCubit storeDirsCubit;
 
   @override
   Widget build(BuildContext context) => MultiBlocListener(
@@ -109,7 +125,7 @@ class RepoCreation extends StatelessWidget with AppLogger {
             ..._buildTokenLabel(context, creationState),
           ..._buildNameField(context, creationState),
           _buildUseCacheServersSwitch(context, creationState),
-          _buildStorageSelector(context, creationState),
+          _buildStoreSelector(context, creationState),
         ],
       );
 
@@ -222,9 +238,9 @@ class RepoCreation extends StatelessWidget with AppLogger {
         )
       : SizedBox.shrink();
 
-  Widget _buildStorageSelector(BuildContext context, RepoCreationState state) =>
-      StoreDirsBuilder(
-        session: creationCubit.reposCubit.session,
+  Widget _buildStoreSelector(BuildContext context, RepoCreationState state) =>
+      BlocBuilder<StoreDirsCubit, List<StoreDir>>(
+        bloc: storeDirsCubit,
         builder: (context, storeDirs) => storeDirs.length > 1
             ? Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -237,9 +253,11 @@ class RepoCreation extends StatelessWidget with AppLogger {
                     ),
                   ),
                   StoreDirSelector(
-                    storeDirs: storeDirs,
-                    value: state.dir,
-                    onChanged: creationCubit.setDir,
+                    storeDirsCubit: storeDirsCubit,
+                    value: storeDirs.firstWhereOrNull(
+                      (dir) => dir.path == state.dir,
+                    ),
+                    onChanged: (dir) => creationCubit.setDir(dir.path),
                   ),
                 ],
               )

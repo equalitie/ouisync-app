@@ -292,7 +292,7 @@ class Settings with AppLogger {
           ),
         ];
 
-        final newDir = await Native.getBaseDir().then(
+        final newDir = await Native.instance.getBaseDir().then(
           (baseDir) => io.Directory(join(baseDir.path, 'repositories')),
         );
 

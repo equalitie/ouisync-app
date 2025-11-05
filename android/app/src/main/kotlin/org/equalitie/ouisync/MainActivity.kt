@@ -37,7 +37,7 @@ class MainActivity : FlutterFragmentActivity() {
                     val path = args[0] as String
                     result.success(getDocumentUri(path).toString())
                 }
-                "getStorageProperties" -> {
+                "getStorageVolume" -> {
                     val args = call.arguments as List<Any>
                     val path = args[0] as String
                     result.success(getStorageVolume(path)?.toMap())
@@ -60,9 +60,7 @@ class MainActivity : FlutterFragmentActivity() {
             storageVolumeCallback = object : StorageManager.StorageVolumeCallback() {
                 override fun onStateChanged(volume: StorageVolume) {
                     Log.v(TAG, "storage volume state changed: ${volume.getDescription(this@MainActivity)}, state: ${volume.state}")
-
-                    // TODO
-                    // methodChannel.invokeMethod("")
+                    methodChannel.invokeMethod("storageVolumeChanged", null)
                 }
             }.also {
                 storageManager.registerStorageVolumeCallback(mainExecutor, it)
@@ -109,9 +107,9 @@ class MainActivity : FlutterFragmentActivity() {
     }
 
     private fun StorageVolume.toMap(): Map<String, Any?> = mapOf(
-        "primary" to isPrimary() as Any,
-        "removable" to isRemovable() as Any,
-        "mounted" to (state == Environment.MEDIA_MOUNTED) as Any,
+        "isPrimary" to isPrimary() as Any,
+        "isRemovable" to isRemovable() as Any,
+        "isMounted" to (state == Environment.MEDIA_MOUNTED) as Any,
         "description" to getDescription(this@MainActivity) as Any,
         "mountPoint" to if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             getDirectory()?.getPath() as Any?

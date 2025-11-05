@@ -4,6 +4,7 @@ import 'package:ouisync_app/app/app.dart';
 import 'package:ouisync_app/app/cubits/locale.dart';
 import 'package:ouisync_app/app/cubits/repos.dart';
 import 'package:ouisync_app/app/cubits/error.dart';
+import 'package:ouisync_app/app/cubits/store_dirs.dart';
 import 'package:ouisync_app/app/pages/main_page.dart';
 import 'package:ouisync_app/app/utils/dirs.dart';
 import 'package:ouisync_app/app/utils/master_key.dart';
@@ -19,6 +20,7 @@ void main() {
   late Settings settings;
   late LocaleCubit localeCubit;
   late ErrorCubit errorCubit;
+  late StoreDirsCubit storeDirsCubit;
 
   setUp(() async {
     dirs = await Dirs.init();
@@ -34,6 +36,9 @@ void main() {
     settings.cacheServers = [];
 
     localeCubit = LocaleCubit(settings);
+
+    storeDirsCubit = StoreDirsCubit(session, dirs);
+    await storeDirsCubit.stream.firstWhere((state) => state.isNotEmpty);
   });
 
   tearDown(() async {
@@ -58,6 +63,7 @@ void main() {
             settings: settings,
             windowManager: FakeWindowManager(),
             dirs: dirs,
+            storeDirsCubit: storeDirsCubit,
           ),
         ),
       );

@@ -11,6 +11,7 @@ import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
+import '../cubits/store_dirs.dart';
 import '../models/models.dart';
 import '../utils/dirs.dart';
 import '../utils/platform/platform.dart';
@@ -39,6 +40,7 @@ class MainPage extends StatefulWidget {
     required this.settings,
     required this.windowManager,
     required this.dirs,
+    required this.storeDirsCubit,
   });
 
   final PlatformWindowManager windowManager;
@@ -50,6 +52,7 @@ class MainPage extends StatefulWidget {
   final MountCubit mountCubit;
   final LocaleCubit localeCubit;
   final Dirs dirs;
+  final StoreDirsCubit storeDirsCubit;
 
   @override
   State<StatefulWidget> createState() => _MainPageState();
@@ -928,7 +931,10 @@ class _MainPageState extends State<MainPage>
       Navigator.push<RepoEntry?>(
         context,
         MaterialPageRoute(
-          builder: (context) => RepoCreationPage(reposCubit: widget.reposCubit),
+          builder: (context) => RepoCreationPage(
+            reposCubit: widget.reposCubit,
+            storeDirsCubit: widget.storeDirsCubit,
+          ),
         ),
       );
 
@@ -964,8 +970,11 @@ class _MainPageState extends State<MainPage>
         final repoEntry = await Navigator.push<RepoEntry?>(
           context,
           MaterialPageRoute(
-            builder: (context) =>
-                RepoCreationPage(reposCubit: widget.reposCubit, token: token),
+            builder: (context) => RepoCreationPage(
+              reposCubit: widget.reposCubit,
+              storeDirsCubit: widget.storeDirsCubit,
+              token: token,
+            ),
           ),
         );
 
@@ -1011,6 +1020,7 @@ class _MainPageState extends State<MainPage>
       session: widget.session,
       repoCubit: repoCubit,
       reposCubit: widget.reposCubit,
+      storeDirsCubit: widget.storeDirsCubit,
     ),
   );
 }

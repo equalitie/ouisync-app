@@ -14,24 +14,14 @@ class Dirs {
   /// Ouisync config directory (subdirectory of `root`).
   String get config => join(root, 'configs');
 
-  /// Default directories for storing repositories.
-  final List<String> defaultStore;
-
   /// Default directory for mounting repositories (if mounting is supported on the platform)
   final String? defaultMount;
 
   /// Download directory.
   final String? download;
 
-  Dirs._({
-    required String root,
-    List<String> defaultStore = const [],
-    this.defaultMount,
-    this.download,
-  }) : root = canonicalize(root),
-       defaultStore = defaultStore.isNotEmpty
-           ? defaultStore
-           : [join(root, _storeDirName)];
+  Dirs._({required String root, this.defaultMount, this.download})
+    : root = canonicalize(root);
 
   /// Initialize the `Dirs` with default directories. Specify `root` to override the default data
   /// root directory. `root` can also be overriden using the `OUISYNC_ROOT_DIR` env variable.
@@ -41,7 +31,6 @@ class Dirs {
 
     return Dirs._(
       root: root,
-      defaultStore: await _getDefaultStoreDirs(root),
       defaultMount: defaultMount,
       download: await _getDownloadDir(),
     );
@@ -50,26 +39,12 @@ class Dirs {
 
 Future<String> _getDefaultRootDir() async =>
     Platform.environment['OUISYNC_ROOT_DIR'] ??
-    await Native.getBaseDir().then((dir) => dir.path);
-
-const _storeDirName = 'repositories';
-
-Future<List<String>> _getDefaultStoreDirs(String root) async {
-  final bases =
-      (Platform.isAndroid
-          ? await getExternalStorageDirectories().then(
-              (dirs) => dirs?.map((dir) => dir.path),
-            )
-          : null) ??
-      [root];
-
-  return bases.map((base) => join(base, _storeDirName)).toList();
-}
+    await Native.instance.getBaseDir().then((dir) => dir.path);
 
 Future<String?> _getDownloadDir() async {
   if (Platform.isAndroid) {
     try {
-      return await Native.getDownloadPathForAndroid();
+      return await Native.instance.getDownloadPathForAndroid();
     } on MissingPluginException {
       // HACK: The method channel handler is defined in `MainActivity` which is not available
       // when this is accessed from the background service. Catching and returning `null` should be
@@ -85,7 +60,7 @@ Future<String?> _getDownloadDir() async {
 
 Future<String?> _getDefaultMountDir() async {
   if (Platform.isMacOS) {
-    return await Native.getMountRootDirectory();
+    return await Native.instance.getMountRootDirectory();
   }
 
   if (Platform.isLinux) {

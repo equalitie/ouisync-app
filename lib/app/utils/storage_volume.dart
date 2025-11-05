@@ -6,48 +6,50 @@ import 'native.dart';
 class StorageVolume {
   const StorageVolume({
     required this.description,
-    required this.primary,
-    required this.removable,
+    required this.isPrimary,
+    required this.isRemovable,
     required this.state,
   });
 
   final String description;
-  final bool primary;
-  final bool removable;
+  final bool isPrimary;
+  final bool isRemovable;
   final StorageVolumeState state;
 
   /// Retrieve storage volume that contains the given path.
   ///
   /// Note this currently works only on Android (returns `null` on other platforms).
   static Future<StorageVolume?> forPath(String path) => Platform.isAndroid
-      ? Native.getStorageProperties(path).then(
-          (props) => props != null
-              ? StorageVolume(
-                  description: props.description,
-                  primary: props.primary,
-                  removable: props.removable,
-                  state: props.mounted
-                      ? StorageVolumeMounted(mountPoint: props.mountPoint)
-                      : StorageVolumeUnmounted(),
-                )
-              : null,
-        )
+      ? Native.instance
+            .getStorageVolume(path)
+            .then(
+              (props) => props != null
+                  ? StorageVolume(
+                      description: props.description,
+                      isPrimary: props.isPrimary,
+                      isRemovable: props.isRemovable,
+                      state: props.isMounted
+                          ? StorageVolumeMounted(mountPoint: props.mountPoint)
+                          : StorageVolumeUnmounted(),
+                    )
+                  : null,
+            )
       : Future.value(null);
 
   @override
   bool operator ==(Object other) =>
       other is StorageVolume &&
       description == other.description &&
-      primary == other.primary &&
-      removable == other.removable &&
+      isPrimary == other.isPrimary &&
+      isRemovable == other.isRemovable &&
       state == other.state;
 
   @override
-  int get hashCode => Object.hash(description, primary, removable, state);
+  int get hashCode => Object.hash(description, isPrimary, isRemovable, state);
 
   @override
   String toString() =>
-      '$runtimeType(description: $description, primary: $primary, removable: $removable, state: $state)';
+      '$runtimeType(description: $description, isPrimary: $isPrimary, isRemovable: $isRemovable, state: $state)';
 }
 
 sealed class StorageVolumeState {}
