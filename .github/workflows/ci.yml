@@ -348,7 +348,7 @@ jobs:
           path: logcat.txt
           if-no-files-found: ignore
         # Upload only when the tests fail
-        if: failure()
+        if: failure() || cancelled()
 
 
   # TODO: Integration tests on both linux and windows currently fail or hang. Commenting them out until they are fixed.
