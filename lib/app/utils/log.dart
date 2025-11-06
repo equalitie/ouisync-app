@@ -134,7 +134,7 @@ class _NativePrinter extends LoggyPrinter {
     final level = record.level.toOuisync();
     final message = _formatMessage(record);
 
-    Native.log(level, message);
+    Native.instance.log(level, message);
   }
 }
 

@@ -1,11 +1,12 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync/ouisync.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart' show RepoCubit, ReposCubit, RepoState;
+import '../../cubits/store_dirs.dart';
 import '../../mixins/mixins.dart' show RepositoryActionsMixin;
-import '../../utils/extensions.dart';
 import '../../utils/themes/app_typography.dart' show AppTypography;
 import '../../utils/utils.dart'
     show
@@ -27,12 +28,14 @@ class RepositorySettings extends StatelessWidget
     required this.session,
     required this.repoCubit,
     required this.reposCubit,
+    required this.storeDirsCubit,
   });
 
   final Settings settings;
   final Session session;
   final RepoCubit repoCubit;
   final ReposCubit reposCubit;
+  final StoreDirsCubit storeDirsCubit;
 
   @override
   Widget build(BuildContext context) => BlocBuilder<RepoCubit, RepoState>(
@@ -116,6 +119,7 @@ class RepositorySettings extends StatelessWidget
                   popDialog: () => Navigator.of(context).pop(),
                 ),
               ),
+
               //// TODO: Removed the eject button for now until the
               //// next release and after team discussion on where to
               //// best put it and how to explain the use case to the
@@ -133,26 +137,35 @@ class RepositorySettings extends StatelessWidget
               //            .ejectRepository(widget.cubit.location);
               //        Navigator.of(context).pop();
               //      }),
-              StorageVolumeBuilder(
-                path: state.location.dir,
-                builder: (context, storage) => ListTile(
-                  leading: Icon(storage?.icon ?? Icons.storage),
-                  title: Text(
-                    S.current.messageStorage,
-                    style: AppTypography.bodyMedium,
-                  ),
-                  subtitle: storage?.let(
-                    (storage) => Text(storage.description),
-                  ),
-                  onTap: () => showRepositoryStorageDialog(
-                    context,
-                    session: session,
-                    repoCubit: repoCubit,
-                  ),
-                  contentPadding: EdgeInsets.zero,
-                  visualDensity: VisualDensity.compact,
-                ),
+              BlocBuilder<StoreDirsCubit, StoreDirs>(
+                bloc: storeDirsCubit,
+                builder: (context, storeDirs) {
+                  final dir = storeDirs.firstWhereOrNull(
+                    (dir) => dir.path == state.location.dir,
+                  );
+
+                  if (dir != null) {
+                    return ListTile(
+                      leading: Icon(dir.volume.icon),
+                      title: Text(
+                        S.current.messageStorage,
+                        style: AppTypography.bodyMedium,
+                      ),
+                      subtitle: Text(dir.volume.description),
+                      onTap: () => showRepositoryStoreDialog(
+                        context,
+                        repoCubit: repoCubit,
+                        storeDirsCubit: storeDirsCubit,
+                      ),
+                      contentPadding: EdgeInsets.zero,
+                      visualDensity: VisualDensity.compact,
+                    );
+                  } else {
+                    return SizedBox.shrink();
+                  }
+                },
               ),
+
               EntryActionItem(
                 iconData: Icons.delete_outline,
                 title: S.current.actionDelete,

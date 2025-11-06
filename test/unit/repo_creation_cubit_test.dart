@@ -5,6 +5,7 @@ import 'package:ouisync_app/app/cubits/navigation.dart';
 import 'package:ouisync_app/app/cubits/repo_creation.dart';
 import 'package:ouisync_app/app/cubits/repos.dart';
 import 'package:ouisync_app/app/cubits/mount.dart';
+import 'package:ouisync_app/app/cubits/store_dirs.dart';
 import 'package:ouisync_app/app/models/auth_mode.dart';
 import 'package:ouisync_app/app/models/repo_entry.dart';
 import 'package:ouisync_app/app/models/repo_location.dart';
@@ -28,6 +29,7 @@ void main() {
   late Session session;
   late ReposCubit reposCubit;
   late MountCubit mountCubit;
+  late StoreDirsCubit storeDirsCubit;
   late RepoCreationCubit repoCreationCubit;
 
   setUp(() async {
@@ -43,8 +45,10 @@ void main() {
     await session.setStoreDirs([p.join(appDir.path, 'store')]);
 
     final settings = await Settings.init(MasterKey.random());
+    final dirs = await Dirs.init();
 
-    mountCubit = MountCubit(session, await Dirs.init())..init();
+    mountCubit = MountCubit(session, dirs)..init();
+    storeDirsCubit = StoreDirsCubit(session, dirs);
 
     reposCubit = ReposCubit(
       session: session,
@@ -53,6 +57,7 @@ void main() {
       bottomSheet: EntryBottomSheetCubit(),
       cacheServers: CacheServers(session),
       mountCubit: mountCubit,
+      storeDirsCubit: storeDirsCubit,
     );
 
     repoCreationCubit = RepoCreationCubit(reposCubit: reposCubit);
@@ -60,8 +65,9 @@ void main() {
 
   tearDown(() async {
     await repoCreationCubit.close();
-    await reposCubit.close();
+    await storeDirsCubit.close();
     await mountCubit.close();
+    await reposCubit.close();
     await session.close();
     await server.stop();
   });

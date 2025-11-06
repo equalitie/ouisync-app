@@ -39,7 +39,7 @@ Future<Settings> loadAndMigrateSettings(Session session) async {
 }
 
 Future<void> _migratePaths() async {
-  final newDir = await Native.getBaseDir();
+  final newDir = await Native.instance.getBaseDir();
   final oldDir = io.Directory(
     newDir.path
         .split(separator)

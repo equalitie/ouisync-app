@@ -14,6 +14,7 @@ import 'package:ouisync_app/app/cubits/locale.dart';
 import 'package:ouisync_app/app/cubits/mount.dart';
 import 'package:ouisync_app/app/cubits/repos.dart';
 import 'package:ouisync_app/app/cubits/error.dart';
+import 'package:ouisync_app/app/cubits/store_dirs.dart';
 import 'package:ouisync_app/app/pages/main_page.dart';
 import 'package:ouisync_app/app/utils/dirs.dart';
 import 'package:ouisync_app/app/utils/log.dart' as log;
@@ -87,6 +88,7 @@ class TestDependencies {
     this.localeCubit,
     this.errorCubit,
     this.dirs,
+    this.storeDirsCubit,
   );
 
   static Future<TestDependencies> create() async {
@@ -102,7 +104,8 @@ class TestDependencies {
 
     final session = await Session.create(configPath: dirs.config);
 
-    await session.setStoreDirs(dirs.defaultStore);
+    final storeDirsCubit = StoreDirsCubit(session, dirs);
+    await storeDirsCubit.stream.firstWhere((state) => state.isNotEmpty);
 
     final errorCubit = ErrorCubit(session);
     final settings = await Settings.init(MasterKey.random());
@@ -112,6 +115,7 @@ class TestDependencies {
       session: session,
       settings: settings,
       mountCubit: mountCubit,
+      storeDirsCubit: storeDirsCubit,
     );
 
     final localeCubit = LocaleCubit(settings);
@@ -125,6 +129,7 @@ class TestDependencies {
       localeCubit,
       errorCubit,
       dirs,
+      storeDirsCubit,
     );
   }
 
@@ -148,6 +153,7 @@ class TestDependencies {
         settings: settings,
         windowManager: FakeWindowManager(),
         dirs: dirs,
+        storeDirsCubit: storeDirsCubit,
       );
 
   final Server server;
@@ -158,6 +164,7 @@ class TestDependencies {
   final LocaleCubit localeCubit;
   final ErrorCubit errorCubit;
   final Dirs dirs;
+  final StoreDirsCubit storeDirsCubit;
 }
 
 class _FakeConnectivityPlatform extends ConnectivityPlatform {

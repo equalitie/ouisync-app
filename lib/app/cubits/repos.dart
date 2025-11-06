@@ -4,6 +4,8 @@ import 'dart:collection';
 import 'package:collection/collection.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync/ouisync.dart';
+import 'package:ouisync_app/app/cubits/store_dirs.dart';
+import 'package:stream_transform/stream_transform.dart';
 
 import '../../generated/l10n.dart';
 import '../models/models.dart';
@@ -52,7 +54,6 @@ class ReposState {
 
 class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
   final Session _session;
-  StreamSubscription<void>? _subscription;
   final Settings _settings;
   final MountCubit _mountCubit;
 
@@ -62,11 +63,15 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
   final EntrySelectionCubit entriesSelection;
   final PasswordHasher passwordHasher;
 
+  StreamSubscription<void>? _currentSubscription;
+  StreamSubscription<void>? _storeDirsSubscription;
+
   ReposCubit({
     required session,
     required settings,
     required this.cacheServers,
     required MountCubit mountCubit,
+    required StoreDirsCubit storeDirsCubit,
     EntryBottomSheetCubit? bottomSheet,
     NavigationCubit? navigation,
     EntrySelectionCubit? entriesSelection,
@@ -78,10 +83,10 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
        entriesSelection = entriesSelection ?? EntrySelectionCubit(),
        passwordHasher = PasswordHasher(session),
        super(ReposState()) {
-    unawaited(_init());
+    unawaited(_init(storeDirsCubit));
   }
 
-  Future<void> _init() async {
+  Future<void> _init(StoreDirsCubit storeDirsCubit) async {
     emitUnlessClosed(state.copyWith(isLoading: true));
 
     await _load();
@@ -92,6 +97,11 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
     await setCurrent(current);
 
     emitUnlessClosed(state.copyWith(isLoading: false));
+
+    // Reload the repos when the store dirs change.
+    _storeDirsSubscription = storeDirsCubit.stream
+        .asyncMapSample((_) => _reload())
+        .listen(null);
   }
 
   Future<void> _load() async {
@@ -100,6 +110,27 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
     for (final repo in repos.values) {
       await _addRepo(repo);
     }
+  }
+
+  Future<void> _reload() async {
+    loggy.debug('Reloading repositories');
+
+    final currentLocation = state.current?.location;
+    final currentSubscription = _currentSubscription;
+    _currentSubscription = null;
+
+    emit(
+      state.copyWith(repos: SplayTreeMap(), current: None(), isLoading: true),
+    );
+
+    await currentSubscription?.cancel();
+    await _load();
+
+    if (currentLocation != null) {
+      await setCurrent(state.repos[currentLocation]);
+    }
+
+    emit(state.copyWith(isLoading: false));
   }
 
   Session get session => _session;
@@ -191,11 +222,11 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
       return;
     }
 
-    await _subscription?.cancel();
-    _subscription = null;
+    await _currentSubscription?.cancel();
+    _currentSubscription = null;
 
     if (entry is OpenRepoEntry) {
-      _subscription = entry.cubit.autoRefresh();
+      _currentSubscription = entry.cubit.autoRefresh();
     }
 
     // We must not set repositories for which the user provides the password
@@ -281,11 +312,14 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
     // meaning nor it will crash.
 
     final repos = state.repos;
-    final subscription = _subscription;
 
     emit(state.copyWith(repos: SplayTreeMap(), current: None()));
 
-    await subscription?.cancel();
+    await _currentSubscription?.cancel();
+    _currentSubscription = null;
+
+    await _storeDirsSubscription?.cancel();
+    _storeDirsSubscription = null;
 
     for (final repo in repos.values) {
       await repo.close();

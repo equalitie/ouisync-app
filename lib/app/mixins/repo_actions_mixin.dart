@@ -4,6 +4,7 @@ import 'package:ouisync/ouisync.dart';
 
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart' show ReposCubit, RepoCubit;
+import '../cubits/store_dirs.dart';
 import '../models/models.dart'
     show
         Access,
@@ -155,14 +156,14 @@ mixin RepositoryActionsMixin on LoggyType {
     );
   }
 
-  Future<void> showRepositoryStorageDialog(
+  Future<void> showRepositoryStoreDialog(
     BuildContext context, {
-    required Session session,
     required RepoCubit repoCubit,
+    required StoreDirsCubit storeDirsCubit,
   }) => showDialog<void>(
     context: context,
     builder: (context) =>
-        StoreDirDialog(session: session, repoCubit: repoCubit),
+        StoreDirDialog(storeDirsCubit: storeDirsCubit, repoCubit: repoCubit),
   );
 
   Future<bool> showDeleteRepositoryDialog(

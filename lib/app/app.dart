@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:ouisync/ouisync.dart' show NetworkDefaults, Server, Session;
+import 'package:ouisync_app/app/cubits/store_dirs.dart';
 import 'package:package_info_plus/package_info_plus.dart' show PackageInfo;
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
@@ -102,6 +103,7 @@ class _AppState extends State<App> {
     settings: components.settings,
     localeCubit: components.localeCubit,
     errorCubit: components.errorCubit,
+    storeDirsCubit: components.storeDirsCubit,
   );
 }
 
@@ -124,6 +126,7 @@ class _AppComponents {
   final Settings settings;
   final ErrorCubit errorCubit;
   final LocaleCubit localeCubit;
+  final StoreDirsCubit storeDirsCubit;
 
   _AppComponents._(
     this.windowManager,
@@ -133,6 +136,7 @@ class _AppComponents {
     this.settings,
     this.errorCubit,
     this.localeCubit,
+    this.storeDirsCubit,
   );
 
   static Future<_AppComponents> create(List<String> args) async {
@@ -149,6 +153,7 @@ class _AppComponents {
     final errorCubit = ErrorCubit(session);
     final settings = await loadAndMigrateSettings(session);
     final localeCubit = LocaleCubit(settings);
+    final storeDirsCubit = StoreDirsCubit(session, dirs);
 
     return _AppComponents._(
       windowManager,
@@ -158,6 +163,7 @@ class _AppComponents {
       settings,
       errorCubit,
       localeCubit,
+      storeDirsCubit,
     );
   }
 
@@ -194,8 +200,6 @@ Future<(Server, Session)> _initServerAndSession(
       await server.stop();
     });
 
-    await session.insertStoreDirs(dirs.defaultStore);
-
     await session.initNetwork(
       NetworkDefaults(
         bind: Constants.defaultBindAddrs,
@@ -221,6 +225,7 @@ class HomeWidget extends StatefulWidget {
     required this.settings,
     required this.localeCubit,
     required this.errorCubit,
+    required this.storeDirsCubit,
     super.key,
   });
 
@@ -231,6 +236,7 @@ class HomeWidget extends StatefulWidget {
   final Settings settings;
   final LocaleCubit localeCubit;
   final ErrorCubit errorCubit;
+  final StoreDirsCubit storeDirsCubit;
 
   @override
   State<HomeWidget> createState() => _HomeWidgetState();
@@ -266,6 +272,7 @@ class _HomeWidgetState extends State<HomeWidget>
       settings: widget.settings,
       cacheServers: cacheServers,
       mountCubit: mountCubit,
+      storeDirsCubit: widget.storeDirsCubit,
     );
 
     unawaited(_init());
@@ -305,6 +312,7 @@ class _HomeWidgetState extends State<HomeWidget>
         settings: widget.settings,
         windowManager: widget.windowManager,
         dirs: widget.dirs,
+        storeDirsCubit: widget.storeDirsCubit,
       ),
     ),
   );
