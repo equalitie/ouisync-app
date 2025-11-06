@@ -272,6 +272,7 @@ class _HomeWidgetState extends State<HomeWidget>
       settings: widget.settings,
       cacheServers: cacheServers,
       mountCubit: mountCubit,
+      storeDirsCubit: widget.storeDirsCubit,
     );
 
     unawaited(_init());

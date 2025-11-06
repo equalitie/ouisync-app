@@ -34,9 +34,7 @@ class StoreDirSelector extends StatelessWidget {
   final StoreDir? value;
 
   @override
-  Widget build(
-    BuildContext context,
-  ) => BlocBuilder<StoreDirsCubit, List<StoreDir>>(
+  Widget build(BuildContext context) => BlocBuilder<StoreDirsCubit, StoreDirs>(
     bloc: storeDirsCubit,
     builder: (context, storeDirs) {
       final selected =
@@ -110,67 +108,65 @@ class StoreDirDialog extends StatelessWidget with AppLogger {
   @override
   Widget build(BuildContext context) => BlocBuilder<RepoCubit, RepoState>(
     bloc: repoCubit,
-    builder: (context, repoState) =>
-        BlocBuilder<StoreDirsCubit, List<StoreDir>>(
-          bloc: storeDirsCubit,
-          builder: (context, storeDirs) => AlertDialog(
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
+    builder: (context, repoState) => BlocBuilder<StoreDirsCubit, StoreDirs>(
+      bloc: storeDirsCubit,
+      builder: (context, storeDirs) => AlertDialog(
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              S.current.repoStorageLocation,
+              style: context.theme.appTextStyle.titleMedium,
+            ),
+            Row(
               children: [
-                Text(
-                  S.current.repoStorageLocation,
-                  style: context.theme.appTextStyle.titleMedium,
-                ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Tooltip(
-                        child: Text(
-                          repoState.location.path,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        message: repoState.location.path,
-                      ),
+                Expanded(
+                  child: Tooltip(
+                    child: Text(
+                      repoState.location.path,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    IconButton(
-                      icon: Icon(Icons.copy),
-                      onPressed: () => _copyToClipboard(context, repoState),
-                      tooltip: S.current.copyToClipboard,
-                    ),
-                    if (Platform.isLinux || Platform.isWindows)
-                      IconButton(
-                        icon: Icon(Icons.folder_open),
-                        onPressed: () => _openDirectory(repoState),
-                        tooltip: S.current.openFolder,
-                      ),
-                  ],
-                ),
-                if (storeDirs.length > 1) ...[
-                  Divider(),
-                  Text(
-                    S.current.messageStorage,
-                    style: context.theme.appTextStyle.titleMedium,
+                    message: repoState.location.path,
                   ),
-                  StoreDirSelector(
-                    storeDirsCubit: storeDirsCubit,
-                    value: storeDirs.firstWhereOrNull(
-                      (dir) => isWithin(dir.path, repoState.location.path),
-                    ),
-                    onChanged: (dir) =>
-                        _selectStoreDir(context, repoState, dir),
+                ),
+                IconButton(
+                  icon: Icon(Icons.copy),
+                  onPressed: () => _copyToClipboard(context, repoState),
+                  tooltip: S.current.copyToClipboard,
+                ),
+                if (Platform.isLinux || Platform.isWindows)
+                  IconButton(
+                    icon: Icon(Icons.folder_open),
+                    onPressed: () => _openDirectory(repoState),
+                    tooltip: S.current.openFolder,
                   ),
-                ],
               ],
             ),
-            actions: [
-              TextButton(
-                child: Text(S.current.actionCloseCapital),
-                onPressed: () => Navigator.of(context).pop(),
+            if (storeDirs.length > 1) ...[
+              Divider(),
+              Text(
+                S.current.messageStorage,
+                style: context.theme.appTextStyle.titleMedium,
+              ),
+              StoreDirSelector(
+                storeDirsCubit: storeDirsCubit,
+                value: storeDirs.firstWhereOrNull(
+                  (dir) => isWithin(dir.path, repoState.location.path),
+                ),
+                onChanged: (dir) => _selectStoreDir(context, repoState, dir),
               ),
             ],
-          ),
+          ],
         ),
+        actions: [
+          TextButton(
+            child: Text(S.current.actionCloseCapital),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ],
+      ),
+    ),
   );
 
   Future<void> _copyToClipboard(BuildContext context, RepoState state) async {

@@ -239,7 +239,7 @@ class RepoCreation extends StatelessWidget with AppLogger {
       : SizedBox.shrink();
 
   Widget _buildStoreSelector(BuildContext context, RepoCreationState state) =>
-      BlocBuilder<StoreDirsCubit, List<StoreDir>>(
+      BlocBuilder<StoreDirsCubit, StoreDirs>(
         bloc: storeDirsCubit,
         builder: (context, storeDirs) => storeDirs.length > 1
             ? Column(

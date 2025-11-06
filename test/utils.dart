@@ -115,6 +115,7 @@ class TestDependencies {
       session: session,
       settings: settings,
       mountCubit: mountCubit,
+      storeDirsCubit: storeDirsCubit,
     );
 
     final localeCubit = LocaleCubit(settings);

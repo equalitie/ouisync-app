@@ -137,7 +137,7 @@ class RepositorySettings extends StatelessWidget
               //            .ejectRepository(widget.cubit.location);
               //        Navigator.of(context).pop();
               //      }),
-              BlocBuilder<StoreDirsCubit, List<StoreDir>>(
+              BlocBuilder<StoreDirsCubit, StoreDirs>(
                 bloc: storeDirsCubit,
                 builder: (context, storeDirs) {
                   final dir = storeDirs.firstWhereOrNull(

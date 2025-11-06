@@ -68,6 +68,7 @@ void main() {
       settings: deps.settings,
       cacheServers: cacheServers,
       mountCubit: mountCubit,
+      storeDirsCubit: deps.storeDirsCubit,
     );
 
     // Create 2 folders, 1 nested, in originRepo

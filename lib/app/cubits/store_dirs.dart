@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io' show Platform;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart' show Cubit;
 import 'package:ouisync/ouisync.dart' show Session;
 import 'package:path/path.dart' show join;
@@ -12,6 +13,28 @@ import '../utils/native.dart';
 import '../utils/storage_volume.dart';
 
 const _name = 'repositories';
+
+class StoreDirs extends Iterable<StoreDir> {
+  final List<StoreDir> values;
+
+  const StoreDirs([this.values = const []]);
+
+  @override
+  Iterator<StoreDir> get iterator => values.iterator;
+
+  @override
+  int get length => values.length;
+
+  @override
+  bool operator ==(Object other) =>
+      other is StoreDirs && listEquals(values, other.values);
+
+  @override
+  int get hashCode => Object.hashAll(values);
+
+  @override
+  String toString() => '$runtimeType($values)';
+}
 
 class StoreDir {
   final String path;
@@ -30,11 +53,11 @@ class StoreDir {
   String toString() => '$runtimeType(path: $path, volume: $volume)';
 }
 
-class StoreDirsCubit extends Cubit<List<StoreDir>> {
+class StoreDirsCubit extends Cubit<StoreDirs> {
   final Session _session;
   final Dirs _dirs;
 
-  StoreDirsCubit(this._session, this._dirs) : super([]) {
+  StoreDirsCubit(this._session, this._dirs) : super(StoreDirs()) {
     unawaited(_update());
     Native.instance.registerStorageVolumeCallback(_update);
   }
@@ -46,10 +69,10 @@ class StoreDirsCubit extends Cubit<List<StoreDir>> {
   }
 
   Future<void> _update() async {
-    List<StoreDir> storeDirs;
+    List<StoreDir> dirs;
 
     if (Platform.isAndroid) {
-      storeDirs = await getExternalStorageDirectories()
+      dirs = await getExternalStorageDirectories()
           .then((dirs) => (dirs ?? []).map((dir) => join(dir.path, _name)))
           .then(_fromPaths)
           .then(
@@ -58,7 +81,7 @@ class StoreDirsCubit extends Cubit<List<StoreDir>> {
                 .toList(),
           );
 
-      await _session.setStoreDirs(storeDirs.paths);
+      await _session.setStoreDirs(dirs.paths);
     } else {
       final path = join(_dirs.root, _name);
       final volume = StorageVolume(
@@ -68,15 +91,15 @@ class StoreDirsCubit extends Cubit<List<StoreDir>> {
         state: StorageVolumeMounted(mountPoint: path),
       );
 
-      storeDirs = [StoreDir(path: path, volume: volume)];
+      dirs = [StoreDir(path: path, volume: volume)];
 
       // Using `insertStoreDirs` so that any custom dirs (set via the CLI app or other means) are
       // preserved.
-      await _session.insertStoreDirs(storeDirs.paths);
+      await _session.insertStoreDirs(dirs.paths);
     }
 
     if (!isClosed) {
-      emit(storeDirs);
+      emit(StoreDirs(dirs));
     }
   }
 }
