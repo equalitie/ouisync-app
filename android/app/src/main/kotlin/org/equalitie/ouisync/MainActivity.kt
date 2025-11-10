@@ -1,8 +1,14 @@
 package org.equalitie.ouisync
 
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
+import android.os.Handler
+import android.os.HandlerThread
 import android.os.storage.StorageManager
 import android.os.storage.StorageVolume
 import android.provider.DocumentsContract
@@ -12,7 +18,6 @@ import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import java.io.File
 import java.util.concurrent.CountDownLatch
-import java.util.concurrent.Executors
 
 class MainActivity : FlutterFragmentActivity() {
     companion object {
@@ -20,8 +25,7 @@ class MainActivity : FlutterFragmentActivity() {
         private val TAG = "ouisync"
     }
 
-    private val storageVolumeExecutor = Executors.newSingleThreadExecutor()
-    private var storageVolumeCallback: StorageManager.StorageVolumeCallback? = null
+    private var storageVolumeReceiver: BroadcastReceiver? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -55,52 +59,11 @@ class MainActivity : FlutterFragmentActivity() {
             }
         }
 
-        storageManager.let { storageManager ->
-            storageVolumeCallback?.let { storageManager.unregisterStorageVolumeCallback(it) }
-
-            storageVolumeCallback =
-                object : StorageManager.StorageVolumeCallback() {
-                    override fun onStateChanged(volume: StorageVolume) {
-                        Log.v(
-                            TAG,
-                            "storage volume state changed: ${volume.getDescription(this@MainActivity)}, state: ${volume.state}",
-                        )
-
-                        // Not 100% sure about this, but it seems that if a removable storage is being
-                        // ejected and there are some repos (or any open files) on it, we need to close
-                        // them before this callback returns, otherwise the os kills the app
-                        // (possibly after a short delay).
-                        val latch = CountDownLatch(1)
-                        val result =
-                            object : MethodChannel.Result {
-                                override fun success(result: Any?) {
-                                    latch.countDown()
-                                }
-
-                                override fun error(
-                                    errorCode: String,
-                                    errorMessage: String?,
-                                    errorDetails: Any?,
-                                ) {
-                                    latch.countDown()
-                                }
-
-                                override fun notImplemented() {
-                                    latch.countDown()
-                                }
-                            }
-
-                        runOnUiThread { methodChannel.invokeMethod("storageVolumeChanged", null, result) }
-
-                        latch.await()
-                    }
-                }.also { storageManager.registerStorageVolumeCallback(storageVolumeExecutor, it) }
-        }
+        registerStorageVolumeReceiver(methodChannel)
     }
 
     override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {
-        storageVolumeCallback?.let { storageManager.unregisterStorageVolumeCallback(it) }
-        storageVolumeCallback = null
+        unregisterStorageVolumeReceiver()
 
         super.cleanUpFlutterEngine(flutterEngine)
     }
@@ -148,4 +111,76 @@ class MainActivity : FlutterFragmentActivity() {
 
     private val storageManager: StorageManager
         get() = getSystemService(STORAGE_SERVICE) as StorageManager
+
+    private fun registerStorageVolumeReceiver(methodChannel: MethodChannel) {
+        val receiver =
+            object : BroadcastReceiver() {
+                override fun onReceive(
+                    context: Context,
+                    intent: Intent,
+                ) {
+                    Log.v(
+                        TAG,
+                        "storageVolumeReceiver.onReceive: action=${intent.action}, data=${intent.data}",
+                    )
+
+                    onStorageVolumeStateChange(methodChannel)
+                }
+            }
+
+        storageVolumeReceiver = receiver
+
+        val filter =
+            IntentFilter().apply {
+                addAction(Intent.ACTION_MEDIA_BAD_REMOVAL)
+                addAction(Intent.ACTION_MEDIA_CHECKING)
+                addAction(Intent.ACTION_MEDIA_EJECT)
+                addAction(Intent.ACTION_MEDIA_MOUNTED)
+                addAction(Intent.ACTION_MEDIA_NOFS)
+                addAction(Intent.ACTION_MEDIA_REMOVED)
+                addAction(Intent.ACTION_MEDIA_SHARED)
+                addAction(Intent.ACTION_MEDIA_UNMOUNTABLE)
+                addAction(Intent.ACTION_MEDIA_UNMOUNTED)
+
+                addDataScheme("file")
+            }
+
+        val handler = Handler(HandlerThread("storage volume receiver thread").apply { start() }.looper)
+
+        registerReceiver(receiver, filter, null, handler)
+    }
+
+    private fun unregisterStorageVolumeReceiver() {
+        storageVolumeReceiver?.let { unregisterReceiver(it) }
+    }
+
+    private fun onStorageVolumeStateChange(methodChannel: MethodChannel) {
+        // Not 100% sure about this, but it seems that if a removable storage is being
+        // ejected and there are some repos (or any open files) on it, we need to close
+        // them before this callback returns, otherwise the os kills the app
+        // (possibly after a short delay).
+        val latch = CountDownLatch(1)
+        val result =
+            object : MethodChannel.Result {
+                override fun success(result: Any?) {
+                    latch.countDown()
+                }
+
+                override fun error(
+                    errorCode: String,
+                    errorMessage: String?,
+                    errorDetails: Any?,
+                ) {
+                    latch.countDown()
+                }
+
+                override fun notImplemented() {
+                    latch.countDown()
+                }
+            }
+
+        runOnUiThread { methodChannel.invokeMethod("storageVolumeChanged", null, result) }
+
+        latch.await()
+    }
 }
