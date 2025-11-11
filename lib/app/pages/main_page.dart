@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'dart:io' as io;
 
-import 'package:build_context_provider/build_context_provider.dart';
+import 'package:build_context_provider/build_context_provider.dart'
+    show ListenerThatRunsFunctionsWithBuildContext;
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -195,6 +196,7 @@ class _MainPageState extends State<MainPage>
 
         return RepoListState(
           reposCubit: widget.reposCubit,
+          storeDirsCubit: widget.storeDirsCubit,
           bottomSheetInfo: _bottomSheetInfo,
           onShowRepoSettings: _showRepoSettings,
         );

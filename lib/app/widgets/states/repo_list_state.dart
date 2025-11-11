@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ouisync_app/app/cubits/store_dirs.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
@@ -11,11 +12,13 @@ class RepoListState extends StatelessWidget
     with AppLogger, RepositoryActionsMixin {
   const RepoListState({
     required this.reposCubit,
+    required this.storeDirsCubit,
     required this.bottomSheetInfo,
     required this.onShowRepoSettings,
   });
 
   final ReposCubit reposCubit;
+  final StoreDirsCubit storeDirsCubit;
   final ValueNotifier<BottomSheetInfo> bottomSheetInfo;
 
   final Future<void> Function(
@@ -97,6 +100,7 @@ class RepoListState extends StatelessWidget
 
         return RepoListItem(
           repoCubit: repoCubit,
+          storeDirsCubit: storeDirsCubit,
           isDefault: isDefault,
           mainAction: () => reposCubit.setCurrent(repoEntry),
           verticalDotsAction: () =>

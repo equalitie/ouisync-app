@@ -1,4 +1,5 @@
-import 'package:build_context_provider/build_context_provider.dart';
+import 'package:build_context_provider/build_context_provider.dart'
+    show BuildContextProvider;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 

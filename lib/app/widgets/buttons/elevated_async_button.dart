@@ -25,6 +25,7 @@ class ElevatedAsyncButton extends StatefulWidget {
 
 class ElevatedAsyncButtonState extends State<ElevatedAsyncButton> {
   bool isExecuting = false;
+  int execCounter = 0;
 
   ElevatedAsyncButtonState();
 
@@ -56,6 +57,7 @@ class ElevatedAsyncButtonState extends State<ElevatedAsyncButton> {
       if (mounted) {
         setState(() {
           isExecuting = false;
+          ++execCounter;
         });
       }
     }

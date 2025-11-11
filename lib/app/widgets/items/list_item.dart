@@ -1,9 +1,11 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:path/path.dart' as p;
 
 import '../../cubits/cubits.dart'
     show EntrySelectionCubit, EntrySelectionState, Job, RepoCubit, RepoState;
+import '../../cubits/store_dirs.dart';
 import '../../models/models.dart'
     show DirectoryEntry, FileEntry, FileSystemEntry, RepoLocation;
 import '../../utils/utils.dart' show Constants, Dimensions, Fields, ThemeGetter;
@@ -16,6 +18,7 @@ import '../widgets.dart'
         RepoStatus,
         ScrollableTextWidget,
         SelectionStatus;
+import '../store_dir.dart' show StorageVolumeExtension;
 
 class FileListItem extends StatelessWidget {
   FileListItem({
@@ -178,12 +181,14 @@ class RepoListItem extends StatelessWidget {
   RepoListItem({
     super.key,
     required this.repoCubit,
+    required this.storeDirsCubit,
     required this.isDefault,
     required this.mainAction,
     required this.verticalDotsAction,
   });
 
   final RepoCubit repoCubit;
+  final StoreDirsCubit storeDirsCubit;
   final bool isDefault;
   final void Function() mainAction;
   final void Function() verticalDotsAction;
@@ -211,6 +216,7 @@ class RepoListItem extends StatelessWidget {
               child: RepoDescription(state, isDefault: isDefault),
             ),
           ),
+          _RepoStore(storeDirsCubit, state.location),
           RepoStatus(repoCubit),
           _VerticalDotsButton(disable: false, action: verticalDotsAction),
         ],
@@ -376,6 +382,37 @@ class TrailAction extends StatelessWidget {
       },
     );
   }
+}
+
+class _RepoStore extends StatelessWidget {
+  final StoreDirsCubit storeDirsCubit;
+  final RepoLocation location;
+
+  _RepoStore(this.storeDirsCubit, this.location);
+
+  @override
+  Widget build(BuildContext context) => BlocBuilder<StoreDirsCubit, StoreDirs>(
+    bloc: storeDirsCubit,
+    builder: (context, storeDirs) {
+      if (storeDirs.length <= 1) {
+        return SizedBox.shrink();
+      }
+
+      final dir = storeDirs.firstWhereOrNull((dir) => dir.path == location.dir);
+      if (dir == null) {
+        return SizedBox.shrink();
+      }
+
+      if (!dir.volume.isRemovable) {
+        return SizedBox.shrink();
+      }
+
+      return Tooltip(
+        message: dir.volume.description,
+        child: Icon(dir.volume.icon, color: Colors.black.withAlpha(128)),
+      );
+    },
+  );
 }
 
 void _updateSelection(
