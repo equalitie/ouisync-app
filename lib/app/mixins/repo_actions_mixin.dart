@@ -1,3 +1,5 @@
+import 'dart:async' show FutureOr;
+
 import 'package:flutter/material.dart';
 import 'package:loggy/loggy.dart';
 import 'package:ouisync/ouisync.dart';
@@ -107,7 +109,7 @@ mixin RepositoryActionsMixin on LoggyType {
     required Session session,
     required RepoCubit repoCubit,
     required PasswordHasher passwordHasher,
-    required void Function() popDialog,
+    required FutureOr<void> Function() popDialog,
   }) async {
     //LocalSecret secret;
     final authMode = repoCubit.state.authMode;
@@ -138,7 +140,7 @@ mixin RepositoryActionsMixin on LoggyType {
       access = await repoCubit.getAccessOf(secret);
     }
 
-    popDialog();
+    await popDialog();
 
     final UnlockedAccess? unlockedAccess = access?.asUnlocked;
 

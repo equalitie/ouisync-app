@@ -110,13 +110,13 @@ class RepositorySettings extends StatelessWidget
                 iconData: Icons.password_outlined,
                 title: S.current.titleSecurity,
                 dense: true,
-                onTap: () async => await navigateToRepositorySecurity(
+                onTap: () => navigateToRepositorySecurity(
                   context,
                   settings: settings,
                   session: session,
                   repoCubit: repoCubit,
                   passwordHasher: reposCubit.passwordHasher,
-                  popDialog: () => Navigator.of(context).pop(),
+                  popDialog: () => Navigator.of(context).maybePop(),
                 ),
               ),
 
