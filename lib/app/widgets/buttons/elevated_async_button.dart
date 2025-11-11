@@ -25,28 +25,15 @@ class ElevatedAsyncButton extends StatefulWidget {
 
 class ElevatedAsyncButtonState extends State<ElevatedAsyncButton> {
   bool isExecuting = false;
-  int execCounter = 0;
 
   ElevatedAsyncButtonState();
 
   @override
   Widget build(BuildContext context) {
-    final widgetOnPressed = widget.onPressed;
+    final callback = widget.onPressed;
 
-    final onPressed = widgetOnPressed != null && isExecuting == false
-        ? () {
-            setState(() {
-              isExecuting = true;
-            });
-            unawaited(
-              widgetOnPressed().whenComplete(() {
-                setState(() {
-                  isExecuting = false;
-                  execCounter += 1;
-                });
-              }),
-            );
-          }
+    final onPressed = callback != null && isExecuting == false
+        ? () => unawaited(_onPressed(callback))
         : null;
 
     return ElevatedButton(
@@ -56,5 +43,21 @@ class ElevatedAsyncButtonState extends State<ElevatedAsyncButton> {
       autofocus: widget.autofocus,
       focusNode: widget.focusNode,
     );
+  }
+
+  Future<void> _onPressed(Future<void> Function() callback) async {
+    setState(() {
+      isExecuting = true;
+    });
+
+    try {
+      await callback();
+    } finally {
+      if (mounted) {
+        setState(() {
+          isExecuting = false;
+        });
+      }
+    }
   }
 }
