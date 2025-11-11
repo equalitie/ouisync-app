@@ -18,6 +18,7 @@ import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import java.io.File
 import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executors
 
 class MainActivity : FlutterFragmentActivity() {
     companion object {
@@ -25,7 +26,7 @@ class MainActivity : FlutterFragmentActivity() {
         private val TAG = "ouisync"
     }
 
-    private var storageVolumeReceiver: BroadcastReceiver? = null
+    private var storageNotifier: StorageNotifier? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -59,11 +60,16 @@ class MainActivity : FlutterFragmentActivity() {
             }
         }
 
-        registerStorageVolumeReceiver(methodChannel)
+        storageNotifier = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            CallbackStorageNotifier(methodChannel)
+        } else {
+            ReceiverStorageNotifier(methodChannel)
+        }
     }
 
     override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {
-        unregisterStorageVolumeReceiver()
+        storageNotifier?.unregister()
+        storageNotifier = null
 
         super.cleanUpFlutterEngine(flutterEngine)
     }
@@ -112,48 +118,6 @@ class MainActivity : FlutterFragmentActivity() {
     private val storageManager: StorageManager
         get() = getSystemService(STORAGE_SERVICE) as StorageManager
 
-    private fun registerStorageVolumeReceiver(methodChannel: MethodChannel) {
-        val receiver =
-            object : BroadcastReceiver() {
-                override fun onReceive(
-                    context: Context,
-                    intent: Intent,
-                ) {
-                    Log.v(
-                        TAG,
-                        "storageVolumeReceiver.onReceive: action=${intent.action}, data=${intent.data}",
-                    )
-
-                    onStorageVolumeStateChange(methodChannel)
-                }
-            }
-
-        storageVolumeReceiver = receiver
-
-        val filter =
-            IntentFilter().apply {
-                addAction(Intent.ACTION_MEDIA_BAD_REMOVAL)
-                addAction(Intent.ACTION_MEDIA_CHECKING)
-                addAction(Intent.ACTION_MEDIA_EJECT)
-                addAction(Intent.ACTION_MEDIA_MOUNTED)
-                addAction(Intent.ACTION_MEDIA_NOFS)
-                addAction(Intent.ACTION_MEDIA_REMOVED)
-                addAction(Intent.ACTION_MEDIA_SHARED)
-                addAction(Intent.ACTION_MEDIA_UNMOUNTABLE)
-                addAction(Intent.ACTION_MEDIA_UNMOUNTED)
-
-                addDataScheme("file")
-            }
-
-        val handler = Handler(HandlerThread("storage volume receiver thread").apply { start() }.looper)
-
-        registerReceiver(receiver, filter, null, handler)
-    }
-
-    private fun unregisterStorageVolumeReceiver() {
-        storageVolumeReceiver?.let { unregisterReceiver(it) }
-    }
-
     private fun onStorageVolumeStateChange(methodChannel: MethodChannel) {
         // Not 100% sure about this, but it seems that if a removable storage is being
         // ejected and there are some repos (or any open files) on it, we need to close
@@ -182,5 +146,78 @@ class MainActivity : FlutterFragmentActivity() {
         runOnUiThread { methodChannel.invokeMethod("storageVolumeChanged", null, result) }
 
         latch.await()
+    }
+
+    private sealed interface StorageNotifier {
+        abstract fun unregister();
+    }
+
+    // Storage notifier backed by BroadcastReceiver. Works on any Android version supported by Ouisync.
+    private inner class ReceiverStorageNotifier(methodChannel: MethodChannel) : StorageNotifier {
+        private val handler = Handler(HandlerThread("storage volume receiver thread").apply { start() }.looper)
+        private lateinit var receiver: BroadcastReceiver
+
+        init {
+            receiver =
+                object : BroadcastReceiver() {
+                    override fun onReceive(
+                        context: Context,
+                        intent: Intent,
+                    ) {
+                        Log.v(
+                            TAG,
+                            "storage volume state changed: action=${intent.action}, data=${intent.data}",
+                        )
+
+                        onStorageVolumeStateChange(methodChannel)
+                    }
+                }
+
+            val filter =
+                IntentFilter().apply {
+                    addAction(Intent.ACTION_MEDIA_BAD_REMOVAL)
+                    addAction(Intent.ACTION_MEDIA_CHECKING)
+                    addAction(Intent.ACTION_MEDIA_EJECT)
+                    addAction(Intent.ACTION_MEDIA_MOUNTED)
+                    addAction(Intent.ACTION_MEDIA_NOFS)
+                    addAction(Intent.ACTION_MEDIA_REMOVED)
+                    addAction(Intent.ACTION_MEDIA_SHARED)
+                    addAction(Intent.ACTION_MEDIA_UNMOUNTABLE)
+                    addAction(Intent.ACTION_MEDIA_UNMOUNTED)
+
+                    addDataScheme("file")
+                }
+
+            registerReceiver(receiver, filter, null, handler)
+        }
+
+        override fun unregister() {
+            unregisterReceiver(receiver)
+        }
+    }
+
+    // Storage notifier backed by StorageManager.StorageVolumeCallback. Works on Android API >= 30.
+    private inner class CallbackStorageNotifier(methodChannel: MethodChannel) : StorageNotifier {
+        private val executor = Executors.newSingleThreadExecutor()
+        private lateinit var callback: StorageManager.StorageVolumeCallback
+
+        init {
+            callback = object : StorageManager.StorageVolumeCallback() {
+                override fun onStateChanged(volume: StorageVolume) {
+                    Log.v(
+                        TAG,
+                        "storage volume state changed: description=${volume.getDescription(this@MainActivity)}, state=${volume.state}",
+                    )
+
+                    onStorageVolumeStateChange(methodChannel)
+                }
+            }
+
+            storageManager.registerStorageVolumeCallback(executor, callback)
+        }
+
+        override fun unregister() {
+            storageManager.unregisterStorageVolumeCallback(callback)
+        }
     }
 }
