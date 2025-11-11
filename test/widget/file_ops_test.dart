@@ -1,5 +1,3 @@
-import 'dart:io' as io;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ouisync_app/app/widgets/dialogs/modal_entry_actions_bottom_sheet.dart'
@@ -13,18 +11,9 @@ import 'package:ouisync_app/app/widgets/dialogs/entries_actions_bottom_sheet.dar
 import 'package:ouisync_app/app/widgets/buttons/dialog_action_button.dart'
     show PositiveButton;
 import 'package:ouisync_app/app/models/repo_entry.dart' show OpenRepoEntry;
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
 
 import '../utils.dart';
 import '../navigation.dart';
-
-Future<io.File> _createTempFile(String name) async {
-  final path = (await getTemporaryDirectory()).path;
-  final file = await io.File(p.join(path, name)).create(recursive: true);
-  await file.writeAsString("Lorem ipsum");
-  return file;
-}
 
 void main() {
   late TestDependencies deps;
@@ -49,7 +38,10 @@ void main() {
       final srcFileName = 'file.txt';
       final dstDir = 'folder';
 
-      final tempFile = await _createTempFile(srcFileName);
+      final tempFile = await createFile(
+        name: srcFileName,
+        content: 'Lorem ipsum',
+      );
 
       String? currentFolder() {
         final state = deps.reposCubit.state;
@@ -131,6 +123,21 @@ void main() {
 
       // Check we did not move the file
       await tester.pumpUntilFound(repoPage.findDirEntry(srcFileName));
+    }),
+  );
+
+  testWidgets(
+    'add_empty_file',
+    (tester) => tester.runAsyncDebug(() async {
+      final mainPage = MainPage(tester, deps);
+      final repoPage = await mainPage.createAndEnterRepository();
+
+      final srcFileName = 'empty.txt';
+      final srcFile = await createFile(name: srcFileName);
+
+      await repoPage.addFile(srcFile.path);
+
+      expect(find.text(srcFileName), findsOne);
     }),
   );
 }

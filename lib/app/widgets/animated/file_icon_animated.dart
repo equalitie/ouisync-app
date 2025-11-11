@@ -39,7 +39,7 @@ class FileIconAnimated extends StatelessWidget with AppLogger {
     return BlocBuilder<Job, JobState>(
       bloc: job,
       builder: (context, state) {
-        final ratio = state.soFar / state.total;
+        final ratio = state.progress;
         final percentage = (ratio * 100.0).round();
 
         return CircularPercentIndicator(

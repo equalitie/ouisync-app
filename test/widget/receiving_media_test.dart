@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' as io;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -34,17 +33,6 @@ void main() {
 
   MainPage createMainPage() =>
       deps.createMainPage(receivedMedia: mediaReceiverController.stream);
-
-  Future<io.File> createFile({
-    required String name,
-    String content = '',
-  }) async {
-    final file = io.File(join((await getTemporaryDirectory()).path, name));
-    await file.create(recursive: true);
-    await file.writeAsString(content);
-
-    return file;
-  }
 
   Future<String> readRepoFileAsString(RepoCubit repoCubit, String path) async {
     final file = await repoCubit.openFile(path);

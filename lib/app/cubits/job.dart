@@ -14,6 +14,8 @@ class JobState {
     total: total ?? this.total,
     cancel: cancel ?? this.cancel,
   );
+
+  double get progress => total > 0 ? soFar / total : 0.0;
 }
 
 class Job extends Cubit<JobState> with CubitActions {

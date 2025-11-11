@@ -77,11 +77,7 @@ class FileDescription extends StatelessWidget with AppLogger {
   Widget _buildUploadProgress(BuildContext context, Job job) => Row(
     textBaseline: TextBaseline.alphabetic,
     children: [
-      Expanded(
-        child: LinearProgressIndicator(
-          value: job.state.soFar / job.state.total,
-        ),
-      ),
+      Expanded(child: LinearProgressIndicator(value: job.state.progress)),
       TextButton(
         onPressed: () {
           job.cancel();

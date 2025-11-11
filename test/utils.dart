@@ -484,6 +484,16 @@ String randomAsciiString(int length) {
   );
 }
 
+/// Create file with the given content (empty by default) in the temp directory of the currenty
+/// running test.
+Future<File> createFile({required String name, String content = ''}) async {
+  final file = File(join((await getTemporaryDirectory()).path, name));
+  await file.create(recursive: true);
+  await file.writeAsString(content);
+
+  return file;
+}
+
 String get _testDirPath {
   var path = (goldenFileComparator as LocalFileComparator).basedir.path;
 
