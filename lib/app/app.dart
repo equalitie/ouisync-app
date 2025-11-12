@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:ouisync/ouisync.dart' show NetworkDefaults, Server, Session;
 import 'package:ouisync_app/app/cubits/store_dirs.dart';
+import 'package:ouisync_app/app/utils/actions.dart';
 import 'package:package_info_plus/package_info_plus.dart' show PackageInfo;
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
@@ -273,6 +274,7 @@ class _HomeWidgetState extends State<HomeWidget>
       cacheServers: cacheServers,
       mountCubit: mountCubit,
       storeDirsCubit: widget.storeDirsCubit,
+      onNotify: (message) => showSnackBar(context, message),
     );
 
     unawaited(_init());

@@ -20,8 +20,7 @@ import '../utils/utils.dart'
         None,
         Option,
         PasswordHasher,
-        Settings,
-        showSnackBar;
+        Settings;
 import 'cubits.dart';
 
 class ReposState {
@@ -56,6 +55,7 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
   final Session _session;
   final Settings _settings;
   final MountCubit _mountCubit;
+  final void Function(String)? _onNotify;
 
   final EntryBottomSheetCubit bottomSheet;
   final CacheServers cacheServers;
@@ -72,12 +72,14 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
     required this.cacheServers,
     required MountCubit mountCubit,
     required StoreDirsCubit storeDirsCubit,
+    void Function(String)? onNotify,
     EntryBottomSheetCubit? bottomSheet,
     NavigationCubit? navigation,
     EntrySelectionCubit? entriesSelection,
   }) : _session = session,
        _settings = settings,
        _mountCubit = mountCubit,
+       _onNotify = onNotify,
        bottomSheet = bottomSheet ?? EntryBottomSheetCubit(),
        navigation = navigation ?? NavigationCubit(),
        entriesSelection = entriesSelection ?? EntrySelectionCubit(),
@@ -304,6 +306,7 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
     entrySelection: entriesSelection,
     bottomSheet: bottomSheet,
     cacheServers: cacheServers,
+    onNotify: _onNotify,
   );
 
   @override
@@ -330,10 +333,7 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
 
   Future<void> importRepoFromLocation(RepoLocation location) async {
     if (state.repos.containsKey(location)) {
-      // TODO:
-      throw UnimplementedError('snackbar in cubit');
-      //showSnackBar(S.current.repositoryIsAlreadyImported);
-
+      _onNotify?.call(S.current.repositoryIsAlreadyImported);
       return;
     }
 
@@ -342,16 +342,18 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
     try {
       repo = await _session.openRepository(path: location.path);
     } on AlreadyExists {
-      // TODO:
-      throw UnimplementedError('snackbar in cubit');
-      //showSnackBar(S.current.repositoryIsAlreadyImported);
-
       loggy.warning(
         'Same repository but from different location is already loaded',
       );
+
+      _onNotify?.call(S.current.repositoryIsAlreadyImported);
+
       return;
     } catch (e, st) {
       loggy.error('Failed to open repository ${location.path}:', e, st);
+
+      _onNotify?.call(S.current.messageFailedAddRepository(location.name));
+
       return;
     }
 
@@ -476,3 +478,5 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
     await entry.cubit?.delete();
   }
 }
+
+//sealed class

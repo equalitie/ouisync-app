@@ -6,10 +6,10 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mime/mime.dart';
 import 'package:ouisync/ouisync.dart' hide DirectoryEntry;
+import 'package:ouisync_app/generated/l10n.dart';
 import 'package:shelf/shelf_io.dart';
 import 'package:stream_transform/stream_transform.dart';
 
-import '../../generated/l10n.dart';
 import '../models/models.dart';
 import '../utils/cipher.dart' as cipher;
 import '../utils/repo_path.dart' as repo_path;
@@ -108,6 +108,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   final cipher.SecretKey _pathSecretKey;
   final CacheServers _cacheServers;
   final MountCubit _mountCubit;
+  final void Function(String)? _onNotify;
 
   RepoCubit._(
     this._navigation,
@@ -117,6 +118,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     this._pathSecretKey,
     this._cacheServers,
     this._mountCubit,
+    this._onNotify,
     super.state,
   ) {
     _currentFolder.repo = this;
@@ -129,6 +131,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     required EntrySelectionCubit entrySelection,
     required EntryBottomSheetCubit bottomSheet,
     required CacheServers cacheServers,
+    void Function(String)? onNotify,
   }) async {
     final path = await repo.getPath();
     final location = RepoLocation.fromDbPath(path);
@@ -160,6 +163,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
       pathSecretKey,
       cacheServers,
       mountCubit,
+      onNotify,
       state,
     );
 
@@ -424,20 +428,14 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     required Stream<List<int>> fileByteStream,
   }) async {
     if (state.uploads.containsKey(filePath)) {
-      // TODO:
-      throw UnimplementedError('snackbar in cubit');
-      //showSnackBar(S.current.messageFileIsDownloading);
-
+      _onNotify?.call(S.current.messageFileIsDownloading);
       return;
     }
 
     final file = await _createFile(filePath);
 
     if (file == null) {
-      // TODO:
-      throw UnimplementedError('snackbar in cubit');
-      //showSnackBar(S.current.messageNewFileError(filePath));
-
+      _onNotify?.call(S.current.messageNewFileError(filePath));
       return;
     }
 
@@ -465,11 +463,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
       loggy.debug('File saved: $filePath (${formatSize(offset)})');
     } catch (e, st) {
       loggy.debug('Save file to $filePath failed: ${e.toString()}', e, st);
-
-      // TODO:
-      throw UnimplementedError('snackbar in cubit');
-      //showSnackBar(S.current.messageWritingFileError(filePath));
-
+      _onNotify?.call(S.current.messageWritingFileError(filePath));
       return;
     } finally {
       await file.close();
@@ -481,9 +475,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     }
 
     if (job.state.cancel) {
-      // TODO:
-      throw UnimplementedError('snackbar in cubit');
-      //showSnackBar(S.current.messageWritingFileCanceled(filePath));
+      _onNotify?.call(S.current.messageWritingFileCanceled(filePath));
     }
   }
 
@@ -687,10 +679,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     required String destinationPath,
   }) async {
     if (state.downloads.containsKey(sourcePath)) {
-      // TODO:
-      throw UnimplementedError('snackbar in cubit');
-      //showSnackBar(S.current.messageFileIsDownloading);
-
+      _onNotify?.call(S.current.messageFileIsDownloading);
       return;
     }
 
