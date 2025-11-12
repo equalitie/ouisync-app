@@ -9,7 +9,7 @@ class PlatformWebViewDesktop implements PlatformWebView {
       launcher.launchUrl(Uri.parse(url));
 
   @override
-  Future<Widget> loadUrl(BuildContext context, String url) {
+  Future<Widget> loadUrl(String url) {
     throw UnimplementedError();
   }
 }

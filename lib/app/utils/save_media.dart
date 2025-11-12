@@ -18,10 +18,8 @@ class SaveMedia with AppLogger {
     required this.sourcePath,
     required this.type,
     required this.stage,
-  }) : _context = context,
-       _repoCubit = repoCubit;
+  }) : _repoCubit = repoCubit;
 
-  final BuildContext _context;
   final RepoCubit _repoCubit;
   final String sourcePath;
   final EntryType type;
@@ -46,11 +44,10 @@ class SaveMedia with AppLogger {
     }
 
     final result = await RenameOrReplaceEntryDialog.show(
-      _context,
+      stage: stage,
       title: S.current.actionSave,
       entryName: newFileName,
       entryType: EntryType.file,
-      stage: stage,
     );
 
     switch (result) {

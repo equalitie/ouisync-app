@@ -3,6 +3,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync/ouisync.dart';
+import 'package:ouisync_app/app/utils/dialogs.dart';
 import 'package:ouisync_app/app/widgets/store_dir.dart';
 
 import '../../generated/l10n.dart';
@@ -18,8 +19,9 @@ import '../cubits/cubits.dart'
 
 import '../cubits/store_dirs.dart';
 import '../utils/log.dart' show AppLogger;
+import '../utils/stage.dart';
 import '../utils/utils.dart'
-    show AppThemeExtension, Constants, Dialogs, Dimensions, Fields, ThemeGetter;
+    show AppThemeExtension, Constants, Dimensions, Fields, ThemeGetter;
 
 import '../widgets/widgets.dart'
     show
@@ -31,11 +33,13 @@ import '../widgets/widgets.dart'
 class RepoCreationPage extends StatelessWidget {
   RepoCreationPage({
     super.key,
+    required this.stage,
     required this.reposCubit,
     required this.storeDirsCubit,
     this.token,
   });
 
+  final Stage stage;
   final ReposCubit reposCubit;
   final StoreDirsCubit storeDirsCubit;
   final ShareToken? token;
@@ -52,6 +56,7 @@ class RepoCreationPage extends StatelessWidget {
     body: BlocHolder(
       create: () => _createCubit(context),
       builder: (context, creationCubit) => RepoCreation(
+        stage: stage,
         creationCubit: creationCubit,
         storeDirsCubit: storeDirsCubit,
       ),
@@ -64,12 +69,7 @@ class RepoCreationPage extends StatelessWidget {
     unawaited(
       // Wrapping this in `Future(() => ...)` to ensure the future does not start executing in
       // the same frame this function is invoked, which would result in exception from flutter.
-      Future(
-        () => Dialogs.executeFutureWithLoadingDialog(
-          context,
-          cubit.setToken(token),
-        ),
-      ),
+      Future(() => stage.loading(cubit.setToken(token))),
     );
 
     return cubit;
@@ -78,11 +78,13 @@ class RepoCreationPage extends StatelessWidget {
 
 class RepoCreation extends StatelessWidget with AppLogger {
   RepoCreation({
+    required this.stage,
     required this.creationCubit,
     required this.storeDirsCubit,
     super.key,
   });
 
+  final Stage stage;
   final RepoCreationCubit creationCubit;
   final StoreDirsCubit storeDirsCubit;
 
@@ -276,10 +278,10 @@ class RepoCreation extends StatelessWidget with AppLogger {
       case RepoCreationValid():
         break;
       case RepoCreationSuccess(entry: final entry):
-        Navigator.of(context).pop(entry);
+        await stage.maybePop(entry);
       case RepoCreationFailure(location: final location, error: final error):
-        await Dialogs.simpleAlertDialog(
-          context,
+        await SimpleAlertDialog.show(
+          stage,
           title: S.current.messageFailedCreateRepository(location.path),
           message: error,
         );

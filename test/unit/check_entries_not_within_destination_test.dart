@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter/widgets.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ouisync_app/app/cubits/cubits.dart';
@@ -121,7 +120,6 @@ void main() {
     (tester) => tester.runAsync(() async {
       await tester.pumpWidget(testApp(deps.createMainPage()));
       await tester.pumpAndSettle();
-      final BuildContext context = tester.element(find.byType(MainPage));
       final Stage stage = tester.widget<MainPage>(find.byType(MainPage)).stage;
 
       // Set originRepoCubit as current repo
@@ -151,11 +149,10 @@ void main() {
       }
 
       final moveEntriesActions = MoveEntriesActions(
-        context,
+        stage: stage,
         reposCubit: reposCubit,
         originRepoCubit: originRepoCubit,
         sheetType: BottomSheetType.move,
-        stage: stage,
       );
 
       final validation = entrySelectionCubit.validateDestination;

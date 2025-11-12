@@ -1,99 +1,35 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:ouisync_app/app/utils/stage.dart';
 
 import '../../generated/l10n.dart';
-import '../cubits/cubits.dart' show RepoCubit;
-import '../models/models.dart' show FileSystemEntry, FileEntry;
-import '../utils/repo_path.dart' as repo_path;
-import '../widgets/widgets.dart' show NegativeButton, PositiveButton;
-import 'utils.dart'
-    show AppThemeExtension, Dimensions, Fields, Strings, ThemeGetter;
+import 'utils.dart' show AppThemeExtension, Fields, ThemeGetter;
 
-abstract class Dialogs {
-  static int _loadingInvocations = 0;
+class AlertDialogWithActions extends StatelessWidget {
+  final String title;
+  final List<Widget> body;
+  final List<Widget> actions;
 
-  static Future<T> executeFutureWithLoadingDialog<T>(
-    BuildContext context,
-    Future<T> future,
-  ) async {
-    if (_loadingInvocations == 0) {
-      unawaited(_showLoadingDialog(context));
-    }
+  const AlertDialogWithActions({
+    required this.title,
+    required this.body,
+    required this.actions,
+    super.key,
+  });
 
-    _loadingInvocations += 1;
-
-    try {
-      return await future;
-    } finally {
-      _loadingInvocations -= 1;
-      if (_loadingInvocations == 0) {
-        _hideLoadingDialog(context);
-      }
-    }
-  }
-
-  static Future<void> _showLoadingDialog(BuildContext context) => showDialog(
-    context: context,
-    barrierDismissible: false,
-    builder: (BuildContext context) => PopScope(
-      canPop: false,
-      child: Center(
-        child: const CircularProgressIndicator.adaptive(
-          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-        ),
-      ),
-    ),
-  );
-
-  static void _hideLoadingDialog(BuildContext context) =>
-      Navigator.of(context, rootNavigator: true).pop();
-
-  static Future<bool?> alertDialogWithActions<bool>(
-    BuildContext context, {
+  static Future<T?> show<T>(
+    Stage stage, {
     required String title,
     required List<Widget> body,
     required List<Widget> actions,
-  }) => showDialog<bool>(
-    context: context,
-    barrierDismissible: false,
-    builder: (BuildContext context) =>
-        _alertDialog(context, title, body, actions),
+  }) => stage.showDialog(
+    builder: (context) =>
+        AlertDialogWithActions(title: title, body: body, actions: actions),
   );
 
-  static Future<bool?> simpleAlertDialog(
-    BuildContext context, {
-    required String title,
-    required String message,
-    List<Widget>? actions,
-  }) => showDialog(
-    context: context,
-    barrierDismissible: false,
-    builder: (BuildContext context) {
-      return _alertDialog(
-        context,
-        title,
-        [Text(message)],
-        actions ??
-            [
-              TextButton(
-                child: Text(S.current.actionCloseCapital),
-                onPressed: () async => await Navigator.of(
-                  context,
-                  rootNavigator: true,
-                ).maybePop(false),
-              ),
-            ],
-      );
-    },
-  );
-
-  static AlertDialog _alertDialog(
-    BuildContext context,
-    String title,
-    List<Widget> body,
-    List<Widget> actions,
-  ) => AlertDialog(
+  @override
+  Widget build(BuildContext context) => AlertDialog(
     title: Flex(
       direction: Axis.horizontal,
       children: [
@@ -107,73 +43,47 @@ abstract class Dialogs {
     content: SingleChildScrollView(child: ListBody(children: body)),
     actions: actions,
   );
+}
 
-  static Future<bool> deleteEntry(
-    BuildContext context, {
-    required RepoCubit repoCubit,
-    required FileSystemEntry entry,
-    bool? isDirEmpty,
-  }) async {
-    final bodyStyle = context.theme.appTextStyle.bodyMedium.copyWith(
-      fontWeight: FontWeight.bold,
-    );
+class SimpleAlertDialog extends StatelessWidget {
+  final Stage stage;
+  final String title;
+  final String message;
+  final List<Widget>? actions;
 
-    final validationMessage = entry is FileEntry
-        ? S.current.messageConfirmFileDeletion
-        : (isDirEmpty ?? false)
-        ? S.current.messageConfirmFolderDeletion
-        : S.current.messageConfirmNotEmptyFolderDeletion;
+  const SimpleAlertDialog({
+    required this.stage,
+    required this.title,
+    required this.message,
+    this.actions,
+    super.key,
+  });
 
-    final fileParentPath = entry is FileEntry
-        ? repo_path.dirname(entry.path)
-        : '';
+  static Future<T?> show<T>(
+    Stage stage, {
+    required String title,
+    required String message,
+    List<Widget>? actions,
+  }) => stage.showDialog(
+    builder: (context) => SimpleAlertDialog(
+      stage: stage,
+      title: title,
+      message: message,
+      actions: actions,
+    ),
+  );
 
-    final title = entry is FileEntry
-        ? S.current.titleDeleteFile
-        : S.current.titleDeleteFolder;
-
-    final body = entry is FileEntry
-        ? [
-            Text(entry.name, style: bodyStyle),
-            Text('${Strings.atSymbol} $fileParentPath', style: bodyStyle),
-            Dimensions.spacingVerticalDouble,
-            Text(validationMessage),
-          ]
-        : [
-            Text(entry.path, style: bodyStyle),
-            Dimensions.spacingVerticalDouble,
-            Text(validationMessage),
-          ];
-
-    final actions = [
-      Row(
-        children: [
-          NegativeButton(
-            text: S.current.actionCancel,
-            onPressed: () async => await Navigator.of(
-              context,
-              rootNavigator: true,
-            ).maybePop(false),
-          ),
-          PositiveButton(
-            text: S.current.actionDelete,
-            isDangerButton: true,
-            onPressed: () async =>
-                await Navigator.of(context, rootNavigator: true).maybePop(true),
+  @override
+  Widget build(BuildContext context) => AlertDialogWithActions(
+    title: title,
+    body: [Text(message)],
+    actions:
+        actions ??
+        [
+          TextButton(
+            child: Text(S.current.actionCloseCapital),
+            onPressed: () => stage.maybePop(false),
           ),
         ],
-      ),
-    ];
-
-    final result =
-        await alertDialogWithActions<bool>(
-          context,
-          title: title,
-          body: body,
-          actions: actions,
-        ) ??
-        false;
-
-    return result;
-  }
+  );
 }

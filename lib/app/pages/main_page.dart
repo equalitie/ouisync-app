@@ -33,6 +33,7 @@ typedef PreviewFileCallback =
 
 class MainPage extends StatefulWidget {
   const MainPage({
+    required this.stage,
     required this.localeCubit,
     required this.mountCubit,
     required this.receivedMedia,
@@ -43,9 +44,9 @@ class MainPage extends StatefulWidget {
     required this.windowManager,
     required this.dirs,
     required this.storeDirsCubit,
-    required this.stage,
   });
 
+  final Stage stage;
   final PlatformWindowManager windowManager;
   final Session session;
   final Settings settings;
@@ -56,7 +57,6 @@ class MainPage extends StatefulWidget {
   final LocaleCubit localeCubit;
   final Dirs dirs;
   final StoreDirsCubit storeDirsCubit;
-  final Stage stage;
 
   @override
   State<StatefulWidget> createState() => _MainPageState();
@@ -125,14 +125,17 @@ class _MainPageState extends State<MainPage>
 
   void checkForDokan() {
     installationOk() => widget.mountCubit.init();
-    Future<bool?> installationFailed() => Dialogs.simpleAlertDialog(
-      context,
-      title: S.current.titleDokanInstallation,
-      message: S.current.messageDokanInstallationFailed,
+
+    Future<bool?> installationFailed() => widget.stage.showDialog(
+      builder: (context) => SimpleAlertDialog(
+        stage: widget.stage,
+        title: S.current.titleDokanInstallation,
+        message: S.current.messageDokanInstallationFailed,
+      ),
     );
 
     final dokanValidation = DokanValidation(
-      context,
+      stage: widget.stage,
       installationOk: installationOk,
       installationFailed: installationFailed,
     );
@@ -317,6 +320,7 @@ class _MainPageState extends State<MainPage>
   PreferredSizeWidget _buildOuiSyncBar() => OuiSyncBar(
     reposCubit: widget.reposCubit,
     repoPicker: RepositoriesBar(
+      stage: widget.stage,
       mount: widget.mountCubit,
       errorCubit: widget.errorCubit,
       powerControl: powerControl,
@@ -376,7 +380,7 @@ class _MainPageState extends State<MainPage>
           focusNode: _fabFocus,
           heroTag: Constants.heroTagRepoListActions,
           child: icon,
-          onPressed: () => unawaited(_showRepoListActions(context)),
+          onPressed: _showRepoListActions,
         );
       }
     } else if (current is OpenRepoEntry) {
@@ -487,6 +491,7 @@ class _MainPageState extends State<MainPage>
             // TODO: A shadow would be nicer.
             const Divider(height: 1),
             FolderContentsBar(
+              stage: widget.stage,
               reposCubit: widget.reposCubit,
               repoCubit: repo,
               hasContents: folder.content.isNotEmpty,
@@ -626,8 +631,8 @@ class _MainPageState extends State<MainPage>
   }
 
   // void _showNotAvailableMessage() => showSnackBar(S.current.messageMovingEntry);
-  Future<void> _showNotAvailableMessage() => Dialogs.simpleAlertDialog(
-    context,
+  Future<void> _showNotAvailableMessage() => SimpleAlertDialog.show(
+    widget.stage,
     title: S.current.titleMovingEntry,
     message: S.current.messageMovingEntry,
   );
@@ -641,7 +646,6 @@ class _MainPageState extends State<MainPage>
     shape: Dimensions.borderBottomSheetTop,
     builder: (context) => entry is FileEntry
         ? EntryDetails.file(
-            context,
             repoCubit: repoCubit,
             entry: entry,
             onPreviewFile: (cubit, data) => viewFile(
@@ -655,7 +659,6 @@ class _MainPageState extends State<MainPage>
             stage: widget.stage,
           )
         : EntryDetails.folder(
-            context,
             repoCubit: repoCubit,
             entry: entry,
             isActionAvailableValidator: _isEntryActionAvailable,
@@ -797,8 +800,8 @@ class _MainPageState extends State<MainPage>
     final current = widget.reposCubit.state.current;
 
     if (current is! OpenRepoEntry) {
-      await Dialogs.simpleAlertDialog(
-        context,
+      await SimpleAlertDialog.show(
+        widget.stage,
         title: S.current.titleAddFile,
         message: S.current.messageNoRepo,
       );
@@ -813,8 +816,7 @@ class _MainPageState extends State<MainPage>
         : S.current.messageAddingFileToLockedRepository;
 
     if (accessModeMessage != null) {
-      await showDialog<bool>(
-        context: context,
+      await widget.stage.showDialog<bool>(
         barrierDismissible: false, // user must tap button!
         builder: (context) {
           return AlertDialog(
@@ -840,7 +842,7 @@ class _MainPageState extends State<MainPage>
             ),
             actions: [
               TextButton(
-                onPressed: () async => await Navigator.of(context).maybePop(),
+                onPressed: () => widget.stage.maybePop(),
                 child: Text(S.current.actionCloseCapital),
               ),
             ],
@@ -915,21 +917,19 @@ class _MainPageState extends State<MainPage>
         ),
       );
 
-  Future<void> _showRepoListActions(BuildContext context) =>
-      showModalBottomSheet(
-        isScrollControlled: true,
-        context: context,
-        shape: Dimensions.borderBottomSheetTop,
-        builder: (context) => RepoListActions(
-          context: context,
-          reposCubit: widget.reposCubit,
-          onCreateRepoPressed: _createRepo,
-          onImportRepoPressed: _importRepo,
-        ),
-      );
+  Future<void> _showRepoListActions() => widget.stage.showModalBottomSheet(
+    isScrollControlled: true,
+    shape: Dimensions.borderBottomSheetTop,
+    builder: (context) => RepoListActions(
+      stage: widget.stage,
+      reposCubit: widget.reposCubit,
+      onCreateRepoPressed: _createRepo,
+      onImportRepoPressed: _importRepo,
+    ),
+  );
 
   Future<RepoEntry?> _createRepo() async {
-    final repoEntry = await createRepoDialog(context);
+    final repoEntry = await createRepoDialog();
 
     if (repoEntry != null) {
       await widget.reposCubit.setCurrent(repoEntry);
@@ -949,16 +949,15 @@ class _MainPageState extends State<MainPage>
     return repoEntries;
   }
 
-  Future<RepoEntry?> createRepoDialog(BuildContext parentContext) async =>
-      Navigator.push<RepoEntry?>(
-        context,
-        MaterialPageRoute(
-          builder: (context) => RepoCreationPage(
-            reposCubit: widget.reposCubit,
-            storeDirsCubit: widget.storeDirsCubit,
-          ),
-        ),
-      );
+  Future<RepoEntry?> createRepoDialog() => widget.stage.push<RepoEntry?>(
+    MaterialPageRoute(
+      builder: (context) => RepoCreationPage(
+        stage: widget.stage,
+        reposCubit: widget.reposCubit,
+        storeDirsCubit: widget.storeDirsCubit,
+      ),
+    ),
+  );
 
   Future<List<RepoEntry>> importRepoDialog({String? initialTokenValue}) async {
     RepoImportResult? result;
@@ -993,6 +992,7 @@ class _MainPageState extends State<MainPage>
         final repoEntry = await navigator.push<RepoEntry?>(
           MaterialPageRoute(
             builder: (context) => RepoCreationPage(
+              stage: widget.stage,
               reposCubit: widget.reposCubit,
               storeDirsCubit: widget.storeDirsCubit,
               token: token,

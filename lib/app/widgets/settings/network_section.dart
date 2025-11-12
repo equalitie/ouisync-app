@@ -18,24 +18,24 @@ import 'settings_section.dart';
 import 'settings_tile.dart';
 
 class NetworkSection extends SettingsSection {
-  NetworkSection(
-    this.session, {
+  NetworkSection({
+    required this.stage,
+    required this.session,
     required this.connectivityInfo,
     required this.natDetection,
     required this.peerSet,
     required this.powerControl,
-    required this.stage,
   }) : super(
          key: GlobalKey(debugLabel: 'key_network_section'),
          title: S.current.titleNetwork,
        );
 
+  final Stage stage;
   final Session session;
   final ConnectivityInfo connectivityInfo;
   final NatDetection natDetection;
   final PeerSetCubit peerSet;
   final PowerControl powerControl;
-  final Stage stage;
 
   TextStyle? bodyStyle;
   TextStyle? subtitleStyle;
@@ -277,7 +277,6 @@ class NetworkSection extends SettingsSection {
             description: [
               TextSpan(text: S.current.messageInfoNATType),
               Fields.linkTextSpan(
-                context,
                 '\n\n${S.current.messageNATOnWikipedia}',
                 _launchNATOnWikipedia,
               ),
@@ -287,9 +286,9 @@ class NetworkSection extends SettingsSection {
         ),
       );
 
-  void _launchNATOnWikipedia(BuildContext context) async {
+  void _launchNATOnWikipedia() async {
     final title = Text(S.current.messageNATOnWikipedia);
-    await Fields.openUrl(context, title, Constants.natWikipediaUrl);
+    await Fields.openUrl(stage, title, Constants.natWikipediaUrl);
   }
 }
 

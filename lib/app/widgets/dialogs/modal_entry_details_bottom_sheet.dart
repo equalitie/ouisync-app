@@ -9,20 +9,22 @@ import '../../cubits/cubits.dart' show BottomSheetType, RepoCubit;
 import '../../models/models.dart'
     show DirectoryEntry, FileEntry, FileSystemEntry;
 import '../../pages/pages.dart' show PreviewFileCallback;
+import '../../utils/dialogs.dart';
 import '../../utils/dirs.dart';
 import '../../utils/entry_ops.dart' show shareFile;
 import '../../utils/stage.dart';
 import '../../utils/repo_path.dart' as repo_path;
+import '../../utils/strings.dart';
 import '../../utils/utils.dart'
     show
         AppThemeExtension,
         Constants,
-        Dialogs,
         Dimensions,
         Fields,
         FileIO,
         ThemeGetter,
         formatSize;
+import '../buttons/dialog_action_button.dart';
 import '../widgets.dart'
     show
         ActionsDialog,
@@ -32,8 +34,7 @@ import '../widgets.dart'
         RenameEntry;
 
 class EntryDetails extends StatefulWidget {
-  const EntryDetails.file(
-    this.context, {
+  const EntryDetails.file({
     required this.repoCubit,
     required this.entry,
     required this.isActionAvailableValidator,
@@ -42,8 +43,7 @@ class EntryDetails extends StatefulWidget {
     required this.stage,
   }) : assert(entry is FileEntry);
 
-  const EntryDetails.folder(
-    this.context, {
+  const EntryDetails.folder({
     required this.repoCubit,
     required this.entry,
     required this.isActionAvailableValidator,
@@ -52,7 +52,6 @@ class EntryDetails extends StatefulWidget {
   }) : assert(entry is DirectoryEntry),
        onPreviewFile = null;
 
-  final BuildContext context;
   final RepoCubit repoCubit;
   final FileSystemEntry entry;
   final bool Function(AccessMode, EntryAction) isActionAvailableValidator;
@@ -198,7 +197,7 @@ extension on _EntryDetailsState {
 
     if (newName.isEmpty) return;
 
-    await Navigator.of(context).maybePop();
+    await widget.stage.maybePop();
 
     final parent = p.dirname(entry.path);
     final newEntryPath = p.join(parent, newName);
@@ -232,7 +231,7 @@ extension on _EntryDetailsState {
                   ? S.current.messageRenameFile
                   : S.current.messageRenameFolder,
               body: RenameEntry(
-                parentContext: context,
+                stage: widget.stage,
                 repoCubit: widget.repoCubit,
                 parent: parent,
                 oldName: oldName,
@@ -254,10 +253,9 @@ extension on _EntryDetailsState {
     final defaultDirectoryPath = widget.dirs.download;
     if (defaultDirectoryPath == null) return;
 
-    await Navigator.of(context, rootNavigator: false).maybePop();
+    await widget.stage.maybePop();
 
     await FileIO(
-      context: context,
       repoCubit: widget.repoCubit,
       stage: widget.stage,
     ).saveFileToDevice(widget.entry as FileEntry, defaultDirectoryPath);
@@ -276,26 +274,96 @@ extension on _EntryDetailsState {
     final path = entry.path;
     final isEmpty = isFile ? true : await repo.isFolderEmpty(path);
     final recursive = !isEmpty;
-    final deleteEntry = await Dialogs.deleteEntry(
-      context,
-      repoCubit: repo,
-      entry: entry,
-      isDirEmpty: isEmpty,
-    );
+
+    final deleteEntry =
+        await widget.stage.showDialog<bool>(
+          builder: (context) => _DeleteEntryDialog(
+            stage: widget.stage,
+            repoCubit: repo,
+            entry: entry,
+            isDirEmpty: isEmpty,
+          ),
+        ) ??
+        false;
     if (deleteEntry == false) return;
 
-    final deleteEntryOk = await Dialogs.executeFutureWithLoadingDialog<bool>(
-      context,
+    final deleteEntryOk = await widget.stage.loading<bool>(
       isFile ? repo.deleteFile(path) : repo.deleteFolder(path, recursive),
     );
 
     if (deleteEntryOk) {
-      Navigator.of(context).pop(deleteEntryOk);
+      await widget.stage.maybePop(deleteEntryOk);
       widget.stage.showSnackBar(
         isFile
             ? S.current.messageFileDeleted(repo_path.basename(path))
             : S.current.messageFolderDeleted(entry.name),
       );
     }
+  }
+}
+
+class _DeleteEntryDialog extends StatelessWidget {
+  final Stage stage;
+  final RepoCubit repoCubit;
+  final FileSystemEntry entry;
+  final bool isDirEmpty;
+
+  _DeleteEntryDialog({
+    required this.stage,
+    required this.repoCubit,
+    required this.entry,
+    this.isDirEmpty = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final bodyStyle = context.theme.appTextStyle.bodyMedium.copyWith(
+      fontWeight: FontWeight.bold,
+    );
+
+    final validationMessage = entry is FileEntry
+        ? S.current.messageConfirmFileDeletion
+        : isDirEmpty
+        ? S.current.messageConfirmFolderDeletion
+        : S.current.messageConfirmNotEmptyFolderDeletion;
+
+    final fileParentPath = entry is FileEntry
+        ? repo_path.dirname(entry.path)
+        : '';
+
+    final title = entry is FileEntry
+        ? S.current.titleDeleteFile
+        : S.current.titleDeleteFolder;
+
+    final body = entry is FileEntry
+        ? [
+            Text(entry.name, style: bodyStyle),
+            Text('${Strings.atSymbol} $fileParentPath', style: bodyStyle),
+            Dimensions.spacingVerticalDouble,
+            Text(validationMessage),
+          ]
+        : [
+            Text(entry.path, style: bodyStyle),
+            Dimensions.spacingVerticalDouble,
+            Text(validationMessage),
+          ];
+
+    final actions = [
+      Row(
+        children: [
+          NegativeButton(
+            text: S.current.actionCancel,
+            onPressed: () => stage.maybePop(false),
+          ),
+          PositiveButton(
+            text: S.current.actionDelete,
+            isDangerButton: true,
+            onPressed: () => stage.maybePop(true),
+          ),
+        ],
+      ),
+    ];
+
+    return AlertDialogWithActions(title: title, body: body, actions: actions);
   }
 }

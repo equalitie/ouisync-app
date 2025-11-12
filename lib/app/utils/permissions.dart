@@ -4,11 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../generated/l10n.dart';
-import 'utils.dart' show Dialogs, Dimensions;
+import 'dialogs.dart';
+import 'stage.dart';
+import 'utils.dart' show Dimensions;
 
 class Permissions {
   static Future<PermissionStatus> requestPermission(
-    BuildContext context,
+    Stage stage,
     Permission permission,
   ) async {
     if (!Platform.isAndroid && !Platform.isIOS && !Platform.isWindows) {
@@ -44,37 +46,27 @@ class Permissions {
           ? <Widget>[
               TextButton(
                 child: Text(S.current.actionCloseCapital),
-                onPressed: () async => await Navigator.of(
-                  context,
-                  rootNavigator: true,
-                ).maybePop(false),
+                onPressed: () => stage.maybePop(false),
               ),
               TextButton(
                 child: Text(S.current.actionGoToSettings.toUpperCase()),
                 onPressed: () async {
                   await openAppSettings();
-
-                  await Navigator.of(
-                    context,
-                    rootNavigator: true,
-                  ).maybePop(true);
+                  await stage.maybePop(true);
                 },
               ),
             ]
           : <Widget>[
               TextButton(
                 child: Text(S.current.actionCloseCapital),
-                onPressed: () async => await Navigator.of(
-                  context,
-                  rootNavigator: true,
-                ).maybePop(false),
+                onPressed: () => stage.maybePop(false),
               ),
             ];
 
       final name = (_labels[permission]?.name)!;
 
-      await Dialogs.alertDialogWithActions(
-        context,
+      await AlertDialogWithActions.show(
+        stage,
         title: S.current.titleRequiredPermission,
         body: [Text(name), Dimensions.spacingVerticalDouble, Text(message)],
         actions: actions,

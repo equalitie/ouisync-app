@@ -4,12 +4,13 @@ import 'package:path/path.dart' as p;
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart' show RepoCubit;
+import '../../utils/dialogs.dart';
 import '../../utils/platform/platform.dart' show PlatformValues;
+import '../../utils/stage.dart';
 import '../../utils/utils.dart'
     show
         AppLogger,
         AppThemeExtension,
-        Dialogs,
         Dimensions,
         Fields,
         TextEditingControllerExtension,
@@ -20,7 +21,7 @@ import '../widgets.dart' show NegativeButton, PositiveButton;
 
 class RenameEntry extends HookWidget with AppLogger {
   RenameEntry({
-    required this.parentContext,
+    required this.stage,
     required this.repoCubit,
     required this.parent,
     required this.oldName,
@@ -29,7 +30,7 @@ class RenameEntry extends HookWidget with AppLogger {
     required this.hint,
   });
 
-  final BuildContext parentContext;
+  final Stage stage;
   final RepoCubit repoCubit;
   final String parent;
   final String oldName;
@@ -98,31 +99,29 @@ class RenameEntry extends HookWidget with AppLogger {
       Dimensions.spacingVerticalDouble,
       ValueListenableBuilder(
         valueListenable: _errorMessage,
-        builder: (context, errorMessage, child) {
-          return Fields.formTextField(
-            context: context,
-            controller: _newNameController,
-            textInputAction: TextInputAction.done,
-            labelText: S.current.labelName,
-            hintText: hint,
-            errorText: _newNameController.text.isEmpty ? '' : errorMessage,
-            onFieldSubmitted: (newName) async {
-              final submitted = await _submitField(parent, newName);
-              if (submitted && PlatformValues.isDesktopDevice) {
-                await Navigator.of(context).maybePop(newName);
-              }
-            },
-            validator: validateNoEmptyMaybeRegExpr(
-              emptyError: S.current.messageErrorFormValidatorNameDefault,
-              regExp: Strings.entityNameRegExp,
-              regExpError: S.current.messageErrorCharactersNotAllowed,
-            ),
-            focusNode: _nameTextFieldFocus,
-            autofocus: true,
-          );
-        },
+        builder: (context, errorMessage, child) => Fields.formTextField(
+          context: context,
+          controller: _newNameController,
+          textInputAction: TextInputAction.done,
+          labelText: S.current.labelName,
+          hintText: hint,
+          errorText: _newNameController.text.isEmpty ? '' : errorMessage,
+          onFieldSubmitted: (newName) async {
+            final submitted = await _submitField(parent, newName);
+            if (submitted && PlatformValues.isDesktopDevice) {
+              await stage.maybePop(newName);
+            }
+          },
+          validator: validateNoEmptyMaybeRegExpr(
+            emptyError: S.current.messageErrorFormValidatorNameDefault,
+            regExp: Strings.entityNameRegExp,
+            regExpError: S.current.messageErrorCharactersNotAllowed,
+          ),
+          focusNode: _nameTextFieldFocus,
+          autofocus: true,
+        ),
       ),
-      Fields.dialogActions(buttons: _actions(context)),
+      Fields.dialogActions(buttons: _actions()),
     ],
   );
 
@@ -188,20 +187,18 @@ class RenameEntry extends HookWidget with AppLogger {
 
     if (title.isEmpty) return true;
 
-    final continueAnyway = await Dialogs.alertDialogWithActions(
-      parentContext,
+    final continueAnyway = await AlertDialogWithActions.show(
+      stage,
       title: title,
       body: [Text(message)],
       actions: [
         TextButton(
           child: Text(S.current.actionRename.toUpperCase()),
-          onPressed: () async =>
-              await Navigator.of(parentContext).maybePop(true),
+          onPressed: () => stage.maybePop(true),
         ),
         TextButton(
           child: Text(S.current.actionCancelCapital),
-          onPressed: () async =>
-              await Navigator.of(parentContext).maybePop(false),
+          onPressed: () => stage.maybePop(false),
         ),
       ],
     );
@@ -224,27 +221,22 @@ class RenameEntry extends HookWidget with AppLogger {
     return true;
   }
 
-  List<Widget> _actions(BuildContext context) => [
+  List<Widget> _actions() => [
     NegativeButton(
       text: S.current.actionCancel,
-      onPressed: () async => await Navigator.of(context).maybePop(''),
+      onPressed: () => stage.maybePop(''),
     ),
     PositiveButton(
       text: S.current.actionRename,
-      onPressed: () async =>
-          await _onSaved(context, parent, _newNameController.text),
+      onPressed: () => _onSaved(parent, _newNameController.text),
       focusNode: _positiveButtonFocus,
     ),
   ];
 
-  Future<void> _onSaved(
-    BuildContext context,
-    String parent,
-    String? newName,
-  ) async {
+  Future<void> _onSaved(String parent, String? newName) async {
     final submitted = await _submitField(parent, newName);
     if (submitted) {
-      await Navigator.of(context).maybePop(newName);
+      await stage.maybePop(newName);
     }
   }
 }

@@ -1,4 +1,3 @@
-import 'package:flutter/widgets.dart';
 import 'package:ouisync/ouisync.dart' show AccessMode;
 import 'package:ouisync_app/app/utils/utils.dart'
     show AppLogger, CopyEntry, MoveEntry, MultiEntryActions;
@@ -9,19 +8,16 @@ import '../models/models.dart' show FileSystemEntry, RepoEntry;
 import 'stage.dart';
 
 class MoveEntriesActions with AppLogger {
-  MoveEntriesActions(
-    BuildContext context, {
+  MoveEntriesActions({
+    required Stage stage,
     required ReposCubit reposCubit,
     required RepoCubit originRepoCubit,
     required BottomSheetType sheetType,
-    required Stage stage,
-  }) : _context = context,
+  }) : _stage = stage,
        _reposCubit = reposCubit,
        _originRepoCubit = originRepoCubit,
-       _sheetType = sheetType,
-       _stage = stage;
+       _sheetType = sheetType;
 
-  final BuildContext _context;
   final ReposCubit _reposCubit;
   final RepoCubit _originRepoCubit;
   final BottomSheetType _sheetType;
@@ -86,7 +82,6 @@ class MoveEntriesActions with AppLogger {
     FileSystemEntry entry,
     RepoCubit? toRepoCubit,
   ) async => CopyEntry(
-    _context,
     originRepoCubit: _originRepoCubit,
     entry: entry,
     destinationPath: currentFolderPath,
@@ -98,7 +93,6 @@ class MoveEntriesActions with AppLogger {
     FileSystemEntry entry,
     RepoCubit? toRepoCubit,
   ) async => MoveEntry(
-    _context,
     originRepoCubit: _originRepoCubit,
     entry: entry,
     destinationPath: currentFolderPath,

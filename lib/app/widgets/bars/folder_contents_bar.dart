@@ -11,8 +11,11 @@ import 'package:ouisync_app/app/utils/utils.dart' show ThemeGetter;
 import 'package:ouisync_app/app/widgets/widgets.dart'
     show SelectEntriesButton, SelectionStatus, SortContentsBar;
 
+import '../../utils/stage.dart';
+
 class FolderContentsBar extends StatefulWidget {
   const FolderContentsBar({
+    required this.stage,
     required this.reposCubit,
     required this.repoCubit,
     required this.hasContents,
@@ -21,6 +24,7 @@ class FolderContentsBar extends StatefulWidget {
     super.key,
   });
 
+  final Stage stage;
   final ReposCubit reposCubit;
   final RepoCubit repoCubit;
   final bool hasContents;
@@ -45,6 +49,7 @@ class _FolderContentsBarState extends State<FolderContentsBar> {
         children: [
           if (widget.hasContents)
             SortContentsBar(
+              stage: widget.stage,
               sortListCubit: widget.sortListCubit,
               reposState: widget.reposCubit.state,
             ),

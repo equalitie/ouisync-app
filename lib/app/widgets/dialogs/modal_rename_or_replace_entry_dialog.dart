@@ -16,14 +16,12 @@ class RenameOrReplaceEntryDialog extends StatelessWidget {
 
   final _fileAction = ValueNotifier<RenameOrReplaceResult>(_defaultAction);
 
-  static Future<RenameOrReplaceResult?> show(
-    BuildContext context, {
+  static Future<RenameOrReplaceResult?> show({
+    required Stage stage,
     required String title,
     required String entryName,
     required EntryType entryType,
-    required Stage stage,
-  }) => showDialog<RenameOrReplaceResult?>(
-    context: context,
+  }) => stage.showDialog<RenameOrReplaceResult?>(
     builder: (context) => AlertDialog(
       title: Flex(
         direction: Axis.horizontal,

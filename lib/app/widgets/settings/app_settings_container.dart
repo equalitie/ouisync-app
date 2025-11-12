@@ -32,12 +32,12 @@ class AppSettingsContainer extends StatefulHookWidget {
     required Stage stage,
   }) : sections = [
          NetworkSection(
-           session,
+           stage: stage,
+           session: session,
            connectivityInfo: connectivityInfo,
            natDetection: natDetection,
            peerSet: peerSet,
            powerControl: powerControl,
-           stage: stage,
          ),
          LogsSection(
            mount: mount,
@@ -50,7 +50,8 @@ class AppSettingsContainer extends StatefulHookWidget {
            dirs: dirs,
          ),
          AboutSection(
-           session,
+           stage: stage,
+           session: session,
            localeCubit: localeCubit,
            powerControl: powerControl,
            reposCubit: reposCubit,
@@ -59,7 +60,6 @@ class AppSettingsContainer extends StatefulHookWidget {
            natDetection: natDetection,
            launchAtStartup: launchAtStartup,
            upgradeExists: upgradeExists,
-           stage: stage,
          ),
        ];
 

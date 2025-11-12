@@ -5,6 +5,7 @@ import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart' show RepoCubit;
 import '../../utils/platform/platform.dart' show PlatformValues;
 import '../../utils/repo_path.dart' as repo_path;
+import '../../utils/stage.dart';
 import '../../utils/utils.dart'
     show
         Dimensions,
@@ -15,6 +16,7 @@ import '../../utils/utils.dart'
 import '../widgets.dart' show ActionsDialog, NegativeButton, PositiveButton;
 
 class FolderCreationDialog extends HookWidget {
+  final Stage stage;
   final RepoCubit repoCubit;
   final String parent;
 
@@ -28,20 +30,25 @@ class FolderCreationDialog extends HookWidget {
   late final ValueNotifier<String> errorMessage;
 
   static Future<String?> show(
-    BuildContext context, {
+    Stage stage, {
     required RepoCubit repoCubit,
     required String parent,
-  }) async {
-    return await showDialog<String>(
-      context: context,
-      builder: (BuildContext _) => ActionsDialog(
-        title: S.current.titleCreateFolder,
-        body: FolderCreationDialog._(repoCubit: repoCubit, parent: parent),
+  }) => stage.showDialog<String>(
+    builder: (BuildContext _) => ActionsDialog(
+      title: S.current.titleCreateFolder,
+      body: FolderCreationDialog._(
+        stage: stage,
+        repoCubit: repoCubit,
+        parent: parent,
       ),
-    );
-  }
+    ),
+  );
 
-  FolderCreationDialog._({required this.repoCubit, required this.parent});
+  FolderCreationDialog._({
+    required this.stage,
+    required this.repoCubit,
+    required this.parent,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +76,6 @@ class FolderCreationDialog extends HookWidget {
                 errorText: nameController.text.isEmpty ? '' : errorMessage,
                 onFieldSubmitted: (String? newFolderName) async {
                   await _onCreateButtonPress(
-                    context,
                     parent: parent,
                     newFolderName: newFolderName ?? '',
                   );
@@ -84,7 +90,7 @@ class FolderCreationDialog extends HookWidget {
               );
             },
           ),
-          Fields.dialogActions(buttons: _actions(context, parent: parent)),
+          Fields.dialogActions(buttons: _actions(parent: parent)),
         ],
       ),
     );
@@ -105,18 +111,15 @@ class FolderCreationDialog extends HookWidget {
     errorMessage = useValueNotifier('');
   }
 
-  List<Widget> _actions(BuildContext context, {required String parent}) => [
+  List<Widget> _actions({required String parent}) => [
     NegativeButton(
       text: S.current.actionCancel,
-      onPressed: () async {
-        await Navigator.of(context).maybePop('');
-      },
+      onPressed: () => stage.maybePop(''),
     ),
     PositiveButton(
       key: Key('create_folder_submit'),
       text: S.current.actionCreate,
       onPressed: () async => await _onCreateButtonPress(
-        context,
         parent: parent,
         newFolderName: nameController.text,
       ),
@@ -124,8 +127,7 @@ class FolderCreationDialog extends HookWidget {
     ),
   ];
 
-  Future<void> _onCreateButtonPress(
-    BuildContext context, {
+  Future<void> _onCreateButtonPress({
     required String parent,
     required String newFolderName,
   }) async {
@@ -133,7 +135,7 @@ class FolderCreationDialog extends HookWidget {
 
     if (submitted) {
       final newFolderPath = repo_path.join(parent, newFolderName);
-      await Navigator.of(context).maybePop(newFolderPath);
+      await stage.maybePop(newFolderPath);
     }
   }
 

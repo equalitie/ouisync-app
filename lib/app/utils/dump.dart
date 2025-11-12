@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:archive/archive_io.dart';
-import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:ouisync/ouisync.dart' show MonitorId, StateMonitor;
 import 'package:package_info_plus/package_info_plus.dart';
@@ -13,8 +12,7 @@ import '../cubits/nat_detection.dart';
 import '../cubits/power_control.dart';
 import 'log.dart' as log;
 
-Future<File> dumpAll(
-  BuildContext context, {
+Future<File> dumpAll({
   required StateMonitor rootMonitor,
   required PowerControl powerControl,
   required ConnectivityInfo connectivityInfo,

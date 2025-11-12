@@ -31,7 +31,6 @@ import '../../utils/utils.dart'
         AppLogger,
         AppThemeExtension,
         Constants,
-        Dialogs,
         dumpAll,
         Fields,
         formatSize,
@@ -42,8 +41,9 @@ import 'settings_section.dart';
 import 'settings_tile.dart';
 
 class AboutSection extends SettingsSection with AppLogger {
-  AboutSection(
-    this.session, {
+  AboutSection({
+    required this.stage,
+    required this.session,
     required this.localeCubit,
     required this.powerControl,
     required this.reposCubit,
@@ -52,7 +52,6 @@ class AboutSection extends SettingsSection with AppLogger {
     required this.natDetection,
     required this.launchAtStartup,
     required this.upgradeExists,
-    required this.stage,
   }) : super(
          key: GlobalKey(debugLabel: 'key_about_section'),
          title: S.current.titleAbout,
@@ -112,9 +111,8 @@ class AboutSection extends SettingsSection with AppLogger {
           S.current.messageFAQ,
           style: context.theme.appTextStyle.bodySmall,
         ),
-        onTap: () => unawaited(
-          _openUrl(context, S.current.titleFAQShort, Constants.faqUrl),
-        ),
+        onTap: () =>
+            unawaited(_openUrl(S.current.titleFAQShort, Constants.faqUrl)),
       ),
       NavigationTile(
         title: Text(S.current.titlePrivacyPolicy, style: bodyStyle),
@@ -123,18 +121,14 @@ class AboutSection extends SettingsSection with AppLogger {
             ? _externalNavigationIcon
             : null,
         onTap: () => unawaited(
-          _openUrl(
-            context,
-            S.current.titlePrivacyPolicy,
-            Constants.eqPrivacyPolicy,
-          ),
+          _openUrl(S.current.titlePrivacyPolicy, Constants.eqPrivacyPolicy),
         ),
       ),
       if (PlatformValues.isMobileDevice)
         NavigationTile(
           title: Text(S.current.titleSendFeedback, style: bodyStyle),
           leading: Icon(Icons.comment_rounded),
-          onTap: () => unawaited(_openFeedback(context)),
+          onTap: () => unawaited(_openFeedback()),
         ),
       NavigationTile(
         title: Text(Constants.ouisyncUrl, style: bodyStyle),
@@ -171,7 +165,6 @@ class AboutSection extends SettingsSection with AppLogger {
             description: [
               TextSpan(text: S.current.messageInfoRuntimeID),
               Fields.linkTextSpan(
-                context,
                 '\n\n${S.current.messageGoToPeers}',
                 _navigateToPeers,
               ),
@@ -197,27 +190,24 @@ class AboutSection extends SettingsSection with AppLogger {
     await S.delegate.load(localeCubit.currentLocale);
   }
 
-  void _navigateToPeers(BuildContext context) => Navigator.push(
-    context,
+  void _navigateToPeers() => stage.push(
     MaterialPageRoute(
       builder: (context) =>
           PeersPage(session: session, cubit: peerSet, stage: stage),
     ),
   );
 
-  Future<void> _openUrl(BuildContext context, String title, String url) async {
+  Future<void> _openUrl(String title, String url) async {
     final webView = PlatformWebView();
 
     if (PlatformValues.isMobileDevice) {
       final pageTitle = Text(title);
 
-      await Dialogs.executeFutureWithLoadingDialog(
-        context,
+      await stage.loading(
         Future(() async {
-          final content = await webView.loadUrl(context, url);
+          final content = await webView.loadUrl(url);
 
-          await Navigator.push(
-            context,
+          await stage.push(
             MaterialPageRoute(
               builder: (context) =>
                   WebViewPage(title: pageTitle, content: content),
@@ -230,9 +220,8 @@ class AboutSection extends SettingsSection with AppLogger {
     }
   }
 
-  Future<void> _openFeedback(BuildContext context) async {
-    final attachments = await showDialog<FeedbackAttachments>(
-      context: context,
+  Future<void> _openFeedback() async {
+    final attachments = await stage.showDialog<FeedbackAttachments>(
       builder: (context) => FeedbackDialog(),
     );
 
@@ -241,10 +230,8 @@ class AboutSection extends SettingsSection with AppLogger {
     }
 
     if (attachments.logs) {
-      final logs = await Dialogs.executeFutureWithLoadingDialog(
-        context,
+      final logs = await stage.loading(
         dumpAll(
-          context,
           rootMonitor: reposCubit.rootStateMonitor,
           powerControl: powerControl,
           connectivityInfo: connectivityInfo,

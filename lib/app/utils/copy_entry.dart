@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:ouisync/ouisync.dart' show EntryType;
 
 import '../../generated/l10n.dart';
@@ -12,23 +11,20 @@ import 'utils.dart'
     show AppLogger, FileReadStream, StringExtension, disambiguateEntryName;
 
 class CopyEntry with AppLogger {
-  CopyEntry(
-    BuildContext context, {
+  CopyEntry({
+    required Stage stage,
     required RepoCubit originRepoCubit,
     required FileSystemEntry entry,
     required String destinationPath,
-    required Stage stage,
-  }) : _context = context,
+  }) : _stage = stage,
        _originRepoCubit = originRepoCubit,
        _entry = entry,
-       _destinationPath = destinationPath,
-       _stage = stage;
+       _destinationPath = destinationPath;
 
-  final BuildContext _context;
+  final Stage _stage;
   final RepoCubit _originRepoCubit;
   final FileSystemEntry _entry;
   final String _destinationPath;
-  final Stage _stage;
 
   /// Copy an entry to the destination path.
   ///
@@ -62,7 +58,6 @@ class CopyEntry with AppLogger {
     }
 
     final result = await RenameOrReplaceEntryDialog.show(
-      _context,
       title: S.current.titleCopyingEntry,
       entryName: newPath,
       entryType: type,

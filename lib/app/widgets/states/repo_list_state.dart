@@ -12,13 +12,14 @@ import '../widgets.dart';
 class RepoListState extends StatelessWidget
     with AppLogger, RepositoryActionsMixin {
   const RepoListState({
+    required this.stage,
     required this.reposCubit,
     required this.storeDirsCubit,
     required this.bottomSheetInfo,
     required this.onShowRepoSettings,
-    required this.stage,
   });
 
+  final Stage stage;
   final ReposCubit reposCubit;
   final StoreDirsCubit storeDirsCubit;
   final ValueNotifier<BottomSheetInfo> bottomSheetInfo;
@@ -27,7 +28,6 @@ class RepoListState extends StatelessWidget
     required RepoCubit repoCubit,
   })
   onShowRepoSettings;
-  final Stage stage;
 
   @override
   Widget build(BuildContext context) {
@@ -87,13 +87,13 @@ class RepoListState extends StatelessWidget
               final location = currentRepoEntry.location;
 
               final deleted = await showDeleteRepositoryDialog(
-                context,
+                stage: stage,
                 repoLocation: location,
                 reposCubit: reposCubit,
               );
 
               if (deleted == true) {
-                Navigator.of(context).pop();
+                await stage.maybePop();
                 stage.showSnackBar(
                   S.current.messageRepositoryDeleted(repoName),
                 );
@@ -103,6 +103,7 @@ class RepoListState extends StatelessWidget
         }
 
         return RepoListItem(
+          stage: stage,
           repoCubit: repoCubit,
           storeDirsCubit: storeDirsCubit,
           isDefault: isDefault,

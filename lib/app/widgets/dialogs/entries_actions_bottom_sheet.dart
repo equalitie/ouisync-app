@@ -187,16 +187,14 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
     bloc: navigationCubit,
     builder: (ctx, state) {
       final moveEntriesActions = MoveEntriesActions(
-        context,
+        stage: widget.stage,
         reposCubit: reposCubit,
         originRepoCubit: originRepoCubit,
         sheetType: sheetType,
-        stage: widget.stage,
       );
 
       return entry == null
           ? _multipleEntriesActions(
-              context,
               entrySelectionCubit!,
               reposCubit,
               originRepoCubit,
@@ -270,7 +268,6 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
   }
 
   Widget _multipleEntriesActions(
-    BuildContext parentContext,
     EntrySelectionCubit entrySelectionCubit,
     ReposCubit reposCubit,
     RepoCubit originRepoCubit,
@@ -303,7 +300,6 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
         if (currentRepoCubit == null) return;
 
         final multiEntryActions = MultiEntryActions(
-          parentContext,
           entrySelectionCubit: entrySelectionCubit,
           dirs: dirs,
           stage: widget.stage,

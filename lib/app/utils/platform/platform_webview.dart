@@ -12,7 +12,7 @@ abstract class PlatformWebView {
     return PlatformWebViewDesktop();
   }
 
-  Future<Widget> loadUrl(BuildContext context, String url);
+  Future<Widget> loadUrl(String url);
 
   Future<bool> launchUrl(String url);
 }

@@ -1,5 +1,3 @@
-import 'dart:async' show FutureOr;
-
 import 'package:flutter/material.dart';
 import 'package:loggy/loggy.dart';
 import 'package:ouisync/ouisync.dart';
@@ -21,7 +19,6 @@ import '../utils/stage.dart';
 import '../utils/utils.dart'
     show
         AppThemeExtension,
-        Dialogs,
         Dimensions,
         Fields,
         LocalAuth,
@@ -39,18 +36,15 @@ import '../widgets/widgets.dart'
         ShareRepository;
 
 mixin RepositoryActionsMixin on LoggyType {
-  Future<String?> renameRepository(
-    BuildContext context, {
+  Future<String?> renameRepository({
+    required Stage stage,
     required ReposCubit reposCubit,
     required RepoLocation location,
   }) async {
-    final newName = await _getRepositoryNewName(context, location);
+    final newName = await _getRepositoryNewName(stage, location);
 
     if (newName.isNotEmpty) {
-      await Dialogs.executeFutureWithLoadingDialog(
-        context,
-        reposCubit.renameRepository(location, newName),
-      );
+      await stage.loading(reposCubit.renameRepository(location, newName));
 
       return newName;
     }
@@ -59,15 +53,14 @@ mixin RepositoryActionsMixin on LoggyType {
   }
 
   Future<String> _getRepositoryNewName(
-    BuildContext context,
+    Stage stage,
     RepoLocation location,
   ) async {
     final newName =
-        await showDialog<String>(
-          context: context,
+        await stage.showDialog<String>(
           builder: (BuildContext context) => ActionsDialog(
             title: S.current.messageRenameRepository,
-            body: RenameRepository(location),
+            body: RenameRepository(stage, location),
           ),
         ) ??
         '';
@@ -75,8 +68,7 @@ mixin RepositoryActionsMixin on LoggyType {
     return newName;
   }
 
-  Future<dynamic> shareRepository(
-    BuildContext context, {
+  Future<dynamic> shareRepository({
     required RepoCubit repository,
     required Stage stage,
   }) {
@@ -87,9 +79,8 @@ mixin RepositoryActionsMixin on LoggyType {
         ? [AccessMode.blind, AccessMode.read]
         : [AccessMode.blind];
 
-    return showModalBottomSheet(
+    return stage.showModalBottomSheet(
       isScrollControlled: true,
-      context: context,
       shape: Dimensions.borderBottomSheetTop,
       constraints: BoxConstraints(maxHeight: 390.0),
       builder: (_) => ScaffoldMessenger(
@@ -105,14 +96,12 @@ mixin RepositoryActionsMixin on LoggyType {
     );
   }
 
-  Future<void> navigateToRepositorySecurity(
-    BuildContext context, {
+  Future<void> navigateToRepositorySecurity({
+    required Stage stage,
     required Settings settings,
     required Session session,
     required RepoCubit repoCubit,
     required PasswordHasher passwordHasher,
-    required FutureOr<void> Function() popDialog,
-    required Stage stage,
   }) async {
     //LocalSecret secret;
     final authMode = repoCubit.state.authMode;
@@ -125,14 +114,14 @@ mixin RepositoryActionsMixin on LoggyType {
       // proceed with `authenticateIfPossible`.
 
       access = await GetPasswordAccessDialog.show(
-        context,
+        stage,
         settings,
         session,
         repoCubit,
       );
     } else {
       if (!await LocalAuth.authenticateIfPossible(
-        context,
+        stage,
         S.current.messageAccessingSecureStorage,
       )) {
         return;
@@ -143,7 +132,7 @@ mixin RepositoryActionsMixin on LoggyType {
       access = await repoCubit.getAccessOf(secret);
     }
 
-    await popDialog();
+    await stage.maybePop();
 
     final UnlockedAccess? unlockedAccess = access?.asUnlocked;
 
@@ -151,7 +140,7 @@ mixin RepositoryActionsMixin on LoggyType {
       return;
     }
 
-    await Navigator.of(context).push(
+    await stage.push(
       MaterialPageRoute(
         builder: (context) => RepoSecurityPage(
           settings: settings,
@@ -165,13 +154,11 @@ mixin RepositoryActionsMixin on LoggyType {
     );
   }
 
-  Future<void> showRepositoryStoreDialog(
-    BuildContext context, {
+  Future<void> showRepositoryStoreDialog({
     required RepoCubit repoCubit,
     required StoreDirsCubit storeDirsCubit,
     required Stage stage,
-  }) => showDialog<void>(
-    context: context,
+  }) => stage.showDialog<void>(
     builder: (context) => StoreDirDialog(
       storeDirsCubit: storeDirsCubit,
       repoCubit: repoCubit,
@@ -179,13 +166,12 @@ mixin RepositoryActionsMixin on LoggyType {
     ),
   );
 
-  Future<bool> showDeleteRepositoryDialog(
-    BuildContext context, {
+  Future<bool> showDeleteRepositoryDialog({
+    required Stage stage,
     required ReposCubit reposCubit,
     required RepoLocation repoLocation,
   }) async {
-    final deleteRepo = await showDialog<bool>(
-      context: context,
+    final deleteRepo = await stage.showDialog<bool>(
       builder: (context) => AlertDialog(
         title: Flex(
           direction: Axis.horizontal,
@@ -222,11 +208,7 @@ mixin RepositoryActionsMixin on LoggyType {
     );
 
     if (deleteRepo == true) {
-      await Dialogs.executeFutureWithLoadingDialog(
-        context,
-        reposCubit.deleteRepository(repoLocation),
-      );
-
+      await stage.loading(reposCubit.deleteRepository(repoLocation));
       return true;
     }
 
@@ -258,7 +240,7 @@ mixin RepositoryActionsMixin on LoggyType {
 
       // If it didn't work, try to unlock using a password from the user.
       final access = await GetPasswordAccessDialog.show(
-        context,
+        stage,
         settings,
         session,
         repoCubit,
@@ -282,7 +264,7 @@ mixin RepositoryActionsMixin on LoggyType {
 
       if (bio) {
         if (!await LocalAuth.authenticateIfPossible(
-          context,
+          stage,
           S.current.messageAccessingSecureStorage,
         )) {
           return;

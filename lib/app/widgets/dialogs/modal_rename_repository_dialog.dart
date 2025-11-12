@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 
 import '../../../generated/l10n.dart';
 import '../../models/repo_location.dart';
+import '../../utils/stage.dart';
 import '../../utils/utils.dart'
     show
         AppThemeExtension,
-        Dialogs,
         Fields,
         Strings,
         TextEditingControllerExtension,
@@ -16,8 +16,9 @@ import '../../utils/utils.dart'
 import '../widgets.dart' show NegativeButton, PositiveButton;
 
 class RenameRepository extends StatefulWidget {
-  RenameRepository(this.location, {super.key});
+  RenameRepository(this.stage, this.location, {super.key});
 
+  final Stage stage;
   final RepoLocation location;
 
   @override
@@ -102,7 +103,7 @@ class _RenameRepository extends State<RenameRepository> {
     }
 
     final newName = newNameController.text;
-    Navigator.of(context).pop(newName);
+    await widget.stage.maybePop(newName);
   }
 
   Future<bool> validate(BuildContext context) async {
@@ -112,10 +113,7 @@ class _RenameRepository extends State<RenameRepository> {
 
     // Check if name is already taken
     final newLocation = widget.location.rename(newNameController.text);
-    final exists = await Dialogs.executeFutureWithLoadingDialog(
-      context,
-      File(newLocation.path).exists(),
-    );
+    final exists = await widget.stage.loading(File(newLocation.path).exists());
 
     setState(() {
       nameTaken = exists;

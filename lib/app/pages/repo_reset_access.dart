@@ -9,6 +9,7 @@ import '../models/auth_mode.dart';
 import '../models/access_mode.dart';
 import '../cubits/cubits.dart' show RepoCubit, RepoState;
 import '../utils/random.dart';
+import '../utils/stage.dart';
 import '../utils/utils.dart'
     show AppThemeExtension, Constants, Fields, LocalAuth, Settings, ThemeGetter;
 import '../widgets/widgets.dart'
@@ -24,7 +25,7 @@ class RepoResetAccessPage extends StatefulWidget {
   // Returns `null` if nothing changes (e.g. the user presses the back button
   // before submitting any changes).
   static Future<Access> show({
-    required NavigatorState navigator,
+    required Stage stage,
     required Session session,
     required Settings settings,
     required RepoCubit repo,
@@ -39,7 +40,7 @@ class RepoResetAccessPage extends StatefulWidget {
       ),
     );
 
-    return (await navigator.push(route)) ?? startAccess;
+    return (await stage.push(route)) ?? startAccess;
   }
 
   RepoResetAccessPage._({

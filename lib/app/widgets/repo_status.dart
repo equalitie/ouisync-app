@@ -6,6 +6,7 @@ import 'package:stream_transform/stream_transform.dart';
 
 import '../cubits/mount.dart';
 import '../cubits/repo.dart';
+import '../utils/stage.dart';
 import '../utils/utils.dart';
 
 const _iconSize = 20.0;
@@ -14,13 +15,14 @@ final _color = Colors.black.withAlpha(64);
 
 /// Widget that displays repository error and sync progress.
 class RepoStatus extends StatelessWidget {
-  RepoStatus(this.repoCubit, {super.key});
+  RepoStatus(this.stage, this.repoCubit, {super.key});
 
+  final Stage stage;
   final RepoCubit repoCubit;
 
   @override
   Widget build(BuildContext context) =>
-      Row(children: [_Error(repoCubit), _Progress(repoCubit)]);
+      Row(children: [_Error(stage, repoCubit), _Progress(repoCubit)]);
 }
 
 /// Widget that builds itself whenever the sync progress of the repository changes.
@@ -91,8 +93,9 @@ class _Progress extends StatelessWidget {
 }
 
 class _Error extends StatelessWidget {
-  _Error(this.repoCubit);
+  _Error(this.stage, this.repoCubit);
 
+  final Stage stage;
   final RepoCubit repoCubit;
 
   @override
@@ -101,7 +104,7 @@ class _Error extends StatelessWidget {
     MountStateMounting() ||
     MountStateSuccess() => SizedBox.shrink(),
     MountStateFailure(error: final error, stack: _) => GestureDetector(
-      onTap: () => _showErrorDialog(context, error.toString()),
+      onTap: () => _showErrorDialog(error.toString()),
       child: Icon(
         Icons.warning,
         color: Constants.warningColor,
@@ -110,10 +113,9 @@ class _Error extends StatelessWidget {
     ),
   };
 
-  Future<void> _showErrorDialog(BuildContext context, String message) =>
-      Dialogs.simpleAlertDialog(
-        context,
-        title: 'Failed to mount the repository',
-        message: 'Error: $message',
-      );
+  Future<void> _showErrorDialog(String message) => SimpleAlertDialog.show(
+    stage,
+    title: 'Failed to mount the repository',
+    message: 'Error: $message',
+  );
 }

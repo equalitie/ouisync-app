@@ -3,17 +3,18 @@ import 'package:flutter/material.dart';
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart' show ReposCubit;
 import '../../models/repo_entry.dart';
+import '../../utils/stage.dart';
 import '../../utils/utils.dart' show AppLogger, Dimensions, Fields;
 
 class RepoListActions extends StatelessWidget with AppLogger {
   RepoListActions({
-    required this.context,
+    required this.stage,
     required this.reposCubit,
     required this.onCreateRepoPressed,
     required this.onImportRepoPressed,
   });
 
-  final BuildContext context;
+  final Stage stage;
   final ReposCubit reposCubit;
 
   final Future<RepoEntry?> Function() onCreateRepoPressed;
@@ -42,7 +43,7 @@ class RepoListActions extends StatelessWidget with AppLogger {
                     return;
                   }
 
-                  await Navigator.of(context).maybePop();
+                  await stage.maybePop();
                 },
               ),
               _buildAction(
@@ -55,7 +56,7 @@ class RepoListActions extends StatelessWidget with AppLogger {
                     return;
                   }
 
-                  await Navigator.of(context).maybePop();
+                  await stage.maybePop();
                 },
               ),
             ],

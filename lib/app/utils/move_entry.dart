@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:ouisync/ouisync.dart' show EntryType;
 
 import '../../generated/l10n.dart';
@@ -12,19 +11,16 @@ import 'utils.dart'
     show AppLogger, FileReadStream, StringExtension, disambiguateEntryName;
 
 class MoveEntry with AppLogger {
-  MoveEntry(
-    BuildContext context, {
+  MoveEntry({
     required RepoCubit originRepoCubit,
     required FileSystemEntry entry,
     required String destinationPath,
     required Stage stage,
-  }) : _context = context,
+  }) : _stage = stage,
        _originRepoCubit = originRepoCubit,
        _entry = entry,
-       _destinationPath = destinationPath,
-       _stage = stage;
+       _destinationPath = destinationPath;
 
-  final BuildContext _context;
   final RepoCubit _originRepoCubit;
   final FileSystemEntry _entry;
   final String _destinationPath;
@@ -57,11 +53,10 @@ class MoveEntry with AppLogger {
     }
 
     final result = await RenameOrReplaceEntryDialog.show(
-      _context,
+      stage: _stage,
       title: S.current.titleMovingEntry,
       entryName: newPath,
       entryType: type,
-      stage: _stage,
     );
 
     switch (result) {

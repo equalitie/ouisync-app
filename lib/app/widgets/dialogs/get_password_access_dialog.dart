@@ -3,6 +3,7 @@ import 'package:ouisync/ouisync.dart';
 
 import '../../../generated/l10n.dart';
 import '../../pages/repo_reset_access.dart';
+import '../../utils/stage.dart';
 import '../../widgets/dialogs/actions_dialog.dart';
 import '../../utils/utils.dart'
     show
@@ -20,38 +21,38 @@ import '../widgets.dart'
 
 class GetPasswordAccessDialog extends StatefulWidget {
   GetPasswordAccessDialog({
+    required this.stage,
     required this.session,
     required this.settings,
     required this.repoCubit,
   });
 
+  final Stage stage;
   final Session session;
   final Settings settings;
   final RepoCubit repoCubit;
 
   static Future<Access?> show(
-    BuildContext context,
+    Stage stage,
     Settings settings,
     Session session,
     RepoCubit repoCubit,
-  ) async {
-    return await showDialog<Access>(
-      context: context,
-      builder: (BuildContext context) => ScaffoldMessenger(
-        child: Scaffold(
-          backgroundColor: Colors.transparent,
-          body: ActionsDialog(
-            title: S.current.messageUnlockRepository(repoCubit.name),
-            body: GetPasswordAccessDialog(
-              repoCubit: repoCubit,
-              settings: settings,
-              session: session,
-            ),
+  ) => stage.showDialog<Access>(
+    builder: (BuildContext context) => ScaffoldMessenger(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: ActionsDialog(
+          title: S.current.messageUnlockRepository(repoCubit.name),
+          body: GetPasswordAccessDialog(
+            stage: stage,
+            repoCubit: repoCubit,
+            settings: settings,
+            session: session,
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
 
   @override
   State<GetPasswordAccessDialog> createState() => _State();
@@ -88,7 +89,7 @@ class _State extends State<GetPasswordAccessDialog> with AppLogger {
           final navigator = Navigator.of(context);
 
           if (!await LocalAuth.authenticateIfPossible(
-            context,
+            widget.stage,
             S.current.messagePleaseAuthenticate,
           )) {
             return;
@@ -99,7 +100,7 @@ class _State extends State<GetPasswordAccessDialog> with AppLogger {
           }
 
           final access = await RepoResetAccessPage.show(
-            navigator: navigator,
+            stage: widget.stage,
             session: widget.session,
             settings: widget.settings,
             repo: widget.repoCubit,
@@ -189,6 +190,6 @@ class _State extends State<GetPasswordAccessDialog> with AppLogger {
       passwordInvalid = false;
     });
 
-    Navigator.of(context).pop(access);
+    await widget.stage.maybePop(access);
   }
 }

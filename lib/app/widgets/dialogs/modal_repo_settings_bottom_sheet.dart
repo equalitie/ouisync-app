@@ -88,13 +88,13 @@ class RepositorySettings extends StatelessWidget
                 dense: true,
                 onTap: () async {
                   final newName = await renameRepository(
-                    context,
+                    stage: stage,
                     reposCubit: reposCubit,
                     location: repoCubit.location,
                   );
 
                   if (newName != null) {
-                    Navigator.of(context).pop();
+                    await stage.maybePop();
                     stage.showSnackBar(
                       S.current.messageRepositoryRenamed(newName),
                     );
@@ -106,12 +106,8 @@ class RepositorySettings extends StatelessWidget
                 title: S.current.actionShare,
                 dense: true,
                 onTap: () async {
-                  await Navigator.of(context).maybePop();
-                  await shareRepository(
-                    context,
-                    repository: repoCubit,
-                    stage: stage,
-                  );
+                  await stage.maybePop();
+                  await shareRepository(stage: stage, repository: repoCubit);
                 },
               ),
               EntryActionItem(
@@ -119,13 +115,11 @@ class RepositorySettings extends StatelessWidget
                 title: S.current.titleSecurity,
                 dense: true,
                 onTap: () => navigateToRepositorySecurity(
-                  context,
+                  stage: stage,
                   settings: settings,
                   session: session,
                   repoCubit: repoCubit,
                   passwordHasher: reposCubit.passwordHasher,
-                  stage: stage,
-                  popDialog: () => Navigator.of(context).maybePop(),
                 ),
               ),
 
@@ -162,7 +156,6 @@ class RepositorySettings extends StatelessWidget
                       ),
                       subtitle: Text(dir.volume.description),
                       onTap: () => showRepositoryStoreDialog(
-                        context,
                         repoCubit: repoCubit,
                         storeDirsCubit: storeDirsCubit,
                         stage: stage,
@@ -186,13 +179,13 @@ class RepositorySettings extends StatelessWidget
                   final location = repoCubit.location;
 
                   final deleted = await showDeleteRepositoryDialog(
-                    context,
+                    stage: stage,
                     reposCubit: reposCubit,
                     repoLocation: location,
                   );
 
                   if (deleted == true) {
-                    Navigator.of(context).pop();
+                    await stage.maybePop();
                     stage.showSnackBar(
                       S.current.messageRepositoryDeleted(repoName),
                     );

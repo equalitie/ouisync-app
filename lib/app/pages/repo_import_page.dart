@@ -125,8 +125,7 @@ class RepoImportPage extends StatelessWidget {
             );
             if (!permissionGranted) return;
 
-            final data = await Navigator.push(
-              context,
+            final data = await stage.push(
               MaterialPageRoute(
                 builder: (context) => QRScanner(reposCubit.session),
               ),
@@ -137,9 +136,7 @@ class RepoImportPage extends StatelessWidget {
             final result = await parseShareToken(reposCubit, data);
             switch (result) {
               case ShareTokenValid(value: final token):
-                await Navigator.of(
-                  context,
-                ).maybePop(RepoImportFromToken(token));
+                await stage.maybePop(RepoImportFromToken(token));
               case ShareTokenInvalid(error: final error):
                 stage.showSnackBar(error.toString());
             }
@@ -152,7 +149,7 @@ class RepoImportPage extends StatelessWidget {
     BuildContext context,
     Permission permission,
   ) async {
-    final status = await Permissions.requestPermission(context, permission);
+    final status = await Permissions.requestPermission(stage, permission);
     return status == PermissionStatus.granted;
   }
 
@@ -224,9 +221,9 @@ class RepoImportPage extends StatelessWidget {
     ShareTokenResult? state,
   ) =>
       _buildButton(S.current.actionAddRepository.toUpperCase(), switch (state) {
-        ShareTokenValid(value: final token) => () async => await Navigator.of(
-          context,
-        ).maybePop(RepoImportFromToken(token)),
+        ShareTokenValid(value: final token) => () => stage.maybePop(
+          RepoImportFromToken(token),
+        ),
         ShareTokenInvalid() || null => null,
       });
 
@@ -260,7 +257,7 @@ class RepoImportPage extends StatelessWidget {
 
           await Future.wait(locations.map(reposCubit.importRepoFromLocation));
 
-          await Navigator.of(context).maybePop(RepoImportFromFiles(locations));
+          await stage.maybePop(RepoImportFromFiles(locations));
         }),
       ],
     );

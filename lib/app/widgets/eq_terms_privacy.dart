@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../generated/l10n.dart';
+import '../utils/stage.dart';
 import '../utils/utils.dart';
 
 class EqTermsAndPrivacy extends StatelessWidget {
-  const EqTermsAndPrivacy({super.key});
+  const EqTermsAndPrivacy(this.stage, {super.key});
+
+  final Stage stage;
 
   @override
   Widget build(BuildContext context) {
@@ -63,16 +66,11 @@ class EqTermsAndPrivacy extends StatelessWidget {
               Fields.boldTextSpan('·	', fontSize: subtitleFontSize),
               TextSpan(text: S.current.messageTerms1_1),
               Fields.linkTextSpan(
-                context,
                 S.current.messageCanadaPrivacyAct,
                 _launchCPA,
               ),
               TextSpan(text: ' ${S.current.messageOr.toLowerCase()} '),
-              Fields.linkTextSpan(
-                context,
-                S.current.messagePIPEDA,
-                _launchPIPEDA,
-              ),
+              Fields.linkTextSpan(S.current.messagePIPEDA, _launchPIPEDA),
               TextSpan(text: ' ${S.current.messageTerms1_2},\n\n'),
               Fields.boldTextSpan('·	', fontSize: subtitleFontSize),
               TextSpan(text: '${S.current.messageTerms2};\n\n'),
@@ -154,7 +152,7 @@ class EqTermsAndPrivacy extends StatelessWidget {
                 fontSize: titleFontSize,
               ),
               TextSpan(text: '${S.current.messageContatUsP1} '),
-              Fields.linkTextSpan(context, Constants.supportEmail, _mailTo),
+              Fields.linkTextSpan(Constants.supportEmail, _mailTo),
               TextSpan(text: '.'),
             ],
           ),
@@ -163,16 +161,15 @@ class EqTermsAndPrivacy extends StatelessWidget {
     );
   }
 
-  void _mailTo(context) =>
-      launchUrl(Uri.parse('mailto:${Constants.supportEmail}'));
+  void _mailTo() => launchUrl(Uri.parse('mailto:${Constants.supportEmail}'));
 
-  void _launchCPA(BuildContext context) async {
+  void _launchCPA() async {
     final title = Text(S.current.messageCanadaPrivacyAct);
-    await Fields.openUrl(context, title, Constants.canadaPrivacyAct);
+    await Fields.openUrl(stage, title, Constants.canadaPrivacyAct);
   }
 
-  void _launchPIPEDA(BuildContext context) async {
+  void _launchPIPEDA() async {
     final title = Text(S.current.titlePIPEDA);
-    await Fields.openUrl(context, title, Constants.pipedaUrl);
+    await Fields.openUrl(stage, title, Constants.pipedaUrl);
   }
 }

@@ -12,7 +12,6 @@ import 'package:url_launcher/url_launcher.dart' show launchUrl;
 import '../../generated/l10n.dart';
 import '../cubits/repo.dart';
 import '../cubits/store_dirs.dart';
-import '../utils/dialogs.dart' show Dialogs;
 import '../utils/dimensions.dart';
 import '../utils/extensions.dart';
 import '../utils/log.dart' show AppLogger;
@@ -97,15 +96,15 @@ class StorageVolumeLabel extends StatelessWidget {
 /// Dialog for changing repository store directory
 class StoreDirDialog extends StatelessWidget with AppLogger {
   StoreDirDialog({
+    required this.stage,
     required this.storeDirsCubit,
     required this.repoCubit,
-    required this.stage,
     super.key,
   });
 
+  final Stage stage;
   final StoreDirsCubit storeDirsCubit;
   final RepoCubit repoCubit;
-  final Stage stage;
 
   @override
   Widget build(BuildContext context) => BlocBuilder<RepoCubit, RepoState>(
@@ -213,8 +212,7 @@ class StoreDirDialog extends StatelessWidget with AppLogger {
     );
 
     if (confirm ?? false) {
-      await Dialogs.executeFutureWithLoadingDialog(
-        context,
+      await stage.loading(
         repoCubit.move(repoState.location.relocate(dir.path).path),
       );
     }

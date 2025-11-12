@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../../generated/l10n.dart';
+import '../utils/stage.dart';
 import '../utils/utils.dart';
 
 class EqValues extends StatelessWidget {
-  const EqValues({super.key});
+  const EqValues(this.stage, {super.key});
+
+  final Stage stage;
 
   @override
   Widget build(BuildContext context) => Theme(
@@ -53,7 +56,6 @@ class EqValues extends StatelessWidget {
             children: [
               TextSpan(text: S.current.messageEqValuesP1),
               Fields.linkTextSpan(
-                context,
                 '${S.current.messageInternationalBillHumanRights}.\n\n',
                 _launchIBoHR,
               ),
@@ -81,7 +83,6 @@ class EqValues extends StatelessWidget {
               ),
               TextSpan(text: S.current.messageEqValuesP8),
               Fields.linkTextSpan(
-                context,
                 '${S.current.messageDeclarationDOS}.\n\n',
                 _launchDfDOS,
               ),
@@ -117,13 +118,13 @@ class EqValues extends StatelessWidget {
     );
   }
 
-  void _launchIBoHR(BuildContext context) async {
+  void _launchIBoHR() async {
     final title = Text(S.current.messageInternationalBillHumanRights);
-    await Fields.openUrl(context, title, Constants.billHumanRightsUrl);
+    await Fields.openUrl(stage, title, Constants.billHumanRightsUrl);
   }
 
-  void _launchDfDOS(BuildContext context) async {
+  void _launchDfDOS() async {
     final title = Text(S.current.messageDeclarationDOS);
-    await Fields.openUrl(context, title, Constants.eqDeclarationDOS);
+    await Fields.openUrl(stage, title, Constants.eqDeclarationDOS);
   }
 }

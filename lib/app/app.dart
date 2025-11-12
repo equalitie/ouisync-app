@@ -306,9 +306,11 @@ class _HomeWidgetState extends State<HomeWidget>
   Widget build(BuildContext context) => MediaReceiver(
     controller: receivedMediaController,
     child: OnboardingPage(
-      widget.localeCubit,
-      widget.settings,
+      stage: stage,
+      localeCubit: widget.localeCubit,
+      settings: widget.settings,
       mainPage: MainPage(
+        stage: stage,
         localeCubit: widget.localeCubit,
         mountCubit: mountCubit,
         errorCubit: widget.errorCubit,
@@ -319,7 +321,6 @@ class _HomeWidgetState extends State<HomeWidget>
         windowManager: widget.windowManager,
         dirs: widget.dirs,
         storeDirsCubit: widget.storeDirsCubit,
-        stage: stage,
       ),
     ),
   );
