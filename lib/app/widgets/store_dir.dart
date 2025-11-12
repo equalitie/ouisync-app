@@ -171,7 +171,7 @@ class StoreDirDialog extends StatelessWidget with AppLogger {
 
   Future<void> _copyToClipboard(BuildContext context, RepoState state) async {
     await Clipboard.setData(ClipboardData(text: state.location.path));
-    showSnackBar(S.current.messageCopiedToClipboard, context: context);
+    showSnackBar(context, S.current.messageCopiedToClipboard);
   }
 
   Future<void> _openDirectory(RepoState state) =>

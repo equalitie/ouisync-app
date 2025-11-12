@@ -92,7 +92,10 @@ class RepoListState extends StatelessWidget
 
               if (deleted == true) {
                 Navigator.of(context).pop();
-                showSnackBar(S.current.messageRepositoryDeleted(repoName));
+                showSnackBar(
+                  context,
+                  S.current.messageRepositoryDeleted(repoName),
+                );
               }
             },
           );

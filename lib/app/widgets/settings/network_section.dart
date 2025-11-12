@@ -340,7 +340,7 @@ class _AddressTile extends StatelessWidget {
 
   Future<void> _onCopyPressed(BuildContext context) async {
     await Clipboard.setData(ClipboardData(text: value));
-    showSnackBar(S.current.messageCopiedToClipboard);
+    showSnackBar(context, S.current.messageCopiedToClipboard);
   }
 }
 

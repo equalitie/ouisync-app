@@ -1,5 +1,3 @@
-import 'package:build_context_provider/build_context_provider.dart'
-    show BuildContextProvider;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -39,27 +37,12 @@ class _SnackBarWrapState extends State<_SnackBarWrap> {
 //------------------------------------------------------------------------------
 
 showSnackBar(
+  BuildContext context,
   String message, {
-  BuildContext? context,
   SnackBarAction? action,
   bool showCloseIcon = true,
   SnackBarBehavior? behavior = SnackBarBehavior.floating,
-}) => context != null
-    ? _showSnackBar(context, message, action, showCloseIcon, behavior!)
-    : WidgetsBinding.instance.addPostFrameCallback(
-        (_) => BuildContextProvider().call(
-          (context) =>
-              _showSnackBar(context, message, action, showCloseIcon, behavior!),
-        ),
-      );
-
-_showSnackBar(
-  BuildContext context,
-  String message,
-  SnackBarAction? action,
-  bool showCloseIcon,
-  SnackBarBehavior behavior,
-) {
+}) {
   final messenger = ScaffoldMessenger.of(context);
 
   if (_snackbars.contains(message)) {

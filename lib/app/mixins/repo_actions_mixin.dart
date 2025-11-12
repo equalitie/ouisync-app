@@ -240,7 +240,10 @@ mixin RepositoryActionsMixin on LoggyType {
       await repoCubit.unlock(null);
       final accessMode = repoCubit.accessMode;
       if (accessMode != AccessMode.blind) {
-        showSnackBar(S.current.messageUnlockRepoOk(accessMode.localized));
+        showSnackBar(
+          context,
+          S.current.messageUnlockRepoOk(accessMode.localized),
+        );
         return;
       }
 
@@ -282,7 +285,7 @@ mixin RepositoryActionsMixin on LoggyType {
 
     if (secret == null) {
       if (errorMessage != null) {
-        showSnackBar(errorMessage);
+        showSnackBar(context, errorMessage);
       }
       return;
     }
@@ -294,7 +297,7 @@ mixin RepositoryActionsMixin on LoggyType {
         ? S.current.messageUnlockRepoOk(accessMode.localized)
         : S.current.messageUnlockRepoFailed;
 
-    showSnackBar(message);
+    showSnackBar(context, message);
   }
 }
 

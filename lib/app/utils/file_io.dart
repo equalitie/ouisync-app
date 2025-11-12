@@ -122,7 +122,7 @@ class FileIO with AppLogger {
       final destinationPaths = await getDestinationPath(defaultPath, fileName);
       if (destinationPaths.canceled) {
         final errorMessage = S.current.messageDownloadFileCanceled;
-        showSnackBar(errorMessage);
+        showSnackBar(context, errorMessage);
 
         return;
       }

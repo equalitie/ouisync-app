@@ -93,7 +93,10 @@ class RepositorySettings extends StatelessWidget
 
                   if (newName != null) {
                     Navigator.of(context).pop();
-                    showSnackBar(S.current.messageRepositoryRenamed(newName));
+                    showSnackBar(
+                      context,
+                      S.current.messageRepositoryRenamed(newName),
+                    );
                   }
                 },
               ),
@@ -183,7 +186,10 @@ class RepositorySettings extends StatelessWidget
 
                   if (deleted == true) {
                     Navigator.of(context).pop();
-                    showSnackBar(S.current.messageRepositoryDeleted(repoName));
+                    showSnackBar(
+                      context,
+                      S.current.messageRepositoryDeleted(repoName),
+                    );
                   }
                 },
               ),

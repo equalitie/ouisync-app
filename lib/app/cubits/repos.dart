@@ -330,7 +330,10 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
 
   Future<void> importRepoFromLocation(RepoLocation location) async {
     if (state.repos.containsKey(location)) {
-      showSnackBar(S.current.repositoryIsAlreadyImported);
+      // TODO:
+      throw UnimplementedError('snackbar in cubit');
+      //showSnackBar(S.current.repositoryIsAlreadyImported);
+
       return;
     }
 
@@ -339,7 +342,10 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
     try {
       repo = await _session.openRepository(path: location.path);
     } on AlreadyExists {
-      showSnackBar(S.current.repositoryIsAlreadyImported);
+      // TODO:
+      throw UnimplementedError('snackbar in cubit');
+      //showSnackBar(S.current.repositoryIsAlreadyImported);
+
       loggy.warning(
         'Same repository but from different location is already loaded',
       );

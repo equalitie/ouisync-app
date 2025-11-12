@@ -189,7 +189,7 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
     );
     if (destinationPaths.canceled) {
       final errorMessage = S.current.messageDownloadFileCanceled;
-      showSnackBar(errorMessage);
+      showSnackBar(context, errorMessage);
 
       return false;
     }

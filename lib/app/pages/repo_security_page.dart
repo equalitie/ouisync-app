@@ -191,9 +191,9 @@ class _State extends State<RepoSecurityPage> {
       passwordHasher: widget.passwordHasher,
       masterKey: widget.settings.masterKey,
     )) {
-      showSnackBar(S.current.messageUpdateLocalSecretOk);
+      showSnackBar(context, S.current.messageUpdateLocalSecretOk);
     } else {
-      showSnackBar(S.current.messageUpdateLocalSecretFailed);
+      showSnackBar(context, S.current.messageUpdateLocalSecretFailed);
     }
   }
 

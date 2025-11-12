@@ -75,7 +75,10 @@ class RenameOrReplaceEntryDialog extends StatelessWidget {
                 GestureDetector(
                   onTap: () {
                     if (type == EntryType.directory) {
-                      showSnackBar(S.current.messageOnlyAvailableFiles);
+                      showSnackBar(
+                        context,
+                        S.current.messageOnlyAvailableFiles,
+                      );
                     }
                   },
                   child: RadioListTile<RenameOrReplaceResult>(

@@ -206,6 +206,7 @@ extension on _EntryDetailsState {
     );
 
     showSnackBar(
+      context,
       widget.entry is FileEntry
           ? S.current.messageFileRenamed(newName)
           : S.current.messageFolderRenamed(newName),
@@ -288,6 +289,7 @@ extension on _EntryDetailsState {
     if (deleteEntryOk) {
       Navigator.of(context).pop(deleteEntryOk);
       showSnackBar(
+        context,
         isFile
             ? S.current.messageFileDeleted(repo_path.basename(path))
             : S.current.messageFolderDeleted(entry.name),

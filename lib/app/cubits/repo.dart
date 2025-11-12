@@ -424,14 +424,20 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     required Stream<List<int>> fileByteStream,
   }) async {
     if (state.uploads.containsKey(filePath)) {
-      showSnackBar(S.current.messageFileIsDownloading);
+      // TODO:
+      throw UnimplementedError('snackbar in cubit');
+      //showSnackBar(S.current.messageFileIsDownloading);
+
       return;
     }
 
     final file = await _createFile(filePath);
 
     if (file == null) {
-      showSnackBar(S.current.messageNewFileError(filePath));
+      // TODO:
+      throw UnimplementedError('snackbar in cubit');
+      //showSnackBar(S.current.messageNewFileError(filePath));
+
       return;
     }
 
@@ -459,7 +465,11 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
       loggy.debug('File saved: $filePath (${formatSize(offset)})');
     } catch (e, st) {
       loggy.debug('Save file to $filePath failed: ${e.toString()}', e, st);
-      showSnackBar(S.current.messageWritingFileError(filePath));
+
+      // TODO:
+      throw UnimplementedError('snackbar in cubit');
+      //showSnackBar(S.current.messageWritingFileError(filePath));
+
       return;
     } finally {
       await file.close();
@@ -471,7 +481,9 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     }
 
     if (job.state.cancel) {
-      showSnackBar(S.current.messageWritingFileCanceled(filePath));
+      // TODO:
+      throw UnimplementedError('snackbar in cubit');
+      //showSnackBar(S.current.messageWritingFileCanceled(filePath));
     }
   }
 
@@ -675,7 +687,10 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     required String destinationPath,
   }) async {
     if (state.downloads.containsKey(sourcePath)) {
-      showSnackBar(S.current.messageFileIsDownloading);
+      // TODO:
+      throw UnimplementedError('snackbar in cubit');
+      //showSnackBar(S.current.messageFileIsDownloading);
+
       return;
     }
 
@@ -724,7 +739,9 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
             );
           }
 
-          showSnackBar(S.current.messageDownloadFileLocation(parentPath));
+          // TODO:
+          throw UnimplementedError('snackbar in cubit');
+          //showSnackBar(S.current.messageDownloadFileLocation(parentPath));
         } finally {
           await sink.flush();
           await sink.close();
@@ -734,7 +751,10 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
       }
     } catch (e, st) {
       loggy.error('Download file $sourcePath exception: ', e, st);
-      showSnackBar(S.current.messageDownloadingFileError(sourcePath));
+
+      // TODO:
+      throw UnimplementedError('snackbar in cubit');
+      //showSnackBar(S.current.messageDownloadingFileError(sourcePath));
     }
   }
 
@@ -933,16 +953,20 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
 
         if (!errorShown) {
           errorShown = true;
-          showSnackBar(S.current.messageErrorCurrentPathMissing(path));
+
+          // TODO:
+          throw UnimplementedError('snackbar in cubit');
+          //showSnackBar(S.current.messageErrorCurrentPathMissing(path));
         }
       }
-    } catch (e) {
-      showSnackBar(e.toString());
+    } catch (e, st) {
+      loggy.error("failed to refresh folder '$path' in repo '$name': ", e, st);
+      rethrow;
+    } finally {
+      emitUnlessClosed(
+        state.copyWith(currentFolder: _currentFolder.state, isLoading: false),
+      );
     }
-
-    emitUnlessClosed(
-      state.copyWith(currentFolder: _currentFolder.state, isLoading: false),
-    );
   }
 
   StreamSubscription<void> autoRefresh() =>

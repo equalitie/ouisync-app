@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:loggy/loggy.dart';
 import 'package:ouisync/helpers.dart' as oui show viewFile, shareFile;
@@ -36,6 +37,7 @@ Future<String> disambiguateEntryName({
 }
 
 Future<void> viewFile({
+  required BuildContext context,
   required RepoCubit repo,
   required String path,
   required Loggy<AppLogger> loggy,
@@ -87,15 +89,15 @@ Future<void> viewFile({
   try {
     await view();
   } on _AppNotFound {
-    showSnackBar(S.current.messageNoAppsForThisAction);
+    showSnackBar(context, S.current.messageNoAppsForThisAction);
   } on _RepoNotMounted {
-    showSnackBar(S.current.messageRepositoryNotMounted);
+    showSnackBar(context, S.current.messageRepositoryNotMounted);
   } on _NotImplemented {
-    showSnackBar(S.current.messageFilePreviewNotAvailable);
+    showSnackBar(context, S.current.messageFilePreviewNotAvailable);
   } on PlatformException catch (e, st) {
     loggy.error('Error viewing file $path:', e, st);
 
-    showSnackBar(S.current.messagePreviewingFileFailed(path));
+    showSnackBar(context, S.current.messagePreviewingFileFailed(path));
   }
 }
 

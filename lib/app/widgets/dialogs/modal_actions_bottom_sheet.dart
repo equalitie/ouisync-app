@@ -160,7 +160,10 @@ class DirectoryActions extends StatelessWidget with AppLogger {
     );
 
     if (!result) {
-      showSnackBar(S.current.messageErrorCreatingFolder(newFolderPath));
+      showSnackBar(
+        context,
+        S.current.messageErrorCreatingFolder(newFolderPath),
+      );
       return;
     }
 

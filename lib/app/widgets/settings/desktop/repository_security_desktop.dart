@@ -96,11 +96,10 @@ class _RepositorySecurityDesktopState extends State<RepositorySecurityDesktop> {
             child: Text(S.current.popupMenuItemCopyPassword),
             onTap: () async {
               if (_password == null) return;
-
               if (_password!.isEmpty) return;
 
               await copyStringToClipboard(_password!);
-              showSnackBar(S.current.messagePasswordCopiedClipboard);
+              showSnackBar(context, S.current.messagePasswordCopiedClipboard);
             },
           ),
           const PopupMenuDivider(),

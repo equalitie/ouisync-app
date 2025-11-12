@@ -495,47 +495,50 @@ class _MainPageState extends State<MainPage>
     );
   }
 
-  Widget _contentsList(ReposState reposState, RepoCubit currentRepoCubit) =>
-      BlocBuilder<EntrySelectionCubit, EntrySelectionState>(
-        bloc: currentRepoCubit.entrySelectionCubit,
-        builder: (context, selectionState) {
-          final contents = currentRepoCubit.state.currentFolder.content;
-          final totalEntries = contents.length;
+  Widget _contentsList(
+    ReposState reposState,
+    RepoCubit currentRepoCubit,
+  ) => BlocBuilder<EntrySelectionCubit, EntrySelectionState>(
+    bloc: currentRepoCubit.entrySelectionCubit,
+    builder: (context, selectionState) {
+      final contents = currentRepoCubit.state.currentFolder.content;
+      final totalEntries = contents.length;
 
-          return RefreshIndicator(
-            onRefresh: () async {
-              await reposState.current?.cubit?.refresh();
-            },
-            child: Container(
-              child: ListView.separated(
-                key: Key('directory_entry_list'),
-                separatorBuilder: (context, index) =>
-                    const Divider(height: 1, color: Colors.transparent),
-                itemCount: totalEntries,
-                itemBuilder: (context, index) {
-                  final entry = contents[index];
-                  final key = ValueKey(entry.name);
-
-                  return Column(
-                    children: [
-                      (entry is FileEntry
-                          ? _builFileListItem
-                          : _buildDirectoryListItem)(
-                        context,
-                        key,
-                        currentRepoCubit,
-                        selectionState,
-                        entry,
-                      ),
-                      if (index == (totalEntries - 1)) SizedBox(height: 56),
-                    ],
-                  );
-                },
-              ),
-            ),
-          );
+      // TODO: Remove this RefreshIndicator (not needed, content refreshed automatically)
+      return RefreshIndicator(
+        onRefresh: () async {
+          await reposState.current?.cubit?.refresh();
         },
+        child: Container(
+          child: ListView.separated(
+            key: Key('directory_entry_list'),
+            separatorBuilder: (context, index) =>
+                const Divider(height: 1, color: Colors.transparent),
+            itemCount: totalEntries,
+            itemBuilder: (context, index) {
+              final entry = contents[index];
+              final key = ValueKey(entry.name);
+
+              return Column(
+                children: [
+                  (entry is FileEntry
+                      ? _builFileListItem
+                      : _buildDirectoryListItem)(
+                    context,
+                    key,
+                    currentRepoCubit,
+                    selectionState,
+                    entry,
+                  ),
+                  if (index == (totalEntries - 1)) SizedBox(height: 56),
+                ],
+              );
+            },
+          ),
+        ),
       );
+    },
+  );
 
   FileListItem _builFileListItem(
     BuildContext context,
@@ -583,7 +586,12 @@ class _MainPageState extends State<MainPage>
     bool isSelected = false,
   ]) async {
     if (entry is FileEntry) {
-      return viewFile(repo: currentRepoCubit, path: entry.path, loggy: loggy);
+      return viewFile(
+        context: context,
+        repo: currentRepoCubit,
+        path: entry.path,
+        loggy: loggy,
+      );
     }
 
     if (isSelected) {
@@ -626,13 +634,17 @@ class _MainPageState extends State<MainPage>
     isScrollControlled: true,
     context: context,
     shape: Dimensions.borderBottomSheetTop,
-    builder: (_) => entry is FileEntry
+    builder: (context) => entry is FileEntry
         ? EntryDetails.file(
             context,
             repoCubit: repoCubit,
             entry: entry,
-            onPreviewFile: (cubit, data) =>
-                viewFile(repo: cubit, path: data.path, loggy: loggy),
+            onPreviewFile: (cubit, data) => viewFile(
+              context: context,
+              repo: cubit,
+              path: data.path,
+              loggy: loggy,
+            ),
             isActionAvailableValidator: _isEntryActionAvailable,
             dirs: widget.dirs,
           )
@@ -955,7 +967,7 @@ class _MainPageState extends State<MainPage>
         case ShareTokenValid():
           result = RepoImportFromToken(tokenResult.value);
         case ShareTokenInvalid():
-          showSnackBar(tokenResult.error.toString());
+          showSnackBar(parentContext, tokenResult.error.toString());
           return [];
       }
     } else {

@@ -136,7 +136,7 @@ class RepoImportPage extends StatelessWidget {
                   context,
                 ).maybePop(RepoImportFromToken(token));
               case ShareTokenInvalid(error: final error):
-                showSnackBar(error.toString());
+                showSnackBar(context, error.toString());
             }
           },
     leadingIcon: const Icon(Icons.qr_code_2_outlined),
