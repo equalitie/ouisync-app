@@ -5,6 +5,7 @@ import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../mixins/mixins.dart';
 import '../../models/models.dart';
+import '../../utils/stage.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
@@ -15,17 +16,18 @@ class RepoListState extends StatelessWidget
     required this.storeDirsCubit,
     required this.bottomSheetInfo,
     required this.onShowRepoSettings,
+    required this.stage,
   });
 
   final ReposCubit reposCubit;
   final StoreDirsCubit storeDirsCubit;
   final ValueNotifier<BottomSheetInfo> bottomSheetInfo;
-
   final Future<void> Function(
     BuildContext context, {
     required RepoCubit repoCubit,
   })
   onShowRepoSettings;
+  final Stage stage;
 
   @override
   Widget build(BuildContext context) {
@@ -92,8 +94,7 @@ class RepoListState extends StatelessWidget
 
               if (deleted == true) {
                 Navigator.of(context).pop();
-                showSnackBar(
-                  context,
+                stage.showSnackBar(
                   S.current.messageRepositoryDeleted(repoName),
                 );
               }

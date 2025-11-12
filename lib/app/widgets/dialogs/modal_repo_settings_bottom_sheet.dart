@@ -7,6 +7,7 @@ import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart' show RepoCubit, ReposCubit, RepoState;
 import '../../cubits/store_dirs.dart';
 import '../../mixins/mixins.dart' show RepositoryActionsMixin;
+import '../../utils/stage.dart';
 import '../../utils/themes/app_typography.dart' show AppTypography;
 import '../../utils/utils.dart'
     show
@@ -16,7 +17,6 @@ import '../../utils/utils.dart'
         Fields,
         ProgressExtension,
         Settings,
-        showSnackBar,
         ThemeGetter;
 import '../store_dir.dart';
 import '../widgets.dart' show EntryActionItem, RepoProgressBuilder;
@@ -29,6 +29,7 @@ class RepositorySettings extends StatelessWidget
     required this.repoCubit,
     required this.reposCubit,
     required this.storeDirsCubit,
+    required this.stage,
   });
 
   final Settings settings;
@@ -36,6 +37,7 @@ class RepositorySettings extends StatelessWidget
   final RepoCubit repoCubit;
   final ReposCubit reposCubit;
   final StoreDirsCubit storeDirsCubit;
+  final Stage stage;
 
   @override
   Widget build(BuildContext context) => BlocBuilder<RepoCubit, RepoState>(
@@ -93,8 +95,7 @@ class RepositorySettings extends StatelessWidget
 
                   if (newName != null) {
                     Navigator.of(context).pop();
-                    showSnackBar(
-                      context,
+                    stage.showSnackBar(
                       S.current.messageRepositoryRenamed(newName),
                     );
                   }
@@ -106,7 +107,11 @@ class RepositorySettings extends StatelessWidget
                 dense: true,
                 onTap: () async {
                   await Navigator.of(context).maybePop();
-                  await shareRepository(context, repository: repoCubit);
+                  await shareRepository(
+                    context,
+                    repository: repoCubit,
+                    stage: stage,
+                  );
                 },
               ),
               EntryActionItem(
@@ -119,6 +124,7 @@ class RepositorySettings extends StatelessWidget
                   session: session,
                   repoCubit: repoCubit,
                   passwordHasher: reposCubit.passwordHasher,
+                  stage: stage,
                   popDialog: () => Navigator.of(context).maybePop(),
                 ),
               ),
@@ -159,6 +165,7 @@ class RepositorySettings extends StatelessWidget
                         context,
                         repoCubit: repoCubit,
                         storeDirsCubit: storeDirsCubit,
+                        stage: stage,
                       ),
                       contentPadding: EdgeInsets.zero,
                       visualDensity: VisualDensity.compact,
@@ -186,8 +193,7 @@ class RepositorySettings extends StatelessWidget
 
                   if (deleted == true) {
                     Navigator.of(context).pop();
-                    showSnackBar(
-                      context,
+                    stage.showSnackBar(
                       S.current.messageRepositoryDeleted(repoName),
                     );
                   }

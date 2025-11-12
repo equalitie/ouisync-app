@@ -9,6 +9,7 @@ import 'package:permission_handler/permission_handler.dart';
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart' show RepoImportCubit, ReposCubit;
 import '../models/models.dart';
+import '../utils/stage.dart';
 import '../utils/platform/platform.dart' show PlatformValues;
 import '../utils/share_token.dart';
 import '../utils/utils.dart'
@@ -18,15 +19,19 @@ import '../utils/utils.dart'
         Dimensions,
         Fields,
         Permissions,
-        showSnackBar,
         ThemeGetter;
 import '../widgets/widgets.dart' show BlocHolder, DirectionalAppBar;
 import 'pages.dart';
 
 class RepoImportPage extends StatelessWidget {
-  const RepoImportPage({super.key, required this.reposCubit});
+  const RepoImportPage({
+    super.key,
+    required this.reposCubit,
+    required this.stage,
+  });
 
   final ReposCubit reposCubit;
+  final Stage stage;
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -136,7 +141,7 @@ class RepoImportPage extends StatelessWidget {
                   context,
                 ).maybePop(RepoImportFromToken(token));
               case ShareTokenInvalid(error: final error):
-                showSnackBar(context, error.toString());
+                stage.showSnackBar(error.toString());
             }
           },
     leadingIcon: const Icon(Icons.qr_code_2_outlined),

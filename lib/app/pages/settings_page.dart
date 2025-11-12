@@ -7,6 +7,7 @@ import 'package:stream_transform/stream_transform.dart';
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart';
 import '../utils/dirs.dart';
+import '../utils/stage.dart';
 import '../widgets/widgets.dart' show AppSettingsContainer, DirectionalAppBar;
 
 class SettingsPage extends StatefulWidget {
@@ -20,6 +21,7 @@ class SettingsPage extends StatefulWidget {
     required this.upgradeExists,
     required this.checkForDokan,
     required this.dirs,
+    required this.stage,
   });
 
   final Session session;
@@ -31,6 +33,7 @@ class SettingsPage extends StatefulWidget {
   final UpgradeExistsCubit upgradeExists;
   final void Function() checkForDokan;
   final Dirs dirs;
+  final Stage stage;
 
   @override
   State<SettingsPage> createState() => _SettingsPageState();
@@ -83,6 +86,7 @@ class _SettingsPageState extends State<SettingsPage> {
       launchAtStartup: launchAtStartup,
       upgradeExists: widget.upgradeExists,
       dirs: widget.dirs,
+      stage: widget.stage,
     ),
   );
 }

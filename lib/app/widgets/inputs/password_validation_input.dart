@@ -2,13 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_password_strength/flutter_password_strength.dart';
 
 import '../../../generated/l10n.dart';
+import '../../utils/stage.dart';
 import '../../utils/utils.dart';
 
 class PasswordValidation extends StatefulWidget {
-  PasswordValidation({required this.onChanged, this.required = true});
+  PasswordValidation({
+    required this.onChanged,
+    required this.stage,
+    this.required = true,
+  });
 
   final void Function(String?) onChanged;
   final bool required;
+  final Stage stage;
 
   @override
   State<PasswordValidation> createState() => _PasswordValidationState();
@@ -152,7 +158,7 @@ class _PasswordValidationState<PasswordResult> extends State<PasswordValidation>
       IconButton(
         onPressed: () async {
           await copyStringToClipboard(_password ?? "");
-          showSnackBar(context, S.current.messagePasswordCopiedClipboard);
+          widget.stage.showSnackBar(S.current.messagePasswordCopiedClipboard);
         },
         icon: const Icon(Icons.copy_rounded),
         padding: EdgeInsetsDirectional.zero,
@@ -177,7 +183,7 @@ class _PasswordValidationState<PasswordResult> extends State<PasswordValidation>
       IconButton(
         onPressed: () async {
           await copyStringToClipboard(_retypedPassword ?? "");
-          showSnackBar(context, S.current.messagePasswordCopiedClipboard);
+          widget.stage.showSnackBar(S.current.messagePasswordCopiedClipboard);
         },
         icon: const Icon(Icons.copy_rounded),
         padding: EdgeInsetsDirectional.zero,

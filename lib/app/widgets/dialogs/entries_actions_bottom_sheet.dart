@@ -18,6 +18,7 @@ import '../../cubits/cubits.dart'
 import '../../cubits/repos.dart';
 import '../../utils/dirs.dart';
 import '../../utils/repo_path.dart' as repo_path;
+import '../../utils/stage.dart';
 import '../../utils/utils.dart'
     show AppLogger, Dimensions, Fields, MoveEntriesActions, MultiEntryActions;
 import '../widgets.dart' show NegativeButton, PositiveButton;
@@ -31,6 +32,7 @@ class EntriesActionsDialog extends StatefulWidget {
     required this.sheetType,
     required this.onUpdateBottomSheet,
     required this.dirs,
+    required this.stage,
   });
 
   const EntriesActionsDialog.multiple(
@@ -40,12 +42,14 @@ class EntriesActionsDialog extends StatefulWidget {
     required this.sheetType,
     required this.onUpdateBottomSheet,
     required this.dirs,
+    required this.stage,
   }) : entry = null;
 
   final BuildContext parentContext;
   final ReposCubit reposCubit;
   final RepoCubit originRepoCubit;
   final Dirs dirs;
+  final Stage stage;
 
   final FileSystemEntry? entry;
 
@@ -187,6 +191,7 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
         reposCubit: reposCubit,
         originRepoCubit: originRepoCubit,
         sheetType: sheetType,
+        stage: widget.stage,
       );
 
       return entry == null
@@ -301,6 +306,7 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
           parentContext,
           entrySelectionCubit: entrySelectionCubit,
           dirs: dirs,
+          stage: widget.stage,
         );
 
         final action = moveEntriesActions.getAction(

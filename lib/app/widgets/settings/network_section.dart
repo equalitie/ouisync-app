@@ -10,6 +10,7 @@ import 'package:ouisync/ouisync.dart' show Session;
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../pages/peers_page.dart';
+import '../../utils/stage.dart';
 import '../../utils/peer_addr.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
@@ -23,6 +24,7 @@ class NetworkSection extends SettingsSection {
     required this.natDetection,
     required this.peerSet,
     required this.powerControl,
+    required this.stage,
   }) : super(
          key: GlobalKey(debugLabel: 'key_network_section'),
          title: S.current.titleNetwork,
@@ -33,6 +35,7 @@ class NetworkSection extends SettingsSection {
   final NatDetection natDetection;
   final PeerSetCubit peerSet;
   final PowerControl powerControl;
+  final Stage stage;
 
   TextStyle? bodyStyle;
   TextStyle? subtitleStyle;
@@ -236,6 +239,7 @@ class NetworkSection extends SettingsSection {
           titleStyle: bodyStyle,
           value: address,
           valueStyle: subtitleStyle,
+          stage: stage,
         );
       } else {
         return SizedBox.shrink();
@@ -254,7 +258,8 @@ class NetworkSection extends SettingsSection {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => PeersPage(session, peerSet),
+                builder: (context) =>
+                    PeersPage(session: session, cubit: peerSet, stage: stage),
               ),
             );
           },
@@ -313,11 +318,13 @@ class _AddressTile extends StatelessWidget {
   final String value;
   final TextStyle? titleStyle;
   final TextStyle? valueStyle;
+  final Stage stage;
 
   const _AddressTile({
     required this.title,
     required this.icon,
     required this.value,
+    required this.stage,
     this.titleStyle,
     this.valueStyle,
   });
@@ -334,13 +341,13 @@ class _AddressTile extends StatelessWidget {
     ),
     trailing: IconButton(
       icon: Icon(Icons.copy),
-      onPressed: () => _onCopyPressed(context),
+      onPressed: () => _onCopyPressed(),
     ),
   );
 
-  Future<void> _onCopyPressed(BuildContext context) async {
+  Future<void> _onCopyPressed() async {
     await Clipboard.setData(ClipboardData(text: value));
-    showSnackBar(context, S.current.messageCopiedToClipboard);
+    stage.showSnackBar(S.current.messageCopiedToClipboard);
   }
 }
 

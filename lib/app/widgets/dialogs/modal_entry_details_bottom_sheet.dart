@@ -11,6 +11,7 @@ import '../../models/models.dart'
 import '../../pages/pages.dart' show PreviewFileCallback;
 import '../../utils/dirs.dart';
 import '../../utils/entry_ops.dart' show shareFile;
+import '../../utils/stage.dart';
 import '../../utils/repo_path.dart' as repo_path;
 import '../../utils/utils.dart'
     show
@@ -21,8 +22,7 @@ import '../../utils/utils.dart'
         Fields,
         FileIO,
         ThemeGetter,
-        formatSize,
-        showSnackBar;
+        formatSize;
 import '../widgets.dart'
     show
         ActionsDialog,
@@ -39,6 +39,7 @@ class EntryDetails extends StatefulWidget {
     required this.isActionAvailableValidator,
     required this.onPreviewFile,
     required this.dirs,
+    required this.stage,
   }) : assert(entry is FileEntry);
 
   const EntryDetails.folder(
@@ -47,6 +48,7 @@ class EntryDetails extends StatefulWidget {
     required this.entry,
     required this.isActionAvailableValidator,
     required this.dirs,
+    required this.stage,
   }) : assert(entry is DirectoryEntry),
        onPreviewFile = null;
 
@@ -56,6 +58,7 @@ class EntryDetails extends StatefulWidget {
   final bool Function(AccessMode, EntryAction) isActionAvailableValidator;
   final PreviewFileCallback? onPreviewFile;
   final Dirs dirs;
+  final Stage stage;
 
   @override
   State<EntryDetails> createState() => _EntryDetailsState();
@@ -205,8 +208,7 @@ extension on _EntryDetailsState {
       destination: newEntryPath,
     );
 
-    showSnackBar(
-      context,
+    widget.stage.showSnackBar(
       widget.entry is FileEntry
           ? S.current.messageFileRenamed(newName)
           : S.current.messageFolderRenamed(newName),
@@ -257,6 +259,7 @@ extension on _EntryDetailsState {
     await FileIO(
       context: context,
       repoCubit: widget.repoCubit,
+      stage: widget.stage,
     ).saveFileToDevice(widget.entry as FileEntry, defaultDirectoryPath);
   }
 
@@ -288,8 +291,7 @@ extension on _EntryDetailsState {
 
     if (deleteEntryOk) {
       Navigator.of(context).pop(deleteEntryOk);
-      showSnackBar(
-        context,
+      widget.stage.showSnackBar(
         isFile
             ? S.current.messageFileDeleted(repo_path.basename(path))
             : S.current.messageFolderDeleted(entry.name),

@@ -17,6 +17,7 @@ import '../models/models.dart'
         UnlockedAccess,
         WriteAccess;
 import '../pages/pages.dart' show RepoSecurityPage;
+import '../utils/stage.dart';
 import '../utils/utils.dart'
     show
         AppThemeExtension,
@@ -26,8 +27,7 @@ import '../utils/utils.dart'
         LocalAuth,
         PasswordHasher,
         Settings,
-        ThemeGetter,
-        showSnackBar;
+        ThemeGetter;
 import '../widgets/store_dir.dart' show StoreDirDialog;
 import '../widgets/widgets.dart'
     show
@@ -78,6 +78,7 @@ mixin RepositoryActionsMixin on LoggyType {
   Future<dynamic> shareRepository(
     BuildContext context, {
     required RepoCubit repository,
+    required Stage stage,
   }) {
     final accessMode = repository.state.accessMode;
     final accessModes = accessMode == AccessMode.write
@@ -97,6 +98,7 @@ mixin RepositoryActionsMixin on LoggyType {
           body: ShareRepository(
             repository: repository,
             availableAccessModes: accessModes,
+            stage: stage,
           ),
         ),
       ),
@@ -110,6 +112,7 @@ mixin RepositoryActionsMixin on LoggyType {
     required RepoCubit repoCubit,
     required PasswordHasher passwordHasher,
     required FutureOr<void> Function() popDialog,
+    required Stage stage,
   }) async {
     //LocalSecret secret;
     final authMode = repoCubit.state.authMode;
@@ -148,13 +151,17 @@ mixin RepositoryActionsMixin on LoggyType {
       return;
     }
 
-    await RepoSecurityPage.show(
-      context,
-      settings,
-      session,
-      repoCubit,
-      unlockedAccess,
-      passwordHasher,
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => RepoSecurityPage(
+          settings: settings,
+          session: session,
+          repo: repoCubit,
+          originalAccess: unlockedAccess,
+          passwordHasher: passwordHasher,
+          stage: stage,
+        ),
+      ),
     );
   }
 
@@ -162,10 +169,14 @@ mixin RepositoryActionsMixin on LoggyType {
     BuildContext context, {
     required RepoCubit repoCubit,
     required StoreDirsCubit storeDirsCubit,
+    required Stage stage,
   }) => showDialog<void>(
     context: context,
-    builder: (context) =>
-        StoreDirDialog(storeDirsCubit: storeDirsCubit, repoCubit: repoCubit),
+    builder: (context) => StoreDirDialog(
+      storeDirsCubit: storeDirsCubit,
+      repoCubit: repoCubit,
+      stage: stage,
+    ),
   );
 
   Future<bool> showDeleteRepositoryDialog(
@@ -222,13 +233,14 @@ mixin RepositoryActionsMixin on LoggyType {
     return false;
   }
 
-  Future<void> unlockRepository(
-    BuildContext context,
-    Settings settings,
-    Session session,
-    RepoCubit repoCubit,
-    PasswordHasher passwordHasher,
-  ) async {
+  Future<void> unlockRepository({
+    required BuildContext context,
+    required Settings settings,
+    required Session session,
+    required RepoCubit repoCubit,
+    required PasswordHasher passwordHasher,
+    required Stage stage,
+  }) async {
     final authMode = repoCubit.state.authMode;
     final LocalSecret? secret;
     String? errorMessage;
@@ -240,10 +252,7 @@ mixin RepositoryActionsMixin on LoggyType {
       await repoCubit.unlock(null);
       final accessMode = repoCubit.accessMode;
       if (accessMode != AccessMode.blind) {
-        showSnackBar(
-          context,
-          S.current.messageUnlockRepoOk(accessMode.localized),
-        );
+        stage.showSnackBar(S.current.messageUnlockRepoOk(accessMode.localized));
         return;
       }
 
@@ -285,7 +294,7 @@ mixin RepositoryActionsMixin on LoggyType {
 
     if (secret == null) {
       if (errorMessage != null) {
-        showSnackBar(context, errorMessage);
+        stage.showSnackBar(errorMessage);
       }
       return;
     }
@@ -297,7 +306,7 @@ mixin RepositoryActionsMixin on LoggyType {
         ? S.current.messageUnlockRepoOk(accessMode.localized)
         : S.current.messageUnlockRepoFailed;
 
-    showSnackBar(context, message);
+    stage.showSnackBar(message);
   }
 }
 

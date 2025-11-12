@@ -83,6 +83,7 @@ class _QRScannerState extends State<QRScanner> with AppLogger {
 
   MobileScanner _buildScanner() {
     var scanned = false;
+    final navigator = Navigator.of(context);
 
     return MobileScanner(
       controller: cameraController,
@@ -113,7 +114,7 @@ class _QRScannerState extends State<QRScanner> with AppLogger {
           loggy.debug('Barcode found! $code');
           scanned = true;
 
-          await Navigator.of(context).maybePop(code);
+          await navigator.maybePop(code);
         }
       },
     );

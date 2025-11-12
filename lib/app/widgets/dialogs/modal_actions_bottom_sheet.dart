@@ -11,20 +11,21 @@ import '../../cubits/cubits.dart'
         EntryBottomSheetState,
         HideSheetState,
         RepoCubit;
+import '../../utils/stage.dart';
 import '../../utils/utils.dart'
-    show AppLogger, Dialogs, Dimensions, Fields, FileIO, showSnackBar;
+    show AppLogger, Dialogs, Dimensions, Fields, FileIO;
 import '../widgets.dart' show FolderCreationDialog;
 
 class DirectoryActions extends StatelessWidget with AppLogger {
-  const DirectoryActions(
-    this.parentContext, {
+  const DirectoryActions({
     required this.repoCubit,
     required this.bottomSheetCubit,
+    required this.stage,
   });
 
-  final BuildContext parentContext;
   final RepoCubit repoCubit;
   final EntryBottomSheetCubit bottomSheetCubit;
+  final Stage stage;
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +40,7 @@ class DirectoryActions extends StatelessWidget with AppLogger {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Fields.bottomSheetHandle(parentContext),
+          Fields.bottomSheetHandle(context),
           Fields.bottomSheetTitle(
             S.current.titleFolderActions,
             style: sheetTitleStyle,
@@ -53,10 +54,9 @@ class DirectoryActions extends StatelessWidget with AppLogger {
                   key: Key('add_folder_action'),
                   name: S.current.actionNewFolder,
                   icon: Icons.create_new_folder_outlined,
-                  action: () async =>
-                      await createFolderDialog(parentContext, repoCubit),
+                  action: () => createFolderDialog(context, repoCubit),
                 ),
-                _buildNewFileAction(parentContext, cubit: repoCubit),
+                _buildNewFileAction(context, cubit: repoCubit),
               ],
             ),
           ),
@@ -160,10 +160,7 @@ class DirectoryActions extends StatelessWidget with AppLogger {
     );
 
     if (!result) {
-      showSnackBar(
-        context,
-        S.current.messageErrorCreatingFolder(newFolderPath),
-      );
+      stage.showSnackBar(S.current.messageErrorCreatingFolder(newFolderPath));
       return;
     }
 
@@ -180,6 +177,7 @@ class DirectoryActions extends StatelessWidget with AppLogger {
     await FileIO(
       context: context,
       repoCubit: repoCubit,
+      stage: stage,
     ).addFileFromDevice(type: type, popCallback: callback);
   }
 }

@@ -12,11 +12,11 @@ import 'package:url_launcher/url_launcher.dart' show launchUrl;
 import '../../generated/l10n.dart';
 import '../cubits/repo.dart';
 import '../cubits/store_dirs.dart';
-import '../utils/actions.dart' show showSnackBar;
 import '../utils/dialogs.dart' show Dialogs;
 import '../utils/dimensions.dart';
 import '../utils/extensions.dart';
 import '../utils/log.dart' show AppLogger;
+import '../utils/stage.dart';
 import '../utils/storage_volume.dart';
 import 'buttons/dialog_action_button.dart';
 
@@ -99,11 +99,13 @@ class StoreDirDialog extends StatelessWidget with AppLogger {
   StoreDirDialog({
     required this.storeDirsCubit,
     required this.repoCubit,
+    required this.stage,
     super.key,
   });
 
   final StoreDirsCubit storeDirsCubit;
   final RepoCubit repoCubit;
+  final Stage stage;
 
   @override
   Widget build(BuildContext context) => BlocBuilder<RepoCubit, RepoState>(
@@ -132,7 +134,7 @@ class StoreDirDialog extends StatelessWidget with AppLogger {
                 ),
                 IconButton(
                   icon: Icon(Icons.copy),
-                  onPressed: () => _copyToClipboard(context, repoState),
+                  onPressed: () => _copyToClipboard(repoState),
                   tooltip: S.current.copyToClipboard,
                 ),
                 if (Platform.isLinux || Platform.isWindows)
@@ -169,9 +171,9 @@ class StoreDirDialog extends StatelessWidget with AppLogger {
     ),
   );
 
-  Future<void> _copyToClipboard(BuildContext context, RepoState state) async {
+  Future<void> _copyToClipboard(RepoState state) async {
     await Clipboard.setData(ClipboardData(text: state.location.path));
-    showSnackBar(context, S.current.messageCopiedToClipboard);
+    stage.showSnackBar(S.current.messageCopiedToClipboard);
   }
 
   Future<void> _openDirectory(RepoState state) =>

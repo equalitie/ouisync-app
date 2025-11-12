@@ -80,30 +80,35 @@ class _State extends State<GetPasswordAccessDialog> with AppLogger {
     ),
   );
 
-  Widget _buildIDontHaveLocalPasswordButton(BuildContext context) {
-    return LinkStyleAsyncButton(
-      key: Key('enter-repo-reset-screen'),
-      text: "\n${S.current.actionIDontHaveALocalPassword}\n",
-      onTap: () async {
-        if (!await LocalAuth.authenticateIfPossible(
-          context,
-          S.current.messagePleaseAuthenticate,
-        )) {
-          return;
-        }
+  Widget _buildIDontHaveLocalPasswordButton(BuildContext context) =>
+      LinkStyleAsyncButton(
+        key: Key('enter-repo-reset-screen'),
+        text: "\n${S.current.actionIDontHaveALocalPassword}\n",
+        onTap: () async {
+          final navigator = Navigator.of(context);
 
-        final access = await RepoResetAccessPage.show(
-          context: context,
-          session: widget.session,
-          settings: widget.settings,
-          repo: widget.repoCubit,
-          startAccess: BlindAccess(),
-        );
+          if (!await LocalAuth.authenticateIfPossible(
+            context,
+            S.current.messagePleaseAuthenticate,
+          )) {
+            return;
+          }
 
-        Navigator.of(context).pop(access);
-      },
-    );
-  }
+          if (!context.mounted) {
+            return;
+          }
+
+          final access = await RepoResetAccessPage.show(
+            navigator: navigator,
+            session: widget.session,
+            settings: widget.settings,
+            repo: widget.repoCubit,
+            startAccess: BlindAccess(),
+          );
+
+          navigator.pop(access);
+        },
+      );
 
   Widget _buildPasswordField(BuildContext context) => Fields.formTextField(
     context: context,

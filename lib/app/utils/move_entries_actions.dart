@@ -6,6 +6,7 @@ import 'package:ouisync_app/app/utils/utils.dart'
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart' show BottomSheetType, RepoCubit, ReposCubit;
 import '../models/models.dart' show FileSystemEntry, RepoEntry;
+import 'stage.dart';
 
 class MoveEntriesActions with AppLogger {
   MoveEntriesActions(
@@ -13,15 +14,18 @@ class MoveEntriesActions with AppLogger {
     required ReposCubit reposCubit,
     required RepoCubit originRepoCubit,
     required BottomSheetType sheetType,
+    required Stage stage,
   }) : _context = context,
        _reposCubit = reposCubit,
        _originRepoCubit = originRepoCubit,
-       _sheetType = sheetType;
+       _sheetType = sheetType,
+       _stage = stage;
 
   final BuildContext _context;
   final ReposCubit _reposCubit;
   final RepoCubit _originRepoCubit;
   final BottomSheetType _sheetType;
+  final Stage _stage;
 
   String getActionText(BottomSheetType type) => switch (type) {
     BottomSheetType.copy => S.current.actionCopy,
@@ -86,6 +90,7 @@ class MoveEntriesActions with AppLogger {
     originRepoCubit: _originRepoCubit,
     entry: entry,
     destinationPath: currentFolderPath,
+    stage: _stage,
   ).copy(currentRepoCubit: toRepoCubit, recursive: true);
 
   Future<void> moveSingleEntry(
@@ -97,6 +102,7 @@ class MoveEntriesActions with AppLogger {
     originRepoCubit: _originRepoCubit,
     entry: entry,
     destinationPath: currentFolderPath,
+    stage: _stage,
   ).move(currentRepoCubit: toRepoCubit, recursive: true);
 
   bool enableAction(

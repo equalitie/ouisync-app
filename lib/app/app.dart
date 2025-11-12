@@ -5,7 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:ouisync/ouisync.dart' show NetworkDefaults, Server, Session;
 import 'package:ouisync_app/app/cubits/store_dirs.dart';
-import 'package:ouisync_app/app/utils/actions.dart';
 import 'package:package_info_plus/package_info_plus.dart' show PackageInfo;
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
@@ -18,6 +17,7 @@ import 'pages/pages.dart';
 import 'utils/constants.dart' show Constants;
 import 'utils/dirs.dart';
 import 'utils/log.dart' as log;
+import 'utils/stage.dart';
 import 'utils/platform/platform.dart' show PlatformWindowManager;
 import 'utils/utils.dart'
     show
@@ -249,6 +249,7 @@ class _HomeWidgetState extends State<HomeWidget>
   late final MountCubit mountCubit;
   late final ReposCubit reposCubit;
   late final StreamSubscription updateServerNotificationSubscription;
+  final stage = Stage();
 
   @override
   void initState() {
@@ -274,7 +275,7 @@ class _HomeWidgetState extends State<HomeWidget>
       cacheServers: cacheServers,
       mountCubit: mountCubit,
       storeDirsCubit: widget.storeDirsCubit,
-      onNotify: (message) => showSnackBar(context, message),
+      onNotify: (message) => stage.showSnackBar(message),
     );
 
     unawaited(_init());
@@ -283,6 +284,9 @@ class _HomeWidgetState extends State<HomeWidget>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+
+    stage.update(context);
+
     //widget.appRouteObserver.subscribe(this, ModalRoute.of(context)!);
   }
 
@@ -315,6 +319,7 @@ class _HomeWidgetState extends State<HomeWidget>
         windowManager: widget.windowManager,
         dirs: widget.dirs,
         storeDirsCubit: widget.storeDirsCubit,
+        stage: stage,
       ),
     ),
   );

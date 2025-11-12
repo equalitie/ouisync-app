@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:ouisync/ouisync.dart' show EntryType;
 
 import '../../../generated/l10n.dart';
+import '../../utils/stage.dart';
 import '../../utils/utils.dart'
-    show AppThemeExtension, Dimensions, Fields, showSnackBar, ThemeGetter;
+    show AppThemeExtension, Dimensions, Fields, ThemeGetter;
 import '../widgets.dart' show NegativeButton, PositiveButton;
 
 class RenameOrReplaceEntryDialog extends StatelessWidget {
   final String name;
   final EntryType type;
+  final Stage stage;
 
   static const _defaultAction = RenameOrReplaceResult.rename;
 
@@ -19,9 +21,10 @@ class RenameOrReplaceEntryDialog extends StatelessWidget {
     required String title,
     required String entryName,
     required EntryType entryType,
-  }) async => await showDialog<RenameOrReplaceResult?>(
+    required Stage stage,
+  }) => showDialog<RenameOrReplaceResult?>(
     context: context,
-    builder: (BuildContext _) => AlertDialog(
+    builder: (context) => AlertDialog(
       title: Flex(
         direction: Axis.horizontal,
         children: [
@@ -32,11 +35,19 @@ class RenameOrReplaceEntryDialog extends StatelessWidget {
           ),
         ],
       ),
-      content: RenameOrReplaceEntryDialog._(name: entryName, type: entryType),
+      content: RenameOrReplaceEntryDialog._(
+        name: entryName,
+        type: entryType,
+        stage: stage,
+      ),
     ),
   );
 
-  RenameOrReplaceEntryDialog._({required this.name, required this.type});
+  RenameOrReplaceEntryDialog._({
+    required this.name,
+    required this.type,
+    required this.stage,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -75,10 +86,7 @@ class RenameOrReplaceEntryDialog extends StatelessWidget {
                 GestureDetector(
                   onTap: () {
                     if (type == EntryType.directory) {
-                      showSnackBar(
-                        context,
-                        S.current.messageOnlyAvailableFiles,
-                      );
+                      stage.showSnackBar(S.current.messageOnlyAvailableFiles);
                     }
                   },
                   child: RadioListTile<RenameOrReplaceResult>(

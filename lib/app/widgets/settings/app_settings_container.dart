@@ -6,6 +6,7 @@ import 'package:settings_ui/settings_ui.dart' as s;
 
 import '../../cubits/cubits.dart';
 import '../../utils/dirs.dart';
+import '../../utils/stage.dart';
 import '../../utils/platform/platform.dart';
 import '../../utils/utils.dart';
 import 'about_section.dart';
@@ -28,6 +29,7 @@ class AppSettingsContainer extends StatefulHookWidget {
     required this.powerControl,
     required ReposCubit reposCubit,
     required this.upgradeExists,
+    required Stage stage,
   }) : sections = [
          NetworkSection(
            session,
@@ -35,6 +37,7 @@ class AppSettingsContainer extends StatefulHookWidget {
            natDetection: natDetection,
            peerSet: peerSet,
            powerControl: powerControl,
+           stage: stage,
          ),
          LogsSection(
            mount: mount,
@@ -56,6 +59,7 @@ class AppSettingsContainer extends StatefulHookWidget {
            natDetection: natDetection,
            launchAtStartup: launchAtStartup,
            upgradeExists: upgradeExists,
+           stage: stage,
          ),
        ];
 

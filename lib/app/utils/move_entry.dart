@@ -6,6 +6,7 @@ import '../cubits/cubits.dart' show RepoCubit;
 import '../models/models.dart' show FileEntry, FileSystemEntry;
 import '../widgets/widgets.dart'
     show RenameOrReplaceResult, RenameOrReplaceEntryDialog;
+import 'stage.dart';
 import 'repo_path.dart' as repo_path;
 import 'utils.dart'
     show AppLogger, FileReadStream, StringExtension, disambiguateEntryName;
@@ -16,15 +17,18 @@ class MoveEntry with AppLogger {
     required RepoCubit originRepoCubit,
     required FileSystemEntry entry,
     required String destinationPath,
+    required Stage stage,
   }) : _context = context,
        _originRepoCubit = originRepoCubit,
        _entry = entry,
-       _destinationPath = destinationPath;
+       _destinationPath = destinationPath,
+       _stage = stage;
 
   final BuildContext _context;
   final RepoCubit _originRepoCubit;
   final FileSystemEntry _entry;
   final String _destinationPath;
+  final Stage _stage;
 
   Future<void> move({
     required RepoCubit? currentRepoCubit,
@@ -57,6 +61,7 @@ class MoveEntry with AppLogger {
       title: S.current.titleMovingEntry,
       entryName: newPath,
       entryType: type,
+      stage: _stage,
     );
 
     switch (result) {

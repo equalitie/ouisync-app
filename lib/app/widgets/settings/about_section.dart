@@ -23,6 +23,7 @@ import '../../cubits/cubits.dart'
         ReposCubit,
         UpgradeExistsCubit;
 import '../../pages/pages.dart' show LanguagePicker, PeersPage, WebViewPage;
+import '../../utils/stage.dart';
 import '../../utils/platform/platform.dart'
     show PlatformValues, PlatformWebView;
 import '../../utils/utils.dart'
@@ -51,6 +52,7 @@ class AboutSection extends SettingsSection with AppLogger {
     required this.natDetection,
     required this.launchAtStartup,
     required this.upgradeExists,
+    required this.stage,
   }) : super(
          key: GlobalKey(debugLabel: 'key_about_section'),
          title: S.current.titleAbout,
@@ -65,6 +67,7 @@ class AboutSection extends SettingsSection with AppLogger {
   final NatDetection natDetection;
   final LaunchAtStartupCubit launchAtStartup;
   final UpgradeExistsCubit upgradeExists;
+  final Stage stage;
 
   TextStyle? bodyStyle;
 
@@ -196,7 +199,10 @@ class AboutSection extends SettingsSection with AppLogger {
 
   void _navigateToPeers(BuildContext context) => Navigator.push(
     context,
-    MaterialPageRoute(builder: (context) => PeersPage(session, peerSet)),
+    MaterialPageRoute(
+      builder: (context) =>
+          PeersPage(session: session, cubit: peerSet, stage: stage),
+    ),
   );
 
   Future<void> _openUrl(BuildContext context, String title, String url) async {

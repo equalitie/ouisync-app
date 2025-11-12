@@ -8,19 +8,23 @@ import '../cubits/cubits.dart'
     show EntrySelectionCubit, EntrySelectionActions, RepoCubit;
 import '../widgets/widgets.dart' show NegativeButton, PositiveButton;
 import 'dirs.dart';
+import 'stage.dart';
 
 class MultiEntryActions {
   const MultiEntryActions(
     BuildContext context, {
     required Dirs dirs,
     required EntrySelectionCubit entrySelectionCubit,
+    required Stage stage,
   }) : _context = context,
        _entrySelectionCubit = entrySelectionCubit,
-       _dirs = dirs;
+       _dirs = dirs,
+       _stage = stage;
 
   final BuildContext _context;
   final EntrySelectionCubit _entrySelectionCubit;
   final Dirs _dirs;
+  final Stage _stage;
 
   int get totalSelectedDirs =>
       _entrySelectionCubit.entries.whereType<DirectoryEntry>().length;
@@ -38,6 +42,7 @@ class MultiEntryActions {
       () async => await _entrySelectionCubit.saveEntriesToDevice(
         _context,
         defaultDirectoryPath: defaultDirectoryPath,
+        stage: _stage,
       ),
     );
 
@@ -64,6 +69,7 @@ class MultiEntryActions {
         _context,
         destinationRepoCubit: currentRepoCubit,
         destinationPath: currentPath,
+        stage: _stage,
       ),
     );
 
@@ -90,6 +96,7 @@ class MultiEntryActions {
         _context,
         destinationRepoCubit: currentRepoCubit,
         destinationPath: currentPath,
+        stage: _stage,
       ),
     );
 

@@ -5,6 +5,7 @@ import 'package:ouisync_app/app/models/auth_mode.dart';
 import 'package:ouisync_app/app/models/access_mode.dart';
 import 'package:ouisync_app/app/models/repo_location.dart';
 import 'package:ouisync_app/app/pages/repo_security_page.dart';
+import 'package:ouisync_app/app/utils/stage.dart';
 import 'package:ouisync_app/app/utils/utils.dart';
 import 'package:ouisync/ouisync.dart';
 
@@ -39,12 +40,17 @@ void main() {
     await deps.dispose();
   });
 
-  RepoSecurityPage createRepoSecurityPage() => RepoSecurityPage(
-    deps.settings,
-    deps.session,
-    repoCubit,
-    WriteAccess(localSecret),
-    PasswordHasher(deps.session),
+  Widget createRepoSecurityPage() => ScaffoldMessenger(
+    child: Builder(
+      builder: (context) => RepoSecurityPage(
+        settings: deps.settings,
+        session: deps.session,
+        repo: repoCubit,
+        originalAccess: WriteAccess(localSecret),
+        passwordHasher: PasswordHasher(deps.session),
+        stage: Stage(context),
+      ),
+    ),
   );
 
   testWidgets(

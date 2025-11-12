@@ -18,6 +18,7 @@ import 'package:ouisync_app/app/cubits/store_dirs.dart';
 import 'package:ouisync_app/app/pages/main_page.dart';
 import 'package:ouisync_app/app/utils/dirs.dart';
 import 'package:ouisync_app/app/utils/log.dart' as log;
+import 'package:ouisync_app/app/utils/stage.dart';
 import 'package:ouisync_app/app/utils/platform/platform.dart';
 import 'package:ouisync_app/app/utils/random.dart';
 import 'package:ouisync_app/app/utils/utils.dart'
@@ -142,18 +143,23 @@ class TestDependencies {
     await server.stop();
   }
 
-  MainPage createMainPage({Stream<List<SharedMediaFile>>? receivedMedia}) =>
-      MainPage(
-        localeCubit: localeCubit,
-        mountCubit: mountCubit,
-        receivedMedia: receivedMedia ?? Stream.empty(),
-        reposCubit: reposCubit,
-        errorCubit: errorCubit,
-        session: session,
-        settings: settings,
-        windowManager: FakeWindowManager(),
-        dirs: dirs,
-        storeDirsCubit: storeDirsCubit,
+  Widget createMainPage({Stream<List<SharedMediaFile>>? receivedMedia}) =>
+      ScaffoldMessenger(
+        child: Builder(
+          builder: (context) => MainPage(
+            localeCubit: localeCubit,
+            mountCubit: mountCubit,
+            receivedMedia: receivedMedia ?? Stream.empty(),
+            reposCubit: reposCubit,
+            errorCubit: errorCubit,
+            session: session,
+            settings: settings,
+            windowManager: FakeWindowManager(),
+            dirs: dirs,
+            storeDirsCubit: storeDirsCubit,
+            stage: Stage(context),
+          ),
+        ),
       );
 
   final Server server;

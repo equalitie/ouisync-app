@@ -16,6 +16,7 @@ import '../cubits/store_dirs.dart';
 import '../models/models.dart';
 import '../utils/dirs.dart';
 import '../utils/platform/platform.dart';
+import '../utils/stage.dart';
 import '../utils/utils.dart';
 import '../widgets/notification_badge.dart';
 import '../widgets/widgets.dart';
@@ -42,6 +43,7 @@ class MainPage extends StatefulWidget {
     required this.windowManager,
     required this.dirs,
     required this.storeDirsCubit,
+    required this.stage,
   });
 
   final PlatformWindowManager windowManager;
@@ -54,6 +56,7 @@ class MainPage extends StatefulWidget {
   final LocaleCubit localeCubit;
   final Dirs dirs;
   final StoreDirsCubit storeDirsCubit;
+  final Stage stage;
 
   @override
   State<StatefulWidget> createState() => _MainPageState();
@@ -199,6 +202,7 @@ class _MainPageState extends State<MainPage>
           storeDirsCubit: widget.storeDirsCubit,
           bottomSheetInfo: _bottomSheetInfo,
           onShowRepoSettings: _showRepoSettings,
+          stage: widget.stage,
         );
       }
 
@@ -385,7 +389,7 @@ class _MainPageState extends State<MainPage>
             focusNode: _fabFocus,
             heroTag: Constants.heroTagMainPageActions,
             child: icon,
-            onPressed: () => unawaited(_showDirectoryActions(context, current)),
+            onPressed: () => unawaited(_showDirectoryActions(current)),
           ),
         ),
       );
@@ -428,6 +432,7 @@ class _MainPageState extends State<MainPage>
           settings: widget.settings,
           session: widget.session,
           passwordHasher: PasswordHasher(widget.session),
+          stage: widget.stage,
         );
       }
 
@@ -587,7 +592,7 @@ class _MainPageState extends State<MainPage>
   ]) async {
     if (entry is FileEntry) {
       return viewFile(
-        context: context,
+        stage: widget.stage,
         repo: currentRepoCubit,
         path: entry.path,
         loggy: loggy,
@@ -640,13 +645,14 @@ class _MainPageState extends State<MainPage>
             repoCubit: repoCubit,
             entry: entry,
             onPreviewFile: (cubit, data) => viewFile(
-              context: context,
+              stage: widget.stage,
               repo: cubit,
               path: data.path,
               loggy: loggy,
             ),
             isActionAvailableValidator: _isEntryActionAvailable,
             dirs: widget.dirs,
+            stage: widget.stage,
           )
         : EntryDetails.folder(
             context,
@@ -654,6 +660,7 @@ class _MainPageState extends State<MainPage>
             entry: entry,
             isActionAvailableValidator: _isEntryActionAvailable,
             dirs: widget.dirs,
+            stage: widget.stage,
           ),
     // TODO: Find out how to get this to work, so we can use the snackbar on the bottom sheet.
     //  ScaffoldMessenger(
@@ -715,6 +722,7 @@ class _MainPageState extends State<MainPage>
         sheetType: state.type,
         onUpdateBottomSheet: updateBottomSheetInfo,
         dirs: widget.dirs,
+        stage: widget.stage,
       );
 
   EntriesActionsDialog _moveMultipleEntriesState(
@@ -726,6 +734,7 @@ class _MainPageState extends State<MainPage>
     sheetType: state.type,
     onUpdateBottomSheet: updateBottomSheetInfo,
     dirs: widget.dirs,
+    stage: widget.stage,
   );
 
   SaveSharedMedia _saveSharedMediaState(SaveMediaSheetState state) =>
@@ -780,6 +789,7 @@ class _MainPageState extends State<MainPage>
       repoCubit: current.cubit,
       sourcePath: sourcePath,
       type: EntryType.file,
+      stage: widget.stage,
     ).save();
   }
 
@@ -875,7 +885,7 @@ class _MainPageState extends State<MainPage>
 
     // Handle share tokens
     for (final token in tokens) {
-      await importRepoDialog(context, initialTokenValue: token);
+      await importRepoDialog(initialTokenValue: token);
     }
 
     // Handle received files
@@ -893,19 +903,17 @@ class _MainPageState extends State<MainPage>
     );
   }
 
-  Future<void> _showDirectoryActions(
-    BuildContext parentContext,
-    OpenRepoEntry repo,
-  ) => showModalBottomSheet(
-    isScrollControlled: true,
-    context: parentContext,
-    shape: Dimensions.borderBottomSheetTop,
-    builder: (context) => DirectoryActions(
-      parentContext,
-      repoCubit: repo.cubit,
-      bottomSheetCubit: widget.reposCubit.bottomSheet,
-    ),
-  );
+  Future<void> _showDirectoryActions(OpenRepoEntry repo) =>
+      showModalBottomSheet(
+        isScrollControlled: true,
+        context: context,
+        shape: Dimensions.borderBottomSheetTop,
+        builder: (context) => DirectoryActions(
+          repoCubit: repo.cubit,
+          bottomSheetCubit: widget.reposCubit.bottomSheet,
+          stage: widget.stage,
+        ),
+      );
 
   Future<void> _showRepoListActions(BuildContext context) =>
       showModalBottomSheet(
@@ -931,7 +939,7 @@ class _MainPageState extends State<MainPage>
   }
 
   Future<List<RepoEntry>> _importRepo() async {
-    final repoEntries = await importRepoDialog(context);
+    final repoEntries = await importRepoDialog();
     final repoEntry = repoEntries.singleOrNull;
 
     if (repoEntry != null) {
@@ -952,11 +960,10 @@ class _MainPageState extends State<MainPage>
         ),
       );
 
-  Future<List<RepoEntry>> importRepoDialog(
-    BuildContext parentContext, {
-    String? initialTokenValue,
-  }) async {
+  Future<List<RepoEntry>> importRepoDialog({String? initialTokenValue}) async {
     RepoImportResult? result;
+
+    final navigator = Navigator.of(context);
 
     if (initialTokenValue != null) {
       final tokenResult = await parseShareToken(
@@ -967,22 +974,23 @@ class _MainPageState extends State<MainPage>
         case ShareTokenValid():
           result = RepoImportFromToken(tokenResult.value);
         case ShareTokenInvalid():
-          showSnackBar(parentContext, tokenResult.error.toString());
+          widget.stage.showSnackBar(tokenResult.error.toString());
           return [];
       }
     } else {
-      result = await Navigator.push<RepoImportResult>(
-        context,
+      result = await navigator.push<RepoImportResult>(
         MaterialPageRoute(
-          builder: (context) => RepoImportPage(reposCubit: widget.reposCubit),
+          builder: (context) => RepoImportPage(
+            reposCubit: widget.reposCubit,
+            stage: widget.stage,
+          ),
         ),
       );
     }
 
     switch (result) {
       case RepoImportFromToken(token: final token):
-        final repoEntry = await Navigator.push<RepoEntry?>(
-          context,
+        final repoEntry = await navigator.push<RepoEntry?>(
           MaterialPageRoute(
             builder: (context) => RepoCreationPage(
               reposCubit: widget.reposCubit,
@@ -1018,6 +1026,7 @@ class _MainPageState extends State<MainPage>
         upgradeExists: upgradeExists,
         checkForDokan: checkForDokan,
         dirs: widget.dirs,
+        stage: widget.stage,
       ),
     ),
   );
@@ -1035,6 +1044,7 @@ class _MainPageState extends State<MainPage>
       repoCubit: repoCubit,
       reposCubit: widget.reposCubit,
       storeDirsCubit: widget.storeDirsCubit,
+      stage: widget.stage,
     ),
   );
 }

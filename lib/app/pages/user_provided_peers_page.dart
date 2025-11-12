@@ -4,15 +4,17 @@ import 'package:ouisync/ouisync.dart';
 
 import '../../generated/l10n.dart';
 import '../cubits/user_provided_peers.dart';
-import '../utils/utils.dart' show Dimensions, showSnackBar;
+import '../utils/stage.dart';
+import '../utils/utils.dart' show Dimensions;
 import '../widgets/dialogs/add_peer_dialog.dart';
 import '../widgets/long_text.dart';
 import '../widgets/widgets.dart' show DirectionalAppBar;
 
 class UserProvidedPeersPage extends StatefulWidget {
-  UserProvidedPeersPage(this.session);
+  UserProvidedPeersPage({required this.session, required this.stage});
 
   final Session session;
+  final Stage stage;
 
   @override
   State<UserProvidedPeersPage> createState() =>
@@ -42,16 +44,16 @@ class _UserProvidedPeersState extends State<UserProvidedPeersPage> {
   );
 
   List<Widget> _buildPeers(BuildContext context, List<String> peers) =>
-      peers.map((peer) => _buildPeer(context, peer)).toList();
+      peers.map((peer) => _buildPeer(peer)).toList();
 
-  Widget _buildPeer(BuildContext context, String peer) => Padding(
+  Widget _buildPeer(String peer) => Padding(
     padding: EdgeInsetsDirectional.all(4.0),
     child: Row(
       children: [
         Expanded(child: LongText(peer)),
         IconButton(
           icon: Icon(Icons.delete_outlined),
-          onPressed: () => _removePeer(context, peer),
+          onPressed: () => _removePeer(peer),
         ),
       ],
     ),
@@ -70,14 +72,13 @@ class _UserProvidedPeersState extends State<UserProvidedPeersPage> {
     await _cubit.addPeer('tcp/$addr');
     await _cubit.addPeer('quic/$addr');
 
-    showSnackBar(context, S.current.messagePeerAdded);
+    widget.stage.showSnackBar(S.current.messagePeerAdded);
   }
 
-  Future<void> _removePeer(BuildContext context, String addr) async {
+  Future<void> _removePeer(String addr) async {
     await _cubit.removePeer(addr);
 
-    showSnackBar(
-      context,
+    widget.stage.showSnackBar(
       S.current.messagePeerRemoved,
       action: SnackBarAction(
         label: S.current.actionUndo,

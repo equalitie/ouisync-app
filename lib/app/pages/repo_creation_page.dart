@@ -62,8 +62,8 @@ class RepoCreationPage extends StatelessWidget {
     final cubit = RepoCreationCubit(reposCubit: reposCubit);
 
     unawaited(
-      // Wrapping this in `Future(() => ...)` to ensure the future does not start executing in the
-      // same frame this function is invoked, which would result in exception from flutter.
+      // Wrapping this in `Future(() => ...)` to ensure the future does not start executing in
+      // the same frame this function is invoked, which would result in exception from flutter.
       Future(
         () => Dialogs.executeFutureWithLoadingDialog(
           context,

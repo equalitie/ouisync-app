@@ -24,7 +24,7 @@ class RepoResetAccessPage extends StatefulWidget {
   // Returns `null` if nothing changes (e.g. the user presses the back button
   // before submitting any changes).
   static Future<Access> show({
-    required BuildContext context,
+    required NavigatorState navigator,
     required Session session,
     required Settings settings,
     required RepoCubit repo,
@@ -39,7 +39,7 @@ class RepoResetAccessPage extends StatefulWidget {
       ),
     );
 
-    return (await Navigator.push(context, route)) ?? startAccess;
+    return (await navigator.push(route)) ?? startAccess;
   }
 
   RepoResetAccessPage._({

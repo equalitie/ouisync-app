@@ -7,6 +7,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../../generated/l10n.dart';
 import '../../cubits/repo.dart';
 import '../../pages/pages.dart';
+import '../../utils/stage.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
@@ -14,11 +15,13 @@ class ShareRepository extends StatefulWidget {
   const ShareRepository({
     required this.repository,
     required this.availableAccessModes,
+    required this.stage,
     super.key,
   });
 
   final RepoCubit repository;
   final List<AccessMode> availableAccessModes;
+  final Stage stage;
 
   @override
   State<StatefulWidget> createState() => _ShareRepositoryState();
@@ -83,7 +86,7 @@ class _ShareRepositoryState extends State<ShareRepository> with AppLogger {
               availableAccessMode: widget.availableAccessModes,
               onChanged: _onChanged,
               onDisabledMessage: (String message) =>
-                  showSnackBar(context, message),
+                  widget.stage.showSnackBar(message),
             ),
             Dimensions.spacingVerticalHalf,
             _buildAccessModeDescription(_accessMode),
@@ -199,14 +202,18 @@ class _ShareRepositoryState extends State<ShareRepository> with AppLogger {
               color: _getActionStateColor(_shareToken != null),
               onPressed: () async {
                 if (_shareToken == null) {
-                  showSnackBar(context, S.current.messageShareActionDisabled);
+                  widget.stage.showSnackBar(
+                    S.current.messageShareActionDisabled,
+                  );
 
                   return;
                 }
 
                 await copyStringToClipboard(_shareToken!);
 
-                showSnackBar(context, S.current.messageTokenCopiedToClipboard);
+                widget.stage.showSnackBar(
+                  S.current.messageTokenCopiedToClipboard,
+                );
               },
             ),
             Fields.constrainedText(
@@ -224,7 +231,9 @@ class _ShareRepositoryState extends State<ShareRepository> with AppLogger {
               color: _getActionStateColor(_shareToken != null),
               onPressed: () async {
                 if (_shareToken == null) {
-                  showSnackBar(context, S.current.messageShareActionDisabled);
+                  widget.stage.showSnackBar(
+                    S.current.messageShareActionDisabled,
+                  );
 
                   return;
                 }
@@ -258,7 +267,9 @@ class _ShareRepositoryState extends State<ShareRepository> with AppLogger {
               color: _getActionStateColor(_shareToken != null),
               onPressed: () async {
                 if (_shareToken == null) {
-                  showSnackBar(context, S.current.messageShareActionDisabled);
+                  widget.stage.showSnackBar(
+                    S.current.messageShareActionDisabled,
+                  );
 
                   return;
                 }

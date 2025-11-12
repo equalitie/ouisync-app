@@ -9,9 +9,9 @@ import 'package:path/path.dart' as p;
 
 import '../../generated/l10n.dart';
 import '../models/models.dart' show DirectoryEntry, FileEntry, FileSystemEntry;
+import '../utils/stage.dart';
 import '../utils/repo_path.dart' as repo_path;
-import '../utils/utils.dart'
-    show AppLogger, CopyEntry, FileIO, MoveEntry, showSnackBar;
+import '../utils/utils.dart' show AppLogger, CopyEntry, FileIO, MoveEntry;
 import '../widgets/widgets.dart' show SelectionStatus;
 import 'cubits.dart' show CubitActions, RepoCubit;
 
@@ -181,15 +181,20 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
   Future<bool> saveEntriesToDevice(
     BuildContext context, {
     required String defaultDirectoryPath,
+    required Stage stage,
   }) async {
-    final fileIO = FileIO(context: context, repoCubit: _originRepoCubit!);
+    final fileIO = FileIO(
+      context: context,
+      repoCubit: _originRepoCubit!,
+      stage: stage,
+    );
 
     final destinationPaths = await fileIO.getDestinationPath(
       defaultDirectoryPath,
     );
     if (destinationPaths.canceled) {
       final errorMessage = S.current.messageDownloadFileCanceled;
-      showSnackBar(context, errorMessage);
+      stage.showSnackBar(errorMessage);
 
       return false;
     }
@@ -230,22 +235,26 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
     BuildContext context, {
     required RepoCubit destinationRepoCubit,
     required String destinationPath,
+    required Stage stage,
   }) async => _moveOrCopySelectedEntries(
     context,
     action: EntrySelectionActions.copy,
     destinationRepoCubit: destinationRepoCubit,
     destinationPath: destinationPath,
+    stage: stage,
   );
 
   Future<bool> moveEntriesTo(
     BuildContext context, {
     required RepoCubit destinationRepoCubit,
     required String destinationPath,
+    required Stage stage,
   }) async => _moveOrCopySelectedEntries(
     context,
     action: EntrySelectionActions.move,
     destinationRepoCubit: destinationRepoCubit,
     destinationPath: destinationPath,
+    stage: stage,
   );
 
   Future<bool> _moveOrCopySelectedEntries(
@@ -253,6 +262,7 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
     required EntrySelectionActions action,
     required RepoCubit destinationRepoCubit,
     required String destinationPath,
+    required Stage stage,
   }) async {
     final destinationRepoInfoHash = await destinationRepoCubit.infoHash;
     final toRepoCubit = _originRepoInfoHash != destinationRepoInfoHash
@@ -273,6 +283,7 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
         toRepoCubit: toRepoCubit,
         destinationPath: destinationPath,
         entry: entry,
+        stage: stage,
       );
 
       _entries.remove(entry);
@@ -287,11 +298,13 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
     required RepoCubit? toRepoCubit,
     required String destinationPath,
     required FileSystemEntry entry,
+    required Stage stage,
   }) async => CopyEntry(
     context,
     originRepoCubit: originRepoCubit,
     entry: entry,
     destinationPath: destinationPath,
+    stage: stage,
   ).copy(currentRepoCubit: toRepoCubit, recursive: true);
 
   Future<void> _move(
@@ -300,11 +313,13 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
     required RepoCubit? toRepoCubit,
     required String destinationPath,
     required FileSystemEntry entry,
+    required Stage stage,
   }) async => MoveEntry(
     context,
     originRepoCubit: originRepoCubit,
     entry: entry,
     destinationPath: destinationPath,
+    stage: stage,
   ).move(currentRepoCubit: toRepoCubit, recursive: true);
 
   Future<bool> deleteEntries() async {

@@ -5,6 +5,7 @@ import 'package:ouisync/ouisync.dart' show Session;
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../mixins/mixins.dart';
+import '../../utils/stage.dart';
 import '../../utils/utils.dart';
 
 class LockedRepositoryState extends HookWidget
@@ -16,6 +17,7 @@ class LockedRepositoryState extends HookWidget
     required this.passwordHasher,
     required this.settings,
     required this.session,
+    required this.stage,
   });
 
   final TextDirection directionality;
@@ -24,6 +26,7 @@ class LockedRepositoryState extends HookWidget
   final PasswordHasher passwordHasher;
   final Settings settings;
   final Session session;
+  final Stage stage;
 
   @override
   Widget build(BuildContext context) {
@@ -82,11 +85,12 @@ class LockedRepositoryState extends HookWidget
               Fields.inPageButton(
                 onPressed: () async {
                   await unlockRepository(
-                    context,
-                    settings,
-                    session,
-                    repoCubit,
-                    passwordHasher,
+                    context: context,
+                    settings: settings,
+                    session: session,
+                    repoCubit: repoCubit,
+                    passwordHasher: passwordHasher,
+                    stage: stage,
                   );
                 },
                 leadingIcon: const Icon(Icons.lock_open_rounded),
