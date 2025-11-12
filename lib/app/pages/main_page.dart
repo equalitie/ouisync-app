@@ -884,7 +884,7 @@ class _MainPageState extends State<MainPage>
   Future<void> _showDirectoryActions(
     BuildContext parentContext,
     OpenRepoEntry repo,
-  ) async => showModalBottomSheet(
+  ) => showModalBottomSheet(
     isScrollControlled: true,
     context: parentContext,
     shape: Dimensions.borderBottomSheetTop,
