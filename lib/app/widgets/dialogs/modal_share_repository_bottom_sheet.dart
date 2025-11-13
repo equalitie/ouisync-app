@@ -274,11 +274,13 @@ class _ShareRepositoryState extends State<ShareRepository> with AppLogger {
                   return;
                 }
 
-                await Navigator.push(
-                  context,
+                await widget.stage.push(
                   MaterialPageRoute(
                     builder: (context) {
-                      return RepositoryQRPage(shareLink: _shareToken!);
+                      return RepositoryQRPage(
+                        stage: widget.stage,
+                        shareLink: _shareToken!,
+                      );
                     },
                   ),
                 );

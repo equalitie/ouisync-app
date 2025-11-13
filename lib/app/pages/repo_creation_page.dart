@@ -112,7 +112,7 @@ class RepoCreation extends StatelessWidget with AppLogger {
         content: _buildContent(context, state),
         footer: Fields.dialogActions(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          buttons: _buildActions(context, state),
+          buttons: _buildActions(state),
         ),
       ),
     ),
@@ -131,13 +131,10 @@ class RepoCreation extends StatelessWidget with AppLogger {
         ],
       );
 
-  List<Widget> _buildActions(
-    BuildContext context,
-    RepoCreationState creationState,
-  ) => [
+  List<Widget> _buildActions(RepoCreationState creationState) => [
     Fields.inPageButton(
       text: S.current.actionCancel,
-      onPressed: () async => await Navigator.of(context).maybePop(null),
+      onPressed: () => stage.maybePop(null),
     ),
     Fields.inPageAsyncButton(
       key: Key('create-repository'),
@@ -278,7 +275,7 @@ class RepoCreation extends StatelessWidget with AppLogger {
       case RepoCreationValid():
         break;
       case RepoCreationSuccess(entry: final entry):
-        await stage.maybePop(entry);
+        stage.pop(entry);
       case RepoCreationFailure(location: final location, error: final error):
         await SimpleAlertDialog.show(
           stage,

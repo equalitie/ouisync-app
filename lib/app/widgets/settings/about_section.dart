@@ -99,7 +99,7 @@ class AboutSection extends SettingsSection with AppLogger {
           currentLanguage.toString(),
           style: context.theme.appTextStyle.bodySmall,
         ),
-        onTap: () => _navigateToLanguagePicker(context),
+        onTap: _navigateToLanguagePicker,
       ),
       NavigationTile(
         title: Text(S.current.titleFAQShort, style: bodyStyle),
@@ -151,6 +151,7 @@ class AboutSection extends SettingsSection with AppLogger {
         onTap: () => unawaited(launchUrl(Uri.parse(Constants.issueTrackerUrl))),
       ),
       AppVersionTile(
+        stage: stage,
         session: session,
         upgradeExists: upgradeExists,
         leading: Icon(Icons.info_rounded),
@@ -180,8 +181,8 @@ class AboutSection extends SettingsSection with AppLogger {
   @override
   bool containsErrorNotification() => upgradeExists.state;
 
-  Future<void> _navigateToLanguagePicker(BuildContext context) async {
-    await Navigator.of(context).push<Locale>(
+  Future<void> _navigateToLanguagePicker() async {
+    await stage.push<Locale>(
       MaterialPageRoute(
         builder: (_) => LanguagePicker(localeCubit: localeCubit, canPop: true),
       ),
@@ -222,7 +223,7 @@ class AboutSection extends SettingsSection with AppLogger {
 
   Future<void> _openFeedback() async {
     final attachments = await stage.showDialog<FeedbackAttachments>(
-      builder: (context) => FeedbackDialog(),
+      builder: (context) => FeedbackDialog(stage),
     );
 
     if (attachments == null) {
@@ -292,7 +293,9 @@ class AboutSection extends SettingsSection with AppLogger {
 const _externalNavigationIcon = Icon(Icons.open_in_browser);
 
 class FeedbackDialog extends StatefulWidget {
-  const FeedbackDialog();
+  const FeedbackDialog(this.stage);
+
+  final Stage stage;
 
   @override
   State<FeedbackDialog> createState() => _FeedbackDialogState();
@@ -330,12 +333,11 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
     actions: [
       NegativeButton(
         text: S.current.actionCancel,
-        onPressed: () async => await Navigator.of(context).maybePop(null),
+        onPressed: () => widget.stage.maybePop(null),
       ),
       PositiveButton(
         text: S.current.actionOK,
-        onPressed: () async =>
-            await Navigator.of(context).maybePop(attachments),
+        onPressed: () => widget.stage.maybePop(attachments),
       ),
     ],
   );

@@ -104,20 +104,19 @@ class RenameOrReplaceEntryDialog extends StatelessWidget {
           },
         ),
         Dimensions.spacingVertical,
-        Fields.dialogActions(buttons: _actions(context)),
+        Fields.dialogActions(buttons: _actions()),
       ],
     );
   }
 
-  List<Widget> _actions(context) => [
+  List<Widget> _actions() => [
     NegativeButton(
       text: S.current.actionCancel,
-      onPressed: () async => await Navigator.of(context).maybePop(null),
+      onPressed: () => stage.maybePop(null),
     ),
     PositiveButton(
       text: S.current.actionAccept,
-      onPressed: () async =>
-          await Navigator.of(context).maybePop(_fileAction.value),
+      onPressed: () => stage.maybePop(_fileAction.value),
     ),
   ];
 

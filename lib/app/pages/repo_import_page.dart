@@ -127,7 +127,8 @@ class RepoImportPage extends StatelessWidget {
 
             final data = await stage.push(
               MaterialPageRoute(
-                builder: (context) => QRScanner(reposCubit.session),
+                builder: (context) =>
+                    QRScanner(stage: stage, session: reposCubit.session),
               ),
             );
 

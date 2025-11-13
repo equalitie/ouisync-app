@@ -196,11 +196,11 @@ mixin RepositoryActionsMixin on LoggyType {
         actions: [
           NegativeButton(
             text: S.current.actionCancelCapital,
-            onPressed: () async => await Navigator.of(context).maybePop(false),
+            onPressed: () => stage.maybePop(false),
           ),
           PositiveButton(
             text: S.current.actionDeleteCapital,
-            onPressed: () async => await Navigator.of(context).maybePop(true),
+            onPressed: () => stage.maybePop(true),
             isDangerButton: true,
           ),
         ],

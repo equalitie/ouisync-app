@@ -39,7 +39,7 @@ class _UserProvidedPeersState extends State<UserProvidedPeersPage> {
     ),
     floatingActionButton: FloatingActionButton(
       child: const Icon(Icons.add_rounded),
-      onPressed: () => _addPeer(context),
+      onPressed: _addPeer,
     ),
   );
 
@@ -59,10 +59,9 @@ class _UserProvidedPeersState extends State<UserProvidedPeersPage> {
     ),
   );
 
-  Future<void> _addPeer(BuildContext context) async {
-    final addr = await showDialog<String>(
-      context: context,
-      builder: (context) => AddPeerDialog(),
+  Future<void> _addPeer() async {
+    final addr = await widget.stage.showDialog<String>(
+      builder: (context) => AddPeerDialog(widget.stage),
     );
 
     if (addr == null) {

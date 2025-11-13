@@ -59,6 +59,7 @@ class _FolderContentsBarState extends State<FolderContentsBar> {
               children: [
                 if (widget.hasContents || state.status == SelectionStatus.on)
                   SelectEntriesButton(
+                    stage: widget.stage,
                     repoCubit: widget.repoCubit,
                     reposCubit: widget.reposCubit,
                   ),

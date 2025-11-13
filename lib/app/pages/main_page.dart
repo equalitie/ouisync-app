@@ -950,8 +950,6 @@ class _MainPageState extends State<MainPage>
   Future<List<RepoEntry>> importRepoDialog({String? initialTokenValue}) async {
     RepoImportResult? result;
 
-    final navigator = Navigator.of(context);
-
     if (initialTokenValue != null) {
       final tokenResult = await parseShareToken(
         widget.reposCubit,
@@ -965,7 +963,7 @@ class _MainPageState extends State<MainPage>
           return [];
       }
     } else {
-      result = await navigator.push<RepoImportResult>(
+      result = await widget.stage.push<RepoImportResult>(
         MaterialPageRoute(
           builder: (context) => RepoImportPage(
             reposCubit: widget.reposCubit,
@@ -977,7 +975,7 @@ class _MainPageState extends State<MainPage>
 
     switch (result) {
       case RepoImportFromToken(token: final token):
-        final repoEntry = await navigator.push<RepoEntry?>(
+        final repoEntry = await widget.stage.push<RepoEntry?>(
           MaterialPageRoute(
             builder: (context) => RepoCreationPage(
               stage: widget.stage,
@@ -1001,8 +999,7 @@ class _MainPageState extends State<MainPage>
     }
   }
 
-  Future<void> _showAppSettings() => Navigator.push(
-    context,
+  Future<void> _showAppSettings() => widget.stage.push(
     MaterialPageRoute(
       builder: (context) => SettingsPage(
         session: widget.session,

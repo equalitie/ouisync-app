@@ -59,10 +59,8 @@ abstract class LocalAuth {
 // platforms where it is available, here is a small "dummy" authentication
 // dialog.
 Future<bool> _debugAuthenticate(Stage stage, String reason) async {
-  Widget button(context, text, value) => TextButton(
-    child: Text(text),
-    onPressed: () => Navigator.of(context).pop(value),
-  );
+  Widget button(context, text, value) =>
+      TextButton(child: Text(text), onPressed: () => stage.pop(value));
 
   return await stage.showDialog(
         builder: (BuildContext context) => AlertDialog(

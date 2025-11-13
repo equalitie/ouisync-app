@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
 
 import '../../../generated/l10n.dart';
+import '../../utils/stage.dart';
 import '../../utils/utils.dart'
     show AppThemeExtension, Dimensions, Fields, ThemeGetter;
 import '../widgets.dart' show NegativeButton;
 
 class DokanOlderMayorFound extends StatelessWidget {
-  const DokanOlderMayorFound({required this.linkLaunchDokanGitHub, super.key});
+  const DokanOlderMayorFound({
+    required this.stage,
+    required this.linkLaunchDokanGitHub,
+    super.key,
+  });
 
+  final Stage stage;
   final TextSpan linkLaunchDokanGitHub;
 
   @override
@@ -33,7 +39,7 @@ class DokanOlderMayorFound extends StatelessWidget {
   List<Widget> buildActions(BuildContext context) => [
     NegativeButton(
       text: S.current.actionCloseCapital,
-      onPressed: () => Navigator.of(context).maybePop(false),
+      onPressed: () => stage.maybePop(false),
       buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
     ),
   ];

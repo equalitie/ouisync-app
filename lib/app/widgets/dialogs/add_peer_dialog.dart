@@ -3,11 +3,14 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import '../../../generated/l10n.dart';
+import '../../utils/stage.dart';
 import '../../utils/utils.dart' show AppThemeExtension, ThemeGetter;
 
 /// Dialog for adding user provided peer
 class AddPeerDialog extends StatefulWidget {
-  const AddPeerDialog();
+  const AddPeerDialog(this.stage);
+
+  final Stage stage;
 
   @override
   State<AddPeerDialog> createState() => _AddPeerDialogState();
@@ -47,14 +50,8 @@ class _AddPeerDialogState extends State<AddPeerDialog> {
       ),
     ),
     actions: [
-      TextButton(
-        child: Text(S.current.actionOK),
-        onPressed: () async => await _submit(context),
-      ),
-      TextButton(
-        child: Text(S.current.actionCancel),
-        onPressed: () async => await _cancel(context),
-      ),
+      TextButton(child: Text(S.current.actionOK), onPressed: _submit),
+      TextButton(child: Text(S.current.actionCancel), onPressed: _cancel),
     ],
   );
 
@@ -94,14 +91,13 @@ class _AddPeerDialogState extends State<AddPeerDialog> {
     }
   }
 
-  Future<void> _submit(BuildContext context) async {
+  Future<void> _submit() async {
     if (_formKey.currentState?.validate() ?? false) {
-      await Navigator.of(context).maybePop(_value);
+      await widget.stage.maybePop(_value);
     }
   }
 
-  Future<void> _cancel(BuildContext context) async =>
-      Navigator.of(context).maybePop();
+  Future<void> _cancel() => widget.stage.maybePop();
 
   String? get _value {
     final a = _address;

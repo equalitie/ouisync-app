@@ -17,7 +17,6 @@ export 'buttons/link_style_async_button.dart';
 
 export 'dialogs/actions_dialog.dart';
 export 'dialogs/add_peer_dialog.dart';
-export 'dialogs/delete_repo_dialog.dart';
 export 'dialogs/dokan_different_mayor_found.dart';
 export 'dialogs/dokan_not_found.dart';
 export 'dialogs/dokan_older_mayor_found.dart';

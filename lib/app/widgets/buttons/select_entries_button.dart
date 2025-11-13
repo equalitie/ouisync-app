@@ -4,16 +4,19 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart'
     show EntrySelectionCubit, EntrySelectionState, RepoCubit, ReposCubit;
+import '../../utils/stage.dart';
 import '../../utils/utils.dart' show Dimensions;
 import '../widgets.dart' show EntryActions;
 
 class SelectEntriesButton extends StatefulWidget {
   const SelectEntriesButton({
+    required this.stage,
     required this.reposCubit,
     required this.repoCubit,
     super.key,
   });
 
+  final Stage stage;
   final ReposCubit reposCubit;
   final RepoCubit repoCubit;
 
@@ -42,7 +45,7 @@ class _SelectEntriesButtonState extends State<SelectEntriesButton> {
     bool selecting,
   ) => switch (selecting) {
     true => DoneState(reposCubit: reposCubit, repoCubit: repoCubit),
-    false => EditState(repoCubit: repoCubit),
+    false => EditState(stage: widget.stage, repoCubit: repoCubit),
   };
 }
 
@@ -69,8 +72,9 @@ class DoneState extends StatelessWidget {
 }
 
 class EditState extends StatelessWidget {
-  const EditState({required this.repoCubit, super.key});
+  const EditState({required this.stage, required this.repoCubit, super.key});
 
+  final Stage stage;
   final RepoCubit repoCubit;
 
   @override
@@ -79,7 +83,7 @@ class EditState extends StatelessWidget {
       isScrollControlled: true,
       context: context,
       shape: Dimensions.borderBottomSheetTop,
-      builder: (context) => EntryActions(repoCubit: repoCubit),
+      builder: (context) => EntryActions(stage: stage, repoCubit: repoCubit),
     ),
     label: Text(S.current.actionSelect),
     icon: const Icon(Icons.check),

@@ -74,28 +74,25 @@ class _RenameRepository extends State<RenameRepository> {
           autofocus: true,
           key: ValueKey('new-name'),
         ),
-        Fields.dialogActions(buttons: buildActions(context)),
+        Fields.dialogActions(buttons: buildActions()),
       ],
     ),
   );
 
-  List<Widget> buildActions(BuildContext context) => [
+  List<Widget> buildActions() => [
     Expanded(
       child: NegativeButton(
         text: S.current.actionCancel,
-        onPressed: () => Navigator.of(context).maybePop(null),
+        onPressed: () => widget.stage.maybePop(null),
       ),
     ),
     Expanded(
-      child: PositiveButton(
-        text: S.current.actionRename,
-        onPressed: () => onSubmit(context),
-      ),
+      child: PositiveButton(text: S.current.actionRename, onPressed: onSubmit),
     ),
   ];
 
-  Future<void> onSubmit(BuildContext context) async {
-    if (!(await validate(context))) {
+  Future<void> onSubmit() async {
+    if (!(await validate())) {
       newNameController.selectAll();
       newNameFocus.requestFocus();
 
@@ -106,7 +103,7 @@ class _RenameRepository extends State<RenameRepository> {
     await widget.stage.maybePop(newName);
   }
 
-  Future<bool> validate(BuildContext context) async {
+  Future<bool> validate() async {
     if (!formKey.currentState!.validate()) {
       return false;
     }

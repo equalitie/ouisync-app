@@ -155,7 +155,7 @@ extension on _EntryDetailsState {
   };
 
   Future<void> _onPreviewFileTap() async {
-    await Navigator.of(context).maybePop();
+    await widget.stage.maybePop();
     await widget.onPreviewFile!.call(
       widget.repoCubit,
       widget.entry as FileEntry,
@@ -163,7 +163,7 @@ extension on _EntryDetailsState {
   }
 
   Future<void> _onCopyTap() async {
-    await Navigator.of(context).maybePop();
+    await widget.stage.maybePop();
     await _copyOrMoveEntry(
       widget.repoCubit,
       widget.entry,
@@ -172,7 +172,7 @@ extension on _EntryDetailsState {
   }
 
   Future<void> _onMoveTap() async {
-    await Navigator.of(context).maybePop();
+    await widget.stage.maybePop();
     await _copyOrMoveEntry(
       widget.repoCubit,
       widget.entry,

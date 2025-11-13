@@ -50,17 +50,17 @@ class NetworkSection extends SettingsSection {
     );
 
     return [
-      _buildConnectivityTypeTile(context),
-      _buildPortForwardingTile(context),
-      _buildLocalDiscoveryTile(context),
-      _buildSyncOnMobileSwitch(context),
-      ..._buildConnectivityInfoTiles(context),
-      _buildPeerListTile(context),
-      _buildNatDetectionTile(context),
+      _buildConnectivityTypeTile(),
+      _buildPortForwardingTile(),
+      _buildLocalDiscoveryTile(),
+      _buildSyncOnMobileSwitch(),
+      ..._buildConnectivityInfoTiles(),
+      _buildPeerListTile(),
+      _buildNatDetectionTile(),
     ];
   }
 
-  Widget _buildConnectivityTypeTile(BuildContext context) =>
+  Widget _buildConnectivityTypeTile() =>
       BlocBuilder<PowerControl, PowerControlState>(
         bloc: powerControl,
         builder: (context, state) => SettingsTile(
@@ -86,7 +86,7 @@ class NetworkSection extends SettingsSection {
         ),
       );
 
-  Widget _buildPortForwardingTile(BuildContext context) =>
+  Widget _buildPortForwardingTile() =>
       BlocSelector<PowerControl, PowerControlState, bool>(
         bloc: powerControl,
         selector: (state) => state.userWantsPortForwardingEnabled,
@@ -104,7 +104,7 @@ class NetworkSection extends SettingsSection {
         ),
       );
 
-  Widget _buildLocalDiscoveryTile(BuildContext context) =>
+  Widget _buildLocalDiscoveryTile() =>
       BlocBuilder<PowerControl, PowerControlState>(
         bloc: powerControl,
         builder: (context, state) => SwitchSettingsTile(
@@ -127,7 +127,7 @@ class NetworkSection extends SettingsSection {
         ),
       );
 
-  Widget _buildSyncOnMobileSwitch(BuildContext context) =>
+  Widget _buildSyncOnMobileSwitch() =>
       BlocSelector<PowerControl, PowerControlState, bool>(
         bloc: powerControl,
         selector: (state) => state.userWantsSyncOnMobileEnabled,
@@ -145,7 +145,7 @@ class NetworkSection extends SettingsSection {
         ),
       );
 
-  List<Widget> _buildConnectivityInfoTiles(BuildContext context) => [
+  List<Widget> _buildConnectivityInfoTiles() => [
     _buildConnectivityInfoTile(
       S.current.labelTcpListenerEndpointV4,
       Icons.computer,
@@ -247,44 +247,41 @@ class NetworkSection extends SettingsSection {
     },
   );
 
-  Widget _buildPeerListTile(BuildContext context) =>
-      BlocBuilder<PeerSetCubit, PeerSet>(
-        bloc: peerSet,
-        builder: (context, state) => NavigationTile(
-          leading: Icon(Icons.people),
-          title: Text(S.current.labelPeers, style: bodyStyle),
-          value: Text(state.numConnected.toString(), style: subtitleStyle),
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) =>
-                    PeersPage(session: session, cubit: peerSet, stage: stage),
-              ),
-            );
-          },
-        ),
-      );
-
-  Widget _buildNatDetectionTile(BuildContext context) =>
-      BlocBuilder<NatDetection, NatBehavior>(
-        bloc: natDetection,
-        builder: (context, state) => SettingsTile(
-          leading: Icon(Icons.nat),
-          title: InfoBuble(
-            child: Text(S.current.messageNATType, style: bodyStyle),
-            title: S.current.messageNATType,
-            description: [
-              TextSpan(text: S.current.messageInfoNATType),
-              Fields.linkTextSpan(
-                '\n\n${S.current.messageNATOnWikipedia}',
-                _launchNATOnWikipedia,
-              ),
-            ],
+  Widget _buildPeerListTile() => BlocBuilder<PeerSetCubit, PeerSet>(
+    bloc: peerSet,
+    builder: (context, state) => NavigationTile(
+      leading: Icon(Icons.people),
+      title: Text(S.current.labelPeers, style: bodyStyle),
+      value: Text(state.numConnected.toString(), style: subtitleStyle),
+      onTap: () {
+        stage.push(
+          MaterialPageRoute(
+            builder: (context) =>
+                PeersPage(session: session, cubit: peerSet, stage: stage),
           ),
-          value: Text(_natBehaviorText(state), style: subtitleStyle),
-        ),
-      );
+        );
+      },
+    ),
+  );
+
+  Widget _buildNatDetectionTile() => BlocBuilder<NatDetection, NatBehavior>(
+    bloc: natDetection,
+    builder: (context, state) => SettingsTile(
+      leading: Icon(Icons.nat),
+      title: InfoBuble(
+        child: Text(S.current.messageNATType, style: bodyStyle),
+        title: S.current.messageNATType,
+        description: [
+          TextSpan(text: S.current.messageInfoNATType),
+          Fields.linkTextSpan(
+            '\n\n${S.current.messageNATOnWikipedia}',
+            _launchNATOnWikipedia,
+          ),
+        ],
+      ),
+      value: Text(_natBehaviorText(state), style: subtitleStyle),
+    ),
+  );
 
   void _launchNATOnWikipedia() async {
     final title = Text(S.current.messageNATOnWikipedia);

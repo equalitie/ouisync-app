@@ -35,6 +35,7 @@ class DokanValidation {
   Future<void> tryInstallDokan() async {
     final title = S.current.titleDokanMissing;
     final body = DokanNotFound(
+      stage: _stage,
       linkLaunchDokanGitHub: _buildLinkToDokanWebsite(),
     );
 
@@ -44,6 +45,7 @@ class DokanValidation {
   Future<void> tryInstallNewerDokanMayor() async {
     final title = S.current.titleDokanInstallationFound;
     final body = DokanDifferentMayorFound(
+      stage: _stage,
       linkLaunchDokanGitHub: _buildLinkToDokanWebsite(),
     );
 
@@ -53,6 +55,7 @@ class DokanValidation {
   Future<void> tryInstallDifferentDokanMayor() async {
     final title = S.current.titleDokanInstallationFound;
     final body = DokanOlderMayorFound(
+      stage: _stage,
       linkLaunchDokanGitHub: _buildLinkToDokanWebsite(),
     );
 

@@ -59,8 +59,7 @@ class _PeersPageState extends State<PeersPage> {
         IconButton(
           icon: const Icon(Icons.manage_accounts),
           tooltip: 'User provided peers',
-          onPressed: () => Navigator.push(
-            context,
+          onPressed: () => widget.stage.push(
             MaterialPageRoute(
               builder: (context) => UserProvidedPeersPage(
                 session: widget.session,

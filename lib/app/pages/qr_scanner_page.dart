@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import 'package:ouisync/ouisync.dart' as plugin;
+import 'package:ouisync/ouisync.dart' show Session;
 
 import '../../generated/l10n.dart';
+import '../utils/stage.dart';
 import '../utils/utils.dart' show AppLogger, Dimensions;
 import '../widgets/widgets.dart' show DirectionalAppBar;
 
 class QRScanner extends StatefulWidget {
-  final plugin.Session session;
+  final Stage stage;
+  final Session session;
 
-  const QRScanner(this.session, {super.key});
+  const QRScanner({required this.stage, required this.session, super.key});
 
   @override
   State<QRScanner> createState() => _QRScannerState();
@@ -83,7 +85,6 @@ class _QRScannerState extends State<QRScanner> with AppLogger {
 
   MobileScanner _buildScanner() {
     var scanned = false;
-    final navigator = Navigator.of(context);
 
     return MobileScanner(
       controller: cameraController,
@@ -114,7 +115,7 @@ class _QRScannerState extends State<QRScanner> with AppLogger {
           loggy.debug('Barcode found! $code');
           scanned = true;
 
-          await navigator.maybePop(code);
+          await widget.stage.maybePop(code);
         }
       },
     );

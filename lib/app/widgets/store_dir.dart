@@ -163,7 +163,7 @@ class StoreDirDialog extends StatelessWidget with AppLogger {
         actions: [
           TextButton(
             child: Text(S.current.actionCloseCapital),
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => stage.pop(),
           ),
         ],
       ),
@@ -201,11 +201,11 @@ class StoreDirDialog extends StatelessWidget with AppLogger {
         actions: [
           NegativeButton(
             text: S.current.actionCancel,
-            onPressed: () => Navigator.of(context).pop(false),
+            onPressed: () => stage.pop(false),
           ),
           PositiveButton(
             text: S.current.actionMove,
-            onPressed: () => Navigator.of(context).pop(true),
+            onPressed: () => stage.pop(true),
           ),
         ],
       ),

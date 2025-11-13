@@ -86,8 +86,6 @@ class _State extends State<GetPasswordAccessDialog> with AppLogger {
         key: Key('enter-repo-reset-screen'),
         text: "\n${S.current.actionIDontHaveALocalPassword}\n",
         onTap: () async {
-          final navigator = Navigator.of(context);
-
           if (!await LocalAuth.authenticateIfPossible(
             widget.stage,
             S.current.messagePleaseAuthenticate,
@@ -107,7 +105,7 @@ class _State extends State<GetPasswordAccessDialog> with AppLogger {
             startAccess: BlindAccess(),
           );
 
-          navigator.pop(access);
+          widget.stage.pop(access);
         },
       );
 
@@ -139,7 +137,7 @@ class _State extends State<GetPasswordAccessDialog> with AppLogger {
   List<Widget> _buildActions(context) => [
     NegativeButton(
       text: S.current.actionCancel,
-      onPressed: () async => await Navigator.of(context).maybePop(null),
+      onPressed: () => widget.stage.maybePop(null),
     ),
     PositiveButton(
       text: S.current.actionUnlock,
