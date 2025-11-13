@@ -2,7 +2,6 @@ import 'dart:io' as io;
 
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/material.dart' show BuildContext;
 import 'package:ouisync/ouisync.dart' show EntryType;
 import 'package:path/path.dart' as p;
 import 'package:permission_handler/permission_handler.dart';
@@ -12,22 +11,23 @@ import '../cubits/cubits.dart' show RepoCubit;
 import '../models/models.dart' show FileEntry;
 import '../widgets/widgets.dart'
     show RenameOrReplaceResult, RenameOrReplaceEntryDialog;
+import 'stage.dart';
 import 'platform/platform.dart' show PlatformValues;
-import 'utils.dart' show AppLogger, Constants, Permissions, showSnackBar;
+import 'utils.dart' show AppLogger, Constants, Permissions;
 
 enum FileDestination { device, ouisync }
 
 class FileIO with AppLogger {
-  const FileIO({required this.context, required this.repoCubit});
+  const FileIO({required this.repoCubit, required this.stage});
 
-  final BuildContext context;
   final RepoCubit repoCubit;
+  final Stage stage;
 
   Future<void> addFileFromDevice({
     required FileType type,
     required Future<bool> popCallback,
   }) async {
-    final storagePermissionOk = await _maybeRequestPermission(context);
+    final storagePermissionOk = await _maybeRequestPermission();
     if (storagePermissionOk == false) {
       return;
     }
@@ -63,7 +63,7 @@ class FileIO with AppLogger {
         }
 
         final replaceOrKeepEntry = await RenameOrReplaceEntryDialog.show(
-          context,
+          stage: stage,
           title: S.current.titleAddFile,
           entryName: fileName,
           entryType: EntryType.file,
@@ -107,7 +107,7 @@ class FileIO with AppLogger {
   ]) async {
     if (defaultPath == null && paths == null) return;
 
-    final storagePermissionOk = await _maybeRequestPermission(context);
+    final storagePermissionOk = await _maybeRequestPermission();
     if (storagePermissionOk == false) {
       return;
     }
@@ -122,7 +122,7 @@ class FileIO with AppLogger {
       final destinationPaths = await getDestinationPath(defaultPath, fileName);
       if (destinationPaths.canceled) {
         final errorMessage = S.current.messageDownloadFileCanceled;
-        showSnackBar(errorMessage);
+        stage.showSnackBar(errorMessage);
 
         return;
       }
@@ -141,7 +141,7 @@ class FileIO with AppLogger {
     );
   }
 
-  Future<bool> _maybeRequestPermission(BuildContext context) async {
+  Future<bool> _maybeRequestPermission() async {
     if (!io.Platform.isAndroid) {
       return true;
     }
@@ -156,7 +156,7 @@ class FileIO with AppLogger {
     loggy.debug('Android SDK is $androidSDK; requesting STORAGE permission');
 
     final storagePermission = await Permissions.requestPermission(
-      context,
+      stage,
       Permission.storage,
     );
 

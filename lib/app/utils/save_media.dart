@@ -8,6 +8,7 @@ import '../../generated/l10n.dart';
 import '../cubits/cubits.dart' show RepoCubit;
 import '../widgets/widgets.dart'
     show RenameOrReplaceResult, RenameOrReplaceEntryDialog;
+import 'stage.dart';
 import 'utils.dart' show AppLogger, disambiguateEntryName;
 
 class SaveMedia with AppLogger {
@@ -16,13 +17,13 @@ class SaveMedia with AppLogger {
     required RepoCubit repoCubit,
     required this.sourcePath,
     required this.type,
-  }) : _context = context,
-       _repoCubit = repoCubit;
+    required this.stage,
+  }) : _repoCubit = repoCubit;
 
-  final BuildContext _context;
   final RepoCubit _repoCubit;
   final String sourcePath;
   final EntryType type;
+  final Stage stage;
 
   Future<void> save() async {
     final newFileName = p.basename(sourcePath);
@@ -43,7 +44,7 @@ class SaveMedia with AppLogger {
     }
 
     final result = await RenameOrReplaceEntryDialog.show(
-      _context,
+      stage: stage,
       title: S.current.actionSave,
       entryName: newFileName,
       entryType: EntryType.file,

@@ -9,6 +9,7 @@ import 'package:permission_handler/permission_handler.dart';
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart' show RepoImportCubit, ReposCubit;
 import '../models/models.dart';
+import '../utils/stage.dart';
 import '../utils/platform/platform.dart' show PlatformValues;
 import '../utils/share_token.dart';
 import '../utils/utils.dart'
@@ -18,15 +19,19 @@ import '../utils/utils.dart'
         Dimensions,
         Fields,
         Permissions,
-        showSnackBar,
         ThemeGetter;
 import '../widgets/widgets.dart' show BlocHolder, DirectionalAppBar;
 import 'pages.dart';
 
 class RepoImportPage extends StatelessWidget {
-  const RepoImportPage({super.key, required this.reposCubit});
+  const RepoImportPage({
+    super.key,
+    required this.reposCubit,
+    required this.stage,
+  });
 
   final ReposCubit reposCubit;
+  final Stage stage;
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -120,10 +125,10 @@ class RepoImportPage extends StatelessWidget {
             );
             if (!permissionGranted) return;
 
-            final data = await Navigator.push(
-              context,
+            final data = await stage.push(
               MaterialPageRoute(
-                builder: (context) => QRScanner(reposCubit.session),
+                builder: (context) =>
+                    QRScanner(stage: stage, session: reposCubit.session),
               ),
             );
 
@@ -132,11 +137,9 @@ class RepoImportPage extends StatelessWidget {
             final result = await parseShareToken(reposCubit, data);
             switch (result) {
               case ShareTokenValid(value: final token):
-                await Navigator.of(
-                  context,
-                ).maybePop(RepoImportFromToken(token));
+                await stage.maybePop(RepoImportFromToken(token));
               case ShareTokenInvalid(error: final error):
-                showSnackBar(error.toString());
+                stage.showSnackBar(error.toString());
             }
           },
     leadingIcon: const Icon(Icons.qr_code_2_outlined),
@@ -147,7 +150,7 @@ class RepoImportPage extends StatelessWidget {
     BuildContext context,
     Permission permission,
   ) async {
-    final status = await Permissions.requestPermission(context, permission);
+    final status = await Permissions.requestPermission(stage, permission);
     return status == PermissionStatus.granted;
   }
 
@@ -219,9 +222,9 @@ class RepoImportPage extends StatelessWidget {
     ShareTokenResult? state,
   ) =>
       _buildButton(S.current.actionAddRepository.toUpperCase(), switch (state) {
-        ShareTokenValid(value: final token) => () async => await Navigator.of(
-          context,
-        ).maybePop(RepoImportFromToken(token)),
+        ShareTokenValid(value: final token) => () => stage.maybePop(
+          RepoImportFromToken(token),
+        ),
         ShareTokenInvalid() || null => null,
       });
 
@@ -255,7 +258,7 @@ class RepoImportPage extends StatelessWidget {
 
           await Future.wait(locations.map(reposCubit.importRepoFromLocation));
 
-          await Navigator.of(context).maybePop(RepoImportFromFiles(locations));
+          await stage.maybePop(RepoImportFromFiles(locations));
         }),
       ],
     );

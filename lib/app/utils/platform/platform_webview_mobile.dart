@@ -10,7 +10,7 @@ class PlatformWebViewMobile implements PlatformWebView {
   PlatformWebViewMobile();
 
   @override
-  Future<WebViewWidget> loadUrl(BuildContext context, String url) async {
+  Future<WebViewWidget> loadUrl(String url) async {
     late final PlatformWebViewControllerCreationParams params;
     if (WebViewPlatform.instance is WebKitWebViewPlatform) {
       params = WebKitWebViewControllerCreationParams(

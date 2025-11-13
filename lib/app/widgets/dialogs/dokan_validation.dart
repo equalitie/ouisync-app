@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../generated/l10n.dart';
+import '../../utils/stage.dart';
 import '../../utils/utils.dart'
     show Constants, DokanScripts, DokanCheckResult, Fields;
 import '../widgets.dart'
@@ -11,15 +12,15 @@ import '../widgets.dart'
         DokanOlderMayorFound;
 
 class DokanValidation {
-  const DokanValidation(
-    BuildContext context, {
+  const DokanValidation({
+    required Stage stage,
     required void Function() installationOk,
     required Future<bool?> Function() installationFailed,
-  }) : _context = context,
+  }) : _stage = stage,
        _installationOk = installationOk,
        _installationFailed = installationFailed;
 
-  final BuildContext _context;
+  final Stage _stage;
   final void Function() _installationOk;
   final Future<bool?> Function() _installationFailed;
 
@@ -34,7 +35,8 @@ class DokanValidation {
   Future<void> tryInstallDokan() async {
     final title = S.current.titleDokanMissing;
     final body = DokanNotFound(
-      linkLaunchDokanGitHub: _buildLinkToDokanWebsite(_context),
+      stage: _stage,
+      linkLaunchDokanGitHub: _buildLinkToDokanWebsite(),
     );
 
     await _runInstallation(title, body);
@@ -43,7 +45,8 @@ class DokanValidation {
   Future<void> tryInstallNewerDokanMayor() async {
     final title = S.current.titleDokanInstallationFound;
     final body = DokanDifferentMayorFound(
-      linkLaunchDokanGitHub: _buildLinkToDokanWebsite(_context),
+      stage: _stage,
+      linkLaunchDokanGitHub: _buildLinkToDokanWebsite(),
     );
 
     await _runInstallation(title, body);
@@ -52,28 +55,24 @@ class DokanValidation {
   Future<void> tryInstallDifferentDokanMayor() async {
     final title = S.current.titleDokanInstallationFound;
     final body = DokanOlderMayorFound(
-      linkLaunchDokanGitHub: _buildLinkToDokanWebsite(_context),
+      stage: _stage,
+      linkLaunchDokanGitHub: _buildLinkToDokanWebsite(),
     );
 
     await _runInstallation(title, body);
   }
 
-  TextSpan _buildLinkToDokanWebsite(BuildContext context) =>
-      Fields.linkTextSpan(
-        _context,
-        S.current.messageDokan,
-        _launchDokanWebsite,
-      );
+  TextSpan _buildLinkToDokanWebsite() =>
+      Fields.linkTextSpan(S.current.messageDokan, _launchDokanWebsite);
 
-  void _launchDokanWebsite(BuildContext context) async {
+  void _launchDokanWebsite() async {
     final title = Text('Dokan');
-    await Fields.openUrl(context, title, Constants.dokanUrl);
+    await Fields.openUrl(_stage, title, Constants.dokanUrl);
   }
 
   Future<void> _runInstallation(String title, Widget body) async {
     final install =
-        await showDialog<bool?>(
-          context: _context,
+        await _stage.showDialog<bool?>(
           barrierDismissible: false,
           builder: (BuildContext context) =>
               ActionsDialog(title: title, body: body),

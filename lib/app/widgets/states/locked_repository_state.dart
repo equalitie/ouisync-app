@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:ouisync/ouisync.dart' show Session;
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../mixins/mixins.dart';
+import '../../utils/stage.dart';
 import '../../utils/utils.dart';
 
-class LockedRepositoryState extends HookWidget
-    with AppLogger, RepositoryActionsMixin {
+class LockedRepositoryState extends StatefulWidget {
   const LockedRepositoryState({
     required this.directionality,
     required this.repoCubit,
@@ -16,6 +15,7 @@ class LockedRepositoryState extends HookWidget
     required this.passwordHasher,
     required this.settings,
     required this.session,
+    required this.stage,
   });
 
   final TextDirection directionality;
@@ -24,6 +24,27 @@ class LockedRepositoryState extends HookWidget
   final PasswordHasher passwordHasher;
   final Settings settings;
   final Session session;
+  final Stage stage;
+
+  @override
+  State<LockedRepositoryState> createState() => _LockedRepositoryStateState();
+}
+
+class _LockedRepositoryStateState extends State<LockedRepositoryState>
+    with AppLogger, RepositoryActionsMixin {
+  final unlockButtonFocus = FocusNode(debugLabel: 'unlock_button_focus');
+
+  @override
+  void initState() {
+    super.initState();
+    unlockButtonFocus.requestFocus();
+  }
+
+  @override
+  void dispose() {
+    unlockButtonFocus.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,14 +52,8 @@ class LockedRepositoryState extends HookWidget
         MediaQuery.of(context).size.height *
         Constants.statePlaceholderImageHeightFactor;
 
-    final FocusNode unlockButtonFocus = useFocusNode(
-      debugLabel: 'unlock_button_focus',
-    );
-
-    unlockButtonFocus.requestFocus();
-
     return Directionality(
-      textDirection: directionality,
+      textDirection: widget.directionality,
       child: Center(
         child: SingleChildScrollView(
           child: Column(
@@ -82,11 +97,12 @@ class LockedRepositoryState extends HookWidget
               Fields.inPageButton(
                 onPressed: () async {
                   await unlockRepository(
-                    context,
-                    settings,
-                    session,
-                    repoCubit,
-                    passwordHasher,
+                    context: context,
+                    settings: widget.settings,
+                    session: widget.session,
+                    repoCubit: widget.repoCubit,
+                    passwordHasher: widget.passwordHasher,
+                    stage: widget.stage,
                   );
                 },
                 leadingIcon: const Icon(Icons.lock_open_rounded),

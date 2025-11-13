@@ -7,10 +7,10 @@ import 'package:path/path.dart' show posix;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
-import 'actions.dart';
 import 'log.dart';
 import '../cubits/cubits.dart' show RepoCubit;
 import '../../generated/l10n.dart';
+import 'stage.dart';
 import 'native.dart';
 
 Future<String> disambiguateEntryName({
@@ -36,6 +36,7 @@ Future<String> disambiguateEntryName({
 }
 
 Future<void> viewFile({
+  required Stage stage,
   required RepoCubit repo,
   required String path,
   required Loggy<AppLogger> loggy,
@@ -87,15 +88,15 @@ Future<void> viewFile({
   try {
     await view();
   } on _AppNotFound {
-    showSnackBar(S.current.messageNoAppsForThisAction);
+    stage.showSnackBar(S.current.messageNoAppsForThisAction);
   } on _RepoNotMounted {
-    showSnackBar(S.current.messageRepositoryNotMounted);
+    stage.showSnackBar(S.current.messageRepositoryNotMounted);
   } on _NotImplemented {
-    showSnackBar(S.current.messageFilePreviewNotAvailable);
+    stage.showSnackBar(S.current.messageFilePreviewNotAvailable);
   } on PlatformException catch (e, st) {
     loggy.error('Error viewing file $path:', e, st);
 
-    showSnackBar(S.current.messagePreviewingFileFailed(path));
+    stage.showSnackBar(S.current.messagePreviewingFileFailed(path));
   }
 }
 

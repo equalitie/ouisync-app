@@ -4,6 +4,7 @@ import 'package:ouisync/ouisync.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../utils/flavor.dart';
+import '../../utils/stage.dart';
 import 'settings_tile.dart';
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
@@ -11,12 +12,14 @@ import '../../pages/pages.dart';
 import '../../utils/click_counter.dart';
 
 class AppVersionTile extends StatefulWidget {
+  final Stage stage;
   final Session session;
   final UpgradeExistsCubit upgradeExists;
   final Widget title;
   final Widget leading;
 
   AppVersionTile({
+    required this.stage,
     required this.session,
     required this.upgradeExists,
     required this.title,
@@ -42,7 +45,7 @@ class _AppVersionTileState extends State<AppVersionTile> {
     leading: widget.leading,
     title: widget.title,
     value: _getAppVersion(),
-    onTap: () => _onTap(context),
+    onTap: _onTap,
   );
 
   FutureBuilder<String> _getAppVersion() => FutureBuilder<String>(
@@ -85,12 +88,11 @@ class _AppVersionTileState extends State<AppVersionTile> {
     },
   );
 
-  void _onTap(BuildContext context) {
+  void _onTap() {
     if (_clickCounter.registerClick() >= 3) {
       _clickCounter.reset();
 
-      Navigator.push(
-        context,
+      widget.stage.push(
         MaterialPageRoute(
           builder: (context) => StateMonitorPage(widget.session),
         ),

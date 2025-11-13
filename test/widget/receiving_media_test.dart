@@ -8,7 +8,6 @@ import 'package:ouisync_app/app/cubits/repo.dart';
 import 'package:ouisync_app/app/cubits/repo_creation.dart';
 import 'package:ouisync_app/app/models/auth_mode.dart';
 import 'package:ouisync_app/app/models/repo_location.dart';
-import 'package:ouisync_app/app/pages/main_page.dart';
 import 'package:ouisync_app/app/widgets/buttons/dialog_action_button.dart';
 import 'package:ouisync/ouisync.dart';
 import 'package:path/path.dart' show join;
@@ -31,7 +30,7 @@ void main() {
     await deps.dispose();
   });
 
-  MainPage createMainPage() =>
+  Widget createMainPage() =>
       deps.createMainPage(receivedMedia: mediaReceiverController.stream);
 
   Future<String> readRepoFileAsString(RepoCubit repoCubit, String path) async {

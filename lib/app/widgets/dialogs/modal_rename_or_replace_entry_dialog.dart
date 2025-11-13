@@ -2,26 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:ouisync/ouisync.dart' show EntryType;
 
 import '../../../generated/l10n.dart';
+import '../../utils/stage.dart';
 import '../../utils/utils.dart'
-    show AppThemeExtension, Dimensions, Fields, showSnackBar, ThemeGetter;
+    show AppThemeExtension, Dimensions, Fields, ThemeGetter;
 import '../widgets.dart' show NegativeButton, PositiveButton;
 
 class RenameOrReplaceEntryDialog extends StatelessWidget {
   final String name;
   final EntryType type;
+  final Stage stage;
 
   static const _defaultAction = RenameOrReplaceResult.rename;
 
   final _fileAction = ValueNotifier<RenameOrReplaceResult>(_defaultAction);
 
-  static Future<RenameOrReplaceResult?> show(
-    BuildContext context, {
+  static Future<RenameOrReplaceResult?> show({
+    required Stage stage,
     required String title,
     required String entryName,
     required EntryType entryType,
-  }) async => await showDialog<RenameOrReplaceResult?>(
-    context: context,
-    builder: (BuildContext _) => AlertDialog(
+  }) => stage.showDialog<RenameOrReplaceResult?>(
+    builder: (context) => AlertDialog(
       title: Flex(
         direction: Axis.horizontal,
         children: [
@@ -32,11 +33,19 @@ class RenameOrReplaceEntryDialog extends StatelessWidget {
           ),
         ],
       ),
-      content: RenameOrReplaceEntryDialog._(name: entryName, type: entryType),
+      content: RenameOrReplaceEntryDialog._(
+        name: entryName,
+        type: entryType,
+        stage: stage,
+      ),
     ),
   );
 
-  RenameOrReplaceEntryDialog._({required this.name, required this.type});
+  RenameOrReplaceEntryDialog._({
+    required this.name,
+    required this.type,
+    required this.stage,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -75,7 +84,7 @@ class RenameOrReplaceEntryDialog extends StatelessWidget {
                 GestureDetector(
                   onTap: () {
                     if (type == EntryType.directory) {
-                      showSnackBar(S.current.messageOnlyAvailableFiles);
+                      stage.showSnackBar(S.current.messageOnlyAvailableFiles);
                     }
                   },
                   child: RadioListTile<RenameOrReplaceResult>(
@@ -95,20 +104,19 @@ class RenameOrReplaceEntryDialog extends StatelessWidget {
           },
         ),
         Dimensions.spacingVertical,
-        Fields.dialogActions(buttons: _actions(context)),
+        Fields.dialogActions(buttons: _actions()),
       ],
     );
   }
 
-  List<Widget> _actions(context) => [
+  List<Widget> _actions() => [
     NegativeButton(
       text: S.current.actionCancel,
-      onPressed: () async => await Navigator.of(context).maybePop(null),
+      onPressed: () => stage.maybePop(null),
     ),
     PositiveButton(
       text: S.current.actionAccept,
-      onPressed: () async =>
-          await Navigator.of(context).maybePop(_fileAction.value),
+      onPressed: () => stage.maybePop(_fileAction.value),
     ),
   ];
 

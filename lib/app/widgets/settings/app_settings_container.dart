@@ -1,11 +1,11 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:ouisync/ouisync.dart';
 import 'package:settings_ui/settings_ui.dart' as s;
 
 import '../../cubits/cubits.dart';
 import '../../utils/dirs.dart';
+import '../../utils/stage.dart';
 import '../../utils/platform/platform.dart';
 import '../../utils/utils.dart';
 import 'about_section.dart';
@@ -13,7 +13,7 @@ import 'logs_section.dart';
 import 'network_section.dart';
 import 'settings_section.dart';
 
-class AppSettingsContainer extends StatefulHookWidget {
+class AppSettingsContainer extends StatefulWidget {
   AppSettingsContainer(
     Session session, {
     required void Function() checkForDokan,
@@ -28,9 +28,11 @@ class AppSettingsContainer extends StatefulHookWidget {
     required this.powerControl,
     required ReposCubit reposCubit,
     required this.upgradeExists,
+    required Stage stage,
   }) : sections = [
          NetworkSection(
-           session,
+           stage: stage,
+           session: session,
            connectivityInfo: connectivityInfo,
            natDetection: natDetection,
            peerSet: peerSet,
@@ -47,7 +49,8 @@ class AppSettingsContainer extends StatefulHookWidget {
            dirs: dirs,
          ),
          AboutSection(
-           session,
+           stage: stage,
+           session: session,
            localeCubit: localeCubit,
            powerControl: powerControl,
            reposCubit: reposCubit,
@@ -73,10 +76,10 @@ class AppSettingsContainer extends StatefulHookWidget {
 
 class _AppSettingsContainerState extends State<AppSettingsContainer>
     with AppLogger {
+  int selected = 0;
+
   @override
   Widget build(BuildContext context) {
-    final selected = useState(0);
-
     return Row(
       children: [
         if (PlatformValues.isDesktopDevice)
@@ -90,9 +93,11 @@ class _AppSettingsContainerState extends State<AppSettingsContainer>
                       powerControl: widget.powerControl,
                       upgradeExists: widget.upgradeExists,
                       section: section,
-                      selected: selected.value == index,
+                      selected: selected == index,
                       onTap: () {
-                        selected.value = index;
+                        setState(() {
+                          selected = index;
+                        });
 
                         Scrollable.ensureVisible(
                           section.key.currentContext!,
@@ -131,18 +136,14 @@ class _AppSettingsContainerState extends State<AppSettingsContainer>
                   )
                   .toList(),
             ),
-            onNotification: (notification) =>
-                _selectFromScroll(notification, selected),
+            onNotification: (notification) => _selectFromScroll(notification),
           ),
         ),
       ],
     );
   }
 
-  bool _selectFromScroll(
-    ScrollEndNotification notification,
-    ValueNotifier<int> selected,
-  ) {
+  bool _selectFromScroll(ScrollEndNotification notification) {
     if (PlatformValues.isMobileDevice) return true;
 
     final networkKey = widget.sections.elementAt(0).key.currentContext;
@@ -169,7 +170,9 @@ class _AppSettingsContainerState extends State<AppSettingsContainer>
         ? 1
         : 0;
 
-    selected.value = index;
+    setState(() {
+      selected = index;
+    });
 
     return true;
   }

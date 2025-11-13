@@ -4,13 +4,19 @@ import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../generated/l10n.dart';
+import '../utils/stage.dart';
 import '../utils/utils.dart'
     show AppThemeExtension, Dimensions, Fields, ThemeGetter;
 import '../widgets/widgets.dart' show DirectionalAppBar;
 
 class RepositoryQRPage extends StatefulWidget {
-  const RepositoryQRPage({required this.shareLink, super.key});
+  const RepositoryQRPage({
+    required this.stage,
+    required this.shareLink,
+    super.key,
+  });
 
+  final Stage stage;
   final String shareLink;
 
   @override
@@ -23,7 +29,7 @@ class _RepositoryQRPageState extends State<RepositoryQRPage> {
     appBar: DirectionalAppBar(
       leading: Fields.actionIcon(
         const Icon(Icons.close, color: Colors.white),
-        onPressed: () async => await Navigator.of(context).maybePop(),
+        onPressed: () => widget.stage.maybePop(),
       ),
       backgroundColor: Colors.transparent,
     ),

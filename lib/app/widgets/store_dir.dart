@@ -12,11 +12,10 @@ import 'package:url_launcher/url_launcher.dart' show launchUrl;
 import '../../generated/l10n.dart';
 import '../cubits/repo.dart';
 import '../cubits/store_dirs.dart';
-import '../utils/actions.dart' show showSnackBar;
-import '../utils/dialogs.dart' show Dialogs;
 import '../utils/dimensions.dart';
 import '../utils/extensions.dart';
 import '../utils/log.dart' show AppLogger;
+import '../utils/stage.dart';
 import '../utils/storage_volume.dart';
 import 'buttons/dialog_action_button.dart';
 
@@ -97,11 +96,13 @@ class StorageVolumeLabel extends StatelessWidget {
 /// Dialog for changing repository store directory
 class StoreDirDialog extends StatelessWidget with AppLogger {
   StoreDirDialog({
+    required this.stage,
     required this.storeDirsCubit,
     required this.repoCubit,
     super.key,
   });
 
+  final Stage stage;
   final StoreDirsCubit storeDirsCubit;
   final RepoCubit repoCubit;
 
@@ -132,7 +133,7 @@ class StoreDirDialog extends StatelessWidget with AppLogger {
                 ),
                 IconButton(
                   icon: Icon(Icons.copy),
-                  onPressed: () => _copyToClipboard(context, repoState),
+                  onPressed: () => _copyToClipboard(repoState),
                   tooltip: S.current.copyToClipboard,
                 ),
                 if (Platform.isLinux || Platform.isWindows)
@@ -162,16 +163,16 @@ class StoreDirDialog extends StatelessWidget with AppLogger {
         actions: [
           TextButton(
             child: Text(S.current.actionCloseCapital),
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => stage.pop(),
           ),
         ],
       ),
     ),
   );
 
-  Future<void> _copyToClipboard(BuildContext context, RepoState state) async {
+  Future<void> _copyToClipboard(RepoState state) async {
     await Clipboard.setData(ClipboardData(text: state.location.path));
-    showSnackBar(S.current.messageCopiedToClipboard, context: context);
+    stage.showSnackBar(S.current.messageCopiedToClipboard);
   }
 
   Future<void> _openDirectory(RepoState state) =>
@@ -200,19 +201,18 @@ class StoreDirDialog extends StatelessWidget with AppLogger {
         actions: [
           NegativeButton(
             text: S.current.actionCancel,
-            onPressed: () => Navigator.of(context).pop(false),
+            onPressed: () => stage.pop(false),
           ),
           PositiveButton(
             text: S.current.actionMove,
-            onPressed: () => Navigator.of(context).pop(true),
+            onPressed: () => stage.pop(true),
           ),
         ],
       ),
     );
 
     if (confirm ?? false) {
-      await Dialogs.executeFutureWithLoadingDialog(
-        context,
+      await stage.loading(
         repoCubit.move(repoState.location.relocate(dir.path).path),
       );
     }

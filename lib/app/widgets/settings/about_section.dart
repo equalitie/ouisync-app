@@ -23,6 +23,7 @@ import '../../cubits/cubits.dart'
         ReposCubit,
         UpgradeExistsCubit;
 import '../../pages/pages.dart' show LanguagePicker, PeersPage, WebViewPage;
+import '../../utils/stage.dart';
 import '../../utils/platform/platform.dart'
     show PlatformValues, PlatformWebView;
 import '../../utils/utils.dart'
@@ -30,7 +31,6 @@ import '../../utils/utils.dart'
         AppLogger,
         AppThemeExtension,
         Constants,
-        Dialogs,
         dumpAll,
         Fields,
         formatSize,
@@ -41,8 +41,9 @@ import 'settings_section.dart';
 import 'settings_tile.dart';
 
 class AboutSection extends SettingsSection with AppLogger {
-  AboutSection(
-    this.session, {
+  AboutSection({
+    required this.stage,
+    required this.session,
     required this.localeCubit,
     required this.powerControl,
     required this.reposCubit,
@@ -65,6 +66,7 @@ class AboutSection extends SettingsSection with AppLogger {
   final NatDetection natDetection;
   final LaunchAtStartupCubit launchAtStartup;
   final UpgradeExistsCubit upgradeExists;
+  final Stage stage;
 
   TextStyle? bodyStyle;
 
@@ -97,7 +99,7 @@ class AboutSection extends SettingsSection with AppLogger {
           currentLanguage.toString(),
           style: context.theme.appTextStyle.bodySmall,
         ),
-        onTap: () => _navigateToLanguagePicker(context),
+        onTap: _navigateToLanguagePicker,
       ),
       NavigationTile(
         title: Text(S.current.titleFAQShort, style: bodyStyle),
@@ -109,9 +111,8 @@ class AboutSection extends SettingsSection with AppLogger {
           S.current.messageFAQ,
           style: context.theme.appTextStyle.bodySmall,
         ),
-        onTap: () => unawaited(
-          _openUrl(context, S.current.titleFAQShort, Constants.faqUrl),
-        ),
+        onTap: () =>
+            unawaited(_openUrl(S.current.titleFAQShort, Constants.faqUrl)),
       ),
       NavigationTile(
         title: Text(S.current.titlePrivacyPolicy, style: bodyStyle),
@@ -120,18 +121,14 @@ class AboutSection extends SettingsSection with AppLogger {
             ? _externalNavigationIcon
             : null,
         onTap: () => unawaited(
-          _openUrl(
-            context,
-            S.current.titlePrivacyPolicy,
-            Constants.eqPrivacyPolicy,
-          ),
+          _openUrl(S.current.titlePrivacyPolicy, Constants.eqPrivacyPolicy),
         ),
       ),
       if (PlatformValues.isMobileDevice)
         NavigationTile(
           title: Text(S.current.titleSendFeedback, style: bodyStyle),
           leading: Icon(Icons.comment_rounded),
-          onTap: () => unawaited(_openFeedback(context)),
+          onTap: () => unawaited(_openFeedback()),
         ),
       NavigationTile(
         title: Text(Constants.ouisyncUrl, style: bodyStyle),
@@ -154,6 +151,7 @@ class AboutSection extends SettingsSection with AppLogger {
         onTap: () => unawaited(launchUrl(Uri.parse(Constants.issueTrackerUrl))),
       ),
       AppVersionTile(
+        stage: stage,
         session: session,
         upgradeExists: upgradeExists,
         leading: Icon(Icons.info_rounded),
@@ -168,7 +166,6 @@ class AboutSection extends SettingsSection with AppLogger {
             description: [
               TextSpan(text: S.current.messageInfoRuntimeID),
               Fields.linkTextSpan(
-                context,
                 '\n\n${S.current.messageGoToPeers}',
                 _navigateToPeers,
               ),
@@ -184,8 +181,8 @@ class AboutSection extends SettingsSection with AppLogger {
   @override
   bool containsErrorNotification() => upgradeExists.state;
 
-  Future<void> _navigateToLanguagePicker(BuildContext context) async {
-    await Navigator.of(context).push<Locale>(
+  Future<void> _navigateToLanguagePicker() async {
+    await stage.push<Locale>(
       MaterialPageRoute(
         builder: (_) => LanguagePicker(localeCubit: localeCubit, canPop: true),
       ),
@@ -194,24 +191,24 @@ class AboutSection extends SettingsSection with AppLogger {
     await S.delegate.load(localeCubit.currentLocale);
   }
 
-  void _navigateToPeers(BuildContext context) => Navigator.push(
-    context,
-    MaterialPageRoute(builder: (context) => PeersPage(session, peerSet)),
+  void _navigateToPeers() => stage.push(
+    MaterialPageRoute(
+      builder: (context) =>
+          PeersPage(session: session, cubit: peerSet, stage: stage),
+    ),
   );
 
-  Future<void> _openUrl(BuildContext context, String title, String url) async {
+  Future<void> _openUrl(String title, String url) async {
     final webView = PlatformWebView();
 
     if (PlatformValues.isMobileDevice) {
       final pageTitle = Text(title);
 
-      await Dialogs.executeFutureWithLoadingDialog(
-        context,
+      await stage.loading(
         Future(() async {
-          final content = await webView.loadUrl(context, url);
+          final content = await webView.loadUrl(url);
 
-          await Navigator.push(
-            context,
+          await stage.push(
             MaterialPageRoute(
               builder: (context) =>
                   WebViewPage(title: pageTitle, content: content),
@@ -224,10 +221,9 @@ class AboutSection extends SettingsSection with AppLogger {
     }
   }
 
-  Future<void> _openFeedback(BuildContext context) async {
-    final attachments = await showDialog<FeedbackAttachments>(
-      context: context,
-      builder: (context) => FeedbackDialog(),
+  Future<void> _openFeedback() async {
+    final attachments = await stage.showDialog<FeedbackAttachments>(
+      builder: (context) => FeedbackDialog(stage),
     );
 
     if (attachments == null) {
@@ -235,10 +231,8 @@ class AboutSection extends SettingsSection with AppLogger {
     }
 
     if (attachments.logs) {
-      final logs = await Dialogs.executeFutureWithLoadingDialog(
-        context,
+      final logs = await stage.loading(
         dumpAll(
-          context,
           rootMonitor: reposCubit.rootStateMonitor,
           powerControl: powerControl,
           connectivityInfo: connectivityInfo,
@@ -299,7 +293,9 @@ class AboutSection extends SettingsSection with AppLogger {
 const _externalNavigationIcon = Icon(Icons.open_in_browser);
 
 class FeedbackDialog extends StatefulWidget {
-  const FeedbackDialog();
+  const FeedbackDialog(this.stage);
+
+  final Stage stage;
 
   @override
   State<FeedbackDialog> createState() => _FeedbackDialogState();
@@ -337,12 +333,11 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
     actions: [
       NegativeButton(
         text: S.current.actionCancel,
-        onPressed: () async => await Navigator.of(context).maybePop(null),
+        onPressed: () => widget.stage.maybePop(null),
       ),
       PositiveButton(
         text: S.current.actionOK,
-        onPressed: () async =>
-            await Navigator.of(context).maybePop(attachments),
+        onPressed: () => widget.stage.maybePop(attachments),
       ),
     ],
   );

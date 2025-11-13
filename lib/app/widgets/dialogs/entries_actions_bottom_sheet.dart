@@ -18,6 +18,7 @@ import '../../cubits/cubits.dart'
 import '../../cubits/repos.dart';
 import '../../utils/dirs.dart';
 import '../../utils/repo_path.dart' as repo_path;
+import '../../utils/stage.dart';
 import '../../utils/utils.dart'
     show AppLogger, Dimensions, Fields, MoveEntriesActions, MultiEntryActions;
 import '../widgets.dart' show NegativeButton, PositiveButton;
@@ -31,6 +32,7 @@ class EntriesActionsDialog extends StatefulWidget {
     required this.sheetType,
     required this.onUpdateBottomSheet,
     required this.dirs,
+    required this.stage,
   });
 
   const EntriesActionsDialog.multiple(
@@ -40,12 +42,14 @@ class EntriesActionsDialog extends StatefulWidget {
     required this.sheetType,
     required this.onUpdateBottomSheet,
     required this.dirs,
+    required this.stage,
   }) : entry = null;
 
   final BuildContext parentContext;
   final ReposCubit reposCubit;
   final RepoCubit originRepoCubit;
   final Dirs dirs;
+  final Stage stage;
 
   final FileSystemEntry? entry;
 
@@ -183,7 +187,7 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
     bloc: navigationCubit,
     builder: (ctx, state) {
       final moveEntriesActions = MoveEntriesActions(
-        context,
+        stage: widget.stage,
         reposCubit: reposCubit,
         originRepoCubit: originRepoCubit,
         sheetType: sheetType,
@@ -191,7 +195,6 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
 
       return entry == null
           ? _multipleEntriesActions(
-              context,
               entrySelectionCubit!,
               reposCubit,
               originRepoCubit,
@@ -265,7 +268,6 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
   }
 
   Widget _multipleEntriesActions(
-    BuildContext parentContext,
     EntrySelectionCubit entrySelectionCubit,
     ReposCubit reposCubit,
     RepoCubit originRepoCubit,
@@ -298,9 +300,9 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
         if (currentRepoCubit == null) return;
 
         final multiEntryActions = MultiEntryActions(
-          parentContext,
           entrySelectionCubit: entrySelectionCubit,
           dirs: dirs,
+          stage: widget.stage,
         );
 
         final action = moveEntriesActions.getAction(

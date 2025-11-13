@@ -6,6 +6,7 @@ import 'package:stream_transform/stream_transform.dart';
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../models/models.dart';
+import '../../utils/stage.dart';
 import '../../utils/utils.dart';
 import '../notification_badge.dart';
 import '../widgets.dart';
@@ -14,6 +15,7 @@ class RepositoriesBar extends StatelessWidget
     with AppLogger
     implements PreferredSizeWidget {
   const RepositoriesBar({
+    required this.stage,
     required this.mount,
     required this.errorCubit,
     required this.powerControl,
@@ -22,6 +24,7 @@ class RepositoriesBar extends StatelessWidget
     super.key,
   });
 
+  final Stage stage;
   final MountCubit mount;
   final ErrorCubit errorCubit;
   final PowerControl powerControl;
@@ -80,7 +83,7 @@ class RepositoriesBar extends StatelessWidget
   Widget _buildStatus(RepoEntry? repo) => repo is OpenRepoEntry
       ? Padding(
           padding: EdgeInsets.only(right: 10.0),
-          child: RepoStatus(repo.cubit),
+          child: RepoStatus(stage, repo.cubit),
         )
       : SizedBox.shrink();
 

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:local_auth/local_auth.dart';
 
 import '../../generated/l10n.dart';
+import 'stage.dart';
 import 'utils.dart' show AppThemeExtension, ThemeGetter;
 
 abstract class LocalAuth {
@@ -26,13 +27,13 @@ abstract class LocalAuth {
   // This is a "best effort" to authenticate the user, but if the device
   // doesn't support authentication, then we proceed as if authenticated.
   static Future<bool> authenticateIfPossible(
-    BuildContext context,
+    Stage stage,
     String? reason,
   ) async {
     reason ??= S.current.messageAccessingSecureStorage;
 
     if (_useDebug()) {
-      final authenticated = await _debugAuthenticate(context, reason);
+      final authenticated = await _debugAuthenticate(stage, reason);
       return authenticated;
     }
 
@@ -57,27 +58,21 @@ abstract class LocalAuth {
 // local_auth is not available on some platforms, so to avoid debugging on
 // platforms where it is available, here is a small "dummy" authentication
 // dialog.
-Future<bool> _debugAuthenticate(BuildContext context, String reason) async {
-  Widget button(context, text, value) => TextButton(
-    child: Text(text),
-    onPressed: () => Navigator.of(context).pop(value),
-  );
+Future<bool> _debugAuthenticate(Stage stage, String reason) async {
+  Widget button(context, text, value) =>
+      TextButton(child: Text(text), onPressed: () => stage.pop(value));
 
-  bool? authenticated = await showDialog(
-    context: context,
-    builder: (BuildContext context) => AlertDialog(
-      title: Text("Mock authentication"),
-      titleTextStyle: context.theme.appTextStyle.titleMedium,
-      content: Text("$reason. Is it you?"),
-      actions: [
-        button(context, "Yes", true),
-        button(context, "No", false),
-        button(context, "Cancel", null),
-      ],
-    ),
-  );
-
-  authenticated = authenticated ?? false;
-
-  return authenticated;
+  return await stage.showDialog(
+        builder: (BuildContext context) => AlertDialog(
+          title: Text("Mock authentication"),
+          titleTextStyle: context.theme.appTextStyle.titleMedium,
+          content: Text("$reason. Is it you?"),
+          actions: [
+            button(context, "Yes", true),
+            button(context, "No", false),
+            button(context, "Cancel", null),
+          ],
+        ),
+      ) ??
+      false;
 }

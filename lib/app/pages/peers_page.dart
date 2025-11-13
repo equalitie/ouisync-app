@@ -5,6 +5,7 @@ import 'package:stream_transform/stream_transform.dart';
 
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart' show PeerSet, PeerSetCubit;
+import '../utils/stage.dart';
 import '../utils/utils.dart' show AppThemeExtension, Dimensions, ThemeGetter;
 import '../widgets/widgets.dart'
     show DirectionalAppBar, LongText, LiveThroughputDisplay, ThroughputDisplay;
@@ -15,8 +16,9 @@ const double _contentSize = 12.0;
 class PeersPage extends StatefulWidget {
   final Session session;
   final PeerSetCubit cubit;
+  final Stage stage;
 
-  PeersPage(this.session, this.cubit);
+  PeersPage({required this.session, required this.cubit, required this.stage});
 
   @override
   State<PeersPage> createState() => _PeersPageState();
@@ -57,10 +59,12 @@ class _PeersPageState extends State<PeersPage> {
         IconButton(
           icon: const Icon(Icons.manage_accounts),
           tooltip: 'User provided peers',
-          onPressed: () => Navigator.push(
-            context,
+          onPressed: () => widget.stage.push(
             MaterialPageRoute(
-              builder: (context) => UserProvidedPeersPage(widget.session),
+              builder: (context) => UserProvidedPeersPage(
+                session: widget.session,
+                stage: widget.stage,
+              ),
             ),
           ),
         ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:introduction_screen/introduction_screen.dart';
 
+import '../utils/stage.dart';
 import 'language_picker_page.dart';
 import 'accept_eq_values_terms_privacy_page.dart';
 import '../../generated/l10n.dart';
@@ -8,9 +9,15 @@ import '../cubits/locale.dart';
 import '../utils/utils.dart';
 
 class OnboardingPage extends StatefulWidget {
-  OnboardingPage(this._localeCubit, this.settings, {required this.mainPage});
+  OnboardingPage({
+    required this.stage,
+    required this.localeCubit,
+    required this.settings,
+    required this.mainPage,
+  });
 
-  final LocaleCubit _localeCubit;
+  final Stage stage;
+  final LocaleCubit localeCubit;
   final Settings settings;
   final Widget mainPage;
   final exitClickCounter = ClickCounter(timeoutMs: 3000);
@@ -58,7 +65,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
     if (_pageIndex == 0) {
       return LanguagePicker(
-        localeCubit: widget._localeCubit,
+        localeCubit: widget.localeCubit,
         canPop: false,
         onSelect: () {
           setState(() {
@@ -71,6 +78,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
       return _buildIntroduction(context);
     } else if (_pageIndex == 2) {
       return AcceptEqualitieValuesTermsPrivacyPage(
+        stage: widget.stage,
         settings: widget.settings,
         onAccept: () {
           setState(() {

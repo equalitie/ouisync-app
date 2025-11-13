@@ -8,6 +8,7 @@ import '../../cubits/cubits.dart'
 import '../../cubits/store_dirs.dart';
 import '../../models/models.dart'
     show DirectoryEntry, FileEntry, FileSystemEntry, RepoLocation;
+import '../../utils/stage.dart';
 import '../../utils/utils.dart' show Constants, Dimensions, Fields, ThemeGetter;
 import '../widgets.dart'
     show
@@ -180,6 +181,7 @@ class DirectoryListItem extends StatelessWidget {
 class RepoListItem extends StatelessWidget {
   RepoListItem({
     super.key,
+    required this.stage,
     required this.repoCubit,
     required this.storeDirsCubit,
     required this.isDefault,
@@ -187,6 +189,7 @@ class RepoListItem extends StatelessWidget {
     required this.verticalDotsAction,
   });
 
+  final Stage stage;
   final RepoCubit repoCubit;
   final StoreDirsCubit storeDirsCubit;
   final bool isDefault;
@@ -217,7 +220,7 @@ class RepoListItem extends StatelessWidget {
             ),
           ),
           _RepoStore(storeDirsCubit, state.location),
-          RepoStatus(repoCubit),
+          RepoStatus(stage, repoCubit),
           _VerticalDotsButton(disable: false, action: verticalDotsAction),
         ],
       ),

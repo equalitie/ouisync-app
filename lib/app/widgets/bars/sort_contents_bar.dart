@@ -5,16 +5,19 @@ import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart'
     show SortBy, SortDirection, SortListCubit, SortListState, ReposState;
 import '../../models/models.dart' show OpenRepoEntry;
+import '../../utils/stage.dart';
 import '../../utils/utils.dart'
-    show AppLogger, Dialogs, Dimensions, Fields, SortByLocalizedExtension;
+    show AppLogger, Dimensions, Fields, SortByLocalizedExtension;
 import '../widgets.dart' show SortByButton, SortDirectionButton;
 
 class SortContentsBar extends StatefulWidget {
   const SortContentsBar({
+    required this.stage,
     required this.sortListCubit,
     required this.reposState,
   });
 
+  final Stage stage;
   final SortListCubit sortListCubit;
   final ReposState reposState;
 
@@ -56,8 +59,7 @@ class _SortContentsBarState extends State<SortContentsBar> {
     final current = widget.reposState.current;
 
     if (current is OpenRepoEntry) {
-      Dialogs.executeFutureWithLoadingDialog(
-        context,
+      widget.stage.loading(
         current.cubit.refresh(sortBy: sortBy, sortDirection: newDirection),
       );
     }
@@ -67,15 +69,17 @@ class _SortContentsBarState extends State<SortContentsBar> {
     isScrollControlled: true,
     context: context,
     shape: Dimensions.borderBottomSheetTop,
-    builder: (context) => _SortByList(widget.sortListCubit, widget.reposState),
+    builder: (context) =>
+        _SortByList(widget.stage, widget.sortListCubit, widget.reposState),
   );
 }
 
 class _SortByList extends StatelessWidget with AppLogger {
-  _SortByList(this._sortCubit, this._reposState);
+  _SortByList(this.stage, this.sortCubit, this.reposState);
 
-  final SortListCubit _sortCubit;
-  final ReposState _reposState;
+  final Stage stage;
+  final SortListCubit sortCubit;
+  final ReposState reposState;
 
   final ValueNotifier<SortDirection> _sortDirection =
       ValueNotifier<SortDirection>(SortDirection.asc);
@@ -87,7 +91,7 @@ class _SortByList extends StatelessWidget with AppLogger {
     ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w400);
 
     return BlocBuilder<SortListCubit, SortListState>(
-      bloc: _sortCubit,
+      bloc: sortCubit,
       builder: (context, state) {
         _sortDirection.value = state.direction;
 
@@ -138,26 +142,25 @@ class _SortByList extends StatelessWidget with AppLogger {
               textSoftWrap: false,
               style: settingStyle,
               onTap: () async {
-                _sortCubit.sortBy(sortByItem);
+                sortCubit.sortBy(sortByItem);
 
-                final current = _reposState.current;
+                final current = reposState.current;
 
                 if (current == null) {
                   if (sortByItem.name != sortBy.name) return;
-                  Navigator.of(context).pop();
+                  await stage.maybePop();
                   return;
                 }
 
                 if (current is OpenRepoEntry) {
-                  await Dialogs.executeFutureWithLoadingDialog(
-                    context,
+                  await stage.loading(
                     current.cubit.refresh(
                       sortBy: sortByItem,
                       sortDirection: direction,
                     ),
                   );
 
-                  Navigator.of(context).pop();
+                  await stage.maybePop();
                 }
               },
               icon: sortByItem.name == sortBy.name ? Icons.check : null,

@@ -3,6 +3,7 @@ import 'package:ouisync/ouisync.dart';
 
 import '../../../generated/l10n.dart';
 import '../../pages/repo_reset_access.dart';
+import '../../utils/stage.dart';
 import '../../widgets/dialogs/actions_dialog.dart';
 import '../../utils/utils.dart'
     show
@@ -20,38 +21,38 @@ import '../widgets.dart'
 
 class GetPasswordAccessDialog extends StatefulWidget {
   GetPasswordAccessDialog({
+    required this.stage,
     required this.session,
     required this.settings,
     required this.repoCubit,
   });
 
+  final Stage stage;
   final Session session;
   final Settings settings;
   final RepoCubit repoCubit;
 
   static Future<Access?> show(
-    BuildContext context,
+    Stage stage,
     Settings settings,
     Session session,
     RepoCubit repoCubit,
-  ) async {
-    return await showDialog<Access>(
-      context: context,
-      builder: (BuildContext context) => ScaffoldMessenger(
-        child: Scaffold(
-          backgroundColor: Colors.transparent,
-          body: ActionsDialog(
-            title: S.current.messageUnlockRepository(repoCubit.name),
-            body: GetPasswordAccessDialog(
-              repoCubit: repoCubit,
-              settings: settings,
-              session: session,
-            ),
+  ) => stage.showDialog<Access>(
+    builder: (BuildContext context) => ScaffoldMessenger(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: ActionsDialog(
+          title: S.current.messageUnlockRepository(repoCubit.name),
+          body: GetPasswordAccessDialog(
+            stage: stage,
+            repoCubit: repoCubit,
+            settings: settings,
+            session: session,
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
 
   @override
   State<GetPasswordAccessDialog> createState() => _State();
@@ -80,30 +81,33 @@ class _State extends State<GetPasswordAccessDialog> with AppLogger {
     ),
   );
 
-  Widget _buildIDontHaveLocalPasswordButton(BuildContext context) {
-    return LinkStyleAsyncButton(
-      key: Key('enter-repo-reset-screen'),
-      text: "\n${S.current.actionIDontHaveALocalPassword}\n",
-      onTap: () async {
-        if (!await LocalAuth.authenticateIfPossible(
-          context,
-          S.current.messagePleaseAuthenticate,
-        )) {
-          return;
-        }
+  Widget _buildIDontHaveLocalPasswordButton(BuildContext context) =>
+      LinkStyleAsyncButton(
+        key: Key('enter-repo-reset-screen'),
+        text: "\n${S.current.actionIDontHaveALocalPassword}\n",
+        onTap: () async {
+          if (!await LocalAuth.authenticateIfPossible(
+            widget.stage,
+            S.current.messagePleaseAuthenticate,
+          )) {
+            return;
+          }
 
-        final access = await RepoResetAccessPage.show(
-          context: context,
-          session: widget.session,
-          settings: widget.settings,
-          repo: widget.repoCubit,
-          startAccess: BlindAccess(),
-        );
+          if (!context.mounted) {
+            return;
+          }
 
-        Navigator.of(context).pop(access);
-      },
-    );
-  }
+          final access = await RepoResetAccessPage.show(
+            stage: widget.stage,
+            session: widget.session,
+            settings: widget.settings,
+            repo: widget.repoCubit,
+            startAccess: BlindAccess(),
+          );
+
+          widget.stage.pop(access);
+        },
+      );
 
   Widget _buildPasswordField(BuildContext context) => Fields.formTextField(
     context: context,
@@ -133,7 +137,7 @@ class _State extends State<GetPasswordAccessDialog> with AppLogger {
   List<Widget> _buildActions(context) => [
     NegativeButton(
       text: S.current.actionCancel,
-      onPressed: () async => await Navigator.of(context).maybePop(null),
+      onPressed: () => widget.stage.maybePop(null),
     ),
     PositiveButton(
       text: S.current.actionUnlock,
@@ -184,6 +188,6 @@ class _State extends State<GetPasswordAccessDialog> with AppLogger {
       passwordInvalid = false;
     });
 
-    Navigator.of(context).pop(access);
+    await widget.stage.maybePop(access);
   }
 }

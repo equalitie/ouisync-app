@@ -1,11 +1,11 @@
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ouisync_app/app/models/folder.dart'
     show DirectoryEntry, FileEntry, FileSystemEntry;
 import 'package:ouisync_app/app/pages/main_page.dart';
+import 'package:ouisync_app/app/utils/stage.dart';
 import 'package:ouisync_app/app/utils/utils.dart' show CacheServers;
 import 'package:ouisync/ouisync.dart' show Repository;
 import 'package:ouisync_app/app/utils/repo_path.dart' as repo_path;
@@ -178,7 +178,7 @@ void main() {
     (tester) => tester.runAsync(() async {
       await tester.pumpWidget(testApp(deps.createMainPage()));
       await tester.pumpAndSettle();
-      final BuildContext context = tester.element(find.byType(MainPage));
+      final Stage stage = tester.widget<MainPage>(find.byType(MainPage)).stage;
 
       // All contents selected
       {
@@ -202,7 +202,7 @@ void main() {
       // Copy all entries form origin to destination root
       {
         final result = await originRepoCubit.entrySelectionCubit.copyEntriesTo(
-          context,
+          stage: stage,
           destinationRepoCubit: destinationRepoCubit,
           destinationPath: '/',
         );
@@ -234,7 +234,8 @@ void main() {
     (tester) => tester.runAsync(() async {
       await tester.pumpWidget(testApp(deps.createMainPage()));
       await tester.pumpAndSettle();
-      final BuildContext context = tester.element(find.byType(MainPage));
+
+      final Stage stage = tester.widget<MainPage>(find.byType(MainPage)).stage;
 
       //Select all entries in root
       {
@@ -258,7 +259,7 @@ void main() {
       // Move all entries form origin root to destination root
       {
         final result = await originRepoCubit.entrySelectionCubit.moveEntriesTo(
-          context,
+          stage: stage,
           destinationRepoCubit: destinationRepoCubit,
           destinationPath: '/',
         );
@@ -309,7 +310,7 @@ void main() {
       {
         final result = await destinationRepoCubit.entrySelectionCubit
             .copyEntriesTo(
-              context,
+              stage: stage,
               destinationRepoCubit: originRepoCubit,
               destinationPath: '/',
             );
@@ -341,7 +342,8 @@ void main() {
     (tester) => tester.runAsync(() async {
       await tester.pumpWidget(testApp(deps.createMainPage()));
       await tester.pumpAndSettle();
-      final BuildContext context = tester.element(find.byType(MainPage));
+
+      final Stage stage = tester.widget<MainPage>(find.byType(MainPage)).stage;
 
       // Select just /folder1/file7.txt
       {
@@ -360,7 +362,7 @@ void main() {
       // Move just /folder1/file7.txt
       {
         final result = await originRepoCubit.entrySelectionCubit.copyEntriesTo(
-          context,
+          stage: stage,
           destinationRepoCubit: destinationRepoCubit,
           destinationPath: '/',
         );
@@ -392,7 +394,8 @@ void main() {
     (tester) => tester.runAsync(() async {
       await tester.pumpWidget(testApp(deps.createMainPage()));
       await tester.pumpAndSettle();
-      final BuildContext context = tester.element(find.byType(MainPage));
+
+      final Stage stage = tester.widget<MainPage>(find.byType(MainPage)).stage;
 
       // Select just /folder1/file7.txt
       {
@@ -411,7 +414,7 @@ void main() {
       // Move just /folder1/file7.txt
       {
         final result = await originRepoCubit.entrySelectionCubit.moveEntriesTo(
-          context,
+          stage: stage,
           destinationRepoCubit: destinationRepoCubit,
           destinationPath: '/',
         );
@@ -443,7 +446,8 @@ void main() {
     (tester) => tester.runAsync(() async {
       await tester.pumpWidget(testApp(deps.createMainPage()));
       await tester.pumpAndSettle();
-      final BuildContext context = tester.element(find.byType(MainPage));
+
+      final Stage stage = tester.widget<MainPage>(find.byType(MainPage)).stage;
 
       // Select /folder1
       {
@@ -461,7 +465,7 @@ void main() {
       // Move /folder1/ and its contents
       {
         final result = await originRepoCubit.entrySelectionCubit.copyEntriesTo(
-          context,
+          stage: stage,
           destinationRepoCubit: destinationRepoCubit,
           destinationPath: '/',
         );
@@ -493,7 +497,8 @@ void main() {
     (tester) => tester.runAsync(() async {
       await tester.pumpWidget(testApp(deps.createMainPage()));
       await tester.pumpAndSettle();
-      final BuildContext context = tester.element(find.byType(MainPage));
+
+      final Stage stage = tester.widget<MainPage>(find.byType(MainPage)).stage;
 
       // Select /folder1
       {
@@ -511,7 +516,7 @@ void main() {
       // Move just /folder1/file7.txt
       {
         final result = await originRepoCubit.entrySelectionCubit.moveEntriesTo(
-          context,
+          stage: stage,
           destinationRepoCubit: destinationRepoCubit,
           destinationPath: '/',
         );

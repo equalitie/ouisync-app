@@ -11,6 +11,7 @@ import '../pages/pages.dart';
 import '../widgets/async_text_form_field.dart';
 import '../widgets/buttons/elevated_async_button.dart';
 import 'platform/platform.dart';
+import 'stage.dart';
 import 'utils.dart';
 
 class Fields {
@@ -602,9 +603,8 @@ class Fields {
   );
 
   static TextSpan linkTextSpan(
-    BuildContext context,
     String text,
-    void Function(BuildContext) callback, {
+    void Function() callback, {
     double? fontSize,
   }) => TextSpan(
     text: text,
@@ -613,7 +613,7 @@ class Fields {
       color: Colors.blueAccent,
       fontSize: fontSize,
     ),
-    recognizer: TapGestureRecognizer()..onTap = () => callback(context),
+    recognizer: TapGestureRecognizer()..onTap = callback,
   );
 
   static WidgetSpan quoteTextSpan(
@@ -651,11 +651,7 @@ class Fields {
     ),
   );
 
-  static Future<void> openUrl(
-    BuildContext context,
-    Widget title,
-    String url,
-  ) async {
+  static Future<void> openUrl(Stage stage, Widget title, String url) async {
     final webView = PlatformWebView();
 
     if (PlatformValues.isDesktopDevice) {
@@ -663,13 +659,9 @@ class Fields {
       return;
     }
 
-    final content = await Dialogs.executeFutureWithLoadingDialog(
-      context,
-      webView.loadUrl(context, url),
-    );
+    final content = await stage.loading(webView.loadUrl(url));
 
-    await Navigator.push(
-      context,
+    await stage.push(
       MaterialPageRoute(
         builder: (context) => WebViewPage(title: title, content: content),
       ),

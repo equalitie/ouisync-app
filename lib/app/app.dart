@@ -17,6 +17,7 @@ import 'pages/pages.dart';
 import 'utils/constants.dart' show Constants;
 import 'utils/dirs.dart';
 import 'utils/log.dart' as log;
+import 'utils/stage.dart';
 import 'utils/platform/platform.dart' show PlatformWindowManager;
 import 'utils/utils.dart'
     show
@@ -248,6 +249,7 @@ class _HomeWidgetState extends State<HomeWidget>
   late final MountCubit mountCubit;
   late final ReposCubit reposCubit;
   late final StreamSubscription updateServerNotificationSubscription;
+  final stage = Stage();
 
   @override
   void initState() {
@@ -273,6 +275,7 @@ class _HomeWidgetState extends State<HomeWidget>
       cacheServers: cacheServers,
       mountCubit: mountCubit,
       storeDirsCubit: widget.storeDirsCubit,
+      onNotify: (message) => stage.showSnackBar(message),
     );
 
     unawaited(_init());
@@ -281,6 +284,9 @@ class _HomeWidgetState extends State<HomeWidget>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+
+    stage.update(context);
+
     //widget.appRouteObserver.subscribe(this, ModalRoute.of(context)!);
   }
 
@@ -300,9 +306,11 @@ class _HomeWidgetState extends State<HomeWidget>
   Widget build(BuildContext context) => MediaReceiver(
     controller: receivedMediaController,
     child: OnboardingPage(
-      widget.localeCubit,
-      widget.settings,
+      stage: stage,
+      localeCubit: widget.localeCubit,
+      settings: widget.settings,
       mainPage: MainPage(
+        stage: stage,
         localeCubit: widget.localeCubit,
         mountCubit: mountCubit,
         errorCubit: widget.errorCubit,

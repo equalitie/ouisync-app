@@ -5,22 +5,24 @@ import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
 import '../../mixins/mixins.dart';
 import '../../models/models.dart';
+import '../../utils/stage.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
 class RepoListState extends StatelessWidget
     with AppLogger, RepositoryActionsMixin {
   const RepoListState({
+    required this.stage,
     required this.reposCubit,
     required this.storeDirsCubit,
     required this.bottomSheetInfo,
     required this.onShowRepoSettings,
   });
 
+  final Stage stage;
   final ReposCubit reposCubit;
   final StoreDirsCubit storeDirsCubit;
   final ValueNotifier<BottomSheetInfo> bottomSheetInfo;
-
   final Future<void> Function(
     BuildContext context, {
     required RepoCubit repoCubit,
@@ -85,20 +87,23 @@ class RepoListState extends StatelessWidget
               final location = currentRepoEntry.location;
 
               final deleted = await showDeleteRepositoryDialog(
-                context,
+                stage: stage,
                 repoLocation: location,
                 reposCubit: reposCubit,
               );
 
               if (deleted == true) {
-                Navigator.of(context).pop();
-                showSnackBar(S.current.messageRepositoryDeleted(repoName));
+                await stage.maybePop();
+                stage.showSnackBar(
+                  S.current.messageRepositoryDeleted(repoName),
+                );
               }
             },
           );
         }
 
         return RepoListItem(
+          stage: stage,
           repoCubit: repoCubit,
           storeDirsCubit: storeDirsCubit,
           isDefault: isDefault,

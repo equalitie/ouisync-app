@@ -2,16 +2,15 @@ import 'dart:async';
 import 'dart:io' as io;
 
 import 'package:equatable/equatable.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync/ouisync.dart' show EntryType;
 import 'package:path/path.dart' as p;
 
 import '../../generated/l10n.dart';
 import '../models/models.dart' show DirectoryEntry, FileEntry, FileSystemEntry;
+import '../utils/stage.dart';
 import '../utils/repo_path.dart' as repo_path;
-import '../utils/utils.dart'
-    show AppLogger, CopyEntry, FileIO, MoveEntry, showSnackBar;
+import '../utils/utils.dart' show AppLogger, CopyEntry, FileIO, MoveEntry;
 import '../widgets/widgets.dart' show SelectionStatus;
 import 'cubits.dart' show CubitActions, RepoCubit;
 
@@ -178,18 +177,18 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
 
   //============================================================================
 
-  Future<bool> saveEntriesToDevice(
-    BuildContext context, {
+  Future<bool> saveEntriesToDevice({
     required String defaultDirectoryPath,
+    required Stage stage,
   }) async {
-    final fileIO = FileIO(context: context, repoCubit: _originRepoCubit!);
+    final fileIO = FileIO(repoCubit: _originRepoCubit!, stage: stage);
 
     final destinationPaths = await fileIO.getDestinationPath(
       defaultDirectoryPath,
     );
     if (destinationPaths.canceled) {
       final errorMessage = S.current.messageDownloadFileCanceled;
-      showSnackBar(errorMessage);
+      stage.showSnackBar(errorMessage);
 
       return false;
     }
@@ -226,33 +225,33 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
     return true;
   }
 
-  Future<bool> copyEntriesTo(
-    BuildContext context, {
+  Future<bool> copyEntriesTo({
     required RepoCubit destinationRepoCubit,
     required String destinationPath,
+    required Stage stage,
   }) async => _moveOrCopySelectedEntries(
-    context,
     action: EntrySelectionActions.copy,
     destinationRepoCubit: destinationRepoCubit,
     destinationPath: destinationPath,
+    stage: stage,
   );
 
-  Future<bool> moveEntriesTo(
-    BuildContext context, {
+  Future<bool> moveEntriesTo({
     required RepoCubit destinationRepoCubit,
     required String destinationPath,
+    required Stage stage,
   }) async => _moveOrCopySelectedEntries(
-    context,
     action: EntrySelectionActions.move,
     destinationRepoCubit: destinationRepoCubit,
     destinationPath: destinationPath,
+    stage: stage,
   );
 
-  Future<bool> _moveOrCopySelectedEntries(
-    BuildContext context, {
+  Future<bool> _moveOrCopySelectedEntries({
     required EntrySelectionActions action,
     required RepoCubit destinationRepoCubit,
     required String destinationPath,
+    required Stage stage,
   }) async {
     final destinationRepoInfoHash = await destinationRepoCubit.infoHash;
     final toRepoCubit = _originRepoInfoHash != destinationRepoInfoHash
@@ -268,11 +267,11 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
 
     for (var entry in sortedEntries) {
       await (action == EntrySelectionActions.copy ? _copy : _move)(
-        context,
         originRepoCubit: _originRepoCubit!,
         toRepoCubit: toRepoCubit,
         destinationPath: destinationPath,
         entry: entry,
+        stage: stage,
       );
 
       _entries.remove(entry);
@@ -281,30 +280,30 @@ class EntrySelectionCubit extends Cubit<EntrySelectionState>
     return true;
   }
 
-  Future<void> _copy(
-    BuildContext context, {
+  Future<void> _copy({
     required RepoCubit originRepoCubit,
     required RepoCubit? toRepoCubit,
     required String destinationPath,
     required FileSystemEntry entry,
+    required Stage stage,
   }) async => CopyEntry(
-    context,
     originRepoCubit: originRepoCubit,
     entry: entry,
     destinationPath: destinationPath,
+    stage: stage,
   ).copy(currentRepoCubit: toRepoCubit, recursive: true);
 
-  Future<void> _move(
-    BuildContext context, {
+  Future<void> _move({
     required RepoCubit originRepoCubit,
     required RepoCubit? toRepoCubit,
     required String destinationPath,
     required FileSystemEntry entry,
+    required Stage stage,
   }) async => MoveEntry(
-    context,
     originRepoCubit: originRepoCubit,
     entry: entry,
     destinationPath: destinationPath,
+    stage: stage,
   ).move(currentRepoCubit: toRepoCubit, recursive: true);
 
   Future<bool> deleteEntries() async {

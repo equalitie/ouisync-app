@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 
 import '../../../generated/l10n.dart';
 import '../../models/repo_location.dart';
+import '../../utils/stage.dart';
 import '../../utils/utils.dart'
     show
         AppThemeExtension,
-        Dialogs,
         Fields,
         Strings,
         TextEditingControllerExtension,
@@ -16,8 +16,9 @@ import '../../utils/utils.dart'
 import '../widgets.dart' show NegativeButton, PositiveButton;
 
 class RenameRepository extends StatefulWidget {
-  RenameRepository(this.location, {super.key});
+  RenameRepository(this.stage, this.location, {super.key});
 
+  final Stage stage;
   final RepoLocation location;
 
   @override
@@ -73,28 +74,25 @@ class _RenameRepository extends State<RenameRepository> {
           autofocus: true,
           key: ValueKey('new-name'),
         ),
-        Fields.dialogActions(buttons: buildActions(context)),
+        Fields.dialogActions(buttons: buildActions()),
       ],
     ),
   );
 
-  List<Widget> buildActions(BuildContext context) => [
+  List<Widget> buildActions() => [
     Expanded(
       child: NegativeButton(
         text: S.current.actionCancel,
-        onPressed: () => Navigator.of(context).maybePop(null),
+        onPressed: () => widget.stage.maybePop(null),
       ),
     ),
     Expanded(
-      child: PositiveButton(
-        text: S.current.actionRename,
-        onPressed: () => onSubmit(context),
-      ),
+      child: PositiveButton(text: S.current.actionRename, onPressed: onSubmit),
     ),
   ];
 
-  Future<void> onSubmit(BuildContext context) async {
-    if (!(await validate(context))) {
+  Future<void> onSubmit() async {
+    if (!(await validate())) {
       newNameController.selectAll();
       newNameFocus.requestFocus();
 
@@ -102,20 +100,17 @@ class _RenameRepository extends State<RenameRepository> {
     }
 
     final newName = newNameController.text;
-    Navigator.of(context).pop(newName);
+    await widget.stage.maybePop(newName);
   }
 
-  Future<bool> validate(BuildContext context) async {
+  Future<bool> validate() async {
     if (!formKey.currentState!.validate()) {
       return false;
     }
 
     // Check if name is already taken
     final newLocation = widget.location.rename(newNameController.text);
-    final exists = await Dialogs.executeFutureWithLoadingDialog(
-      context,
-      File(newLocation.path).exists(),
-    );
+    final exists = await widget.stage.loading(File(newLocation.path).exists());
 
     setState(() {
       nameTaken = exists;

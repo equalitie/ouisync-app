@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart' show BottomSheetType, RepoCubit;
+import '../../utils/stage.dart';
 import '../../utils/utils.dart'
     show AppThemeExtension, Constants, Dimensions, Fields, ThemeGetter;
 import '../widgets.dart' show EntryActionItem;
 
 class EntryActions extends StatefulWidget {
-  const EntryActions({required this.repoCubit});
+  const EntryActions({required this.stage, required this.repoCubit});
 
+  final Stage stage;
   final RepoCubit repoCubit;
 
   @override
@@ -73,8 +75,7 @@ class _EntryActionsState extends State<EntryActions> {
   );
 
   void _handleEntryAction(BottomSheetType sheetType) async {
-    await Navigator.of(context).maybePop();
-
+    await widget.stage.maybePop();
     await widget.repoCubit.startEntriesSelection();
     widget.repoCubit.showMoveSelectedEntriesBottomSheet(sheetType: sheetType);
   }

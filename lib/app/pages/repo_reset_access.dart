@@ -9,12 +9,14 @@ import '../models/auth_mode.dart';
 import '../models/access_mode.dart';
 import '../cubits/cubits.dart' show RepoCubit, RepoState;
 import '../utils/random.dart';
+import '../utils/stage.dart';
 import '../utils/utils.dart'
     show AppThemeExtension, Constants, Fields, LocalAuth, Settings, ThemeGetter;
 import '../widgets/widgets.dart'
     show ActionsDialog, DirectionalAppBar, PositiveButton, NegativeButton;
 
 class RepoResetAccessPage extends StatefulWidget {
+  final Stage stage;
   final Session session;
   final RepoCubit repo;
   final Access startAccess;
@@ -24,7 +26,7 @@ class RepoResetAccessPage extends StatefulWidget {
   // Returns `null` if nothing changes (e.g. the user presses the back button
   // before submitting any changes).
   static Future<Access> show({
-    required BuildContext context,
+    required Stage stage,
     required Session session,
     required Settings settings,
     required RepoCubit repo,
@@ -32,6 +34,7 @@ class RepoResetAccessPage extends StatefulWidget {
   }) async {
     final route = MaterialPageRoute<Access>(
       builder: (context) => RepoResetAccessPage._(
+        stage: stage,
         session: session,
         settings: settings,
         repo: repo,
@@ -39,10 +42,11 @@ class RepoResetAccessPage extends StatefulWidget {
       ),
     );
 
-    return (await Navigator.push(context, route)) ?? startAccess;
+    return (await stage.push(route)) ?? startAccess;
   }
 
   RepoResetAccessPage._({
+    required this.stage,
     required this.session,
     required this.settings,
     required this.repo,
@@ -68,7 +72,7 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
     canPop: false,
     onPopInvokedWithResult: (didPop, _) {
       if (didPop) return;
-      Navigator.pop(context, currentAccess);
+      widget.stage.pop(currentAccess);
     },
     child: Scaffold(
       appBar: DirectionalAppBar(title: Text(S.current.repoResetTitle)),
@@ -327,8 +331,7 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
   }
 
   Future<bool> _confirmUpdateDialog() async {
-    final bool? confirmed = await showDialog<bool>(
-      context: context,
+    final bool? confirmed = await widget.stage.showDialog<bool>(
       builder: (BuildContext context) => ActionsDialog(
         title: S.current.repoResetConfirmUpdateTitle,
         body: ListBody(
@@ -345,14 +348,12 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
               buttons: [
                 NegativeButton(
                   text: S.current.actionCancel,
-                  onPressed: () async =>
-                      await Navigator.of(context).maybePop(false),
+                  onPressed: () => widget.stage.maybePop(false),
                 ),
                 PositiveButton(
                   text: S.current.actionYes,
                   isDangerButton: true,
-                  onPressed: () async =>
-                      await Navigator.of(context).maybePop(true),
+                  onPressed: () => widget.stage.maybePop(true),
                 ),
               ],
             ),

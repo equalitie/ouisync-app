@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 
 import '../../../../generated/l10n.dart';
+import '../../../utils/stage.dart';
 import '../../../utils/platform/platform.dart';
 import '../../../utils/utils.dart';
 
 class RepositorySecurityDesktop extends StatefulWidget {
-  const RepositorySecurityDesktop({required this.onRepositorySecurity});
+  const RepositorySecurityDesktop({
+    required this.onRepositorySecurity,
+    required this.stage,
+  });
 
   final Future<String?> Function(dynamic context) onRepositorySecurity;
+  final Stage stage;
 
   @override
   State<RepositorySecurityDesktop> createState() =>
@@ -96,11 +101,12 @@ class _RepositorySecurityDesktopState extends State<RepositorySecurityDesktop> {
             child: Text(S.current.popupMenuItemCopyPassword),
             onTap: () async {
               if (_password == null) return;
-
               if (_password!.isEmpty) return;
 
               await copyStringToClipboard(_password!);
-              showSnackBar(S.current.messagePasswordCopiedClipboard);
+              widget.stage.showSnackBar(
+                S.current.messagePasswordCopiedClipboard,
+              );
             },
           ),
           const PopupMenuDivider(),

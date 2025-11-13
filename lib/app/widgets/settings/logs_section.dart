@@ -53,14 +53,14 @@ class LogsSection extends SettingsSection with AppLogger {
       NavigationTile(
         title: Text(S.current.actionSave, style: bodyStyle),
         leading: Icon(Icons.save),
-        onTap: () => unawaited(_saveLogs(context, natDetection)),
+        onTap: () => unawaited(_saveLogs(natDetection)),
       ),
       // TODO: enable this on desktop as well
       if (PlatformValues.isMobileDevice)
         NavigationTile(
           title: Text(S.current.actionShare, style: bodyStyle),
           leading: Icon(Icons.share),
-          onTap: () => unawaited(_shareLogs(context, natDetection)),
+          onTap: () => unawaited(_shareLogs(natDetection)),
         ),
       BlocBuilder<ErrorCubit, ErrorCubitState>(
         bloc: errorCubit,
@@ -124,11 +124,8 @@ class LogsSection extends SettingsSection with AppLogger {
   bool containsErrorNotification() =>
       errorCubit.state.errorHappened || mount.state is MountStateFailure;
 
-  Future<void> _saveLogs(
-    BuildContext context,
-    NatDetection natDetection,
-  ) async {
-    final tempFile = await _dumpInfo(context, natDetection);
+  Future<void> _saveLogs(NatDetection natDetection) async {
+    final tempFile = await _dumpInfo(natDetection);
 
     loggy.debug('Saving logs');
 
@@ -160,11 +157,8 @@ class LogsSection extends SettingsSection with AppLogger {
     }
   }
 
-  Future<void> _shareLogs(
-    BuildContext context,
-    NatDetection natDetection,
-  ) async {
-    final tempFile = await _dumpInfo(context, natDetection);
+  Future<void> _shareLogs(NatDetection natDetection) async {
+    final tempFile = await _dumpInfo(natDetection);
 
     try {
       await Share.shareXFiles([
@@ -175,13 +169,11 @@ class LogsSection extends SettingsSection with AppLogger {
     }
   }
 
-  Future<File> _dumpInfo(BuildContext context, NatDetection natDetection) =>
-      dumpAll(
-        context,
-        connectivityInfo: connectivityInfo,
-        natDetection: natDetection,
-        powerControl: powerControl,
-        rootMonitor: stateMonitor,
-        compress: true,
-      );
+  Future<File> _dumpInfo(NatDetection natDetection) => dumpAll(
+    connectivityInfo: connectivityInfo,
+    natDetection: natDetection,
+    powerControl: powerControl,
+    rootMonitor: stateMonitor,
+    compress: true,
+  );
 }

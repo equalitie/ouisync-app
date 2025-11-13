@@ -1,11 +1,11 @@
 import 'dart:convert';
 
-import 'package:flutter/widgets.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ouisync_app/app/cubits/cubits.dart';
 import 'package:ouisync_app/app/models/models.dart';
 import 'package:ouisync_app/app/pages/main_page.dart';
+import 'package:ouisync_app/app/utils/stage.dart';
 import 'package:ouisync_app/app/utils/utils.dart';
 import 'package:ouisync/ouisync.dart' hide DirectoryEntry;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -120,7 +120,7 @@ void main() {
     (tester) => tester.runAsync(() async {
       await tester.pumpWidget(testApp(deps.createMainPage()));
       await tester.pumpAndSettle();
-      final BuildContext context = tester.element(find.byType(MainPage));
+      final Stage stage = tester.widget<MainPage>(find.byType(MainPage)).stage;
 
       // Set originRepoCubit as current repo
       {
@@ -149,7 +149,7 @@ void main() {
       }
 
       final moveEntriesActions = MoveEntriesActions(
-        context,
+        stage: stage,
         reposCubit: reposCubit,
         originRepoCubit: originRepoCubit,
         sheetType: BottomSheetType.move,

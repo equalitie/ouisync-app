@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 
 import '../../generated/l10n.dart';
+import '../utils/stage.dart';
 import '../utils/utils.dart';
 import '../widgets/widgets.dart';
 
 class AcceptEqualitieValuesTermsPrivacyPage extends StatefulWidget {
   const AcceptEqualitieValuesTermsPrivacyPage({
+    required this.stage,
     required this.settings,
     required this.onAccept,
     required this.onBack,
   });
 
+  final Stage stage;
   final Settings settings;
   final void Function() onAccept;
   final void Function() onBack;
@@ -53,8 +56,8 @@ class _AcceptEqualitieValuesTermsPrivacyPageState
         const SizedBox(height: 60.0),
         _introTextSpan(),
         const SizedBox(height: 20.0),
-        EqValues(),
-        EqTermsAndPrivacy(),
+        EqValues(widget.stage),
+        EqTermsAndPrivacy(widget.stage),
       ],
     );
   }

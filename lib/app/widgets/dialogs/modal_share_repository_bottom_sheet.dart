@@ -7,6 +7,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../../generated/l10n.dart';
 import '../../cubits/repo.dart';
 import '../../pages/pages.dart';
+import '../../utils/stage.dart';
 import '../../utils/utils.dart';
 import '../widgets.dart';
 
@@ -14,11 +15,13 @@ class ShareRepository extends StatefulWidget {
   const ShareRepository({
     required this.repository,
     required this.availableAccessModes,
+    required this.stage,
     super.key,
   });
 
   final RepoCubit repository;
   final List<AccessMode> availableAccessModes;
+  final Stage stage;
 
   @override
   State<StatefulWidget> createState() => _ShareRepositoryState();
@@ -83,7 +86,7 @@ class _ShareRepositoryState extends State<ShareRepository> with AppLogger {
               availableAccessMode: widget.availableAccessModes,
               onChanged: _onChanged,
               onDisabledMessage: (String message) =>
-                  showSnackBar(message, context: context),
+                  widget.stage.showSnackBar(message),
             ),
             Dimensions.spacingVerticalHalf,
             _buildAccessModeDescription(_accessMode),
@@ -199,9 +202,8 @@ class _ShareRepositoryState extends State<ShareRepository> with AppLogger {
               color: _getActionStateColor(_shareToken != null),
               onPressed: () async {
                 if (_shareToken == null) {
-                  showSnackBar(
+                  widget.stage.showSnackBar(
                     S.current.messageShareActionDisabled,
-                    context: context,
                   );
 
                   return;
@@ -209,9 +211,8 @@ class _ShareRepositoryState extends State<ShareRepository> with AppLogger {
 
                 await copyStringToClipboard(_shareToken!);
 
-                showSnackBar(
+                widget.stage.showSnackBar(
                   S.current.messageTokenCopiedToClipboard,
-                  context: context,
                 );
               },
             ),
@@ -230,9 +231,8 @@ class _ShareRepositoryState extends State<ShareRepository> with AppLogger {
               color: _getActionStateColor(_shareToken != null),
               onPressed: () async {
                 if (_shareToken == null) {
-                  showSnackBar(
+                  widget.stage.showSnackBar(
                     S.current.messageShareActionDisabled,
-                    context: context,
                   );
 
                   return;
@@ -267,19 +267,20 @@ class _ShareRepositoryState extends State<ShareRepository> with AppLogger {
               color: _getActionStateColor(_shareToken != null),
               onPressed: () async {
                 if (_shareToken == null) {
-                  showSnackBar(
+                  widget.stage.showSnackBar(
                     S.current.messageShareActionDisabled,
-                    context: context,
                   );
 
                   return;
                 }
 
-                await Navigator.push(
-                  context,
+                await widget.stage.push(
                   MaterialPageRoute(
                     builder: (context) {
-                      return RepositoryQRPage(shareLink: _shareToken!);
+                      return RepositoryQRPage(
+                        stage: widget.stage,
+                        shareLink: _shareToken!,
+                      );
                     },
                   ),
                 );

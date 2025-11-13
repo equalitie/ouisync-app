@@ -9,15 +9,10 @@ import '../pages/repo_reset_access.dart';
 import '../cubits/cubits.dart'
     show RepoCubit, RepoSecurityCubit, RepoSecurityState;
 import '../models/models.dart' show UnlockedAccess;
+import '../utils/dialogs.dart';
+import '../utils/stage.dart';
 import '../utils/utils.dart'
-    show
-        AppThemeExtension,
-        Dialogs,
-        Fields,
-        PasswordHasher,
-        Settings,
-        showSnackBar,
-        ThemeGetter;
+    show AppThemeExtension, Fields, PasswordHasher, Settings, ThemeGetter;
 import '../widgets/widgets.dart'
     show
         BlocHolder,
@@ -31,34 +26,16 @@ import '../models/models.dart' show SecretKeyOrigin;
 //--------------------------------------------------------------------
 
 class RepoSecurityPage extends StatefulWidget {
-  static Future<void> show(
-    BuildContext context,
-    Settings settings,
-    Session session,
-    RepoCubit repo,
-    UnlockedAccess originalAccess,
-    PasswordHasher passwordHasher,
-  ) => Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (context) => RepoSecurityPage(
-        settings,
-        session,
-        repo,
-        originalAccess,
-        passwordHasher,
-      ),
-    ),
-  );
+  const RepoSecurityPage({
+    required this.stage,
+    required this.settings,
+    required this.session,
+    required this.repo,
+    required this.originalAccess,
+    required this.passwordHasher,
+  });
 
-  const RepoSecurityPage(
-    this.settings,
-    this.session,
-    this.repo,
-    this.originalAccess,
-    this.passwordHasher,
-  );
-
+  final Stage stage;
   final Settings settings;
   final Session session;
   final RepoCubit repo;
@@ -95,14 +72,14 @@ class _State extends State<RepoSecurityPage> {
     content: PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) =>
-          _onPopInvoked(context, didPop, cubit.state),
+          unawaited(_onPopInvoked(didPop, cubit.state)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          RepoSecurityWidget(cubit),
+          RepoSecurityWidget(cubit: cubit, stage: widget.stage),
           // TODO: Arbitrary size, this can likely be done better.
           SizedBox(height: 14),
-          _buildResetRepoUsingTokenButton(context),
+          _buildResetRepoUsingTokenButton(),
         ],
       ),
     ),
@@ -118,66 +95,60 @@ class _State extends State<RepoSecurityPage> {
     ),
   );
 
-  Widget _buildResetRepoUsingTokenButton(BuildContext context) {
-    return LinkStyleAsyncButton(
-      key: Key('enter-repo-reset-screen'), // Used in tests
-      text: "Reset repository access using a share token",
-      onTap: () async {
-        final newAccess = await RepoResetAccessPage.show(
-          context: context,
-          session: widget.session,
-          settings: widget.settings,
-          repo: widget.repo,
-          startAccess: access,
-        );
+  Widget _buildResetRepoUsingTokenButton() => LinkStyleAsyncButton(
+    key: Key('enter-repo-reset-screen'), // Used in tests
+    text: "Reset repository access using a share token",
+    onTap: () async {
+      final newAccess = await RepoResetAccessPage.show(
+        stage: widget.stage,
+        session: widget.session,
+        settings: widget.settings,
+        repo: widget.repo,
+        startAccess: access,
+      );
 
-        final unlockedAccess = newAccess.asUnlocked;
+      final unlockedAccess = newAccess.asUnlocked;
 
-        if (unlockedAccess == null) {
-          Navigator.pop(context);
-          return;
-        }
+      if (unlockedAccess == null) {
+        widget.stage.pop();
+        return;
+      }
 
-        setState(() {
-          access = unlockedAccess;
-        });
-      },
-    );
-  }
+      setState(() {
+        access = unlockedAccess;
+      });
+    },
+  );
 
-  void _onPopInvoked(
-    BuildContext context,
-    bool didPop,
-    RepoSecurityState state,
-  ) {
+  Future<void> _onPopInvoked(bool didPop, RepoSecurityState state) async {
     if (didPop) {
       return;
     }
 
     if (!state.hasPendingChanges) {
-      Navigator.pop(context);
+      widget.stage.pop();
       return;
     }
 
-    Dialogs.alertDialogWithActions(
-      context,
+    final pop = await AlertDialogWithActions.show(
+      widget.stage,
       title: S.current.titleUnsavedChanges,
       body: [Text(S.current.messageUnsavedChanges)],
       actions: [
         TextButton(
           child: Text(S.current.actionCancel),
-          onPressed: () async => await Navigator.of(context).maybePop(false),
+          onPressed: () => widget.stage.maybePop(false),
         ),
         TextButton(
           child: Text(S.current.actionDiscard),
-          onPressed: () async => await Navigator.of(context).maybePop(true),
+          onPressed: () => widget.stage.maybePop(true),
         ),
       ],
-    ).then((pop) {
-      if (pop ?? false) {
-        Navigator.pop(context);
-      }
-    });
+    );
+
+    if (pop ?? false) {
+      widget.stage.pop();
+    }
   }
 
   Future<void> _onSubmit(BuildContext context, RepoSecurityCubit cubit) async {
@@ -191,27 +162,27 @@ class _State extends State<RepoSecurityPage> {
       passwordHasher: widget.passwordHasher,
       masterKey: widget.settings.masterKey,
     )) {
-      showSnackBar(S.current.messageUpdateLocalSecretOk);
+      widget.stage.showSnackBar(S.current.messageUpdateLocalSecretOk);
     } else {
-      showSnackBar(S.current.messageUpdateLocalSecretFailed);
+      widget.stage.showSnackBar(S.current.messageUpdateLocalSecretFailed);
     }
   }
 
   Future<bool> _confirmSaveChanges(BuildContext context) async {
     final message = S.current.messageConfirmIrreversibleChange;
 
-    final saveChanges = await Dialogs.alertDialogWithActions(
-      context,
+    final saveChanges = await AlertDialogWithActions.show(
+      widget.stage,
       title: S.current.titleSaveChanges,
       body: [Text(message, style: context.theme.appTextStyle.bodyMedium)],
       actions: [
         TextButton(
           child: Text(S.current.actionCancel),
-          onPressed: () async => await Navigator.of(context).maybePop(false),
+          onPressed: () => widget.stage.maybePop(false),
         ),
         TextButton(
           child: Text(S.current.actionAccept),
-          onPressed: () async => await Navigator.of(context).maybePop(true),
+          onPressed: () => widget.stage.maybePop(true),
         ),
       ],
     );
@@ -223,9 +194,14 @@ class _State extends State<RepoSecurityPage> {
 //--------------------------------------------------------------------
 
 class RepoSecurityWidget extends StatelessWidget {
-  const RepoSecurityWidget(this.cubit, {super.key});
+  const RepoSecurityWidget({
+    required this.cubit,
+    required this.stage,
+    super.key,
+  });
 
   final RepoSecurityCubit cubit;
+  final Stage stage;
 
   @override
   Widget build(BuildContext context) {
@@ -253,6 +229,7 @@ class RepoSecurityWidget extends StatelessWidget {
         SecretKeyOrigin.manual => PasswordValidation(
           onChanged: cubit.setLocalPassword,
           required: state.isLocalPasswordRequired,
+          stage: stage,
         ),
         SecretKeyOrigin.random => SizedBox.shrink(),
       };

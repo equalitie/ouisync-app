@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'dart:io' as io;
 
-import 'package:build_context_provider/build_context_provider.dart'
-    show ListenerThatRunsFunctionsWithBuildContext;
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -16,6 +14,7 @@ import '../cubits/store_dirs.dart';
 import '../models/models.dart';
 import '../utils/dirs.dart';
 import '../utils/platform/platform.dart';
+import '../utils/stage.dart';
 import '../utils/utils.dart';
 import '../widgets/notification_badge.dart';
 import '../widgets/widgets.dart';
@@ -32,6 +31,7 @@ typedef PreviewFileCallback =
 
 class MainPage extends StatefulWidget {
   const MainPage({
+    required this.stage,
     required this.localeCubit,
     required this.mountCubit,
     required this.receivedMedia,
@@ -44,6 +44,7 @@ class MainPage extends StatefulWidget {
     required this.storeDirsCubit,
   });
 
+  final Stage stage;
   final PlatformWindowManager windowManager;
   final Session session;
   final Settings settings;
@@ -122,14 +123,17 @@ class _MainPageState extends State<MainPage>
 
   void checkForDokan() {
     installationOk() => widget.mountCubit.init();
-    Future<bool?> installationFailed() => Dialogs.simpleAlertDialog(
-      context,
-      title: S.current.titleDokanInstallation,
-      message: S.current.messageDokanInstallationFailed,
+
+    Future<bool?> installationFailed() => widget.stage.showDialog(
+      builder: (context) => SimpleAlertDialog(
+        stage: widget.stage,
+        title: S.current.titleDokanInstallation,
+        message: S.current.messageDokanInstallationFailed,
+      ),
     );
 
     final dokanValidation = DokanValidation(
-      context,
+      stage: widget.stage,
       installationOk: installationOk,
       installationFailed: installationFailed,
     );
@@ -199,6 +203,7 @@ class _MainPageState extends State<MainPage>
           storeDirsCubit: widget.storeDirsCubit,
           bottomSheetInfo: _bottomSheetInfo,
           onShowRepoSettings: _showRepoSettings,
+          stage: widget.stage,
         );
       }
 
@@ -272,17 +277,7 @@ class _MainPageState extends State<MainPage>
         // all those variables without previously properly closing them.
         canPop: false,
         onPopInvokedWithResult: _onBackPressed,
-        child: Stack(
-          alignment: AlignmentDirectional.bottomEnd,
-          children: <Widget>[
-            Column(
-              children: [
-                Expanded(child: buildMainWidget(Directionality.of(context))),
-              ],
-            ),
-            const ListenerThatRunsFunctionsWithBuildContext(),
-          ],
-        ),
+        child: buildMainWidget(Directionality.of(context)),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.miniEndFloat,
       floatingActionButton: BlocBuilder<ReposCubit, ReposState>(
@@ -313,6 +308,7 @@ class _MainPageState extends State<MainPage>
   PreferredSizeWidget _buildOuiSyncBar() => OuiSyncBar(
     reposCubit: widget.reposCubit,
     repoPicker: RepositoriesBar(
+      stage: widget.stage,
       mount: widget.mountCubit,
       errorCubit: widget.errorCubit,
       powerControl: powerControl,
@@ -372,7 +368,7 @@ class _MainPageState extends State<MainPage>
           focusNode: _fabFocus,
           heroTag: Constants.heroTagRepoListActions,
           child: icon,
-          onPressed: () => unawaited(_showRepoListActions(context)),
+          onPressed: _showRepoListActions,
         );
       }
     } else if (current is OpenRepoEntry) {
@@ -385,7 +381,7 @@ class _MainPageState extends State<MainPage>
             focusNode: _fabFocus,
             heroTag: Constants.heroTagMainPageActions,
             child: icon,
-            onPressed: () => unawaited(_showDirectoryActions(context, current)),
+            onPressed: () => unawaited(_showDirectoryActions(current)),
           ),
         ),
       );
@@ -428,6 +424,7 @@ class _MainPageState extends State<MainPage>
           settings: widget.settings,
           session: widget.session,
           passwordHasher: PasswordHasher(widget.session),
+          stage: widget.stage,
         );
       }
 
@@ -482,6 +479,7 @@ class _MainPageState extends State<MainPage>
             // TODO: A shadow would be nicer.
             const Divider(height: 1),
             FolderContentsBar(
+              stage: widget.stage,
               reposCubit: widget.reposCubit,
               repoCubit: repo,
               hasContents: folder.content.isNotEmpty,
@@ -495,47 +493,50 @@ class _MainPageState extends State<MainPage>
     );
   }
 
-  Widget _contentsList(ReposState reposState, RepoCubit currentRepoCubit) =>
-      BlocBuilder<EntrySelectionCubit, EntrySelectionState>(
-        bloc: currentRepoCubit.entrySelectionCubit,
-        builder: (context, selectionState) {
-          final contents = currentRepoCubit.state.currentFolder.content;
-          final totalEntries = contents.length;
+  Widget _contentsList(
+    ReposState reposState,
+    RepoCubit currentRepoCubit,
+  ) => BlocBuilder<EntrySelectionCubit, EntrySelectionState>(
+    bloc: currentRepoCubit.entrySelectionCubit,
+    builder: (context, selectionState) {
+      final contents = currentRepoCubit.state.currentFolder.content;
+      final totalEntries = contents.length;
 
-          return RefreshIndicator(
-            onRefresh: () async {
-              await reposState.current?.cubit?.refresh();
-            },
-            child: Container(
-              child: ListView.separated(
-                key: Key('directory_entry_list'),
-                separatorBuilder: (context, index) =>
-                    const Divider(height: 1, color: Colors.transparent),
-                itemCount: totalEntries,
-                itemBuilder: (context, index) {
-                  final entry = contents[index];
-                  final key = ValueKey(entry.name);
-
-                  return Column(
-                    children: [
-                      (entry is FileEntry
-                          ? _builFileListItem
-                          : _buildDirectoryListItem)(
-                        context,
-                        key,
-                        currentRepoCubit,
-                        selectionState,
-                        entry,
-                      ),
-                      if (index == (totalEntries - 1)) SizedBox(height: 56),
-                    ],
-                  );
-                },
-              ),
-            ),
-          );
+      // TODO: Remove this RefreshIndicator (not needed, content refreshed automatically)
+      return RefreshIndicator(
+        onRefresh: () async {
+          await reposState.current?.cubit?.refresh();
         },
+        child: Container(
+          child: ListView.separated(
+            key: Key('directory_entry_list'),
+            separatorBuilder: (context, index) =>
+                const Divider(height: 1, color: Colors.transparent),
+            itemCount: totalEntries,
+            itemBuilder: (context, index) {
+              final entry = contents[index];
+              final key = ValueKey(entry.name);
+
+              return Column(
+                children: [
+                  (entry is FileEntry
+                      ? _builFileListItem
+                      : _buildDirectoryListItem)(
+                    context,
+                    key,
+                    currentRepoCubit,
+                    selectionState,
+                    entry,
+                  ),
+                  if (index == (totalEntries - 1)) SizedBox(height: 56),
+                ],
+              );
+            },
+          ),
+        ),
       );
+    },
+  );
 
   FileListItem _builFileListItem(
     BuildContext context,
@@ -583,7 +584,12 @@ class _MainPageState extends State<MainPage>
     bool isSelected = false,
   ]) async {
     if (entry is FileEntry) {
-      return viewFile(repo: currentRepoCubit, path: entry.path, loggy: loggy);
+      return viewFile(
+        stage: widget.stage,
+        repo: currentRepoCubit,
+        path: entry.path,
+        loggy: loggy,
+      );
     }
 
     if (isSelected) {
@@ -613,8 +619,8 @@ class _MainPageState extends State<MainPage>
   }
 
   // void _showNotAvailableMessage() => showSnackBar(S.current.messageMovingEntry);
-  Future<void> _showNotAvailableMessage() => Dialogs.simpleAlertDialog(
-    context,
+  Future<void> _showNotAvailableMessage() => SimpleAlertDialog.show(
+    widget.stage,
     title: S.current.titleMovingEntry,
     message: S.current.messageMovingEntry,
   );
@@ -626,22 +632,26 @@ class _MainPageState extends State<MainPage>
     isScrollControlled: true,
     context: context,
     shape: Dimensions.borderBottomSheetTop,
-    builder: (_) => entry is FileEntry
+    builder: (context) => entry is FileEntry
         ? EntryDetails.file(
-            context,
             repoCubit: repoCubit,
             entry: entry,
-            onPreviewFile: (cubit, data) =>
-                viewFile(repo: cubit, path: data.path, loggy: loggy),
+            onPreviewFile: (cubit, data) => viewFile(
+              stage: widget.stage,
+              repo: cubit,
+              path: data.path,
+              loggy: loggy,
+            ),
             isActionAvailableValidator: _isEntryActionAvailable,
             dirs: widget.dirs,
+            stage: widget.stage,
           )
         : EntryDetails.folder(
-            context,
             repoCubit: repoCubit,
             entry: entry,
             isActionAvailableValidator: _isEntryActionAvailable,
             dirs: widget.dirs,
+            stage: widget.stage,
           ),
     // TODO: Find out how to get this to work, so we can use the snackbar on the bottom sheet.
     //  ScaffoldMessenger(
@@ -703,6 +713,7 @@ class _MainPageState extends State<MainPage>
         sheetType: state.type,
         onUpdateBottomSheet: updateBottomSheetInfo,
         dirs: widget.dirs,
+        stage: widget.stage,
       );
 
   EntriesActionsDialog _moveMultipleEntriesState(
@@ -714,6 +725,7 @@ class _MainPageState extends State<MainPage>
     sheetType: state.type,
     onUpdateBottomSheet: updateBottomSheetInfo,
     dirs: widget.dirs,
+    stage: widget.stage,
   );
 
   SaveSharedMedia _saveSharedMediaState(SaveMediaSheetState state) =>
@@ -768,6 +780,7 @@ class _MainPageState extends State<MainPage>
       repoCubit: current.cubit,
       sourcePath: sourcePath,
       type: EntryType.file,
+      stage: widget.stage,
     ).save();
   }
 
@@ -775,8 +788,8 @@ class _MainPageState extends State<MainPage>
     final current = widget.reposCubit.state.current;
 
     if (current is! OpenRepoEntry) {
-      await Dialogs.simpleAlertDialog(
-        context,
+      await SimpleAlertDialog.show(
+        widget.stage,
         title: S.current.titleAddFile,
         message: S.current.messageNoRepo,
       );
@@ -791,8 +804,7 @@ class _MainPageState extends State<MainPage>
         : S.current.messageAddingFileToLockedRepository;
 
     if (accessModeMessage != null) {
-      await showDialog<bool>(
-        context: context,
+      await widget.stage.showDialog<bool>(
         barrierDismissible: false, // user must tap button!
         builder: (context) {
           return AlertDialog(
@@ -818,7 +830,7 @@ class _MainPageState extends State<MainPage>
             ),
             actions: [
               TextButton(
-                onPressed: () async => await Navigator.of(context).maybePop(),
+                onPressed: () => widget.stage.maybePop(),
                 child: Text(S.current.actionCloseCapital),
               ),
             ],
@@ -863,7 +875,7 @@ class _MainPageState extends State<MainPage>
 
     // Handle share tokens
     for (final token in tokens) {
-      await importRepoDialog(context, initialTokenValue: token);
+      await importRepoDialog(initialTokenValue: token);
     }
 
     // Handle received files
@@ -881,35 +893,31 @@ class _MainPageState extends State<MainPage>
     );
   }
 
-  Future<void> _showDirectoryActions(
-    BuildContext parentContext,
-    OpenRepoEntry repo,
-  ) async => showModalBottomSheet(
-    isScrollControlled: true,
-    context: parentContext,
-    shape: Dimensions.borderBottomSheetTop,
-    builder: (context) => DirectoryActions(
-      parentContext,
-      repoCubit: repo.cubit,
-      bottomSheetCubit: widget.reposCubit.bottomSheet,
-    ),
-  );
-
-  Future<void> _showRepoListActions(BuildContext context) =>
+  Future<void> _showDirectoryActions(OpenRepoEntry repo) =>
       showModalBottomSheet(
         isScrollControlled: true,
         context: context,
         shape: Dimensions.borderBottomSheetTop,
-        builder: (context) => RepoListActions(
-          context: context,
-          reposCubit: widget.reposCubit,
-          onCreateRepoPressed: _createRepo,
-          onImportRepoPressed: _importRepo,
+        builder: (context) => DirectoryActions(
+          repoCubit: repo.cubit,
+          bottomSheetCubit: widget.reposCubit.bottomSheet,
+          stage: widget.stage,
         ),
       );
 
+  Future<void> _showRepoListActions() => widget.stage.showModalBottomSheet(
+    isScrollControlled: true,
+    shape: Dimensions.borderBottomSheetTop,
+    builder: (context) => RepoListActions(
+      stage: widget.stage,
+      reposCubit: widget.reposCubit,
+      onCreateRepoPressed: _createRepo,
+      onImportRepoPressed: _importRepo,
+    ),
+  );
+
   Future<RepoEntry?> _createRepo() async {
-    final repoEntry = await createRepoDialog(context);
+    final repoEntry = await createRepoDialog();
 
     if (repoEntry != null) {
       await widget.reposCubit.setCurrent(repoEntry);
@@ -919,7 +927,7 @@ class _MainPageState extends State<MainPage>
   }
 
   Future<List<RepoEntry>> _importRepo() async {
-    final repoEntries = await importRepoDialog(context);
+    final repoEntries = await importRepoDialog();
     final repoEntry = repoEntries.singleOrNull;
 
     if (repoEntry != null) {
@@ -929,21 +937,17 @@ class _MainPageState extends State<MainPage>
     return repoEntries;
   }
 
-  Future<RepoEntry?> createRepoDialog(BuildContext parentContext) async =>
-      Navigator.push<RepoEntry?>(
-        context,
-        MaterialPageRoute(
-          builder: (context) => RepoCreationPage(
-            reposCubit: widget.reposCubit,
-            storeDirsCubit: widget.storeDirsCubit,
-          ),
-        ),
-      );
+  Future<RepoEntry?> createRepoDialog() => widget.stage.push<RepoEntry?>(
+    MaterialPageRoute(
+      builder: (context) => RepoCreationPage(
+        stage: widget.stage,
+        reposCubit: widget.reposCubit,
+        storeDirsCubit: widget.storeDirsCubit,
+      ),
+    ),
+  );
 
-  Future<List<RepoEntry>> importRepoDialog(
-    BuildContext parentContext, {
-    String? initialTokenValue,
-  }) async {
+  Future<List<RepoEntry>> importRepoDialog({String? initialTokenValue}) async {
     RepoImportResult? result;
 
     if (initialTokenValue != null) {
@@ -955,24 +959,26 @@ class _MainPageState extends State<MainPage>
         case ShareTokenValid():
           result = RepoImportFromToken(tokenResult.value);
         case ShareTokenInvalid():
-          showSnackBar(tokenResult.error.toString());
+          widget.stage.showSnackBar(tokenResult.error.toString());
           return [];
       }
     } else {
-      result = await Navigator.push<RepoImportResult>(
-        context,
+      result = await widget.stage.push<RepoImportResult>(
         MaterialPageRoute(
-          builder: (context) => RepoImportPage(reposCubit: widget.reposCubit),
+          builder: (context) => RepoImportPage(
+            reposCubit: widget.reposCubit,
+            stage: widget.stage,
+          ),
         ),
       );
     }
 
     switch (result) {
       case RepoImportFromToken(token: final token):
-        final repoEntry = await Navigator.push<RepoEntry?>(
-          context,
+        final repoEntry = await widget.stage.push<RepoEntry?>(
           MaterialPageRoute(
             builder: (context) => RepoCreationPage(
+              stage: widget.stage,
               reposCubit: widget.reposCubit,
               storeDirsCubit: widget.storeDirsCubit,
               token: token,
@@ -993,8 +999,7 @@ class _MainPageState extends State<MainPage>
     }
   }
 
-  Future<void> _showAppSettings() => Navigator.push(
-    context,
+  Future<void> _showAppSettings() => widget.stage.push(
     MaterialPageRoute(
       builder: (context) => SettingsPage(
         session: widget.session,
@@ -1006,6 +1011,7 @@ class _MainPageState extends State<MainPage>
         upgradeExists: upgradeExists,
         checkForDokan: checkForDokan,
         dirs: widget.dirs,
+        stage: widget.stage,
       ),
     ),
   );
@@ -1023,6 +1029,7 @@ class _MainPageState extends State<MainPage>
       repoCubit: repoCubit,
       reposCubit: widget.reposCubit,
       storeDirsCubit: widget.storeDirsCubit,
+      stage: widget.stage,
     ),
   );
 }

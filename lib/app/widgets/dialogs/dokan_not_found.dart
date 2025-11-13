@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
 
 import '../../../generated/l10n.dart';
+import '../../utils/stage.dart';
 import '../../utils/utils.dart' show AppThemeExtension, Fields, ThemeGetter;
 import '../widgets.dart' show NegativeButton, PositiveButton;
 
 class DokanNotFound extends StatelessWidget {
-  const DokanNotFound({required this.linkLaunchDokanGitHub, super.key});
+  const DokanNotFound({
+    required this.stage,
+    required this.linkLaunchDokanGitHub,
+    super.key,
+  });
 
+  final Stage stage;
   final TextSpan linkLaunchDokanGitHub;
 
   @override
@@ -25,18 +31,18 @@ class DokanNotFound extends StatelessWidget {
           ],
         ),
       ),
-      Fields.dialogActions(buttons: buildActions(context)),
+      Fields.dialogActions(buttons: buildActions()),
     ],
   );
 
-  List<Widget> buildActions(BuildContext context) => [
+  List<Widget> buildActions() => [
     NegativeButton(
       text: S.current.actionSkip.toLowerCase(),
-      onPressed: () => Navigator.of(context).maybePop(false),
+      onPressed: () => stage.maybePop(false),
     ),
     PositiveButton(
       text: S.current.actionInstallDokan.toUpperCase(),
-      onPressed: () => Navigator.of(context).maybePop(true),
+      onPressed: () => stage.maybePop(true),
     ),
   ];
 }
