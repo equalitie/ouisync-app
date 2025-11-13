@@ -3,8 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../utils/extensions.dart';
-
 /// Helper widget that maintains a lifecycle of some resource and explicitly provides it to the
 /// descendant widgets. This is similar to `Provider` from the `provider` package but it passes the
 /// resource explicitly via the `builder` callback instead of implicitly via `context`. This means
@@ -37,7 +35,7 @@ class _ObjectHolderState<T> extends State<ObjectHolder<T>> {
 
   @override
   void dispose() {
-    widget.dispose?.let((dispose) => dispose(object));
+    widget.dispose?.call(object);
     super.dispose();
   }
 

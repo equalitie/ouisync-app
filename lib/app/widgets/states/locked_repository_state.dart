@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:ouisync/ouisync.dart' show Session;
 
 import '../../../generated/l10n.dart';
@@ -8,8 +7,7 @@ import '../../mixins/mixins.dart';
 import '../../utils/stage.dart';
 import '../../utils/utils.dart';
 
-class LockedRepositoryState extends HookWidget
-    with AppLogger, RepositoryActionsMixin {
+class LockedRepositoryState extends StatefulWidget {
   const LockedRepositoryState({
     required this.directionality,
     required this.repoCubit,
@@ -29,19 +27,33 @@ class LockedRepositoryState extends HookWidget
   final Stage stage;
 
   @override
+  State<LockedRepositoryState> createState() => _LockedRepositoryStateState();
+}
+
+class _LockedRepositoryStateState extends State<LockedRepositoryState>
+    with AppLogger, RepositoryActionsMixin {
+  final unlockButtonFocus = FocusNode(debugLabel: 'unlock_button_focus');
+
+  @override
+  void initState() {
+    super.initState();
+    unlockButtonFocus.requestFocus();
+  }
+
+  @override
+  void dispose() {
+    unlockButtonFocus.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final lockedRepoImageHeight =
         MediaQuery.of(context).size.height *
         Constants.statePlaceholderImageHeightFactor;
 
-    final FocusNode unlockButtonFocus = useFocusNode(
-      debugLabel: 'unlock_button_focus',
-    );
-
-    unlockButtonFocus.requestFocus();
-
     return Directionality(
-      textDirection: directionality,
+      textDirection: widget.directionality,
       child: Center(
         child: SingleChildScrollView(
           child: Column(
@@ -86,11 +98,11 @@ class LockedRepositoryState extends HookWidget
                 onPressed: () async {
                   await unlockRepository(
                     context: context,
-                    settings: settings,
-                    session: session,
-                    repoCubit: repoCubit,
-                    passwordHasher: passwordHasher,
-                    stage: stage,
+                    settings: widget.settings,
+                    session: widget.session,
+                    repoCubit: widget.repoCubit,
+                    passwordHasher: widget.passwordHasher,
+                    stage: widget.stage,
                   );
                 },
                 leadingIcon: const Icon(Icons.lock_open_rounded),

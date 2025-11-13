@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart' show RepoCubit;
@@ -15,19 +14,10 @@ import '../../utils/utils.dart'
         validateNoEmptyMaybeRegExpr;
 import '../widgets.dart' show ActionsDialog, NegativeButton, PositiveButton;
 
-class FolderCreationDialog extends HookWidget {
+class FolderCreationDialog extends StatefulWidget {
   final Stage stage;
   final RepoCubit repoCubit;
   final String parent;
-
-  final formKey = GlobalKey<FormState>();
-
-  late final TextEditingController nameController;
-
-  late final FocusNode nameTextFieldFocus;
-  late final FocusNode positiveButtonFocus;
-
-  late final ValueNotifier<String> errorMessage;
 
   static Future<String?> show(
     Stage stage, {
@@ -51,70 +41,88 @@ class FolderCreationDialog extends HookWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    initHooks();
+  State<FolderCreationDialog> createState() => _FolderCreationDialogState();
+}
 
-    return Form(
-      key: formKey,
-      autovalidateMode: AutovalidateMode.onUserInteraction,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.max,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Dimensions.spacingVerticalDouble,
-          ValueListenableBuilder(
-            valueListenable: errorMessage,
-            builder: (context, errorMessage, child) {
-              return Fields.formTextField(
-                key: Key('create_folder_name_input'),
-                context: context,
-                controller: nameController,
-                textInputAction: TextInputAction.done,
-                labelText: S.current.labelName,
-                hintText: S.current.messageFolderName,
-                errorText: nameController.text.isEmpty ? '' : errorMessage,
-                onFieldSubmitted: (String? newFolderName) async {
-                  await _onCreateButtonPress(
-                    parent: parent,
-                    newFolderName: newFolderName ?? '',
-                  );
-                },
-                validator: validateNoEmptyMaybeRegExpr(
-                  emptyError: S.current.messageErrorFormValidatorNameDefault,
-                  regExp: Strings.entityNameRegExp,
-                  regExpError: S.current.messageErrorCharactersNotAllowed,
-                ),
-                autofocus: true,
-                focusNode: nameTextFieldFocus,
-              );
-            },
-          ),
-          Fields.dialogActions(buttons: _actions(parent: parent)),
-        ],
-      ),
-    );
-  }
+class _FolderCreationDialogState extends State<FolderCreationDialog> {
+  final formKey = GlobalKey<FormState>();
 
-  void initHooks() {
-    nameController = useTextEditingController.fromValue(TextEditingValue.empty);
+  final nameController = TextEditingController.fromValue(
+    TextEditingValue.empty,
+  );
+
+  final nameTextFieldFocus = FocusNode(debugLabel: 'name-txt-focus');
+  final positiveButtonFocus = FocusNode(debugLabel: 'positive-btn-focus');
+
+  final errorMessage = ValueNotifier('');
+
+  @override
+  void initState() {
+    super.initState();
 
     nameController.addListener(() {
       if (nameController.text.isEmpty) {
         errorMessage.value = '';
       }
     });
-
-    nameTextFieldFocus = useFocusNode(debugLabel: 'name-txt-focus');
-    positiveButtonFocus = useFocusNode(debugLabel: 'positive-btn-focus');
-
-    errorMessage = useValueNotifier('');
   }
+
+  @override
+  void dispose() {
+    errorMessage.dispose();
+    positiveButtonFocus.dispose();
+    nameTextFieldFocus.dispose();
+    nameController.dispose();
+
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Form(
+    key: formKey,
+    autovalidateMode: AutovalidateMode.onUserInteraction,
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.max,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Dimensions.spacingVerticalDouble,
+        ValueListenableBuilder(
+          valueListenable: errorMessage,
+          builder: (context, errorMessage, child) {
+            return Fields.formTextField(
+              key: Key('create_folder_name_input'),
+              context: context,
+              controller: nameController,
+              textInputAction: TextInputAction.done,
+              labelText: S.current.labelName,
+              hintText: S.current.messageFolderName,
+              errorText: nameController.text.isEmpty ? '' : errorMessage,
+              onFieldSubmitted: (String? newFolderName) async {
+                await _onCreateButtonPress(
+                  parent: widget.parent,
+                  newFolderName: newFolderName ?? '',
+                );
+              },
+              validator: validateNoEmptyMaybeRegExpr(
+                emptyError: S.current.messageErrorFormValidatorNameDefault,
+                regExp: Strings.entityNameRegExp,
+                regExpError: S.current.messageErrorCharactersNotAllowed,
+              ),
+              autofocus: true,
+              focusNode: nameTextFieldFocus,
+            );
+          },
+        ),
+        Fields.dialogActions(buttons: _actions(parent: widget.parent)),
+      ],
+    ),
+  );
 
   List<Widget> _actions({required String parent}) => [
     NegativeButton(
       text: S.current.actionCancel,
-      onPressed: () => stage.maybePop(''),
+      onPressed: () => widget.stage.maybePop(''),
     ),
     PositiveButton(
       key: Key('create_folder_submit'),
@@ -135,7 +143,7 @@ class FolderCreationDialog extends HookWidget {
 
     if (submitted) {
       final newFolderPath = repo_path.join(parent, newFolderName);
-      await stage.maybePop(newFolderPath);
+      await widget.stage.maybePop(newFolderPath);
     }
   }
 
@@ -162,7 +170,7 @@ class FolderCreationDialog extends HookWidget {
     if (!(formKey.currentState?.validate() ?? false)) return false;
 
     final newFolderPath = repo_path.join(parent, newName);
-    if (await repoCubit.entryExists(newFolderPath)) {
+    if (await widget.repoCubit.entryExists(newFolderPath)) {
       errorMessage.value = S.current.messageEntryAlreadyExist(newName);
       return false;
     } else {

@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../../generated/l10n.dart';
 import '../../utils/utils.dart';
 
-class NoRepositoriesState extends HookWidget {
+class NoRepositoriesState extends StatefulWidget {
   const NoRepositoriesState({
     required this.directionality,
     required this.onCreateRepoPressed,
@@ -16,20 +15,31 @@ class NoRepositoriesState extends HookWidget {
   final Future<void> Function() onImportRepoPressed;
 
   @override
+  State<NoRepositoriesState> createState() => _NoRepositoriesStateState();
+}
+
+class _NoRepositoriesStateState extends State<NoRepositoriesState> {
+  final newRepoButtonFocus = FocusNode(debugLabel: 'new_repo_button_focus');
+  final importRepoButtonFocus = FocusNode(
+    debugLabel: 'import_repo_button_focus',
+  );
+
+  @override
+  void dispose() {
+    super.dispose();
+
+    newRepoButtonFocus.dispose();
+    importRepoButtonFocus.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final nothingHereYetImageHeight =
         MediaQuery.of(context).size.height *
         Constants.statePlaceholderImageHeightFactor;
 
-    final newRepoButtonFocus = useFocusNode(
-      debugLabel: 'new_repo_button_focus',
-    );
-    final importRepoButtonFocus = useFocusNode(
-      debugLabel: 'import_repo_button_focus',
-    );
-
     return Directionality(
-      textDirection: directionality,
+      textDirection: widget.directionality,
       child: Center(
         child: SingleChildScrollView(
           reverse: false,
@@ -64,7 +74,7 @@ class NoRepositoriesState extends HookWidget {
               Dimensions.spacingVerticalDouble,
               Fields.inPageButton(
                 key: Key('create_first_repo'),
-                onPressed: onCreateRepoPressed,
+                onPressed: widget.onCreateRepoPressed,
                 text: S.current.actionCreateRepository,
                 size: Dimensions.sizeInPageButtonRegular,
                 focusNode: newRepoButtonFocus,
@@ -72,7 +82,7 @@ class NoRepositoriesState extends HookWidget {
               ),
               Dimensions.spacingVertical,
               Fields.inPageButton(
-                onPressed: onImportRepoPressed,
+                onPressed: widget.onImportRepoPressed,
                 text: S.current.actionAddRepositoryWithToken,
                 size: Dimensions.sizeInPageButtonRegular,
                 focusNode: importRepoButtonFocus,

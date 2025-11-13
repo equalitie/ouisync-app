@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:path/path.dart' as p;
 
 import '../../../generated/l10n.dart';
@@ -19,7 +18,7 @@ import '../../utils/utils.dart'
         validateNoEmptyMaybeRegExpr;
 import '../widgets.dart' show NegativeButton, PositiveButton;
 
-class RenameEntry extends HookWidget with AppLogger {
+class RenameEntry extends StatefulWidget {
   RenameEntry({
     required this.stage,
     required this.repoCubit,
@@ -38,43 +37,53 @@ class RenameEntry extends HookWidget with AppLogger {
   final bool isFile;
   final String hint;
 
+  @override
+  State<RenameEntry> createState() => _RenameEntryState();
+}
+
+class _RenameEntryState extends State<RenameEntry> with AppLogger {
   final formKey = GlobalKey<FormState>();
 
-  late final TextEditingController _newNameController;
+  final _newNameController = TextEditingController.fromValue(
+    TextEditingValue.empty,
+  );
 
-  late final FocusNode _nameTextFieldFocus;
-  late final FocusNode _positiveButtonFocus;
+  final _nameTextFieldFocus = FocusNode(debugLabel: 'name-txt-focus');
+  final _positiveButtonFocus = FocusNode(debugLabel: 'positive-btn-focus');
 
-  late final ValueNotifier<String> _errorMessage;
+  final _errorMessage = ValueNotifier('');
+
+  @override
+  void initState() {
+    super.initState();
+
+    _newNameController.addListener(() {
+      if (_newNameController.text.isEmpty ||
+          _newNameController.text == widget.oldName) {
+        _errorMessage.value = '';
+      }
+    });
+
+    selectEntryName(widget.oldName, widget.originalExtension, widget.isFile);
+  }
+
+  @override
+  void dispose() {
+    _errorMessage.dispose();
+    _positiveButtonFocus.dispose();
+    _nameTextFieldFocus.dispose();
+    _newNameController.dispose();
+
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    initHooks();
-    selectEntryName(oldName, originalExtension, isFile);
-
     return Form(
       key: formKey,
       autovalidateMode: AutovalidateMode.onUserInteraction,
       child: _buildRenameEntryWidget(context),
     );
-  }
-
-  void initHooks() {
-    _newNameController = useTextEditingController.fromValue(
-      TextEditingValue.empty,
-    );
-
-    _newNameController.addListener(() {
-      if (_newNameController.text.isEmpty ||
-          _newNameController.text == oldName) {
-        _errorMessage.value = '';
-      }
-    });
-
-    _nameTextFieldFocus = useFocusNode(debugLabel: 'name-txt-focus');
-    _positiveButtonFocus = useFocusNode(debugLabel: 'positive-btn-focus');
-
-    _errorMessage = useValueNotifier('');
   }
 
   void selectEntryName(String value, String extension, bool isFile) {
@@ -90,7 +99,7 @@ class RenameEntry extends HookWidget with AppLogger {
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
       Fields.constrainedText(
-        '"$oldName"',
+        '"${widget.oldName}"',
         flex: 0,
         style: context.theme.appTextStyle.bodyMedium.copyWith(
           fontWeight: FontWeight.w400,
@@ -104,12 +113,12 @@ class RenameEntry extends HookWidget with AppLogger {
           controller: _newNameController,
           textInputAction: TextInputAction.done,
           labelText: S.current.labelName,
-          hintText: hint,
+          hintText: widget.hint,
           errorText: _newNameController.text.isEmpty ? '' : errorMessage,
           onFieldSubmitted: (newName) async {
-            final submitted = await _submitField(parent, newName);
+            final submitted = await _submitField(widget.parent, newName);
             if (submitted && PlatformValues.isDesktopDevice) {
-              await stage.maybePop(newName);
+              await widget.stage.maybePop(newName);
             }
           },
           validator: validateNoEmptyMaybeRegExpr(
@@ -128,7 +137,7 @@ class RenameEntry extends HookWidget with AppLogger {
   Future<bool> _submitField(String parent, String? newName) async {
     if (newName == null) return false;
 
-    if (newName == oldName) {
+    if (newName == widget.oldName) {
       _errorMessage.value = S.current.messageEnterDifferentName;
       _nameTextFieldFocus.requestFocus();
 
@@ -138,7 +147,7 @@ class RenameEntry extends HookWidget with AppLogger {
     final validationOk = await _validateNewName(parent, newName);
     if (!validationOk) {
       final newExtension = p.extension(newName);
-      selectEntryName(newName, newExtension, isFile);
+      selectEntryName(newName, newExtension, widget.isFile);
 
       _nameTextFieldFocus.requestFocus();
 
@@ -155,7 +164,7 @@ class RenameEntry extends HookWidget with AppLogger {
   Future<bool> _validateNewName(String parent, String newName) async {
     if (!(formKey.currentState?.validate() ?? false)) return false;
 
-    if (isFile) {
+    if (widget.isFile) {
       final extensionValidationOK = await _validateExtension(newName);
       if (!extensionValidationOK) return false;
     }
@@ -172,12 +181,12 @@ class RenameEntry extends HookWidget with AppLogger {
 
     /// If there was not extension originally, then no need to have or validate
     /// a new one
-    if (originalExtension.isEmpty) return true;
+    if (widget.originalExtension.isEmpty) return true;
 
     String title = '';
     String message = S.current.messageChangeExtensionAlert;
 
-    if (fileExtension != originalExtension) {
+    if (fileExtension != widget.originalExtension) {
       title = S.current.titleFileExtensionChanged;
     }
 
@@ -188,17 +197,17 @@ class RenameEntry extends HookWidget with AppLogger {
     if (title.isEmpty) return true;
 
     final continueAnyway = await AlertDialogWithActions.show(
-      stage,
+      widget.stage,
       title: title,
       body: [Text(message)],
       actions: [
         TextButton(
           child: Text(S.current.actionRename.toUpperCase()),
-          onPressed: () => stage.maybePop(true),
+          onPressed: () => widget.stage.maybePop(true),
         ),
         TextButton(
           child: Text(S.current.actionCancelCapital),
-          onPressed: () => stage.maybePop(false),
+          onPressed: () => widget.stage.maybePop(false),
         ),
       ],
     );
@@ -211,7 +220,7 @@ class RenameEntry extends HookWidget with AppLogger {
     String newName,
   ) async {
     final newPath = p.join(parent, newName);
-    final exist = await repoCubit.entryExists(newPath);
+    final exist = await widget.repoCubit.entryExists(newPath);
     if (exist) {
       _errorMessage.value = S.current.messageEntryAlreadyExist(newName);
       return false;
@@ -224,11 +233,11 @@ class RenameEntry extends HookWidget with AppLogger {
   List<Widget> _actions() => [
     NegativeButton(
       text: S.current.actionCancel,
-      onPressed: () => stage.maybePop(''),
+      onPressed: () => widget.stage.maybePop(''),
     ),
     PositiveButton(
       text: S.current.actionRename,
-      onPressed: () => _onSaved(parent, _newNameController.text),
+      onPressed: () => _onSaved(widget.parent, _newNameController.text),
       focusNode: _positiveButtonFocus,
     ),
   ];
@@ -236,7 +245,7 @@ class RenameEntry extends HookWidget with AppLogger {
   Future<void> _onSaved(String parent, String? newName) async {
     final submitted = await _submitField(parent, newName);
     if (submitted) {
-      await stage.maybePop(newName);
+      await widget.stage.maybePop(newName);
     }
   }
 }
