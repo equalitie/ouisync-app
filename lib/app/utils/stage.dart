@@ -66,6 +66,9 @@ class Stage {
     }
   }
 
+  /// Pop the topmost route from the navigator stack.
+  void pop<T>([T? result]) => _navigatorState?.pop(result);
+
   /// Pop the topmost route from the navigator stack if the route allows it. Returns whether the
   /// route has been popped.
   Future<bool> maybePop<T>([T? result]) async =>

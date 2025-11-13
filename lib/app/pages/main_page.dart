@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'dart:io' as io;
 
-import 'package:build_context_provider/build_context_provider.dart'
-    show ListenerThatRunsFunctionsWithBuildContext;
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -279,17 +277,7 @@ class _MainPageState extends State<MainPage>
         // all those variables without previously properly closing them.
         canPop: false,
         onPopInvokedWithResult: _onBackPressed,
-        child: Stack(
-          alignment: AlignmentDirectional.bottomEnd,
-          children: <Widget>[
-            Column(
-              children: [
-                Expanded(child: buildMainWidget(Directionality.of(context))),
-              ],
-            ),
-            const ListenerThatRunsFunctionsWithBuildContext(),
-          ],
-        ),
+        child: buildMainWidget(Directionality.of(context)),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.miniEndFloat,
       floatingActionButton: BlocBuilder<ReposCubit, ReposState>(

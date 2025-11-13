@@ -27,7 +27,6 @@ dependencies:
   auto_size_text: ^3.0.0
   badges: ^3.1.2
   biometric_storage: ^5.0.1
-  build_context_provider: ^1.1.0
   collection: ^1.18.0
   connectivity_plus: ^6.0.5
   cross_file: ^0.3.3

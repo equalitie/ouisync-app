@@ -97,14 +97,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.2"
-  build_context_provider:
-    dependency: "direct main"
-    description:
-      name: build_context_provider
-      sha256: f5ea0a893d8a3d2e1d10bf34e4e8020beb3fefaacad0273ca87d7279ed8f6672
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.1.0"
   build_daemon:
     dependency: transitive
     description:

@@ -110,7 +110,7 @@ class _State extends State<RepoSecurityPage> {
       final unlockedAccess = newAccess.asUnlocked;
 
       if (unlockedAccess == null) {
-        await widget.stage.maybePop();
+        widget.stage.pop();
         return;
       }
 
@@ -126,7 +126,7 @@ class _State extends State<RepoSecurityPage> {
     }
 
     if (!state.hasPendingChanges) {
-      await widget.stage.maybePop();
+      widget.stage.pop();
       return;
     }
 
@@ -147,7 +147,7 @@ class _State extends State<RepoSecurityPage> {
     );
 
     if (pop ?? false) {
-      await widget.stage.maybePop();
+      widget.stage.pop();
     }
   }
 
