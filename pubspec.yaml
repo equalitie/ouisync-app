@@ -44,7 +44,6 @@ dependencies:
   flutter_bloc: ^8.0.1
   flutter_email_sender: ^6.0.0
   flutter_file_dialog: ^3.0.2
-  flutter_hooks: ^0.20.0
   flutter_localizations:
     sdk: flutter
   flutter_loggy: ^2.0.1
