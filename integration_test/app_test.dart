@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:ouisync_app/app/app.dart';
 import 'package:ouisync_app/app/cubits/store_dirs.dart';
+import 'package:ouisync_app/app/utils/master_key.dart';
+import 'package:ouisync_app/app/utils/settings/settings.dart';
 import 'package:ouisync_app/app/utils/storage_volume.dart' show StorageVolume;
 import 'package:path_provider/path_provider.dart'
     show getExternalStorageDirectories;
@@ -16,7 +18,13 @@ void main() {
   Sandbox? sandbox;
   var appController = AppController();
 
-  Future<void> init(WidgetTester tester) async {
+  Future<void> init(WidgetTester tester, {bool skipOnboarding = false}) async {
+    if (skipOnboarding) {
+      final settings = await Settings.init(MasterKey.random());
+      await settings.setShowOnboarding(false);
+      await settings.setEqualitieValues(true);
+    }
+
     await tester.pumpWidget(App.test(controller: appController));
     await tester.pumpAndSettle();
   }
@@ -35,26 +43,25 @@ void main() {
     sandbox = null;
   });
 
+  // -----------------------------------------------------------------------------------------------
+
   testWidgets('sanity check', (tester) async {
     await init(tester);
     await onboard(tester);
   });
+
+  // -----------------------------------------------------------------------------------------------
 
   testWidgets('rename repo', (tester) async {
     final oldName = 'Cat pictures';
     final newName = 'Funny pictures';
 
     // Create a repo
-    await init(tester);
-    await onboard(tester);
+    await init(tester, skipOnboarding: true);
     await createRepo(tester, name: oldName);
 
     // Open the rename dialog and rename the repo
-    final settingButton = find.repoSettingsButton();
-    await tester.pumpUntilFound(settingButton);
-
-    await tester.tap(settingButton);
-    await tester.pumpAndSettle();
+    await openRepoSettings(tester);
 
     await tester.tap(find.text('Rename'));
     await tester.pumpAndSettle();
@@ -86,42 +93,20 @@ void main() {
     expect(find.text(oldName), findsNothing);
   });
 
+  // -----------------------------------------------------------------------------------------------
+
   testWidgets('create repo on removable storage', (tester) async {
-    // Precondition: check there is at least one removable storage volume
-    final volumes = await getExternalStorageDirectories().then(
-      (dirs) => Future.wait(
-        dirs?.map((dir) => StorageVolume.forPath(dir.path)) ?? [],
-      ),
-    );
+    await requireRemovableStorage();
 
-    expect(volumes.length, greaterThan(1));
-    expect(
-      volumes,
-      contains(
-        isA<StorageVolume>().having(
-          (volume) => volume.isRemovable,
-          "removable",
-          isTrue,
-        ),
-      ),
-    );
-
-    await init(tester);
-    await onboard(tester);
+    await init(tester, skipOnboarding: true);
 
     // Create the repo on the removable storage (sdcard)
-    await tester.tap(find.text('CREATE REPOSITORY'));
-    await tester.pumpAndSettle();
-
-    await tester.enterText(find.byKey(ValueKey('name')), 'my repo');
-    await tester.pumpAndSettle();
+    await goToCreateRepoPage(tester);
+    await enterRepoName(tester, 'my repo');
 
     // Find the radio tile with the "sd_card" icon which should correspond to the removable
     // storage.
-    final removable = find.widgetWithIcon(
-      RadioListTile<StoreDir>,
-      Icons.sd_card,
-    );
+    final removable = find.removableStorageRadio();
     expect(removable, isNot(isChecked));
 
     // Verify the storage really is removable.
@@ -135,10 +120,7 @@ void main() {
 
     expect(removable, isChecked);
 
-    final createButton = find.text('CREATE');
-    await tester.ensureVisible(createButton);
-    await tester.tap(createButton);
-    await tester.pumpAndSettle();
+    await tapCreateButton(tester);
 
     // Open the repo settings
     final settingButton = find.repoSettingsButton();
@@ -164,10 +146,7 @@ void main() {
 
     // Find the radio tile with the "smartphone" icon which should correspond to the internal
     // storage.
-    final internal = find.widgetWithIcon(
-      RadioListTile<StoreDir>,
-      Icons.smartphone,
-    );
+    final internal = find.internalStorageRadio();
     expect(internal, isNot(isChecked));
 
     // Verify the storage is really internal (not removable)
@@ -199,6 +178,50 @@ void main() {
       findsOne,
     );
   }, tags: ['removable-storage']);
+
+  // -----------------------------------------------------------------------------------------------
+
+  testWidgets('move repo to removable storage then delete it', (tester) async {
+    await requireRemovableStorage();
+
+    await init(tester, skipOnboarding: true);
+
+    await createRepo(tester, name: 'my repo', storage: Storage.internal);
+    await openRepoSettings(tester);
+    await moveRepoToStorage(tester, Storage.removable);
+
+    await tester.tap(find.text('Delete'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('DELETE'));
+    await tester.pumpAndSettle();
+
+    // Verify snackbar message
+    expect(find.text('Repository my repo deleted'), findsOne);
+
+    // Verify the repo is gone
+    expect(find.text('my repo'), findsNothing);
+  }, tags: ['removable-storage']);
+}
+
+// Precondition: check there is at least one removable storage volume
+Future<void> requireRemovableStorage() async {
+  final volumes = await getExternalStorageDirectories().then(
+    (dirs) =>
+        Future.wait(dirs?.map((dir) => StorageVolume.forPath(dir.path)) ?? []),
+  );
+
+  expect(volumes.length, greaterThan(1));
+  expect(
+    volumes,
+    contains(
+      isA<StorageVolume>().having(
+        (volume) => volume.isRemovable,
+        "removable",
+        isTrue,
+      ),
+    ),
+  );
 }
 
 Future<void> onboard(WidgetTester tester) async {
@@ -214,16 +237,77 @@ Future<void> onboard(WidgetTester tester) async {
   await tester.pumpAndSettle();
 }
 
-Future<void> createRepo(WidgetTester tester, {required String name}) async {
+enum Storage { internal, removable }
+
+Future<void> createRepo(
+  WidgetTester tester, {
+  required String name,
+  Storage storage = Storage.internal,
+}) async {
+  await goToCreateRepoPage(tester);
+  await enterRepoName(tester, name);
+
+  switch (storage) {
+    case Storage.internal:
+      break;
+    case Storage.removable:
+      await selectRemovableStorage(tester);
+  }
+
+  await tapCreateButton(tester);
+}
+
+Future<void> goToCreateRepoPage(WidgetTester tester) async {
   await tester.tap(find.text('CREATE REPOSITORY'));
   await tester.pumpAndSettle();
+}
 
+Future<void> enterRepoName(WidgetTester tester, String name) async {
   await tester.enterText(find.byKey(ValueKey('name')), name);
   await tester.pumpAndSettle();
+}
 
+Future<void> selectRemovableStorage(WidgetTester tester) async {
+  await tester.tap(find.removableStorageRadio());
+  await tester.pumpAndSettle();
+}
+
+Future<void> tapCreateButton(WidgetTester tester) async {
   final createButton = find.text('CREATE');
   await tester.ensureVisible(createButton);
   await tester.tap(createButton);
+  await tester.pumpAndSettle();
+}
+
+Future<void> openRepoSettings(WidgetTester tester) async {
+  final settingButton = find.repoSettingsButton();
+  await tester.pumpUntilFound(settingButton);
+
+  await tester.tap(settingButton);
+  await tester.pumpAndSettle();
+}
+
+Future<void> moveRepoToStorage(WidgetTester tester, Storage dst) async {
+  // Open the storage dialog
+  final storageTile = find.widgetWithText(ListTile, 'Storage');
+  await tester.tap(storageTile);
+  await tester.pumpAndSettle();
+
+  // Check the corresponding radio button
+  final radio = switch (dst) {
+    Storage.internal => find.internalStorageRadio(),
+    Storage.removable => find.removableStorageRadio(),
+  };
+
+  await tester.tap(radio);
+  await tester.pumpAndSettle();
+
+  // Confirm the move
+  await tester.tap(find.text('MOVE'));
+  await tester.pumpAndSettle();
+
+  // Close the storage dialog
+  await tester.tap(find.text('CLOSE'));
   await tester.pumpAndSettle();
 }
 
@@ -232,6 +316,12 @@ extension on CommonFinders {
     of: find.bySubtype<AppBar>(),
     matching: find.byIcon(Icons.more_vert_rounded),
   );
+
+  Finder removableStorageRadio() =>
+      find.widgetWithIcon(RadioListTile<StoreDir>, Icons.sd_card);
+
+  Finder internalStorageRadio() =>
+      find.widgetWithIcon(RadioListTile<StoreDir>, Icons.smartphone);
 }
 
 class _IsChecked extends Matcher {

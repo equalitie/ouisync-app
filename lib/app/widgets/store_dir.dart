@@ -11,6 +11,7 @@ import 'package:url_launcher/url_launcher.dart' show launchUrl;
 
 import '../../generated/l10n.dart';
 import '../cubits/repo.dart';
+import '../cubits/repos.dart';
 import '../cubits/store_dirs.dart';
 import '../utils/dimensions.dart';
 import '../utils/extensions.dart';
@@ -98,12 +99,14 @@ class StoreDirDialog extends StatelessWidget with AppLogger {
   StoreDirDialog({
     required this.stage,
     required this.storeDirsCubit,
+    required this.reposCubit,
     required this.repoCubit,
     super.key,
   });
 
   final Stage stage;
   final StoreDirsCubit storeDirsCubit;
+  final ReposCubit reposCubit;
   final RepoCubit repoCubit;
 
   @override
@@ -213,7 +216,10 @@ class StoreDirDialog extends StatelessWidget with AppLogger {
 
     if (confirm ?? false) {
       await stage.loading(
-        repoCubit.move(repoState.location.relocate(dir.path).path),
+        reposCubit.moveRepository(
+          repoState.location,
+          repoState.location.relocate(dir.path),
+        ),
       );
     }
   }

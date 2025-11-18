@@ -142,38 +142,33 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
   Future<ShareToken> createToken(String tokenString) =>
       session.validateShareToken(tokenString);
 
-  Future<void> renameRepository(
+  Future<void> moveRepository(
     RepoLocation oldLocation,
-    String newName,
+    RepoLocation newLocation,
   ) async {
     // The checks here should have been caught before calling this function,
     // thus only logging here.
-    if (newName.isEmpty) {
-      loggy.error("Not renaming: new name can't be empty");
-      return;
-    }
-
     final oldEntry = state.repos[oldLocation];
 
     if (oldEntry == null) {
-      loggy.error("Not renaming: repository doesn't exist: $oldLocation");
+      loggy.error("Not moving: repository doesn't exist: $oldLocation");
       return;
     }
 
     if (oldEntry is! OpenRepoEntry) {
-      loggy.error("Not renaming: repository is not open: $oldLocation");
+      loggy.error("Not moving: repository is not open: $oldLocation");
       return;
     }
 
-    final newLocation = oldEntry.location.rename(newName);
-
     if (newLocation == oldLocation) {
-      loggy.error("Not renaming: new name same as old name: $oldLocation");
+      loggy.error(
+        "Not moving: new location same as old location: $oldLocation",
+      );
       return;
     }
 
     if (state.repos[newLocation] != null) {
-      loggy.error("Not renaming: repository at $newLocation already exists");
+      loggy.error("Not moving: repository at $newLocation already exists");
       return;
     }
 

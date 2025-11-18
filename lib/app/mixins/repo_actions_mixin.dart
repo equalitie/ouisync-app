@@ -44,7 +44,9 @@ mixin RepositoryActionsMixin on LoggyType {
     final newName = await _getRepositoryNewName(stage, location);
 
     if (newName.isNotEmpty) {
-      await stage.loading(reposCubit.renameRepository(location, newName));
+      await stage.loading(
+        reposCubit.moveRepository(location, location.rename(newName)),
+      );
 
       return newName;
     }
@@ -155,12 +157,14 @@ mixin RepositoryActionsMixin on LoggyType {
   }
 
   Future<void> showRepositoryStoreDialog({
+    required Stage stage,
+    required ReposCubit reposCubit,
     required RepoCubit repoCubit,
     required StoreDirsCubit storeDirsCubit,
-    required Stage stage,
   }) => stage.showDialog<void>(
     builder: (context) => StoreDirDialog(
       storeDirsCubit: storeDirsCubit,
+      reposCubit: reposCubit,
       repoCubit: repoCubit,
       stage: stage,
     ),

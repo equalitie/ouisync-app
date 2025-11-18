@@ -156,6 +156,7 @@ class RepositorySettings extends StatelessWidget
                       ),
                       subtitle: Text(dir.volume.description),
                       onTap: () => showRepositoryStoreDialog(
+                        reposCubit: reposCubit,
                         repoCubit: repoCubit,
                         storeDirsCubit: storeDirsCubit,
                         stage: stage,
