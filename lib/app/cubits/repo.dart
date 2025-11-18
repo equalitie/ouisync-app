@@ -110,6 +110,12 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   final MountCubit _mountCubit;
   final void Function(String)? _onNotify;
 
+  // We don't expose `_repo.events` directly, instead we pipe it though this controller and expose
+  // only its stream. This allows us to resubscribe to `_repo.events` when the repo gets closed and
+  // reopened (e.g., when it gets moved) in a way that's transparent to the callers.
+  final _eventController = StreamController<void>.broadcast();
+  StreamSubscription<void>? _eventSubscription;
+
   RepoCubit._(
     this._navigation,
     this._entrySelection,
@@ -122,6 +128,11 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     super.state,
   ) {
     _currentFolder.repo = this;
+
+    _eventController.onListen = () {
+      _eventSubscription = _repo.events.listen(_eventController.add);
+    };
+    _eventController.onCancel = () => _eventSubscription?.cancel();
   }
 
   static Future<RepoCubit> create({
@@ -182,14 +193,10 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   AccessMode get accessMode => state.accessMode;
   String get currentFolder => _currentFolder.state.path;
   EntrySelectionCubit get entrySelectionCubit => _entrySelection;
-  Future<void> delete() => _repo.delete();
 
-  // Note: By converting `_repo.events` to a broadcast stream and caching it here we ensure at most
-  // one subscription is created on the backend and then the events are fanned out to every
-  // subscription on the frontend. If we instead returned `_repo.events` directly here, then every
-  // frontend subscription would have its own backend subscription which would multiply the traffic
-  // over the local control socket, potentially degrading performance during heavy event emissions.
-  late final Stream<void> events = _repo.events.asBroadcastStream();
+  Stream<void> get events => _eventController.stream;
+
+  Future<void> delete() => _repo.delete();
 
   void updateNavigation() {
     _navigation.current(location, currentFolder);
@@ -623,6 +630,13 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
 
     final path = await _repo.getPath();
     final location = RepoLocation.fromDbPath(path);
+
+    // Resubscribe to the event stream
+    await _eventSubscription?.cancel();
+
+    if (_eventController.hasListener) {
+      _eventSubscription = _repo.events.listen(_eventController.add);
+    }
 
     emitUnlessClosed(state.copyWith(location: location));
   }
