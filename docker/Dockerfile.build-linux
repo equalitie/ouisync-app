@@ -3,9 +3,8 @@
 FROM ubuntu:22.04
 
 ARG NDK_VERSION
-
-ENV FLUTTER_VERSION=3.32.5
-ENV RUST_VERSION=1.89.0
+ARG RUST_VERSION=1.91.0
+ARG FLUTTER_VERSION=3.32.5
 
 RUN apt-get update && apt-get upgrade -y
 RUN apt-get install -y \
@@ -58,6 +57,7 @@ RUN flutter config --enable-android --enable-linux-desktop
 RUN flutter precache --linux
 RUN flutter config --no-analytics
 RUN yes | flutter doctor --android-licenses
+RUN dart --disable-analytics
 RUN flutter doctor -v
 
 # install rust

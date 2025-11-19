@@ -11,24 +11,34 @@ function check_dependency {
 }
 
 function dock() {
-    docker --host ssh://$host "$@"
+    if [ -n "$host" ]; then
+        docker --host ssh://$host "$@"
+    else
+        docker "$@"
+    fi
 }
 
 function exe() (
-    while [[ "$#" -gt 0 ]]; do
+    local opts=
+    local history_log=
+
+    while true; do
         case $1 in
-            -d) local dir_opt="-w $2"; shift ;;
-            -i) local interactive_opt="-i" ;;
-            -l) local history_log=1 ;;
+            -w) opts="$opts --workdir $2"; shift ;;
+            -i) opts="$opts --interactive" ;;
+            -e) opts="$opts --env $2"; shift ;;
+            -t) opts="$opts --tty" ;;
+            -l) history_log=1 ;;
+            -*) echo "exe: unknown option: $1" >&2; exit ;;
             *) break ;;
         esac
         shift
     done
 
-    local cmd="dock exec $dir_opt $interactive_opt $container_name $@"
+    local cmd="dock exec $opts $container_id $@"
 
     if [ "$history_log" == 1 ]; then
-        echo $cmd | dock exec -i $container_name dd of=/root/.bash_history oflag=append conv=notrunc
+        echo $cmd | dock exec -i $container_id dd of=/root/.bash_history oflag=append conv=notrunc
     fi
 
     $cmd
@@ -41,9 +51,9 @@ function get_sources_from_git {
     # Remove slash suffix if present
     dstdir=${dstdir%/}
 
-    exe -d $dstdir/ git clone --filter=tree:0 https://github.com/equalitie/ouisync-app
-    exe -d $dstdir/ouisync-app git reset --hard $commit
-    exe -d $dstdir/ouisync-app git submodule update --init --recursive
+    exe -w $dstdir/ git clone --filter=tree:0 https://github.com/equalitie/ouisync-app
+    exe -w $dstdir/ouisync-app git reset --hard $commit
+    exe -w $dstdir/ouisync-app git submodule update --init --recursive
 }
 
 function get_sources_from_local_dir {
@@ -52,22 +62,29 @@ function get_sources_from_local_dir {
 
     local exclude_dirs=(
         # .git is needed for release.dart script to read git commit
+        .dart_tool
+        android/app/.cxx
+        build
+        ios
+        linux/flutter/ephemeral
         ouisync/.git
         ouisync/target
         releases
-        .dart_tool
-        ios
-        android/app/.cxx
-        build
+        tmp
         windows/flutter/ephemeral
-        linux/flutter/ephemeral
     )
 
-    rsync -e "docker --host ssh://$host exec -i" \
+    local host_opt=
+    if [ -n "$host" ]; then
+        host_opt="--host ssh://$host"
+    fi
+
+    rsync -e "docker $host_opt exec -i" \
         -av \
         --no-links \
+        --quiet \
         ${exclude_dirs[@]/#/--exclude=} \
-        ${srcdir%/}/ $container_name:$dstdir/ouisync-app
+        ${srcdir%/}/ $container_id:$dstdir/ouisync-app
 
     exe git config --global --add safe.directory /opt/ouisync-app
 }
