@@ -24,10 +24,10 @@ function exe() (
 
     while true; do
         case $1 in
-            -w) opts="$opts --workdir $2"; shift ;;
-            -i) opts="$opts --interactive" ;;
-            -e) opts="$opts --env $2"; shift ;;
-            -t) opts="$opts --tty" ;;
+            -w|--workdir) opts="$opts --workdir $2"; shift ;;
+            -i|--interactive) opts="$opts --interactive" ;;
+            -e|--env) opts="$opts --env $2"; shift ;;
+            -t|--tty) opts="$opts --tty" ;;
             -l) history_log=1 ;;
             -*) echo "exe: unknown option: $1" >&2; exit ;;
             *) break ;;

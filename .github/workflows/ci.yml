@@ -16,30 +16,28 @@ env:
     ouisync/target/
 
 jobs:
-  test:
-    name: test on ${{ matrix.name }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        name: [linux, windows]
-        include:
-          - name: linux
-            os: ubuntu-24.04
-            env:
-              OUISYNC_LIB: ouisync/target/debug/libouisync_service.so
-            analyze: true
+  test_linux:
+    name: test on linux
+    runs-on: self-hosted
 
-          - name: windows
-            os: windows-latest
-            env:
-              # Install Dokan2.dll to where `flutter test` can find it
-              DOKAN_DLL_OUTPUT_PATH: C:\Windows\System32
-              OUISYNC_LIB: ouisync\target\debug\ouisync_service.dll
-            # FIXME: The mount test fails on windows CI with a panic somewhere in the dokan-rust
-            # crate. Disabling for now but it needs to be looked into.
-            test-args: --exclude-tags mount
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
-    env: ${{ matrix.env }}
+      - name: Analyze
+        run: ./docker/build-linux.sh --src . --cache analyze
+
+      - name: Run tests
+        run: ./docker/build-linux.sh --src . --cache unit-test
+
+  test_windows:
+    name: test on windows
+    runs-on: windows-latest
+    env:
+      # Install Dokan2.dll to where `flutter test` can find it
+      DOKAN_DLL_OUTPUT_PATH: C:\Windows\System32
+      OUISYNC_LIB: ouisync\target\debug\ouisync_service.dll
 
     steps:
       - uses: actions/checkout@v4
@@ -54,18 +52,10 @@ jobs:
           key: ${{ runner.os }}-cargo-test-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: ${{ runner.os }}-cargo-
 
-      - name: Install dependencies (linux)
-        run: |
-          sudo apt update -y
-          sudo apt-get install libfuse-dev
-        if: matrix.name == 'linux'
-
       # FIXME: when dokan is installed some tests fail with weird panic from the dokan-rust library.
-      # Disabling for now. See also the comment for the `test-args` variable in the `windows`
-      # strategy.
+      # Disabling for now. See also the comment in the 'Run tests' step.
       # - name: Install dependencies (windows)
       #   run: choco install dokany2
-      #   if: matrix.name == 'windows'
 
       - uses: subosito/flutter-action@v2
         with:
@@ -109,25 +99,25 @@ jobs:
       - name: "[HACK] Force dokan-sys to build"
         run: cargo clean --package dokan-sys
         working-directory: ouisync
-        if: matrix.name == 'windows'
 
       - name: Build Ouisync service library for tests
         working-directory: ouisync
         run: cargo build --package ouisync-service --lib
 
       - name: Run tests
-        run:
-          flutter test ${{ matrix.test-args }}
+        # FIXME: The mount test fails on windows CI with a panic somewhere in the dokan-rust
+        # crate. Disabling for now but it needs to be looked into.
+        run: flutter test --exclude-tags mount
 
       - name: Upload test/debug artifacts
         uses: actions/upload-artifact@v4
         with:
           # Name of the produced zip file
-          name: test-artifacts-${{ matrix.name }}
+          name: test-artifacts-${{ runner.os }}
           path: test/widget/artifacts/*
           if-no-files-found: ignore
-        # Upload even when tests fail
-        if: always()
+        # Upload when tests fail
+        if: failure()
 
   build:
     name: build on ${{ matrix.name }}

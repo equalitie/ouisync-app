@@ -150,6 +150,9 @@ function init() {
     # Generate bindings (TODO: This should be done automatically)
     exe -w /opt/ouisync-app/ouisync/bindings/dart dart pub get
     exe -w /opt/ouisync-app/ouisync/bindings/dart dart tool/bindgen.dart
+
+    # Update dependencies
+    exe -w /opt/ouisync-app dart pub get
 }
 
 # Build the release artifacts for linux and android
@@ -199,9 +202,6 @@ function run_build() {
         arg_android_key_properties="--android-key-properties=/opt/secrets/key.properties"
         arg_sentry="--sentry=/opt/secrets/sentry_dsn"
     fi
-
-    # Update dependencies
-    exe -w /opt/ouisync-app dart pub get
 
     # Build Ouisync app
     exe -w /opt/ouisync-app dart run util/release.dart \
