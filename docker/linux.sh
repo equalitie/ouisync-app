@@ -7,7 +7,7 @@ commit=
 srcdir=
 shell=
 
-source $(dirname $0)/build-utils.sh
+source $(dirname $0)/utils.sh
 
 base_name="ouisync-runner-linux"
 default_image_name="$base_name:$USER"
@@ -98,7 +98,7 @@ keep_alive_pid=
 
 function build_container() {
     ndk_version=$(cat ndk-version.txt)
-    dock build -t $image_name --build-arg NDK_VERSION=$ndk_version - < docker/Dockerfile.build-linux
+    dock build -t $image_name --build-arg NDK_VERSION=$ndk_version - < docker/Dockerfile.linux
 }
 
 function start_container() {
