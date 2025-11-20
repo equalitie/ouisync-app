@@ -16,8 +16,8 @@ image_name=$default_image_name
 cache=
 cache_volume="$base_name-cache"
 
-container_name=
-container_id=
+default_container_name="$base_name.$USER"
+container_name=$default_container_name
 
 function print_help() {
     local command="${1:-}"
@@ -53,6 +53,18 @@ function print_help() {
             echo
             echo "Usage: $0 analyze"
             ;;
+        "start")
+            echo "Explicitly start the container"
+            echo
+            echo "Usage: $0 start"
+            echo
+            echo "Subsequent commands run on this container instead of starting a new one."
+            ;;
+        "stop")
+            echo "Explicitly stop the container"
+            echo
+            echo "Usage: $0 stop"
+            ;;
         *)
             echo "Script for building and testing Ouisync App in a Docker container"
             echo
@@ -63,7 +75,7 @@ function print_help() {
             echo "    --host <HOST>         IP or entry in ~/.ssh/config of machine running Docker. If omitted, runs locally"
             echo "    --commit <COMMIT>     Commit from which to build"
             echo "    --src <PATH>          Source dir from which to build"
-            echo "    --container <NAME>    Assign a name to the docker container"
+            echo "    --container <NAME>    Assign a name to the docker container [default: $default_container_name]"
             echo "    --image <NAME>[:TAG]  Name (and optional tag) of the docker image to use [default: $default_image_name]"
             echo "    --cache               Cache intermediate build artifacts in a persistent docker volume"
             echo "    -s, --shell           Open a shell session in the container after the command finishes"
@@ -74,6 +86,8 @@ function print_help() {
             echo "    unit-test         Run unit tests"
             echo "    integration-test  Run integration tests"
             echo "    analyze           Analyze the dart source code"
+            echo "    start             Explicitly start the container"
+            echo "    stop              Excplicitly stop the container"
             echo
             echo "See '$0 help <command> for more information on a specific command"
             ;;
@@ -88,7 +102,6 @@ function build_container() {
 }
 
 function start_container() {
-
     local opts=
 
     if [ "$cache" = 1 ]; then
@@ -96,31 +109,34 @@ function start_container() {
         opts="$opts --mount src=$cache_volume,dst=/root/.pub-cache,volume-subpath=pub-cache"
     fi
 
-    if [ -n "$container_name" ]; then
+    if [ -n "${container_name-}" ]; then
         opts="$opts --name $container_name"
     fi
 
+    dock run -d --rm $opts $image_name "$@"
+}
+
+function auto_start_container() {
     # Run the container for as long as this script is running
-    container_id=$(dock run -d --rm $opts $image_name \
-        sh -c 'sleep 60; while [ -n "$(find /tmp/alive -cmin -1)" ]; do sleep 10; done')
+    start_container sh -c 'sleep 60; while [ -n "$(find /tmp/alive -cmin -1)" ]; do sleep 10; done'
 
     # Prevent the container from stopping
     while true; do exe touch /tmp/alive || true; sleep 5; done &
     keep_alive_pid=$!
 
     # Stop the container on exit
-    trap stop_container EXIT
+    trap auto_stop_container EXIT
 }
 
-function stop_container() {
+function auto_stop_container() {
     if [ "$shell" = 1 ]; then
-        echo "Entering container"
-        dock exec -it $container_id bash
+        echo "Entering container $container_name"
+        dock exec -it $container_name bash
     fi
 
-    echo "Stopping container"
+    echo "Stopping container $container_name"
     kill $keep_alive_pid
-    dock container stop $container_id
+    dock container stop $container_name
 }
 
 function create_cache_volume() {
@@ -133,13 +149,16 @@ function init() {
     if [ -z "$commit" -a -z "$srcdir" ]; then error "Missing one of --commit or --src"; fi
     if [ -n "$commit" -a -n "$srcdir" ]; then error "--commit and --src are mutually exclusive"; fi
 
-    build_container
+    # Auto-start the container unless already running
+    if [ "$(dock container inspect -f '{{.State.Status}}' $container_name 2> /dev/null)" != "running" ]; then
+        build_container
 
-    if [ "$cache" = 1 ]; then
-        create_cache_volume
+        if [ "$cache" = 1 ]; then
+            create_cache_volume
+        fi
+
+        auto_start_container
     fi
-
-    start_container
 
     if [ -n "$commit" ]; then
         get_sources_from_git $commit /opt
@@ -155,11 +174,24 @@ function init() {
     exe -w /opt/ouisync-app dart pub get
 }
 
+# Start the docker container and keep it running
+function run_start() {
+    build_container
+
+    echo "Starting container '$container_name'"
+    start_container tail -f /dev/null
+}
+
+# Stop the docker container
+function run_stop() {
+    dock container stop $container_name
+}
+
 # Build the release artifacts for linux and android
 function run_build() {
     init
 
-    local dst_dir="./releases/${container_name-default}"
+    local dst_dir="./releases/$container_name"
     local flavor=
 
     while true; do
@@ -191,7 +223,7 @@ function run_build() {
 
     # Set up secrets inside the container
     if [ "$flavor" != unofficial ]; then
-        function exe_i() { dock exec -i $container_id "$@"; }
+        function exe_i() { dock exec -i $container_name "$@"; }
         exe mkdir -p /opt/secrets
         echo "$secretKeystoreHex" | xxd -p -r      | exe_i dd of=/opt/secrets/keystore.jks
         echo "storePassword=$secretStorePassword"  | exe_i dd of=/opt/secrets/key.properties
@@ -214,7 +246,7 @@ function run_build() {
     mkdir -p $dst_dir
     src_dir=/opt/ouisync-app/releases/latest
     for artifact in $(exe -w $src_dir ls); do
-        dock cp $container_id:$src_dir/$artifact $dst_dir/
+        dock cp $container_name:$src_dir/$artifact $dst_dir/
     done
 }
 
@@ -286,6 +318,12 @@ case "$1" in
     help|h)
         print_help ${@:2}
         exit
+        ;;
+    start)
+        run_start ${@:2}
+        ;;
+    stop)
+        run_stop ${@:2}
         ;;
     build|b)
         run_build ${@:2}

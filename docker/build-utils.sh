@@ -35,10 +35,10 @@ function exe() (
         shift
     done
 
-    local cmd="dock exec $opts $container_id $@"
+    local cmd="dock exec $opts $container_name $@"
 
     if [ "$history_log" == 1 ]; then
-        echo $cmd | dock exec -i $container_id dd of=/root/.bash_history oflag=append conv=notrunc
+        echo $cmd | dock exec -i $container_name dd of=/root/.bash_history oflag=append conv=notrunc
     fi
 
     $cmd
@@ -84,7 +84,7 @@ function get_sources_from_local_dir {
         --no-links \
         --quiet \
         ${exclude_dirs[@]/#/--exclude=} \
-        ${srcdir%/}/ $container_id:$dstdir/ouisync-app
+        ${srcdir%/}/ $container_name:$dstdir/ouisync-app
 
     exe git config --global --add safe.directory /opt/ouisync-app
 }

@@ -19,17 +19,26 @@ jobs:
   test_linux:
     name: test on linux
     runs-on: self-hosted
+    env:
+      CONTAINER: ouisync-test-linux
 
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
 
+      - name: Start container
+        run: ./docker/build-linux.sh --container $CONTAINER start
+
       - name: Analyze
         run: ./docker/build-linux.sh --src . --cache analyze
 
       - name: Run tests
         run: ./docker/build-linux.sh --src . --cache unit-test
+
+      - name: Stop container
+        run: ./docker/build-linux.sh --container $CONTAINER stop
+        if: always()
 
   test_windows:
     name: test on windows
