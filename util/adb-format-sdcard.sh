@@ -3,6 +3,8 @@
 # This script is meant to be used on the CI (Github Actions, etc...) to setup the emulated SD card
 # for testing. Using it for other purposes is not recommended.
 
+adb_opts="$@"
+
 echo "Format SD card on the connected Android device or emulator? [y/n]"
 read -r reply
 
@@ -14,14 +16,14 @@ fi
 
 echo "Formatting SD card ..."
 
-adoptable=$(adb shell sm has-adoptable)
+adoptable=$(adb $adb_opts shell sm has-adoptable)
 if [ $adoptable == "false" ]; then
-    adb shell sm set-force-adoptable true
+    adb $adb_opts shell sm set-force-adoptable true
 fi
 
 disk=
 while true; do
-    disk=$(adb shell sm list-disks)
+    disk=$(adb $adb_opts shell sm list-disks)
 
     if [ -n "$disk" ]; then
         break
@@ -31,9 +33,9 @@ done
 adb shell sm partition "$disk" public
 
 if [ $adoptable == "false" ]; then
-    volume=$(adb shell sm list-volumes | grep public | cut -d' ' -f1)
-    adb shell sm format "$volume"
-    adb shell sm mount "$volume"
+    volume=$(adb $adb_opts shell sm list-volumes | grep public | cut -d' ' -f1)
+    adb $adb_opts shell sm format "$volume"
+    adb $adb_opts shell sm mount "$volume"
 fi
 
 echo "Done"

@@ -5,6 +5,20 @@ function error() {
     exit 1
 }
 
+function log_group_begin() {
+    if [ -n "${GITHUB_ACTIONS-}" ]; then
+        echo "::group::$@"
+    else
+        echo "$@"
+    fi
+}
+
+function log_group_end() {
+    if [ -n "${GITHUB_ACTIONS-}" ]; then
+        echo "::endgroup::"
+    fi
+}
+
 function check_dependency {
     local dep=$1
     command -v $dep >/dev/null 2>&1 || { error "'$dep' is not installed"; }
@@ -35,6 +49,10 @@ function exe() (
         shift
     done
 
+    if [ -n "${GITHUB_ACTIONS-}" ]; then
+        opts="$opts --env GITHUB_ACTIONS=$GITHUB_ACTIONS"
+    fi
+
     local cmd="dock exec $opts $container_name $@"
 
     if [ "$history_log" == 1 ]; then
@@ -61,12 +79,12 @@ function get_sources_from_local_dir {
     local dstdir=$2
 
     local exclude_dirs=(
-        # .git is needed for release.dart script to read git commit
         .dart_tool
         android/app/.cxx
         build
         ios
         linux/flutter/ephemeral
+        # .git is needed for release.dart script to read git commit
         ouisync/.git
         ouisync/target
         releases
@@ -80,9 +98,7 @@ function get_sources_from_local_dir {
     fi
 
     rsync -e "docker $host_opt exec -i" \
-        -av \
-        --no-links \
-        --quiet \
+        -av --no-links \
         ${exclude_dirs[@]/#/--exclude=} \
         ${srcdir%/}/ $container_name:$dstdir/ouisync-app
 

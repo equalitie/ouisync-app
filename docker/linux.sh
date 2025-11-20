@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -eu
+set -euo pipefail
 
 host=
 commit=
@@ -13,11 +13,14 @@ base_name="ouisync-runner-linux"
 default_image_name="$base_name:$USER"
 image_name=$default_image_name
 
-cache=
-cache_volume="$base_name-cache"
-
 default_container_name="$base_name.$USER"
 container_name=$default_container_name
+
+cache_volume="$base_name-cache"
+cache=
+
+emulator_port=5554
+emulator_sdcard=32M
 
 function print_help() {
     local command="${1:-}"
@@ -65,6 +68,11 @@ function print_help() {
             echo
             echo "Usage: $0 stop"
             ;;
+        "shell")
+            echo "Run a shell session in the container"
+            echo
+            echo "Usage: $0 shell"
+            ;;
         *)
             echo "Script for building and testing Ouisync App in a Docker container"
             echo
@@ -74,10 +82,10 @@ function print_help() {
             echo "    -h, --help            Print help"
             echo "    --host <HOST>         IP or entry in ~/.ssh/config of machine running Docker. If omitted, runs locally"
             echo "    --commit <COMMIT>     Commit from which to build"
-            echo "    --src <PATH>          Source dir from which to build"
+            echo "    --srcdir <PATH>       Source dir from which to build"
             echo "    --container <NAME>    Assign a name to the docker container [default: $default_container_name]"
             echo "    --image <NAME>[:TAG]  Name (and optional tag) of the docker image to use [default: $default_image_name]"
-            echo "    --cache               Cache intermediate build artifacts in a persistent docker volume"
+            echo "    --cache               Cache some dependencies and intermediate build artifacts"
             echo "    -s, --shell           Open a shell session in the container after the command finishes"
             echo
             echo "Commands:"
@@ -87,33 +95,139 @@ function print_help() {
             echo "    integration-test  Run integration tests"
             echo "    analyze           Analyze the dart source code"
             echo "    start             Explicitly start the container"
-            echo "    stop              Excplicitly stop the container"
+            echo "    stop              Explicitly stop the container"
             echo
             echo "See '$0 help <command> for more information on a specific command"
             ;;
     esac
 }
 
-keep_alive_pid=
-
 function build_container() {
+    log_group_begin "Building image $image_name"
+
     ndk_version=$(cat ndk-version.txt)
     dock build -t $image_name --build-arg NDK_VERSION=$ndk_version - < docker/Dockerfile.linux
+
+    log_group_end
+}
+
+function create_cache_volume() {
+    log_group_begin "Create cache volume $cache_volume"
+
+    dock volume create $cache_volume > /dev/null
+    dock run --rm --mount src=$cache_volume,dst=/mnt/cache --workdir /mnt/cache $image_name \
+        bash -c 'mkdir -p cargo/bin;
+                 mkdir -p cargo/git/db;
+                 mkdir -p cargo/registry/cache;
+                 mkdir -p cargo/registry/index;
+                 mkdir -p cargo-target;
+                 mkdir -p pub-cache;
+                 mkdir -p android-system-images;
+                 mkdir -p gradle;'
+
+    log_group_end
+}
+
+function cache_mount_options() {
+    # Cargo global
+    echo "--mount src=$cache_volume,dst=/root/.cargo/bin,volume-subpath=cargo/bin"
+    echo "--mount src=$cache_volume,dst=/root/.cargo/registry/index,volume-subpath=cargo/registry/index"
+    echo "--mount src=$cache_volume,dst=/root/.cargo/registry/cache,volume-subpath=cargo/registry/cache"
+    echo "--mount src=$cache_volume,dst=/root/.cargo/git/db,volume-subpath=cargo/git/db"
+
+    # Cargo per project
+    echo "--mount src=$cache_volume,dst=/opt/ouisync-app/ouisync/target,volume-subpath=cargo-target"
+
+    # Dart
+    echo "--mount src=$cache_volume,dst=/root/.pub-cache,volume-subpath=pub-cache"
+
+    # Android system images
+    echo "--mount src=$cache_volume,dst=/opt/android-sdk/system-images,volume-subpath=android-system-images"
+
+    # Gradle
+    echo "--mount src=$cache_volume,dst=/root/.gradle,volume-subpath=gradle"
+
+    # Sharing the gradle journal directory causes issues with locking. Create a throwaway volume for
+    # it so each container uses its own.
+    echo "--mount dst=/root/.gradle/caches/journal-1"
 }
 
 function start_container() {
-    local opts=
+    if [ -z "$commit" -a -z "$srcdir" ]; then error "Missing one of --commit or --srcdir"; fi
+    if [ -n "$commit" -a -n "$srcdir" ]; then error "--commit and --src are mutually exclusive"; fi
+
+    build_container
 
     if [ "$cache" = 1 ]; then
-        opts="$opts --mount src=$cache_volume,dst=/opt/ouisync-app/ouisync/target,volume-subpath=cargo-target"
-        opts="$opts --mount src=$cache_volume,dst=/root/.pub-cache,volume-subpath=pub-cache"
+        create_cache_volume
     fi
+
+    echo "Start container $container_name"
+
+    local opts="-d --rm"
+
+    # Sync localtime with host
+    opts="$opts --mount type=bind,src=/etc/timezone,dst=/etc/timezone,ro"
+    opts="$opts --mount type=bind,src=/etc/localtime,dst=/etc/localtime:ro"
+
+    # Mount cache volume (if enabled)
+    if [ "$cache" = 1 ]; then
+        opts="$opts $(cache_mount_options)"
+    fi
+
+    # Needed for android emulator
+    opts="$opts --device /dev/kvm"
 
     if [ -n "${container_name-}" ]; then
         opts="$opts --name $container_name"
     fi
 
-    dock run -d --rm $opts $image_name "$@"
+    # Note: can't use the `dock` function here (that is, `docker --host ...`) because it doesn't
+    # seem to play well with the `--device /dev/kvm` option. Running docker through ssh instead
+    # which seems to work.
+    if [ -n "$host" ]; then
+        local args=()
+        for arg; do
+            args+=("'$arg'")
+        done
+
+        ssh $host docker run $opts $image_name ${args[@]}
+    else
+        docker run $opts $image_name "$@"
+    fi
+
+    log_group_begin "Fetch app source"
+
+    if [ -n "$commit" ]; then
+        get_sources_from_git $commit /opt
+    else
+        get_sources_from_local_dir $srcdir /opt
+    fi
+
+    log_group_end
+
+    # Generate bindings (TODO: This should be done automatically)
+    log_group_begin "Generate bindings"
+    exe -w /opt/ouisync-app/ouisync/bindings/dart -t dart pub get
+    exe -w /opt/ouisync-app/ouisync/bindings/dart -t dart tool/bindgen.dart
+    log_group_end
+
+    log_group_begin "Update dart dependencies"
+    exe -w /opt/ouisync-app -t dart pub get
+    log_group_end
+
+    # Run cargo sweep to delete all cargo artifacts older than 30 days (prevents unbounded cache grow)
+    if [ "$cache" = 1 ]; then
+        log_group_begin "Prune cached cargo artifacts"
+        exe -t cargo install cargo-sweep || true
+        exe -w /opt/ouisync-app/ouisync -t cargo sweep --recursive --time 30
+        log_group_end
+    fi
+}
+
+function stop_container() {
+    echo "Stop container $container_name"
+    dock container stop $container_name
 }
 
 function auto_start_container() {
@@ -122,79 +236,42 @@ function auto_start_container() {
 
     # Prevent the container from stopping
     while true; do exe touch /tmp/alive || true; sleep 5; done &
-    keep_alive_pid=$!
+    local keep_alive_pid=$!
 
     # Stop the container on exit
-    trap auto_stop_container EXIT
+    trap "auto_stop_container $keep_alive_pid" EXIT
 }
 
 function auto_stop_container() {
+    local keep_alive_pid="$1"
+
     if [ "$shell" = 1 ]; then
-        echo "Entering container $container_name"
+        echo "Enter container $container_name"
         dock exec -it $container_name bash
     fi
 
-    echo "Stopping container $container_name"
-    kill $keep_alive_pid
-    dock container stop $container_name
+    kill $keep_alive_pid || true
+
+    stop_container
 }
 
-function create_cache_volume() {
-    dock volume create $cache_volume > /dev/null
-    dock run --rm --mount src=$cache_volume,dst=/mnt/cache --workdir /mnt/cache $image_name \
-        bash -c 'mkdir -p cargo-target; mkdir -p pub-cache'
-}
 
 function init() {
-    if [ -z "$commit" -a -z "$srcdir" ]; then error "Missing one of --commit or --src"; fi
-    if [ -n "$commit" -a -n "$srcdir" ]; then error "--commit and --src are mutually exclusive"; fi
-
     # Auto-start the container unless already running
     if [ "$(dock container inspect -f '{{.State.Status}}' $container_name 2> /dev/null)" != "running" ]; then
-        build_container
-
-        if [ "$cache" = 1 ]; then
-            create_cache_volume
-        fi
-
         auto_start_container
     fi
-
-    if [ -n "$commit" ]; then
-        get_sources_from_git $commit /opt
-    else
-        get_sources_from_local_dir $srcdir /opt
-    fi
-
-    # Generate bindings (TODO: This should be done automatically)
-    exe -w /opt/ouisync-app/ouisync/bindings/dart dart pub get
-    exe -w /opt/ouisync-app/ouisync/bindings/dart dart tool/bindgen.dart
-
-    # Update dependencies
-    exe -w /opt/ouisync-app dart pub get
 }
 
-# Start the docker container and keep it running
-function run_start() {
-    build_container
-
-    echo "Starting container '$container_name'"
-    start_container tail -f /dev/null
-}
-
-# Stop the docker container
-function run_stop() {
-    dock container stop $container_name
-}
-
+####################################################################################################
 # Build the release artifacts for linux and android
-function run_build() {
+function build() {
     init
 
     local dst_dir="./releases/$container_name"
     local flavor=
 
-    while true; do
+    while [ $# -gt 0 ]; do
         case $1 in
             "--out")
                 dst_dir="$1"
@@ -250,25 +327,173 @@ function run_build() {
     done
 }
 
+####################################################################################################
 # Run unit tests
-function run_unit_tests() {
+function unit_test() {
     init
 
-    # Build the library
+    log_group_begin "Build the Ouisync library for tests"
     exe -w /opt/ouisync-app/ouisync -t cargo build --package ouisync-service --lib
+    log_group_end
 
-    # Run tests
-    exe -w /opt/ouisync-app -t -e OUISYNC_LIB=ouisync/target/debug/libouisync_service.so flutter test $@
+    log_group_begin "Run tests"
+    exe -w /opt/ouisync-app -t -e OUISYNC_LIB=ouisync/target/debug/libouisync_service.so flutter test "$@"
+    log_group_end
 }
 
+####################################################################################################
+
+function start_emulator() {
+    local api=
+
+    while true; do
+        case ${1-} in
+            --api)
+                api=${2-}
+                shift
+                shift
+                ;;
+            *)
+                break
+                ;;
+        esac
+    done
+
+    if [ -z "$api" ]; then
+        error "Missing --api"
+    fi
+
+    local target=google_apis
+    if [ "$api" = "27" ]; then
+        target=default
+    fi
+
+    local avd=android-$api
+    local system_image="system-images;android-$api;$target;x86_64"
+
+    #-----------------------------
+
+    log_group_begin "Create AVD"
+    exe sdkmanager --install "$system_image"
+    echo "no" | exe -i avdmanager create avd --force --name $avd --package "$system_image" --sdcard $emulator_sdcard
+    log_group_end
+
+    #-----------------------------
+
+    log_group_begin "Launch emulator"
+
+    exe -t \
+        -e ANDROID_EMULATOR_WAIT_TIME_BEFORE_KILL=1 \
+        emulator -no-metrics -no-window -no-audio -avd $avd -port $emulator_port &
+
+    # Wait for the emulator to boot
+    while true; do
+        local result=$(exe adb -s "emulator-$emulator_port" shell getprop sys.boot_completed 2> /dev/null)
+
+        if [ "$result" = "1" ]; then
+            break
+        else
+            echo "Waiting for the emulator to boot"
+            sleep 1
+        fi
+    done
+
+    log_group_end
+
+    log_group_begin "Format sdcard"
+    echo "yes" | exe -w /opt/ouisync-app -i ./util/adb-format-sdcard.sh -s "emulator-$emulator_port"
+    log_group_end
+}
+
+function stop_emulator() {
+    log_group_begin "Stop emulator"
+    exe adb -s "emulator-$emulator_port" emu kill
+    log_group_end
+}
+
+function integration_test_android() {
+    local api=
+
+    while true; do
+        case ${1-} in
+            --api)
+                api="${2-}"
+                shift
+                shift
+                ;;
+            *)
+                break
+                ;;
+        esac
+    done
+
+    if [ -z "$api" ]; then
+        error "Missing --api"
+    fi
+
+    log_group_begin "Pre-build the app for tests"
+    exe -w /opt/ouisync-app -t flutter build apk --debug --flavor itest --target-platform android-x64
+    log_group_end
+
+    start_emulator --api $api
+
+    log_group_begin "Run tests"
+    exe -w /opt/ouisync-app -t flutter test integration_test --flavor itest --ignore-timeouts $@
+    log_group_end
+
+    stop_emulator
+}
+
+function integration_test_linux() {
+    exe -w /opt/ouisync-app -t flutter test -d linux integration_test $@
+}
+
+# Run integration tests
+function integration_test() {
+    init
+
+    local platform=
+
+    while true; do
+        case ${1-} in
+            --platform)
+                platform=${2-}
+                shift
+                shift
+                ;;
+            *)
+                break
+                ;;
+        esac
+    done
+
+    case $platform in
+        linux)
+            integration_test_linux $@
+            ;;
+        android)
+            integration_test_android $@
+            ;;
+        "")
+            error "Missing --platform"
+            ;;
+        *)
+            error "Unknown platform: $platform"
+            ;;
+    esac
+}
+
+####################################################################################################
 # Analyze the dart source code
-function run_analyze() {
+function analyze() {
     init
 
     exe -w /opt/ouisync-app/lib  -t flutter analyze
     exe -w /opt/ouisync-app/test -t flutter analyze
     exe -w /opt/ouisync-app/util -t flutter analyze
 }
+
+####################################################################################################
 
 # Handle common options
 while true; do
@@ -285,7 +510,7 @@ while true; do
             commit="$2";
             shift
             ;;
-        --src|--srcdir)
+        --srcdir|--src)
             srcdir="$2";
             shift
             ;;
@@ -320,24 +545,24 @@ case "$1" in
         exit
         ;;
     start)
-        run_start ${@:2}
+        start_container tail -f /dev/null
         ;;
     stop)
-        run_stop ${@:2}
+        stop_container
         ;;
     build|b)
-        run_build ${@:2}
+        build ${@:2}
         ;;
     unit-test|unit-tests|ut)
-        run_unit_tests ${@:2}
+        unit_test ${@:2}
         ;;
     integration-test|integration-tests|it)
-        run_integration_tests ${@:2}
+        integration_test ${@:2}
         ;;
     analyze)
-        run_analyze ${@:2}
+        analyze ${@:2}
         ;;
-    shell)
+    shell|sh)
         init
         shell=1
         ;;

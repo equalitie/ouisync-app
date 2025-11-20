@@ -19,25 +19,26 @@ jobs:
   test_linux:
     name: test on linux
     runs-on: self-hosted
-    env:
-      CONTAINER: ouisync-test-linux
 
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
 
+      - name: Create container name
+        run: echo "CONTAINER=ouisync-unit-test-linux-$GITHUB_RUN_ID" >> $GITHUB_ENV
+
       - name: Start container
-        run: ./docker/build-linux.sh --container $CONTAINER start
+        run: ./docker/linux.sh --container $CONTAINER --srcdir . --cache start
 
       - name: Analyze
-        run: ./docker/build-linux.sh --src . --cache analyze
+        run: ./docker/linux.sh --container $CONTAINER analyze
 
       - name: Run tests
-        run: ./docker/build-linux.sh --src . --cache unit-test
+        run: ./docker/linux.sh --container $CONTAINER unit-test
 
       - name: Stop container
-        run: ./docker/build-linux.sh --container $CONTAINER stop
+        run: ./docker/linux.sh --container $CONTAINER stop
         if: always()
 
   test_windows:
@@ -279,8 +280,7 @@ jobs:
 
   integration_test_android:
     name: "run integration tests on android ${{ matrix.api-level }}"
-    runs-on: ubuntu-24.04
-
+    runs-on: self-hosted
     strategy:
       fail-fast: false
       matrix:
@@ -291,10 +291,7 @@ jobs:
           # - 25
 
           - 26
-
-          # This uses different target so it's included explicitly
-          # - 27
-
+          - 27
           - 28
           - 29
           - 30
@@ -304,50 +301,34 @@ jobs:
           - 34
           - 35
           - 36
-        target:
-          - google_apis
-        include:
-          - api-level: 27
-            target: default
+
     steps:
-
-      - name: Enable KVM
-        run: |
-          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-          sudo udevadm control --reload-rules
-          sudo udevadm trigger --name-match=kvm
-
       - uses: actions/checkout@v4
         with:
           submodules: recursive
 
-      - uses: ./.github/actions/setup_android_tests
+      - name: Create container name
+        run: echo "CONTAINER=ouisync-integration-test-android-${{ matrix.api-level }}-$GITHUB_RUN_ID" >> $GITHUB_ENV
 
-      - name: Prebuild
-        run: flutter build apk --debug --flavor itest --target-platform android-x64
+      - name: Start container
+        run: ./docker/linux.sh --container $CONTAINER --srcdir . --cache start
 
       - name: Run tests
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: ${{ matrix.api-level }}
-          target: ${{ matrix.target }}
-          arch: x86_64
-          sdcard-path-or-size: 16M
-          script: |
-            adb logcat -c || true
-            adb logcat > logcat.txt &
-            yes | ./util/adb-format-sdcard.sh
-            flutter test integration_test --flavor itest --ignore-timeouts
+        run: ./docker/linux.sh --container $CONTAINER integration-test --platform android --api ${{ matrix.api-level }}
 
-      - name: Upload logcat
-        uses: actions/upload-artifact@v4
-        with:
-          # Name of the produced zip file
-          name: logcat-${{ matrix.api-level }}
-          path: logcat.txt
-          if-no-files-found: ignore
-        # Upload only when the tests fail
-        if: failure() || cancelled()
+      - name: Stop container
+        run: ./docker/linux.sh --container $CONTAINER stop
+        if: always()
+
+      # - name: Upload logcat
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     # Name of the produced zip file
+      #     name: logcat-${{ matrix.api-level }}
+      #     path: logcat.txt
+      #     if-no-files-found: ignore
+      #   # Upload only when the tests fail
+      #   if: failure() || cancelled()
 
 
   # TODO: Integration tests on both linux and windows currently fail or hang. Commenting them out until they are fixed.
