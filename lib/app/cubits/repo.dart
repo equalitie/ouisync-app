@@ -742,9 +742,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
             );
           }
 
-          // TODO:
-          throw UnimplementedError('snackbar in cubit');
-          //showSnackBar(S.current.messageDownloadFileLocation(parentPath));
+          _onNotify?.call(S.current.messageDownloadFileLocation(parentPath));
         } finally {
           await sink.flush();
           await sink.close();
@@ -754,10 +752,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
       }
     } catch (e, st) {
       loggy.error('Download file $sourcePath exception: ', e, st);
-
-      // TODO:
-      throw UnimplementedError('snackbar in cubit');
-      //showSnackBar(S.current.messageDownloadingFileError(sourcePath));
+      _onNotify?.call(S.current.messageDownloadingFileError(sourcePath));
     }
   }
 
@@ -956,10 +951,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
 
         if (!errorShown) {
           errorShown = true;
-
-          // TODO:
-          throw UnimplementedError('snackbar in cubit');
-          //showSnackBar(S.current.messageErrorCurrentPathMissing(path));
+          _onNotify?.call(S.current.messageErrorCurrentPathMissing(path));
         }
       }
     } catch (e, st) {
