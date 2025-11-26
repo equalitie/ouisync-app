@@ -2,12 +2,12 @@
 
 set -euo pipefail
 
+source $(dirname $0)/utils.sh
+
 host=
 commit=
 srcdir=
 shell=
-
-source $(dirname $0)/utils.sh
 
 base_name="ouisync-runner-linux"
 default_image_name="$base_name:$USER"
@@ -146,10 +146,6 @@ function cache_mount_options() {
 
     # Gradle
     echo "--mount src=$cache_volume,dst=/root/.gradle,volume-subpath=gradle"
-
-    # Sharing the gradle journal directory causes issues with locking. Create a throwaway volume for
-    # it so each container uses its own.
-    echo "--mount dst=/root/.gradle/caches/journal-1"
 }
 
 function start_container() {
@@ -177,6 +173,11 @@ function start_container() {
 
     # Needed for android emulator
     opts="$opts --device /dev/kvm"
+
+    # HACK: Sharing gradle cache between multiple containers doesn't work because the gradle daemons
+    # running in those containers can't talk to each other over a localhost TCP socket in order to
+    # coordinate the locking. Using a host network is a quick and dirty way around that.
+    opts="$opts --network host"
 
     if [ -n "${container_name-}" ]; then
         opts="$opts --name $container_name"
@@ -219,7 +220,7 @@ function start_container() {
     # Run cargo sweep to delete all cargo artifacts older than 30 days (prevents unbounded cache grow)
     if [ "$cache" = 1 ]; then
         log_group_begin "Prune cached cargo artifacts"
-        exe -t cargo install cargo-sweep || true
+        exe -t bash -c 'command -v cargo-sweep 2>&1 > /dev/null || cargo install cargo-sweep'
         exe -w /opt/ouisync-app/ouisync -t cargo sweep --recursive --time 30
         log_group_end
     fi
@@ -231,36 +232,58 @@ function stop_container() {
 }
 
 function auto_start_container() {
+    # Prevent the container from stopping
+    (
+        # First wait until the container is started...
+        while true; do
+            if is_container_running; then
+                break
+            fi
+
+            sleep 5
+        done
+
+        # ...then keep poking the file until the container stops.
+        while true; do
+            if is_container_running; then
+                exe touch /tmp/alive || true
+            else
+                break
+            fi
+
+            sleep 5
+        done
+    ) &
+
     # Run the container for as long as this script is running
     start_container sh -c 'sleep 60; while [ -n "$(find /tmp/alive -cmin -1)" ]; do sleep 10; done'
 
-    # Prevent the container from stopping
-    while true; do exe touch /tmp/alive || true; sleep 5; done &
-    local keep_alive_pid=$!
-
     # Stop the container on exit
-    trap "auto_stop_container $keep_alive_pid" EXIT
+    trap auto_stop_container EXIT
 }
 
 function auto_stop_container() {
-    local keep_alive_pid="$1"
-
     if [ "$shell" = 1 ]; then
         echo "Enter container $container_name"
         dock exec -it $container_name bash
     fi
 
-    kill $keep_alive_pid || true
-
     stop_container
 }
 
+function is_container_running() {
+    local result=$(dock container inspect -f '{{.State.Status}}' $container_name 2> /dev/null)
+
+    if [ "$result" == "running" ]; then
+        return 0
+    else
+        return 1
+    fi
+}
 
 function init() {
     # Auto-start the container unless already running
-    if [ "$(dock container inspect -f '{{.State.Status}}' $container_name 2> /dev/null)" != "running" ]; then
-        auto_start_container
-    fi
+    is_container_running || auto_start_container
 }
 
 ####################################################################################################
