@@ -69,10 +69,13 @@ RUN yes | flutter doctor --android-licenses
 RUN dart --disable-analytics
 RUN flutter doctor -v
 
-# install rust
+# Install rust
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --default-toolchain=${RUST_VERSION} -y
 ENV PATH="/root/.cargo/bin:$PATH"
 RUN rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
+
+# Install some rust utilities
+RUN cargo install cargo-sweep
 
 # Expose Java
 # Sentry started to require JDK even for non Android builds. This requirement

@@ -84,13 +84,18 @@ function get_sources_from_local_dir {
         build
         ios
         linux/flutter/ephemeral
-        # .git is needed for release.dart script to read git commit
         ouisync/.git
         ouisync/target
         releases
         tmp
         windows/flutter/ephemeral
     )
+
+    # .git is needed for release.dart script to read git commit
+    if [ "$rsync_include_git" != 1 ]; then
+        exclude_dirs+=(.git)
+    fi
+
 
     local host_opt=
     local compress_opt=

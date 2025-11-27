@@ -16,11 +16,39 @@ image_name=$default_image_name
 default_container_name="$base_name.$USER"
 container_name=$default_container_name
 
-cache_volume="$base_name-cache"
+# Is cache enabled (see `$cache_paths` to see what's cached)?
 cache=
 
-emulator_port=5554
+# Name of the docker volume to put the cache on
+cache_volume="$base_name-cache"
+
+# List of paths to cache
+cache_paths=(
+    # Cargo global
+    /root/.cargo/bin
+    /root/.cargo/registry/index
+    /root/.cargo/registry/cache
+    /root/.cargo/git/db
+
+    # Cargo per project
+    /opt/ouisync-app/ouisync/target
+
+    # Dart
+    /root/.pub-cache
+
+    # Android system images
+    /opt/android-sdk/system-images
+
+    # Gradle
+    /root/.gradle/caches
+    /root/.gradle/wrapper
+)
+
 emulator_sdcard=32M
+
+# Whether to also include the .git directory when copying the source directory into the container.
+# Including it is currently necessary when running the `build` command only.
+rsync_include_git=
 
 function print_help() {
     local command="${1:-}"
@@ -116,36 +144,9 @@ function create_cache_volume() {
 
     dock volume create $cache_volume > /dev/null
     dock run --rm --mount src=$cache_volume,dst=/mnt/cache --workdir /mnt/cache $image_name \
-        bash -c 'mkdir -p cargo/bin;
-                 mkdir -p cargo/git/db;
-                 mkdir -p cargo/registry/cache;
-                 mkdir -p cargo/registry/index;
-                 mkdir -p cargo-target;
-                 mkdir -p pub-cache;
-                 mkdir -p android-system-images;
-                 mkdir -p gradle;'
+        mkdir -p "${cache_paths[@]#/}"
 
     log_group_end
-}
-
-function cache_mount_options() {
-    # Cargo global
-    echo "--mount src=$cache_volume,dst=/root/.cargo/bin,volume-subpath=cargo/bin"
-    echo "--mount src=$cache_volume,dst=/root/.cargo/registry/index,volume-subpath=cargo/registry/index"
-    echo "--mount src=$cache_volume,dst=/root/.cargo/registry/cache,volume-subpath=cargo/registry/cache"
-    echo "--mount src=$cache_volume,dst=/root/.cargo/git/db,volume-subpath=cargo/git/db"
-
-    # Cargo per project
-    echo "--mount src=$cache_volume,dst=/opt/ouisync-app/ouisync/target,volume-subpath=cargo-target"
-
-    # Dart
-    echo "--mount src=$cache_volume,dst=/root/.pub-cache,volume-subpath=pub-cache"
-
-    # Android system images
-    echo "--mount src=$cache_volume,dst=/opt/android-sdk/system-images,volume-subpath=android-system-images"
-
-    # Gradle
-    echo "--mount src=$cache_volume,dst=/root/.gradle,volume-subpath=gradle"
 }
 
 function start_container() {
@@ -168,7 +169,11 @@ function start_container() {
 
     # Mount cache volume (if enabled)
     if [ "$cache" = 1 ]; then
-        opts="$opts $(cache_mount_options)"
+        opts="$opts --mount src=$cache_volume,dst=/mnt/cache"
+
+        for path in ${cache_paths[@]}; do
+            opts="$opts --mount src=$cache_volume,dst=$path,volume-subpath=${path#/}"
+        done
     fi
 
     # Needed for android emulator
@@ -220,7 +225,6 @@ function start_container() {
     # Run cargo sweep to delete all cargo artifacts older than 30 days (prevents unbounded cache grow)
     if [ "$cache" = 1 ]; then
         log_group_begin "Prune cached cargo artifacts"
-        exe -t bash -c 'command -v cargo-sweep 2>&1 > /dev/null || cargo install cargo-sweep'
         exe -w /opt/ouisync-app/ouisync -t cargo sweep --recursive --time 30
         log_group_end
     fi
@@ -233,40 +237,29 @@ function stop_container() {
 
 function auto_start_container() {
     # Prevent the container from stopping
-    (
-        # First wait until the container is started...
-        while true; do
-            if is_container_running; then
-                break
-            fi
+    while true; do
+        exe touch /tmp/alive 2> /dev/null || true
+        sleep 5
+    done &
 
-            sleep 5
-        done
+    local keep_alive_pid=$!
 
-        # ...then keep poking the file until the container stops.
-        while true; do
-            if is_container_running; then
-                exe touch /tmp/alive || true
-            else
-                break
-            fi
-
-            sleep 5
-        done
-    ) &
+    # Stop the container on exit
+    trap "auto_stop_container $keep_alive_pid" EXIT
 
     # Run the container for as long as this script is running
     start_container sh -c 'sleep 60; while [ -n "$(find /tmp/alive -cmin -1)" ]; do sleep 10; done'
-
-    # Stop the container on exit
-    trap auto_stop_container EXIT
 }
 
 function auto_stop_container() {
+    local keep_alive_pid=$1
+
     if [ "$shell" = 1 ]; then
         echo "Enter container $container_name"
         dock exec -it $container_name bash
     fi
+
+    kill $keep_alive_pid
 
     stop_container
 }
@@ -289,6 +282,8 @@ function init() {
 ####################################################################################################
 # Build the release artifacts for linux and android
 function build() {
+    rsync_include_git=1
+
     init
 
     local dst_dir="./releases/$container_name"
@@ -366,7 +361,43 @@ function unit_test() {
 
 ####################################################################################################
 
-function start_emulator() {
+emulator_serial=
+
+# Find the serial number of the emulator that is running an avd with the given id.
+function emulator_find_serial() {
+    local wanted_id=$1
+
+    while true; do
+        for serial in $(exe adb devices | grep "emulator" | cut -f1); do
+            # Note `adb emu avd id` outputs some garbage characters for some reason, so we need to
+            # stip them.
+            local actual_id=$(exe adb -s $serial emu avd id 2> /dev/null | head -n1 | sed 's/[^[:alnum:]-]//g')
+
+            if [ "$actual_id" = "$wanted_id" ]; then
+                emulator_serial=$serial
+                return 0
+            fi
+        done
+
+        sleep 1
+    done
+}
+
+# Wait for the emulator to boot
+function emulator_wait_boot() {
+    while true; do
+        local result=$(exe adb -s $emulator_serial shell getprop sys.boot_completed 2> /dev/null)
+
+        if [ "$result" = "1" ]; then
+            break
+        else
+            echo "Waiting for the emulator to boot"
+            sleep 1
+        fi
+    done
+}
+
+function emulator_start() {
     local api=
 
     while true; do
@@ -405,32 +436,35 @@ function start_emulator() {
 
     log_group_begin "Launch emulator"
 
-    exe -t \
-        -e ANDROID_EMULATOR_WAIT_TIME_BEFORE_KILL=1 \
-        emulator -no-metrics -no-window -no-audio -avd $avd -port $emulator_port &
+    # There can be multiple emulators running on this machine. Assign a unique id to the one we are
+    # launching so we can find it afterwards using that id.
+    local id=$(uuidgen)
 
-    # Wait for the emulator to boot
-    while true; do
-        local result=$(exe adb -s "emulator-$emulator_port" shell getprop sys.boot_completed 2> /dev/null)
+    # Launch the emulator in separate process. Prefix its output with '🤖' to distinguish them from
+    # other output
+    exe -e ANDROID_EMULATOR_WAIT_TIME_BEFORE_KILL=1 \
+        emulator \
+            -no-metrics -no-window -no-audio -no-boot-anim -avd $avd -id $id \
+        | sed 's/^/🤖 /' \
+        &
 
-        if [ "$result" = "1" ]; then
-            break
-        else
-            echo "Waiting for the emulator to boot"
-            sleep 1
-        fi
-    done
+    # Find the serial number of the emulator we just launched using the unique id we assigned
+    # before. There can be multiple emulators running on this machine and this ensures we are
+    # talking to the right one.
+    emulator_find_serial $id
+    emulator_wait_boot
 
     log_group_end
 
     log_group_begin "Format sdcard"
-    echo "yes" | exe -w /opt/ouisync-app -i ./util/adb-format-sdcard.sh -s "emulator-$emulator_port"
+    echo "yes" | exe -w /opt/ouisync-app -i ./util/adb-format-sdcard.sh -s $emulator_serial
     log_group_end
 }
 
-function stop_emulator() {
+function emulator_stop() {
     log_group_begin "Stop emulator"
-    exe adb -s "emulator-$emulator_port" emu kill
+    exe adb -s $emulator_serial emu kill > /dev/null
+    emulator_serial=""
     log_group_end
 }
 
@@ -458,13 +492,15 @@ function integration_test_android() {
     exe -w /opt/ouisync-app -t flutter build apk --debug --flavor itest --target-platform android-x64
     log_group_end
 
-    start_emulator --api $api
+    emulator_start --api $api
 
     log_group_begin "Run tests"
-    exe -w /opt/ouisync-app -t flutter test integration_test --flavor itest --ignore-timeouts $@
+    exe -w /opt/ouisync-app -t flutter \
+        --device-id $emulator_serial \
+        test integration_test --flavor itest --ignore-timeouts $@
     log_group_end
 
-    stop_emulator
+    emulator_stop
 }
 
 function integration_test_linux() {
@@ -514,6 +550,12 @@ function analyze() {
     exe -w /opt/ouisync-app/lib  -t flutter analyze
     exe -w /opt/ouisync-app/test -t flutter analyze
     exe -w /opt/ouisync-app/util -t flutter analyze
+}
+
+####################################################################################################
+# Clean cache
+function clean_cache() {
+    dock volume rm $cache_volume
 }
 
 ####################################################################################################
@@ -588,6 +630,9 @@ case "$1" in
     shell|sh)
         init
         shell=1
+        ;;
+    clean-cache)
+        clean_cache ${@:2}
         ;;
     "")
         error "Missing command"
