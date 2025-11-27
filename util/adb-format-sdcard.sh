@@ -5,6 +5,10 @@
 
 adb_opts="$@"
 
+function adb_shell() {
+    adb $adb_opts shell $@
+}
+
 echo "Format SD card on the connected Android device or emulator? [y/n]"
 read -r reply
 
@@ -16,26 +20,26 @@ fi
 
 echo "Formatting SD card ..."
 
-adoptable=$(adb $adb_opts shell sm has-adoptable)
+adoptable=$(adb_shell sm has-adoptable)
 if [ $adoptable == "false" ]; then
-    adb $adb_opts shell sm set-force-adoptable true
+    adb_shell sm set-force-adoptable true
 fi
 
 disk=
 while true; do
-    disk=$(adb $adb_opts shell sm list-disks)
+    disk=$(adb_shell sm list-disks)
 
     if [ -n "$disk" ]; then
         break
     fi
 done
 
-adb shell sm partition "$disk" public
+adb_shell sm partition "$disk" public
 
 if [ $adoptable == "false" ]; then
-    volume=$(adb $adb_opts shell sm list-volumes | grep public | cut -d' ' -f1)
-    adb $adb_opts shell sm format "$volume"
-    adb $adb_opts shell sm mount "$volume"
+    volume=$(adb_shell sm list-volumes | grep public | cut -d' ' -f1)
+    adb_shell sm format "$volume"
+    adb_shell sm mount "$volume"
 fi
 
 echo "Done"
