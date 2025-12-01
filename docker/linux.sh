@@ -38,10 +38,6 @@ cache_paths=(
 
     # Android system images
     /opt/android-sdk/system-images
-
-    # Gradle
-    /root/.gradle/caches
-    /root/.gradle/wrapper
 )
 
 emulator_sdcard=32M
@@ -149,6 +145,43 @@ function create_cache_volume() {
     log_group_end
 }
 
+# Gradle cache doesn't work well when accessed from multiple containers concurrently. This is
+# because the Gradle daemons need to communicate with each other over localhost TCP sockets in
+# order to coordinate locking and this doesn't work when each daemon runs in a separate container
+# (due to network separation). One way around this is to run the containers with `--network host`
+# but that comes with its own issues and is generally not worth it. To solve this, we copy
+# (using rsync) the Gradle cache files from the cache volume to the container at the beginning of
+# the run and the copy them back at the end of it. We use file locks to synchronize the copies.
+gradle_cache_root=/root/.gradle
+gradle_cache_dirs=(caches wrapper)
+
+function gradle_cache_rsync() {
+    local lock_mode=$1
+    local src=$2
+    local dst=$3
+
+    exe mkdir -p "${gradle_cache_dirs[@]/#/$src/}"
+    exe flock $lock_mode /mnt/cache/gradle.lock                             \
+            rsync                                                           \
+                -a                                                          \
+                --exclude='*.lock'                                          \
+                ${gradle_cache_dirs[@]/*/--include=/&/ --include=/&/***}    \
+                --exclude='*'                                               \
+                "$src/" "$dst"
+}
+
+function restore_gradle_cache() {
+    log_group_begin "Restore gradle cache"
+    gradle_cache_rsync --shared /mnt/cache$gradle_cache_root $gradle_cache_root
+    log_group_end
+}
+
+function save_gradle_cache() {
+    log_group_begin "Save gradle cache"
+    gradle_cache_rsync --exclusive $gradle_cache_root /mnt/cache$gradle_cache_root
+    log_group_end
+}
+
 function start_container() {
     if [ -z "$commit" -a -z "$srcdir" ]; then error "Missing one of --commit or --srcdir"; fi
     if [ -n "$commit" -a -n "$srcdir" ]; then error "--commit and --src are mutually exclusive"; fi
@@ -159,7 +192,7 @@ function start_container() {
         create_cache_volume
     fi
 
-    echo "Start container $container_name"
+    log_group_begin "Start container $container_name"
 
     local opts="-d --rm"
 
@@ -179,11 +212,6 @@ function start_container() {
     # Needed for android emulator
     opts="$opts --device /dev/kvm"
 
-    # HACK: Sharing gradle cache between multiple containers doesn't work because the gradle daemons
-    # running in those containers can't talk to each other over a localhost TCP socket in order to
-    # coordinate the locking. Using a host network is a quick and dirty way around that.
-    opts="$opts --network host"
-
     if [ -n "${container_name-}" ]; then
         opts="$opts --name $container_name"
     fi
@@ -202,15 +230,20 @@ function start_container() {
         docker run $opts $image_name "$@"
     fi
 
-    log_group_begin "Fetch app source"
+    log_group_end
 
+
+    log_group_begin "Fetch app source"
     if [ -n "$commit" ]; then
         get_sources_from_git $commit /opt
     else
         get_sources_from_local_dir $srcdir /opt
     fi
-
     log_group_end
+
+    if [ "$cache" = 1 ]; then
+        restore_gradle_cache
+    fi
 
     # Generate bindings (TODO: This should be done automatically)
     log_group_begin "Generate bindings"
@@ -231,6 +264,10 @@ function start_container() {
 }
 
 function stop_container() {
+    if [ "$cache" = 1 ]; then
+        save_gradle_cache
+    fi
+
     echo "Stop container $container_name"
     dock container stop $container_name
 }
@@ -361,32 +398,10 @@ function unit_test() {
 
 ####################################################################################################
 
-emulator_serial=
-
-# Find the serial number of the emulator that is running an avd with the given id.
-function emulator_find_serial() {
-    local wanted_id=$1
-
-    while true; do
-        for serial in $(exe adb devices | grep "emulator" | cut -f1); do
-            # Note `adb emu avd id` outputs some garbage characters for some reason, so we need to
-            # stip them.
-            local actual_id=$(exe adb -s $serial emu avd id 2> /dev/null | head -n1 | sed 's/[^[:alnum:]-]//g')
-
-            if [ "$actual_id" = "$wanted_id" ]; then
-                emulator_serial=$serial
-                return 0
-            fi
-        done
-
-        sleep 1
-    done
-}
-
 # Wait for the emulator to boot
 function emulator_wait_boot() {
     while true; do
-        local result=$(exe adb -s $emulator_serial shell getprop sys.boot_completed 2> /dev/null)
+        local result=$(exe adb shell getprop sys.boot_completed)
 
         if [ "$result" = "1" ]; then
             break
@@ -436,35 +451,26 @@ function emulator_start() {
 
     log_group_begin "Launch emulator"
 
-    # There can be multiple emulators running on this machine. Assign a unique id to the one we are
-    # launching so we can find it afterwards using that id.
-    local id=$(uuidgen)
-
     # Launch the emulator in separate process. Prefix its output with '🤖' to distinguish them from
     # other output
     exe -e ANDROID_EMULATOR_WAIT_TIME_BEFORE_KILL=1 \
         emulator \
-            -no-metrics -no-window -no-audio -no-boot-anim -avd $avd -id $id \
+            -no-metrics -no-window -no-audio -no-boot-anim -avd $avd \
         | sed 's/^/🤖 /' \
         &
 
-    # Find the serial number of the emulator we just launched using the unique id we assigned
-    # before. There can be multiple emulators running on this machine and this ensures we are
-    # talking to the right one.
-    emulator_find_serial $id
     emulator_wait_boot
 
     log_group_end
 
     log_group_begin "Format sdcard"
-    echo "yes" | exe -w /opt/ouisync-app -i ./util/adb-format-sdcard.sh -s $emulator_serial
+    echo "yes" | exe -w /opt/ouisync-app -i ./util/adb-format-sdcard.sh
     log_group_end
 }
 
 function emulator_stop() {
     log_group_begin "Stop emulator"
-    exe adb -s $emulator_serial emu kill > /dev/null
-    emulator_serial=""
+    exe adb emu kill > /dev/null
     log_group_end
 }
 
@@ -488,7 +494,7 @@ function integration_test_android() {
         error "Missing --api"
     fi
 
-    log_group_begin "Pre-build the app for tests"
+    log_group_begin "Pre-build the test binary"
     exe -w /opt/ouisync-app -t flutter build apk --debug --flavor itest --target-platform android-x64
     log_group_end
 
@@ -496,7 +502,6 @@ function integration_test_android() {
 
     log_group_begin "Run tests"
     exe -w /opt/ouisync-app -t flutter \
-        --device-id $emulator_serial \
         test integration_test --flavor itest --ignore-timeouts $@
     log_group_end
 
