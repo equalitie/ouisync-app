@@ -444,7 +444,7 @@ function emulator_start() {
 
     log_group_begin "Create AVD"
     exe sdkmanager --install "$system_image"
-    echo "no" | exe -i avdmanager create avd --force --name $avd --package "$system_image" --sdcard $emulator_sdcard
+    echo "no" | exe -i avdmanager create avd --force --name $avd --package "$system_image" --sdcard $emulator_sdcard > /dev/null
     log_group_end
 
     #-----------------------------
