@@ -90,17 +90,15 @@ function print_help() {
             echo
             echo "Usage: $0 analyze"
             ;;
-        "start")
-            echo "Explicitly start the container"
+        "container")
+            echo "Explicitly manage the container"
             echo
-            echo "Usage: $0 start"
+            echo "Usage: $0 container <start|stop|build>"
             echo
-            echo "Subsequent commands run on this container instead of starting a new one."
-            ;;
-        "stop")
-            echo "Explicitly stop the container"
-            echo
-            echo "Usage: $0 stop"
+            echo "Commands:"
+            echo "    start Start the container"
+            echo "    stop  Stop the container"
+            echo "    build Build the container image"
             ;;
         "shell")
             echo "Run a shell session in the container"
@@ -128,8 +126,7 @@ function print_help() {
             echo "    unit-test         Run unit tests"
             echo "    integration-test  Run integration tests"
             echo "    analyze           Analyze the dart source code"
-            echo "    start             Explicitly start the container"
-            echo "    stop              Explicitly stop the container"
+            echo "    container         Explicitly manage the container"
             echo
             echo "See '$0 help <command> for more information on a specific command"
             ;;
@@ -324,6 +321,20 @@ function is_container_running() {
     else
         return 1
     fi
+}
+
+function manage_container() {
+    case $1 in
+        start)
+            start_container tail -f /dev/null
+            ;;
+        stop)
+            stop_container
+            ;;
+        build)
+            build_container
+            ;;
+    esac
 }
 
 function init() {
@@ -638,12 +649,6 @@ case "$1" in
         print_help ${@:2}
         exit
         ;;
-    start)
-        start_container tail -f /dev/null
-        ;;
-    stop)
-        stop_container
-        ;;
     build|b)
         build ${@:2}
         ;;
@@ -655,6 +660,9 @@ case "$1" in
         ;;
     analyze)
         analyze ${@:2}
+        ;;
+    container)
+        manage_container ${@:2}
         ;;
     shell|sh)
         init

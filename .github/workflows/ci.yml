@@ -29,7 +29,7 @@ jobs:
         run: echo "CONTAINER=ouisync-unit-test-linux-$GITHUB_RUN_ID" >> $GITHUB_ENV
 
       - name: Start container
-        run: ./docker/linux.sh --container $CONTAINER --srcdir . --cache start
+        run: ./docker/linux.sh --container $CONTAINER --srcdir . --cache container start
 
       - name: Analyze
         run: ./docker/linux.sh --container $CONTAINER analyze
@@ -38,7 +38,7 @@ jobs:
         run: ./docker/linux.sh --container $CONTAINER unit-test
 
       - name: Stop container
-        run: ./docker/linux.sh --container $CONTAINER stop
+        run: ./docker/linux.sh --container $CONTAINER container stop
         if: always()
 
   test_windows:
@@ -278,9 +278,16 @@ jobs:
           name: ${{ matrix.name }}
           path: releases/release_*/${{ matrix.artifact-files }}
 
+  build_image_for_integration_test_android:
+    name: "build docker image to run integration tests on android"
+    runs-on: self-hosted
+    steps:
+      - run: ./docker/linux.sh container build
+
   integration_test_android:
     name: "run integration tests on android ${{ matrix.api-level }}"
     runs-on: self-hosted
+    needs: ["build_image_for_integration_test_android"]
     strategy:
       fail-fast: false
       matrix:
