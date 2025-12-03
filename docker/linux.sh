@@ -223,7 +223,9 @@ function start_container() {
     opts="$opts --device /dev/kvm"
 
     # Needed to run mount tests
-    opts="$opts --device /dev/fuse"
+    # TODO: The 'apparmor:unconfined' feels sketchy. Ideally we would use a more
+    # fine-grained policy - one which enables fuse but keeps other restrictions in place.
+    opts="$opts --device /dev/fuse --cap-add SYS_ADMIN --security-opt apparmor:unconfined"
 
     if [ -n "${container_name-}" ]; then
         opts="$opts --name $container_name"

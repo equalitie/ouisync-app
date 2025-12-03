@@ -15,7 +15,9 @@ RUN apt-get update && \
         libgtk-3-dev libfuse-dev libappindicator3-dev libsecret-1-dev libcurl4-openssl-dev \
         python3-minimal python-is-python3 \
         openjdk-17-jdk \
-        libpulse0 && \
+        libpulse0 \
+        fuse3 \
+        && \
     apt-get clean
 
 # download and install sdkmanager
