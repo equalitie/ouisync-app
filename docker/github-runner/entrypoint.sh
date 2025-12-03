@@ -3,12 +3,12 @@
 set -euo pipefail
 
 if [ -z "${GITHUB_REPO-}" ]; then
-    echo "The environment variable GITHUB_REPO is missing. It needs to be set to the 'owner/repo' of a Github repository for which to start the runner."
+    echo "GITHUB_REPO env var missing"
     exit 1
 fi
 
 if [ -z "${GITHUB_TOKEN-}" ]; then
-    echo "The environment variable GITHUB_TOKEN is missing. It needs to be set to the Github personal access token with sufficient permissions to manage runners in $GITHUB_REPO."
+    echo "GITHUB_TOKEN env var missing"
     exit 1
 fi
 
