@@ -24,14 +24,12 @@ function check_dependency {
     command -v $dep >/dev/null 2>&1 || { error "'$dep' is not installed"; }
 }
 
-function docker_host() {
-    if [ -n "$host" ]; then
-        echo -n "--host ssh://$host"
-    fi
-}
-
 function dock() {
-    docker $(docker_host) "$@"
+    if [ -n "$host" ]; then
+        docker --host ssh://$host "$@"
+    else
+        docker "$@"
+    fi
 }
 
 function exe() (

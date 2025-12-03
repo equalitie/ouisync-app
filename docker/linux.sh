@@ -139,14 +139,8 @@ function print_help() {
 function build_container() {
     log_group_begin "Building image $image_name"
 
-    local ndk_version=$(cat ndk-version.txt)
-
-    flock --exclusive docker/Dockerfile.linux \
-        docker $(docker_host) build \
-            --tag $image_name \
-            --file docker/Dockerfile.linux \
-            --build-arg NDK_VERSION=$ndk_version \
-            docker
+    ndk_version=$(cat ndk-version.txt)
+    dock build -t $image_name --build-arg NDK_VERSION=$ndk_version - < docker/Dockerfile.linux
 
     log_group_end
 }
