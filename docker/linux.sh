@@ -4,10 +4,21 @@ set -euo pipefail
 
 source $(dirname $0)/utils.sh
 
+# Host to run on. If omitted, runs on the local machine.
 host=
-commit=
-srcdir=
+
+# If set, opens a shell session in the container before existing.
 shell=
+
+# How to put the source files into the container:
+#
+# Either checkout the given commit with git...
+commit=
+# ... or rsync from the given host directory.
+srcdir=
+# Whether to also include the .git directory when copying the source directory into the container.
+# Including it is currently necessary when running the `build` command only.
+rsync_include_git=
 
 base_name="ouisync-runner-linux"
 default_image_name="$base_name:$USER"
@@ -18,6 +29,9 @@ container_name=$default_container_name
 
 # Is cache enabled (see `$cache_paths` to see what's cached)?
 cache=
+
+# Is gradle cache enabled? Needed only for android integration test and build
+cache_gradle=
 
 # Name of the docker volume to put the cache on
 cache_volume="$base_name-cache"
@@ -41,10 +55,6 @@ cache_paths=(
 )
 
 emulator_sdcard=32M
-
-# Whether to also include the .git directory when copying the source directory into the container.
-# Including it is currently necessary when running the `build` command only.
-rsync_include_git=
 
 function print_help() {
     local command="${1:-}"
@@ -109,7 +119,7 @@ function print_help() {
             echo "    --srcdir <PATH>       Source dir from which to build"
             echo "    --container <NAME>    Assign a name to the docker container [default: $default_container_name]"
             echo "    --image <NAME>[:TAG]  Name (and optional tag) of the docker image to use [default: $default_image_name]"
-            echo "    --cache               Cache some dependencies and intermediate build artifacts"
+            echo "    --cache               Cache some dependencies and intermediate build artifacts on a persistent docker volume"
             echo "    -s, --shell           Open a shell session in the container after the command finishes"
             echo
             echo "Commands:"
@@ -212,6 +222,9 @@ function start_container() {
     # Needed for android emulator
     opts="$opts --device /dev/kvm"
 
+    # Needed to run mount tests
+    opts="$opts --device /dev/fuse"
+
     if [ -n "${container_name-}" ]; then
         opts="$opts --name $container_name"
     fi
@@ -241,7 +254,7 @@ function start_container() {
     fi
     log_group_end
 
-    if [ "$cache" = 1 ]; then
+    if [ "$cache" = 1 -a "$cache_gradle" = 1 ]; then
         restore_gradle_cache
     fi
 
@@ -264,7 +277,7 @@ function start_container() {
 }
 
 function stop_container() {
-    if [ "$cache" = 1 ]; then
+    if [ "$cache" = 1 -a "$cache_gradle" ]; then
         save_gradle_cache
     fi
 
@@ -320,6 +333,7 @@ function init() {
 # Build the release artifacts for linux and android
 function build() {
     rsync_include_git=1
+    cache_gradle=1
 
     local dst_dir="./releases/$container_name"
     local flavor=
@@ -481,6 +495,9 @@ function emulator_stop() {
 }
 
 function integration_test_android() {
+    cache_gradle=1
+    init
+
     local api=
 
     while true; do
@@ -515,13 +532,12 @@ function integration_test_android() {
 }
 
 function integration_test_linux() {
+    init
     exe -w /opt/ouisync-app -t flutter test -d linux integration_test $@
 }
 
 # Run integration tests
 function integration_test() {
-    init
-
     local platform=
 
     while true; do
