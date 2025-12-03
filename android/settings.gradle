@@ -46,4 +46,3 @@ includeBuild('../ouisync/bindings/kotlin') {
         substitute module('ie.equalit.ouinet:ouisync-service-debug') using project(':ouisync-service')
     }
 }
-

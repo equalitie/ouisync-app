@@ -278,26 +278,9 @@ jobs:
           name: ${{ matrix.name }}
           path: releases/release_*/${{ matrix.artifact-files }}
 
-  integration_test_android_prebuild:
-    name: "Prebuild the test binary for integration tests on android"
-    runs-on: self-hosted
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - name: Prebuild
-        run: |
-          ./docker/linux.sh \
-            --container ouisync-integration-test-android-prebuild-$GITHUB_RUN_ID \
-            --srcdir . \
-            --cache \
-            integration-test --platform android --prebuild
-
   integration_test_android:
     name: "run integration tests on android ${{ matrix.api-level }}"
     runs-on: self-hosted
-    needs: ["integration_test_android_prebuild"]
     strategy:
       fail-fast: false
       matrix:
@@ -341,7 +324,6 @@ jobs:
       #     if-no-files-found: ignore
       #   # Upload only when the tests fail
       #   if: failure() || cancelled()
-
 
   # TODO: Integration tests on both linux and windows currently fail or hang. Commenting them out until they are fixed.
   # integration_test_desktop:
