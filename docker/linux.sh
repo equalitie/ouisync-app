@@ -93,6 +93,8 @@ function print_help() {
         "container")
             echo "Explicitly manage the container"
             echo
+            echo "Note the commands normally build, start and stop the container automatically. This is only useful when running multiple commands on the same container."
+            echo
             echo "Usage: $0 container <start|stop|build>"
             echo
             echo "Commands:"

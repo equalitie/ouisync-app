@@ -282,6 +282,10 @@ jobs:
     name: "build docker image to run integration tests on android"
     runs-on: self-hosted
     steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
       - run: ./docker/linux.sh container build
 
   integration_test_android:
