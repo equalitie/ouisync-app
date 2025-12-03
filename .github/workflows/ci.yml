@@ -307,18 +307,11 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Create container name
-        run: echo "CONTAINER=ouisync-integration-test-android-${{ matrix.api-level }}-$GITHUB_RUN_ID" >> $GITHUB_ENV
-
-      - name: Start container
-        run: ./docker/linux.sh --container $CONTAINER --srcdir . --cache start
-
       - name: Run tests
-        run: ./docker/linux.sh --container $CONTAINER integration-test --platform android --api ${{ matrix.api-level }}
-
-      - name: Stop container
-        run: ./docker/linux.sh --container $CONTAINER stop
-        if: always()
+        run: |
+          ./docker/linux.sh \
+            --container ouisync-integration-test-android-${{ matrix.api-level }}-$GITHUB_RUN_ID \
+            integration-test --platform android --api ${{ matrix.api-level }}
 
       # - name: Upload logcat
       #   uses: actions/upload-artifact@v4
