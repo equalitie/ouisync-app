@@ -321,8 +321,6 @@ function init() {
 function build() {
     rsync_include_git=1
 
-    init
-
     local dst_dir="./releases/$container_name"
     local flavor=
 
@@ -344,14 +342,24 @@ function build() {
         flavor=unofficial
     fi
 
+    local secretSentryDsn=
+    local secretStorePassword=
+    local secretKeyAlias=
+    local secretKeyPassword=
+    local secretKeystoreHex=
+
     # Collect secrets
     if [ "$flavor" != unofficial ]; then
-        local secretSentryDsn=$(pass cenoers/ouisync/app/$flavor/sentry_dsn)
-        local secretStorePassword=$(pass cenoers/ouisync/app/$flavor/android/storePassword)
-        local secretKeyAlias=$(pass cenoers/ouisync/app/$flavor/android/keyAlias)
-        local secretKeyPassword=$(pass cenoers/ouisync/app/$flavor/android/keyPassword)
-        local secretKeystoreHex=$(pass cenoers/ouisync/app/$flavor/android/keystore.jks | xxd -p)
+        secretSentryDsn=$(pass cenoers/ouisync/app/$flavor/sentry_dsn)
+        secretStorePassword=$(pass cenoers/ouisync/app/$flavor/android/storePassword)
+        secretKeyAlias=$(pass cenoers/ouisync/app/$flavor/android/keyAlias)
+        secretKeyPassword=$(pass cenoers/ouisync/app/$flavor/android/keyPassword)
+        secretKeystoreHex=$(pass cenoers/ouisync/app/$flavor/android/keystore.jks | xxd -p)
     fi
+
+    init
+
+    local opts=
 
     # Set up secrets inside the container
     if [ "$flavor" != unofficial ]; then
@@ -363,16 +371,14 @@ function build() {
         echo "keyAlias=$secretKeyAlias"            | exe_i dd of=/opt/secrets/key.properties oflag=append conv=notrunc
         echo "storeFile=/opt/secrets/keystore.jks" | exe_i dd of=/opt/secrets/key.properties oflag=append conv=notrunc
         echo "$secretSentryDsn"                    | exe_i dd of=/opt/secrets/sentry_dsn
-        arg_android_key_properties="--android-key-properties=/opt/secrets/key.properties"
-        arg_sentry="--sentry=/opt/secrets/sentry_dsn"
+
+        opts="$opts --android-key-properties=/opt/secrets/key.properties"
+        opts="$opts --sentry=/opt/secrets/sentry_dsn"
     fi
 
     # Build Ouisync app
     exe -w /opt/ouisync-app dart run util/release.dart \
-        --flavor=$flavor \
-        $arg_android_key_properties \
-        $arg_sentry \
-        --apk --aab --deb-gui --deb-cli
+        --flavor=$flavor --apk --aab --deb-gui --deb-cli $opts
 
     # Collect artifacts
     mkdir -p $dst_dir
