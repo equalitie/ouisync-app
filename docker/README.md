@@ -1,19 +1,16 @@
-# Docker building
+# Testing and building in Docker
 
-This folder contains scripts for building Ouisync App in remote docker containers.
+This folder contains scripts for testing and building Ouisync App in docker containers.
 
-The `build-linux.sh` script will build `aab`, `apk`, `deb-cli` and `deb-gui` packages.
-The `build-windows.sh` script will build `msix` and `exe` packages.
+- The `linux.sh` script is used to run unit and integration tests and to build release packages for
+  linux and android.
+- The `build-windows.sh` script is used to build release packages for windows.
 
 ## Usage
 
-Assuming you have machines running Docker listed in your `~/.ssh/config` as `linux_machine` and `windows_machine`, run
-
-```bash
-./docker/build-linux.sh --host linux_machine --commit <COMMIT_HASH>
-./docker/build-windows.sh --host windows_machine --commit <COMMIT_HASH>
-```
+Run `./docker/linux.sh --help` and `./docker/build-windows.sh --help` for usage instructions.
 
 ## Requirements
 
-Have [pass](https://www.passwordstore.org/) installed with eQualitie's password repository.
+To build the release packages, have [pass](https://www.passwordstore.org/) installed with
+eQualitie's password repository.

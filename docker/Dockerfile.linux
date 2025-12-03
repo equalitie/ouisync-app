@@ -3,18 +3,22 @@
 FROM ubuntu:22.04
 
 ARG NDK_VERSION
+ARG RUST_VERSION=1.91.0
+ARG FLUTTER_VERSION=3.32.5
 
-ENV FLUTTER_VERSION=3.32.5
-ENV RUST_VERSION=1.89.0
-
-RUN apt-get update && apt-get upgrade -y
-RUN apt-get install -y \
-    build-essential cmake ninja-build clang pkg-config \
-    git xxd unzip \
-    wget curl rsync \
-    libgtk-3-dev libfuse-dev libappindicator3-dev libsecret-1-dev libcurl4-openssl-dev \
-    python3-minimal python-is-python3 \
-    openjdk-17-jdk
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y \
+        build-essential cmake ninja-build clang pkg-config \
+        git xxd unzip \
+        wget curl rsync \
+        libgtk-3-dev libfuse-dev libappindicator3-dev libsecret-1-dev libcurl4-openssl-dev \
+        python3-minimal python-is-python3 \
+        openjdk-17-jdk \
+        libpulse0 \
+        fuse3 \
+        && \
+    apt-get clean
 
 # download and install sdkmanager
 # https://developer.android.com/studio#command-tools
@@ -30,19 +34,25 @@ RUN mkdir -p ${ANDROID_SDK_ROOT}/cmdline-tools && \
 ENV PATH="${ANDROID_SDK_ROOT}/cmdline-tools/tools/bin:${PATH}"
 RUN yes | sdkmanager --licenses
 
-# These would be installed automatically, but good to have them in the image.
+# Install android packages (some of these would be installed automatically, but good to have them in
+# the image to speed things up).
+#
 # TODO: Why do we need different versions of `build-tools` and `platforms`?
-RUN sdkmanager --install \
-    "ndk;$NDK_VERSION" \
-    'build-tools;35.0.0' \
-    'build-tools;36.0.0' \
-    'platform-tools' \
-    'platforms;android-31' \
-    'platforms;android-33' \
-    'platforms;android-34' \
-    'platforms;android-35' \
-    'cmake;3.22.1' \
-    'cmdline-tools;latest'
+RUN sdkmanager --install    \
+    "cmdline-tools;latest"  \
+    "build-tools;35.0.0"    \
+    "build-tools;36.0.0"    \
+    "platform-tools"        \
+    "platforms;android-31"  \
+    "platforms;android-33"  \
+    "platforms;android-34"  \
+    "platforms;android-35"  \
+    "platforms;android-36"  \
+    "emulator"              \
+    "ndk;$NDK_VERSION"      \
+    "cmake;3.22.1"
+
+ENV PATH="${ANDROID_SDK_ROOT}/platform-tools:${ANDROID_SDK_ROOT}/emulator:${PATH}"
 
 # install flutter
 RUN wget https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_${FLUTTER_VERSION}-stable.tar.xz -P /tmp
@@ -56,19 +66,27 @@ RUN git config --global --add safe.directory /opt/flutter
 
 RUN flutter config --enable-android --enable-linux-desktop
 RUN flutter precache --linux
-RUN flutter config --no-analytics
+RUN flutter config --no-analytics --no-cli-animations
 RUN yes | flutter doctor --android-licenses
+RUN dart --disable-analytics
 RUN flutter doctor -v
 
-# install rust
+# Install rust
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --default-toolchain=${RUST_VERSION} -y
 ENV PATH="/root/.cargo/bin:$PATH"
 RUN rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
+
+# Install some rust utilities
+RUN cargo install cargo-sweep
 
 # Expose Java
 # Sentry started to require JDK even for non Android builds. This requirement
 # might be removed in the future.
 # https://github.com/getsentry/sentry-dart/issues/3033#issuecomment-3140320200
 ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+
+ENV LANG="C.UTF-8"
+ENV LANGUAGE="C.UTF-8"
+ENV LC_ALL="C.UTF-8"
 
 WORKDIR /opt

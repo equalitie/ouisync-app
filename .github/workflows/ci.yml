@@ -16,30 +16,38 @@ env:
     ouisync/target/
 
 jobs:
-  test:
-    name: test on ${{ matrix.name }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        name: [linux, windows]
-        include:
-          - name: linux
-            os: ubuntu-24.04
-            env:
-              OUISYNC_LIB: ouisync/target/debug/libouisync_service.so
-            analyze: true
+  test_linux:
+    name: test on linux
+    runs-on: self-hosted
 
-          - name: windows
-            os: windows-latest
-            env:
-              # Install Dokan2.dll to where `flutter test` can find it
-              DOKAN_DLL_OUTPUT_PATH: C:\Windows\System32
-              OUISYNC_LIB: ouisync\target\debug\ouisync_service.dll
-            # FIXME: The mount test fails on windows CI with a panic somewhere in the dokan-rust
-            # crate. Disabling for now but it needs to be looked into.
-            test-args: --exclude-tags mount
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
-    env: ${{ matrix.env }}
+      - name: Create container name
+        run: echo "CONTAINER=ouisync-unit-test-linux-$GITHUB_RUN_ID" >> $GITHUB_ENV
+
+      - name: Start container
+        run: ./docker/linux.sh --container $CONTAINER --srcdir . --cache start
+
+      - name: Analyze
+        run: ./docker/linux.sh --container $CONTAINER analyze
+
+      - name: Run tests
+        run: ./docker/linux.sh --container $CONTAINER unit-test
+
+      - name: Stop container
+        run: ./docker/linux.sh --container $CONTAINER stop
+        if: always()
+
+  test_windows:
+    name: test on windows
+    runs-on: windows-latest
+    env:
+      # Install Dokan2.dll to where `flutter test` can find it
+      DOKAN_DLL_OUTPUT_PATH: C:\Windows\System32
+      OUISYNC_LIB: ouisync\target\debug\ouisync_service.dll
 
     steps:
       - uses: actions/checkout@v4
@@ -54,18 +62,10 @@ jobs:
           key: ${{ runner.os }}-cargo-test-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: ${{ runner.os }}-cargo-
 
-      - name: Install dependencies (linux)
-        run: |
-          sudo apt update -y
-          sudo apt-get install libfuse-dev
-        if: matrix.name == 'linux'
-
       # FIXME: when dokan is installed some tests fail with weird panic from the dokan-rust library.
-      # Disabling for now. See also the comment for the `test-args` variable in the `windows`
-      # strategy.
+      # Disabling for now. See also the comment in the 'Run tests' step.
       # - name: Install dependencies (windows)
       #   run: choco install dokany2
-      #   if: matrix.name == 'windows'
 
       - uses: subosito/flutter-action@v2
         with:
@@ -109,25 +109,25 @@ jobs:
       - name: "[HACK] Force dokan-sys to build"
         run: cargo clean --package dokan-sys
         working-directory: ouisync
-        if: matrix.name == 'windows'
 
       - name: Build Ouisync service library for tests
         working-directory: ouisync
         run: cargo build --package ouisync-service --lib
 
       - name: Run tests
-        run:
-          flutter test ${{ matrix.test-args }}
+        # FIXME: The mount test fails on windows CI with a panic somewhere in the dokan-rust
+        # crate. Disabling for now but it needs to be looked into.
+        run: flutter test --exclude-tags mount
 
       - name: Upload test/debug artifacts
         uses: actions/upload-artifact@v4
         with:
           # Name of the produced zip file
-          name: test-artifacts-${{ matrix.name }}
+          name: test-artifacts-${{ runner.os }}
           path: test/widget/artifacts/*
           if-no-files-found: ignore
-        # Upload even when tests fail
-        if: always()
+        # Upload when tests fail
+        if: failure()
 
   build:
     name: build on ${{ matrix.name }}
@@ -280,8 +280,7 @@ jobs:
 
   integration_test_android:
     name: "run integration tests on android ${{ matrix.api-level }}"
-    runs-on: ubuntu-24.04
-
+    runs-on: self-hosted
     strategy:
       fail-fast: false
       matrix:
@@ -292,10 +291,7 @@ jobs:
           # - 25
 
           - 26
-
-          # This uses different target so it's included explicitly
-          # - 27
-
+          - 27
           - 28
           - 29
           - 30
@@ -305,50 +301,27 @@ jobs:
           - 34
           - 35
           - 36
-        target:
-          - google_apis
-        include:
-          - api-level: 27
-            target: default
+
     steps:
-
-      - name: Enable KVM
-        run: |
-          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-          sudo udevadm control --reload-rules
-          sudo udevadm trigger --name-match=kvm
-
       - uses: actions/checkout@v4
         with:
           submodules: recursive
 
-      - uses: ./.github/actions/setup_android_tests
-
-      - name: Prebuild
-        run: flutter build apk --debug --flavor itest --target-platform android-x64
-
       - name: Run tests
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: ${{ matrix.api-level }}
-          target: ${{ matrix.target }}
-          arch: x86_64
-          sdcard-path-or-size: 16M
-          script: |
-            adb logcat -c || true
-            adb logcat > logcat.txt &
-            yes | ./util/adb-format-sdcard.sh
-            flutter test integration_test --flavor itest --ignore-timeouts
+        run: |
+          ./docker/linux.sh \
+            --container ouisync-integration-test-android-${{ matrix.api-level }}-$GITHUB_RUN_ID \
+            integration-test --platform android --api ${{ matrix.api-level }}
 
-      - name: Upload logcat
-        uses: actions/upload-artifact@v4
-        with:
-          # Name of the produced zip file
-          name: logcat-${{ matrix.api-level }}
-          path: logcat.txt
-          if-no-files-found: ignore
-        # Upload only when the tests fail
-        if: failure() || cancelled()
+      # - name: Upload logcat
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     # Name of the produced zip file
+      #     name: logcat-${{ matrix.api-level }}
+      #     path: logcat.txt
+      #     if-no-files-found: ignore
+      #   # Upload only when the tests fail
+      #   if: failure() || cancelled()
 
 
   # TODO: Integration tests on both linux and windows currently fail or hang. Commenting them out until they are fixed.
