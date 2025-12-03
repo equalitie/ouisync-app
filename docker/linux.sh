@@ -612,7 +612,7 @@ function clean_cache() {
 
 # Handle common options
 while true; do
-    case $1 in
+    case "${1-}" in
         -h|--help)
             print_help
             exit
@@ -654,7 +654,7 @@ while true; do
 done
 
 # Handle command
-case "$1" in
+case "${1-}" in
     help|h)
         print_help ${@:2}
         exit

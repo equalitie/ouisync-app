@@ -287,11 +287,11 @@ jobs:
           submodules: recursive
 
       - name: Prebuild
-        run: >
-          ./docker/linux.sh
-            --container ouisync-integration-test-android-prebuild-$GITHUB_RUN_ID
-            --srcdir .
-            --cache
+        run: |
+          ./docker/linux.sh \
+            --container ouisync-integration-test-android-prebuild-$GITHUB_RUN_ID \
+            --srcdir . \
+            --cache \
             integration-test --platform android --prebuild
 
   integration_test_android:
@@ -325,11 +325,11 @@ jobs:
           submodules: recursive
 
       - name: Run tests
-        run: >
-          ./docker/linux.sh
-            --container ouisync-integration-test-android-${{ matrix.api-level }}-$GITHUB_RUN_ID
-            --srcdir .
-            --cache
+        run: |
+          ./docker/linux.sh \
+            --container ouisync-integration-test-android-${{ matrix.api-level }}-$GITHUB_RUN_ID \
+            --srcdir . \
+            --cache \
             integration-test --platform android --api ${{ matrix.api-level }}
 
       # - name: Upload logcat
