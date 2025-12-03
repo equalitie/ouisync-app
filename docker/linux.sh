@@ -84,6 +84,7 @@ function print_help() {
             echo "Options:"
             echo "    --platform <linux|android>    Platform for which to run the tests"
             echo "    --api <API>                   Android API level to run in"
+            echo "    --prebuild                    Only build the test binary, don't run the tests. Useful for seeding the cache."
             ;;
         "analyze")
             echo "Analyze the dart source code"
@@ -514,12 +515,16 @@ function integration_test_android() {
     init
 
     local api=
+    local prebuild=
 
     while true; do
         case ${1-} in
             --api)
                 api="${2-}"
-                shift
+                shift 2
+                ;;
+            --prebuild)
+                prebuild=1
                 shift
                 ;;
             *)
@@ -528,13 +533,16 @@ function integration_test_android() {
         esac
     done
 
+    if [ "$prebuild" = 1 ]; then
+        log_group_begin "Pre-build the test binary"
+        exe -w /opt/ouisync-app -t flutter build apk --debug --flavor itest --target-platform android-x64
+        log_group_end
+        return
+    fi
+
     if [ -z "$api" ]; then
         error "Missing --api"
     fi
-
-    log_group_begin "Pre-build the test binary"
-    exe -w /opt/ouisync-app -t flutter build apk --debug --flavor itest --target-platform android-x64
-    log_group_end
 
     emulator_start --api $api
 
