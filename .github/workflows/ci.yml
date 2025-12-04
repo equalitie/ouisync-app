@@ -285,7 +285,7 @@ jobs:
       fail-fast: false
       # These jobs are very RAM hungry - reducing the number of them running at the same time to
       # avoid exhausting all RAM.
-      max-parallel: 3
+      max-parallel: 1
       matrix:
         api-level:
           # These don't work due to various missing apis
@@ -313,7 +313,7 @@ jobs:
       - name: Run tests
         run: |
           ./docker/linux.sh \
-            --container ouisync-integration-test-android-${{ matrix.api-level }}-$GITHUB_RUN_ID \
+            --container ouisync-integration-test-android \
             --srcdir . \
             --cache \
             integration-test --platform android --api ${{ matrix.api-level }}

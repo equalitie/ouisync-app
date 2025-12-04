@@ -30,9 +30,6 @@ container_name=$default_container_name
 # Is cache enabled (see `$cache_paths` to see what's cached)?
 cache=
 
-# Is gradle cache enabled? Needed only for android integration test and build
-cache_gradle=
-
 # Name of the docker volume to put the cache on
 cache_volume="$base_name-cache"
 
@@ -56,6 +53,10 @@ cache_paths=(
 
     # Android AVDs
     /root/.android
+
+    # Gradle
+    /root/.gradle/caches
+    /root/.gradle/wrapper
 )
 
 emulator_sdcard=32M
@@ -158,44 +159,6 @@ function create_cache_volume() {
     log_group_end
 }
 
-# Gradle cache doesn't work well when accessed from multiple containers concurrently. This is
-# because the Gradle daemons need to communicate with each other over localhost TCP sockets in
-# order to coordinate locking and this doesn't work when each daemon runs in a separate container
-# (due to network separation). One way around this is to run the containers with `--network host`
-# but that comes with its own issues and is generally not worth it. To solve this, we copy
-# (using rsync) the Gradle cache files from the cache volume to the container at the beginning of
-# the run and the copy them back at the end of it. We use file locks to synchronize the copies.
-gradle_cache_root=/root/.gradle
-gradle_cache_dirs=(caches wrapper)
-
-function gradle_cache_rsync() {
-    local lock_mode=$1
-    local src=$2
-    local dst=$3
-
-    exe mkdir -p "${gradle_cache_dirs[@]/#/$src/}"
-    exe flock $lock_mode /mnt/cache/gradle.lock                             \
-            rsync                                                           \
-                -a                                                          \
-                --delete                                                    \
-                --exclude='*.lock'                                          \
-                ${gradle_cache_dirs[@]/*/--include=/&/ --include=/&/***}    \
-                --exclude='*'                                               \
-                "$src/" "$dst"
-}
-
-function restore_gradle_cache() {
-    log_group_begin "Restore gradle cache"
-    gradle_cache_rsync --shared /mnt/cache$gradle_cache_root $gradle_cache_root
-    log_group_end
-}
-
-function save_gradle_cache() {
-    log_group_begin "Save gradle cache"
-    gradle_cache_rsync --exclusive $gradle_cache_root /mnt/cache$gradle_cache_root
-    log_group_end
-}
-
 function start_container() {
     if [ -z "$commit" -a -z "$srcdir" ]; then error "Missing one of --commit or --srcdir"; fi
     if [ -n "$commit" -a -n "$srcdir" ]; then error "--commit and --src are mutually exclusive"; fi
@@ -260,10 +223,6 @@ function start_container() {
     fi
     log_group_end
 
-    if [ "$cache" = 1 -a "$cache_gradle" = 1 ]; then
-        restore_gradle_cache
-    fi
-
     # Generate bindings (TODO: This should be done automatically)
     log_group_begin "Generate bindings"
     exe -w /opt/ouisync-app/ouisync/bindings/dart -t dart pub get
@@ -283,10 +242,6 @@ function start_container() {
 }
 
 function stop_container() {
-    if [ "$cache" = 1 -a "$cache_gradle" ]; then
-        save_gradle_cache
-    fi
-
     echo "Stop container $container_name"
     dock container stop $container_name
 }
@@ -353,7 +308,6 @@ function init() {
 # Build the release artifacts for linux and android
 function build() {
     rsync_include_git=1
-    cache_gradle=1
 
     local dst_dir="./releases/$container_name"
     local flavor=
@@ -518,7 +472,6 @@ function emulator_stop() {
 }
 
 function integration_test_android() {
-    cache_gradle=1
     init
 
     local api=
