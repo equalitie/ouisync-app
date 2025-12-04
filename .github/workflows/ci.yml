@@ -283,6 +283,9 @@ jobs:
     runs-on: self-hosted
     strategy:
       fail-fast: false
+      # These jobs are very RAM hungry - reducing the number of them running at the same time to
+      # avoid exhausting all RAM.
+      max-parallel: 3
       matrix:
         api-level:
           # These don't work due to various missing apis
