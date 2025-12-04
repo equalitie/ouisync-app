@@ -54,6 +54,9 @@ cache_paths=(
 
     # Android system images
     /opt/android-sdk/system-images
+
+    # Android AVDs
+    /root/.android
 )
 
 emulator_sdcard=32M
@@ -433,22 +436,25 @@ function emulator_start() {
 
     #-----------------------------
 
-    log_group_begin "Create AVD"
-    exe sdkmanager --install "$system_image"
-    echo "no" | exe -i avdmanager create avd --force --name $avd --package "$system_image" --sdcard $emulator_sdcard > /dev/null
-    log_group_end
+    if ! exe avdmanager list avd | grep "Name:\s\+$avd" > /dev/null; then
+        log_group_begin "Create AVD"
+        exe sdkmanager --install "$system_image"
+        echo "no" | exe -i avdmanager create avd \
+            --force \
+            --name $avd \
+            --package "$system_image" \
+            --sdcard $emulator_sdcard \
+            > /dev/null
+        log_group_end
+    fi
 
     #-----------------------------
 
     log_group_begin "Launch emulator"
 
-    # Launch the emulator in separate process. Prefix its output with '🤖' to distinguish them from
+    # Launch the emulator in separate process. Prefix its output with '🤖' to distinguish it from
     # other output
-    exe -e ANDROID_EMULATOR_WAIT_TIME_BEFORE_KILL=1 \
-        emulator \
-            -no-metrics -no-window -no-audio -no-boot-anim -avd $avd \
-        | sed 's/^/🤖 /' \
-        &
+    exe emulator -no-metrics -no-window -no-audio -no-boot-anim -avd $avd | sed 's/^/🤖 /' &
 
     emulator_wait_boot
 
