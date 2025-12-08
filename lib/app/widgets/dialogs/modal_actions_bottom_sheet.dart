@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io' as io;
 
 import 'package:file_picker/file_picker.dart';
@@ -14,6 +15,7 @@ import '../../cubits/cubits.dart'
 import '../../utils/dialogs.dart';
 import '../../utils/stage.dart';
 import '../../utils/utils.dart' show AppLogger, Dimensions, Fields, FileIO;
+import '../async_callback_builder.dart';
 import '../widgets.dart' show FolderCreationDialog;
 
 class DirectoryActions extends StatelessWidget with AppLogger {
@@ -69,26 +71,29 @@ class DirectoryActions extends StatelessWidget with AppLogger {
     required Key key,
     required String name,
     required IconData icon,
-    required Function()? action,
-  }) {
-    Color? disabledColor = action == null ? Colors.grey : null;
+    required FutureOr<void> Function()? action,
+  }) => Padding(
+    padding: Dimensions.paddingBottomSheetActions,
+    child: AsyncCallbackBuilder(
+      callback: action,
+      builder: (context, callback) {
+        Color? disabledColor = callback == null ? Colors.grey : null;
 
-    return Padding(
-      padding: Dimensions.paddingBottomSheetActions,
-      child: GestureDetector(
-        key: key,
-        behavior: HitTestBehavior.opaque,
-        onTap: action,
-        child: Column(
-          children: [
-            Icon(icon, size: Dimensions.sizeIconBig, color: disabledColor),
-            Dimensions.spacingVertical,
-            Text(name, style: TextStyle(color: disabledColor)),
-          ],
-        ),
-      ),
-    );
-  }
+        return GestureDetector(
+          key: key,
+          behavior: HitTestBehavior.opaque,
+          onTap: callback,
+          child: Column(
+            children: [
+              Icon(icon, size: Dimensions.sizeIconBig, color: disabledColor),
+              Dimensions.spacingVertical,
+              Text(name, style: TextStyle(color: disabledColor)),
+            ],
+          ),
+        );
+      },
+    ),
+  );
 
   Widget _buildNewFileAction({required RepoCubit cubit}) =>
       BlocBuilder<EntryBottomSheetCubit, EntryBottomSheetState>(
