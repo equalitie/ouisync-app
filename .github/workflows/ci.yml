@@ -286,7 +286,7 @@ jobs:
     name: "run integration tests on android ${{ matrix.api-level }}"
     runs-on: self-hosted
     concurrency:
-      group: ${{ github.workflow }}-integration_test_android
+      group: ${{ github.workflow }}-integration_test_android-${{ matrix.api-level }}
     strategy:
       fail-fast: false
       max-parallel: 1
