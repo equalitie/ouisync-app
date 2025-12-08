@@ -36,14 +36,10 @@ void main() {
   testWidgets(
     'attempt_to_create_repository_with_existing_name',
     (tester) => tester.runAsync(() async {
-      final name = 'le repo';
-
-      final repoCreationObserver = StateObserver.install<RepoCreationState>();
-
       await deps.reposCubit.createRepository(
         location: RepoLocation(
           dir: await deps.session.getStoreDirs().then((dirs) => dirs.first),
-          name: name,
+          name: 'foo',
         ),
         setLocalSecret: randomSetLocalSecret(),
         localSecretMode: LocalSecretMode.randomStored,
@@ -57,22 +53,19 @@ void main() {
       await tester.anxiousTap(find.text('Create repository'));
       await tester.pumpAndSettle();
 
-      await tester.enterText(find.byKey(ValueKey('name')), name);
-      await repoCreationObserver.waitUntil(
-        (state) => switch (state.substate) {
-          RepoCreationPending(nameError: final nameError)
-              when nameError != null && nameError.isNotEmpty =>
-            true,
-          _ => false,
-        },
+      final nameFinder = find.byKey(ValueKey('name'));
+      final errorFinder = find.text(
+        'There is already a repository with this name',
       );
 
-      await tester.pump();
+      await tester.enterText(nameFinder, 'foo');
+      await tester.pumpUntilFound(errorFinder);
 
-      expect(
-        find.text('There is already a repository with this name'),
-        findsOne,
-      );
+      // The error should disappear after the name is fixed.
+      await tester.enterText(nameFinder, 'bar');
+      await tester.pumpAndSettle();
+
+      expect(errorFinder, findsNothing);
     }),
   );
 

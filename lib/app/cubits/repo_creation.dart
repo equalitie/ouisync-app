@@ -394,12 +394,32 @@ class RepoCreationCubit extends Cubit<RepoCreationState>
 
   void _setInvalidName(String error) {
     final substate = switch (state.substate) {
-      RepoCreationPending(setLocalSecret: final setLocalSecret) =>
-        RepoCreationPending(setLocalSecret: setLocalSecret, nameError: error),
-      RepoCreationValid(setLocalSecret: final setLocalSecret) =>
-        RepoCreationPending(setLocalSecret: setLocalSecret, nameError: error),
-      RepoCreationSuccess() ||
-      RepoCreationFailure() => RepoCreationPending(nameError: error),
+      RepoCreationPending(
+        dir: final dir,
+        setLocalSecret: final setLocalSecret,
+      ) =>
+        RepoCreationPending(
+          dir: dir,
+          setLocalSecret: setLocalSecret,
+          nameError: error,
+        ),
+      RepoCreationValid(
+        location: final location,
+        setLocalSecret: final setLocalSecret,
+      ) =>
+        RepoCreationPending(
+          dir: location.dir,
+          setLocalSecret: setLocalSecret,
+          nameError: error,
+        ),
+      RepoCreationSuccess(entry: final entry) => RepoCreationPending(
+        dir: entry.location.dir,
+        nameError: error,
+      ),
+      RepoCreationFailure(location: final location) => RepoCreationPending(
+        dir: location.dir,
+        nameError: error,
+      ),
     };
 
     emitUnlessClosed(state.copyWith(substate: substate));
