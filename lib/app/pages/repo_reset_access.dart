@@ -352,7 +352,7 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
                 ),
                 PositiveButton(
                   text: S.current.actionYes,
-                  isDangerButton: true,
+                  dangerous: true,
                   onPressed: () => widget.stage.maybePop(true),
                 ),
               ],

@@ -1,31 +1,20 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../utils/utils.dart';
-
-typedef _GestureTapAsyncCallback = FutureOr<void> Function();
+import '../async_callback_builder.dart';
 
 class PositiveButton extends _ActionButton {
+  final bool dangerous;
+
   PositiveButton({
-    this.isDangerButton = false,
     required super.text,
     required super.onPressed,
+    this.dangerous = false,
     super.focusNode,
     super.buttonConstrains = Dimensions.sizeConstrainsDialogAction,
     super.buttonsAspectRatio,
     super.key,
-  }) : super(_Type.positive);
-
-  final bool isDangerButton;
-
-  @override
-  Color? _fillColor(context) {
-    return onPressed == null
-        ? Colors.grey
-        : isDangerButton
-        ? Theme.of(context).colorScheme.error
-        : Theme.of(context).colorScheme.primary;
-  }
+  });
 }
 
 class NegativeButton extends _ActionButton {
@@ -36,103 +25,71 @@ class NegativeButton extends _ActionButton {
     super.buttonConstrains = Dimensions.sizeConstrainsDialogAction,
     super.buttonsAspectRatio,
     super.key,
-  }) : super(_Type.negative);
-
-  @override
-  Color? _fillColor(context) => null;
+  });
 }
 
-enum _Type { positive, negative }
-
-abstract class _ActionButton extends StatelessWidget {
+sealed class _ActionButton extends StatelessWidget {
   final String? text;
-  final _GestureTapAsyncCallback? onPressed;
+  final AsyncCallback? onPressed;
   final double buttonsAspectRatio;
-  final _Type _type;
   final BoxConstraints buttonConstrains;
   final FocusNode? focusNode;
-  final ValueNotifier<bool> _enabled;
 
-  _ActionButton(
-    this._type, {
+  _ActionButton({
     required this.text,
     required this.onPressed,
+    required this.buttonConstrains,
     double? buttonsAspectRatio,
     this.focusNode,
-    required this.buttonConstrains,
     super.key,
   }) : buttonsAspectRatio =
-           buttonsAspectRatio ?? Dimensions.aspectRatioModalDialogButton,
-       _enabled = ValueNotifier<bool>(onPressed != null);
+           buttonsAspectRatio ?? Dimensions.aspectRatioModalDialogButton;
 
   @override
   Widget build(BuildContext context) => Container(
     margin: _margin(),
-    child: ValueListenableBuilder<bool>(
-      valueListenable: _enabled,
-      builder: (BuildContext _, bool enabled, Widget? child) =>
-          RawMaterialButton(
-            onPressed: _getOnPressed(enabled),
-            focusNode: focusNode,
-            child: Text((text ?? '').toUpperCase()),
-            constraints: buttonConstrains,
-            elevation: Dimensions.elevationDialogAction,
-            fillColor: _fillColor(context),
-            shape: _shape(context),
-            textStyle: _textStyle(context),
-          ),
+    child: AsyncCallbackBuilder(
+      callback: onPressed,
+      builder: (context, callback) => RawMaterialButton(
+        onPressed: callback,
+        focusNode: focusNode,
+        child: Text((text ?? '').toUpperCase()),
+        constraints: buttonConstrains,
+        elevation: Dimensions.elevationDialogAction,
+        fillColor: _fillColor(context),
+        shape: _shape(context),
+        textStyle: _textStyle(context),
+      ),
     ),
   );
 
-  // Disables the button while the async `onPressed` is executing
-  GestureTapCallback? _getOnPressed(bool enabled) {
-    final callback = onPressed;
+  EdgeInsetsDirectional _margin() => switch (this) {
+    PositiveButton() => Dimensions.marginDialogPositiveButton,
+    NegativeButton() => Dimensions.marginDialogNegativeButton,
+  };
 
-    if (!enabled || callback == null) return null;
+  ShapeBorder _shape(BuildContext context) => switch (this) {
+    PositiveButton() => const RoundedRectangleBorder(
+      borderRadius: Dimensions.borderRadiusDialogPositiveButton,
+    ),
+    NegativeButton() => RoundedRectangleBorder(),
+  };
 
-    return () {
-      unawaited(() async {
-        _enabled.value = false;
-        try {
-          await callback();
-        } finally {
-          _enabled.value = true;
-        }
-      }());
-    };
-  }
+  TextStyle? _textStyle(BuildContext context) => switch (this) {
+    PositiveButton() => TextStyle(
+      color: Theme.of(context).dialogTheme.backgroundColor,
+      fontWeight: FontWeight.w500,
+    ),
+    NegativeButton() => Dimensions.textStyleDialogNegativeButton,
+  };
 
-  EdgeInsetsDirectional _margin() {
-    switch (_type) {
-      case _Type.positive:
-        return Dimensions.marginDialogPositiveButton;
-      case _Type.negative:
-        return Dimensions.marginDialogNegativeButton;
-    }
-  }
-
-  ShapeBorder _shape(BuildContext context) {
-    switch (_type) {
-      case _Type.positive:
-        return const RoundedRectangleBorder(
-          borderRadius: Dimensions.borderRadiusDialogPositiveButton,
-        );
-      case _Type.negative:
-        return RoundedRectangleBorder();
-    }
-  }
-
-  TextStyle? _textStyle(BuildContext context) {
-    switch (_type) {
-      case _Type.positive:
-        return TextStyle(
-          color: Theme.of(context).dialogTheme.backgroundColor,
-          fontWeight: FontWeight.w500,
-        );
-      case _Type.negative:
-        return Dimensions.textStyleDialogNegativeButton;
-    }
-  }
-
-  Color? _fillColor(context);
+  Color? _fillColor(context) => switch (this) {
+    PositiveButton(dangerous: final dangerous) =>
+      onPressed == null
+          ? Colors.grey
+          : dangerous
+          ? Theme.of(context).colorScheme.error
+          : Theme.of(context).colorScheme.primary,
+    NegativeButton() => null,
+  };
 }

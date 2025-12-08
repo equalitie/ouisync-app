@@ -357,7 +357,7 @@ class _DeleteEntryDialog extends StatelessWidget {
           ),
           PositiveButton(
             text: S.current.actionDelete,
-            isDangerButton: true,
+            dangerous: true,
             onPressed: () => stage.maybePop(true),
           ),
         ],

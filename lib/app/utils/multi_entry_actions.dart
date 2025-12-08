@@ -186,7 +186,7 @@ class MultiEntryActions {
           ),
           PositiveButton(
             text: positiveAction,
-            isDangerButton: isDangerButton,
+            dangerous: isDangerButton,
             onPressed: () => _stage.maybePop(true),
             buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
           ),

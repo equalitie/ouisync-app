@@ -360,7 +360,7 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
     PositiveButton(
       key: ValueKey('move_entry'),
       buttonsAspectRatio: aspectRatio,
-      isDangerButton: isDangerButton,
+      dangerous: isDangerButton,
       buttonConstrains: Dimensions.sizeConstrainsBottomDialogAction,
       text: positiveText,
       onPressed: enableAction ? positiveAction : null,

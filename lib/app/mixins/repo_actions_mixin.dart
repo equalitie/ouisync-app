@@ -205,7 +205,7 @@ mixin RepositoryActionsMixin on LoggyType {
           PositiveButton(
             text: S.current.actionDeleteCapital,
             onPressed: () => stage.maybePop(true),
-            isDangerButton: true,
+            dangerous: true,
           ),
         ],
       ),
