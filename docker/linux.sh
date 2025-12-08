@@ -496,7 +496,14 @@ function integration_test_android() {
     emulator_start --api $api
 
     log_group_begin "Run tests"
-    exe -w /opt/ouisync-app -t flutter test integration_test --flavor itest --ignore-timeouts $@
+
+    # Note accessing the gradle home directory from multiple containers concurrently doesn't work
+    # (because the gradle daemons can't talk to each other when they run in different containers). We
+    # could either run the jobs sequentially or not cache the gradle home. The later would be much
+    # slower so we opt for the former by putting a file lock around this command.
+    exe -w /opt/ouisync-app -t \
+        flock /mnt/cache/gradle.lock \
+            flutter test integration_test --flavor itest --ignore-timeouts $@
     log_group_end
 
     emulator_stop
