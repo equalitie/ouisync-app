@@ -310,7 +310,7 @@ jobs:
       - name: Run tests
         run: |
           ./docker/linux.sh \
-            --container ouisync-integration-test-android \
+            --container ouisync-integration-test-android-${{ matrix.api-level }} \
             --srcdir . \
             --cache \
             integration-test --platform android --api ${{ matrix.api-level }}
