@@ -327,14 +327,25 @@ extension WidgetTesterExtension on WidgetTester {
   // `takeScreenshot` renders normal fonts instead of squares.
   Future<void> loadFonts() async {
     // TODO: Path on other platforms.
-    final fontFile = File(
+    final fontPaths = [
       '/usr/lib/ouisync/data/flutter_assets/packages/golden_toolkit/fonts/Roboto-Regular.ttf',
-    );
+      'build/flutter_assets/packages/golden_toolkit/fonts/Roboto-Regular.ttf',
+    ];
 
-    if (!(await fontFile.exists())) {
-      _loggy.error(
-        "Failed to load fonts, the file ${fontFile.path} does not exist",
-      );
+    final fontFile = await Future.wait(
+      fontPaths.map((path) async {
+        final file = File(path);
+
+        if (await file.exists()) {
+          return file;
+        } else {
+          return null;
+        }
+      }),
+    ).then((files) => files.nonNulls.firstOrNull);
+
+    if (fontFile == null) {
+      _loggy.error("Failed to load fonts - no file from $fontPaths exists");
       return;
     }
 
