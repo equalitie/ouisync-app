@@ -342,7 +342,7 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
     bool isDangerButton,
   ) => [
     NegativeButton(
-      buttonConstrains: Dimensions.sizeConstrainsBottomDialogAction,
+      constrains: Dimensions.sizeConstrainsBottomDialogAction,
       text: negativeText,
       onPressed: () async {
         negativeAction();
@@ -351,7 +351,7 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
     PositiveButton(
       key: ValueKey('move_entry'),
       dangerous: isDangerButton,
-      buttonConstrains: Dimensions.sizeConstrainsBottomDialogAction,
+      constrains: Dimensions.sizeConstrainsBottomDialogAction,
       text: positiveText,
       onPressed: enableAction ? positiveAction : null,
     ),

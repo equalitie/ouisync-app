@@ -11,7 +11,7 @@ class PositiveButton extends _ActionButton {
     required super.onPressed,
     this.dangerous = false,
     super.focusNode,
-    super.buttonConstrains = Dimensions.sizeConstrainsDialogAction,
+    super.constrains = Dimensions.sizeConstrainsDialogAction,
     super.key,
   });
 }
@@ -21,7 +21,7 @@ class NegativeButton extends _ActionButton {
     required super.text,
     required super.onPressed,
     super.focusNode,
-    super.buttonConstrains = Dimensions.sizeConstrainsDialogAction,
+    super.constrains = Dimensions.sizeConstrainsDialogAction,
     super.key,
   });
 }
@@ -29,13 +29,13 @@ class NegativeButton extends _ActionButton {
 sealed class _ActionButton extends StatelessWidget {
   final String? text;
   final AsyncCallback? onPressed;
-  final BoxConstraints buttonConstrains;
+  final BoxConstraints constrains;
   final FocusNode? focusNode;
 
   _ActionButton({
     required this.text,
     required this.onPressed,
-    required this.buttonConstrains,
+    required this.constrains,
     this.focusNode,
     super.key,
   });
@@ -49,7 +49,7 @@ sealed class _ActionButton extends StatelessWidget {
         onPressed: callback,
         focusNode: focusNode,
         child: Text((text ?? '').toUpperCase()),
-        constraints: buttonConstrains,
+        constraints: constrains,
         elevation: Dimensions.elevationDialogAction,
         fillColor: _fillColor(context),
         shape: _shape(context),
