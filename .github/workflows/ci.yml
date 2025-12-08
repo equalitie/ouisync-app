@@ -278,13 +278,17 @@ jobs:
           name: ${{ matrix.name }}
           path: releases/release_*/${{ matrix.artifact-files }}
 
+  # Note accessing the gradle home directory from multiple containers concurrently doesn't work
+  # (because the gradle daemons can't talk to each other when they run in different containers). We
+  # could either run the jobs sequentially or not cache the gradle home. The later would be much
+  # slower so we opt for the former.
   integration_test_android:
     name: "run integration tests on android ${{ matrix.api-level }}"
     runs-on: self-hosted
+    concurrency:
+      group: ${{ github.workflow }}-integration_test_android
     strategy:
       fail-fast: false
-      # These jobs are very RAM hungry - reducing the number of them running at the same time to
-      # avoid exhausting all RAM.
       max-parallel: 1
       matrix:
         api-level:
