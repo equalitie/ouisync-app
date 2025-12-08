@@ -12,7 +12,6 @@ class PositiveButton extends _ActionButton {
     this.dangerous = false,
     super.focusNode,
     super.buttonConstrains = Dimensions.sizeConstrainsDialogAction,
-    super.buttonsAspectRatio,
     super.key,
   });
 }
@@ -23,7 +22,6 @@ class NegativeButton extends _ActionButton {
     required super.onPressed,
     super.focusNode,
     super.buttonConstrains = Dimensions.sizeConstrainsDialogAction,
-    super.buttonsAspectRatio,
     super.key,
   });
 }
@@ -31,7 +29,6 @@ class NegativeButton extends _ActionButton {
 sealed class _ActionButton extends StatelessWidget {
   final String? text;
   final AsyncCallback? onPressed;
-  final double buttonsAspectRatio;
   final BoxConstraints buttonConstrains;
   final FocusNode? focusNode;
 
@@ -39,11 +36,9 @@ sealed class _ActionButton extends StatelessWidget {
     required this.text,
     required this.onPressed,
     required this.buttonConstrains,
-    double? buttonsAspectRatio,
     this.focusNode,
     super.key,
-  }) : buttonsAspectRatio =
-           buttonsAspectRatio ?? Dimensions.aspectRatioModalDialogButton;
+  });
 
   @override
   Widget build(BuildContext context) => Container(

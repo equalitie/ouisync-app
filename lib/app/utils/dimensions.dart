@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import 'constants.dart';
-import 'platform/platform_values.dart';
 
 class Dimensions {
   Dimensions._();
@@ -23,11 +22,6 @@ class Dimensions {
   static const double sizeIconBadge = 12.0;
 
   static const double sizeModalDialogWidthDesktop = 400.0;
-
-  static final double aspectRatioModalDialogButton =
-      PlatformValues.isMobileDevice ? 13 / 5 : 10 / 3;
-
-  static const double aspectRatioBottomDialogButton = 11 / 3;
 
   static const BoxConstraints sizeConstrainsDialogAction = BoxConstraints(
     minWidth: 98,

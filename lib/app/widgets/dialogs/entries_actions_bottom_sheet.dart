@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync_app/app/models/models.dart'
@@ -246,13 +244,10 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
     }
 
     final positiveText = moveEntriesActions.getActionText(sheetType);
-
-    final aspectRatio = _getButtonAspectRatio(widgetSize);
     final isDangerButton = sheetType == BottomSheetType.delete;
 
     final actions = _actions(
       enableAction,
-      aspectRatio,
       positiveAction,
       positiveText,
       negativeAction,
@@ -319,12 +314,10 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
 
       final positiveText = moveEntriesActions.getActionText(sheetType);
 
-      final aspectRatio = _getButtonAspectRatio(widgetSize);
       final isDangerButton = sheetType == BottomSheetType.delete;
 
       final actions = _actions(
         enableAction,
-        aspectRatio,
         positiveAction,
         positiveText,
         negativeAction,
@@ -342,7 +335,6 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
 
   List<Widget> _actions(
     bool enableAction,
-    double aspectRatio,
     Future<void> Function()? positiveAction,
     String positiveText,
     void Function() negativeAction,
@@ -350,7 +342,6 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
     bool isDangerButton,
   ) => [
     NegativeButton(
-      buttonsAspectRatio: aspectRatio,
       buttonConstrains: Dimensions.sizeConstrainsBottomDialogAction,
       text: negativeText,
       onPressed: () async {
@@ -359,7 +350,6 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
     ),
     PositiveButton(
       key: ValueKey('move_entry'),
-      buttonsAspectRatio: aspectRatio,
       dangerous: isDangerButton,
       buttonConstrains: Dimensions.sizeConstrainsBottomDialogAction,
       text: positiveText,
@@ -376,19 +366,5 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
   ) {
     moveEntriesActions.cancel();
     originRepoCubit.endEntriesSelection();
-  }
-
-  double _getButtonAspectRatio(Size? size) {
-    if (Platform.isWindows || Platform.isLinux) {
-      if (size == null) {
-        return Dimensions.aspectRatioModalDialogButton;
-      }
-
-      final height = size.height * 0.6;
-      final width = size.width;
-      return width / height;
-    }
-
-    return Dimensions.aspectRatioBottomDialogButton;
   }
 }

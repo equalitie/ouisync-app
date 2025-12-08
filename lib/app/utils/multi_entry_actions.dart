@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ouisync_app/app/models/models.dart'
     show DirectoryEntry, FileEntry;
-import 'package:ouisync_app/app/utils/utils.dart' show Dimensions;
 
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart'
@@ -182,13 +181,11 @@ class MultiEntryActions {
           NegativeButton(
             text: S.current.actionCancel,
             onPressed: () => _stage.maybePop(false),
-            buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
           ),
           PositiveButton(
             text: positiveAction,
             dangerous: isDangerButton,
             onPressed: () => _stage.maybePop(true),
-            buttonsAspectRatio: Dimensions.aspectRatioModalDialogButton,
           ),
         ],
       ),
