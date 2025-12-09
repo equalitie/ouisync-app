@@ -310,7 +310,7 @@ jobs:
       - name: Run tests
         run: |
           ./docker/linux.sh \
-            --container ouisync-integration-test-android-${{ matrix.api-level }} \
+            --container ouisync-integration-test-android-${{ matrix.api-level }}-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT \
             --srcdir . \
             --cache \
             integration-test --platform android --api ${{ matrix.api-level }}
