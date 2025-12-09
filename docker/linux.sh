@@ -51,9 +51,6 @@ cache_paths=(
     # Android system images
     /opt/android-sdk/system-images
 
-    # Android AVDs
-    /root/.android
-
     # Gradle
     /root/.gradle/caches
     /root/.gradle/wrapper
@@ -436,24 +433,22 @@ function emulator_start() {
 
     #-----------------------------
 
-    if ! exe avdmanager list avd | grep "Name:\s\+$avd" > /dev/null; then
-        log_group_begin "Create AVD"
-        exe sdkmanager --install "$system_image"
-        echo "no" | exe -i avdmanager create avd \
-            --force \
-            --name $avd \
-            --package "$system_image" \
-            --sdcard $emulator_sdcard \
-            > /dev/null
-        log_group_end
-    fi
+    log_group_begin "Create AVD"
+    exe sdkmanager --install "$system_image"
+    echo "no" | exe -i avdmanager create avd \
+        --force \
+        --name $avd \
+        --package "$system_image" \
+        --sdcard $emulator_sdcard \
+        > /dev/null
+    log_group_end
 
     #-----------------------------
 
     log_group_begin "Launch emulator"
 
     # Launch the emulator in separate process. Prefix its output with '🤖' to distinguish it from
-    # other output
+    # other output.
     exe emulator -no-metrics -no-window -no-audio -no-boot-anim -avd $avd | sed 's/^/🤖 /' &
 
     emulator_wait_boot
