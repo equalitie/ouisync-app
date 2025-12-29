@@ -319,6 +319,7 @@ function build() {
                 error "Unknown argument: $1"
                 ;;
         esac
+        shift
     done
 
     if [ -n "$commit" ]; then
