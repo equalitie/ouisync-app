@@ -90,18 +90,18 @@ else
 fi
 
 # Generate bindings
-exe -d c:/ouisync-app/ouisync/bindings/dart dart pub get
-exe -d c:/ouisync-app/ouisync/bindings/dart dart tool/bindgen.dart
+exe -w c:/ouisync-app/ouisync/bindings/dart dart pub get
+exe -w c:/ouisync-app/ouisync/bindings/dart dart tool/bindgen.dart
 
 # Build Ouisync
-exe -d c:/ouisync-app dart pub get
-exe -d c:/ouisync-app dart run util/release.dart --flavor=$flavor $sentry_arg $build_exe $build_msix
+exe -w c:/ouisync-app dart pub get
+exe -w c:/ouisync-app dart run util/release.dart --flavor=$flavor $sentry_arg $build_exe $build_msix
 
 function dock_rsync() {
     rsync -e "docker -H ssh://$host exec -i" "$@"
 }
 
 mkdir -p $out_dir
-for asset in $(exe -d c:/ouisync-app/releases/latest ls); do
+for asset in $(exe -w c:/ouisync-app/releases/latest ls); do
     dock_rsync -av $container_name:/c/ouisync-app/releases/latest/$asset $out_dir
 done
