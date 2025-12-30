@@ -404,8 +404,10 @@ function build() {
     done
 
     # Build Ouisync app
-    exe -w /opt/ouisync-app dart run util/release.dart \
-        --flavor=$flavor $opts
+    # (see the comment in the `integration_test_android` function for more info about the gradle file lock)
+    exe -w /opt/ouisync-app \
+        flock /mnt/cache/gradle.lock \
+            dart run util/release.dart --flavor=$flavor $opts
 
     # Collect artifacts
     mkdir -p $dst_dir
