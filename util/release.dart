@@ -617,6 +617,18 @@ class AssetDesc {
   }
 }
 
+// https://docs.flutter.dev/platform-integration/windows/building#building-your-own-zip-file-for-windows
+Future<void> copyMsVcRedistributables() async {
+  final dlls = ["msvcp140.dll", "vcruntime140.dll", "vcruntime140_1.dll"];
+
+  for (final dll in dlls) {
+    final src = File(
+      "C:/BuildTools/VC/Redist/MSVC/14.44.35112/x64/Microsoft.VC143.CRT/$dll",
+    );
+    src.copy("$windowsArtifactDir/$dll");
+  }
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 // exe
@@ -638,6 +650,8 @@ Future<File> buildWindowsInstaller(Version version, String? sentryDSN) async {
     'OUISYNC_FLAVOR=${version.flavor}',
   ]);
 
+  await copyMsVcRedistributables();
+
   /// Download the Dokan MSI to be bundle with the Ouisync MSIX, into the source
   /// directory (releases/bundled-assets-windows)
   await prepareDokanBundle();
@@ -654,7 +668,7 @@ Future<File> buildWindowsInstaller(Version version, String? sentryDSN) async {
     'build/inno-setup.iss',
   ]);
 
-  return File('build/windows/x64/runner/Release/ouisync-installer.exe');
+  return File('$windowsArtifactDir/ouisync-installer.exe');
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -697,6 +711,8 @@ Future<File> buildWindowsMSIX(
     'msix:build',
     ...args,
   ]);
+
+  await copyMsVcRedistributables();
 
   /// Download the Dokan MSI to be bundle with the Ouisync MSIX, into the source
   /// directory (releases/bundled-assets-windows)
