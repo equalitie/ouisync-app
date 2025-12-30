@@ -86,7 +86,10 @@ fi
 if [ -n "$commit" ]; then
     get_sources_from_git $commit c:
 else
-    get_sources_from_local_dir $srcdir  /c
+    (
+        rsync_include_git=1;
+        get_sources_from_local_dir $srcdir  /c
+    )
 fi
 
 # Generate bindings
