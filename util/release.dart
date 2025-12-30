@@ -627,10 +627,10 @@ Future<void> copyMsVcRedistributables() async {
   // containers and CI machines the files are in C:/Windows/System32. I presume
   // the Visual Studio installer copies them, if true, it should be OK to get
   // them from there.
-  final src_path = "C:/Windows/System32";
+  final srcPath = "C:/Windows/System32";
 
   for (final dll in dlls) {
-    final src = File("$src_path/$dll");
+    final src = File("$srcPath/$dll");
     await src.copy("$windowsArtifactDir/$dll");
   }
 }
