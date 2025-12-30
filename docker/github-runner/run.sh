@@ -13,7 +13,7 @@ function help() {
     echo "Usage: $0 [OPTIONS] [ARGS...]"
     echo
     echo "Options:"
-    echo "    --name <NAME>         Name of the runner (must be unique for a given git repo)"
+    echo "    --name <NAME>         Name of the runner (must be unique for the given git repo)"
     echo "    --repo <OWNER/REPO>   Github repo for which to start the runner"
     echo "    --token <TOKEN>       Github access token (see below for details)"
     echo "    --help                Print help"
@@ -24,7 +24,7 @@ function help() {
     echo "Github token:"
     echo "    This script requires a valid Github Personal Access Token in order to register/unregister the runner. The token can be either a Fine-grained personal access token with the 'Administration (write)' permission for the given repo or a Classic Personal Access Token with the 'repo' scope."
     echo
-    echo "    The token can be passed in one of three ways: thtough the '--token' command line argument, through the 'GITHUB_TOKEN' env variable or read from the '.github-token' file in the same directory as this script."
+    echo "    The token can be passed in one of three ways: with the '--token' command line argument, with the 'GITHUB_TOKEN' env variable or read from the '.github-token' file in the same directory as this script."
 }
 
 while [ $# -gt 0 ]; do
@@ -92,7 +92,7 @@ docker run \
     --name $container_name \
     --hostname $name \
     --group-add $docker_gid \
-    --env GITHUB_TOKEN=$GITHUB_TOKEN \
+    --env GITHUB_TOKEN=$github_token \
     --env GITHUB_REPO=$repo \
     ${args[@]} \
     $image_name

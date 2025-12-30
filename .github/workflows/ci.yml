@@ -140,12 +140,13 @@ jobs:
 
       - name: Build artifacts
         run: |
-          ./docker/linux.sh             \
-            --srcdir .                  \
-            --cache                     \
-            build                       \
-            --flavor nightly            \
-            --out releases              \
+          ./docker/linux.sh                                         \
+            --container ouisync-build-linux-android-$GITHUB_RUN_ID  \
+            --srcdir .                                              \
+            --cache                                                 \
+            build                                                   \
+            --flavor nightly                                        \
+            --out releases                                          \
             --type apk,deb-gui,deb-cli
         env:
           SECRET_SENTRY_DSN:      ${{ secrets.NIGHTLY_SENTRY_DSN }}

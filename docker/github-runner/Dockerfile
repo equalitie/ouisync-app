@@ -10,6 +10,7 @@ RUN apt-get update && \
         jq curl \
         docker.io docker-buildx \
         rsync \
+        xxd \
         && \
     apt-get clean
 
