@@ -68,7 +68,9 @@ function print_help() {
             echo "Usage: $0 build [OPTIONS]"
             echo
             echo "Options:"
-            echo "    --out <PATH> Directory where artifacts will be stored"
+            echo "    --out <PATH>                              Directory where artifacts will be stored"
+            echo "    --flavor <production|nightly|unofficial>  Which flavor to build"
+            echo "    --type <aab|apk|deb-gui|deb-cli>...       Which package type(s) to build."
             ;;
         "unit-test")
             echo "Run unit tests"
@@ -308,11 +310,27 @@ function build() {
 
     local dst_dir="./releases/$container_name"
     local flavor=
+    local types=()
+
+    if [ -n "$commit" ]; then
+        flavor=production
+    elif [ -n "$srcdir" ]; then
+        flavor=unofficial
+    fi
 
     while [ $# -gt 0 ]; do
         case $1 in
             "--out")
-                dst_dir="$1"
+                dst_dir="$2"
+                shift
+                ;;
+            "--flavor")
+                flavor="$2"
+                shift
+                ;;
+            "--type"|"--types")
+                IFS=',' read -r -a more_types <<< "$2"
+                types+=( "${more_types[@]}" )
                 shift
                 ;;
             *)
@@ -322,25 +340,44 @@ function build() {
         shift
     done
 
-    if [ -n "$commit" ]; then
-        flavor=production
-    elif [ -n "$srcdir" ]; then
-        flavor=unofficial
-    fi
-
-    local secretSentryDsn=
-    local secretStorePassword=
-    local secretKeyAlias=
-    local secretKeyPassword=
-    local secretKeystoreHex=
+    local secret_sentry_dsn=
+    local secret_store_password=
+    local secret_key_alias=
+    local secret_key_password=
+    local secret_keystore_hex=
 
     # Collect secrets
     if [ "$flavor" != unofficial ]; then
-        secretSentryDsn=$(pass cenoers/ouisync/app/$flavor/sentry_dsn)
-        secretStorePassword=$(pass cenoers/ouisync/app/$flavor/android/storePassword)
-        secretKeyAlias=$(pass cenoers/ouisync/app/$flavor/android/keyAlias)
-        secretKeyPassword=$(pass cenoers/ouisync/app/$flavor/android/keyPassword)
-        secretKeystoreHex=$(pass cenoers/ouisync/app/$flavor/android/keystore.jks | xxd -p)
+        local prefix="cenoers/ouisync/app/$flavor"
+
+        secret_sentry_dsn="${SECRET_SENTRY_DSN-}"
+        if [ -z "$secret_sentry_dsn" ]; then
+            secret_sentry_dsn=$(pass "$prefix/sentry_dsn")
+        fi
+
+        secret_store_password="${SECRET_STORE_PASSWORD-}"
+        if [ -z "$secret_store_password" ]; then
+            secret_store_password=$(pass "$prefix/android/storePassword")
+        fi
+
+        secret_key_alias="${SECRET_KEY_ALIAS-}"
+        if [ -z "$secret_key_alias" ]; then
+            secret_key_alias=$(pass "$prefix/android/keyAlias")
+        fi
+
+        secret_key_password="${SECRET_KEY_PASSWORD-}"
+        if [ -z "$secret_key_password" ]; then
+            secret_key_password=$(pass "$prefix/android/keyPassword")
+        fi
+
+        secret_keystore_hex="${SECRET_KEYSTORE_HEX-}"
+        if [ -z "$secret_keystore_hex" ]; then
+            secret_keystore_hex=$(pass "$prefix/android/keystore.jks" | xxd -p)
+        fi
+    fi
+
+    if [ ${#types[@]} = 0 ]; then
+        types=(apk aab deb-gui deb-cli)
     fi
 
     init
@@ -351,20 +388,24 @@ function build() {
     if [ "$flavor" != unofficial ]; then
         function exe_i() { dock exec -i $container_name "$@"; }
         exe mkdir -p /opt/secrets
-        echo "$secretKeystoreHex" | xxd -p -r      | exe_i dd of=/opt/secrets/keystore.jks
-        echo "storePassword=$secretStorePassword"  | exe_i dd of=/opt/secrets/key.properties
-        echo "keyPassword=$secretKeyPassword"      | exe_i dd of=/opt/secrets/key.properties oflag=append conv=notrunc
-        echo "keyAlias=$secretKeyAlias"            | exe_i dd of=/opt/secrets/key.properties oflag=append conv=notrunc
-        echo "storeFile=/opt/secrets/keystore.jks" | exe_i dd of=/opt/secrets/key.properties oflag=append conv=notrunc
-        echo "$secretSentryDsn"                    | exe_i dd of=/opt/secrets/sentry_dsn
+        echo "$secret_keystore_hex" | xxd -p -r     | exe_i dd of=/opt/secrets/keystore.jks
+        echo "storePassword=$secret_store_password" | exe_i dd of=/opt/secrets/key.properties
+        echo "keyPassword=$secret_key_password"     | exe_i dd of=/opt/secrets/key.properties oflag=append conv=notrunc
+        echo "keyAlias=$secret_key_alias"           | exe_i dd of=/opt/secrets/key.properties oflag=append conv=notrunc
+        echo "storeFile=/opt/secrets/keystore.jks"  | exe_i dd of=/opt/secrets/key.properties oflag=append conv=notrunc
+        echo "$secret_sentry_dsn"                   | exe_i dd of=/opt/secrets/sentry_dsn
 
         opts="$opts --android-key-properties=/opt/secrets/key.properties"
         opts="$opts --sentry=/opt/secrets/sentry_dsn"
     fi
 
+    for type in ${types[@]}; do
+        opts="$opts --$type"
+    done
+
     # Build Ouisync app
     exe -w /opt/ouisync-app dart run util/release.dart \
-        --flavor=$flavor --apk --aab --deb-gui --deb-cli $opts
+        --flavor=$flavor $opts
 
     # Collect artifacts
     mkdir -p $dst_dir
