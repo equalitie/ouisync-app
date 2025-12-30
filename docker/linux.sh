@@ -403,11 +403,15 @@ function build() {
         opts="$opts --$type"
     done
 
+    # Lock gradle home dir when building the android packages. See the comment in
+    # `integration_tests_android` for more details.
+    if [ "$cache" = 1 ]; then
+        opts="$opts --gradle-lock=/mnt/cache/gradle.lock"
+    fi
+
     # Build Ouisync app
-    # (see the comment in the `integration_test_android` function for more info about the gradle file lock)
     exe -w /opt/ouisync-app \
-        flock /mnt/cache/gradle.lock \
-            dart run util/release.dart --flavor=$flavor $opts
+        dart run util/release.dart --flavor=$flavor $opts
 
     # Collect artifacts
     mkdir -p $dst_dir

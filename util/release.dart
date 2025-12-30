@@ -90,7 +90,12 @@ Future<void> main(List<String> args) async {
     };
 
     try {
-      final aab = await buildAab(version, secrets, sentryDSN);
+      final aab = await buildAab(
+        version,
+        secrets,
+        sentryDSN,
+        gradleLock: options.gradleLock,
+      );
 
       if (options.aab) {
         assets.add(await collateAsset(outputDir, name, version, aab));
@@ -239,6 +244,7 @@ class Options {
   final String? androidKeyPropertiesPath;
   final String? sentryDSN;
   final String? assetDirPath;
+  final String? gradleLock;
 
   Options._({
     this.apk = false,
@@ -257,6 +263,7 @@ class Options {
     this.flavor = Flavor.production,
     this.androidKeyPropertiesPath,
     this.sentryDSN,
+    this.gradleLock,
   });
 
   static Future<Options> parse(List<String> args) async {
@@ -358,6 +365,12 @@ class Options {
       help: 'Path to file containing Sentry DSN (single line)',
     );
 
+    parser.addOption(
+      'gradle-lock',
+      help:
+          'Path to file to lock when invoking android builds. Useful when running in a container with shared gradle home directory to work around gradle locking issues',
+    );
+
     final results = parser.parse(args);
 
     if (results['help']) {
@@ -453,6 +466,7 @@ class Options {
       flavor: Flavor.fromString(results['flavor']),
       androidKeyPropertiesPath: androidKeyProperties,
       sentryDSN: sentryDSN,
+      gradleLock: results['gradle-lock'],
     );
   }
 }
@@ -967,8 +981,9 @@ Future<File> buildDebCLI({
 Future<File> buildAab(
   Version version,
   AndroidSecrets? secrets,
-  String? sentryDSN,
-) async {
+  String? sentryDSN, {
+  String? gradleLock,
+}) async {
   Flavor flavor = version.flavor;
 
   final env = <String, String>{};
@@ -982,7 +997,8 @@ Future<File> buildAab(
 
   print('Creating Android App Bundle ...');
 
-  await run('flutter', [
+  var command = 'flutter';
+  var args = [
     'build',
     'appbundle',
     '--verbose',
@@ -993,7 +1009,14 @@ Future<File> buildAab(
     '--flavor=$flavor',
     '--build-name',
     version.toString(),
-  ], environment: env);
+  ];
+
+  if (gradleLock != null) {
+    args = [gradleLock, command, ...args];
+    command = 'flock';
+  }
+
+  await run(command, args, environment: env);
 
   return File(inputPath);
 }
