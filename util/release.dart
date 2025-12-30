@@ -671,8 +671,12 @@ Future<File> buildWindowsMSIX(
     // We had a problem when creating the msix when there was an executable from
     // previous non-msix builds, the executable was not regenerated and the
     // package was unusable.
+    //
+    // Also, the `ouisync-installer.exe` created by `buildWindowsInstaller` is
+    // created in `windowsArtifactDir`, keeping it there would double the size
+    // of the final msix installer.
     print("Removing artifacts from previous builds");
-    //await Directory(windowsArtifactDir).delete(recursive: true);
+    await Directory(windowsArtifactDir).delete(recursive: true);
   }
 
   final args = [
