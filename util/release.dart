@@ -621,10 +621,16 @@ class AssetDesc {
 Future<void> copyMsVcRedistributables() async {
   final dlls = ["msvcp140.dll", "vcruntime140.dll", "vcruntime140_1.dll"];
 
+  // In the container, these files are installed with Visual Studio here
+  // C:/BuildTools/VC/Redist/MSVC/14.44.35112/x64/Microsoft.VC143.CRT
+  // But in CI we don't install Visual Studio explicitly. On both, the
+  // containers and CI machines the files are in C:/Windows/System32. I presume
+  // the Visual Studio installer copies them, if true, it should be OK to get
+  // them from there.
+  final src_path = "C:/Windows/System32";
+
   for (final dll in dlls) {
-    final src = File(
-      "C:/BuildTools/VC/Redist/MSVC/14.44.35112/x64/Microsoft.VC143.CRT/$dll",
-    );
+    final src = File("$src_path/$dll");
     await src.copy("$windowsArtifactDir/$dll");
   }
 }
