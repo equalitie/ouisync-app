@@ -625,7 +625,7 @@ Future<void> copyMsVcRedistributables() async {
     final src = File(
       "C:/BuildTools/VC/Redist/MSVC/14.44.35112/x64/Microsoft.VC143.CRT/$dll",
     );
-    src.copy("$windowsArtifactDir/$dll");
+    await src.copy("$windowsArtifactDir/$dll");
   }
 }
 
