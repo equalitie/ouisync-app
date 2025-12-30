@@ -259,6 +259,11 @@ jobs:
           NIGHTLY_KEYSTORE_PASSWORD : ${{ secrets.NIGHTLY_KEYSTORE_PASSWORD }}
         if: env.NIGHTLY_KEYSTORE_JKS_HEX != null && env.NIGHTLY_KEYSTORE_PASSWORD != null
 
+      - name: Find VS redistributables
+        run: Get-Childitem –Path C:\ -Include msvcp140.dll,vcruntime140.dll,vcruntime140_1.dll -File -Recurse -ErrorAction SilentlyContinue
+        shell: pwsh
+        if: matrix.name == 'windows'
+
       - name: Build artifacts
         run: |
           key_properties_path=secrets/android/key.properties
