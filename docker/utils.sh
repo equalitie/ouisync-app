@@ -106,7 +106,7 @@ function get_sources_from_local_dir {
     fi
 
     rsync -e "docker $host_opt exec -i" \
-        -a --no-links \
+        --archive --no-links --verbose \
         $compress_opt \
         ${exclude_dirs[@]/#/--exclude=} \
         ${srcdir%/}/ $container_name:$dstdir/ouisync-app

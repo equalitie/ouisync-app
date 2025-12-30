@@ -985,6 +985,7 @@ Future<File> buildAab(
   await run('flutter', [
     'build',
     'appbundle',
+    '--verbose',
     '--release',
     if (sentryDSN != null) '--dart-define=SENTRY_DSN=$sentryDSN',
     '--build-number',
