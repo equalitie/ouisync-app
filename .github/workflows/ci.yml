@@ -289,7 +289,7 @@ jobs:
       - name: Warmup cache
         run: |
           ./docker/linux.sh \
-            --conainer ouisync-warmup-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT \
+            --container ouisync-warmup-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT \
             --srcdir . \
             --cache exclusive \
             warmup
