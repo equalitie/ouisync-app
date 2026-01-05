@@ -27,14 +27,16 @@ image_name=$default_image_name
 default_container_name="$base_name.$USER"
 container_name=$default_container_name
 
-# Is cache enabled (see `$cache_paths` to see what's cached)?
+# Cache mode (none, 'shared' or 'exclusive'). See `$shared_cache_paths` and `$exclusive_cache_paths`
+# to see what's cached.
 cache=
 
 # Name of the docker volume to put the cache on
 cache_volume="$base_name-cache"
 
-# List of paths to cache
-cache_paths=(
+# List of paths to cache and which can be safely accessed (for reading and writing) from multiple
+# running containers concurrently.
+shared_cache_paths=(
     # Cargo global
     /root/.cargo/bin
     /root/.cargo/registry/index
@@ -50,7 +52,14 @@ cache_paths=(
 
     # Android system images
     /opt/android-sdk/system-images
+)
 
+# List of paths to cache but which can't be accessed concurrently. In 'shared' cache mode, these are
+# mounted read-only with overlay fs created on top of them so they appear writeable from the
+# container's point of view but any modifications to them are discarded when the container stops.
+# In 'exclusive' cache mode they are mounted normally but the user must ensure at most one
+# container is accessing them at a time.
+exclusive_cache_paths=(
     # Gradle
     /root/.gradle/caches
     /root/.gradle/wrapper
@@ -117,14 +126,14 @@ function print_help() {
             echo "Usage: $0 [OPTIONS] <COMMAND>"
             echo
             echo "Options:"
-            echo "    -h, --help            Print help"
-            echo "    --host <HOST>         IP or entry in ~/.ssh/config of machine running Docker. If omitted, runs locally"
-            echo "    --commit <COMMIT>     Commit from which to build"
-            echo "    --srcdir <PATH>       Source dir from which to build"
-            echo "    --container <NAME>    Assign a name to the docker container [default: $default_container_name]"
-            echo "    --image <NAME>[:TAG]  Name (and optional tag) of the docker image to use [default: $default_image_name]"
-            echo "    --cache               Cache some dependencies and intermediate build artifacts on a persistent docker volume"
-            echo "    -s, --shell           Open a shell session in the container after the command finishes"
+            echo "    -h, --help                 Print help"
+            echo "    --host <HOST>              IP or entry in ~/.ssh/config of machine running Docker. If omitted, runs locally"
+            echo "    --commit <COMMIT>          Commit from which to build"
+            echo "    --srcdir <PATH>            Source dir from which to build"
+            echo "    --container <NAME>         Assign a name to the docker container [default: $default_container_name]"
+            echo "    --image <NAME>[:TAG]       Name (and optional tag) of the docker image to use [default: $default_image_name]"
+            echo "    --cache <shared|exclusive> Cache some dependencies and intermediate build artifacts on a persistent docker volume"
+            echo "    -s, --shell                Open a shell session in the container after the command finishes"
             echo
             echo "Commands:"
             echo "    help              Print help"
@@ -133,6 +142,7 @@ function print_help() {
             echo "    integration-test  Run integration tests"
             echo "    analyze           Analyze the dart source code"
             echo "    container         Explicitly manage the container"
+            echo "    warmup            Warmup cache for android tests and builds"
             echo
             echo "See '$0 help <command> for more information on a specific command"
             ;;
@@ -153,7 +163,25 @@ function create_cache_volume() {
 
     dock volume create $cache_volume > /dev/null
     dock run --rm --mount src=$cache_volume,dst=/mnt/cache --workdir /mnt/cache $image_name \
-        mkdir -p "${cache_paths[@]#/}"
+        mkdir -p "${shared_cache_paths[@]#/}" "${exclusive_cache_paths[@]#/}"
+
+    log_group_end
+}
+
+function setup_cache_overlays() {
+    log_group_begin "Setup cache overlays"
+
+    for path in ${exclusive_cache_paths[@]}; do
+        exe mkdir -p /tmp/overlay$path/tmp $path
+
+        exe mount -t tmpfs tmpfs /tmp/overlay$path/tmp
+        exe mkdir -p /tmp/overlay$path/tmp/upper /tmp/overlay$path/tmp/work
+
+        exe mount \
+            -t overlay overlay \
+            -o lowerdir=/tmp/overlay$path/lower,upperdir=/tmp/overlay$path/tmp/upper,workdir=/tmp/overlay$path/tmp/work \
+            $path
+    done
 
     log_group_end
 }
@@ -164,7 +192,7 @@ function start_container() {
 
     build_image
 
-    if [ "$cache" = 1 ]; then
+    if [ -n "$cache" ]; then
         create_cache_volume
     fi
 
@@ -177,18 +205,28 @@ function start_container() {
     opts="$opts --mount type=bind,src=/etc/localtime,dst=/etc/localtime:ro"
 
     # Mount cache volume (if enabled)
-    if [ "$cache" = 1 ]; then
+    if [ -n "$cache" ]; then
         opts="$opts --mount src=$cache_volume,dst=/mnt/cache"
 
-        for path in ${cache_paths[@]}; do
+        for path in ${shared_cache_paths[@]}; do
             opts="$opts --mount src=$cache_volume,dst=$path,volume-subpath=${path#/}"
         done
+
+        if [ "$cache" = "exclusive" ]; then
+            for path in ${exclusive_cache_paths[@]}; do
+                opts="$opts --mount src=$cache_volume,dst=$path,volume-subpath=${path#/}"
+            done
+        else
+            for path in ${exclusive_cache_paths[@]}; do
+                opts="$opts --mount src=$cache_volume,dst=/tmp/overlay$path/lower,volume-subpath=${path#/},ro"
+            done
+        fi
     fi
 
     # Needed for android emulator
     opts="$opts --device /dev/kvm"
 
-    # Needed to run mount tests
+    # Needed to run mount tests and to setup overlay fs for exclusive cache paths.
     # TODO: The 'apparmor:unconfined' feels sketchy. Ideally we would use a more
     # fine-grained policy - one which enables fuse but keeps other restrictions in place.
     opts="$opts --device /dev/fuse --cap-add SYS_ADMIN --security-opt apparmor:unconfined"
@@ -213,6 +251,9 @@ function start_container() {
 
     log_group_end
 
+    if [ "$cache" = "shared" ]; then
+        setup_cache_overlays
+    fi
 
     log_group_begin "Fetch app source"
     if [ -n "$commit" ]; then
@@ -232,7 +273,7 @@ function start_container() {
     exe -w /opt/ouisync-app -t dart pub get
     log_group_end
 
-    if [ "$cache" = 1 ]; then
+    if [ -n "$cache" ]; then
         # Run cargo sweep to delete all cargo artifacts older than 30 days (prevents unbounded cache grow)
         log_group_begin "Prune cached cargo artifacts"
         exe -w /opt/ouisync-app/ouisync -t cargo sweep --recursive --time 30
@@ -403,12 +444,6 @@ function build() {
         opts="$opts --$type"
     done
 
-    # Lock gradle home dir when building the android packages. See the comment in
-    # `integration_tests_android` for more details.
-    if [ "$cache" = 1 ]; then
-        opts="$opts --gradle-lock=/mnt/cache/gradle.lock"
-    fi
-
     # Build Ouisync app
     exe -w /opt/ouisync-app \
         dart run util/release.dart --flavor=$flavor $opts
@@ -545,8 +580,7 @@ function integration_test_android() {
     # could either run the jobs sequentially or not cache the gradle home. The later would be much
     # slower so we opt for the former by putting a file lock around this command.
     exe -w /opt/ouisync-app -t \
-        flock /mnt/cache/gradle.lock \
-            flutter test integration_test --flavor itest --ignore-timeouts $@
+        flutter test integration_test --flavor itest --ignore-timeouts $@
     log_group_end
 
     emulator_stop
@@ -588,6 +622,15 @@ function integration_test() {
             error "Unknown platform: $platform"
             ;;
     esac
+}
+
+function warmup_cache() {
+    init
+
+    log_group_begin "Warmup cache for android"
+    exe -w /opt/ouisync-app -t \
+        flutter build apk --debug --flavor unofficial --target-platform android-x64
+    log_group_end
 }
 
 ####################################################################################################
@@ -636,7 +679,15 @@ while true; do
             shift
             ;;
         --cache)
-            cache=1
+            case "${2-}" in
+                shared|exclusive)
+                    cache="$2"
+                    shift
+                    ;;
+                *)
+                    error "Invalid cache mode: '${2-}' (must be 'shared' or 'exclusive')"
+                    ;;
+            esac
             ;;
         -s|--shell)
             shell=1
@@ -675,6 +726,9 @@ case "${1-}" in
     shell|sh)
         init
         shell=1
+        ;;
+    warmup-cache|warmup)
+        warmup_cache ${@:2}
         ;;
     clean-cache)
         clean_cache ${@:2}

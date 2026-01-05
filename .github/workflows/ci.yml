@@ -29,7 +29,7 @@ jobs:
         run: echo "CONTAINER=ouisync-unit-test-linux-$GITHUB_RUN_ID" >> $GITHUB_ENV
 
       - name: Start container
-        run: ./docker/linux.sh --container $CONTAINER --srcdir . --cache container start
+        run: ./docker/linux.sh --container $CONTAINER --srcdir . --cache shared container start
 
       - name: Analyze
         run: ./docker/linux.sh --container $CONTAINER analyze
@@ -132,6 +132,7 @@ jobs:
   build_linux_and_android:
     name: build on linux and android
     runs-on: self-hosted
+    needs: [warmup_android]
 
     steps:
       - uses: actions/checkout@v4
@@ -143,7 +144,7 @@ jobs:
           ./docker/linux.sh                                         \
             --container ouisync-build-linux-android-$GITHUB_RUN_ID  \
             --srcdir .                                              \
-            --cache                                                 \
+            --cache shared                                          \
             build                                                   \
             --flavor nightly                                        \
             --out releases                                          \
@@ -229,8 +230,10 @@ jobs:
   integration_test_android:
     name: "run integration tests on android ${{ matrix.api-level }}"
     runs-on: self-hosted
+    needs: [warmup_android]
     strategy:
       fail-fast: false
+      max-parallel: 2
       matrix:
         api-level:
           # These don't work due to various missing apis
@@ -260,7 +263,7 @@ jobs:
           ./docker/linux.sh \
             --container ouisync-integration-test-android-${{ matrix.api-level }}-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT \
             --srcdir . \
-            --cache \
+            --cache shared \
             integration-test --platform android --api ${{ matrix.api-level }}
 
       # - name: Upload logcat
@@ -272,6 +275,24 @@ jobs:
       #     if-no-files-found: ignore
       #   # Upload only when the tests fail
       #   if: failure() || cancelled()
+
+  warmup_android:
+    name: "warmup cache for android"
+    runs-on: self-hosted
+    concurrency: # ensure this job runs only once at a time
+      group: warmup
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Warmup cache
+        run: |
+          ./docker/linux.sh \
+            --conainer ouisync-warmup-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT \
+            --srcdir . \
+            --cache exclusive \
+            warmup
 
   # TODO: Integration tests on both linux and windows currently fail or hang. Commenting them out until they are fixed.
   # integration_test_desktop:
