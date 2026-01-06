@@ -11,8 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [v0.9.3](https://github.com/equalitie/ouisync-app/compare/v0.9.2...v0.9.3)
 
 - Update [Ouisync library](https://github.com/equalitie/ouisync) to [v0.10.0](https://github.com/equalitie/ouisync/blob/master/CHANGELOG.md#v0.10.0)
-- Support storing repositories on SD cards on Android.
 - Fix various minor UI bugs
+- Android: Support storing repositories on SD cards
+- Windows: Include MS VC++ redistributable DLLs in the release packages
 
 ## [v0.9.2](https://github.com/equalitie/ouisync-app/compare/v0.9.1...v0.9.2) - 2025-10-27
 
