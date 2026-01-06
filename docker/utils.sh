@@ -62,6 +62,14 @@ function exe() (
     $cmd
 )
 
+function host_exe() {
+    if [ -n "$host" ]; then
+        ssh $host $@
+    else
+        $@
+    fi
+}
+
 function get_sources_from_git {
     local commit=$1
     local dstdir=$2

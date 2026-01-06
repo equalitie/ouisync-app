@@ -87,8 +87,11 @@ fi
 # host's 'docker' group.
 docker_gid=$(getent group docker | cut -d: -f3)
 
+mkdir -p /tmp/ouisync
+
 docker run \
     --mount type=bind,src=/var/run/docker.sock,dst=/var/run/docker.sock \
+    --mount type=bind,src=/tmp/ouisync,dst=/tmp/ouisync \
     --name $container_name \
     --hostname $name \
     --group-add $docker_gid \

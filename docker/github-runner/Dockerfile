@@ -11,6 +11,7 @@ RUN apt-get update && \
         docker.io docker-buildx \
         rsync \
         xxd \
+        socat \
         && \
     apt-get clean
 
