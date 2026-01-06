@@ -186,13 +186,16 @@ function setup_cache_overlays() {
     log_group_end
 }
 
-function keep_alive_socket() {
-    echo -n "/tmp/ouisync/$container_name.keep-alive.sock"
-}
-
 function start_container() {
     if [ -z "$commit" -a -z "$srcdir" ]; then error "Missing one of --commit or --srcdir"; fi
     if [ -n "$commit" -a -n "$srcdir" ]; then error "--commit and --src are mutually exclusive"; fi
+
+    local keep_alive_socket=
+
+    if [ "${1-}" = "--keep-alive" ]; then
+        keep_alive_socket="$2"
+        shift 2
+    fi
 
     build_image
 
@@ -205,7 +208,9 @@ function start_container() {
     local opts="--detach --rm"
 
     # Mount the keep-alive socket
-    opts="$opts --mount type=bind,src=$(keep_alive_socket),dst=/run/keep-alive.sock"
+    if [ -n "$keep_alive_socket" ]; then
+        opts="$opts --mount type=bind,src=$keep_alive_socket,dst=/run/keep-alive.sock"
+    fi
 
     # Sync localtime with host
     opts="$opts --mount type=bind,src=/etc/timezone,dst=/etc/timezone,ro"
@@ -299,8 +304,8 @@ function auto_start_container() {
     # this script finishes, the listening process stops and the socket closes. The connecting
     # script on the container then stops and because it's the entrypoint of the container, the
     # container itself stops as well.
-    local socket=$(keep_alive_socket)
-    local socket_dir=$(dirname "$socket")
+    local socket_dir=/tmp/ouisync
+    local socket="$socket_dir/$container_name.keep-alive.sock"
 
     host_exe mkdir -p "$socket_dir"
     host_exe rm -f $socket
@@ -310,7 +315,7 @@ function auto_start_container() {
     # Stop the container on exit
     trap "auto_stop_container $keep_alive_pid" EXIT
 
-    start_container socat PIPE UNIX-CONNECT:/run/keep-alive.sock
+    start_container --keep-alive $socket socat PIPE UNIX-CONNECT:/run/keep-alive.sock
 }
 
 function auto_stop_container() {
