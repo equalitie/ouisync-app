@@ -17,6 +17,7 @@ RUN apt-get update && \
         openjdk-17-jdk \
         libpulse0 \
         fuse3 \
+        socat \
         && \
     apt-get clean
 

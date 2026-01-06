@@ -198,7 +198,10 @@ function start_container() {
 
     log_group_begin "Start container $container_name"
 
-    local opts="-d --rm"
+    local opts="--detach --rm"
+
+    # Mount the keep-alive socket
+    opts="$opts --mount type=bind,src=/tmp/$container_name.keep_alive.sock,dst=/run/keep_alive.sock"
 
     # Sync localtime with host
     opts="$opts --mount type=bind,src=/etc/timezone,dst=/etc/timezone,ro"
@@ -287,19 +290,27 @@ function stop_container() {
 }
 
 function auto_start_container() {
-    # Prevent the container from stopping
-    while true; do
-        exe touch /tmp/alive 2> /dev/null || true
-        sleep 5
-    done &
+    # Create a unix socket on the host and listen for connections. Mount the socket into the
+    # container. Inside the container, connect to the socket and wait while it remains open. When
+    # this script finishes, the listening process stops and the socket closes. The connecting
+    # script on the container then stops and because it's the entrypoint of the container, the
+    # container itself stops as well.
+    local socket="/tmp/$container_name.keep_alive.sock"
+
+    if [ -n "$host" ]; then
+        ssh $host rm -f $socket
+        ssh $host socat PIPE UNIX-LISTEN:$socket &
+    else
+        rm -f $socket
+        socat PIPE UNIX-LISTEN:$socket &
+    fi
 
     local keep_alive_pid=$!
 
     # Stop the container on exit
     trap "auto_stop_container $keep_alive_pid" EXIT
 
-    # Run the container for as long as this script is running
-    start_container sh -c 'sleep 60; while [ -n "$(find /tmp/alive -cmin -1)" ]; do sleep 10; done'
+    start_container socat PIPE UNIX-CONNECT:/run/keep_alive.sock
 }
 
 function auto_stop_container() {
@@ -429,12 +440,12 @@ function build() {
     if [ "$flavor" != unofficial ]; then
         function exe_i() { dock exec -i $container_name "$@"; }
         exe mkdir -p /opt/secrets
-        echo "$secret_keystore_hex" | xxd -p -r     | exe_i dd of=/opt/secrets/keystore.jks
-        echo "storePassword=$secret_store_password" | exe_i dd of=/opt/secrets/key.properties
-        echo "keyPassword=$secret_key_password"     | exe_i dd of=/opt/secrets/key.properties oflag=append conv=notrunc
-        echo "keyAlias=$secret_key_alias"           | exe_i dd of=/opt/secrets/key.properties oflag=append conv=notrunc
-        echo "storeFile=/opt/secrets/keystore.jks"  | exe_i dd of=/opt/secrets/key.properties oflag=append conv=notrunc
-        echo "$secret_sentry_dsn"                   | exe_i dd of=/opt/secrets/sentry_dsn
+        echo "$secret_keystore_hex" | xxd -p -r     | exe_i dd status=none of=/opt/secrets/keystore.jks
+        echo "storePassword=$secret_store_password" | exe_i dd status=none of=/opt/secrets/key.properties
+        echo "keyPassword=$secret_key_password"     | exe_i dd status=none of=/opt/secrets/key.properties oflag=append conv=notrunc
+        echo "keyAlias=$secret_key_alias"           | exe_i dd status=none of=/opt/secrets/key.properties oflag=append conv=notrunc
+        echo "storeFile=/opt/secrets/keystore.jks"  | exe_i dd status=none of=/opt/secrets/key.properties oflag=append conv=notrunc
+        echo "$secret_sentry_dsn"                   | exe_i dd status=none of=/opt/secrets/sentry_dsn
 
         opts="$opts --android-key-properties=/opt/secrets/key.properties"
         opts="$opts --sentry=/opt/secrets/sentry_dsn"
@@ -445,15 +456,19 @@ function build() {
     done
 
     # Build Ouisync app
+    log_group_begin "Build release packages"
     exe -w /opt/ouisync-app \
         dart run util/release.dart --flavor=$flavor $opts
+    log_group_end
 
     # Collect artifacts
+    log_group_begin "Collect artifacts"
     mkdir -p $dst_dir
     src_dir=/opt/ouisync-app/releases/latest
     for artifact in $(exe -w $src_dir ls); do
         dock cp $container_name:$src_dir/$artifact $dst_dir/
     done
+    log_group_end
 }
 
 ####################################################################################################
