@@ -77,7 +77,7 @@ function print_help() {
             echo "Usage: $0 build [OPTIONS]"
             echo
             echo "Options:"
-            echo "    --out <PATH>                              Directory where artifacts will be stored"
+            echo "    --out <PATH>                              Directory where artifacts will be stored. Default is 'releases/release_XXX' where XXX is a unique string consisting of the timestamp, version and git commit of the release. This directory is also symlinked as 'releases/latest'."
             echo "    --flavor <production|nightly|unofficial>  Which flavor to build"
             echo "    --type <aab|apk|deb-gui|deb-cli>...       Which package type(s) to build."
             ;;
@@ -365,7 +365,7 @@ function init() {
 function build() {
     rsync_include_git=1
 
-    local dst_dir="./releases/$container_name"
+    local dst_dir=
     local flavor=
     local types=()
 
@@ -468,11 +468,19 @@ function build() {
 
     # Collect artifacts
     log_group_begin "Collect artifacts"
-    mkdir -p $dst_dir
-    src_dir=/opt/ouisync-app/releases/latest
-    for artifact in $(exe -w $src_dir ls); do
-        dock cp $container_name:$src_dir/$artifact $dst_dir/
-    done
+
+    local src_dir=/opt/ouisync-app/releases
+
+    if [ -n "$dst_dir" ]; then
+        mkdir -p $dst_dir
+        dock cp $container_name:$src_dir/latest/. $dst_dir
+    else
+        local release_name=$(exe ls -At $src_dir | grep '^release_' | head -n1)
+        mkdir -p releases
+        dock cp $container_name:$src_dir/$release_name releases
+        ln --force --symbolic $release_name releases/latest
+    fi
+
     log_group_end
 }
 
