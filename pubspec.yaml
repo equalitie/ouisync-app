@@ -111,7 +111,7 @@ dev_dependencies:
   # # dart run intl_utils:generate
   intl_utils: ^2.6.1
   lints: ^4.0.0
-  msix: ^3.16.8
+  msix: ^3.16.12
   path_provider_platform_interface: ^2.1.2
   properties: ^2.1.0
   pub_semver: ^2.1.4

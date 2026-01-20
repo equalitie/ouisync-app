@@ -579,10 +579,10 @@ packages:
     dependency: transitive
     description:
       name: get_it
-      sha256: d85128a5dae4ea777324730dc65edd9c9f43155c109d5cc0a69cab74139fbac1
+      sha256: ae78de7c3f2304b8d81f2bb6e320833e5e81de942188542328f074978cc0efa9
       url: "https://pub.dev"
     source: hosted
-    version: "7.7.0"
+    version: "8.3.0"
   git:
     dependency: "direct dev"
     description:
@@ -903,10 +903,10 @@ packages:
     dependency: "direct dev"
     description:
       name: msix
-      sha256: edde648a8133bf301883c869d19d127049683037c65ff64173ba526ac7a8af2f
+      sha256: f88033fcb9e0dd8de5b18897cbebbd28ea30596810f4a7c86b12b0c03ace87e5
       url: "https://pub.dev"
     source: hosted
-    version: "3.16.9"
+    version: "3.16.12"
   mutex:
     dependency: "direct main"
     description:
