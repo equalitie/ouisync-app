@@ -6,11 +6,13 @@ source $(dirname $0)/utils.sh
 
 function print_help() {
     echo "Script for building Ouisync App in a Docker container"
-    echo "Usage: $0 --host <HOST> (--commit <COMMIT> | --srcdir <SRCDIR>) [--out <OUTPUT_DIRECTORY>]"
+    echo "Usage: $0 --host <HOST> (--commit <COMMIT> | --srcdir <SRCDIR>) [--out <OUTPUT_DIRECTORY>] [--flavor <FLAVOR>]"
     echo "  HOST:             IP or entry in ~/.ssh/config of machine running Docker"
     echo "  COMMIT:           Commit from which to build"
     echo "  SRCDIR:           Source dir from which to build"
     echo "  OUTPUT_DIRECTORY: Directory where artifacts will be stored"
+    echo "  FLAVOR:           One of {production,nightly,unofficial}. The default is 'production' when '--commit'"
+    echo "                    is used and 'unofficial' when '--srcdir' is used"
 }
 
 build_exe="--exe"
@@ -25,6 +27,7 @@ while [[ "$#" -gt 0 ]]; do
         --no-exe) build_exe='' ;;
         --no-msix) build_msix='' ;;
         --out) out_dir="$2"; shift ;;
+        --flavor) flavor="$2"; shift ;;
         *) error "Unknown argument: $1" ;;
     esac
     shift
@@ -42,14 +45,26 @@ export DOCKER_BUILDKIT=0
 
 out_dir=${out_dir:=./releases/$container_name}
 
-# Collect secrets (only sentry DSN on Windows)
+# Check dependencies and set flavor
 if [ -n "$commit" ]; then
     check_dependency git
-    secretSentryDSN=$(pass cenoers/ouisync/app/production/sentry_dsn)
-    flavor=production
+    flavor=${flavor:=production}
 else
     check_dependency rsync
-    flavor=unofficial
+    flavor=${flavor:=unofficial}
+fi
+
+case "$flavor" in
+    production|nightly|unofficial) ;;
+    *) error "Invalid --flavor argument ($flavor)"
+esac
+
+# Collect secrets
+if [ "$flavor" != "unofficial" ]; then
+    secretSentryDSN=$(pass cenoers/ouisync/app/$flavor/sentry_dsn)
+    secretCertHex=$(pass cenoers/ouisync/app/$flavor/windows/private.pfx | xxd -p)
+    publicCertHex=$(pass cenoers/ouisync/app/$flavor/windows/public.cer | xxd -p)
+    secretCertPassword=$(pass cenoers/ouisync/app/$flavor/windows/certificatePassword)
 fi
 
 # Build image
@@ -75,10 +90,15 @@ function on_exit() {
     dock container rm -f $container_name
 }
 
+function container_cat() {
+    exe -i powershell -Command "[Console]::OpenStandardInput().CopyTo([IO.File]::Create(\"$1\"))"
+}
+
 # Prepare secrets
-if [ "$flavor" = "production" ]; then
-    exe mkdir c:\\secrets
+if [ "$flavor" != "unofficial" ]; then
+    exe mkdir -p c:\\secrets
     exe powershell -Command "Add-Content -Force -Path c:/secrets/sentry_dsn -Value \"$secretSentryDSN\""
+    echo $secretCertHex | xxd -p -r | container_cat c:/secrets/private.pfx
     sentry_arg='--sentry=C:/secrets/sentry_dsn'
 fi
 
@@ -100,11 +120,21 @@ exe -w c:/ouisync-app/ouisync/bindings/dart dart tool/bindgen.dart
 exe -w c:/ouisync-app dart pub get
 exe -w c:/ouisync-app dart run util/release.dart --flavor=$flavor $sentry_arg $build_exe $build_msix
 
+host_out_dir=c:/ouisync-app/releases/latest
+
+# Sign the msix and add public certificate to artifacts
+if [ -n "$build_msix" -a "$flavor" != "unofficial" ]; then
+    msix=$(exe "ls $host_out_dir/*.msix")
+    exe -w c:/ouisync-app powershell -Command "util/windows/sign-msix.ps1 -msixPath $msix -pfxPath c:/secrets/private.pfx -certPassword $secretCertPassword"
+    echo $publicCertHex | xxd -p -r | container_cat $host_out_dir/public.cer
+fi
+
+# Collect artifacts
 function dock_rsync() {
     rsync -e "docker -H ssh://$host exec -i" "$@"
 }
 
 mkdir -p $out_dir
-for asset in $(exe -w c:/ouisync-app/releases/latest ls); do
+for asset in $(exe -w $host_out_dir ls); do
     dock_rsync -av $container_name:/c/ouisync-app/releases/latest/$asset $out_dir
 done
