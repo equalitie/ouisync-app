@@ -74,7 +74,7 @@ dependencies:
   qr_flutter: ^4.0.0
   receive_sharing_intent: ^1.8.0
   result_type: ^1.0.0
-  sentry_flutter: ^9.6.0
+  sentry_flutter: ^9.10.0
   settings_ui: ^2.0.2
   share_plus: ^10.0.2
   shared_preferences: ^2.3.2
@@ -111,7 +111,7 @@ dev_dependencies:
   # # dart run intl_utils:generate
   intl_utils: ^2.6.1
   lints: ^4.0.0
-  msix: ^3.16.8
+  msix: ^3.16.12
   path_provider_platform_interface: ^2.1.2
   properties: ^2.1.0
   pub_semver: ^2.1.4
