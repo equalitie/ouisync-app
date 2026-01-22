@@ -19,6 +19,7 @@ import 'package:pub_semver/pub_semver.dart';
 
 const rootWorkDir = 'releases';
 const String windowsArtifactDir = 'build/windows/x64/runner/Release';
+const String msixCertFileName = "public.cer";
 
 enum Flavor {
   production(true, true, true),
@@ -204,19 +205,28 @@ Future<void> publishToGithub(
 Future<(Version, List<File>)> readAssetsFromDir(Directory assetDir) async {
   final files = <File>[];
   Version? version;
+  bool hasPublicMsixCert = false;
   await for (final entry in assetDir.list()) {
     if (entry is File) {
-      final desc = AssetDesc.parse(p.basename(entry.path));
-      if (version == null) {
-        version = desc.version;
-      } else if (version != desc.version) {
-        throw "Assets in ${assetDir.path} have different versions ('$version' != '${desc.version}')";
+      final fileName = p.basename(entry.path);
+      if (fileName != msixCertFileName) {
+        final desc = AssetDesc.parse(fileName);
+        if (version == null) {
+          version = desc.version;
+        } else if (version != desc.version) {
+          throw "Assets in ${assetDir.path} have different versions ('$version' != '${desc.version}')";
+        }
+      } else {
+        hasPublicMsixCert = true;
       }
       files.add(entry);
     }
   }
   if (version == null || files.isEmpty) {
     throw "No assets in ${assetDir.path} to publish";
+  }
+  if (!hasPublicMsixCert) {
+    throw "Missing msix public certificate";
   }
   return (version, files);
 }
@@ -1144,13 +1154,22 @@ Future<void> uploadAssets(
 ) async {
   for (final asset in assets) {
     final fileName = p.basename(asset.path);
-    AssetDesc dsc = AssetDesc.parse(fileName);
     final content = await asset.readAsBytes();
-    final contentType = dsc.extension == ".$checksumExtension"
-        ? 'text/plain'
-        : 'application/octet-stream';
 
-    final dstFileName = dsc.gitHubName();
+    String dstFileName;
+    String contentType;
+
+    if (fileName != msixCertFileName) {
+      AssetDesc dsc = AssetDesc.parse(fileName);
+      contentType = dsc.extension == ".$checksumExtension"
+          ? 'text/plain'
+          : 'application/octet-stream';
+
+      dstFileName = dsc.gitHubName();
+    } else {
+      contentType = 'application/octet-stream';
+      dstFileName = "ouisync.msix.cer";
+    }
 
     print('Uploading $fileName as $dstFileName ...');
 
