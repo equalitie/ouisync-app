@@ -5,7 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/equalitie/ouisync-app/compare/v0.9.3...v0.9.4)
+<!-- ## [Unreleased](https://github.com/equalitie/ouisync-app/compare/v0.9.4...master) -->
+
+## [v0.9.4](https://github.com/equalitie/ouisync-app/compare/v0.9.3...v0.9.4) - 2026-02-09
 
 - Fix the Msix installer and with it the version on the Microsoft Store by updating `sentry` and `msix` packages
 - Release `ouisync.msix.cer` to allow testing of the Msix installer
