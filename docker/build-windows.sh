@@ -98,8 +98,11 @@ function container_cat() {
 if [ "$flavor" != "unofficial" ]; then
     exe mkdir -p c:\\secrets
     exe powershell -Command "Add-Content -Force -Path c:/secrets/sentry_dsn -Value \"$secretSentryDSN\""
-    echo $secretCertHex | xxd -p -r | container_cat c:/secrets/private.pfx
+    container_msix_cert_path=c:/secrets/private.pfx
+    echo $secretCertHex | xxd -p -r | container_cat $container_msix_cert_path
     sentry_arg='--sentry=C:/secrets/sentry_dsn'
+    msix_cert_path_arg="--msix-signing-cert-path=$container_msix_cert_path"
+    msix_cert_pass_arg="--msix-signing-cert-pass=$secretCertPassword"
 fi
 
 # Checkout or copy Ouisync sources
@@ -118,14 +121,12 @@ exe -w c:/ouisync-app/ouisync/bindings/dart dart tool/bindgen.dart
 
 # Build Ouisync
 exe -w c:/ouisync-app dart pub get
-exe -w c:/ouisync-app dart run util/release.dart --flavor=$flavor $sentry_arg $build_exe $build_msix
+exe -w c:/ouisync-app dart run util/release.dart --flavor=$flavor $sentry_arg $build_exe $build_msix $msix_cert_path_arg $msix_cert_pass_arg
 
 host_out_dir=c:/ouisync-app/releases/latest
 
-# Sign the msix and add public certificate to artifacts
+# Add public certificate to artifacts
 if [ -n "$build_msix" -a "$flavor" != "unofficial" ]; then
-    msix=$(exe "ls $host_out_dir/*.msix")
-    exe -w c:/ouisync-app powershell -Command "util/windows/sign-msix.ps1 -msixPath $msix -pfxPath c:/secrets/private.pfx -certPassword $secretCertPassword"
     echo $publicCertHex | xxd -p -r | container_cat $host_out_dir/public.cer
 fi
 

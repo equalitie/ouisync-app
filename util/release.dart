@@ -121,6 +121,7 @@ Future<void> main(List<String> args) async {
       options.identityName!,
       options.publisher!,
       sentryDSN,
+      options.msixSecrets,
     );
     assets.add(await collateAsset(outputDir, name, version, asset));
   }
@@ -231,6 +232,13 @@ Future<(Version, List<File>)> readAssetsFromDir(Directory assetDir) async {
   return (version, files);
 }
 
+class MsixSecrets {
+  final String certPath;
+  final String certPass;
+
+  MsixSecrets(this.certPath, this.certPass);
+}
+
 class Options {
   final bool apk;
   final bool aab;
@@ -249,6 +257,7 @@ class Options {
   final String? androidKeyPropertiesPath;
   final String? sentryDSN;
   final String? assetDirPath;
+  final MsixSecrets? msixSecrets;
 
   Options._({
     this.apk = false,
@@ -267,6 +276,7 @@ class Options {
     this.flavor = Flavor.production,
     this.androidKeyPropertiesPath,
     this.sentryDSN,
+    this.msixSecrets,
   });
 
   static Future<Options> parse(List<String> args) async {
@@ -346,6 +356,14 @@ class Options {
           'The Publisher (CN) value for the app in the Microsoft Store (For the MSIX)',
       defaultsTo: 'CN=E3D17812-E9F1-46C8-B650-4D39786777D9',
     );
+    parser.addOption(
+      'msix-signing-cert-path',
+      help: 'Path to certificate for signing MSIX packages',
+    );
+    parser.addOption(
+      'msix-signing-cert-pass',
+      help: 'Password for unlocking --msix-signing-cert-path certificate',
+    );
     parser.addFlag(
       'help',
       abbr: 'h',
@@ -395,12 +413,28 @@ class Options {
         ? ReleaseAction.update
         : null;
 
+    final flavor = Flavor.fromString(results['flavor']);
+    MsixSecrets? msixSecrets = null;
+
     if (results['msix']) {
       if (results['identity-name'] == null || results['publisher'] == null) {
         print(
           "The Windows MSIX creation requires the --identity-name and --publisher parameters",
         );
         exit(1);
+      }
+      if (flavor.requiresSigning) {
+        final msixSigningCertPath = results['msix-signing-cert-path'];
+        final msixSigningCertPass = results['msix-signing-cert-pass'];
+
+        if (msixSigningCertPath == null || msixSigningCertPass == null) {
+          print(
+            "The Windows MSIX whith flavor '$flavor' requires --msix-signing-cert-path and --msix-signing-cert-pass parameters",
+          );
+          exit(1);
+        }
+
+        msixSecrets = MsixSecrets(msixSigningCertPath, msixSigningCertPass);
       }
     }
 
@@ -460,9 +494,10 @@ class Options {
       identityName: results['identity-name'],
       publisher: results['publisher'],
       awaitUpload: results['await-upload'],
-      flavor: Flavor.fromString(results['flavor']),
+      flavor: flavor,
       androidKeyPropertiesPath: androidKeyProperties,
       sentryDSN: sentryDSN,
+      msixSecrets: msixSecrets,
     );
   }
 }
@@ -696,6 +731,7 @@ Future<File> buildWindowsMSIX(
   String identityName,
   String publisher,
   String? sentryDSN,
+  MsixSecrets? msixSecrets,
 ) async {
   if (await Directory(windowsArtifactDir).exists()) {
     // We had a problem when creating the msix when there was an executable from
@@ -738,7 +774,23 @@ Future<File> buildWindowsMSIX(
   /// the data directory (Release/data/bundled-assets-windows)
   await run('dart', ['run', 'msix:pack', ...args]);
 
-  return File('$windowsArtifactDir/ouisync_app.msix');
+  final msixPackagePath = '$windowsArtifactDir/ouisync_app.msix';
+
+  /// Sign the msix file
+  if (msixSecrets != null) {
+    run('powershell', [
+      '-Command',
+      'util/windows/sign-msix.ps1',
+      '-msixPath',
+      msixPackagePath,
+      '-pfxPath',
+      msixSecrets.certPath,
+      '-certPassword',
+      msixSecrets.certPass,
+    ]);
+  }
+
+  return File(msixPackagePath);
 }
 
 Future<void> prepareDokanBundle() async {
