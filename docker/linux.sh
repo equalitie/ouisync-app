@@ -490,7 +490,7 @@ function unit_test() {
     init
 
     log_group_begin "Build the Ouisync library for tests"
-    exe -w /opt/ouisync-app/ouisync -t cargo build --package ouisync-service --lib
+    exe -w /opt/ouisync-app/ouisync -t cargo build --package ouisync-service --lib --features vfs
     log_group_end
 
     log_group_begin "Run tests"

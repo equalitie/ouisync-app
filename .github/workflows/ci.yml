@@ -112,7 +112,7 @@ jobs:
 
       - name: Build Ouisync service library for tests
         working-directory: ouisync
-        run: cargo build --package ouisync-service --lib
+        run: cargo build --package ouisync-service --lib --features vfs
 
       - name: Run tests
         # FIXME: The mount test fails on windows CI with a panic somewhere in the dokan-rust
