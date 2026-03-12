@@ -414,7 +414,7 @@ class Options {
         : null;
 
     final flavor = Flavor.fromString(results['flavor']);
-    MsixSecrets? msixSecrets = null;
+    MsixSecrets? msixSecrets;
 
     if (results['msix']) {
       if (results['identity-name'] == null || results['publisher'] == null) {
@@ -778,7 +778,7 @@ Future<File> buildWindowsMSIX(
 
   /// Sign the msix file
   if (msixSecrets != null) {
-    run('powershell', [
+    await run('powershell', [
       '-Command',
       'util/windows/sign-msix.ps1',
       '-msixPath',
