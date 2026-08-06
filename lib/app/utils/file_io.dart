@@ -1,4 +1,5 @@
 import 'dart:io' as io;
+import 'dart:typed_data' show Uint8List;
 
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:file_picker/file_picker.dart';
@@ -32,11 +33,7 @@ class FileIO with AppLogger {
       return;
     }
 
-    final result = await FilePicker.platform.pickFiles(
-      type: type,
-      withReadStream: true,
-      allowMultiple: true,
-    );
+    final result = await FilePicker.pickFiles(type: type);
 
     if (result != null) {
       loggy.debug(() {
@@ -56,7 +53,7 @@ class FileIO with AppLogger {
           await repoCubit.saveFile(
             filePath: destinationFilePath,
             length: srcFile.size,
-            fileByteStream: srcFile.readStream!,
+            fileByteStream: srcFile.readAsByteStream(),
           );
 
           continue;
@@ -217,12 +214,11 @@ class FileIO with AppLogger {
 
   Future<String?> _getDesktopPath(String parentPath, String? fileName) async {
     final basePath = (fileName ?? '').isEmpty
-        ? await FilePicker.platform.getDirectoryPath(
+        ? await FilePicker.getDirectoryPath(initialDirectory: parentPath)
+        : await FilePicker.saveFile(
+            fileName: fileName!,
             initialDirectory: parentPath,
-          )
-        : await FilePicker.platform.saveFile(
-            fileName: fileName,
-            initialDirectory: parentPath,
+            bytes: Uint8List(0),
           );
 
     return basePath;

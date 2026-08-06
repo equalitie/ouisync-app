@@ -242,7 +242,7 @@ class RepoImportPage extends StatelessWidget {
         ),
         Dimensions.spacingVerticalDouble,
         _buildButton(S.current.buttonLocateRepository, () async {
-          final result = await FilePicker.platform.pickFiles(
+          final result = await FilePicker.pickFiles(
             type: FileType.custom,
             allowedExtensions: [
               RepoLocation.defaultExtension,

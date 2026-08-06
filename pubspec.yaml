@@ -18,27 +18,34 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 0.9.5+77
 
 environment:
-  sdk: 3.8.1
-  flutter: 3.32.5
+  sdk: 3.12.2
+  flutter: 3.44.8
 
 dependencies:
   archive: ^4.0.7
   async: ^2.11.0
   auto_size_text: ^3.0.0
   badges: ^3.1.2
-  biometric_storage: ^5.0.1
+
+  biometric_storage:
+      # Using fork because latest upstream version is incompatible with some of our other
+      # dependencies.
+      git:
+          url: https://github.com/madadam/biometric_storage.git
+          ref: 3de417b442dc5c474eca89b6e54ebb776bd01227
+
   collection: ^1.18.0
   connectivity_plus: ^6.0.5
   cross_file: ^0.3.3
   cryptography_plus: ^2.7.1
   cupertino_icons: ^1.0.4
   desktop_drop: ^0.6.0
-  device_info_plus: ^11.4.0
-  dns_client: ^0.2.1
+  device_info_plus: ^13.2.0
+  dns_client: ^1.3.1
   equatable: ^2.0.3
   ffi: ^2.0.1
   file: ^7.0.0
-  file_picker: ^10.3.10
+  file_picker: ^12.0.0-beta.7
   flutter:
     sdk: flutter
   flutter_bloc: ^8.0.1
@@ -53,20 +60,27 @@ dependencies:
   intl: ^0.20.2
   intro_slider: ^4.2.0
   introduction_screen: ^3.1.14
-  launch_at_startup: ^0.5.1
+
+  launch_at_startup:
+      # Using fork because latest upstream version is incompatible with some of our other
+      # dependencies.
+      git:
+          url: https://github.com/madadam/launch_at_startup.git
+          ref: 542c594bc132132d1285fd023964105c17c7bba3
+
   local_auth: ^2.3.0
   locale_names: ^1.1.1
   loggy: ^2.0.1+1
   logtee:
     path: ouisync/logtee/dart
   meta: ^1.10.0
-  mime: ^1.0.6
+  mime: ^2.0.0
   mobile_scanner: ^7.1.2
   mutex: ^3.1.0
-  network_info_plus: ^6.0.1
+  network_info_plus: ^8.2.1
   ouisync:
     path: ouisync/bindings/dart
-  package_info_plus: ^8.3.0
+  package_info_plus: ^10.2.1
   path: ^1.8.2
   path_provider: ^2.1.2
   percent_indicator: ^4.2.2
@@ -76,7 +90,7 @@ dependencies:
   result_type: ^1.0.0
   sentry_flutter: ^9.10.0
   settings_ui: ^2.0.2
-  share_plus: ^10.0.2
+  share_plus: ^13.3.0
   shared_preferences: ^2.3.2
   shelf: ^1.4.1
   stack_trace: ^1.11.1
@@ -88,7 +102,7 @@ dependencies:
   webview_flutter: ^4.10.0
   webview_flutter_android: ^4.0.2
   webview_flutter_wkwebview: ^3.16.2
-  win32: ^5.0.7
+  win32: ^6.4.0
   window_manager: ^0.5.0
   windows_single_instance: ^1.0.1
 

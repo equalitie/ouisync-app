@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data' show Uint8List;
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -138,9 +139,10 @@ class LogsSection extends SettingsSection with AppLogger {
           loggy.debug('Logs saved to $outputPath');
         }
       } else if (Platform.isLinux || Platform.isMacOS || Platform.isWindows) {
-        final outputPath = await FilePicker.platform.saveFile(
+        final outputPath = await FilePicker.saveFile(
           fileName: basename(tempFile.path),
           initialDirectory: dirs.download,
+          bytes: Uint8List(0),
         );
 
         if (outputPath != null) {

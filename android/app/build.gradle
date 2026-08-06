@@ -3,7 +3,6 @@ import java.util.regex.Pattern
 
 plugins {
     id "com.android.application"
-    id "kotlin-android"
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id "dev.flutter.flutter-gradle-plugin"
     id "com.starter.easylauncher" version "6.4.0"
@@ -17,7 +16,7 @@ rootProject.file("local.properties").withInputStream { localProperties.load(it) 
 android {
     namespace = "org.equalitie.ouisync"
 
-    compileSdk = 36
+    compileSdk = 37
 
     kotlin {
         jvmToolchain(17)
@@ -26,6 +25,11 @@ android {
     lint {
         checkReleaseBuilds false
         disable 'InvalidPackage'
+    }
+
+    buildFeatures {
+        // Enable custom resource values (`resValue`)
+        resValues true
     }
 
     def keystoreProperties = loadKeystorePropertiesFile(System.getenv('STORE_FILE') ?: localProperties['STORE_FILE'])
@@ -38,7 +42,7 @@ android {
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = 26
-        targetSdk = flutter.targetSdkVersion
+        targetSdk = 37
         versionCode = flutter.versionCode
         versionName = flutter.versionName
         multiDexEnabled = true
