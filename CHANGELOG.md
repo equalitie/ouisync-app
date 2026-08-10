@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/equalitie/ouisync-app/compare/v0.9.4...master)
 
+- Update [Ouisync library](https://github.com/equalitie/ouisync) to the latest version (TODO: link to changelog)
 - Fix repository size not decreasing after deleting files in a repository
 - Update if-watch rust dependency caused crash on Windows in local discovery code
 - Update `file_picker` dependency
