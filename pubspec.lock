@@ -61,8 +61,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "3de417b442dc5c474eca89b6e54ebb776bd01227"
-      resolved-ref: "3de417b442dc5c474eca89b6e54ebb776bd01227"
+      ref: "4f0fe4cf9e8eedfc961e22cdf2f32387d3de07a2"
+      resolved-ref: "4f0fe4cf9e8eedfc961e22cdf2f32387d3de07a2"
       url: "https://github.com/madadam/biometric_storage.git"
     source: git
     version: "5.1.1-dev.2"
@@ -278,10 +278,10 @@ packages:
     dependency: "direct main"
     description:
       name: desktop_drop
-      sha256: bd21017e0415632c85f6b813c846bc8c9811742507776dcf6abf91a14d946e98
+      sha256: aa1e797255bfbc76f9eb5aa4f61e5b68dbf69962ab1be6495816d2f251bc0d1f
       url: "https://pub.dev"
     source: hosted
-    version: "0.6.0"
+    version: "0.7.1"
   device_info_plus:
     dependency: "direct main"
     description:
@@ -392,18 +392,42 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_email_sender
-      sha256: fb515d4e073d238d0daf1d765e5318487b6396d46b96e0ae9745dbc9a133f97a
+      sha256: "0e1bc57128cef5bbc4c92c7d6d2768e61166c9118dcb961b7453c78531b382ed"
       url: "https://pub.dev"
     source: hosted
-    version: "6.0.3"
+    version: "10.0.1"
+  flutter_email_sender_method_channel:
+    dependency: transitive
+    description:
+      name: flutter_email_sender_method_channel
+      sha256: f40d2893b6f3e16d771b65fd9ffaeada44b65e95a02bcf532ed55775a0a96a60
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.1"
+  flutter_email_sender_platform_interface:
+    dependency: transitive
+    description:
+      name: flutter_email_sender_platform_interface
+      sha256: "576fb2b08790040693bd02b1911ad51bf52ccabba87dc2964d6805552f27c39a"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
+  flutter_email_sender_web:
+    dependency: transitive
+    description:
+      name: flutter_email_sender_web
+      sha256: cf47a07211d2e802f4638a8e17bfc87de0ee5c93f91d16051c0ed5ad01781c65
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
   flutter_file_dialog:
     dependency: "direct main"
     description:
       name: flutter_file_dialog
-      sha256: "9344b8f07be6a1b6f9854b723fb0cf84a8094ba94761af1d213589d3cb087488"
+      sha256: "2bb0ac16fe5a390eae8f718e80cc0807fcf3ae2b4c3b9ab1e1c2a130bf904d4f"
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.2"
+    version: "3.3.2"
   flutter_keyboard_visibility:
     dependency: transitive
     description:
@@ -889,10 +913,10 @@ packages:
     dependency: "direct main"
     description:
       name: mobile_scanner
-      sha256: "5e7e09d904dc01de071b79b3f3789b302b0ed3c9c963109cd3f83ad90de62ecf"
+      sha256: ce3f059ebd6dbfab7292bba0e893e354b46730636820d3c9ef69005ce2d55bce
       url: "https://pub.dev"
     source: hosted
-    version: "7.1.2"
+    version: "7.4.0"
   msix:
     dependency: "direct dev"
     description:
@@ -1192,10 +1216,10 @@ packages:
     dependency: "direct main"
     description:
       name: receive_sharing_intent
-      sha256: ec76056e4d258ad708e76d85591d933678625318e411564dcb9059048ca3a593
+      sha256: "72f229a38f2910029c11d840770c173b27072e348ef3376130b37514bc4556f6"
       url: "https://pub.dev"
     source: hosted
-    version: "1.8.1"
+    version: "1.9.0"
   result_type:
     dependency: "direct main"
     description:
@@ -1248,18 +1272,18 @@ packages:
     dependency: transitive
     description:
       name: sentry
-      sha256: fa14b2177d2cd4489ec78817ec4e52affe1be9f595718de970a5e4ed2bccc530
+      sha256: "330a341076e16b87aa8a4f97b0bd48c085737d087e81ef337aee2b4c3e8896f9"
       url: "https://pub.dev"
     source: hosted
-    version: "9.10.0"
+    version: "9.26.0"
   sentry_flutter:
     dependency: "direct main"
     description:
       name: sentry_flutter
-      sha256: "00d168260c9be3777e4f1c9ca7a2e4f2c48566926ec22a64bbacae5a94ff72a3"
+      sha256: "163685070e173b9b28cd10e56eb76fdaca34067831bd7e3563f98a5bc5866165"
       url: "https://pub.dev"
     source: hosted
-    version: "9.10.0"
+    version: "9.26.0"
   settings_ui:
     dependency: "direct main"
     description:
@@ -1288,18 +1312,18 @@ packages:
     dependency: "direct main"
     description:
       name: shared_preferences
-      sha256: "6e8bf70b7fef813df4e9a36f658ac46d107db4b4cfe1048b477d4e453a8159f5"
+      sha256: c3025c5534b01739267eb7d76959bbc25a6d10f6988e1c2a3036940133dd10bf
       url: "https://pub.dev"
     source: hosted
-    version: "2.5.3"
+    version: "2.5.5"
   shared_preferences_android:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: shared_preferences_android
-      sha256: "20cbd561f743a342c76c151d6ddb93a9ce6005751e7aa458baad3858bfbfb6ac"
+      sha256: "0634e64bd719f89c012f392938e173521f535d3ecaf66558fa94a056d22b5cc7"
       url: "https://pub.dev"
     source: hosted
-    version: "2.4.10"
+    version: "2.4.27"
   shared_preferences_foundation:
     dependency: transitive
     description:
@@ -1525,10 +1549,10 @@ packages:
     dependency: "direct main"
     description:
       name: url_launcher
-      sha256: "9d06212b1362abc2f0f0d78e6f09f726608c74e3b9462e8368bb03314aa8d603"
+      sha256: f6a7e5c4835bb4e3026a04793a4199ca2d14c739ec378fdfe23fc8075d0439f8
       url: "https://pub.dev"
     source: hosted
-    version: "6.3.1"
+    version: "6.3.2"
   url_launcher_android:
     dependency: transitive
     description:
@@ -1661,34 +1685,34 @@ packages:
     dependency: "direct main"
     description:
       name: webview_flutter
-      sha256: c3e4fe614b1c814950ad07186007eff2f2e5dd2935eba7b9a9a1af8e5885f1ba
+      sha256: d53e1ccf5516f25017e3c9d44c39034db352d20fa34fe200674270242c2c5111
       url: "https://pub.dev"
     source: hosted
-    version: "4.13.0"
+    version: "4.14.1"
   webview_flutter_android:
     dependency: "direct main"
     description:
       name: webview_flutter_android
-      sha256: f6e6afef6e234801da77170f7a1847ded8450778caf2fe13979d140484be3678
+      sha256: a97db7a44f8e71af2f3971c45550a08cce1fb60059c1b8e534251e6cfb753490
       url: "https://pub.dev"
     source: hosted
-    version: "4.7.0"
+    version: "4.13.0"
   webview_flutter_platform_interface:
     dependency: transitive
     description:
       name: webview_flutter_platform_interface
-      sha256: "7cb32b21825bd65569665c32bb00a34ded5779786d6201f5350979d2d529940d"
+      sha256: "1221c1b12f5278791042f2ec2841743784cf25c5a644e23d6680e5d718824f04"
       url: "https://pub.dev"
     source: hosted
-    version: "2.13.0"
+    version: "2.15.1"
   webview_flutter_wkwebview:
     dependency: "direct main"
     description:
       name: webview_flutter_wkwebview
-      sha256: a3d461fe3467014e05f3ac4962e5fdde2a4bf44c561cb53e9ae5c586600fdbc3
+      sha256: c879dd64b87c452aa84381b244d5469da57ba7e8cca6884c7b1e0d406372c12d
       url: "https://pub.dev"
     source: hosted
-    version: "3.22.0"
+    version: "3.26.0"
   win32:
     dependency: "direct main"
     description:
@@ -1754,5 +1778,5 @@ packages:
     source: hosted
     version: "3.1.3"
 sdks:
-  dart: "3.12.2"
-  flutter: "3.44.8"
+  dart: ">=3.12.2 <4.0.0"
+  flutter: ">=3.44.9 <4.0.0"
