@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix repository size not decreasing after deleting files in a repository
 - Update if-watch rust dependency caused crash on Windows in local discovery code
 - Update `file_picker` dependency
+- Android: Update Target SDK to 37 to conform to the new Play Store requirements
 
 ## [v0.9.4](https://github.com/equalitie/ouisync-app/compare/v0.9.3...v0.9.4) - 2026-02-09
 
