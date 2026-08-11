@@ -251,8 +251,8 @@ jobs:
           - 34
           - 35
           - 36
-          - 37.0
-          - 37.1
+          - "37.0"
+          - "37.1"
 
     steps:
       - uses: actions/checkout@v4
