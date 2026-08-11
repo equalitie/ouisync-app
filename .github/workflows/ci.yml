@@ -193,7 +193,7 @@ jobs:
 
       - name: Install Inno Setup (Windows exe installation builder)
         run: |
-          Invoke-WebRequest https://files.jrsoftware.org/is/6/innosetup-6.4.3.exe -OutFile C:/TEMP/innosetup.exe
+          Invoke-WebRequest https://github.com/jrsoftware/issrc/releases/download/is-6_7_3/innosetup-6.7.3.exe -OutFile C:/TEMP/innosetup.exe
           C:/TEMP/innosetup.exe /SP- /VERYSILENT /ALLUSERS /SUPPRESSMSGBOXES
         shell: pwsh
 
