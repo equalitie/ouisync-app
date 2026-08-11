@@ -50,7 +50,8 @@ shared_cache_paths=(
     /root/.pub-cache
     /opt/ouisync-app/.dart_tool
 
-    # Android system images
+    # Android packages
+    /opt/android-sdk/platforms
     /opt/android-sdk/system-images
 )
 
@@ -153,7 +154,7 @@ function build_image() {
     log_group_begin "Build image $image_name"
 
     ndk_version=$(cat ndk-version.txt)
-    dock build -t $image_name --build-arg NDK_VERSION=$ndk_version - < docker/Dockerfile.linux
+    dock build --progress plain -t $image_name --build-arg NDK_VERSION=$ndk_version - < docker/Dockerfile.linux
 
     log_group_end
 }
@@ -535,9 +536,14 @@ function emulator_start() {
     fi
 
     local target=google_apis
-    if [ "$api" = "27" ]; then
-        target=default
-    fi
+    case $api in
+        "27")
+            target=default
+            ;;
+        "37.1")
+            target=google_apis_ps16k
+            ;;
+    esac
 
     local avd=android-$api
     local system_image="system-images;android-$api;$target;x86_64"
@@ -603,10 +609,6 @@ function integration_test_android() {
 
     log_group_begin "Run tests"
 
-    # Note accessing the gradle home directory from multiple containers concurrently doesn't work
-    # (because the gradle daemons can't talk to each other when they run in different containers). We
-    # could either run the jobs sequentially or not cache the gradle home. The later would be much
-    # slower so we opt for the former by putting a file lock around this command.
     exe -w /opt/ouisync-app -t \
         flutter test integration_test --flavor itest --ignore-timeouts $@
     log_group_end
