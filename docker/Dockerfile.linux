@@ -4,7 +4,7 @@ FROM ubuntu:22.04
 
 ARG NDK_VERSION
 ARG RUST_VERSION=1.91.0
-ARG FLUTTER_VERSION=3.32.5
+ARG FLUTTER_VERSION=3.44.9
 
 RUN apt-get update && \
     apt-get upgrade -y && \
@@ -37,20 +37,12 @@ RUN yes | sdkmanager --licenses
 
 # Install android packages (some of these would be installed automatically, but good to have them in
 # the image to speed things up).
-#
-# TODO: Why do we need different versions of `build-tools` and `platforms`?
-RUN sdkmanager --install    \
-    "cmdline-tools;latest"  \
-    "build-tools;35.0.0"    \
-    "build-tools;36.0.0"    \
-    "platform-tools"        \
-    "platforms;android-31"  \
-    "platforms;android-33"  \
-    "platforms;android-34"  \
-    "platforms;android-35"  \
-    "platforms;android-36"  \
-    "emulator"              \
-    "ndk;$NDK_VERSION"      \
+RUN sdkmanager --install        \
+    "build-tools;36.0.0"        \
+    "cmdline-tools;latest"      \
+    "platform-tools"            \
+    "emulator"                  \
+    "ndk;$NDK_VERSION"          \
     "cmake;3.22.1"
 
 ENV PATH="${ANDROID_SDK_ROOT}/platform-tools:${ANDROID_SDK_ROOT}/emulator:${PATH}"
@@ -78,7 +70,7 @@ ENV PATH="/root/.cargo/bin:$PATH"
 RUN rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
 
 # Install some rust utilities
-RUN cargo install cargo-sweep
+RUN cargo install --force cargo-sweep cargo-ndk
 
 # Expose Java
 # Sentry started to require JDK even for non Android builds. This requirement

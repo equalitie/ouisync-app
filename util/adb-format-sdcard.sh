@@ -21,7 +21,7 @@ fi
 echo "Formatting SD card ..."
 
 adoptable=$(adb_shell sm has-adoptable)
-if [ $adoptable == "false" ]; then
+if [ "$adoptable" == "false" ]; then
     adb_shell sm set-force-adoptable true
 fi
 
@@ -36,7 +36,7 @@ done
 
 adb_shell sm partition "$disk" public
 
-if [ $adoptable == "false" ]; then
+if [ "$adoptable" == "false" ]; then
     volume=$(adb_shell sm list-volumes | grep public | cut -d' ' -f1)
     adb_shell sm format "$volume"
     adb_shell sm mount "$volume"
