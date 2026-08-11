@@ -14,11 +14,11 @@ import 'utils.dart' show AppLogger, disambiguateEntryName;
 class SaveMedia with AppLogger {
   SaveMedia(
     BuildContext context, {
-    required RepoCubit repoCubit,
+    required this._repoCubit,
     required this.sourcePath,
     required this.type,
     required this.stage,
-  }) : _repoCubit = repoCubit;
+  });
 
   final RepoCubit _repoCubit;
   final String sourcePath;

@@ -67,23 +67,19 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
   StreamSubscription<void>? _storeDirsSubscription;
 
   ReposCubit({
-    required session,
-    required settings,
+    required this._session,
+    required this._settings,
     required this.cacheServers,
-    required MountCubit mountCubit,
+    required this._mountCubit,
     required StoreDirsCubit storeDirsCubit,
-    void Function(String)? onNotify,
+    this._onNotify,
     EntryBottomSheetCubit? bottomSheet,
     NavigationCubit? navigation,
     EntrySelectionCubit? entriesSelection,
-  }) : _session = session,
-       _settings = settings,
-       _mountCubit = mountCubit,
-       _onNotify = onNotify,
-       bottomSheet = bottomSheet ?? EntryBottomSheetCubit(),
+  }) : bottomSheet = bottomSheet ?? EntryBottomSheetCubit(),
        navigation = navigation ?? NavigationCubit(),
        entriesSelection = entriesSelection ?? EntrySelectionCubit(),
-       passwordHasher = PasswordHasher(session),
+       passwordHasher = PasswordHasher(_session),
        super(ReposState()) {
     unawaited(_init(storeDirsCubit));
   }

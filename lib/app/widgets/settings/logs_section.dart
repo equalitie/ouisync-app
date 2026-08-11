@@ -163,9 +163,9 @@ class LogsSection extends SettingsSection with AppLogger {
     final tempFile = await _dumpInfo(natDetection);
 
     try {
-      await Share.shareXFiles([
-        XFile(tempFile.path, mimeType: 'application/zip'),
-      ]);
+      await SharePlus.instance.share(
+        ShareParams(files: [XFile(tempFile.path, mimeType: 'application/zip')]),
+      );
     } finally {
       await tempFile.delete();
     }

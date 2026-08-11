@@ -249,7 +249,9 @@ class _ShareRepositoryState extends State<ShareRepository> with AppLogger {
                       (renderBox?.size ?? Size.zero);
                 }
 
-                await Share.share(_shareToken!, sharePositionOrigin: origin);
+                await SharePlus.instance.share(
+                  ShareParams(text: _shareToken!, sharePositionOrigin: origin),
+                );
               },
             ),
             Fields.constrainedText(

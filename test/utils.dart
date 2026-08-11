@@ -206,35 +206,33 @@ class FakeWindowManager extends PlatformWindowManager {
 
 /// Observer for bloc/cubit state. Useful when we don't have direct access to the bloc/cubit we
 /// want to observe. If we do have access, prefer to use `BlocBaseExtension.waitUntil`.
-class StateObserver<State> extends BlocObserver {
+class StateObserver<T> extends BlocObserver {
   StateObserver._(this._prev);
 
   final BlocObserver? _prev;
-  final _completer = Completer<BlocBase<State>>();
+  final _completer = Completer<BlocBase<T>>();
 
   /// Waits until the observed bloc transitions to a state for which the given predicate returns
   /// true. If it's already in such state, returns immediately.
-  Future<void> waitUntil(
-    bool Function(State) f, {
-    Duration timeout = _timeout,
-  }) => _completer.future
-      .timeout(timeout)
-      .then((bloc) => bloc.waitUntil(f, timeout: timeout));
+  Future<void> waitUntil(bool Function(T) f, {Duration timeout = _timeout}) =>
+      _completer.future
+          .timeout(timeout)
+          .then((bloc) => bloc.waitUntil(f, timeout: timeout));
 
   @override
   void onCreate(BlocBase bloc) {
     super.onCreate(bloc);
 
-    if (bloc is BlocBase<State>) {
+    if (bloc is BlocBase<T>) {
       _completer.complete(bloc);
     }
 
     _prev?.onCreate(bloc);
   }
 
-  static StateObserver<State> install<State>() {
+  static StateObserver<T> install<T>() {
     final prev = Bloc.observer;
-    final next = StateObserver<State>._(prev);
+    final next = StateObserver<T>._(prev);
     Bloc.observer = next;
     return next;
   }

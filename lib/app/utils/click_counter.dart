@@ -8,7 +8,7 @@ class ClickCounter {
   int _clickCount = 0;
   final int _timeoutMs;
 
-  ClickCounter({required int timeoutMs}) : _timeoutMs = timeoutMs;
+  ClickCounter({required this._timeoutMs});
 
   int registerClick({int count = 1}) {
     int now = DateTime.now().millisecondsSinceEpoch;

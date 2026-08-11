@@ -12,12 +12,10 @@ import 'stage.dart';
 
 class MultiEntryActions {
   const MultiEntryActions({
-    required Dirs dirs,
-    required EntrySelectionCubit entrySelectionCubit,
-    required Stage stage,
-  }) : _entrySelectionCubit = entrySelectionCubit,
-       _dirs = dirs,
-       _stage = stage;
+    required this._dirs,
+    required this._entrySelectionCubit,
+    required this._stage,
+  });
 
   final EntrySelectionCubit _entrySelectionCubit;
   final Dirs _dirs;

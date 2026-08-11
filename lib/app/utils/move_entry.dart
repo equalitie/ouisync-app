@@ -12,14 +12,11 @@ import 'utils.dart'
 
 class MoveEntry with AppLogger {
   MoveEntry({
-    required RepoCubit originRepoCubit,
-    required FileSystemEntry entry,
-    required String destinationPath,
-    required Stage stage,
-  }) : _stage = stage,
-       _originRepoCubit = originRepoCubit,
-       _entry = entry,
-       _destinationPath = destinationPath;
+    required this._originRepoCubit,
+    required this._entry,
+    required this._destinationPath,
+    required this._stage,
+  });
 
   final RepoCubit _originRepoCubit;
   final FileSystemEntry _entry;
