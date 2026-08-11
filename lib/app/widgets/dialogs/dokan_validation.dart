@@ -13,12 +13,10 @@ import '../widgets.dart'
 
 class DokanValidation {
   const DokanValidation({
-    required Stage stage,
-    required void Function() installationOk,
-    required Future<bool?> Function() installationFailed,
-  }) : _stage = stage,
-       _installationOk = installationOk,
-       _installationFailed = installationFailed;
+    required this._stage,
+    required this._installationOk,
+    required this._installationFailed,
+  });
 
   final Stage _stage;
   final void Function() _installationOk;

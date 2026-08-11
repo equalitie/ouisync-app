@@ -302,15 +302,14 @@ class TrailAction extends StatelessWidget {
     this.repoInfoHash,
     this.entry, {
     required this.entrySelectionCubit,
-    required ValueNotifier<bool?> selectedNotifier,
-    required ValueNotifier<Color?> backgroundColorNotifier,
+    required this._selectedNotifier,
+    required this._backgroundColorNotifier,
     required this.onSelectEntry,
     required this.onClearEntry,
     required this.uploadJob,
     required this.verticalDotsAction,
     super.key,
-  }) : _selectedNotifier = selectedNotifier,
-       _backgroundColorNotifier = backgroundColorNotifier;
+  });
 
   final String repoInfoHash;
   final FileSystemEntry entry;
