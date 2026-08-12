@@ -503,6 +503,9 @@ function unit_test() {
 
 # Wait for the emulator to boot
 function emulator_wait_boot() {
+    exe adb wait-for-device
+
+    # Wait for boot
     while true; do
         local result=$(exe adb shell getprop sys.boot_completed)
 
@@ -510,6 +513,28 @@ function emulator_wait_boot() {
             break
         else
             echo "Waiting for the emulator to boot"
+            sleep 1
+        fi
+    done
+
+    # Wait for the services to get ready
+
+    while true; do
+        local result=$(exe adb shell service check package)
+        if [[ "$result" =~ ": found" ]]; then
+            break
+        else
+            echo "Waiting for package service to start"
+            sleep 1
+        fi
+    done
+
+    while true; do
+        local result=$(exe adb shell service check activity)
+        if [[ "$result" =~ ": found" ]]; then
+            break
+        else
+            echo "Waiting for activity service to start"
             sleep 1
         fi
     done
@@ -566,7 +591,15 @@ function emulator_start() {
 
     # Launch the emulator in separate process. Prefix its output with '🤖' to distinguish it from
     # other output.
-    exe emulator -no-metrics -no-window -no-audio -no-boot-anim -avd $avd | sed 's/^/🤖 /' &
+    exe emulator                    \
+        -avd $avd                   \
+        -no-metrics                 \
+        -no-snapshot                \
+        -gpu swiftshader_indirect   \
+        -no-window                  \
+        -no-audio                   \
+        -no-boot-anim               \
+        | sed 's/^/🤖 /' &
 
     emulator_wait_boot
 
@@ -604,11 +637,9 @@ function integration_test_android() {
         error "Missing --api"
     fi
 
-
     emulator_start --api $api
 
     log_group_begin "Run tests"
-
     exe -w /opt/ouisync-app -t \
         flutter test integration_test --flavor itest --ignore-timeouts $@
     log_group_end
