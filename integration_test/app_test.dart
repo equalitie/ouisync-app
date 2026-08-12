@@ -326,15 +326,36 @@ extension on CommonFinders {
 
 class _IsChecked extends Matcher {
   @override
-  bool matches(covariant FinderBase<Element> item, Map matchState) =>
-      switch (item.evaluate().single.widget) {
-        RadioListTile(value: final value, groupValue: final groupValue) =>
-          value == groupValue,
-        _ => false,
-      };
+  bool matches(covariant FinderBase<Element> item, Map matchState) {
+    final element = item.evaluate().single;
+
+    switch (element.widget) {
+      case RadioListTile(value: final value):
+        final groupValue = _findRadioGroup(element)?.groupValue;
+        return value == groupValue;
+      default:
+        return false;
+    }
+  }
 
   @override
   Description describe(Description description) => description.add('checked');
+
+  RadioGroup? _findRadioGroup(Element element) {
+    RadioGroup? group;
+
+    element.visitAncestorElements((ancestor) {
+      final widget = ancestor.widget;
+      if (widget is RadioGroup) {
+        group = widget;
+        return false;
+      } else {
+        return true;
+      }
+    });
+
+    return group;
+  }
 }
 
 final isChecked = _IsChecked();
