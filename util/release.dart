@@ -719,7 +719,6 @@ Future<File> buildWindowsInstaller(Version version, String? sentryDSN) async {
     '/cc',
     'build/inno-setup.iss',
   ]);
-  print('Building the installer done');
 
   return File('$windowsArtifactDir/ouisync-installer.exe');
 }
@@ -825,8 +824,6 @@ Future<void> prepareDokanBundle() async {
     } finally {
       client.close();
     }
-
-    print('Downloading Dokan (x64) MSI: done');
   }
 
   /// Move all additional assets to the data directory (Release/data)

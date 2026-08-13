@@ -236,6 +236,11 @@ function start_container() {
         fi
     fi
 
+    # Mount anonymous volume to put the AVDs on. This is because they work better on a real
+    # filesystem rather than on overlay. The volume is destroyed when the container stops which is
+    # what we want because we create the AVD from scratch on every run anyway.
+    opts="$opts --mount dst=/root/.android"
+
     # Needed for android emulator
     opts="$opts --device /dev/kvm"
 
@@ -501,6 +506,20 @@ function unit_test() {
 
 ####################################################################################################
 
+function adb_wait_for_service() {
+    local service="$1"
+
+    while true; do
+        local result=$(exe adb shell service check "$service")
+        if [[ "$result" =~ ": found" ]]; then
+            break
+        else
+            echo "Waiting for service '$service' to start"
+            sleep 1
+        fi
+    done
+}
+
 # Wait for the emulator to boot
 function emulator_wait_boot() {
     exe adb wait-for-device
@@ -518,26 +537,8 @@ function emulator_wait_boot() {
     done
 
     # Wait for the services to get ready
-
-    while true; do
-        local result=$(exe adb shell service check package)
-        if [[ "$result" =~ ": found" ]]; then
-            break
-        else
-            echo "Waiting for package service to start"
-            sleep 1
-        fi
-    done
-
-    while true; do
-        local result=$(exe adb shell service check activity)
-        if [[ "$result" =~ ": found" ]]; then
-            break
-        else
-            echo "Waiting for activity service to start"
-            sleep 1
-        fi
-    done
+    adb_wait_for_service "activity"
+    adb_wait_for_service "package"
 }
 
 function emulator_start() {
