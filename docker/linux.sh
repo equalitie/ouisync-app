@@ -561,10 +561,10 @@ function emulator_start() {
         error "Missing --api"
     fi
 
-    local target=google_apis
+    local target=default
     case $api in
-        "27")
-            target=default
+        "37.0")
+            target=google_apis
             ;;
         "37.1")
             target=google_apis_ps16k
@@ -603,6 +603,15 @@ function emulator_start() {
         | sed 's/^/🤖 /' &
 
     emulator_wait_boot
+
+    # HACK: the google launcher caused crashes probably due to a bug in the emulator (possibly only
+    # on some SDK versions). Disable it as a workaround (we don't need it for the integration tests
+    # anyway).
+    if [[ "$target" =~ "google" ]]; then
+        while ! exe adb shell pm disable-user --user 0 com.google.android.apps.nexuslauncher 2>/dev/null; do
+        sleep 0.5
+        done
+    fi
 
     log_group_end
 
@@ -763,6 +772,7 @@ while true; do
     esac
     shift
 done
+
 
 # Handle command
 case "${1-}" in

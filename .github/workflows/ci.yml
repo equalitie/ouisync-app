@@ -251,11 +251,8 @@ jobs:
           - 34
           - 35
           - 36
-
-          # TODO: these currently don't work when running in docker but they seems to work running
-          # directly on the host. Commenting them out until we figure it out.
-          # - "37.0"
-          # - "37.1"
+          - "37.0"
+          - "37.1"
 
     steps:
       - uses: actions/checkout@v4
