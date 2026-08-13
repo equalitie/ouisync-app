@@ -9,14 +9,11 @@ import 'stage.dart';
 
 class MoveEntriesActions with AppLogger {
   MoveEntriesActions({
-    required Stage stage,
-    required ReposCubit reposCubit,
-    required RepoCubit originRepoCubit,
-    required BottomSheetType sheetType,
-  }) : _stage = stage,
-       _reposCubit = reposCubit,
-       _originRepoCubit = originRepoCubit,
-       _sheetType = sheetType;
+    required this._stage,
+    required this._reposCubit,
+    required this._originRepoCubit,
+    required this._sheetType,
+  });
 
   final ReposCubit _reposCubit;
   final RepoCubit _originRepoCubit;

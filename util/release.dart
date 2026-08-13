@@ -63,13 +63,15 @@ Future<void> main(List<String> args) async {
   final pubspec = Pubspec.parse(await File("pubspec.yaml").readAsString());
   final sentryDSN = await getSentryDSN(options);
 
-  final git = await GitDir.fromExisting(p.current);
-
-  final commit = await getCommit();
+  final commit = await GitDir.isGitDir(p.current) ? await getCommit() : "";
   Version version = determineVersion(pubspec, options, commit);
 
-  if (version.flavor.doGitCleanCheck && !await checkWorkingTreeIsClean(git)) {
-    return;
+  if (version.flavor.doGitCleanCheck) {
+    final git = await GitDir.fromExisting(p.current);
+
+    if (!await checkWorkingTreeIsClean(git)) {
+      return;
+    }
   }
 
   // TODO: use `pubspec.name` here but first rename it from "ouisync_app" to "ouisync"
@@ -714,6 +716,7 @@ Future<File> buildWindowsInstaller(Version version, String? sentryDSN) async {
     "build/inno-setup.iss",
   ).writeAsString(innoScript.replaceAll("<APP_VERSION>", buildName));
 
+  print('Building the installer');
   await run("C:/Program Files (x86)/Inno Setup 6/Compil32.exe", [
     '/cc',
     'build/inno-setup.iss',
@@ -828,7 +831,7 @@ Future<void> prepareDokanBundle() async {
   /// Move all additional assets to the data directory (Release/data)
   final dataPath = await Directory(
     '$windowsArtifactDir/data/bundled-assets',
-  ).create();
+  ).create(recursive: true);
 
   final msixAssetsPath = Directory('releases/bundled-assets-windows');
   await copyDirectory(msixAssetsPath, dataPath);
@@ -1417,12 +1420,15 @@ Version determineVersion(Pubspec pubspec, Options options, String commit) {
   if (pubspecVersion.isPreRelease) {
     throw "Pre-release string (the \"foo\" in \"1.2.3-foo\") is already set in pubspec.yaml";
   }
+
+  final buildSuffix = commit.isNotEmpty ? ".$commit" : "";
+
   return Version(
     pubspecVersion.major,
     pubspecVersion.minor,
     pubspecVersion.patch,
     pre: options.flavor.toString(),
-    build: "${pubspecVersion.build[0].toString()}.$commit",
+    build: "${pubspecVersion.build[0].toString()}$buildSuffix",
   );
 }
 

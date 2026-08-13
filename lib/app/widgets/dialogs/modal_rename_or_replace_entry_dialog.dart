@@ -70,36 +70,35 @@ class RenameOrReplaceEntryDialog extends StatelessWidget {
         ValueListenableBuilder(
           valueListenable: _fileAction,
           builder: (context, value, child) {
-            return Column(
-              children: [
-                RadioListTile<RenameOrReplaceResult>(
-                  key: Key('rename_entry_radio_tile'),
-                  dense: true,
-                  contentPadding: EdgeInsetsDirectional.zero,
-                  title: Text(renameMessage, style: bodyStyle),
-                  value: RenameOrReplaceResult.rename,
-                  groupValue: value,
-                  onChanged: _onFileActionChanged,
-                ),
-                GestureDetector(
-                  onTap: () {
-                    if (type == EntryType.directory) {
-                      stage.showSnackBar(S.current.messageOnlyAvailableFiles);
-                    }
-                  },
-                  child: RadioListTile<RenameOrReplaceResult>(
-                    key: Key('replace_entry_radio_tile'),
+            return RadioGroup(
+              onChanged: _onFileActionChanged,
+              groupValue: value,
+              child: Column(
+                children: [
+                  RadioListTile<RenameOrReplaceResult>(
+                    key: Key('rename_entry_radio_tile'),
                     dense: true,
                     contentPadding: EdgeInsetsDirectional.zero,
-                    title: Text(replaceMessage, style: bodyStyle),
-                    value: RenameOrReplaceResult.replace,
-                    groupValue: value,
-                    onChanged: type == EntryType.file
-                        ? _onFileActionChanged
-                        : null,
+                    title: Text(renameMessage, style: bodyStyle),
+                    value: RenameOrReplaceResult.rename,
                   ),
-                ),
-              ],
+                  GestureDetector(
+                    onTap: () {
+                      if (type == EntryType.directory) {
+                        stage.showSnackBar(S.current.messageOnlyAvailableFiles);
+                      }
+                    },
+                    child: RadioListTile<RenameOrReplaceResult>(
+                      key: Key('replace_entry_radio_tile'),
+                      dense: true,
+                      contentPadding: EdgeInsetsDirectional.zero,
+                      title: Text(replaceMessage, style: bodyStyle),
+                      value: RenameOrReplaceResult.replace,
+                      enabled: type == EntryType.file,
+                    ),
+                  ),
+                ],
+              ),
             );
           },
         ),

@@ -12,14 +12,11 @@ import 'utils.dart'
 
 class CopyEntry with AppLogger {
   CopyEntry({
-    required Stage stage,
-    required RepoCubit originRepoCubit,
-    required FileSystemEntry entry,
-    required String destinationPath,
-  }) : _stage = stage,
-       _originRepoCubit = originRepoCubit,
-       _entry = entry,
-       _destinationPath = destinationPath;
+    required this._stage,
+    required this._originRepoCubit,
+    required this._entry,
+    required this._destinationPath,
+  });
 
   final Stage _stage;
   final RepoCubit _originRepoCubit;

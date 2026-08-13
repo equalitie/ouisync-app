@@ -74,7 +74,7 @@ class FileIO with AppLogger {
           await repoCubit.replaceFile(
             filePath: destinationFilePath,
             length: srcFile.size,
-            fileByteStream: srcFile.readStream!,
+            fileByteStream: srcFile.readAsByteStream(),
           );
 
           continue;
@@ -90,7 +90,7 @@ class FileIO with AppLogger {
           await repoCubit.saveFile(
             filePath: newPath,
             length: srcFile.size,
-            fileByteStream: srcFile.readStream!,
+            fileByteStream: srcFile.readAsByteStream(),
           );
         }
       }

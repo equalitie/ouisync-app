@@ -40,29 +40,31 @@ class StoreDirSelector extends StatelessWidget {
       final selected =
           value ?? storeDirs.firstWhereOrNull((dir) => dir.volume.isPrimary);
 
-      return Column(
-        children: storeDirs
-            .map(
-              (dir) => RadioListTile(
-                title: StorageVolumeLabel(dir.volume),
-                subtitle: switch (dir.volume.state) {
-                  StorageVolumeMounted(mountPoint: final mountPoint)
-                      when mountPoint != null =>
-                    Text(mountPoint, overflow: TextOverflow.ellipsis),
-                  StorageVolumeMounted() || StorageVolumeUnmounted() => null,
-                },
-                value: dir,
-                groupValue: selected,
-                onChanged: (dir) {
-                  if (dir != null) {
-                    onChanged(dir);
-                  }
-                },
-                visualDensity: VisualDensity.compact,
-                contentPadding: EdgeInsets.zero,
-              ),
-            )
-            .toList(),
+      return RadioGroup(
+        groupValue: selected,
+        onChanged: (dir) {
+          if (dir != null) {
+            onChanged(dir);
+          }
+        },
+        child: Column(
+          children: storeDirs
+              .map(
+                (dir) => RadioListTile(
+                  title: StorageVolumeLabel(dir.volume),
+                  subtitle: switch (dir.volume.state) {
+                    StorageVolumeMounted(mountPoint: final mountPoint)
+                        when mountPoint != null =>
+                      Text(mountPoint, overflow: TextOverflow.ellipsis),
+                    StorageVolumeMounted() || StorageVolumeUnmounted() => null,
+                  },
+                  value: dir,
+                  visualDensity: VisualDensity.compact,
+                  contentPadding: EdgeInsets.zero,
+                ),
+              )
+              .toList(),
+        ),
       );
     },
   );

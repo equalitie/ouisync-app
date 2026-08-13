@@ -189,7 +189,7 @@ function setup_cache_overlays() {
 
 function start_container() {
     if [ -z "$commit" -a -z "$srcdir" ]; then error "Missing one of --commit or --srcdir"; fi
-    if [ -n "$commit" -a -n "$srcdir" ]; then error "--commit and --src are mutually exclusive"; fi
+    if [ -n "$commit" -a -n "$srcdir" ]; then error "--commit and --srcdir are mutually exclusive"; fi
 
     local keep_alive_socket=
 
@@ -235,6 +235,11 @@ function start_container() {
             done
         fi
     fi
+
+    # Mount anonymous volume to put the AVDs on. This is because they work better on a real
+    # filesystem rather than on overlay. The volume is destroyed when the container stops which is
+    # what we want because we create the AVD from scratch on every run anyway.
+    opts="$opts --mount dst=/root/.android"
 
     # Needed for android emulator
     opts="$opts --device /dev/kvm"
@@ -501,8 +506,25 @@ function unit_test() {
 
 ####################################################################################################
 
+function adb_wait_for_service() {
+    local service="$1"
+
+    while true; do
+        local result=$(exe adb shell service check "$service")
+        if [[ "$result" =~ ": found" ]]; then
+            break
+        else
+            echo "Waiting for service '$service' to start"
+            sleep 1
+        fi
+    done
+}
+
 # Wait for the emulator to boot
 function emulator_wait_boot() {
+    exe adb wait-for-device
+
+    # Wait for boot
     while true; do
         local result=$(exe adb shell getprop sys.boot_completed)
 
@@ -513,6 +535,10 @@ function emulator_wait_boot() {
             sleep 1
         fi
     done
+
+    # Wait for the services to get ready
+    adb_wait_for_service "activity"
+    adb_wait_for_service "package"
 }
 
 function emulator_start() {
@@ -535,10 +561,10 @@ function emulator_start() {
         error "Missing --api"
     fi
 
-    local target=google_apis
+    local target=default
     case $api in
-        "27")
-            target=default
+        "37.0")
+            target=google_apis
             ;;
         "37.1")
             target=google_apis_ps16k
@@ -566,9 +592,26 @@ function emulator_start() {
 
     # Launch the emulator in separate process. Prefix its output with '🤖' to distinguish it from
     # other output.
-    exe emulator -no-metrics -no-window -no-audio -no-boot-anim -avd $avd | sed 's/^/🤖 /' &
+    exe emulator                    \
+        -avd $avd                   \
+        -no-metrics                 \
+        -no-snapshot                \
+        -gpu swiftshader_indirect   \
+        -no-window                  \
+        -no-audio                   \
+        -no-boot-anim               \
+        | sed 's/^/🤖 /' &
 
     emulator_wait_boot
+
+    # HACK: the google launcher caused crashes probably due to a bug in the emulator (possibly only
+    # on some SDK versions). Disable it as a workaround (we don't need it for the integration tests
+    # anyway).
+    if [[ "$target" =~ "google" ]]; then
+        while ! exe adb shell pm disable-user --user 0 com.google.android.apps.nexuslauncher 2>/dev/null; do
+        sleep 0.5
+        done
+    fi
 
     log_group_end
 
@@ -604,11 +647,9 @@ function integration_test_android() {
         error "Missing --api"
     fi
 
-
     emulator_start --api $api
 
     log_group_begin "Run tests"
-
     exe -w /opt/ouisync-app -t \
         flutter test integration_test --flavor itest --ignore-timeouts $@
     log_group_end
@@ -731,6 +772,7 @@ while true; do
     esac
     shift
 done
+
 
 # Handle command
 case "${1-}" in
