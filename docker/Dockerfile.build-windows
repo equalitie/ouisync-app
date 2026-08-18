@@ -1,8 +1,5 @@
 FROM mcr.microsoft.com/windows/servercore:ltsc2022 AS windows
 
-ENV FLUTTER_VERSION=3.32.5
-ENV RUST_VERSION=1.91.0
-
 ####################
 # Use powershell by default. Setting the ProgressPreference to SilentlyContinue
 # should speed up Invoke-WebRequest
@@ -43,6 +40,7 @@ SHELL ["powershell", "-Command", "$ProgressPreference = 'SilentlyContinue';"]
 ######################
 #### Install Rust ####
 ######################
+ENV RUST_VERSION=1.97.1
 RUN Invoke-WebRequest https://static.rust-lang.org/rustup/dist/x86_64-pc-windows-msvc/rustup-init.exe -OutFile C:/TEMP/rustup-init.exe
 RUN C:\TEMP\rustup-init.exe --default-toolchain=$env:RUST_VERSION -y
 
@@ -56,6 +54,7 @@ RUN cmd /c 'setx /M path "C:\MinGit\cmd;%path%"'
 #########################
 #### Install Flutter ####
 #########################
+ENV FLUTTER_VERSION=3.44.9
 RUN git clone --filter=tree:0 -b $env:FLUTTER_VERSION https://github.com/flutter/flutter.git C:\flutter
 RUN cmd /c 'setx /M path "C:\flutter\bin;C:\flutter\bin\cache\dart-sdk\bin;%path%"'
 
@@ -72,7 +71,7 @@ RUN flutter doctor -v
 #######################
 ##### Install Inno ####
 #######################
-RUN Invoke-WebRequest https://files.jrsoftware.org/is/6/innosetup-6.4.3.exe -OutFile C:/TEMP/innosetup.exe
+RUN Invoke-WebRequest https://github.com/jrsoftware/issrc/releases/download/is-6_7_3/innosetup-6.7.3.exe -OutFile C:/TEMP/innosetup.exe
 # https://jrsoftware.org/ishelp/index.php?topic=setupcmdline
 RUN C:/TEMP/innosetup.exe /SP- /VERYSILENT /ALLUSERS /SUPPRESSMSGBOXES
 
