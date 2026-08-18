@@ -103,7 +103,15 @@ function get_sources_from_local_dir {
         --archive --no-links --verbose \
         $compress_opt \
         ${rsync_filter[@]} \
-        ${srcdir%/}/ $container_name:$dstdir/ouisync-app
+        ${srcdir%/}/ $container_name:$dstdir/ouisync-app || rc=$?
+
+    rc=${rc:-0}
+
+    # Workaround for Windows/Msys where rsync fails to set permission (error 23).
+    if [[ $rc -ne 0 && $rc -ne 23 ]]; then
+        echo "rsync failed with exit code $rc" >&2
+        exit $rc
+    fi
 
     exe git config --global --add safe.directory /opt/ouisync-app
 }
