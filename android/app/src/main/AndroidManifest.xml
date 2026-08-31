@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
 xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.INTERNET"/> 
+    <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.CAMERA"/>
@@ -26,15 +26,15 @@ xmlns:tools="http://schemas.android.com/tools">
         android:roundIcon="@mipmap/ic_launcher_round">
 
         <!--
-        NOTE: Forcing single Ouisync instance in its own task with launchMode="singleInstance". 
-        This is because Ouisync doesn't currently support multiple instances well. 
-        
-        For example, modifying the repository list (adding/removing/renaming a repo) in one 
-        instance would not be reflected in the other instances, resulting in bad UX. 
-        Also the way Ouisync handles the back button is not currently compatible with launching 
-        it as part of other app's task. 
-        
-        Even though these issues are potentially fixable, the single instance mode is still 
+        NOTE: Forcing single Ouisync instance in its own task with launchMode="singleInstance".
+        This is because Ouisync doesn't currently support multiple instances well.
+
+        For example, modifying the repository list (adding/removing/renaming a repo) in one
+        instance would not be reflected in the other instances, resulting in bad UX.
+        Also the way Ouisync handles the back button is not currently compatible with launching
+        it as part of other app's task.
+
+        Even though these issues are potentially fixable, the single instance mode is still
         arguably more natural for Ouisync.
         -->
         <activity
@@ -54,6 +54,12 @@ xmlns:tools="http://schemas.android.com/tools">
               android:name="io.flutter.embedding.android.NormalTheme"
               android:resource="@style/NormalTheme"
               />
+
+            <!-- Disable built-in flutter deeplinking because we use the `receive_sharing_intent` plugin
+                 to handle it. More info:
+                 https://docs.flutter.dev/ui/navigation/deep-linking#migrating-from-plugin-based-deep-linking -->
+            <meta-data android:name="flutter_deeplinking_enabled" android:value="false" />
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -70,6 +76,7 @@ xmlns:tools="http://schemas.android.com/tools">
                 <category android:name="android.intent.category.DEFAULT"/>
                 <data android:mimeType="*/*"/>
             </intent-filter>
+
             <!-- Open share tokens -->
             <!-- https://developer.android.com/training/app-links#android-app-links -->
             <intent-filter android:autoVerify="true">
@@ -85,6 +92,8 @@ xmlns:tools="http://schemas.android.com/tools">
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+
+
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and
