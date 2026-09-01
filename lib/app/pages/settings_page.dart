@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:ouisync/ouisync.dart';
+import 'package:ouisync_app/app/cubits/lan_access.dart' show LanAccessCubit;
 import 'package:stream_transform/stream_transform.dart';
 
 import '../../generated/l10n.dart';
@@ -20,6 +21,7 @@ class SettingsPage extends StatefulWidget {
     required this.reposCubit,
     required this.upgradeExists,
     required this.checkForDokan,
+    required this.lanAccess,
     required this.dirs,
     required this.stage,
   });
@@ -31,6 +33,7 @@ class SettingsPage extends StatefulWidget {
   final PowerControl powerControl;
   final ReposCubit reposCubit;
   final UpgradeExistsCubit upgradeExists;
+  final LanAccessCubit lanAccess;
   final void Function() checkForDokan;
   final Dirs dirs;
   final Stage stage;
@@ -85,6 +88,7 @@ class _SettingsPageState extends State<SettingsPage> {
       checkForDokan: widget.checkForDokan,
       launchAtStartup: launchAtStartup,
       upgradeExists: widget.upgradeExists,
+      lanAccess: widget.lanAccess,
       dirs: widget.dirs,
       stage: widget.stage,
     ),

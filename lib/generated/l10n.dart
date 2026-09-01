@@ -814,6 +814,16 @@ class S {
     );
   }
 
+  /// `Local network access is not allowed`
+  String get titleLanAccessDenied {
+    return Intl.message(
+      'Local network access is not allowed',
+      name: 'titleLanAccessDenied',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Folder`
   String get typeFolder {
     return Intl.message('Folder', name: 'typeFolder', desc: '', args: []);
@@ -3835,6 +3845,16 @@ class S {
     );
   }
 
+  /// `Local network access is required to sync with other devices on the local network.`
+  String get messageLanAccessRequired {
+    return Intl.message(
+      'Local network access is required to sync with other devices on the local network.',
+      name: 'messageLanAccessRequired',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Copy password`
   String get popupMenuItemCopyPassword {
     return Intl.message(
@@ -4843,6 +4863,11 @@ class S {
   /// `Copy`
   String get actionCopy {
     return Intl.message('Copy', name: 'actionCopy', desc: '', args: []);
+  }
+
+  /// `Allow`
+  String get actionAllow {
+    return Intl.message('Allow', name: 'actionAllow', desc: '', args: []);
   }
 
   /// `App language`

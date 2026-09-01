@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync/ouisync.dart' show Session;
+import 'package:ouisync_app/app/cubits/lan_access.dart'
+    show LanAccessState, LanAccessCubit;
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
@@ -25,6 +27,7 @@ class NetworkSection extends SettingsSection {
     required this.natDetection,
     required this.peerSet,
     required this.powerControl,
+    required this.lanAccess,
   }) : super(
          key: GlobalKey(debugLabel: 'key_network_section'),
          title: S.current.titleNetwork,
@@ -36,6 +39,7 @@ class NetworkSection extends SettingsSection {
   final NatDetection natDetection;
   final PeerSetCubit peerSet;
   final PowerControl powerControl;
+  final LanAccessCubit lanAccess;
 
   TextStyle? bodyStyle;
   TextStyle? subtitleStyle;
@@ -50,6 +54,7 @@ class NetworkSection extends SettingsSection {
     );
 
     return [
+      _buildLanAccessTile(),
       _buildConnectivityTypeTile(),
       _buildPortForwardingTile(),
       _buildLocalDiscoveryTile(),
@@ -59,6 +64,35 @@ class NetworkSection extends SettingsSection {
       _buildNatDetectionTile(),
     ];
   }
+
+  Widget _buildLanAccessTile() => BlocBuilder<LanAccessCubit, LanAccessState>(
+    bloc: lanAccess,
+    builder: (context, state) {
+      switch (state) {
+        case .granted:
+        case .unknown:
+          return SizedBox.shrink();
+        case .denied:
+        case .permanentlyDenied:
+          return SettingsTile(
+            title: Text(S.current.titleLanAccessDenied, style: bodyStyle),
+            leading: Icon(Icons.warning, color: Constants.warningColor),
+            trailing: FilledButton.tonal(
+              onPressed: () => lanAccess.request(),
+              child: Text(switch (state) {
+                .denied => S.current.actionAllow,
+                .permanentlyDenied => S.current.actionGoToSettings,
+                _ => '',
+              }),
+            ),
+            value: Text(
+              S.current.messageLanAccessRequired,
+              style: subtitleStyle,
+            ),
+          );
+      }
+    },
+  );
 
   Widget _buildConnectivityTypeTile() =>
       BlocBuilder<PowerControl, PowerControlState>(

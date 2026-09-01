@@ -122,12 +122,13 @@
   "@titleMovingEntry": {},
   "titleSaveEntriesToDevice":"Save to device",
   "@titleSaveEntriesToDevice":{
-    "description": "Title for the confirmation dialog when saving entries to device"	
+    "description": "Title for the confirmation dialog when saving entries to device"
   },
   "titleDeleteEntries":"Delete",
   "@titleDeleteEntries":{
-    "description": "Title for the confirmation dialog when deleting entries"	
+    "description": "Title for the confirmation dialog when deleting entries"
   },
+  "titleLanAccessDenied":"Local network access is not allowed",
   "typeFolder": "Folder",
   "@typeFolder": {},
   "typeFile": "File",
@@ -562,7 +563,7 @@
   "messageInstallDokanForOuisyncP1":"Ouisync uses",
   "messageInstallDokanForOuisyncP2":"to access repositories via the File Explorer.\nPlease install Dokan to enhance your Ouisync experience.",
   "messageDokanDifferentMayorP1":"The installed",
-  "messageDokanDifferentMayorP2":"is out of date. Please update it to the latest version.", 
+  "messageDokanDifferentMayorP2":"is out of date. Please update it to the latest version.",
   "messageDokanOlderVersionP2":"is out of date.\n\nPlease uninstall the existing version of Dokan, reboot the system and run Ouisync again.",
   "messageDokanInstallationFailed":"The Dokan installation failed.",
   "messageCopyEntries":"Copy selection here:\n\n\t\t{totals}",
@@ -605,6 +606,7 @@
         }
     }
   },
+  "messageLanAccessRequired":"Local network access is required to sync with other devices on the local network.",
   "popupMenuItemCopyPassword":"Copy password",
   "popupMenuItemChangePassword":"Change password",
   "repoResetTitle": "Reset repository access",
@@ -784,6 +786,7 @@
   "actionSelect":"Select",
   "actionDownload":"Download",
   "actionCopy":"Copy",
+  "actionAllow":"Allow",
   "titleApplicationLanguage": "App language",
   "languageOfTheDevice": "device's language",
   "languageIsNotAvailable": "not available",

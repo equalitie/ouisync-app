@@ -1,6 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:ouisync/ouisync.dart';
+import 'package:ouisync_app/app/cubits/lan_access.dart' show LanAccessCubit;
 import 'package:settings_ui/settings_ui.dart' as s;
 
 import '../../cubits/cubits.dart';
@@ -28,6 +29,7 @@ class AppSettingsContainer extends StatefulWidget {
     required this.powerControl,
     required ReposCubit reposCubit,
     required this.upgradeExists,
+    required this.lanAccess,
     required Stage stage,
   }) : sections = [
          NetworkSection(
@@ -37,6 +39,7 @@ class AppSettingsContainer extends StatefulWidget {
            natDetection: natDetection,
            peerSet: peerSet,
            powerControl: powerControl,
+           lanAccess: lanAccess,
          ),
          LogsSection(
            mount: mount,
@@ -67,6 +70,7 @@ class AppSettingsContainer extends StatefulWidget {
   final ErrorCubit errorCubit;
   final PowerControl powerControl;
   final UpgradeExistsCubit upgradeExists;
+  final LanAccessCubit lanAccess;
 
   final List<SettingsSection> sections;
 

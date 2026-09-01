@@ -5,6 +5,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync/ouisync.dart' show EntryType, Session;
+import 'package:ouisync_app/app/cubits/lan_access.dart' show LanAccessCubit;
 import 'package:path/path.dart' as system_path;
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
@@ -68,6 +69,7 @@ class _MainPageState extends State<MainPage>
   );
   late final SortListCubit sortListCubit;
   late final UpgradeExistsCubit upgradeExists;
+  final lanAccess = LanAccessCubit();
 
   final _bottomSheetInfo = ValueNotifier<BottomSheetInfo>(
     BottomSheetInfo(type: BottomSheetType.gone, neededPadding: 0.0, entry: ''),
@@ -117,6 +119,7 @@ class _MainPageState extends State<MainPage>
     unawaited(upgradeExists.close());
     unawaited(sortListCubit.close());
     unawaited(powerControl.close());
+    unawaited(lanAccess.close());
 
     super.dispose();
   }
@@ -314,6 +317,7 @@ class _MainPageState extends State<MainPage>
       powerControl: powerControl,
       reposCubit: widget.reposCubit,
       upgradeExists: upgradeExists,
+      lanAccess: lanAccess,
     ),
     appSettingsButton: _buildAppSettingsIcon(),
     searchButton: _buildSearchIcon(),
@@ -325,6 +329,7 @@ class _MainPageState extends State<MainPage>
     errorCubit: widget.errorCubit,
     powerControl: powerControl,
     upgradeExists: upgradeExists,
+    lanAccess: lanAccess,
     moveDownwards: 5,
     moveRight: 3,
     child: Fields.actionIcon(
@@ -1010,6 +1015,7 @@ class _MainPageState extends State<MainPage>
         reposCubit: widget.reposCubit,
         upgradeExists: upgradeExists,
         checkForDokan: checkForDokan,
+        lanAccess: lanAccess,
         dirs: widget.dirs,
         stage: widget.stage,
       ),

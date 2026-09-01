@@ -141,6 +141,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "actionAddRepositoryWithToken": MessageLookupByLibrary.simpleMessage(
       "Import Repository",
     ),
+    "actionAllow": MessageLookupByLibrary.simpleMessage("Allow"),
     "actionBack": MessageLookupByLibrary.simpleMessage("Back"),
     "actionCancel": MessageLookupByLibrary.simpleMessage("Cancel"),
     "actionCancelCapital": MessageLookupByLibrary.simpleMessage("CANCEL"),
@@ -669,6 +670,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "messageKeepBothFolders": MessageLookupByLibrary.simpleMessage(
       "Keep both folders",
+    ),
+    "messageLanAccessRequired": MessageLookupByLibrary.simpleMessage(
+      "Local network access is required to sync with other devices on the local network.",
     ),
     "messageLaunchAtStartup": MessageLookupByLibrary.simpleMessage(
       "Launch at startup",
@@ -1243,6 +1247,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "titleIssueTracker": MessageLookupByLibrary.simpleMessage("Issue tracker"),
     "titleJustLegalSociety": MessageLookupByLibrary.simpleMessage(
       "Just and legal society",
+    ),
+    "titleLanAccessDenied": MessageLookupByLibrary.simpleMessage(
+      "Local network access is not allowed",
     ),
     "titleLinksOtherSites": MessageLookupByLibrary.simpleMessage(
       "Links to Other Sites",

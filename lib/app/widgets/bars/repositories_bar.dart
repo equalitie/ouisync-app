@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync/ouisync.dart' show Stats;
+import 'package:ouisync_app/app/cubits/lan_access.dart' show LanAccessCubit;
 import 'package:stream_transform/stream_transform.dart';
 
 import '../../../generated/l10n.dart';
@@ -21,6 +22,7 @@ class RepositoriesBar extends StatelessWidget
     required this.powerControl,
     required this.reposCubit,
     required this.upgradeExists,
+    required this.lanAccess,
     super.key,
   });
 
@@ -30,6 +32,7 @@ class RepositoriesBar extends StatelessWidget
   final PowerControl powerControl;
   final ReposCubit reposCubit;
   final UpgradeExistsCubit upgradeExists;
+  final LanAccessCubit lanAccess;
 
   @override
   Widget build(BuildContext context) => BlocBuilder<ReposCubit, ReposState>(
@@ -116,6 +119,7 @@ class RepositoriesBar extends StatelessWidget
     errorCubit: errorCubit,
     powerControl: powerControl,
     upgradeExists: upgradeExists,
+    lanAccess: lanAccess,
     moveDownwards: 5,
     moveRight: 6,
     child: Fields.actionIcon(
