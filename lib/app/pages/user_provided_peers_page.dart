@@ -33,9 +33,9 @@ class _UserProvidedPeersState extends State<UserProvidedPeersPage> {
     body: BlocBuilder<UserProvidedPeersCubit, List<String>>(
       bloc: _cubit,
       builder: (context, state) => ListView(
-        padding: MediaQuery.of(
+        padding: MediaQuery.viewPaddingOf(
           context,
-        ).viewPadding.add(Dimensions.paddingContents),
+        ).add(Dimensions.paddingContents),
         children: _buildPeers(context, state),
       ),
     ),

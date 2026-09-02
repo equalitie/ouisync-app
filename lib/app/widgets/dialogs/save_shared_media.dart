@@ -16,6 +16,7 @@ class SaveSharedMedia extends StatefulWidget {
     required this.canSaveMedia,
     required this.onUpdateBottomSheet,
     required this.onSaveFile,
+    this.padding = EdgeInsets.zero,
   });
 
   final ReposCubit reposCubit;
@@ -23,6 +24,7 @@ class SaveSharedMedia extends StatefulWidget {
   final Future<bool> Function() canSaveMedia;
   final void Function(BottomSheetType type, double padding) onUpdateBottomSheet;
   final SaveFileCallback onSaveFile;
+  final EdgeInsets padding;
 
   @override
   State<SaveSharedMedia> createState() => _SaveSharedMediaState();
@@ -61,7 +63,7 @@ class _SaveSharedMediaState extends State<SaveSharedMedia> {
 
     return Container(
       key: bodyKey,
-      padding: Dimensions.paddingBottomSheet,
+      padding: widget.padding.add(Dimensions.paddingBottomSheet),
       decoration: Dimensions.decorationBottomSheetAlternative,
       child: IntrinsicHeight(
         child: Column(

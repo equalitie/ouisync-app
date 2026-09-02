@@ -265,31 +265,40 @@ class _MainPageState extends State<MainPage>
   );
 
   @override
-  Widget build(BuildContext context) => Directionality(
-    textDirection: TextDirection.ltr,
-    child: Scaffold(
-      appBar: _buildOuiSyncBar(),
-      body: PopScope<Object?>(
-        // Don't pop => don't exit
-        //
-        // We don't want to do the pop because that would destroy the current Isolate's execution
-        // context and we would lose track of open OuiSync objects (i.e. repositories, files,
-        // directories, network handles,...). This is bad because even though the current execution
-        // context is deleted, the OuiSync Rust global variables and threads stay alive. If the
-        // user at that point tried to open the app again, this widget would try to reinitialize
-        // all those variables without previously properly closing them.
-        canPop: false,
-        onPopInvokedWithResult: _onBackPressed,
-        child: buildMainWidget(Directionality.of(context)),
+  Widget build(BuildContext context) {
+    // HACK: Wrapping the content of non-modal bottom sheet in `SafeArea` doesn't work for some
+    // reason (it does work for modal bottom sheets though). Grabbing the safe area padding outside
+    // the `Scaffold` and passing it explicitly to the bottom sheet widgets works around this.
+    final bottomSheetSafeArea = EdgeInsets.only(
+      bottom: MediaQuery.viewPaddingOf(context).bottom,
+    );
+
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: Scaffold(
+        appBar: _buildOuiSyncBar(),
+        body: PopScope<Object?>(
+          // Don't pop => don't exit
+          //
+          // We don't want to do the pop because that would destroy the current Isolate's execution
+          // context and we would lose track of open OuiSync objects (i.e. repositories, files,
+          // directories, network handles,...). This is bad because even though the current execution
+          // context is deleted, the OuiSync Rust global variables and threads stay alive. If the
+          // user at that point tried to open the app again, this widget would try to reinitialize
+          // all those variables without previously properly closing them.
+          canPop: false,
+          onPopInvokedWithResult: _onBackPressed,
+          child: buildMainWidget(Directionality.of(context)),
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.miniEndFloat,
+        floatingActionButton: BlocBuilder<ReposCubit, ReposState>(
+          bloc: widget.reposCubit,
+          builder: _buildFAB,
+        ),
+        bottomSheet: _buildBottomSheet(bottomSheetSafeArea),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.miniEndFloat,
-      floatingActionButton: BlocBuilder<ReposCubit, ReposState>(
-        bloc: widget.reposCubit,
-        builder: _buildFAB,
-      ),
-      bottomSheet: modalBottomSheet(),
-    ),
-  );
+    );
+  }
 
   Future<void> _onBackPressed(bool didPop, Object? result) async {
     final currentRepoEntry = widget.reposCubit.state.current;
@@ -695,31 +704,38 @@ class _MainPageState extends State<MainPage>
     return !readDisabledActions.contains(action);
   }
 
-  Widget modalBottomSheet() =>
+  Widget _buildBottomSheet(EdgeInsets safeArea) =>
       BlocBuilder<EntryBottomSheetCubit, EntryBottomSheetState>(
         bloc: widget.reposCubit.bottomSheet,
         builder: (context, state) => switch (state) {
-          MoveEntrySheetState() => _moveSingleEntryState(state),
-          MoveSelectedEntriesSheetState() => _moveMultipleEntriesState(state),
-          SaveMediaSheetState() => _saveSharedMediaState(state),
+          MoveEntrySheetState() => _moveSingleEntryState(state, safeArea),
+          MoveSelectedEntriesSheetState() => _moveMultipleEntriesState(
+            state,
+            safeArea,
+          ),
+          SaveMediaSheetState() => _saveSharedMediaState(state, safeArea),
           HideSheetState() => _hideBottomSheet(),
         },
       );
 
-  EntriesActionsDialog _moveSingleEntryState(MoveEntrySheetState state) =>
-      EntriesActionsDialog.single(
-        context,
-        reposCubit: widget.reposCubit,
-        originRepoCubit: state.repoCubit,
-        entry: state.entry,
-        sheetType: state.type,
-        onUpdateBottomSheet: updateBottomSheetInfo,
-        dirs: widget.dirs,
-        stage: widget.stage,
-      );
+  EntriesActionsDialog _moveSingleEntryState(
+    MoveEntrySheetState state,
+    EdgeInsets safeArea,
+  ) => EntriesActionsDialog.single(
+    context,
+    reposCubit: widget.reposCubit,
+    originRepoCubit: state.repoCubit,
+    entry: state.entry,
+    sheetType: state.type,
+    onUpdateBottomSheet: updateBottomSheetInfo,
+    dirs: widget.dirs,
+    stage: widget.stage,
+    padding: safeArea,
+  );
 
   EntriesActionsDialog _moveMultipleEntriesState(
     MoveSelectedEntriesSheetState state,
+    EdgeInsets safeArea,
   ) => EntriesActionsDialog.multiple(
     context,
     reposCubit: widget.reposCubit,
@@ -728,16 +744,20 @@ class _MainPageState extends State<MainPage>
     onUpdateBottomSheet: updateBottomSheetInfo,
     dirs: widget.dirs,
     stage: widget.stage,
+    padding: safeArea,
   );
 
-  SaveSharedMedia _saveSharedMediaState(SaveMediaSheetState state) =>
-      SaveSharedMedia(
-        state.reposCubit,
-        sharedMediaPaths: state.sharedMediaPaths,
-        onUpdateBottomSheet: updateBottomSheetInfo,
-        onSaveFile: trySaveFile,
-        canSaveMedia: canSaveFiles,
-      );
+  SaveSharedMedia _saveSharedMediaState(
+    SaveMediaSheetState state,
+    EdgeInsets safeArea,
+  ) => SaveSharedMedia(
+    state.reposCubit,
+    sharedMediaPaths: state.sharedMediaPaths,
+    onUpdateBottomSheet: updateBottomSheetInfo,
+    onSaveFile: trySaveFile,
+    canSaveMedia: canSaveFiles,
+    padding: safeArea,
+  );
 
   Widget _hideBottomSheet() {
     WidgetsBinding.instance.addPostFrameCallback((_) {

@@ -73,9 +73,9 @@ class _PeersPageState extends State<PeersPage> {
     body: BlocBuilder<PeerSetCubit, PeerSet>(
       bloc: widget.cubit,
       builder: (context, state) => ListView(
-        padding: MediaQuery.of(
+        padding: MediaQuery.viewPaddingOf(
           context,
-        ).viewPadding.add(Dimensions.paddingContents),
+        ).add(Dimensions.paddingContents),
         children: _buildItems(context, state),
       ),
     ),

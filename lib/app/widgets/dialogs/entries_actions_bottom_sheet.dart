@@ -31,6 +31,7 @@ class EntriesActionsDialog extends StatefulWidget {
     required this.onUpdateBottomSheet,
     required this.dirs,
     required this.stage,
+    this.padding = EdgeInsets.zero,
   });
 
   const EntriesActionsDialog.multiple(
@@ -41,6 +42,7 @@ class EntriesActionsDialog extends StatefulWidget {
     required this.onUpdateBottomSheet,
     required this.dirs,
     required this.stage,
+    this.padding = EdgeInsets.zero,
   }) : entry = null;
 
   final BuildContext parentContext;
@@ -53,6 +55,8 @@ class EntriesActionsDialog extends StatefulWidget {
 
   final BottomSheetType sheetType;
   final void Function(BottomSheetType type, double padding) onUpdateBottomSheet;
+
+  final EdgeInsets padding;
 
   @override
   State<EntriesActionsDialog> createState() => _EntriesActionsDialogState();
@@ -83,7 +87,7 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
     bloc: widget.reposCubit,
     builder: (ctx, reposState) => Container(
       key: bodyKey,
-      padding: Dimensions.paddingBottomSheet,
+      padding: widget.padding.add(Dimensions.paddingBottomSheet),
       decoration: Dimensions.decorationBottomSheetAlternative,
       child: IntrinsicHeight(
         child: Column(

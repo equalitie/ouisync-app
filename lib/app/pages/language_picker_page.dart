@@ -72,7 +72,7 @@ class LanguagePicker extends StatelessWidget {
             shrinkWrap: true,
             primary: false,
             padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewPadding.bottom,
+              bottom: MediaQuery.viewPaddingOf(context).bottom,
             ),
             itemCount: localeItems.length,
             itemBuilder: (context, index) {

@@ -62,7 +62,7 @@ class RepoListState extends StatelessWidget
   ) => ValueListenableBuilder(
     valueListenable: bottomSheetInfo,
     builder: (context, btInfo, child) => ListView.separated(
-      padding: MediaQuery.of(context).viewPadding.add(
+      padding: MediaQuery.viewPaddingOf(context).add(
         EdgeInsetsDirectional.only(
           bottom: btInfo.neededPadding <= 0.0
               ? Dimensions.defaultListBottomPadding
