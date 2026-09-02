@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io' show Platform;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -8,13 +9,23 @@ import 'package:permission_handler/permission_handler.dart'
 enum LanAccessState { unknown, granted, denied, permanentlyDenied }
 
 class LanAccessCubit extends Cubit<LanAccessState> with WidgetsBindingObserver {
-  LanAccessCubit() : super(.unknown) {
-    WidgetsBinding.instance.addObserver(this);
+  // Whether LAN access permissions are enforced. Currently they are enforced only on Android SDK 37 and higher.
+  final bool _active = Platform.isAndroid;
 
-    unawaited(_refresh());
+  LanAccessCubit() : super(.unknown) {
+    if (_active) {
+      WidgetsBinding.instance.addObserver(this);
+      unawaited(_refresh());
+    } else {
+      emit(.granted);
+    }
   }
 
   Future<void> request() async {
+    if (!_active) {
+      return;
+    }
+
     switch (state) {
       case .denied:
         await Permission.accessLocalNetwork.request();
@@ -28,7 +39,10 @@ class LanAccessCubit extends Cubit<LanAccessState> with WidgetsBindingObserver {
 
   @override
   Future<void> close() async {
-    WidgetsBinding.instance.removeObserver(this);
+    if (_active) {
+      WidgetsBinding.instance.removeObserver(this);
+    }
+
     await super.close();
   }
 
