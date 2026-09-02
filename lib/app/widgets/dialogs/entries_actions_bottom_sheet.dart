@@ -52,8 +52,7 @@ class EntriesActionsDialog extends StatefulWidget {
   final FileSystemEntry? entry;
 
   final BottomSheetType sheetType;
-  final void Function(BottomSheetType type, double padding, String entry)
-  onUpdateBottomSheet;
+  final void Function(BottomSheetType type, double padding) onUpdateBottomSheet;
 
   @override
   State<EntriesActionsDialog> createState() => _EntriesActionsDialogState();
@@ -76,11 +75,7 @@ class _EntriesActionsDialogState extends State<EntriesActionsDialog>
 
     widgetSize = widgetContext.size;
 
-    widget.onUpdateBottomSheet(
-      BottomSheetType.move,
-      widgetSize?.height ?? 0.0,
-      '',
-    );
+    widget.onUpdateBottomSheet(BottomSheetType.move, widgetSize?.height ?? 0.0);
   }
 
   @override

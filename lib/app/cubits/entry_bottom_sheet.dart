@@ -10,26 +10,17 @@ enum BottomSheetType { copy, delete, download, move, upload, gone }
 class BottomSheetInfo extends Equatable {
   final BottomSheetType type;
   final double neededPadding;
-  final String entry;
 
-  BottomSheetInfo({
-    required this.type,
-    required this.neededPadding,
-    required this.entry,
-  });
+  BottomSheetInfo({required this.type, required this.neededPadding});
 
-  BottomSheetInfo copyWith({
-    BottomSheetType? type,
-    double? neededPadding,
-    String? entry,
-  }) => BottomSheetInfo(
-    type: type ?? BottomSheetType.gone,
-    neededPadding: neededPadding ?? 0.0,
-    entry: entry ?? '',
-  );
+  BottomSheetInfo copyWith({BottomSheetType? type, double? neededPadding}) =>
+      BottomSheetInfo(
+        type: type ?? BottomSheetType.gone,
+        neededPadding: neededPadding ?? 0.0,
+      );
 
   @override
-  List<Object?> get props => [type, neededPadding, entry];
+  List<Object?> get props => [type, neededPadding];
 }
 
 sealed class EntryBottomSheetState {}

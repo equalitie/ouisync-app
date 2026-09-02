@@ -21,8 +21,7 @@ class SaveSharedMedia extends StatefulWidget {
   final ReposCubit reposCubit;
   final List<String> sharedMediaPaths;
   final Future<bool> Function() canSaveMedia;
-  final void Function(BottomSheetType type, double padding, String entry)
-  onUpdateBottomSheet;
+  final void Function(BottomSheetType type, double padding) onUpdateBottomSheet;
   final SaveFileCallback onSaveFile;
 
   @override
@@ -47,7 +46,7 @@ class _SaveSharedMediaState extends State<SaveSharedMedia> {
     widgetSize = widgetContext.size;
 
     widgetContext.size?.let((it) {
-          widget.onUpdateBottomSheet(BottomSheetType.move, it.height, '');
+          widget.onUpdateBottomSheet(BottomSheetType.move, it.height);
         }) ??
         0.0;
   }
@@ -136,7 +135,7 @@ class _SaveSharedMediaState extends State<SaveSharedMedia> {
       NegativeButton(
         text: S.current.actionCancel,
         onPressed: () async {
-          widget.onUpdateBottomSheet(BottomSheetType.gone, 0.0, '');
+          widget.onUpdateBottomSheet(BottomSheetType.gone, 0.0);
           widget.reposCubit.bottomSheet.hide();
         },
       ),
@@ -153,7 +152,7 @@ class _SaveSharedMediaState extends State<SaveSharedMedia> {
                   await widget.onSaveFile(path);
                 }
 
-                widget.onUpdateBottomSheet(BottomSheetType.gone, 0.0, '');
+                widget.onUpdateBottomSheet(BottomSheetType.gone, 0.0);
                 widget.reposCubit.bottomSheet.hide();
               },
       ),

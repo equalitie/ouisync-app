@@ -72,7 +72,7 @@ class _MainPageState extends State<MainPage>
   final lanAccess = LanAccessCubit();
 
   final _bottomSheetInfo = ValueNotifier<BottomSheetInfo>(
-    BottomSheetInfo(type: BottomSheetType.gone, neededPadding: 0.0, entry: ''),
+    BottomSheetInfo(type: BottomSheetType.gone, neededPadding: 0.0),
   );
   bool _isBottomSheetInfoDisposed = false;
 
@@ -525,7 +525,7 @@ class _MainPageState extends State<MainPage>
               return Column(
                 children: [
                   (entry is FileEntry
-                      ? _builFileListItem
+                      ? _buildFileListItem
                       : _buildDirectoryListItem)(
                     context,
                     key,
@@ -543,7 +543,7 @@ class _MainPageState extends State<MainPage>
     },
   );
 
-  FileListItem _builFileListItem(
+  FileListItem _buildFileListItem(
     BuildContext context,
     ValueKey<String> key,
     RepoCubit currentRepoCubit,
@@ -602,10 +602,7 @@ class _MainPageState extends State<MainPage>
       return;
     }
 
-    final path = entry.path;
-    if (_bottomSheetInfo.value.entry != path) {
-      return currentRepoCubit.navigateTo(path);
-    }
+    return currentRepoCubit.navigateTo(entry.path);
   }
 
   Future<void> _entryDotsMenuAction(
@@ -748,7 +745,6 @@ class _MainPageState extends State<MainPage>
         _bottomSheetInfo.value = BottomSheetInfo(
           type: BottomSheetType.gone,
           neededPadding: 0.0,
-          entry: '',
         );
       }
     });
@@ -756,15 +752,10 @@ class _MainPageState extends State<MainPage>
     return SizedBox.shrink();
   }
 
-  void updateBottomSheetInfo(
-    BottomSheetType type,
-    double padding,
-    String entry,
-  ) {
+  void updateBottomSheetInfo(BottomSheetType type, double padding) {
     final newInfo = _bottomSheetInfo.value.copyWith(
       type: type,
       neededPadding: padding,
-      entry: entry,
     );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_isBottomSheetInfoDisposed == false) {

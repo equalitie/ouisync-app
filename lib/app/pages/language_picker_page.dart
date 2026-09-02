@@ -6,8 +6,7 @@ import 'package:locale_names/locale_names.dart';
 import '../../generated/l10n.dart';
 import '../cubits/cubits.dart' show LocaleCubit;
 import '../utils/utils.dart' show ClickCounter, Dimensions;
-import '../widgets/widgets.dart'
-    show ContentWithStickyFooterState, DirectionalAppBar;
+import '../widgets/widgets.dart' show DirectionalAppBar;
 
 class LanguagePicker extends StatelessWidget {
   LanguagePicker({
