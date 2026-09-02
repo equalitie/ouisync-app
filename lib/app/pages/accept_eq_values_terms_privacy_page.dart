@@ -26,17 +26,15 @@ class AcceptEqualitieValuesTermsPrivacyPage extends StatefulWidget {
 class _AcceptEqualitieValuesTermsPrivacyPageState
     extends State<AcceptEqualitieValuesTermsPrivacyPage> {
   @override
-  Widget build(BuildContext context) => SafeArea(
-    child: Scaffold(
-      body: PopScope<Object?>(
-        canPop: false,
-        onPopInvokedWithResult: _onBackPressed,
-        child: ContentWithStickyFooterState(
-          content: _buildContent(context),
-          footer: Fields.dialogActions(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            buttons: _buildActions(context),
-          ),
+  Widget build(BuildContext context) => Scaffold(
+    body: PopScope<Object?>(
+      canPop: false,
+      onPopInvokedWithResult: _onBackPressed,
+      child: ContentWithStickyFooterState(
+        content: _buildContent(context),
+        footer: Fields.dialogActions(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          buttons: _buildActions(context),
         ),
       ),
     ),
@@ -47,8 +45,8 @@ class _AcceptEqualitieValuesTermsPrivacyPageState
     widget.onBack();
   }
 
-  Column _buildContent(BuildContext context) {
-    return Column(
+  Widget _buildContent(BuildContext context) => SafeArea(
+    child: Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -59,8 +57,8 @@ class _AcceptEqualitieValuesTermsPrivacyPageState
         EqValues(widget.stage),
         EqTermsAndPrivacy(widget.stage),
       ],
-    );
-  }
+    ),
+  );
 
   Widget _headerImages() => Column(
     children: [

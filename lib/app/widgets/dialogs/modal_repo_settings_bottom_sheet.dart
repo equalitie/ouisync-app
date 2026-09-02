@@ -43,9 +43,9 @@ class RepositorySettings extends StatelessWidget
   Widget build(BuildContext context) => BlocBuilder<RepoCubit, RepoState>(
     bloc: repoCubit,
     builder: (c, state) => SingleChildScrollView(
-      child: Container(
-        padding: Dimensions.paddingBottomSheet,
-        child: SafeArea(
+      child: SafeArea(
+        child: Container(
+          padding: Dimensions.paddingBottomSheet,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,

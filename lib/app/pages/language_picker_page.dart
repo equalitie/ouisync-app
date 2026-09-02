@@ -25,23 +25,18 @@ class LanguagePicker extends StatelessWidget {
   Locale get currentLocale => localeCubit.currentLocale;
 
   @override
-  Widget build(BuildContext context) => SafeArea(
-    child: Scaffold(
-      appBar: DirectionalAppBar(
-        title: Text(S.current.titleApplicationLanguage),
-        automaticallyImplyLeading: canPop,
-      ),
-      body: PopScope<Object?>(
-        canPop: canPop,
-        onPopInvokedWithResult: (bool didPop, Object? result) =>
-            _onBackPressed(context, didPop, result),
-        child: Padding(
-          padding: Dimensions.paddingActionBox,
-          child: ContentWithStickyFooterState(
-            content: _buildContent(context),
-            footer: SizedBox.shrink(),
-          ),
-        ),
+  Widget build(BuildContext context) => Scaffold(
+    appBar: DirectionalAppBar(
+      title: Text(S.current.titleApplicationLanguage),
+      automaticallyImplyLeading: canPop,
+    ),
+    body: PopScope<Object?>(
+      canPop: canPop,
+      onPopInvokedWithResult: (bool didPop, Object? result) =>
+          _onBackPressed(context, didPop, result),
+      child: Padding(
+        padding: Dimensions.paddingActionBox,
+        child: _buildContent(context),
       ),
     ),
   );
@@ -77,6 +72,9 @@ class LanguagePicker extends StatelessWidget {
           child: ListView.builder(
             shrinkWrap: true,
             primary: false,
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewPadding.bottom,
+            ),
             itemCount: localeItems.length,
             itemBuilder: (context, index) {
               final item = localeItems[index];

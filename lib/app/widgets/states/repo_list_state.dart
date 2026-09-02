@@ -62,10 +62,12 @@ class RepoListState extends StatelessWidget
   ) => ValueListenableBuilder(
     valueListenable: bottomSheetInfo,
     builder: (context, btInfo, child) => ListView.separated(
-      padding: EdgeInsetsDirectional.only(
-        bottom: btInfo.neededPadding <= 0.0
-            ? Dimensions.defaultListBottomPadding
-            : btInfo.neededPadding,
+      padding: MediaQuery.of(context).viewPadding.add(
+        EdgeInsetsDirectional.only(
+          bottom: btInfo.neededPadding <= 0.0
+              ? Dimensions.defaultListBottomPadding
+              : btInfo.neededPadding,
+        ),
       ),
       separatorBuilder: (context, index) =>
           const Divider(height: 1, color: Colors.transparent),

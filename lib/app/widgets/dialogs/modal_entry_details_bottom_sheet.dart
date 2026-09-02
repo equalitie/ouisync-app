@@ -68,42 +68,47 @@ class _EntryDetailsState extends State<EntryDetails> {
 
   @override
   Widget build(BuildContext context) => SingleChildScrollView(
-    child: Container(
-      padding: Dimensions.paddingBottomSheet,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Fields.bottomSheetHandle(context),
-          Fields.bottomSheetTitle(
-            isFile ? S.current.titleFileDetails : S.current.titleFolderDetails,
-            style: context.theme.appTextStyle.titleMedium,
-          ),
-          if (isFile) _buildAction(EntryAction.preview),
-          _buildAction(EntryAction.copy),
-          _buildAction(EntryAction.move),
-          _buildAction(EntryAction.rename),
-          if (isFile) _buildAction(EntryAction.download),
-          if (isFile && io.Platform.isAndroid) _buildAction(EntryAction.share),
-          _buildAction(EntryAction.delete),
-          const Divider(
-            height: 10.0,
-            thickness: 2.0,
-            indent: 20.0,
-            endIndent: 20.0,
-          ),
-          EntryInfoTable(
-            entryInfo: {
-              S.current.labelName: widget.entry.name,
-              S.current.labelLocation: p.dirname(widget.entry.path),
-              if (isFile)
-                S.current.labelSize: formatSize(
-                  (widget.entry as FileEntry).size ?? 0,
-                ),
-            },
-          ),
-        ],
+    child: SafeArea(
+      child: Container(
+        padding: Dimensions.paddingBottomSheet,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Fields.bottomSheetHandle(context),
+            Fields.bottomSheetTitle(
+              isFile
+                  ? S.current.titleFileDetails
+                  : S.current.titleFolderDetails,
+              style: context.theme.appTextStyle.titleMedium,
+            ),
+            if (isFile) _buildAction(EntryAction.preview),
+            _buildAction(EntryAction.copy),
+            _buildAction(EntryAction.move),
+            _buildAction(EntryAction.rename),
+            if (isFile) _buildAction(EntryAction.download),
+            if (isFile && io.Platform.isAndroid)
+              _buildAction(EntryAction.share),
+            _buildAction(EntryAction.delete),
+            const Divider(
+              height: 10.0,
+              thickness: 2.0,
+              indent: 20.0,
+              endIndent: 20.0,
+            ),
+            EntryInfoTable(
+              entryInfo: {
+                S.current.labelName: widget.entry.name,
+                S.current.labelLocation: p.dirname(widget.entry.path),
+                if (isFile)
+                  S.current.labelSize: formatSize(
+                    (widget.entry as FileEntry).size ?? 0,
+                  ),
+              },
+            ),
+          ],
+        ),
       ),
     ),
   );

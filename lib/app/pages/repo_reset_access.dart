@@ -78,8 +78,8 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
       appBar: DirectionalAppBar(title: Text(S.current.repoResetTitle)),
       body: BlocBuilder<RepoCubit, RepoState>(
         bloc: widget.repo,
-        builder: (context, repoState) {
-          return Column(
+        builder: (context, repoState) => SafeArea(
+          child: Column(
             children: [
               Expanded(
                 child: ListView(
@@ -99,8 +99,8 @@ class RepoResetAccessPageState extends State<RepoResetAccessPage> {
                 child: _buildSubmitButton(),
               ),
             ],
-          );
-        },
+          ),
+        ),
       ),
     ),
   );

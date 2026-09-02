@@ -35,34 +35,36 @@ class DirectoryActions extends StatelessWidget with AppLogger {
       context,
     ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w400);
 
-    return Container(
-      padding: MediaQuery.paddingOf(context).add(Dimensions.paddingBottomSheet),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Fields.bottomSheetHandle(context),
-          Fields.bottomSheetTitle(
-            S.current.titleFolderActions,
-            style: sheetTitleStyle,
-          ),
-          Directionality(
-            textDirection: TextDirection.ltr,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildAction(
-                  key: Key('add_folder_action'),
-                  name: S.current.actionNewFolder,
-                  icon: Icons.create_new_folder_outlined,
-                  action: () => createFolderDialog(repoCubit),
-                ),
-                _buildNewFileAction(cubit: repoCubit),
-              ],
+    return SafeArea(
+      child: Container(
+        padding: Dimensions.paddingBottomSheet,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Fields.bottomSheetHandle(context),
+            Fields.bottomSheetTitle(
+              S.current.titleFolderActions,
+              style: sheetTitleStyle,
             ),
-          ),
-        ],
+            Directionality(
+              textDirection: TextDirection.ltr,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _buildAction(
+                    key: Key('add_folder_action'),
+                    name: S.current.actionNewFolder,
+                    icon: Icons.create_new_folder_outlined,
+                    action: () => createFolderDialog(repoCubit),
+                  ),
+                  _buildNewFileAction(cubit: repoCubit),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
