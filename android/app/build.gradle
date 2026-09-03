@@ -46,6 +46,8 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
         multiDexEnabled = true
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     signingConfigs {
@@ -95,7 +97,6 @@ android {
     }
 }
 
-
 // Generate launcher icons by invoking [icons_launcher](https://pub.dev/packages/icons_launcher)
 def isWindows = System.getProperty('os.name').toLowerCase().contains('windows')
 tasks.register("generateLauncherIcons", Exec) {
@@ -103,7 +104,7 @@ tasks.register("generateLauncherIcons", Exec) {
     // TODO: This generates icons for all platforms. Ideally we would restrict it to generate them
     // only for android (and set it up separately in other platforms' respective build systems).
     if (isWindows) {
-       commandLine 'cmd.exe', '/c', 'dart', 'run', 'icons_launcher:create'
+        commandLine 'cmd.exe', '/c', 'dart', 'run', 'icons_launcher:create'
     } else {
         commandLine 'dart', 'run', 'icons_launcher:create'
     }
