@@ -86,25 +86,6 @@ function get_sources_from_local_dir {
     local srcdir=$1
     local dstdir=$2
 
-    local exclude_dirs=(
-        .dart_tool
-        android/app/.cxx
-        build
-        ios
-        linux/flutter/ephemeral
-        ouisync/.git
-        ouisync/target
-        releases
-        tmp
-        windows/flutter/ephemeral
-    )
-
-    # .git is needed for release.dart script to read git commit
-    if [ "$rsync_include_git" != 1 ]; then
-        exclude_dirs+=(.git)
-    fi
-
-
     local host_opt=
     local compress_opt=
 
@@ -116,7 +97,8 @@ function get_sources_from_local_dir {
     rsync -e "docker $host_opt exec -i" \
         --archive --no-links --verbose \
         $compress_opt \
-        ${exclude_dirs[@]/#/--exclude=} \
+        ${rsync_include[@]/#/--include=} \
+        ${rsync_exclude[@]/#/--exclude=} \
         ${srcdir%/}/ $container_name:$dstdir/ouisync-app
 
     exe git config --global --add safe.directory /opt/ouisync-app
