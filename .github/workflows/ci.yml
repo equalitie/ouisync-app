@@ -132,7 +132,7 @@ jobs:
   build_linux_and_android:
     name: build on linux and android
     runs-on: self-hosted
-    needs: [warmup_android]
+    needs: [build_integration_test_android] # to seed gradle cache
 
     steps:
       - uses: actions/checkout@v4
@@ -230,7 +230,7 @@ jobs:
   integration_test_android:
     name: "run integration tests on android ${{ matrix.api-level }}"
     runs-on: self-hosted
-    needs: [warmup_android]
+    needs: [build_integration_test_android]
     strategy:
       fail-fast: false
       matrix:
@@ -259,13 +259,19 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: integration-test-apks
+
       - name: Run tests
         run: |
           ./docker/linux.sh \
             --container ouisync-integration-test-android-${{ matrix.api-level }}-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT \
             --srcdir . \
             --cache shared \
-            integration-test --platform android --api ${{ matrix.api-level }}
+            --mount-build-dir build \
+            integration-test --platform android --run --api ${{ matrix.api-level }}
 
       # - name: Upload logcat
       #   uses: actions/upload-artifact@v4
@@ -277,23 +283,39 @@ jobs:
       #   # Upload only when the tests fail
       #   if: failure() || cancelled()
 
-  warmup_android:
-    name: "warmup cache for android"
+  build_integration_test_android:
+    name: "build integration tests for android"
     runs-on: self-hosted
-    concurrency: # ensure this job runs only once at a time
-      group: warmup
+    concurrency: # ensure this job runs only once at a time because it needs exclusive cache access
+      group: prebuild
       cancel-in-progress: false
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
-      - name: Warmup cache
+
+      - name: Create build directory
+        run: |
+          mkdir -p build
+          ls -al .
+          pwd
+
+      - name: Build
         run: |
           ./docker/linux.sh \
-            --container ouisync-warmup-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT \
+            --container ouisync-build-integration-test-android-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT \
             --srcdir . \
             --cache exclusive \
-            warmup
+            --mount-build-dir build \
+            integration-test --platform android --build
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-test-apks
+          path: |
+            "build/app/outputs/apk/itest/debug/app-itest-debug.apk"
+            "build/app/outputs/apk/androidTest/itest/debug/app-itest-debug-androidTest.apk"
 
   # TODO: Integration tests on both linux and windows currently fail or hang. Commenting them out until they are fixed.
   # integration_test_desktop:
