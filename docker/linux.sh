@@ -18,25 +18,19 @@ commit=
 srcdir=
 
 # Which files/directories to include/exclude when rsyncing from `srcdir` to the container.
-rsync_exclude=(
-    .dart_tool
-    .git
-    android/app/.cxx
-    build
-    ios
-    linux/flutter/ephemeral
-    ouisync/.git
-    ouisync/target
-    releases
-    tmp
-    windows/flutter/ephemeral
+rsync_filter=(
+    "--exclude=.dart_tool"
+    "--exclude=.git"
+    "--exclude=android/app/.cxx"
+    "--exclude=build"
+    "--exclude=ios"
+    "--exclude=linux/flutter/ephemeral"
+    "--exclude=ouisync/.git"
+    "--exclude=ouisync/target"
+    "--exclude=releases"
+    "--exclude=tmp"
+    "--exclude=windows/flutter/ephemeral"
 )
-rsync_include=
-
-
-# A host directory mounted to /opt/ouisync-app/build in the container. Useful to retrieve artifacts
-# after a build.
-mount_build_dir=
 
 base_name="ouisync-runner-linux"
 default_image_name="$base_name:$USER"
@@ -85,6 +79,13 @@ exclusive_cache_paths=(
 )
 
 emulator_sdcard=32M
+
+# If specified, the build artifacts are placed into a directory on a shared named volume. This
+# allows two jobs that use the same `artifact_id` to share the artifacts, e.g., one job creates
+# them and the other uses them.
+artifact_id=
+artifact_volume="$base_name-artifacts"
+artifact_retention_days=7
 
 function print_help() {
     local command="${1:-}"
@@ -152,7 +153,7 @@ function print_help() {
             echo "    --container <NAME>         Assign a name to the docker container [default: $default_container_name]"
             echo "    --image <NAME>[:TAG]       Name (and optional tag) of the docker image to use [default: $default_image_name]"
             echo "    --cache <shared|exclusive> Cache some dependencies and intermediate build artifacts on a persistent docker volume"
-            echo "    --mount-build-dir <PATH>   Mount <PATH> into the ouisync-app's build dir on the container (/opt/ouisync-app/build)"
+            echo "    --artifact_id              Place build artifacts in a directory with this name on a shared named volume, for reuse"
             echo "    -s, --shell                Open a shell session in the container after the command finishes"
             echo
             echo "Commands:"
@@ -206,6 +207,27 @@ function setup_cache_overlays() {
     log_group_end
 }
 
+function create_artifact_volume() {
+    log_group_begin "Create artifact volume $artifact_volume"
+
+    local common_opts=" \
+        --rm \
+        --mount src=$artifact_volume,dst=/mnt/artifacts \
+        --workdir /mnt/artifacts \
+        $image_name \
+    "
+
+    dock volume create $artifact_volume > /dev/null
+
+    # Prune old artifact directories
+    dock run $common_opts find . -type d -ctime +$artifact_retention_days -exec rm -rf {} \;
+
+    # Create new artifacts directory
+    dock run $common_opts mkdir -p "$artifact_id"
+
+    log_group_end
+}
+
 function start_container() {
     if [ -z "$commit" -a -z "$srcdir" ]; then error "Missing one of --commit or --srcdir"; fi
     if [ -n "$commit" -a -n "$srcdir" ]; then error "--commit and --srcdir are mutually exclusive"; fi
@@ -221,6 +243,10 @@ function start_container() {
 
     if [ -n "$cache" ]; then
         create_cache_volume
+    fi
+
+    if [ -n "$artifact_id" ]; then
+        create_artifact_volume
     fi
 
     log_group_begin "Start container $container_name"
@@ -255,15 +281,15 @@ function start_container() {
         fi
     fi
 
+    # Mount artifacts volume
+    if [ -n "$artifact_id" ]; then
+        opts="$opts --mount src=$artifact_volume,dst=/opt/ouisync-app/build/app/outputs,volume-subpath=$artifact_id"
+    fi
+
     # Mount anonymous volume to put the AVDs on. This is because they work better on a real
     # filesystem rather than on overlay. The volume is destroyed when the container stops which is
     # what we want because we create the AVD from scratch on every run anyway.
     opts="$opts --mount dst=/root/.android"
-
-    # Mount ouisync-app build dir
-    if [ -n "$mount_build_dir" ]; then
-        opts="$opts --mount type=bind,src=$(realpath $mount_build_dir),dst=/opt/ouisync-app/build"
-    fi
 
     # Needed for android emulator
     opts="$opts --device /dev/kvm"
@@ -427,8 +453,8 @@ function build() {
         shift
     done
 
-    # .git is needed for release.dart script to read git commit
-    rsync_exclude=("${rsync_exclude[@]/.git}")
+    # Don't exclude '.git' because it's needed for release.dart script to read git commit
+    rsync_filter=("${rsync_filter[@]/"--exclude=.git"}")
 
     local secret_sentry_dsn=
     local secret_store_password=
@@ -688,9 +714,12 @@ function integration_test_android() {
 
     if [ -z "$build" ]; then
         # When we are only running the tests, not building them, we don't need the whole source.
-        # Just these files:
-        rsync_include=("/util/" "/util/adb-format-sdcard.sh")
-        rsync_exclude=("*")
+        # Just a few files:
+        rsync_filter=(
+            "--include=/util/"
+            "--include=/util/adb-format-sdcard.sh"
+            "--exclude=*"
+        )
     fi
 
     init
@@ -702,11 +731,10 @@ function integration_test_android() {
     # Build the instrumented app
     if [ -n "$build" ]; then
         log_group_begin "Build app"
-        exe -w /opt/ouisync-app -t \
-            flutter build apk \
-                --debug \
-                --flavor itest \
-                --target-platform android-x64 \
+        exe -w /opt/ouisync-app -t flutter build apk \
+            --debug \
+            --flavor itest \
+            --target-platform android-x64 \
             --target integration_test/app_test.dart
         log_group_end
 
@@ -853,8 +881,8 @@ while true; do
                     ;;
             esac
             ;;
-        --mount-build-dir)
-            mount_build_dir="$2"
+        --artifact-id)
+            artifact_id="$2"
             shift
             ;;
         -s|--shell)
@@ -885,9 +913,6 @@ case "${1-}" in
         ;;
     integration-test|integration-tests|it)
         integration_test ${@:2}
-        ;;
-    prebuild-integration-test|prebuild-integration-tests)
-        prebuild_integration_test ${@:2}
         ;;
     analyze)
         analyze ${@:2}

@@ -94,11 +94,15 @@ function get_sources_from_local_dir {
         compress_opt="--compress"
     fi
 
+    local filter_opts=()
+    for f in "${rsync_filter[@]}"; do
+        filter_opts+=("--filter=${f:0:1} ${f:1}")
+    done
+
     rsync -e "docker $host_opt exec -i" \
         --archive --no-links --verbose \
         $compress_opt \
-        ${rsync_include[@]/#/--include=} \
-        ${rsync_exclude[@]/#/--exclude=} \
+        ${rsync_filter[@]} \
         ${srcdir%/}/ $container_name:$dstdir/ouisync-app
 
     exe git config --global --add safe.directory /opt/ouisync-app
