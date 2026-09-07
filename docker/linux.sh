@@ -16,9 +16,21 @@ shell=
 commit=
 # ... or rsync from the given host directory.
 srcdir=
-# Whether to also include the .git directory when copying the source directory into the container.
-# Including it is currently necessary when running the `build` command only.
-rsync_include_git=
+
+# Which files/directories to include/exclude when rsyncing from `srcdir` to the container.
+rsync_filter=(
+    "--exclude=.dart_tool"
+    "--exclude=.git"
+    "--exclude=android/app/.cxx"
+    "--exclude=build"
+    "--exclude=ios"
+    "--exclude=linux/flutter/ephemeral"
+    "--exclude=ouisync/.git"
+    "--exclude=ouisync/target"
+    "--exclude=releases"
+    "--exclude=tmp"
+    "--exclude=windows/flutter/ephemeral"
+)
 
 base_name="ouisync-runner-linux"
 default_image_name="$base_name:$USER"
@@ -67,6 +79,13 @@ exclusive_cache_paths=(
 )
 
 emulator_sdcard=32M
+
+# If specified, the build artifacts are placed into a directory on a shared named volume. This
+# allows two jobs that use the same `artifact_id` to share the artifacts, e.g., one job creates
+# them and the other uses them.
+artifact_id=
+artifact_volume="$base_name-artifacts"
+artifact_retention_days=7
 
 function print_help() {
     local command="${1:-}"
@@ -134,16 +153,17 @@ function print_help() {
             echo "    --container <NAME>         Assign a name to the docker container [default: $default_container_name]"
             echo "    --image <NAME>[:TAG]       Name (and optional tag) of the docker image to use [default: $default_image_name]"
             echo "    --cache <shared|exclusive> Cache some dependencies and intermediate build artifacts on a persistent docker volume"
+            echo "    --artifact_id              Place build artifacts in a directory with this name on a shared named volume, for reuse"
             echo "    -s, --shell                Open a shell session in the container after the command finishes"
             echo
             echo "Commands:"
-            echo "    help              Print help"
-            echo "    build             Build release"
-            echo "    unit-test         Run unit tests"
-            echo "    integration-test  Run integration tests"
-            echo "    analyze           Analyze the dart source code"
-            echo "    container         Explicitly manage the container"
-            echo "    warmup            Warmup cache for android tests and builds"
+            echo "    help                       Print help"
+            echo "    build                      Build release"
+            echo "    unit-test                  Run unit tests"
+            echo "    integration-test           Run integration tests"
+            echo "    analyze                    Analyze the dart source code"
+            echo "    container                  Explicitly manage the container"
+            echo "    warmup                     Warmup cache for android tests and builds"
             echo
             echo "See '$0 help <command> for more information on a specific command"
             ;;
@@ -187,6 +207,27 @@ function setup_cache_overlays() {
     log_group_end
 }
 
+function create_artifact_volume() {
+    log_group_begin "Create artifact volume $artifact_volume"
+
+    local common_opts=" \
+        --rm \
+        --mount src=$artifact_volume,dst=/mnt/artifacts \
+        --workdir /mnt/artifacts \
+        $image_name \
+    "
+
+    dock volume create $artifact_volume > /dev/null
+
+    # Prune old artifact directories
+    dock run $common_opts find . -type d -ctime +$artifact_retention_days -exec rm -rf {} \;
+
+    # Create new artifacts directory
+    dock run $common_opts mkdir -p "$artifact_id"
+
+    log_group_end
+}
+
 function start_container() {
     if [ -z "$commit" -a -z "$srcdir" ]; then error "Missing one of --commit or --srcdir"; fi
     if [ -n "$commit" -a -n "$srcdir" ]; then error "--commit and --srcdir are mutually exclusive"; fi
@@ -202,6 +243,10 @@ function start_container() {
 
     if [ -n "$cache" ]; then
         create_cache_volume
+    fi
+
+    if [ -n "$artifact_id" ]; then
+        create_artifact_volume
     fi
 
     log_group_begin "Start container $container_name"
@@ -234,6 +279,11 @@ function start_container() {
                 opts="$opts --mount src=$cache_volume,dst=/tmp/overlay$path/lower,volume-subpath=${path#/},ro"
             done
         fi
+    fi
+
+    # Mount artifacts volume
+    if [ -n "$artifact_id" ]; then
+        opts="$opts --mount src=$artifact_volume,dst=/opt/ouisync-app/build/app/outputs,volume-subpath=$artifact_id"
     fi
 
     # Mount anonymous volume to put the AVDs on. This is because they work better on a real
@@ -281,15 +331,17 @@ function start_container() {
     fi
     log_group_end
 
-    # Generate bindings (TODO: This should be done automatically)
-    log_group_begin "Generate bindings"
-    exe -w /opt/ouisync-app/ouisync/bindings/dart -t dart pub get
-    exe -w /opt/ouisync-app/ouisync/bindings/dart -t dart tool/bindgen.dart
-    log_group_end
+    if exe test -f /opt/ouisync-app/pubspec.yaml; then
+        # Generate bindings (TODO: This should be done automatically)
+        log_group_begin "Generate bindings"
+        exe -w /opt/ouisync-app/ouisync/bindings/dart -t dart pub get
+        exe -w /opt/ouisync-app/ouisync/bindings/dart -t dart tool/bindgen.dart
+        log_group_end
 
-    log_group_begin "Update dart dependencies"
-    exe -w /opt/ouisync-app -t dart pub get
-    log_group_end
+        log_group_begin "Update dart dependencies"
+        exe -w /opt/ouisync-app -t dart pub get
+        log_group_end
+    fi
 
     if [ -n "$cache" ]; then
         # Run cargo sweep to delete all cargo artifacts older than 30 days (prevents unbounded cache grow)
@@ -369,8 +421,6 @@ function init() {
 ####################################################################################################
 # Build the release artifacts for linux and android
 function build() {
-    rsync_include_git=1
-
     local dst_dir=
     local flavor=
     local types=()
@@ -402,6 +452,9 @@ function build() {
         esac
         shift
     done
+
+    # Don't exclude '.git' because it's needed for release.dart script to read git commit
+    rsync_filter=("${rsync_filter[@]/"--exclude=.git"}")
 
     local secret_sentry_dsn=
     local secret_store_password=
@@ -627,9 +680,9 @@ function emulator_stop() {
 }
 
 function integration_test_android() {
-    init
-
     local api=
+    local build=
+    local run=
 
     while true; do
         case ${1-} in
@@ -637,24 +690,92 @@ function integration_test_android() {
                 api="${2-}"
                 shift 2
                 ;;
+            --build)
+                build=1
+                shift
+                ;;
+            --run)
+                run=1
+                shift
+                ;;
             *)
                 break
                 ;;
         esac
     done
 
-    if [ -z "$api" ]; then
+    if [ -z "$build" -a -z "$run" ]; then
+        error "Missing --build and/or --run"
+    fi
+
+    if [ -n "$run" -a -z "$api" ]; then
         error "Missing --api"
     fi
 
-    emulator_start --api $api
+    if [ -z "$build" ]; then
+        # When we are only running the tests, not building them, we don't need the whole source.
+        # Just a few files:
+        rsync_filter=(
+            "--include=/util/"
+            "--include=/util/adb-format-sdcard.sh"
+            "--exclude=*"
+        )
+    fi
 
-    log_group_begin "Run tests"
-    exe -w /opt/ouisync-app -t \
-        flutter test integration_test --flavor itest --ignore-timeouts $@
-    log_group_end
+    init
 
-    emulator_stop
+    local build_dir=/opt/ouisync-app/build/app/outputs/apk
+    local app_path="$build_dir/itest/debug/app-itest-debug.apk"
+    local test_path="$build_dir/androidTest/itest/debug/app-itest-debug-androidTest.apk"
+
+    # Build the instrumented app
+    if [ -n "$build" ]; then
+        log_group_begin "Build app"
+        exe -w /opt/ouisync-app -t flutter build apk \
+            --debug \
+            --flavor itest \
+            --target-platform android-x64 \
+            --target integration_test/app_test.dart
+        log_group_end
+
+        log_group_begin "Build androidTest"
+        exe -w /opt/ouisync-app/android -t ./gradlew app:assembleItestDebugAndroidTest
+        log_group_end
+    fi
+
+    # Run the tests
+    if [ -n "$run" ]; then
+        exe test -f $app_path  || exit "Missing $app_path - rerun with --build"
+        exe test -f $test_path || exit "Missing $test_path - rerun with --build"
+
+        emulator_start --api $api
+
+        log_group_begin "Install"
+        exe adb install -r $app_path
+        exe adb install -r $test_path
+        log_group_end
+
+        log_group_begin "Run tests"
+
+        # HACK: `adb shell am instrument` returns success error code even on test failure. Need to
+        # parse the output to find out the test result.
+        output=$(mktemp)
+        exe -t adb shell am instrument -w \
+            org.equalitie.ouisync.itest.test/androidx.test.runner.AndroidJUnitRunner \
+            2>&1 \
+            | tee $output
+
+        result=0
+        grep -qE "^OK \(" $output || result=$?
+
+        log_group_end
+
+        emulator_stop
+
+        if [ "$result" != 0 ]; then
+            exit "$result"
+        fi
+    fi
 }
 
 function integration_test_linux() {
@@ -759,6 +880,10 @@ while true; do
                     error "Invalid cache mode: '${2-}' (must be 'shared' or 'exclusive')"
                     ;;
             esac
+            ;;
+        --artifact-id)
+            artifact_id="$2"
+            shift
             ;;
         -s|--shell)
             shell=1
