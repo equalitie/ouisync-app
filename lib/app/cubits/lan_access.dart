@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io' show Platform;
 
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:permission_handler/permission_handler.dart'
@@ -10,15 +11,10 @@ enum LanAccessState { unknown, granted, denied, permanentlyDenied }
 
 class LanAccessCubit extends Cubit<LanAccessState> with WidgetsBindingObserver {
   // Whether LAN access permissions are enforced. Currently they are enforced only on Android SDK 37 and higher.
-  final bool _active = Platform.isAndroid;
+  var _active = false;
 
   LanAccessCubit() : super(.unknown) {
-    if (_active) {
-      WidgetsBinding.instance.addObserver(this);
-      unawaited(_refresh());
-    } else {
-      emit(.granted);
-    }
+    unawaited(_init());
   }
 
   Future<void> request() async {
@@ -51,6 +47,22 @@ class LanAccessCubit extends Cubit<LanAccessState> with WidgetsBindingObserver {
     // Refresh on app resume. This handles the case when the user changes the permission in the system settings.
     if (state == .resumed) {
       unawaited(_refresh());
+    }
+  }
+
+  Future<void> _init() async {
+    if (Platform.isAndroid) {
+      final androidInfo = await DeviceInfoPlugin().androidInfo;
+      if (androidInfo.version.sdkInt >= 37) {
+        _active = true;
+      }
+    }
+
+    if (_active) {
+      WidgetsBinding.instance.addObserver(this);
+      await _refresh();
+    } else {
+      emit(.granted);
     }
   }
 
