@@ -103,11 +103,14 @@ class _AppSettingsContainerState extends State<AppSettingsContainer>
                           selected = index;
                         });
 
-                        Scrollable.ensureVisible(
-                          section.key.currentContext!,
-                          duration: Duration(seconds: 1),
-                          curve: Curves.linearToEaseOut,
-                        );
+                        final context = section.key.currentContext;
+                        if (context != null) {
+                          Scrollable.ensureVisible(
+                            context,
+                            duration: Duration(seconds: 1),
+                            curve: Curves.linearToEaseOut,
+                          );
+                        }
                       },
                     ),
                   )
@@ -118,7 +121,13 @@ class _AppSettingsContainerState extends State<AppSettingsContainer>
           flex: 4,
           child: NotificationListener<ScrollEndNotification>(
             child: s.SettingsList(
-              platform: s.PlatformUtils.detectPlatform(context),
+              // To support `Scrollable.ensureVisible`, all sections need to be already built so
+              // that their `BuildContext` is available. Using `SectionBuildMode.eager` to achieve
+              // this (note we are currently using our own fork of the `flutter-settings-ui` package
+              // to have support for this feature).
+              sectionBuildMode: s.SectionBuildMode.eager,
+              // Use the same style on all platforms for now, for simplicity.
+              platform: s.DevicePlatform.android,
               contentPadding: MediaQuery.paddingOf(context),
               sections: widget.sections
                   .map(

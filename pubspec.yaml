@@ -89,7 +89,14 @@ dependencies:
   receive_sharing_intent: ^1.9.0
   result_type: ^1.0.0
   sentry_flutter: ^9.26.0
-  settings_ui: ^2.0.2
+
+  settings_ui:
+    # Using fork to support "eager build mode" for settings sections. See
+    # `lib/app/widgets/settings/app_settings_container.dart` for more details.
+    git:
+      url: https://github.com/madadam/flutter-settings-ui.git
+      ref: d83fc48138d69a40f1762b6d622f9f45f88f3e21
+
   share_plus: ^13.3.0
   shared_preferences: ^2.5.5
   shared_preferences_android: ^2.4.27
