@@ -1514,6 +1514,11 @@ Future<void> copyDirectory(Directory src, Directory dst) async {
 // Check if working tree is clean and if not confirm with the caller if we want to continue.
 Future<bool> checkWorkingTreeIsClean(GitDir git) async {
   if (!await git.isWorkingTreeClean()) {
+    if (!stdin.hasTerminal) {
+      await run('git', ['diff', '--color=always']);
+      print('Git is dirty and terminal is not attached');
+      throw ('Git is dirty');
+    }
     while (true) {
       print("Git is dirty, continue anyway? [y/n/diff]");
       final input = stdin.readLineSync();
