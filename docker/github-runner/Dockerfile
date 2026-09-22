@@ -1,6 +1,6 @@
 FROM ubuntu:resolute
 
-ARG GITHUB_RUNNER_VERSION="2.329.0"
+ARG GITHUB_RUNNER_VERSION="2.337.0"
 ENV GITHUB_RUNNER_PACKAGE=actions-runner-linux-x64-$GITHUB_RUNNER_VERSION.tar.gz
 
 RUN apt-get update && \

@@ -35,5 +35,5 @@ if [ -z "$token" ]; then
     exit 1
 fi
 
-./config.sh --unattended --replace --url https://github.com/$GITHUB_REPO --token $token
+./config.sh --unattended --replace --url https://github.com/$GITHUB_REPO --token $token --disableupdate
 ./run.sh
