@@ -34,7 +34,16 @@ root dir: ${dirs.root}
 log file: ${file.path}
 ${'-' * (48 + package.appName.length)}''';
 
-  _tee = Logtee.start(file.path);
+  // Logtee mirrors process output (including native logs) into the log file via an FFI native
+  // library (liblogtee). That library isn't currently built/bundled on macOS/iOS, so guard the
+  // call: if it can't be loaded we skip file-teeing rather than failing app startup.
+  try {
+    _tee = Logtee.start(file.path);
+  } catch (e) {
+    // ignore: avoid_print
+    print('WARNING: Logtee unavailable; file logging disabled: $e');
+    _tee = null;
+  }
 
   LoggyPrinter defaultPrinter;
 
