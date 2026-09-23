@@ -26,13 +26,6 @@ enum ItemIdentifier: CustomDebugStringConvertible, Hashable, Equatable {
         self = deserialized
     }
 
-    init(_ ouisyncEntry: OuisyncEntry, _ repoName: RepoName) {
-        switch ouisyncEntry {
-        case .directory(let entry): self = .entry(DirectoryIdentifier(entry.path, repoName).entry())
-        case .file(let entry): self = .entry(FileIdentifier(entry.path, repoName).entry())
-        }
-    }
-
     init(_ entryId: EntryIdentifier) {
         self = .entry(entryId)
     }
@@ -110,21 +103,21 @@ enum EntryIdentifier: CustomDebugStringConvertible, Codable, Equatable, Hashable
         self = .directory(dir)
     }
 
-    func loadItem(_ session: OuisyncSession) async throws -> NSFileProviderItem {
+    func loadItem(_ session: Session) async throws -> NSFileProviderItem {
         switch self {
         case .file(let id): return try await id.loadItem(session)
         case .directory(let id): return try await id.loadItem(session)
         }
     }
 
-    func loadItem(_ repo: OuisyncRepository) async throws -> NSFileProviderItem {
+    func loadItem(_ repo: Repository) async throws -> NSFileProviderItem {
         switch self {
         case .file(let id): return try await id.loadItem(repo)
         case .directory(let id): return try await id.loadItem(repo)
         }
     }
 
-    func loadRepo(_ session: OuisyncSession) async throws -> OuisyncRepository {
+    func loadRepo(_ session: Session) async throws -> Repository {
         switch self {
         case .file(let id): return try await id.loadRepo(session)
         case .directory(let id): return try await id.loadRepo(session)
@@ -145,7 +138,7 @@ enum EntryIdentifier: CustomDebugStringConvertible, Codable, Equatable, Hashable
         }
     }
 
-    public func type() -> OuisyncEntryType {
+    public func type() -> EntryType {
         switch self {
         case .file: return .file
         case .directory: return .directory
@@ -174,7 +167,7 @@ struct FileIdentifier: CustomDebugStringConvertible, Codable, Hashable, Equatabl
         self.repoName = repoName
     }
 
-    func loadItem(_ session: OuisyncSession) async throws -> FileItem {
+    func loadItem(_ session: Session) async throws -> FileItem {
         guard let repo = await getRepoByName(session, repoName) else {
             throw ExtError.noSuchItem
         }
@@ -182,24 +175,23 @@ struct FileIdentifier: CustomDebugStringConvertible, Codable, Hashable, Equatabl
         return try await loadItem(repo)
     }
 
-    func loadItem(_ repo: OuisyncRepository) async throws -> FileItem {
-        let entry = OuisyncFileEntry(path, repo)
-
-        var file: OuisyncFile? = nil
+    func loadItem(_ repo: Repository) async throws -> FileItem {
         var size: UInt64 = 0
+        var haveSize = false
 
         // When a directory lists a file Ouisync may not yet have it and thus it may not
         // be able to determine it's size. The FileItem we want to return here doesn't
-        // require a OuisyncFile, so we may still proceed as if the file was there but
+        // require an open file, so we may still proceed as if the file was there but
         // with size == 0.
         do {
-            file = try await entry.open()
-            size = try await file!.size()
-            try await file!.close()
+            let file = try await repo.openFile(path.string)
+            size = try await file.getLength()
+            try await file.close()
+            haveSize = true
         } catch let error as OuisyncError {
-            if error.code == .EntryNotFound {
+            if error.code == .notFound {
                 throw ExtError.noSuchItem
-            } else if error.code == .Store {
+            } else if error.code == .storeError {
                 // We likely don't yet have the first block which tells us the file size
                 size = 0
             } else {
@@ -211,30 +203,19 @@ struct FileIdentifier: CustomDebugStringConvertible, Codable, Hashable, Equatabl
 
         var version = Version.invalid()
 
-        do {
-            // If the file is open returning it's version vector hash should succeed because
-            // that information is stored in that file's parent directory.
-            version = Version(Hash(try await entry.getVersionHash()), size)
-        } catch let error as OuisyncError where error.code == OuisyncErrorCode.Store {
+        if haveSize {
+            // TODO(stopgap): synthesized version; new service API lacks per-entry version hash
+            version = Version(synthesizeFileVersionHash(size), size)
+        } else {
+            // We likely don't yet have the first block which tells us the file size, so we can't
+            // derive a stable version yet; keep the version invalid (as the old code did on `.Store`).
             NSLog("WARNING: Block to file not found")
-        } catch let error as OuisyncError where error.code == OuisyncErrorCode.EntryNotFound {
-            throw ExtError.noSuchItem.from("\(self):L\(#line)")
-        } catch {
-            fatalError("Unhandled exception when retrieving file version:\(error)")
         }
 
-        return FileItem(entry, repoName, size: size, version: version)
+        return FileItem(path, repoName, size: size, version: version)
     }
 
-    func loadEntry(_ session: OuisyncSession) async throws -> OuisyncFileEntry {
-        guard let repo = await getRepoByName(session, repoName) else {
-            throw ExtError.noSuchItem
-        }
-
-        return OuisyncFileEntry(path, repo)
-    }
-
-    func loadRepo(_ session: OuisyncSession) async throws -> OuisyncRepository {
+    func loadRepo(_ session: Session) async throws -> Repository {
         guard let repo = await getRepoByName(session, repoName) else {
             throw ExtError.noSuchItem
         }
@@ -268,35 +249,36 @@ struct DirectoryIdentifier: CustomDebugStringConvertible, Codable, Hashable, Equ
         path.components.isEmpty
     }
 
-    func loadItem(_ session: OuisyncSession) async throws -> DirectoryItem {
+    func loadItem(_ session: Session) async throws -> DirectoryItem {
         let repo = try await loadRepo(session)
         return try await loadItem(repo)
     }
 
-    func loadItem(_ repo: OuisyncRepository) async throws -> DirectoryItem {
-        let entry = OuisyncDirectoryEntry(path, repo)
-
-        if try await entry.exists() == false {
-            throw ExtError.noSuchItem
+    func loadItem(_ repo: Repository) async throws -> DirectoryItem {
+        // An empty path denotes the repository root, which always exists.
+        if !path.components.isEmpty {
+            if try await repo.getEntryType(path.string) == nil {
+                throw ExtError.noSuchItem
+            }
         }
 
-        return try await DirectoryItem.load(OuisyncDirectoryEntry(path, repo), repoName)
+        return try await DirectoryItem.load(repo, path, repoName)
     }
 
-    func loadRepo(_ session: OuisyncSession) async throws -> OuisyncRepository {
+    func loadRepo(_ session: Session) async throws -> Repository {
         guard let repo = await getRepoByName(session, repoName) else {
             throw ExtError.noSuchItem
         }
         return repo
     }
 
-    func listEntries(_ session: OuisyncSession) async throws -> [EntryIdentifier] {
+    func listEntries(_ session: Session) async throws -> [EntryIdentifier] {
         let repo = try await loadRepo(session)
-        let entry = OuisyncDirectoryEntry(path, repo)
-        return try await entry.listEntries().map { e in
-            switch e {
-            case .directory(let dirEntry): return EntryIdentifier(DirectoryIdentifier(dirEntry.path, repoName))
-            case .file(let fileEntry): return EntryIdentifier(FileIdentifier(fileEntry.path, repoName))
+        return try await repo.readDirectory(path.string).map { e in
+            let childPath = path.appending(e.name)
+            switch e.entryType {
+            case .directory: return EntryIdentifier(DirectoryIdentifier(childPath, repoName))
+            case .file: return EntryIdentifier(FileIdentifier(childPath, repoName))
             }
         }
     }

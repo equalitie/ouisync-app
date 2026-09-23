@@ -4,6 +4,15 @@
 //
 //  Created by Peter Jankuliak on 25/03/2024.
 //
+// TODO(obsolete): app<->extension XPC backend tunnel no longer used in the new client/service
+// architecture; needs an architectural decision (likely removal, coordinated with
+// macos/Runner/FileProviderProxy.swift).
+//
+// In the OLD architecture the extension embedded the Rust core in-process and let the app tunnel
+// raw protocol bytes through XPC (`ouisyncSession.connectNewClient()` + `OuisyncClient`). In the
+// NEW architecture the app connects to the shared out-of-process service directly, so this bridge
+// is obsolete. The XPC listener scaffolding below is kept so the code compiles and the service
+// source still vends a (no-op) proxy, but the ouisync-client tunneling has been stubbed out.
 import FileProvider
 import Foundation
 import OuisyncCommon
@@ -12,30 +21,28 @@ import OuisyncLib
 
 extension Extension: NSFileProviderServicing {
     public func supportedServiceSources(for itemIdentifier: NSFileProviderItemIdentifier,
-                                        completionHandler: @escaping ([NSFileProviderServiceSource]?, Error?) -> Void) -> Progress {
+                                        completionHandler: @escaping ([NSFileProviderServiceSource]?, Error?) -> Void) -> Foundation.Progress {
         completionHandler([OuisyncServiceSource(self)], nil)
-        let progress = Progress()
+        let progress = Foundation.Progress()
         progress.cancellationHandler = { completionHandler(nil, NSError(domain: NSCocoaErrorDomain, code: NSUserCancelledError)) }
         return progress
     }
 }
 
+// TODO(obsolete): stub. Previously forwarded raw ouisync protocol bytes between the app and the
+// in-process backend via `OuisyncClient`. That tunnel no longer exists in the new architecture.
 class AppToBackendProxy: FromAppToFileProviderProtocol {
     let connectionToApp: NSXPCConnection
     let sendToApp: FromFileProviderToAppProtocol
-    let ouisyncClient: OuisyncClient
 
-    init(_ connectionToApp: NSXPCConnection, _ sendToApp: FromFileProviderToAppProtocol, _ ouisyncClient: OuisyncClient) {
+    init(_ connectionToApp: NSXPCConnection, _ sendToApp: FromFileProviderToAppProtocol) {
         self.connectionToApp = connectionToApp
         self.sendToApp = sendToApp
-        self.ouisyncClient = ouisyncClient
-        self.ouisyncClient.onReceiveFromBackend = { [weak self] message_data in
-            self?.sendToApp.fromFileProviderToApp(message_data)
-        }
     }
 
     func fromAppToFileProvider(_ message_data: [UInt8]) {
-        ouisyncClient.sendToBackend(message_data)
+        // TODO(obsolete): no ouisync backend tunnel in the new client/service architecture; drop it.
+        NSLog("⚠️ Ignoring app→fileProvider message; the XPC backend tunnel is obsolete")
     }
 }
 
@@ -98,10 +105,9 @@ extension Extension {
                 return false
             }
 
-            guard let ouisyncClient = try? ext.ouisyncSession.connectNewClient() else {
-                NSLog("😡 Failed to create new ouisync client when accepting new connection from the app")
-                return false
-            }
+            // TODO(obsolete): previously created a new ouisync client tunnel here
+            // (`ext.ouisyncSession.connectNewClient()`). That path no longer exists in the new
+            // architecture; we accept the connection and export a no-op proxy instead.
 
             // this is a bit awkward because to avoid a reference leak, we have to atomically add
             // our invalidation closure iff the base extension has not been shut down yet, but we
@@ -111,7 +117,6 @@ extension Extension {
                 if ext.active {
                     ext.invalidators.append {
                         connection.invalidate() // this should notify peer; invalidationHandler cleans up proxies
-                        await ouisyncClient.close()
                     }
                 }
                 return ext.active
@@ -123,7 +128,7 @@ extension Extension {
                 return false
             }
 
-            let proxy = AppToBackendProxy(connection, sendToApp, ouisyncClient)
+            let proxy = AppToBackendProxy(connection, sendToApp)
 
             connection.exportedObject = proxy
             connection.exportedInterface = NSXPCInterface(with: FromAppToFileProviderProtocol.self)

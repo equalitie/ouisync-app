@@ -10,16 +10,18 @@ import OuisyncLib
 
 
 class Enumerator: NSObject, NSFileProviderEnumerator {
-    private let session: OuisyncSession
+    // The session is now created asynchronously (the service runs out of process), so instead of
+    // holding a session we hold an async provider that resolves it on demand.
+    private let getSession: () async throws -> Session
     private let itemId: ItemIdentifier
     private let currentAnchor: NSFileProviderSyncAnchor
     private let log: Log
     private let pastEnumerations: PastEnumerations?
 
-    init(_ itemIdentifier: ItemIdentifier, _ session: OuisyncSession, _ currentAnchor: NSFileProviderSyncAnchor, _ log: Log, _ pastEnumerations: PastEnumerations?) {
+    init(_ itemIdentifier: ItemIdentifier, _ getSession: @escaping () async throws -> Session, _ currentAnchor: NSFileProviderSyncAnchor, _ log: Log, _ pastEnumerations: PastEnumerations?) {
         let log = log.child("Enumerator").trace("init(\(itemIdentifier), currentAnchor(\(currentAnchor)), ...)")
         self.itemId = itemIdentifier
-        self.session = session
+        self.getSession = getSession
         self.currentAnchor = currentAnchor
         self.log = log
         self.pastEnumerations = pastEnumerations
@@ -49,7 +51,8 @@ class Enumerator: NSObject, NSFileProviderEnumerator {
          */
         Task {
             do {
-                let items = try await enumerateImpl(itemId)
+                let session = try await getSession()
+                let items = try await enumerateImpl(session, itemId)
                 log.trace("  ↳ \(items.map{ $0.providerItem() })")
                 if !items.isEmpty {
                     observer.didEnumerate(items.map{ $0.providerItem() })
@@ -109,7 +112,8 @@ class Enumerator: NSObject, NSFileProviderEnumerator {
 
             Task {
                 do {
-                    let currentItems = try await enumerateImpl(itemId)
+                    let session = try await getSession()
+                    let currentItems = try await enumerateImpl(session, itemId)
 
                     let removedIds = Set(previousItems.keys).subtracting(Set(currentItems.map { $0.id() }))
                     let changed: [EntryItem] = currentItems.makeIterator().filter { (current: EntryItem) in
@@ -145,16 +149,16 @@ class Enumerator: NSObject, NSFileProviderEnumerator {
         }
     }
 
-    private func enumerateImpl(_ itemId: ItemIdentifier, recursive: Bool = false) async throws -> [EntryItem] {
+    private func enumerateImpl(_ session: Session, _ itemId: ItemIdentifier, recursive: Bool = false) async throws -> [EntryItem] {
         var retItems: [EntryItem]
 
         switch itemId {
         case .workingSet:
-            retItems = try await enumerateImpl(.rootContainer, recursive: true)
+            retItems = try await enumerateImpl(session, .rootContainer, recursive: true)
         case .rootContainer:
-            retItems = try await enumerateRootImpl()
+            retItems = try await enumerateRootImpl(session)
         case .entry(.directory(let identifier)):
-            retItems = try await enumerateDirImpl(identifier)
+            retItems = try await enumerateDirImpl(session, identifier)
         case .trashContainer:
             retItems = []
         default: fatalError("Invalid item in `enumerateItems`: \(itemId)")
@@ -164,7 +168,7 @@ class Enumerator: NSObject, NSFileProviderEnumerator {
             let copy = retItems
             for item in copy {
                 if case let .directory(dirItem) = item {
-                    retItems += try await enumerateImpl(dirItem.directoryIdentifier().item())
+                    retItems += try await enumerateImpl(session, dirItem.directoryIdentifier().item())
                 }
             }
         }
@@ -172,15 +176,15 @@ class Enumerator: NSObject, NSFileProviderEnumerator {
         return retItems
     }
 
-    private func enumerateRootImpl() async throws -> [EntryItem] {
+    private func enumerateRootImpl(_ session: Session) async throws -> [EntryItem] {
         do {
-            let reposByName = try await listRepositories()
+            let reposByName = try await listRepositories(session)
             var items: [DirectoryItem] = []
             for (repoName, repo) in reposByName {
                 do {
                     let dirItem = try await DirectoryItem.load(repo, repoName)
                     items.append(dirItem)
-                } catch let error as OuisyncError where error.code == .PermissionDenied {
+                } catch let error as OuisyncError where error.code == .permissionDenied {
                     log.error("Failed to load repo \(repoName), might be it has not yet been unlocked")
                     continue
                 }
@@ -191,23 +195,24 @@ class Enumerator: NSObject, NSFileProviderEnumerator {
         }
     }
 
-    private func enumerateDirImpl(_ dirItemId: DirectoryIdentifier) async throws -> [EntryItem] {
+    private func enumerateDirImpl(_ session: Session, _ dirItemId: DirectoryIdentifier) async throws -> [EntryItem] {
         do {
-            let dir = try await dirItemId.loadItem(session)
-            let entries = try await dir.directory.listEntries()
+            let repo = try await dirItemId.loadRepo(session)
+            let entries = try await repo.readDirectory(dirItemId.path.string)
             var items: [EntryItem] = []
             for entry in entries {
-                switch entry {
-                case .directory(let dirEntry):
-                    let dirItem = try await DirectoryItem.load(dirEntry, dir.repoName)
+                let childPath = dirItemId.path.appending(entry.name)
+                switch entry.entryType {
+                case .directory:
+                    let dirItem = try await DirectoryItem.load(repo, childPath, dirItemId.repoName)
                     items.append(.directory(dirItem))
-                case .file(let fileEntry):
-                    let identifier = FileIdentifier(fileEntry.path, dir.repoName)
-                    items.append(.file(try await identifier.loadItem(session)))
+                case .file:
+                    let identifier = FileIdentifier(childPath, dirItemId.repoName)
+                    items.append(.file(try await identifier.loadItem(repo)))
                 }
             }
             return items
-        } catch let error as OuisyncError where error.code == .PermissionDenied {
+        } catch let error as OuisyncError where error.code == .permissionDenied {
             log.error("Can't open directory dirItemId: \(error)")
             return [];
         } catch {
@@ -215,7 +220,7 @@ class Enumerator: NSObject, NSFileProviderEnumerator {
         }
     }
 
-    func reposToIdentifiers(_ repos: Dictionary<RepoName, OuisyncRepository>) -> Set<DirectoryIdentifier> {
+    func reposToIdentifiers(_ repos: Dictionary<RepoName, Repository>) -> Set<DirectoryIdentifier> {
         var items: Set<DirectoryIdentifier> = Set()
         for (repoName, _) in repos {
             items.insert(DirectoryIdentifier("", repoName))
@@ -228,13 +233,9 @@ class Enumerator: NSObject, NSFileProviderEnumerator {
         completionHandler(currentAnchor)
     }
 
-    func listRepositories() async throws -> Dictionary<RepoName, OuisyncRepository> {
-        var repos: Dictionary<RepoName, OuisyncRepository> = [:]
-        for repo in try await session.listRepositories() {
-            let name = try await repo.getName()
-            repos[name] = repo
-        }
-        return repos
+    func listRepositories(_ session: Session) async throws -> Dictionary<RepoName, Repository> {
+        // The new API already returns repositories keyed by name.
+        return try await session.listRepositories()
     }
 }
 
