@@ -23,7 +23,6 @@ rsync_filter=(
     "--exclude=.git"
     "--exclude=android/app/.cxx"
     "--exclude=build"
-    "--exclude=ios"
     "--exclude=linux/flutter/ephemeral"
     "--exclude=ouisync/.git"
     "--exclude=ouisync/target"
@@ -521,7 +520,7 @@ function build() {
 
     # Build Ouisync app
     log_group_begin "Build release packages"
-    exe -w /opt/ouisync-app \
+    exe -w /opt/ouisync-app -i -t \
         dart run util/release.dart --flavor=$flavor $opts
     log_group_end
 
