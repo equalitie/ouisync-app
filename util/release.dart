@@ -208,29 +208,41 @@ Future<void> publishToGithub(
 Future<(Version, List<File>)> readAssetsFromDir(Directory assetDir) async {
   final files = <File>[];
   Version? version;
-  bool hasPublicMsixCert = false;
+
+  bool publicMsixCertFound = false;
+  bool publicMsixCertNeeded = false;
+
   await for (final entry in assetDir.list()) {
     if (entry is File) {
       final fileName = p.basename(entry.path);
-      if (fileName != msixCertFileName) {
+
+      if (fileName == msixCertFileName) {
+        publicMsixCertFound = true;
+      } else {
         final desc = AssetDesc.parse(fileName);
         if (version == null) {
           version = desc.version;
         } else if (version != desc.version) {
           throw "Assets in ${assetDir.path} have different versions ('$version' != '${desc.version}')";
         }
-      } else {
-        hasPublicMsixCert = true;
+
+        if (desc.extension == 'msix') {
+          publicMsixCertNeeded = true;
+        }
       }
+
       files.add(entry);
     }
   }
+
   if (version == null || files.isEmpty) {
     throw "No assets in ${assetDir.path} to publish";
   }
-  if (!hasPublicMsixCert) {
+
+  if (publicMsixCertNeeded && !publicMsixCertFound) {
     throw "Missing msix public certificate";
   }
+
   return (version, files);
 }
 
