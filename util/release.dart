@@ -1514,7 +1514,11 @@ Future<void> copyDirectory(Directory src, Directory dst) async {
 // Check if working tree is clean and if not confirm with the caller if we want to continue.
 Future<bool> checkWorkingTreeIsClean(GitDir git) async {
   if (!await git.isWorkingTreeClean()) {
-    if (!stdin.hasTerminal) {
+    // Need to check both `stdin` and `stdout` because when this runs on docker without `--tty` then
+    // `stdin` is mapped to `/dev/null` for which `stdinhasTerminal` still returns `true` but
+    // `stdout.hasTerminal` returns `false`. The `stdin` check is needed in cases where `stdin` is a
+    // pipe (e.g., when piping a file or output of some other command into this script).
+    if (!stdin.hasTerminal || !stdout.hasTerminal) {
       await run('git', ['diff', '--color=always']);
       print('Git is dirty and terminal is not attached');
       throw ('Git is dirty');

@@ -520,7 +520,7 @@ function build() {
 
     # Build Ouisync app
     log_group_begin "Build release packages"
-    exe -w /opt/ouisync-app -i -t \
+    exe -w /opt/ouisync-app \
         dart run util/release.dart --flavor=$flavor $opts
     log_group_end
 
