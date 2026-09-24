@@ -1297,10 +1297,7 @@ Future<String> buildReleaseNotes(
   RepositorySlug slug,
   String tagName,
 ) async {
-  final releasedHeaderRegexp = RegExp(
-    r'^\s*##\s+\[(.*)\]\((.*)\)\s+\-\s+(.*)\s*$',
-  );
-  final unreleasedHeaderRegexp = RegExp(r'^\s*##\s+\[Unreleased]\((.*)\)\s*$');
+  final headerRegexp = RegExp(r'^\s*##\s+\[(.*)\]\((.*)\)\s+\-\s+(.*)\s*$');
 
   final input = File('CHANGELOG.md');
   final output = StringBuffer()..writeln('## What\'s new');
@@ -1310,20 +1307,16 @@ Future<String> buildReleaseNotes(
 
   await for (final line
       in input.openRead().transform(utf8.decoder).transform(LineSplitter())) {
-    final unreleasedMatch = unreleasedHeaderRegexp.firstMatch(line);
-    final releasedMatch = releasedHeaderRegexp.firstMatch(line);
+    final headerMatch = headerRegexp.firstMatch(line);
 
-    if (unreleasedMatch != null) {
-      extracting = true;
-      continue;
-    }
-
-    if (releasedMatch != null) {
-      if (!extracting) {
-        throw 'Found a release section in changelog before [Unreleased] section';
+    if (headerMatch != null) {
+      if (extracting) {
+        prevVersionTag = headerMatch.group(1);
+        break;
+      } else {
+        extracting = true;
+        continue;
       }
-      prevVersionTag = releasedMatch.group(1);
-      break;
     }
 
     if (extracting) {
@@ -1332,13 +1325,13 @@ Future<String> buildReleaseNotes(
   }
 
   if (extracting == false) {
-    throw 'Could not find [Unreleased] section in changelog';
+    throw 'No released or unreleased section found in the changelog';
   }
 
   if (prevVersionTag == null) {
     // TODO: This shouldn't happen because we've already made releases, but
     // wouldn't work on a new project.
-    throw 'Failed to find the tag for previous version';
+    throw 'Failed to find the tag of the previous version';
   }
 
   // Throws if the previous release doesn't exist
