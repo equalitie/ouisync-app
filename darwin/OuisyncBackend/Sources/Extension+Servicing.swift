@@ -113,10 +113,13 @@ extension Extension {
             // our invalidation closure iff the base extension has not been shut down yet, but we
             // also don't want to lift the rest of this function into the synchronized block,
             // thus resulting in two checks against the same value
+            // NSXPCConnection.invalidate() is documented as safe to call from any thread,
+            // so this capture is sound despite NSXPCConnection not being Sendable.
+            nonisolated(unsafe) let connectionToInvalidate = connection
             let active = synchronized(ext) {
                 if ext.active {
                     ext.invalidators.append {
-                        connection.invalidate() // this should notify peer; invalidationHandler cleans up proxies
+                        connectionToInvalidate.invalidate() // this should notify peer; invalidationHandler cleans up proxies
                     }
                 }
                 return ext.active

@@ -8,7 +8,7 @@ import FileProvider
 import Foundation
 
 
-extension NSFileProviderItemFields: CustomDebugStringConvertible {
+extension NSFileProviderItemFields: @retroactive CustomDebugStringConvertible {
     static public var debugDescriptions: [(Self, String)] = [
         (.filename, ".filename"),
         (.contents, ".contents"),
@@ -39,7 +39,7 @@ extension NSFileProviderItemFields: CustomDebugStringConvertible {
     }
 }
 
-extension NSFileProviderItemIdentifier: CustomDebugStringConvertible {
+extension NSFileProviderItemIdentifier: @retroactive CustomDebugStringConvertible {
     public var debugDescription: String {
         if let deserialized = ItemIdentifier.tryDeserialize(self) {
             return deserialized.debugDescription

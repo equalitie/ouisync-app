@@ -8,7 +8,7 @@ import FileProvider
 import Foundation
 
 
-extension NSFileProviderSyncAnchor: CustomDebugStringConvertible {
+extension NSFileProviderSyncAnchor: @retroactive CustomDebugStringConvertible {
     public var debugDescription: String {
         guard let str = String(bytes: rawValue, encoding: .ascii) else {
             return "InvalidAnchor(non-ascii)"

@@ -98,7 +98,7 @@ open class Extension: NSObject, NSFileProviderReplicatedExtension {
         // 1. Need to ensure that the task finishes when the extension is `invalidate`d
         // 2. Check that repos are removed from `repoWatchingTasks` when a repo is removed.
         Task {
-            weak var weakExt = this
+            weak let weakExt = this
 
             let session: Session
             do {
@@ -143,7 +143,7 @@ open class Extension: NSObject, NSFileProviderReplicatedExtension {
                     }
                     log.info("Added repository \(name)")
                     repoWatchingTasks[name] = Task {
-                        weak var weakExt = this
+                        weak let weakExt = this
                         for await _ in stream {
                             guard let ext = weakExt else {
                                 return
