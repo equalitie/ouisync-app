@@ -14,25 +14,19 @@ RUN Invoke-WebRequest https://aka.ms/vs/17/release/channel -OutFile C:/TEMP/Visu
 RUN Invoke-WebRequest https://aka.ms/vs/17/release/vs_buildtools.exe -OutFile C:/TEMP/vs_buildtools.exe
 
 # https://docs.microsoft.com/en-us/visualstudio/install/build-tools-container?view=vs-2019
-# When installing Visual Studio, we need Desktop development with C++ components.
-# For that we need to add: Microsoft.VisualStudio.ComponentGroup.NativeDesktop.Core
 # Info on individual components:
 # https://docs.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-build-tools?view=vs-2019
 SHELL ["cmd", "/S", "/C"]
 RUN C:\TEMP\vs_buildtools.exe --quiet --wait --norestart --nocache \
     --channelUri C:\TEMP\VisualStudio.chman \
     --installChannelUri C:\TEMP\VisualStudio.chman \
-    --add Microsoft.VisualStudio.Component.Windows10SDK.19041 \
-    --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 \
-    --add Microsoft.VisualStudio.Component.VC.CMake.Project \
-    --add Microsoft.VisualStudio.Component.VC.ATLMFC \
-    --add Microsoft.VisualStudio.ComponentGroup.NativeDesktop.Core \
-    --add Microsoft.VisualStudio.Workload.NativeDesktop \
-    --add Microsoft.VisualStudio.Workload.ManagedDesktopBuildTools \
-    --add Microsoft.VisualStudio.Workload.VCTools \
-    --add Microsoft.VisualStudio.Component.VC.CLI.Support \
     --installPath C:\BuildTools \
-     || IF "%ERRORLEVEL%"=="3010" EXIT 0
+    --add Microsoft.VisualStudio.Workload.VCTools \
+    --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 \
+    --add Microsoft.VisualStudio.Component.Windows10SDK.19041 \
+    --add Microsoft.VisualStudio.Component.VC.CMake.Project \
+    --add Microsoft.VisualStudio.Component.VC.ATL \
+    || IF "%ERRORLEVEL%"=="3010" EXIT 0
 
 # Back to using powershell
 SHELL ["powershell", "-Command", "$ProgressPreference = 'SilentlyContinue';"]
