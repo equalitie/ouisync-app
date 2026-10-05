@@ -3629,6 +3629,16 @@ class S {
     );
   }
 
+  /// `Sharing file {path} failed`
+  String messageSharingFileFailed(Object path) {
+    return Intl.message(
+      'Sharing file $path failed',
+      name: 'messageSharingFileFailed',
+      desc: '',
+      args: [path],
+    );
+  }
+
   /// `File download canceled`
   String get messageDownloadFileCanceled {
     return Intl.message(

@@ -4,6 +4,8 @@ PODS:
   - Flutter (1.0.0)
   - flutter_keyboard_visibility (0.0.1):
     - Flutter
+  - open_filex (0.0.2):
+    - Flutter
   - ouisync (0.0.1):
     - Flutter
     - FlutterMacOS
@@ -12,6 +14,7 @@ DEPENDENCIES:
   - biometric_storage (from `.symlinks/plugins/biometric_storage/ios`)
   - Flutter (from `Flutter`)
   - flutter_keyboard_visibility (from `.symlinks/plugins/flutter_keyboard_visibility/ios`)
+  - open_filex (from `.symlinks/plugins/open_filex/ios`)
   - ouisync (from `.symlinks/plugins/ouisync/darwin`)
 
 EXTERNAL SOURCES:
@@ -21,6 +24,8 @@ EXTERNAL SOURCES:
     :path: Flutter
   flutter_keyboard_visibility:
     :path: ".symlinks/plugins/flutter_keyboard_visibility/ios"
+  open_filex:
+    :path: ".symlinks/plugins/open_filex/ios"
   ouisync:
     :path: ".symlinks/plugins/ouisync/darwin"
 
@@ -28,6 +33,7 @@ SPEC CHECKSUMS:
   biometric_storage: 662167ef947fba48891850f0b3042f892a839e9a
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
   flutter_keyboard_visibility: 4625131e43015dbbe759d9b20daaf77e0e3f6619
+  open_filex: 432f3cd11432da3e39f47fcc0df2b1603854eff1
   ouisync: 7045743463fa7bdcebaeaabc11310c284298903b
 
 PODFILE CHECKSUM: 056183cb0166f18ebff6c6613a455621b2da8bf6

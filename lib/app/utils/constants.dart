@@ -49,9 +49,9 @@ class Constants {
 
   static const int bufferSize = 64000;
 
-  static const String fileServerAuthority = 'localhost';
-  static const String fileServerPreviewPath = 'preview';
-  static const String fileServerHandleQuery = 'handle';
+  // Chunk size for exporting whole files to local disk. Must stay well below the service's
+  // maximum message size (8 MiB by default).
+  static const int exportChunkSize = 1024 * 1024;
 
   static const int maxCharacterRepoTokenForDisplay = 8;
   static const String ouisyncUrl = 'https://ouisync.net';

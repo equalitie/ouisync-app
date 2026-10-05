@@ -33,5 +33,4 @@ export 'save_media.dart';
 export 'share_token.dart';
 export 'settings/settings.dart';
 export 'spinning_icon.dart';
-export 'static_file_handler.dart';
 export 'strings.dart';

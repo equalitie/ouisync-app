@@ -1,17 +1,13 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io' as io;
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mime/mime.dart';
 import 'package:ouisync/ouisync.dart' hide DirectoryEntry;
 import 'package:ouisync_app/generated/l10n.dart';
-import 'package:shelf/shelf_io.dart';
 import 'package:stream_transform/stream_transform.dart';
 
 import '../models/models.dart';
-import '../utils/cipher.dart' as cipher;
 import '../utils/repo_path.dart' as repo_path;
 import '../utils/utils.dart';
 import 'cubits.dart';
@@ -105,7 +101,6 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   final EntrySelectionCubit _entrySelection;
   final EntryBottomSheetCubit _bottomSheet;
   final Repository _repo;
-  final cipher.SecretKey _pathSecretKey;
   final CacheServers _cacheServers;
   final MountCubit _mountCubit;
   final void Function(String)? _onNotify;
@@ -121,7 +116,6 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     this._entrySelection,
     this._bottomSheet,
     this._repo,
-    this._pathSecretKey,
     this._cacheServers,
     this._mountCubit,
     this._onNotify,
@@ -164,14 +158,11 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
       );
     }
 
-    final pathSecretKey = cipher.randomSecretKey();
-
     final cubit = RepoCubit._(
       navigation,
       entrySelection,
       bottomSheet,
       repo,
-      pathSecretKey,
       cacheServers,
       mountCubit,
       onNotify,
@@ -662,29 +653,40 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     }
   }
 
-  Future<Uri> previewFileUrl(String path) async {
-    final encryptedHandle = base64Encode(
-      await cipher.encrypt(_pathSecretKey, utf8.encode(path)),
-    );
-    final mimeType = MimeTypeResolver().lookup(path);
+  /// Copies the file at [sourcePath] (a path inside this repo) to [destinationPath] on local
+  /// disk. Unlike [downloadFile], this does not track progress or show user-facing
+  /// notifications - it's meant for producing a throwaway local copy (e.g. so a native OS app
+  /// can open or share it), not for a user-initiated download.
+  Future<void> exportFile({
+    required String sourcePath,
+    required String destinationPath,
+  }) async {
+    final src = await openFile(sourcePath);
+    try {
+      final dst = io.File(destinationPath);
+      await dst.parent.create(recursive: true);
 
-    final handler = createStaticFileHandler(
-      encryptedHandle,
-      mimeType,
-      openFile,
-      _pathSecretKey,
-    );
+      final sink = dst.openWrite();
+      try {
+        // Read in bounded chunks: a single read of the whole file would exceed the service's
+        // maximum message size for large files.
+        int offset = 0;
+        while (true) {
+          final chunk = await src.read(offset, Constants.exportChunkSize);
+          if (chunk.isEmpty) break;
 
-    final server = await serve(handler, Constants.fileServerAuthority, 0);
-    final authority = '${server.address.host}:${server.port}';
+          offset += chunk.length;
+          sink.add(chunk);
 
-    loggy.debug('Serving file at http://$authority');
-
-    final url = Uri.http(authority, Constants.fileServerPreviewPath, {
-      Constants.fileServerHandleQuery: encryptedHandle,
-    });
-
-    return url;
+          if (chunk.length < Constants.exportChunkSize) break;
+        }
+      } finally {
+        await sink.flush();
+        await sink.close();
+      }
+    } finally {
+      await src.close();
+    }
   }
 
   Future<void> downloadFile({

@@ -79,6 +79,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m26(path) => "Previewing file ${path} failed";
 
+  static String m50(path) => "Sharing file ${path} failed";
+
   static String m27(name) => "We could not delete the repository \"${name}\"";
 
   static String m28(name) =>
@@ -937,6 +939,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageShareWithWR": MessageLookupByLibrary.simpleMessage(
       "Share with QR Code",
     ),
+    "messageSharingFileFailed": m50,
     "messageSortBy": m35,
     "messageStorage": MessageLookupByLibrary.simpleMessage("Storage"),
     "messageStoragePermission": MessageLookupByLibrary.simpleMessage(

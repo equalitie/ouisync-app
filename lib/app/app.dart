@@ -25,6 +25,7 @@ import 'utils/utils.dart'
         AppTextThemeExtension,
         AppTypography,
         CacheServers,
+        clearPreviewCache,
         loadAndMigrateSettings,
         Settings;
 import 'widgets/flavor_banner.dart';
@@ -149,6 +150,8 @@ class _AppComponents {
 
     final dirs = await Dirs.init();
     await log.init(dirs);
+
+    unawaited(clearPreviewCache());
 
     final (server, session) = await _initServerAndSession(dirs, windowManager);
     final errorCubit = ErrorCubit(session);
