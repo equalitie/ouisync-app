@@ -47,8 +47,9 @@ ${'-' * (48 + package.appName.length)}''';
 
   LoggyPrinter defaultPrinter;
 
-  // Log to platform's default logging facility
-  if (Platform.isAndroid || Platform.isIOS || Platform.isMacOS) {
+  // Log to platform's default logging facility. Only the Android host implements the native `log`
+  // method; on iOS/macOS it doesn't, so use the console printer there.
+  if (Platform.isAndroid) {
     defaultPrinter = _NativePrinter();
   } else {
     defaultPrinter = _ConsolePrinter();
@@ -143,7 +144,13 @@ class _NativePrinter extends LoggyPrinter {
     final level = record.level.toOuisync();
     final message = _formatMessage(record);
 
-    Native.instance.log(level, message);
+    // The call isn't awaited, so a failure would surface as an unhandled error, which is itself
+    // logged through this printer, which fails again, and so on, forever. Catch it here and fall
+    // back to printing so logging can never feed back into itself.
+    Native.instance.log(level, message).catchError((Object _) {
+      // ignore: avoid_print
+      print(_formatRecord(record));
+    });
   }
 }
 
