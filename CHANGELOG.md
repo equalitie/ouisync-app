@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Android: Update Target SDK to 37 to conform to the new Play Store requirements
 - Fix regression where LAN connectivity was not working
 - Windows: Fix limit to 512MiB repository sizes and O: drive size reporting
+- Fix disappearing repositories when one of the storage paths doesn't exist
 
 ## [v0.9.4](https://github.com/equalitie/ouisync-app/compare/v0.9.3...v0.9.4) - 2026-02-09
 
