@@ -35,6 +35,10 @@ class Dirs {
       download: await _getDownloadDir(),
     );
   }
+
+  @override
+  String toString() =>
+      'Dirs(root: $root, defaultMount: $defaultMount, download: $download)';
 }
 
 Future<String> _getDefaultRootDir() async =>
