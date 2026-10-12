@@ -42,7 +42,7 @@ includeBuild('../ouisync/bindings/kotlin') {
 
         substitute module('ie.equalit.ouinet:ouisync-session')       using project(':ouisync-session')
 
-        substitute module('ie.equalit.ouinet:ouisync-service')       using project(':ouisync-service')
-        substitute module('ie.equalit.ouinet:ouisync-service-debug') using project(':ouisync-service')
+        substitute module('ie.equalit.ouinet:ouisync-service-android') using project(':ouisync-service-android')
+        substitute module('ie.equalit.ouinet:ouisync-service-debug') using project(':ouisync-service-android')
     }
 }
