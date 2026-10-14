@@ -74,10 +74,10 @@ dependencies:
   logtee:
     path: ouisync/logtee/dart
   meta: ^1.10.0
-  mime: ^2.0.0
   mobile_scanner: ^7.4.0
   mutex: ^3.1.0
   network_info_plus: ^8.2.1
+  open_filex: ^4.7.0
   ouisync:
     path: ouisync/bindings/dart
   package_info_plus: ^10.2.1
@@ -100,7 +100,6 @@ dependencies:
   share_plus: ^13.3.0
   shared_preferences: ^2.5.5
   shared_preferences_android: ^2.4.27
-  shelf: ^1.4.1
   stack_trace: ^1.11.1
   stream_transform: ^2.1.0
   styled_text: ^8.1.0

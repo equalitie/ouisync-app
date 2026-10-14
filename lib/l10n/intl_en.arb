@@ -548,6 +548,7 @@
   "messageNoAppsForThisAction":"No application can perform this action",
   "messageFilePreviewFailed":"We couldn’t start the file preview",
   "messagePreviewingFileFailed":"Previewing file {path} failed",
+  "messageSharingFileFailed":"Sharing file {path} failed",
   "messageDownloadFileCanceled":"File download canceled",
   "messageDownloadFileLocation": "File downloaded to {path}",
   "messageCopiedToClipboard":"Copied to the clipboard.",

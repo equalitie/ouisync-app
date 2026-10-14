@@ -12,6 +12,7 @@ import '../../pages/pages.dart' show PreviewFileCallback;
 import '../../utils/dialogs.dart';
 import '../../utils/dirs.dart';
 import '../../utils/entry_ops.dart' show shareFile;
+import '../../utils/log.dart';
 import '../../utils/stage.dart';
 import '../../utils/repo_path.dart' as repo_path;
 import '../../utils/strings.dart';
@@ -63,7 +64,7 @@ class EntryDetails extends StatefulWidget {
   State<EntryDetails> createState() => _EntryDetailsState();
 }
 
-class _EntryDetailsState extends State<EntryDetails> {
+class _EntryDetailsState extends State<EntryDetails> with AppLogger {
   late final bool isFile = widget.entry is FileEntry;
 
   @override
@@ -88,7 +89,10 @@ class _EntryDetailsState extends State<EntryDetails> {
             _buildAction(EntryAction.move),
             _buildAction(EntryAction.rename),
             if (isFile) _buildAction(EntryAction.download),
-            if (isFile && io.Platform.isAndroid)
+            if (isFile &&
+                (io.Platform.isAndroid ||
+                    io.Platform.isIOS ||
+                    io.Platform.isMacOS))
               _buildAction(EntryAction.share),
             _buildAction(EntryAction.delete),
             const Divider(
@@ -266,8 +270,12 @@ extension on _EntryDetailsState {
     ).saveFileToDevice(widget.entry as FileEntry, defaultDirectoryPath);
   }
 
-  Future<void> _onShareTap() async =>
-      shareFile(repo: widget.repoCubit, path: widget.entry.path);
+  Future<void> _onShareTap() async => shareFile(
+    stage: widget.stage,
+    repo: widget.repoCubit,
+    path: widget.entry.path,
+    loggy: loggy,
+  );
 
   Future<void> _onDeleteTap() async =>
       _deleteEntryWithValidation(widget.repoCubit, widget.entry);

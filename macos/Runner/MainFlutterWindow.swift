@@ -75,18 +75,68 @@ class MainFlutterWindow: NSWindow {
         switch call.method {
         case "getSharedDir": result(Directories.rootPath)
         case "getMountRootDirectory": Task {
-            let manager = NSFileProviderManager(for: ouisyncFileProviderDomain)!
-            let userVisibleRootUrl = try! await manager.getUserVisibleURL(for: .rootContainer)
-            var path = userVisibleRootUrl.path(percentEncoded: false)
-            if path.last == "/" {
-                path = String(path.dropLast())
-            }
-            result(path)
+            // Resolving the File Provider mount root is best-effort and MUST NOT block app
+            // startup: this call is on the `Dirs.init()` critical path, and both
+            // `NSFileProviderManager.add` and `getUserVisibleURL` can block indefinitely when the
+            // File Provider domain/extension isn't ready. If we can't resolve it quickly we return
+            // `nil`, which the Dart side treats as "mounting disabled" and continues launching.
+            let path: String? = await Self.resolveMountRoot()
+            DispatchQueue.main.async { result(path) }
         }
         default: result(FlutterError(code: "OS06",
                                      message: "Method \"\(call.method)\" not exported by host",
                                      details: nil))
         }
+    }
+
+    // Best-effort resolution of the File Provider mount root, time-bounded so it can NEVER hang
+    // app startup. Registers the domain (idempotent) and asks for the root container's
+    // user-visible URL, but if that doesn't resolve within `timeout` seconds we give up and return
+    // nil ("mounting disabled"). Both `NSFileProviderManager.add` and `getUserVisibleURL` can block
+    // indefinitely when the File Provider extension/domain isn't ready, so we race them against a
+    // timer and never await the (possibly stuck) system call before returning.
+    static func resolveMountRoot(timeout seconds: Double = 5) async -> String? {
+        await withCheckedContinuation { (cont: CheckedContinuation<String?, Never>) in
+            let gate = ResumeOnce()
+
+            // Worker: register the domain and resolve the user-visible root URL.
+            Task {
+                var value: String? = nil
+                do {
+                    try await NSFileProviderManager.add(ouisyncFileProviderDomain)
+                    if let manager = NSFileProviderManager(for: ouisyncFileProviderDomain) {
+                        let url = try await manager.getUserVisibleURL(for: .rootContainer)
+                        var path = url.path(percentEncoded: false)
+                        if path.last == "/" { path = String(path.dropLast()) }
+                        value = path
+                    }
+                } catch {
+                    NSLog("getMountRootDirectory: failed to resolve mount root: \(error)")
+                }
+                gate.resume(cont, with: value)
+            }
+
+            // Timeout: don't let a stuck File Provider call hang startup.
+            Task {
+                try? await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000))
+                NSLog("getMountRootDirectory: timed out; continuing with mounting disabled")
+                gate.resume(cont, with: nil)
+            }
+        }
+    }
+}
+
+// Resumes a continuation at most once, so racing worker/timeout tasks can't double-resume.
+private final class ResumeOnce {
+    private let lock = NSLock()
+    private var done = false
+
+    func resume(_ cont: CheckedContinuation<String?, Never>, with value: String?) {
+        lock.lock()
+        defer { lock.unlock() }
+        guard !done else { return }
+        done = true
+        cont.resume(returning: value)
     }
 }
 
