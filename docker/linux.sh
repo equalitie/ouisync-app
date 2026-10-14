@@ -23,7 +23,6 @@ rsync_filter=(
     "--exclude=.git"
     "--exclude=android/app/.cxx"
     "--exclude=build"
-    "--exclude=ios"
     "--exclude=linux/flutter/ephemeral"
     "--exclude=ouisync/.git"
     "--exclude=ouisync/target"

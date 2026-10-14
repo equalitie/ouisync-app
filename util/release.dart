@@ -208,29 +208,41 @@ Future<void> publishToGithub(
 Future<(Version, List<File>)> readAssetsFromDir(Directory assetDir) async {
   final files = <File>[];
   Version? version;
-  bool hasPublicMsixCert = false;
+
+  bool publicMsixCertFound = false;
+  bool publicMsixCertNeeded = false;
+
   await for (final entry in assetDir.list()) {
     if (entry is File) {
       final fileName = p.basename(entry.path);
-      if (fileName != msixCertFileName) {
+
+      if (fileName == msixCertFileName) {
+        publicMsixCertFound = true;
+      } else {
         final desc = AssetDesc.parse(fileName);
         if (version == null) {
           version = desc.version;
         } else if (version != desc.version) {
           throw "Assets in ${assetDir.path} have different versions ('$version' != '${desc.version}')";
         }
-      } else {
-        hasPublicMsixCert = true;
+
+        if (desc.extension == 'msix') {
+          publicMsixCertNeeded = true;
+        }
       }
+
       files.add(entry);
     }
   }
+
   if (version == null || files.isEmpty) {
     throw "No assets in ${assetDir.path} to publish";
   }
-  if (!hasPublicMsixCert) {
+
+  if (publicMsixCertNeeded && !publicMsixCertFound) {
     throw "Missing msix public certificate";
   }
+
   return (version, files);
 }
 
@@ -1285,10 +1297,7 @@ Future<String> buildReleaseNotes(
   RepositorySlug slug,
   String tagName,
 ) async {
-  final releasedHeaderRegexp = RegExp(
-    r'^\s*##\s+\[(.*)\]\((.*)\)\s+\-\s+(.*)\s*$',
-  );
-  final unreleasedHeaderRegexp = RegExp(r'^\s*##\s+\[Unreleased]\((.*)\)\s*$');
+  final headerRegexp = RegExp(r'^\s*##\s+\[(.*)\]\((.*)\)\s+\-\s+(.*)\s*$');
 
   final input = File('CHANGELOG.md');
   final output = StringBuffer()..writeln('## What\'s new');
@@ -1298,20 +1307,16 @@ Future<String> buildReleaseNotes(
 
   await for (final line
       in input.openRead().transform(utf8.decoder).transform(LineSplitter())) {
-    final unreleasedMatch = unreleasedHeaderRegexp.firstMatch(line);
-    final releasedMatch = releasedHeaderRegexp.firstMatch(line);
+    final headerMatch = headerRegexp.firstMatch(line);
 
-    if (unreleasedMatch != null) {
-      extracting = true;
-      continue;
-    }
-
-    if (releasedMatch != null) {
-      if (!extracting) {
-        throw 'Found a release section in changelog before [Unreleased] section';
+    if (headerMatch != null) {
+      if (extracting) {
+        prevVersionTag = headerMatch.group(1);
+        break;
+      } else {
+        extracting = true;
+        continue;
       }
-      prevVersionTag = releasedMatch.group(1);
-      break;
     }
 
     if (extracting) {
@@ -1320,13 +1325,13 @@ Future<String> buildReleaseNotes(
   }
 
   if (extracting == false) {
-    throw 'Could not find [Unreleased] section in changelog';
+    throw 'No released or unreleased section found in the changelog';
   }
 
   if (prevVersionTag == null) {
     // TODO: This shouldn't happen because we've already made releases, but
     // wouldn't work on a new project.
-    throw 'Failed to find the tag for previous version';
+    throw 'Failed to find the tag of the previous version';
   }
 
   // Throws if the previous release doesn't exist
@@ -1514,7 +1519,11 @@ Future<void> copyDirectory(Directory src, Directory dst) async {
 // Check if working tree is clean and if not confirm with the caller if we want to continue.
 Future<bool> checkWorkingTreeIsClean(GitDir git) async {
   if (!await git.isWorkingTreeClean()) {
-    if (!stdin.hasTerminal) {
+    // Need to check both `stdin` and `stdout` because when this runs on docker without `--tty` then
+    // `stdin` is mapped to `/dev/null` for which `stdinhasTerminal` still returns `true` but
+    // `stdout.hasTerminal` returns `false`. The `stdin` check is needed in cases where `stdin` is a
+    // pipe (e.g., when piping a file or output of some other command into this script).
+    if (!stdin.hasTerminal || !stdout.hasTerminal) {
       await run('git', ['diff', '--color=always']);
       print('Git is dirty and terminal is not attached');
       throw ('Git is dirty');
