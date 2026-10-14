@@ -1,33 +1,48 @@
-## Some tips for working on macos
+## Building macOS
 
-### Building
+### 1. Build the Rust native core
 
-Currently xcode nor flutter for darwin doesn't compile the Rust backend automatically
-thus one has to do it manually:
-
-```bash
-(cd ouisync; cargo build -p ouisync-service)
-```
-
-And then copy the `libouisync_service.dylib` to where xcode can find it:
+Xcode and Flutter don't automatically compile the Rust backend, so build it manually:
 
 ```bash
-  cp ouisync/target/debug/libouisync_service.dylib ouisync/bindings/dart/macos/
+cd ouisync/bindings/swift/OuisyncLib
+bash build-xcframework.sh
 ```
 
-Further, xcode won't build flutter dependencies so this has to be done outside
-of xcode as well:
+This builds:
+- The Rust service for macOS (both x86_64 and arm64)
+- Static library (`OuisyncLibFFI.xcframework`) for the File Provider extension
+- Dynamic framework (`OuisyncService.framework`) for the main app
+
+### 2. Set up CocoaPods
 
 ```bash
-flutter build -d macos
+cd macos
+pod install
+cd ..
 ```
 
-After the above, one can either run and debug ouisync from xcode or from the command
-line as such:
+### 3. Build Flutter dependencies and the app
 
 ```bash
-flutter run
+flutter build macos --release
 ```
+
+Or for development with hot-reload:
+
+```bash
+flutter run -d macos
+```
+
+### 4. Open in Xcode (optional)
+
+To debug or develop further:
+
+```bash
+open macos/Runner.xcworkspace
+```
+
+Always open `.xcworkspace`, not `.xcodeproj`. Then build/run via Xcode (`Cmd+B` / `Cmd+R`).
 
 ### Removing the file provider extension
 

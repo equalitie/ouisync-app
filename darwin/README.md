@@ -19,13 +19,15 @@ To build, you must have a mac and:
 * at least 10GB of free space (after installing the above)
 
 ## Building
+
+### Quick start
+
 1. `git clone git@github.com:equalitie/ouisync-app && cd ouisync-app`
-2. `git clone git@github.com:equalitie/ouisync` (or `git submodule update` if
-   you don't use ssh auth / don't want to push changes)
-3. `darwin/init` to install the remaining dependencies
-4. `flutter build macos` (grab a cup of ☕️ or 🍵 cause this will take some time)
-5. `open macos/Runner.xcworkspace` to continue development (the first build must
-   be done from the command line, though you can debug it via Xcode afterwards)
+2. `git submodule update --init` (fetch the Rust core)
+3. `cd ouisync/bindings/swift/OuisyncLib && bash build-xcframework.sh` (build Rust)
+4. Platform-specific: see [macos/README.md](../macos/README.md) or [ios/README.md](../ios/README.md)
+
+**Note**: The first build takes time because the Rust service cross-compiles for all platforms. You can speed it up by editing `ouisync/bindings/swift/OuisyncLib/config.sh` and disabling unneeded targets or opting for debug builds (`DEBUG=0` → `DEBUG=1`).
 
 ## Tips & tricks
 * Xcode cannot currently open the same package in multiple windows; as such,

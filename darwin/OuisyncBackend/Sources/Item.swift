@@ -39,31 +39,28 @@ enum EntryItem: Hashable, Equatable, CustomDebugStringConvertible {
 
 class FileItem: NSObject, NSFileProviderItem {
     let repoName: String
-    let file: OuisyncFileEntry
+    // The file path is relative to the repository
+    let path: FilePath
     var size: UInt64
     let version: Version
 
-    init(_ file: OuisyncFileEntry, _ repoName: String, size: UInt64, version: Version) {
+    init(_ path: FilePath, _ repoName: String, size: UInt64, version: Version) {
         self.repoName = repoName
-        self.file = file
+        self.path = path
         self.size = size
         self.version = version
     }
 
-    func exists() async throws -> Bool {
-        try await file.exists()
-    }
-
     func fileIdentifier() -> FileIdentifier {
-        FileIdentifier(file.path, repoName)
+        FileIdentifier(path, repoName)
     }
 
     var itemIdentifier: NSFileProviderItemIdentifier {
-        return FileIdentifier(file.path, repoName).item().serialize()
+        return FileIdentifier(path, repoName).item().serialize()
     }
 
     var parentItemIdentifier: NSFileProviderItemIdentifier {
-        return DirectoryIdentifier(file.parent().path, repoName).item().serialize()
+        return DirectoryIdentifier(path.removingLastComponent(), repoName).item().serialize()
     }
 
     var capabilities: NSFileProviderItemCapabilities {
@@ -77,7 +74,7 @@ class FileItem: NSObject, NSFileProviderItem {
     }
 
     var filename: String {
-        return file.name()
+        return path.lastComponent?.string ?? ""
     }
 
     var contentType: UTType {
@@ -85,7 +82,7 @@ class FileItem: NSObject, NSFileProviderItem {
     }
 
     public override var debugDescription: String {
-        "FileItem(\(repoName), \(file.path), \(version))"
+        "FileItem(\(repoName), \(path), \(version))"
     }
 
     var documentSize: NSNumber? {
@@ -95,43 +92,40 @@ class FileItem: NSObject, NSFileProviderItem {
 
 class DirectoryItem: NSObject, NSFileProviderItem {
     let repoName: String
-    let directory: OuisyncDirectoryEntry
+    // The directory path is relative to the repository (empty path means the repository root)
+    let path: FilePath
     let version: Version
 
-    fileprivate init(_ directory: OuisyncDirectoryEntry, _ repoName: String, _ version: Version) {
+    fileprivate init(_ path: FilePath, _ repoName: String, _ version: Version) {
         self.repoName = repoName
-        self.directory = directory
+        self.path = path
         self.version = version
     }
 
-    static func load(_ directory: OuisyncDirectoryEntry, _ repoName: String) async throws -> DirectoryItem {
-        let version = Version(Hash(try await directory.repository.getEntryVersionHash("/")), 0)
-        return DirectoryItem(directory, repoName, version)
+    static func load(_ repo: Repository, _ path: FilePath, _ repoName: String) async throws -> DirectoryItem {
+        // TODO(stopgap): synthesized version; new service API lacks per-entry version hash
+        let version = Version(try await synthesizeDirectoryVersionHash(repo, path), 0)
+        return DirectoryItem(path, repoName, version)
     }
 
     // For when this directory represents a repository
-    static func load(_ repo: OuisyncRepository, _ repoName: String) async throws -> DirectoryItem {
-        let directory = OuisyncDirectoryEntry(FilePath(""), repo)
-        return try await load(directory, repoName)
-    }
-    
-    func directoryIdentifier() -> DirectoryIdentifier {
-        DirectoryIdentifier(directory.path, repoName)
+    static func load(_ repo: Repository, _ repoName: String) async throws -> DirectoryItem {
+        return try await load(repo, FilePath(""), repoName)
     }
 
-    func exists() async throws -> Bool {
-        try await directory.exists()
+    func directoryIdentifier() -> DirectoryIdentifier {
+        DirectoryIdentifier(path, repoName)
     }
 
     var itemIdentifier: NSFileProviderItemIdentifier {
-        return DirectoryIdentifier(directory.path, repoName).item().serialize()
+        return DirectoryIdentifier(path, repoName).item().serialize()
     }
 
     var parentItemIdentifier: NSFileProviderItemIdentifier {
-        if let parent = directory.parent() {
-            return DirectoryIdentifier(parent.path, repoName).item().serialize()
-        } else {
+        if path.components.isEmpty {
             return .rootContainer
+        } else {
+            return DirectoryIdentifier(path.removingLastComponent(), repoName).item().serialize()
         }
     }
 
@@ -139,7 +133,7 @@ class DirectoryItem: NSObject, NSFileProviderItem {
         var caps: NSFileProviderItemCapabilities = [.allowsReading, .allowsWriting, .allowsAddingSubItems, .allowsContentEnumerating]
 
         // We currently allow these *repository* operations only from the app
-        if !DirectoryIdentifier(directory.path, repoName).isRepository() {
+        if !DirectoryIdentifier(path, repoName).isRepository() {
             caps.insert(.allowsDeleting)
             caps.insert(.allowsReparenting)
             caps.insert(.allowsRenaming)
@@ -154,7 +148,8 @@ class DirectoryItem: NSObject, NSFileProviderItem {
     }
 
     var filename: String {
-        return OuisyncDirectoryEntry.name(FilePath.mergeRepoNameAndPath(repoName, directory.path))
+        // When this directory is the repository root its path is empty; use the repository name.
+        return path.lastComponent?.string ?? repoName
     }
 
     var contentType: UTType {
@@ -162,7 +157,7 @@ class DirectoryItem: NSObject, NSFileProviderItem {
     }
 
     public override var debugDescription: String {
-        return "DirectoryItem(\(repoName), \(directory.path), \(version), \(parentItemIdentifier))"
+        return "DirectoryItem(\(repoName), \(path), \(version), \(parentItemIdentifier))"
     }
 }
 
@@ -272,17 +267,27 @@ class TrashContainerItem: NSObject, NSFileProviderItem {
     }
 }
 
-func getRepoByName(_ session: OuisyncSession, _ repoName: String) async -> OuisyncRepository? {
-    // TODO: the unwraps
+func getRepoByName(_ session: Session, _ repoName: String) async -> Repository? {
+    // Repositories are now keyed by name; `findRepository` throws when there is no match, so we
+    // map that (and any other lookup failure) back to the previous "return nil" behavior.
+    return try? await session.findRepository(repoName)
+}
 
-    let repos = (try? await session.listRepositories())!
+// TODO(stopgap): synthesized version; new service API lacks per-entry version hash.
+// Derive a deterministic content-version hash from the file's size (the 8 bytes of the UInt64).
+func synthesizeFileVersionHash(_ size: UInt64) -> Hash {
+    var value = size.littleEndian
+    let data = Swift.withUnsafeBytes(of: &value) { Data($0) }
+    return Hash(data)
+}
 
-    for repo in repos {
-        let name = (try? await repo.getName())!
-        if name == repoName {
-            return repo
-        }
-    }
-
-    return nil
+// TODO(stopgap): synthesized version; new service API lacks per-entry version hash.
+// Derive a stable directory version hash from the sorted "name:entryType" child listing.
+func synthesizeDirectoryVersionHash(_ repo: Repository, _ path: FilePath) async throws -> Hash {
+    let entries = try await repo.readDirectory(path.string)
+    let joined = entries
+        .map { "\($0.name):\($0.entryType.rawValue)" }
+        .sorted()
+        .joined(separator: "\n")
+    return Hash(Data(joined.utf8))
 }
