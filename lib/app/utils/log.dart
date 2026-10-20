@@ -111,6 +111,10 @@ Future<void> dump(IOSink sink) async {
     return;
   }
 
+  if (!await file.parent.exists()) {
+    return;
+  }
+
   final all = await file.parent
       .list()
       .map((entry) => entry.absolute.path)
