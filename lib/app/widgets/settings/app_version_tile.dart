@@ -37,7 +37,9 @@ class _AppVersionTileState extends State<AppVersionTile> {
   @override
   void initState() {
     super.initState();
-    _version = PackageInfo.fromPlatform().then((info) => info.version);
+    _version = PackageInfo.fromPlatform().then(
+      (info) => '${info.version}.${info.buildNumber}',
+    );
   }
 
   @override
