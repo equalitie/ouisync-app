@@ -12,11 +12,21 @@ import '../utils/log.dart' show AppLogger;
 // around the same reconnect) can't make this grow without bound.
 const _maxRecordedErrors = 20;
 
+// Don't attempt another connection reset within this long of the last one, so a burst of
+// errors arriving together (e.g. several subscriptions erroring around the same disconnect)
+// triggers one reset instead of piling up overlapping ones.
+const _minResetInterval = Duration(seconds: 2);
+
 // Watch if an error happened in different parts of the app and the ouisync library.
 // Only captures errors that can't be gracefuly handled, the cubit indicates to
 // the user that the log should be captured.
 class ErrorCubit extends Cubit<ErrorCubitState> with CubitActions, AppLogger {
-  ErrorCubit(native.Session session) : super(ErrorCubitState(const [])) {
+  final native.Session _session;
+  DateTime? _lastReset;
+
+  ErrorCubit(native.Session session)
+    : _session = session,
+      super(ErrorCubitState(const [])) {
     // NOTE: Depending on where a panic happens inside the Rust code, we either
     // can detect it through the state monitor, or the server/service closes
     // the connection and we disconnect. The latter is caught through the
@@ -65,6 +75,28 @@ class ErrorCubit extends Cubit<ErrorCubitState> with CubitActions, AppLogger {
     }
 
     emitUnlessClosed(ErrorCubitState(messages));
+    _resetConnection();
+  }
+
+  // Whatever just went wrong, force the client to drop and reestablish its connection to the
+  // service: most of what lands here is a symptom of a stale/dead connection (dropped sockets,
+  // subscriptions that stopped delivering, etc.), and resetting is cheap and a no-op if the
+  // connection was actually fine.
+  void _resetConnection() {
+    final now = DateTime.now();
+
+    if (_lastReset != null && now.difference(_lastReset!) < _minResetInterval) {
+      return;
+    }
+
+    _lastReset = now;
+    loggy.debug('Resetting ouisync connection after error');
+
+    unawaited(
+      _session.resetConnection().catchError((Object e) {
+        loggy.debug('Failed to reset ouisync connection: $e');
+      }),
+    );
   }
 }
 
