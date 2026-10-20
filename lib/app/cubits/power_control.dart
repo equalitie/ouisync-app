@@ -134,8 +134,18 @@ class PowerControl extends Cubit<PowerControlState>
     // `_updateNetworkMode`'s "mode unchanged" guard would otherwise skip rebinding entirely on
     // resume. Call `_setNetworkMode` directly so a fresh `bindNetwork` is sent regardless,
     // letting ouisync-net's rebind-on-death logic detect and recreate any dead QUIC stack.
+    //
+    // `_setNetworkMode` deliberately rethrows on failure (callers that react to a user-driven
+    // mode change want to know it failed); here there's no user action to report back to, and
+    // right after resuming the connection to the backend may still be mid-reconnect, so a
+    // failure is expected and transient - swallow it rather than surfacing it as an unhandled
+    // error (`_setNetworkMode` has already recorded the failure by emitting a disabled mode).
     if (state == AppLifecycleState.resumed) {
-      unawaited(_setNetworkMode(this.state.networkMode));
+      unawaited(
+        _setNetworkMode(this.state.networkMode).catchError((Object e) {
+          loggy.debug('Failed to rebind network on resume: $e');
+        }),
+      );
     }
   }
 
