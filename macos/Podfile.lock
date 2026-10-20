@@ -2,6 +2,9 @@ PODS:
   - biometric_storage (0.0.1):
     - FlutterMacOS
   - FlutterMacOS (1.0.0)
+  - logtee (0.0.1):
+    - Flutter
+    - FlutterMacOS
   - ouisync (0.0.1):
     - Flutter
     - FlutterMacOS
@@ -13,6 +16,7 @@ PODS:
 DEPENDENCIES:
   - biometric_storage (from `Flutter/ephemeral/.symlinks/plugins/biometric_storage/macos`)
   - FlutterMacOS (from `Flutter/ephemeral`)
+  - logtee (from `Flutter/ephemeral/.symlinks/plugins/logtee/darwin`)
   - ouisync (from `Flutter/ephemeral/.symlinks/plugins/ouisync/darwin`)
   - screen_retriever_macos (from `Flutter/ephemeral/.symlinks/plugins/screen_retriever_macos/macos`)
   - system_tray (from `Flutter/ephemeral/.symlinks/plugins/system_tray/macos`)
@@ -22,6 +26,8 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/biometric_storage/macos
   FlutterMacOS:
     :path: Flutter/ephemeral
+  logtee:
+    :path: Flutter/ephemeral/.symlinks/plugins/logtee/darwin
   ouisync:
     :path: Flutter/ephemeral/.symlinks/plugins/ouisync/darwin
   screen_retriever_macos:
@@ -32,6 +38,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   biometric_storage: 9de0cb4e591e52329ca0da7df42e964db6c526cf
   FlutterMacOS: d0db08ddef1a9af05a5ec4b724367152bb0500b1
+  logtee: 9d74c06f039f07d5faf6d7367f083c5e13866bfa
   ouisync: 7045743463fa7bdcebaeaabc11310c284298903b
   screen_retriever_macos: 452e51764a9e1cdb74b3c541238795849f21557f
   system_tray: 53f0cdb020c3fbee711d3fe45ae7ce730e033d2b

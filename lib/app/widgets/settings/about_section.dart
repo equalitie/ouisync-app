@@ -273,19 +273,11 @@ class AboutSection extends SettingsSection with AppLogger {
     future: session.getRuntimeId(),
     builder: (context, snapshot) {
       final runtimeId = snapshot.data;
-      final runtimeIdWidget = Text(
+      return Text(
         runtimeId != null ? HEX.encode(runtimeId.value) : '',
         overflow: TextOverflow.ellipsis,
         style: context.theme.appTextStyle.bodySmall,
       );
-
-      if (io.Platform.isIOS) {
-        return Expanded(
-          child: Row(children: [Expanded(child: runtimeIdWidget)]),
-        );
-      }
-
-      return runtimeIdWidget;
     },
   );
 }
