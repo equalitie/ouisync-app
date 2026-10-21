@@ -65,6 +65,7 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
 
   StreamSubscription<void>? _currentSubscription;
   StreamSubscription<void>? _storeDirsSubscription;
+  late final StreamSubscription<void> _reconnectedSubscription;
 
   ReposCubit({
     required this._session,
@@ -82,6 +83,19 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
        passwordHasher = PasswordHasher(_session),
        super(ReposState()) {
     unawaited(_init(storeDirsCubit));
+
+    // Every `RepoCubit` holds a `Repository` bound to a native handle from whatever service
+    // process opened it. After the service has been fully restarted (see
+    // `Session.serviceUnresponsive` in app.dart) rather than just having its socket momentarily
+    // drop, that handle no longer refers to anything meaningful in the new process - at best this
+    // shows as stale/empty content (the new process happens to reuse the same handle number for
+    // something else), at worst an operation on it just hangs forever (nothing is listening on
+    // the other end to ever reply). Merely re-fetching through the same stale `Repository`
+    // object doesn't fix this; every repo needs to be closed and reopened against the new
+    // process, which is exactly what `_reload()` already does for the "store dirs changed" case.
+    _reconnectedSubscription = _session.reconnected.listen(
+      (_) => unawaited(_reload()),
+    );
   }
 
   Future<void> _init(StoreDirsCubit storeDirsCubit) async {
@@ -314,6 +328,8 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
 
     await _storeDirsSubscription?.cancel();
     _storeDirsSubscription = null;
+
+    await _reconnectedSubscription.cancel();
 
     for (final repo in repos.values) {
       await repo.close();
