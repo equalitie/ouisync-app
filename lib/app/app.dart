@@ -55,10 +55,15 @@ class App extends StatefulWidget {
 }
 
 class _AppState extends State<App> {
-  late final components = _AppComponents.create(widget.args).then((components) {
-    widget.controller?._stopListener = () => components.destroy();
-    return components;
-  });
+  late final components = _AppComponents.create(widget.args)
+      .then((components) {
+        widget.controller?._stopListener = () => components.destroy();
+        return components;
+      })
+      .catchError((Object error, StackTrace stackTrace) {
+        log.named('Startup').error('app startup failed:', error, stackTrace);
+        throw error;
+      });
 
   @override
   Widget build(BuildContext context) => FutureBuilder<_AppComponents>(
@@ -66,7 +71,14 @@ class _AppState extends State<App> {
     builder: (context, snapshot) {
       final components = snapshot.data;
 
-      if (components != null) {
+      if (snapshot.hasError) {
+        return _buildMaterialApp(
+          home: StartupErrorScreen(
+            error: snapshot.error!,
+            stackTrace: snapshot.stackTrace,
+          ),
+        );
+      } else if (components != null) {
         return BlocBuilder<LocaleCubit, LocaleState>(
           bloc: components.localeCubit,
           builder: (context, localeState) => _buildMaterialApp(
@@ -420,6 +432,31 @@ class LoadingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) =>
       Scaffold(body: Center(child: CircularProgressIndicator()));
+}
+
+// Shown instead of the loading spinner when app startup fails, so the cause is visible.
+class StartupErrorScreen extends StatelessWidget {
+  final Object error;
+  final StackTrace? stackTrace;
+
+  const StartupErrorScreen({
+    required this.error,
+    required this.stackTrace,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    body: SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: SelectableText(
+          'Ouisync failed to start.\n\n$error\n\n${stackTrace ?? ''}',
+          style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+        ),
+      ),
+    ),
+  );
 }
 
 // Due to race conditions the app sometimes `pop`s more from the stack than have been pushed
