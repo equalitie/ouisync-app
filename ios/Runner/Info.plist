@@ -28,8 +28,14 @@
 	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_dartVmService._tcp</string>
+	</array>
 	<key>NSCameraUsageDescription</key>
 	<string>Pair with other machines by scanning QR codes</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Allow Ouisync to find and connect to development tooling on the local network.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Import files from your media library into Ouisync</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>

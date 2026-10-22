@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/widgets.dart'
+    show AppLifecycleState, WidgetsBinding, WidgetsBindingObserver;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync/ouisync.dart' as oui;
 import 'package:ouisync_app/app/utils/constants.dart';
@@ -104,7 +106,7 @@ class PowerControlState {
 }
 
 class PowerControl extends Cubit<PowerControlState>
-    with AppLogger, CubitActions {
+    with AppLogger, CubitActions, WidgetsBindingObserver {
   final oui.Session _session;
   final Settings _settings;
   final Connectivity _connectivity;
@@ -114,13 +116,37 @@ class PowerControl extends Cubit<PowerControlState>
   PowerControl(this._session, this._settings, {Connectivity? connectivity})
     : _connectivity = connectivity ?? Connectivity(),
       super(PowerControlState()) {
+    WidgetsBinding.instance.addObserver(this);
     unawaited(_init());
   }
 
   @override
   Future<void> close() {
+    WidgetsBinding.instance.removeObserver(this);
     _localInterfaceWatch.close();
     return super.close();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Backgrounding can silently kill the network stack (e.g. iOS tearing down sockets while
+    // the app is backgrounded) without ever changing the reported connectivity type, so
+    // `_updateNetworkMode`'s "mode unchanged" guard would otherwise skip rebinding entirely on
+    // resume. Call `_setNetworkMode` directly so a fresh `bindNetwork` is sent regardless,
+    // letting ouisync-net's rebind-on-death logic detect and recreate any dead QUIC stack.
+    //
+    // `_setNetworkMode` deliberately rethrows on failure (callers that react to a user-driven
+    // mode change want to know it failed); here there's no user action to report back to, and
+    // right after resuming the connection to the backend may still be mid-reconnect, so a
+    // failure is expected and transient - swallow it rather than surfacing it as an unhandled
+    // error (`_setNetworkMode` has already recorded the failure by emitting a disabled mode).
+    if (state == AppLifecycleState.resumed) {
+      unawaited(
+        _setNetworkMode(this.state.networkMode).catchError((Object e) {
+          loggy.debug('Failed to rebind network on resume: $e');
+        }),
+      );
+    }
   }
 
   Future<void> _init() async {

@@ -6,6 +6,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:ouisync/ouisync.dart' show NetworkDefaults, Server, Session;
 import 'package:ouisync_app/app/cubits/store_dirs.dart';
 import 'package:package_info_plus/package_info_plus.dart' show PackageInfo;
+import 'package:path/path.dart' show join;
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:stream_transform/stream_transform.dart';
@@ -54,10 +55,15 @@ class App extends StatefulWidget {
 }
 
 class _AppState extends State<App> {
-  late final components = _AppComponents.create(widget.args).then((components) {
-    widget.controller?._stopListener = () => components.destroy();
-    return components;
-  });
+  late final components = _AppComponents.create(widget.args)
+      .then((components) {
+        widget.controller?._stopListener = () => components.destroy();
+        return components;
+      })
+      .catchError((Object error, StackTrace stackTrace) {
+        log.named('Startup').error('app startup failed:', error, stackTrace);
+        throw error;
+      });
 
   @override
   Widget build(BuildContext context) => FutureBuilder<_AppComponents>(
@@ -65,7 +71,14 @@ class _AppState extends State<App> {
     builder: (context, snapshot) {
       final components = snapshot.data;
 
-      if (components != null) {
+      if (snapshot.hasError) {
+        return _buildMaterialApp(
+          home: StartupErrorScreen(
+            error: snapshot.error!,
+            stackTrace: snapshot.stackTrace,
+          ),
+        );
+      } else if (components != null) {
         return BlocBuilder<LocaleCubit, LocaleState>(
           bloc: components.localeCubit,
           builder: (context, localeState) => _buildMaterialApp(
@@ -129,6 +142,7 @@ class _AppComponents {
   final ErrorCubit errorCubit;
   final LocaleCubit localeCubit;
   final StoreDirsCubit storeDirsCubit;
+  final StreamSubscription<void> _unresponsiveSubscription;
 
   _AppComponents._(
     this.windowManager,
@@ -139,6 +153,7 @@ class _AppComponents {
     this.errorCubit,
     this.localeCubit,
     this.storeDirsCubit,
+    this._unresponsiveSubscription,
   );
 
   static Future<_AppComponents> create(List<String> args) async {
@@ -158,6 +173,9 @@ class _AppComponents {
     final settings = await loadAndMigrateSettings(session);
     final localeCubit = LocaleCubit(settings);
     final storeDirsCubit = StoreDirsCubit(session, dirs);
+    final unresponsiveSubscription = session.serviceUnresponsive.listen(
+      (_) => unawaited(_restartUnresponsiveService(server, session)),
+    );
 
     return _AppComponents._(
       windowManager,
@@ -168,15 +186,58 @@ class _AppComponents {
       errorCubit,
       localeCubit,
       storeDirsCubit,
+      unresponsiveSubscription,
     );
   }
 
   Future<void> destroy() async {
+    await _unresponsiveSubscription.cancel();
     await localeCubit.close();
     await errorCubit.close();
 
     await session.close();
     await server.stop();
+  }
+}
+
+// Several independent subscriptions on the same dead client tend to cross the unresponsive
+// threshold within the same tick, each firing their own event - guard against the resulting
+// pile-up of concurrent restarts (harmless in practice, since `server.start()` just rejects the
+// extra ones with `serviceAlreadyRunning`, but there's no reason to let them race).
+bool _restartingUnresponsiveService = false;
+
+/// Restarts the native service when it appears to be gone rather than merely unreachable (see
+/// `Session.serviceUnresponsive`). Observed after some iOS background/foreground cycles: the
+/// service's local listener socket disappears outright (connection attempts get refused
+/// immediately, forever) rather than just erroring once and recovering on its own, which means
+/// the native process/thread died and nothing will bring it back except restarting it.
+Future<void> _restartUnresponsiveService(Server server, Session session) async {
+  if (_restartingUnresponsiveService) {
+    return;
+  }
+  _restartingUnresponsiveService = true;
+
+  final logger = log.named('');
+  logger.warning('Native service appears unresponsive, restarting it');
+
+  try {
+    // The old handle may belong to a thread that's already dead, in which case this would hang
+    // forever waiting for a reply that will never come - time-box it instead. `server.stop()`
+    // clears its handle synchronously before awaiting anything, so `server.start()` below is
+    // safe to call regardless of whether this completes, times out, or throws.
+    await server.stop().timeout(const Duration(seconds: 2));
+  } catch (e) {
+    logger.debug('Ignoring failure stopping unresponsive server: $e');
+  }
+
+  try {
+    await server.start();
+    await session.resetConnection();
+    logger.debug('Native service restarted');
+  } catch (e, st) {
+    logger.error('Failed to restart native service:', e, st);
+  } finally {
+    _restartingUnresponsiveService = false;
   }
 }
 
@@ -187,7 +248,13 @@ Future<(Server, Session)> _initServerAndSession(
   final logger = log.named('');
 
   final server = Server.create(configPath: dirs.config);
-  await server.initLog();
+  // Append the native (Rust) logs to the same file the Dart side logs to (see utils/log.dart),
+  // so they show up in the app's Save/Share logs. On iOS/macOS the native side's stdout isn't
+  // otherwise captured anywhere once the app is backgrounded, so without this there is no way
+  // to see what the service is doing after that point.
+  await server.initLog(
+    logFilePath: join(dirs.root, 'logs', Constants.logFileName),
+  );
 
   try {
     await server.start();
@@ -365,6 +432,31 @@ class LoadingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) =>
       Scaffold(body: Center(child: CircularProgressIndicator()));
+}
+
+// Shown instead of the loading spinner when app startup fails, so the cause is visible.
+class StartupErrorScreen extends StatelessWidget {
+  final Object error;
+  final StackTrace? stackTrace;
+
+  const StartupErrorScreen({
+    required this.error,
+    required this.stackTrace,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    body: SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: SelectableText(
+          'Ouisync failed to start.\n\n$error\n\n${stackTrace ?? ''}',
+          style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+        ),
+      ),
+    ),
+  );
 }
 
 // Due to race conditions the app sometimes `pop`s more from the stack than have been pushed
