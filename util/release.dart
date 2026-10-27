@@ -794,7 +794,11 @@ Future<File> buildWindowsMSIX(
   /// Sign the msix file
   if (msixSecrets != null) {
     await run('powershell', [
-      '-Command',
+      '-NoProfile',
+      '-NonInteractive',
+      '-ExecutionPolicy',
+      'Bypass',
+      '-File',
       'util/windows/sign-msix.ps1',
       '-msixPath',
       msixPackagePath,
