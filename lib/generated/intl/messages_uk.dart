@@ -23,88 +23,108 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m0(access) =>
       "Дозвіл не може бути вищим за поточний режим доступу до сховища: ${access}";
 
-  static String m3(path) => "Завантаження файлу в ${path}";
+  static String m39(totals) => "Скопіювати вибір сюди:\n\n\t\t${totals}";
 
-  static String m4(name) => "${name} - завантаження скасовано";
+  static String m40(totals) => "Видалити виділення:\n\n\t\t${totals}";
 
-  static String m5(name) => "${name} - не вдалося завантажити";
+  static String m1(path) => "Завантаження файлу в ${path}";
 
-  static String m6(entry) => "${entry} вже існує.";
+  static String m2(name) => "${name} - завантаження скасовано";
 
-  static String m8(path) =>
+  static String m3(name) => "${name} - не вдалося завантажити";
+
+  static String m4(entry) => "${entry} вже існує.";
+
+  static String m41(name) => "Помилка створення папки ${name}";
+
+  static String m5(path) =>
       "Поточна папка відсутня, перехід до її батьківської: ${path}";
 
-  static String m9(error) => "Помилка: ${error}";
+  static String m6(error) => "Помилка: ${error}";
 
-  static String m10(dokanUrl) => "Докан відсутній ${dokanUrl}";
+  static String m7(dokanUrl) => "Докан відсутній ${dokanUrl}";
 
-  static String m11(name) => "Не вдалося ініціалізувати репозиторій ${name}";
+  static String m8(name) => "Не вдалося ініціалізувати репозиторій ${name}";
 
-  static String m12(path) => "${path} не порожній";
+  static String m9(path) => "${path} не порожній";
 
-  static String m13(name) => "Не вдалося імпортувати репозиторій ${name}";
+  static String m10(name) => "Не вдалося імпортувати репозиторій ${name}";
 
-  static String m14(name) => "Не вдалося створити репозиторій ${name}";
+  static String m11(name) => "Не вдалося створити репозиторій ${name}";
 
-  static String m15(reason) =>
+  static String m12(reason) =>
       "Доступ до репозицій через File Explorer не доступний: ${reason}";
 
-  static String m16(name) =>
+  static String m13(name) =>
       "${name} вже існують у цій локації.\n\nЩо ви хочете зробити?";
 
-  static String m19(name) => "Теку успішно видалено: ${name}";
+  static String m42(name) => "Файл успішно видалено: ${name}";
 
-  static String m21(number) =>
+  static String m43(name) => "Файл перейменовано на ${name}";
+
+  static String m14(name) => "Теку успішно видалено: ${name}";
+
+  static String m44(name) => "Папку перейменовано на ${name}";
+
+  static String m15(number) =>
       "Ви хочете заблокувати всі відкриті репозиторії?\n\n(${number} відкритих)";
 
-  static String m23(path) => "з ${path}";
+  static String m45(totals) => "Перемістити вибір сюди:\n\n\t\t${totals}";
 
-  static String m24(name) => "Помилка створення файлу ${name}";
+  static String m16(path) => "з ${path}";
 
-  static String m25(name) => "Помилка відкриття файлу ${name}";
+  static String m17(name) => "Помилка створення файлу ${name}";
 
-  static String m26(path) => "Перегляд файлу ${path} не вдалося";
+  static String m18(name) => "Помилка відкриття файлу ${name}";
 
-  static String m27(name) => "Ми не змогли видалити репозиторій \"${name}\"";
+  static String m19(path) => "Перегляд файлу ${path} не вдалося";
 
-  static String m28(name) =>
+  static String m20(name) => "Ми не змогли видалити репозиторій \"${name}\"";
+
+  static String m21(name) =>
       "Не вдалося знайти репозиторій \"${name}\" за звичним місцем розташування";
 
-  static String m29(access) => "Режим доступу: ${access}";
+  static String m22(access) => "Режим доступу: ${access}";
 
-  static String m30(name) =>
+  static String m23(name) =>
       "Цей репозиторій вже існує в застосунку під назвою \"${name}\".";
 
-  static String m33(name) =>
+  static String m46(name) => "Репозиторій ${name} видалено";
+
+  static String m47(name) => "Репозиторій перейменовано на ${name}";
+
+  static String m24(name) =>
       "Запропоновано: ${name}\n(натисніть тут, щоб використовувати цю назву)";
 
-  static String m35(name) => "Сортувати за: ${name}";
+  static String m48(totals) => "Зберегти вибір:\n\n\t\t${totals}";
 
-  static String m36(access) => "Розблоковано як ${access} копія";
+  static String m25(name) => "Сортувати за: ${name}";
 
-  static String m37(name) => "Введіть пароль для розблокування \"${name}\"";
+  static String m26(access) => "Розблоковано як ${access} копія";
 
-  static String m38(name) => "${name} запис скасовано";
+  static String m27(name) => "Введіть пароль для розблокування \"${name}\"";
 
-  static String m39(name) => "${name} - не вдалося записати";
+  static String m28(name) => "${name} запис скасовано";
 
-  static String m40(access) => "${access}";
+  static String m29(name) => "${name} - не вдалося записати";
 
-  static String m41(changes) => "${changes}";
+  static String m30(access) => "${access}";
 
-  static String m42(entry) => "${entry}";
+  static String m31(changes) => "${changes}";
 
-  static String m43(error) => "${error} і";
+  static String m32(entry) => "${entry}";
 
-  static String m44(name) => "${name}";
+  static String m33(error) => "${error} і";
 
-  static String m45(number) => "${number}";
+  static String m34(name) => "${name}";
 
-  static String m46(path) => "${path}";
+  static String m35(number) => "${number}";
 
-  static String m47(status) => "${status}";
+  static String m36(path) => "${path}";
 
-  static String m49(name) => "Поділитися репозиторієм \"${name}\"";
+  static String m37(status) => "${status}";
+
+  static String m38(name) => "Поділитися репозиторієм \"${name}\"";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -124,6 +144,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "actionCancelCapital": MessageLookupByLibrary.simpleMessage("СКАСУВАТИ"),
     "actionClear": MessageLookupByLibrary.simpleMessage("Очистити"),
     "actionCloseCapital": MessageLookupByLibrary.simpleMessage("ЗАКРИТИ"),
+    "actionCopy": MessageLookupByLibrary.simpleMessage("Копіювати"),
     "actionCreate": MessageLookupByLibrary.simpleMessage("Створити"),
     "actionCreateRepository": MessageLookupByLibrary.simpleMessage(
       "Створити репозиторій",
@@ -137,6 +158,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "actionDiscard": MessageLookupByLibrary.simpleMessage("Відхилити"),
     "actionDone": MessageLookupByLibrary.simpleMessage("Завершено"),
+    "actionDownload": MessageLookupByLibrary.simpleMessage("Завантажити"),
     "actionEditRepositoryName": MessageLookupByLibrary.simpleMessage(
       "Змінити назву",
     ),
@@ -150,6 +172,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "actionIAgree": MessageLookupByLibrary.simpleMessage("Я згоден/згодна"),
     "actionIDontAgree": MessageLookupByLibrary.simpleMessage(
       "Я не згодний/згодна",
+    ),
+    "actionIDontHaveALocalPassword": MessageLookupByLibrary.simpleMessage(
+      "У мене немає локального пароля для цього репозиторію",
     ),
     "actionImport": MessageLookupByLibrary.simpleMessage("Імпортувати"),
     "actionImportRepo": MessageLookupByLibrary.simpleMessage(
@@ -190,6 +215,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "actionSave": MessageLookupByLibrary.simpleMessage("Зберегти"),
     "actionSaveChanges": MessageLookupByLibrary.simpleMessage("Зберегти зміни"),
     "actionScanQR": MessageLookupByLibrary.simpleMessage("Сканувати QR-код"),
+    "actionSelect": MessageLookupByLibrary.simpleMessage("Виберіть"),
     "actionShare": MessageLookupByLibrary.simpleMessage("Поділитися"),
     "actionShareFile": MessageLookupByLibrary.simpleMessage(
       "Поділитися файлом",
@@ -208,6 +234,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "iconAddExistingRepository": MessageLookupByLibrary.simpleMessage(
       "Імпортувати репозиторій",
     ),
+    "iconCopy": MessageLookupByLibrary.simpleMessage("Копіювати"),
     "iconCreateRepository": MessageLookupByLibrary.simpleMessage(
       "Створити новий репозиторій",
     ),
@@ -288,6 +315,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "labelSyncStatus": MessageLookupByLibrary.simpleMessage(
       "Стан Синхронізації: ",
     ),
+    "labelSynced": MessageLookupByLibrary.simpleMessage("Синхронізовано"),
     "labelTcpListenerEndpointV4": MessageLookupByLibrary.simpleMessage(
       "Прослуховування за протоколом TCP IPv4",
     ),
@@ -346,6 +374,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "messageBackgroundAndroidPermissions": MessageLookupByLibrary.simpleMessage(
       "Незабаром операційна система запитає у вас дозвіл на виконання цієї програми у фоновому режимі.\n\nЦе необхідно для того, щоб продовжувати синхронізацію, коли програма не знаходиться на передньому плані",
+    ),
+    "messageBackgroundNotification": MessageLookupByLibrary.simpleMessage(
+      "Ouisync працює",
     ),
     "messageBioAuthFailed": MessageLookupByLibrary.simpleMessage(
       "Не вдалося виконати біометричну аутентифікацію",
@@ -408,6 +439,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageCopiedToClipboard": MessageLookupByLibrary.simpleMessage(
       "Скопійовано в буфер обміну.",
     ),
+    "messageCopyEntries": m39,
     "messageCreateAddNewItem": MessageLookupByLibrary.simpleMessage(
       "Створіть нову <bold>папку</bold>, або додайте <bold>файл</bold>, використовуючи <icon></icon>",
     ),
@@ -429,6 +461,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageDeclarationDOS": MessageLookupByLibrary.simpleMessage(
       "Декларацією про розподілені онлайн-послуги",
     ),
+    "messageDeleteEntries": m40,
     "messageDeletionDataServerNote": MessageLookupByLibrary.simpleMessage(
       "Команда Ouisync не може видаляти окремі файли зі сховищ, оскільки їх неможливо ідентифікувати, оскільки вони зашифровані. Ми можемо видаляти цілі сховища, якщо ви надішлете нам посилання на сховище, яке потрібно видалити",
     ),
@@ -454,9 +487,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageDownloadFileCanceled": MessageLookupByLibrary.simpleMessage(
       "Завантаження файлу скасовано",
     ),
-    "messageDownloadFileLocation": m3,
-    "messageDownloadingFileCanceled": m4,
-    "messageDownloadingFileError": m5,
+    "messageDownloadFileLocation": m1,
+    "messageDownloadingFileCanceled": m2,
+    "messageDownloadingFileError": m3,
     "messageEmptyFolder": MessageLookupByLibrary.simpleMessage(
       "Ця <bold>папка</bold> порожня",
     ),
@@ -466,7 +499,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageEnterDifferentName": MessageLookupByLibrary.simpleMessage(
       "Будь ласка, введіть інше ім\'я",
     ),
-    "messageEntryAlreadyExist": m6,
+    "messageEntryAlreadyExist": m4,
     "messageEntryTypeDefault": MessageLookupByLibrary.simpleMessage("Запис"),
     "messageEntryTypeFile": MessageLookupByLibrary.simpleMessage("Файл"),
     "messageEntryTypeFolder": MessageLookupByLibrary.simpleMessage("Папка"),
@@ -525,21 +558,22 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageErrorCharactersNotAllowed": MessageLookupByLibrary.simpleMessage(
       "Використання \\ або / не допускається",
     ),
+    "messageErrorCreatingFolder": m41,
     "messageErrorCreatingRepository": MessageLookupByLibrary.simpleMessage(
       "Помилка при створенні репозиторію",
     ),
     "messageErrorCreatingToken": MessageLookupByLibrary.simpleMessage(
       "Помилка при створенні токена.",
     ),
-    "messageErrorCurrentPathMissing": m8,
+    "messageErrorCurrentPathMissing": m5,
     "messageErrorDefault": MessageLookupByLibrary.simpleMessage(
       "Щось пішло не так. Будь ласка, спробуйте ще раз.",
     ),
     "messageErrorDefaultShort": MessageLookupByLibrary.simpleMessage(
       "Невдало.",
     ),
-    "messageErrorDetail": m9,
-    "messageErrorDokanNotInstalled": m10,
+    "messageErrorDetail": m6,
+    "messageErrorDokanNotInstalled": m7,
     "messageErrorEntryNotFound": MessageLookupByLibrary.simpleMessage(
       "запис не знайдено",
     ),
@@ -557,8 +591,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageErrorOpeningRepo": MessageLookupByLibrary.simpleMessage(
       "Помилка при відкритті сховища",
     ),
-    "messageErrorOpeningRepoDescription": m11,
-    "messageErrorPathNotEmpty": m12,
+    "messageErrorOpeningRepoDescription": m8,
+    "messageErrorPathNotEmpty": m9,
     "messageErrorRepositoryNameExist": MessageLookupByLibrary.simpleMessage(
       "Репозиторій з такою назвою вже існує",
     ),
@@ -584,11 +618,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "Натисніть ще раз, щоб вийти.",
     ),
     "messageFAQ": MessageLookupByLibrary.simpleMessage("Поширені запитання"),
-    "messageFailedAddRepository": m13,
-    "messageFailedCreateRepository": m14,
-    "messageFailedToMount": m15,
+    "messageFailedAddRepository": m10,
+    "messageFailedCreateRepository": m11,
+    "messageFailedToMount": m12,
     "messageFile": MessageLookupByLibrary.simpleMessage("файл"),
-    "messageFileAlreadyExist": m16,
+    "messageFileAlreadyExist": m13,
+    "messageFileDeleted": m42,
     "messageFileIsDownloading": MessageLookupByLibrary.simpleMessage(
       "Файл завантажується",
     ),
@@ -599,9 +634,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageFilePreviewNotAvailable": MessageLookupByLibrary.simpleMessage(
       "Попередній перегляд файлу ще не доступний",
     ),
+    "messageFileRenamed": m43,
     "messageFiles": MessageLookupByLibrary.simpleMessage("файли"),
-    "messageFolderDeleted": m19,
+    "messageFolderDeleted": m14,
     "messageFolderName": MessageLookupByLibrary.simpleMessage("Назва папки"),
+    "messageFolderRenamed": m44,
     "messageGeneratePassword": MessageLookupByLibrary.simpleMessage(
       "Згенерувати пароль",
     ),
@@ -677,7 +714,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageLocalDiscovery": MessageLookupByLibrary.simpleMessage(
       "Локальне відкриття",
     ),
-    "messageLockOpenRepos": m21,
+    "messageLockOpenRepos": m15,
     "messageLockedRepository": MessageLookupByLibrary.simpleMessage(
       "Цей <bold>репозиторій</bold> заблоковано.",
     ),
@@ -710,7 +747,8 @@ class MessageLookup extends MessageLookupByLibrary {
           "Ouisync не має дозволу на роботу у фоновому режимі, відкриття іншої програми може зупинити поточну синхронізацію",
         ),
     "messageMobile": MessageLookupByLibrary.simpleMessage("Телефон"),
-    "messageMoveEntryOrigin": m23,
+    "messageMoveEntries": m45,
+    "messageMoveEntryOrigin": m16,
     "messageMovingEntry": MessageLookupByLibrary.simpleMessage(
       "Ця функція недоступна при переміщенні запису.",
     ),
@@ -721,7 +759,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageNetworkIsUnavailable": MessageLookupByLibrary.simpleMessage(
       "Мережа недоступна",
     ),
-    "messageNewFileError": m24,
+    "messageNetworkNoInternet": MessageLookupByLibrary.simpleMessage(
+      "Немає інтернету, ви все ще можете синхронізуватися локально, якщо Wi-Fi увімкнено",
+    ),
+    "messageNewFileError": m17,
     "messageNewPasswordCopiedClipboard": MessageLookupByLibrary.simpleMessage(
       "Новий пароль скопійовано до буфера обміну",
     ),
@@ -729,7 +770,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Доступна нова версія.",
     ),
     "messageNoAppsForThisAction": MessageLookupByLibrary.simpleMessage(
-      "Не всі застосунки можуть виконувати цю дію",
+      "Жодна програма не може виконати цю дію",
     ),
     "messageNoMediaPresent": MessageLookupByLibrary.simpleMessage(
       "Не маж медіа файлів.",
@@ -760,7 +801,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageOnlyAvailableFiles": MessageLookupByLibrary.simpleMessage(
       "Доступно тільки для файлів",
     ),
-    "messageOpenFileError": m25,
+    "messageOpenFileError": m18,
     "messageOr": MessageLookupByLibrary.simpleMessage("Або"),
     "messageOuiSyncDesktopTitle": MessageLookupByLibrary.simpleMessage(
       "Ouisync",
@@ -786,7 +827,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "messagePermissionRequired": MessageLookupByLibrary.simpleMessage(
       "Цей дозвіл є обов\'язковим",
     ),
-    "messagePreviewingFileFailed": m26,
+    "messagePleaseAuthenticate": MessageLookupByLibrary.simpleMessage(
+      "Будь ласка, автентифікуйте",
+    ),
+    "messagePreviewingFileFailed": m19,
     "messagePrivacyIntro": MessageLookupByLibrary.simpleMessage(
       "Цей розділ призначений для інформування відвідувачів про нашу політику щодо збору, використання та розкриття персональних даних під час використання нашого Сервісу",
     ),
@@ -836,19 +880,20 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageRepoAuthFailed": MessageLookupByLibrary.simpleMessage(
       "Не вдалося виконати аутентифікацію сховища",
     ),
-    "messageRepoDeletionErrorDescription": m27,
+    "messageRepoDeletionErrorDescription": m20,
     "messageRepoDeletionFailed": MessageLookupByLibrary.simpleMessage(
       "Видалення сховища не вдалося",
     ),
     "messageRepoMissing": MessageLookupByLibrary.simpleMessage(
       "Сховища більше не існує",
     ),
-    "messageRepoMissingErrorDescription": m28,
-    "messageRepositoryAccessMode": m29,
-    "messageRepositoryAlreadyExist": m30,
+    "messageRepoMissingErrorDescription": m21,
+    "messageRepositoryAccessMode": m22,
+    "messageRepositoryAlreadyExist": m23,
     "messageRepositoryCurrentPassword": MessageLookupByLibrary.simpleMessage(
       "Поточний пароль",
     ),
+    "messageRepositoryDeleted": m46,
     "messageRepositoryIsNotOpen": MessageLookupByLibrary.simpleMessage(
       "Репозиторій не відкритий",
     ),
@@ -865,7 +910,8 @@ class MessageLookup extends MessageLookupByLibrary {
       "Репозиторій не змонтовано ",
     ),
     "messageRepositoryPassword": MessageLookupByLibrary.simpleMessage("Пароль"),
-    "messageRepositorySuggestedName": m33,
+    "messageRepositoryRenamed": m47,
+    "messageRepositorySuggestedName": m24,
     "messageRepositoryToken": MessageLookupByLibrary.simpleMessage(
       "Вставте посилання сюди",
     ),
@@ -873,6 +919,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Відновити місцевий секрет",
     ),
     "messageRousseau": MessageLookupByLibrary.simpleMessage("Жан-Жак Руссо"),
+    "messageSaveEntriesToDevice": m48,
     "messageSaveToLocation": MessageLookupByLibrary.simpleMessage(
       "Зберегти файл в цю папку",
     ),
@@ -919,7 +966,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageShareWithWR": MessageLookupByLibrary.simpleMessage(
       "Поширити за допомогою QR коду",
     ),
-    "messageSortBy": m35,
+    "messageSortBy": m25,
     "messageStorage": MessageLookupByLibrary.simpleMessage("Сховище"),
     "messageStoragePermission": MessageLookupByLibrary.simpleMessage(
       "Потрібно для отримання доступу до файлів",
@@ -974,8 +1021,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageUnlockRepoFailed": MessageLookupByLibrary.simpleMessage(
       "Пароль не розблокував репозиторій",
     ),
-    "messageUnlockRepoOk": m36,
-    "messageUnlockRepository": m37,
+    "messageUnlockRepoOk": m26,
+    "messageUnlockRepository": m27,
     "messageUnlockUsingBiometrics": MessageLookupByLibrary.simpleMessage(
       "Розблокувати за допомогою біометричних даних",
     ),
@@ -1008,22 +1055,122 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageWriteReplicaExplanation": MessageLookupByLibrary.simpleMessage(
       "Повний доступ. Ваш вузол може читати і писати",
     ),
-    "messageWritingFileCanceled": m38,
-    "messageWritingFileError": m39,
+    "messageWritingFileCanceled": m28,
+    "messageWritingFileError": m29,
     "popupMenuItemChangePassword": MessageLookupByLibrary.simpleMessage(
       "Змінити пароль",
     ),
     "popupMenuItemCopyPassword": MessageLookupByLibrary.simpleMessage(
       "Скопіювати пароль",
     ),
-    "replacementAccess": m40,
-    "replacementChanges": m41,
-    "replacementEntry": m42,
-    "replacementError": m43,
-    "replacementName": m44,
-    "replacementNumber": m45,
-    "replacementPath": m46,
-    "replacementStatus": m47,
+    "replacementAccess": m30,
+    "replacementChanges": m31,
+    "replacementEntry": m32,
+    "replacementError": m33,
+    "replacementName": m34,
+    "replacementNumber": m35,
+    "replacementPath": m36,
+    "replacementStatus": m37,
+    "repoResetAccessTypeInfoBlindOrLocked":
+        MessageLookupByLibrary.simpleMessage("Сліпий або замкнений"),
+    "repoResetAccessTypeInfoRead": MessageLookupByLibrary.simpleMessage(
+      "Читати",
+    ),
+    "repoResetAccessTypeInfoWrite": MessageLookupByLibrary.simpleMessage(
+      "Написати",
+    ),
+    "repoResetAccessTypeLabel": MessageLookupByLibrary.simpleMessage(
+      "Тип доступу до репозиторію",
+    ),
+    "repoResetActionAnyToWrite": MessageLookupByLibrary.simpleMessage(
+      "Репозиторій отримає доступ для запису.",
+    ),
+    "repoResetActionBlindToBlind": MessageLookupByLibrary.simpleMessage(
+      "Сховище стане сліпим.",
+    ),
+    "repoResetActionBlindToBlindWarn": MessageLookupByLibrary.simpleMessage(
+      "Можливо, доступ для читання або запису в цьому репозиторії заблоковано локальним паролем. Якщо так, розблокування буде неможливим після виконання цієї дії.",
+    ),
+    "repoResetActionBlindToRead": MessageLookupByLibrary.simpleMessage(
+      "Репозиторій стане доступним лише для читання.",
+    ),
+    "repoResetActionBlindToReadWarn": MessageLookupByLibrary.simpleMessage(
+      "Можливо, доступ для запису в цьому репозиторії заблоковано локальним паролем. Якщо так, розблокування для запису буде неможливим після виконання цієї дії.",
+    ),
+    "repoResetActionInfoLabel": MessageLookupByLibrary.simpleMessage(
+      "Дія, яку потрібно подати",
+    ),
+    "repoResetActionReadToBlind": MessageLookupByLibrary.simpleMessage(
+      "Репозиторій втратить доступ для читання.",
+    ),
+    "repoResetActionReadToBlindWarn": MessageLookupByLibrary.simpleMessage(
+      "Ця дія незворотна без посилання на токен читання або запису.",
+    ),
+    "repoResetActionSame": MessageLookupByLibrary.simpleMessage(
+      "Жодних дій не буде виконано, оскільки токен та доступ до репозиторію однакові.",
+    ),
+    "repoResetActionWriteToBlind": MessageLookupByLibrary.simpleMessage(
+      "Репозиторій втратить доступ для читання та запису.",
+    ),
+    "repoResetActionWriteToBlindWarn": MessageLookupByLibrary.simpleMessage(
+      "Ця дія незворотна без посилання токена запису.",
+    ),
+    "repoResetActionWriteToRead": MessageLookupByLibrary.simpleMessage(
+      "Репозиторій втратить доступ для запису.",
+    ),
+    "repoResetActionWriteToReadWarn": MessageLookupByLibrary.simpleMessage(
+      "Ця дія незворотна без посилання на токен запису.",
+    ),
+    "repoResetAuthInfoBlindOrLocked": MessageLookupByLibrary.simpleMessage(
+      "Репозиторій або прихований, або заблокований локальним паролем",
+    ),
+    "repoResetAuthInfoBlindOrLockedWarn": MessageLookupByLibrary.simpleMessage(
+      "Додаток не може розпізнати різницю.",
+    ),
+    "repoResetAuthInfoKeyIsStored": MessageLookupByLibrary.simpleMessage(
+      "Ключ зберігається на цьому пристрої.",
+    ),
+    "repoResetAuthInfoKeyIsStoredAndProtected":
+        MessageLookupByLibrary.simpleMessage(
+          "Ключ зберігається на цьому пристрої, і для відкриття репозиторію потрібна додаткова перевірка.",
+        ),
+    "repoResetAuthInfoLabel": MessageLookupByLibrary.simpleMessage(
+      "Метод автентифікації",
+    ),
+    "repoResetAuthInfoLocked": MessageLookupByLibrary.simpleMessage(
+      "Заблоковано локальним паролем.",
+    ),
+    "repoResetAuthInfoPasswordIsStored": MessageLookupByLibrary.simpleMessage(
+      "Пароль зберігається на цьому пристрої.",
+    ),
+    "repoResetConfirmUpdateMessage": MessageLookupByLibrary.simpleMessage(
+      "Ви впевнені, що хочете продовжити дію оновлення?",
+    ),
+    "repoResetConfirmUpdateTitle": MessageLookupByLibrary.simpleMessage(
+      "Будь ласка, підтвердіть",
+    ),
+    "repoResetRepoNameLabel": MessageLookupByLibrary.simpleMessage(
+      "Назва репозиторію",
+    ),
+    "repoResetTitle": MessageLookupByLibrary.simpleMessage(
+      "Скинути доступ до репозиторію",
+    ),
+    "repoResetTokenAlreadySubmitted": MessageLookupByLibrary.simpleMessage(
+      "Жодних дій не буде виконано, оскільки токен вже надіслано.",
+    ),
+    "repoResetTokenEmptyInfo": MessageLookupByLibrary.simpleMessage(
+      "Будь ласка, надайте дійсне посилання на токен, щоб визначити дію.",
+    ),
+    "repoResetTokenInvalid": MessageLookupByLibrary.simpleMessage("Недійсний"),
+    "repoResetTokenInvalidInfo": MessageLookupByLibrary.simpleMessage(
+      "Посилання на токен недійсне.",
+    ),
+    "repoResetTokenNonMatching": MessageLookupByLibrary.simpleMessage(
+      "Неможливо виконати жодної дії, оскільки токен не відповідає цьому репозиторію.",
+    ),
+    "repoResetTokenTypeLabel": MessageLookupByLibrary.simpleMessage(
+      "Тип доступу за допомогою токена",
+    ),
     "repositoryIsAlreadyImported": MessageLookupByLibrary.simpleMessage(
       "Репозиторій вже імпортовано",
     ),
@@ -1061,6 +1208,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "Зв\'яжіться з нами",
     ),
     "titleCookies": MessageLookupByLibrary.simpleMessage("Куки"),
+    "titleCopyEntries": MessageLookupByLibrary.simpleMessage("Копіювати"),
+    "titleCopyingEntry": MessageLookupByLibrary.simpleMessage(
+      "Копіювання запису",
+    ),
     "titleCreateFolder": MessageLookupByLibrary.simpleMessage("Створити папку"),
     "titleCreateRepository": MessageLookupByLibrary.simpleMessage(
       "Створити новий репозиторій",
@@ -1071,6 +1222,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "titleDataSharing": MessageLookupByLibrary.simpleMessage(
       "3.2 Як ми ділимося даними",
     ),
+    "titleDeleteEntries": MessageLookupByLibrary.simpleMessage("Видалити"),
     "titleDeleteFile": MessageLookupByLibrary.simpleMessage("Видалити файл"),
     "titleDeleteFolder": MessageLookupByLibrary.simpleMessage("Видалити папку"),
     "titleDeleteNotEmptyFolder": MessageLookupByLibrary.simpleMessage(
@@ -1137,6 +1289,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Дані логів (журналу)",
     ),
     "titleLogs": MessageLookupByLibrary.simpleMessage("Журнали"),
+    "titleMoveEntries": MessageLookupByLibrary.simpleMessage("Перемістити"),
     "titleMovingEntry": MessageLookupByLibrary.simpleMessage(
       "Переміщення входу",
     ),
@@ -1181,6 +1334,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Необхідний дозвіл",
     ),
     "titleSaveChanges": MessageLookupByLibrary.simpleMessage("Зберегти зміни"),
+    "titleSaveEntriesToDevice": MessageLookupByLibrary.simpleMessage(
+      "Зберегти на пристрої",
+    ),
     "titleScanRepoQR": MessageLookupByLibrary.simpleMessage(
       "Сканувати QR-код Репозиторію",
     ),
@@ -1195,7 +1351,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Встановіть пароль для",
     ),
     "titleSettings": MessageLookupByLibrary.simpleMessage("Налаштування"),
-    "titleShareRepository": m49,
+    "titleShareRepository": m38,
     "titleSortBy": MessageLookupByLibrary.simpleMessage("Відсортовано"),
     "titleStateMonitor": MessageLookupByLibrary.simpleMessage(
       "Моніторинг статусу",
