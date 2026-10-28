@@ -61,7 +61,11 @@ Future<void> main(List<String> args) async {
   final options = await Options.parse(args);
 
   final pubspec = Pubspec.parse(await File("pubspec.yaml").readAsString());
-  final sentryDSN = await getSentryDSN(options);
+
+  final sentryDSN = switch (options.requiresSentryDSN()) {
+    true => await getSentryDSN(options),
+    false => null,
+  };
 
   final commit = await GitDir.isGitDir(p.current) ? await getCommit() : "";
   Version version = determineVersion(pubspec, options, commit);
@@ -292,6 +296,10 @@ class Options {
     this.sentryDSN,
     this.msixSecrets,
   });
+
+  bool requiresSentryDSN() {
+    return apk || aab || exe || msix || debGui;
+  }
 
   static Future<Options> parse(List<String> args) async {
     final parser = ArgParser();
