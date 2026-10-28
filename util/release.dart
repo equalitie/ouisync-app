@@ -61,7 +61,11 @@ Future<void> main(List<String> args) async {
   final options = await Options.parse(args);
 
   final pubspec = Pubspec.parse(await File("pubspec.yaml").readAsString());
-  final sentryDSN = await getSentryDSN(options);
+
+  final sentryDSN = switch (options.requiresSentryDSN()) {
+    true => await getSentryDSN(options),
+    false => null,
+  };
 
   final commit = await GitDir.isGitDir(p.current) ? await getCommit() : "";
   Version version = determineVersion(pubspec, options, commit);
@@ -292,6 +296,10 @@ class Options {
     this.sentryDSN,
     this.msixSecrets,
   });
+
+  bool requiresSentryDSN() {
+    return apk || aab || exe || msix || debGui;
+  }
 
   static Future<Options> parse(List<String> args) async {
     final parser = ArgParser();
@@ -794,7 +802,11 @@ Future<File> buildWindowsMSIX(
   /// Sign the msix file
   if (msixSecrets != null) {
     await run('powershell', [
-      '-Command',
+      '-NoProfile',
+      '-NonInteractive',
+      '-ExecutionPolicy',
+      'Bypass',
+      '-File',
       'util/windows/sign-msix.ps1',
       '-msixPath',
       msixPackagePath,
@@ -1297,7 +1309,10 @@ Future<String> buildReleaseNotes(
   RepositorySlug slug,
   String tagName,
 ) async {
-  final headerRegexp = RegExp(r'^\s*##\s+\[(.*)\]\((.*)\)\s+\-\s+(.*)\s*$');
+  final unreleasedHeaderRegexp = RegExp(r'^\s*##\s+\[(.*)\]\s*$');
+  final releasedHeaderRegexp = RegExp(
+    r'^\s*##\s+\[(.*)\]\((.*)\)\s+\-\s+(.*)\s*$',
+  );
 
   final input = File('CHANGELOG.md');
   final output = StringBuffer()..writeln('## What\'s new');
@@ -1307,15 +1322,17 @@ Future<String> buildReleaseNotes(
 
   await for (final line
       in input.openRead().transform(utf8.decoder).transform(LineSplitter())) {
-    final headerMatch = headerRegexp.firstMatch(line);
-
-    if (headerMatch != null) {
-      if (extracting) {
-        prevVersionTag = headerMatch.group(1);
-        break;
-      } else {
+    if (!extracting) {
+      final match = unreleasedHeaderRegexp.firstMatch(line);
+      if (match != null) {
         extracting = true;
         continue;
+      }
+    } else {
+      final match = releasedHeaderRegexp.firstMatch(line);
+      if (match != null) {
+        prevVersionTag = match.group(1);
+        break;
       }
     }
 
