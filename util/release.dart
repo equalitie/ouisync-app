@@ -1309,7 +1309,10 @@ Future<String> buildReleaseNotes(
   RepositorySlug slug,
   String tagName,
 ) async {
-  final headerRegexp = RegExp(r'^\s*##\s+\[(.*)\]\((.*)\)\s+\-\s+(.*)\s*$');
+  final unreleasedHeaderRegexp = RegExp(r'^\s*##\s+\[(.*)\]\s*$');
+  final releasedHeaderRegexp = RegExp(
+    r'^\s*##\s+\[(.*)\]\((.*)\)\s+\-\s+(.*)\s*$',
+  );
 
   final input = File('CHANGELOG.md');
   final output = StringBuffer()..writeln('## What\'s new');
@@ -1319,15 +1322,17 @@ Future<String> buildReleaseNotes(
 
   await for (final line
       in input.openRead().transform(utf8.decoder).transform(LineSplitter())) {
-    final headerMatch = headerRegexp.firstMatch(line);
-
-    if (headerMatch != null) {
-      if (extracting) {
-        prevVersionTag = headerMatch.group(1);
-        break;
-      } else {
+    if (!extracting) {
+      final match = unreleasedHeaderRegexp.firstMatch(line);
+      if (match != null) {
         extracting = true;
         continue;
+      }
+    } else {
+      final match = releasedHeaderRegexp.firstMatch(line);
+      if (match != null) {
+        prevVersionTag = match.group(1);
+        break;
       }
     }
 
