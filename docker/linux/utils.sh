@@ -19,11 +19,6 @@ function log_group_end() {
     fi
 }
 
-function check_dependency {
-    local dep=$1
-    command -v $dep >/dev/null 2>&1 || { error "'$dep' is not installed"; }
-}
-
 function dock() {
     if [ -n "$host" ]; then
         docker --host ssh://$host "$@"

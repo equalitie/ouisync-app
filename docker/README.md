@@ -4,11 +4,11 @@ This folder contains scripts for testing and building Ouisync App in docker cont
 
 - The `linux.sh` script is used to run unit and integration tests and to build release packages for
   linux and android.
-- The `build-windows.sh` script is used to build release packages for windows.
+- The `windows.sh` script is used to build release packages for windows.
 
 ## Usage
 
-Run `./docker/linux.sh --help` and `./docker/build-windows.sh --help` for usage instructions.
+Run `./docker/linux.sh --help` and `./docker/windows.sh --help` for usage instructions.
 
 ## Requirements
 
