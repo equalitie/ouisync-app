@@ -395,9 +395,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageConfirmIrreversibleChange": MessageLookupByLibrary.simpleMessage(
       "Esta acción es irreversible, ¿desea proceder?",
     ),
-    "messageConfirmNotEmptyFolderDeletion": MessageLookupByLibrary.simpleMessage(
-      "Este directorio no está vacío.\n\n¿Aún así quiere borrarlo? (esto borrarar todos sus contenidos)",
-    ),
+    "messageConfirmNotEmptyFolderDeletion":
+        MessageLookupByLibrary.simpleMessage(
+          "Este directorio no está vacío.\n\n¿Aún así quiere borrarlo? (esto borrarar todos sus contenidos)",
+        ),
     "messageConfirmRepositoryDeletion": MessageLookupByLibrary.simpleMessage(
       "¿Borrar este repositorio?",
     ),
@@ -522,9 +523,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "está construido en línea con nuestros valores.\n\nAl utilizarlo, usted accede a cumplir con estos principios, y aceptar nuestros términos de uso y notas de privacidad.",
     ),
     "messageError": MessageLookupByLibrary.simpleMessage("Error!"),
-    "messageErrorAuthenticatingBiometrics": MessageLookupByLibrary.simpleMessage(
-      "Se ha producido un error al autenticarse mediante datos biométricos. Por favor, inténtelo de nuevo",
-    ),
+    "messageErrorAuthenticatingBiometrics":
+        MessageLookupByLibrary.simpleMessage(
+          "Se ha producido un error al autenticarse mediante datos biométricos. Por favor, inténtelo de nuevo",
+        ),
     "messageErrorChangingPassword": MessageLookupByLibrary.simpleMessage(
       "Ha habido un problema al cambiar la contraseña. Por favor, inténtelo de nuevo",
     ),
@@ -814,9 +816,10 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage(
           "Esto eliminará la contraseña del repositorio y utilizará la validación biométrica para el desbloqueo",
         ),
-    "messageRemoveLocalPasswordConfirmation": MessageLookupByLibrary.simpleMessage(
-      "¿Quitar la contraseña local de este repositorio?\n\nEl repositorio se desbloqueará automáticamente, a menos que se vuelva a añadir una contraseña local",
-    ),
+    "messageRemoveLocalPasswordConfirmation":
+        MessageLookupByLibrary.simpleMessage(
+          "¿Quitar la contraseña local de este repositorio?\n\nEl repositorio se desbloqueará automáticamente, a menos que se vuelva a añadir una contraseña local",
+        ),
     "messageRemovedInBrackets": MessageLookupByLibrary.simpleMessage(
       "<eliminado>",
     ),
@@ -891,9 +894,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageSecureUsingBiometrics": MessageLookupByLibrary.simpleMessage(
       "Protección biométrica",
     ),
-    "messageSecurityOptionsNotAvailableBlind": MessageLookupByLibrary.simpleMessage(
-      "Las opciones de seguridad no están disponibles para repositorios vacíos",
-    ),
+    "messageSecurityOptionsNotAvailableBlind":
+        MessageLookupByLibrary.simpleMessage(
+          "Las opciones de seguridad no están disponibles para repositorios vacíos",
+        ),
     "messageSecurityPracticesP1": MessageLookupByLibrary.simpleMessage(
       "Los datos que el usuario carga en los repositorios de Ouisync se cifran de extremo a extremo tanto en tránsito como en reposo. Esto incluye los metadatos como los nombres de los archivos, los tamaños, la estructura de las carpetas, etc. En Ouisync, sólo pueden leer los datos la persona que los ha cargado y las personas con las que comparte sus repositorios",
     ),
@@ -915,9 +919,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageSettingsRuntimeID": MessageLookupByLibrary.simpleMessage(
       "Identificador del tiempo de ejecución",
     ),
-    "messageSettingsVersionNewerThanCurrent": MessageLookupByLibrary.simpleMessage(
-      "Los ajustes de este dispositivo se crearón con una versión más reciente de Ouisync y no se pueden migrar.",
-    ),
+    "messageSettingsVersionNewerThanCurrent":
+        MessageLookupByLibrary.simpleMessage(
+          "Los ajustes de este dispositivo se crearón con una versión más reciente de Ouisync y no se pueden migrar.",
+        ),
     "messageShareActionDisabled": MessageLookupByLibrary.simpleMessage(
       "Necesitas seleccionar un permiso primero para crear un link de repository",
     ),

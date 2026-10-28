@@ -394,9 +394,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageConfirmIrreversibleChange": MessageLookupByLibrary.simpleMessage(
       "این اقدام بازگشت‌ناپذیر خواهد بود، مایلید ادامه دهید؟",
     ),
-    "messageConfirmNotEmptyFolderDeletion": MessageLookupByLibrary.simpleMessage(
-      "این پوشه خالی نیست\n\nهنوز می‌خواهید حذفش کنید؟ (با این کار تمام محتویاتش حذف می‌شود)",
-    ),
+    "messageConfirmNotEmptyFolderDeletion":
+        MessageLookupByLibrary.simpleMessage(
+          "این پوشه خالی نیست\n\nهنوز می‌خواهید حذفش کنید؟ (با این کار تمام محتویاتش حذف می‌شود)",
+        ),
     "messageConfirmRepositoryDeletion": MessageLookupByLibrary.simpleMessage(
       "مطمئنید که می‌خواهید این مخزن را حذف کنید؟",
     ),
@@ -827,9 +828,10 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage(
           "با این عمل رمز مخزن حذف می‌شود و از اعتبارسنجی بیومتریک برای باز‌کردن قفل استفاده می‌شود",
         ),
-    "messageRemoveLocalPasswordConfirmation": MessageLookupByLibrary.simpleMessage(
-      "این رمز عبور محلی مخزن حذف شود؟\n\nمخزن به‌طور خودکار باز می‌شود، مگر این که یک رمز عبور محلی مجدد اضافه شود",
-    ),
+    "messageRemoveLocalPasswordConfirmation":
+        MessageLookupByLibrary.simpleMessage(
+          "این رمز عبور محلی مخزن حذف شود؟\n\nمخزن به‌طور خودکار باز می‌شود، مگر این که یک رمز عبور محلی مجدد اضافه شود",
+        ),
     "messageRemovedInBrackets": MessageLookupByLibrary.simpleMessage("حذف شد"),
     "messageRenameFile": MessageLookupByLibrary.simpleMessage("تغییر نام فایل"),
     "messageRenameFolder": MessageLookupByLibrary.simpleMessage(
@@ -926,9 +928,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageSettingsRuntimeID": MessageLookupByLibrary.simpleMessage(
       "شناسه زمان اجرا (Runtime ID)",
     ),
-    "messageSettingsVersionNewerThanCurrent": MessageLookupByLibrary.simpleMessage(
-      "تنظیمات موجود در این دستگاه با نسخه جدیدتری از وی‌سینک ایجاد شده‌اند و قابل انتقال نیستند.",
-    ),
+    "messageSettingsVersionNewerThanCurrent":
+        MessageLookupByLibrary.simpleMessage(
+          "تنظیمات موجود در این دستگاه با نسخه جدیدتری از وی‌سینک ایجاد شده‌اند و قابل انتقال نیستند.",
+        ),
     "messageShareActionDisabled": MessageLookupByLibrary.simpleMessage(
       "برای ایجاد لینک مخزن ابتدا باید نوع دسترسی را انتخاب کنید",
     ),

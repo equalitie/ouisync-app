@@ -436,6 +436,7 @@
   "messageWiFi":"Wi-Fi",
   "messageMobile":"Mobile",
   "messageEthernet":"Ethernet",
+  "messageSatellite":"Satellite",
   "messageVPN":"VPN",
   "messageNone":"None",
   "messagePeerExchange":"Peer Exchange",

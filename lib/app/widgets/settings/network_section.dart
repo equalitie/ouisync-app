@@ -333,6 +333,8 @@ String _connectivityTypeName(ConnectivityResult result) {
       return S.current.messageMobile;
     case ConnectivityResult.ethernet:
       return S.current.messageEthernet;
+    case ConnectivityResult.satellite:
+      return S.current.messageSatellite;
     case ConnectivityResult.vpn:
       return S.current.messageVPN;
     case ConnectivityResult.none:

@@ -402,9 +402,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageConfirmIrreversibleChange": MessageLookupByLibrary.simpleMessage(
       "This action is irreversible, would you like to proceed?",
     ),
-    "messageConfirmNotEmptyFolderDeletion": MessageLookupByLibrary.simpleMessage(
-      "This folder is not empty.\n\nDo you still want to delete it? (this will delete all its contents)",
-    ),
+    "messageConfirmNotEmptyFolderDeletion":
+        MessageLookupByLibrary.simpleMessage(
+          "This folder is not empty.\n\nDo you still want to delete it? (this will delete all its contents)",
+        ),
     "messageConfirmRepositoryDeletion": MessageLookupByLibrary.simpleMessage(
       "Are you sure you want to delete this repository?",
     ),
@@ -827,9 +828,10 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage(
           "This will remove the repository password and use the biometric validation for unlocking",
         ),
-    "messageRemoveLocalPasswordConfirmation": MessageLookupByLibrary.simpleMessage(
-      "Remove this repository local password?\n\nThe repository will unlock automatically, unless a local password is added again",
-    ),
+    "messageRemoveLocalPasswordConfirmation":
+        MessageLookupByLibrary.simpleMessage(
+          "Remove this repository local password?\n\nThe repository will unlock automatically, unless a local password is added again",
+        ),
     "messageRemovedInBrackets": MessageLookupByLibrary.simpleMessage(
       "<removed>",
     ),
@@ -892,6 +894,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageRousseau": MessageLookupByLibrary.simpleMessage(
       "Jean-Jacques Rousseau",
     ),
+    "messageSatellite": MessageLookupByLibrary.simpleMessage("Satellite"),
     "messageSaveEntriesToDevice": m48,
     "messageSaveToLocation": MessageLookupByLibrary.simpleMessage(
       "Save the file to this folder",
@@ -930,9 +933,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageSettingsRuntimeID": MessageLookupByLibrary.simpleMessage(
       "Runtime ID",
     ),
-    "messageSettingsVersionNewerThanCurrent": MessageLookupByLibrary.simpleMessage(
-      "The settings found on this device were created with a newer version of Ouisync and can\'t be migrated.",
-    ),
+    "messageSettingsVersionNewerThanCurrent":
+        MessageLookupByLibrary.simpleMessage(
+          "The settings found on this device were created with a newer version of Ouisync and can\'t be migrated.",
+        ),
     "messageShareActionDisabled": MessageLookupByLibrary.simpleMessage(
       "You need to select one permission to create a repository link first",
     ),

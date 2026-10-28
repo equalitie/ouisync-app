@@ -437,9 +437,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageConfirmIrreversibleChange": MessageLookupByLibrary.simpleMessage(
       "இந்த நடவடிக்கை மீளமுடியாதது, நீங்கள் தொடர விரும்புகிறீர்களா?",
     ),
-    "messageConfirmNotEmptyFolderDeletion": MessageLookupByLibrary.simpleMessage(
-      "இந்த கோப்புறை காலியாக இல்லை.\n\n நீங்கள் இன்னும் அதை நீக்க விரும்புகிறீர்களா? (இது அதன் அனைத்து உள்ளடக்கங்களையும் நீக்கும்)",
-    ),
+    "messageConfirmNotEmptyFolderDeletion":
+        MessageLookupByLibrary.simpleMessage(
+          "இந்த கோப்புறை காலியாக இல்லை.\n\n நீங்கள் இன்னும் அதை நீக்க விரும்புகிறீர்களா? (இது அதன் அனைத்து உள்ளடக்கங்களையும் நீக்கும்)",
+        ),
     "messageConfirmRepositoryDeletion": MessageLookupByLibrary.simpleMessage(
       "இந்த களஞ்சியத்தை நீக்க விரும்புகிறீர்களா?",
     ),
@@ -566,9 +567,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "எங்கள் மதிப்புகளுக்கு ஏற்ப கட்டப்பட்டுள்ளது.\n\n இதைப் பயன்படுத்துவதன் மூலம் இந்த கொள்கைகளுக்கு கட்டுப்பட ஒப்புக்கொள்கிறீர்கள், மேலும் எங்கள் பயன்பாட்டு விதிமுறைகளையும் தனியுரிமை அறிவிப்பையும் ஏற்றுக்கொள்ளுங்கள்.",
     ),
     "messageError": MessageLookupByLibrary.simpleMessage("பிழை!"),
-    "messageErrorAuthenticatingBiometrics": MessageLookupByLibrary.simpleMessage(
-      "பயோமெட்ரிக்சைப் பயன்படுத்தி ஒரு பிழை ஏற்பு இருந்தது. மீண்டும் முயற்சிக்கவும்",
-    ),
+    "messageErrorAuthenticatingBiometrics":
+        MessageLookupByLibrary.simpleMessage(
+          "பயோமெட்ரிக்சைப் பயன்படுத்தி ஒரு பிழை ஏற்பு இருந்தது. மீண்டும் முயற்சிக்கவும்",
+        ),
     "messageErrorChangingPassword": MessageLookupByLibrary.simpleMessage(
       "கடவுச்சொல்லை மாற்றுவதில் சிக்கல் இருந்தது. மீண்டும் முயற்சிக்கவும்",
     ),
@@ -870,9 +872,10 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage(
           "இது களஞ்சிய கடவுச்சொல்லை அகற்றி, திறக்க பயோமெட்ரிக் சரிபார்ப்பைப் பயன்படுத்தும்",
         ),
-    "messageRemoveLocalPasswordConfirmation": MessageLookupByLibrary.simpleMessage(
-      "இந்த களஞ்சிய உள்ளக கடவுச்சொல்லை அகற்றவா?\n\n உள்ளக கடவுச்சொல் மீண்டும் சேர்க்கப்படாவிட்டால், களஞ்சியம் தானாகத் திறக்கும்",
-    ),
+    "messageRemoveLocalPasswordConfirmation":
+        MessageLookupByLibrary.simpleMessage(
+          "இந்த களஞ்சிய உள்ளக கடவுச்சொல்லை அகற்றவா?\n\n உள்ளக கடவுச்சொல் மீண்டும் சேர்க்கப்படாவிட்டால், களஞ்சியம் தானாகத் திறக்கும்",
+        ),
     "messageRemovedInBrackets": MessageLookupByLibrary.simpleMessage(
       "<அகற்றப்பட்டது>",
     ),
@@ -973,9 +976,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageSettingsRuntimeID": MessageLookupByLibrary.simpleMessage(
       "இயக்க நேர ஐடி",
     ),
-    "messageSettingsVersionNewerThanCurrent": MessageLookupByLibrary.simpleMessage(
-      "இந்த சாதனத்தில் காணப்படும் அமைப்புகள் OUISYNC இன் புதிய பதிப்பைக் கொண்டு உருவாக்கப்பட்டன, மேலும் அவை இடம்பெயர முடியாது.",
-    ),
+    "messageSettingsVersionNewerThanCurrent":
+        MessageLookupByLibrary.simpleMessage(
+          "இந்த சாதனத்தில் காணப்படும் அமைப்புகள் OUISYNC இன் புதிய பதிப்பைக் கொண்டு உருவாக்கப்பட்டன, மேலும் அவை இடம்பெயர முடியாது.",
+        ),
     "messageShareActionDisabled": MessageLookupByLibrary.simpleMessage(
       "முதலில் களஞ்சிய இணைப்பை உருவாக்க நீங்கள் ஒரு அனுமதியைத் தேர்ந்தெடுக்க வேண்டும்",
     ),
