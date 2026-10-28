@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-source $(dirname $0)/utils.sh
+source $(dirname $0)/linux/utils.sh
 
 # Host to run on. If omitted, runs on the local machine.
 host=
@@ -173,7 +173,7 @@ function build_image() {
     log_group_begin "Build image $image_name"
 
     ndk_version=$(cat ndk-version.txt)
-    dock build --progress plain -t $image_name --build-arg NDK_VERSION=$ndk_version - < docker/Dockerfile.linux
+    dock build --progress plain -t $image_name --build-arg NDK_VERSION=$ndk_version - < docker/linux/Dockerfile
 
     log_group_end
 }
