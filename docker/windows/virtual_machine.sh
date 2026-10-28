@@ -8,10 +8,7 @@ function error() {
 }
 
 host_root=$(dirname $0)/windows
-host_shared_dir=$host_root/shared
 host_ssh_port=2222
-
-mkdir -p $host_shared_dir
 
 ### Utils
 
@@ -47,6 +44,10 @@ function vm_ctx_volume_name() (
     echo $1 | jq -r '.volume_name'
 )
 
+function vm_ctx_sharedir() (
+    echo $1 | jq -r '.sharedir'
+)
+
 function start_vm() (
     # https://github.com/dockur/windows
 
@@ -64,9 +65,7 @@ function start_vm() (
 
     docker volume create $volume_name || true
 
-    docker_run=(
-        docker run 
-        #-it 
+    docker_run_args=(
         --rm 
         --name $container_name 
         -p 8006:8006 
@@ -83,8 +82,6 @@ function start_vm() (
         --device=/dev/net/tun 
         --cap-add NET_ADMIN 
         -v "$volume_name:/storage" 
-        # In the VM this will be in Z:\ and C:\Users\Docker\Desktop\Shared
-        -v "$host_shared_dir:/shared"
         -v "$host_root/oem:/oem"
         --stop-timeout 120 
         # "Windows 11 LTSC
@@ -94,10 +91,16 @@ function start_vm() (
         # QCOW2 allows snapshotting
         # https://github.com/dockur/windows/issues/485#issuecomment-5344257600
         -e DISK_FMT="qcow2"
-        $image_name
     )
     
-    ${docker_run[@]} 2>&1 | prefix "🪟 " &
+    sharedir=$(vm_ctx_sharedir "$ctx")
+
+    if [ -n "$sharedir" ]; then
+        # In the VM this will be in Z:\ and C:\Users\Docker\Desktop\Shared
+        docker_run_args+=(-v "$sharedir:/shared")
+    fi
+
+    docker run ${docker_run_args[@]} $image_name 2>&1 | prefix "🪟 " &
 )
 
 function stop_vm() (

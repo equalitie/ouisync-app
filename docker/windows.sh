@@ -6,16 +6,20 @@ source $(dirname $0)/utils.sh
 
 function print_help() {
     echo "Script for building Ouisync App in a Docker container"
-    echo "Usage: $0 (--commit <COMMIT> | --srcdir <SRCDIR>) [--out <OUTPUT_DIRECTORY>] [--flavor <FLAVOR>]"
+    echo "Usage: $0 (--commit <COMMIT> | --srcdir <SRCDIR>) [--out <OUTPUT_DIRECTORY>] [--flavor <FLAVOR>] [--no-build] [--sharedir <SHAREDIR>]"
     echo "  COMMIT:           Commit from which to build"
     echo "  SRCDIR:           Source dir from which to build"
     echo "  OUTPUT_DIRECTORY: Directory where artifacts will be stored"
     echo "  FLAVOR:           One of {production,nightly,unofficial}. The default is 'production' when '--commit'"
     echo "                    is used and 'unofficial' when '--srcdir' is used"
+    echo "  SHAREDIR:         Share the giveven directory with the Windows virtual machine"
+    echo "  --no-build:       Use if you just want to access the Windows VM without any building taking place"
 }
 
 build_exe="--exe"
 build_msix="--msix"
+sharedir=
+do_build=y
 
 while [[ "$#" -gt 0 ]]; do
     case $1 in
@@ -26,6 +30,8 @@ while [[ "$#" -gt 0 ]]; do
         --no-msix) build_msix='' ;;
         --out) out_dir="$2"; shift ;;
         --flavor) flavor="$2"; shift ;;
+        --sharedir) sharedir="$2"; shift ;;
+        --no-build) do_build=n ;;
         *) error "Unknown argument: $1" ;;
     esac
     shift
@@ -33,6 +39,12 @@ done
 
 if [ -z "$commit" -a -z "$srcdir" ]; then error "Missing one of --commit or --srcdir"; fi
 if [ -n "$commit" -a -n "$srcdir" ]; then error "--commit and --srcdir are mutually exclusive"; fi
+
+if [ -n "$sharedir" ]; then
+    if [ ! -d "$sharedir" ]; then
+        error "The path '$sharedir' passed as --sharedir argument is not a directory"
+    fi
+fi
 
 source $(dirname $0)/windows/virtual_machine.sh
 
@@ -56,13 +68,15 @@ case "$flavor" in
 esac
 
 # Collect secrets
-if [ "$flavor" != "unofficial" ]; then
+if [ "$do_build" = y ] && [ "$flavor" != "unofficial" ]; then
     secretSentryDSN=$(pass cenoers/ouisync/app/$flavor/sentry_dsn)
     secretCertHex=$(pass cenoers/ouisync/app/$flavor/windows/private.pfx | xxd -p)
     publicCertHex=$(pass cenoers/ouisync/app/$flavor/windows/public.cer | xxd -p)
     secretCertPassword=$(pass cenoers/ouisync/app/$flavor/windows/certificatePassword)
 fi
 
+# Create JSON object with settings so we don't have to pass it one by one
+# to the virtual machine bash scripts.
 ctx_vm=$(cat << EOF
     {
       "container_name":"$container_name",
@@ -72,6 +86,11 @@ ctx_vm=$(cat << EOF
 EOF
 )
 
+if [ -n "$sharedir" ]; then
+    ctx_vm=$(jq --arg var "$sharedir" '.sharedir = $var' <<< "$ctx_vm")
+fi
+
+# Setup the VM
 vm_ensure_os_and_ssh_installed "$ctx_vm"
 
 vm_install "$ctx_vm" $host_root/install/visual_studio.bat
@@ -82,6 +101,7 @@ vm_install "$ctx_vm" $host_root/install/inno_setup.bat
 vm_install "$ctx_vm" $host_root/install/java.bat
 vm_install "$ctx_vm" $host_root/install/flutter.bat
 
+# Utils
 function cat_vm() (
     vm_ssh "[Console]::OpenStandardInput().CopyTo([IO.File]::Create(\"$1\"))"
 )
@@ -103,6 +123,12 @@ function on_exit() {
 }
 
 await_ssh_connectible
+
+if [ "$do_build" != y ]; then
+    # This will trigger the `on_exit` trap and we'll get the ssh console
+    # to the machine. While the ssh is active we can also RDP into it.
+    exit
+fi
 
 mkdir_vm c:/src
 
