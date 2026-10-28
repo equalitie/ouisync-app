@@ -35,24 +35,31 @@ class FileIO with AppLogger {
 
     final result = await FilePicker.pickFiles(type: type);
 
-    if (result != null) {
+    if (!result.isEmpty) {
       loggy.debug(() {
-        final fileNames = result.files.map((file) => file.name).toList();
+        final fileNames = result.map((file) => file.name).toList();
         return 'Adding files $fileNames';
       });
 
       await popCallback;
 
-      for (final srcFile in result.files) {
+      for (final srcFile in result) {
         final parentPath = repoCubit.state.currentFolder.path;
         String fileName = srcFile.name;
         String destinationFilePath = p.join(parentPath, fileName);
+
+        final fileSize = await srcFile.length();
+
+        if (fileSize == null) {
+          loggy.warning('Failed to determine size of file ${fileName}');
+          continue;
+        }
 
         final exist = await repoCubit.entryExists(destinationFilePath);
         if (!exist) {
           await repoCubit.saveFile(
             filePath: destinationFilePath,
-            length: srcFile.size,
+            length: fileSize,
             fileByteStream: srcFile.readAsByteStream(),
           );
 
@@ -73,7 +80,7 @@ class FileIO with AppLogger {
         if (replaceOrKeepEntry == RenameOrReplaceResult.replace) {
           await repoCubit.replaceFile(
             filePath: destinationFilePath,
-            length: srcFile.size,
+            length: fileSize,
             fileByteStream: srcFile.readAsByteStream(),
           );
 
@@ -89,7 +96,7 @@ class FileIO with AppLogger {
 
           await repoCubit.saveFile(
             filePath: newPath,
-            length: srcFile.size,
+            length: fileSize,
             fileByteStream: srcFile.readAsByteStream(),
           );
         }
@@ -213,15 +220,30 @@ class FileIO with AppLogger {
   }
 
   Future<String?> _getDesktopPath(String parentPath, String? fileName) async {
-    final basePath = (fileName ?? '').isEmpty
-        ? await FilePicker.getDirectoryPath(initialDirectory: parentPath)
-        : await FilePicker.saveFile(
-            fileName: fileName!,
-            initialDirectory: parentPath,
-            bytes: Uint8List(0),
-          );
+    if ((fileName ?? '').isEmpty) {
+      return await FilePicker.getDirectoryPath(initialDirectory: parentPath);
+    } else {
+      final uri = await FilePicker.saveFile(
+        fileName: fileName!,
+        initialDirectory: parentPath,
+        bytes: Uint8List(0),
+      );
 
-    return basePath;
+      if (uri == null) return null;
+
+      if (!uri.isScheme('file')) {
+        loggy.warning('Picked file is not a path on the local FS ($uri)');
+        return null;
+      }
+      try {
+        return uri.toFilePath();
+      } on UnsupportedError {
+        loggy.warning(
+          "Failed to convert picked file's Uri into a file path ($uri)",
+        );
+        return null;
+      }
+    }
   }
 
   Future<String> _renameFileWithVersion(

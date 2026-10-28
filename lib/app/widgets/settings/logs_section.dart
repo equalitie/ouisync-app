@@ -139,15 +139,31 @@ class LogsSection extends SettingsSection with AppLogger {
           loggy.debug('Logs saved to $outputPath');
         }
       } else if (Platform.isLinux || Platform.isMacOS || Platform.isWindows) {
-        final outputPath = await FilePicker.saveFile(
+        final uri = await FilePicker.saveFile(
           fileName: basename(tempFile.path),
           initialDirectory: dirs.download,
           bytes: Uint8List(0),
         );
 
-        if (outputPath != null) {
+        if (uri == null) {
+          loggy.debug('Not saving logs because no output file was selected');
+          return;
+        }
+
+        if (!uri.isScheme('file')) {
+          loggy.warning('Selected file is not a path on the local FS ($uri)');
+          return;
+        }
+
+        try {
+          final outputPath = uri.toFilePath();
           await tempFile.copy(outputPath);
           loggy.debug('Logs saved to $outputPath');
+        } on UnsupportedError {
+          loggy.warning(
+            "Failed to convert picked file's Uri into a file path ($uri)",
+          );
+          return null;
         }
       } else {
         loggy.error(
