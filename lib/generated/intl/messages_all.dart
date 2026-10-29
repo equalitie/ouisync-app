@@ -16,24 +16,36 @@ import 'package:intl/intl.dart';
 import 'package:intl/message_lookup_by_library.dart';
 import 'package:intl/src/intl_helpers.dart';
 
+import 'messages_ar.dart' as messages_ar;
+import 'messages_cs.dart' as messages_cs;
+import 'messages_de.dart' as messages_de;
 import 'messages_en.dart' as messages_en;
 import 'messages_es.dart' as messages_es;
 import 'messages_fa.dart' as messages_fa;
 import 'messages_fr.dart' as messages_fr;
 import 'messages_my.dart' as messages_my;
+import 'messages_pt.dart' as messages_pt;
+import 'messages_pt_BR.dart' as messages_pt_br;
 import 'messages_ru.dart' as messages_ru;
+import 'messages_ta.dart' as messages_ta;
 import 'messages_uk.dart' as messages_uk;
 import 'messages_zh-CN.dart' as messages_zh_cn;
 import 'messages_zh-TW.dart' as messages_zh_tw;
 
 typedef Future<dynamic> LibraryLoader();
 Map<String, LibraryLoader> _deferredLibraries = {
+  'ar': () => new SynchronousFuture(null),
+  'cs': () => new SynchronousFuture(null),
+  'de': () => new SynchronousFuture(null),
   'en': () => new SynchronousFuture(null),
   'es': () => new SynchronousFuture(null),
   'fa': () => new SynchronousFuture(null),
   'fr': () => new SynchronousFuture(null),
   'my': () => new SynchronousFuture(null),
+  'pt': () => new SynchronousFuture(null),
+  'pt_BR': () => new SynchronousFuture(null),
   'ru': () => new SynchronousFuture(null),
+  'ta': () => new SynchronousFuture(null),
   'uk': () => new SynchronousFuture(null),
   'zh_CN': () => new SynchronousFuture(null),
   'zh_TW': () => new SynchronousFuture(null),
@@ -41,6 +53,12 @@ Map<String, LibraryLoader> _deferredLibraries = {
 
 MessageLookupByLibrary? _findExact(String localeName) {
   switch (localeName) {
+    case 'ar':
+      return messages_ar.messages;
+    case 'cs':
+      return messages_cs.messages;
+    case 'de':
+      return messages_de.messages;
     case 'en':
       return messages_en.messages;
     case 'es':
@@ -51,8 +69,14 @@ MessageLookupByLibrary? _findExact(String localeName) {
       return messages_fr.messages;
     case 'my':
       return messages_my.messages;
+    case 'pt':
+      return messages_pt.messages;
+    case 'pt_BR':
+      return messages_pt_br.messages;
     case 'ru':
       return messages_ru.messages;
+    case 'ta':
+      return messages_ta.messages;
     case 'uk':
       return messages_uk.messages;
     case 'zh_CN':

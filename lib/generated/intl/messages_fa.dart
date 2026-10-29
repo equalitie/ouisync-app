@@ -21,86 +21,110 @@ class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'fa';
 
   static String m0(access) =>
-      "مجوز مورد نظر نمی‌تواند بالاتر از حالت دسترسی فعلی مخزن باشد: ${access}";
+      "دسترسی مورد نظر نمی‌تواند بالاتر از حالت دسترسی فعلی مخزن باشد: ${access}";
 
-  static String m3(path) => "فایل دانلود شد در ${path}";
+  static String m39(totals) => "کپی انتخاب در اینجا:\n\n\t\t${totals}";
 
-  static String m4(name) => "${name} - دانلود لغو شد";
+  static String m40(totals) => "حذف انتخاب:\n\n\t\t${totals}";
 
-  static String m5(name) => "${name} - ناموفق در دانلود";
+  static String m1(path) => "فایل دانلود شد در ${path}";
 
-  static String m6(entry) => "${entry} در حال حاضر موجود است.";
+  static String m2(name) => "${name} - دانلود لغو شد";
 
-  static String m8(path) => "پوشه فعلی موجود نیست، به بخش اصلی بروید: ${path}";
+  static String m3(name) => "${name} - ناموفق در دانلود";
 
-  static String m9(error) => "خطا: ${error}";
+  static String m4(entry) => "${entry} در حال حاضر موجود است.";
 
-  static String m10(dokanUrl) =>
+  static String m41(name) => "خطا در ساخت پوشه ${name}";
+
+  static String m5(path) => "پوشه فعلی موجود نیست، به بخش اصلی بروید: ${path}";
+
+  static String m6(error) => "خطا: ${error}";
+
+  static String m7(dokanUrl) =>
       "فایل نصب رابط کاربری Dokan پیدا نشد. ${dokanUrl}";
 
-  static String m11(name) => "آماده‌سازی اولیه مخزن ${name} ناموفق بود";
+  static String m8(name) => "آماده‌سازی اولیه مخزن ${name} ناموفق بود";
 
-  static String m12(path) => "${path} خالی نیست";
+  static String m9(path) => "${path} خالی نیست";
 
-  static String m15(reason) =>
+  static String m10(name) => "ناموفق در وارد کردن مخزن ${name}";
+
+  static String m11(name) => "ناموفق در ایجاد مخزن ${name}";
+
+  static String m12(reason) =>
       "دسترسی به مخازن از طریق بخش جست‌وجوگر فایل در دسترس نیست: ${reason}";
 
-  static String m16(name) =>
+  static String m13(name) =>
       "${name} از قبل در این‌جا وجود دارد.\n\nمی‌خواهید چه کاری بکنید؟";
 
-  static String m19(name) => "پوشه با موفقیت حذف شد: ${name}";
+  static String m42(name) => "فایل با موفقیت حذف شد: ${name}";
 
-  static String m21(number) =>
+  static String m43(name) => "نام فایل به ${name} تغییر کرد";
+
+  static String m14(name) => "پوشه با موفقیت حذف شد: ${name}";
+
+  static String m44(name) => "نام پوشه به ${name} تغییر کرد";
+
+  static String m15(number) =>
       "آیا می‌خواهید تمام مخازنی را که باز هستند قفل کنید؟\n\n(${number} باز)";
 
-  static String m23(path) => "از ${path}";
+  static String m45(totals) => "انتقال انتخاب به اینجا:\n\n\t\t${totals}";
 
-  static String m24(name) => "خطا در ایجاد فایل ${name}";
+  static String m16(path) => "از ${path}";
 
-  static String m25(name) => "خطا در باز کردن فایل ${name}";
+  static String m17(name) => "خطا در ایجاد فایل ${name}";
 
-  static String m26(path) => "فرآیند پیش‌نمایش فایل ${path} انجام نشد";
+  static String m18(name) => "خطا در باز کردن فایل ${name}";
 
-  static String m27(name) => "نتوانستیم این مخزن را حذف کنیم: \"${name}\"";
+  static String m19(path) => "فرآیند پیش‌نمایش فایل ${path} انجام نشد";
 
-  static String m28(name) =>
+  static String m20(name) => "نتوانستیم این مخزن را حذف کنیم: \"${name}\"";
+
+  static String m21(name) =>
       "نتوانستیم این مخزن را در مکانی که معمولا هست، بیابیم: \"${name}\"";
 
-  static String m29(access) => "اجازه دسترسی داده شد: ${access}";
+  static String m22(access) => "اجازه دسترسی داده شد: ${access}";
 
-  static String m30(name) =>
+  static String m23(name) =>
       "این مخزن از قبل در برنامه با نامِ \"${name}\" وجود دارد.";
 
-  static String m33(name) =>
+  static String m46(name) => "مخزن ${name} حذف شد";
+
+  static String m47(name) => "نام مخزن به ${name} تغییر کرد";
+
+  static String m24(name) =>
       "پیشنهاد: ${name}\n(برای استفاده از این نام این‌جا ضربه بزنید)";
 
-  static String m35(name) => "‌مرتب‌سازی بر اساس:${name}";
+  static String m48(totals) => "ذخیره انتخاب:\n\n\t\t${totals}";
 
-  static String m36(access) => "به‌عنوان یک کپیِ ${access} باز شد";
+  static String m25(name) => "‌مرتب‌سازی بر اساس:${name}";
 
-  static String m37(name) => "رمز عبور را برای باز کردن قفل وارد کنید. ${name}";
+  static String m26(access) => "به‌عنوان یک کپیِ ${access} باز شد";
 
-  static String m38(name) => "${name} نوشتن لغو شد";
+  static String m27(name) => "رمز عبور را برای باز کردن قفل وارد کنید. ${name}";
 
-  static String m39(name) => "${name} - ناموفق در نوشتن";
+  static String m28(name) => "${name} نوشتن لغو شد";
 
-  static String m40(access) => "[دسترسی]";
+  static String m29(name) => "${name} - ناموفق در نوشتن";
 
-  static String m41(changes) => "${changes}";
+  static String m30(access) => "[دسترسی]";
 
-  static String m42(entry) => "${entry}";
+  static String m31(changes) => "${changes}";
 
-  static String m43(error) => "خطا ${error}";
+  static String m32(entry) => "${entry}";
 
-  static String m44(name) => "${name}";
+  static String m33(error) => "خطا ${error}";
 
-  static String m45(number) => "[شماره]";
+  static String m34(name) => "${name}";
 
-  static String m46(path) => "${path}";
+  static String m35(number) => "[شماره]";
 
-  static String m47(status) => "${status}";
+  static String m36(path) => "${path}";
 
-  static String m49(name) => "اشتراک‌گذاری مخزن \"${name}\"";
+  static String m37(status) => "${status}";
+
+  static String m38(name) => "اشتراک‌گذاری مخزن \"${name}\"";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -120,6 +144,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "actionCancelCapital": MessageLookupByLibrary.simpleMessage("لغو"),
     "actionClear": MessageLookupByLibrary.simpleMessage("پاک‌ کردن"),
     "actionCloseCapital": MessageLookupByLibrary.simpleMessage("بستن"),
+    "actionCopy": MessageLookupByLibrary.simpleMessage("کپی"),
     "actionCreate": MessageLookupByLibrary.simpleMessage("ایجاد"),
     "actionCreateRepository": MessageLookupByLibrary.simpleMessage(
       "ایجاد مخزن",
@@ -131,10 +156,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "actionDeleteRepository": MessageLookupByLibrary.simpleMessage("حذف مخزن"),
     "actionDiscard": MessageLookupByLibrary.simpleMessage("نادیده‌ گرفتن"),
     "actionDone": MessageLookupByLibrary.simpleMessage("انجام شد"),
+    "actionDownload": MessageLookupByLibrary.simpleMessage("دانلود"),
     "actionEditRepositoryName": MessageLookupByLibrary.simpleMessage(
       "ویرایش نام",
     ),
-    "actionEject": MessageLookupByLibrary.simpleMessage("خروج"),
+    "actionEject": MessageLookupByLibrary.simpleMessage("خروج‌"),
     "actionExit": MessageLookupByLibrary.simpleMessage("خروج"),
     "actionGoToSettings": MessageLookupByLibrary.simpleMessage(
       "به بخش تنظیمات بروید",
@@ -143,6 +169,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "actionHideCapital": MessageLookupByLibrary.simpleMessage("پنهان‌سازی"),
     "actionIAgree": MessageLookupByLibrary.simpleMessage("موافقم"),
     "actionIDontAgree": MessageLookupByLibrary.simpleMessage("موافق نیستم"),
+    "actionIDontHaveALocalPassword": MessageLookupByLibrary.simpleMessage(
+      "برای این مخزن رمز محلی ندارم",
+    ),
     "actionImport": MessageLookupByLibrary.simpleMessage("وارد کردن"),
     "actionImportRepo": MessageLookupByLibrary.simpleMessage("وارد کردن مخزن"),
     "actionInstallDokan": MessageLookupByLibrary.simpleMessage(
@@ -174,6 +203,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "actionSave": MessageLookupByLibrary.simpleMessage("ذخیره"),
     "actionSaveChanges": MessageLookupByLibrary.simpleMessage("ذخیره تغییرات"),
     "actionScanQR": MessageLookupByLibrary.simpleMessage("کد QR را اسکن کنید"),
+    "actionSelect": MessageLookupByLibrary.simpleMessage("انتخاب"),
     "actionShare": MessageLookupByLibrary.simpleMessage("اشتراک‌گذاری‌"),
     "actionShareFile": MessageLookupByLibrary.simpleMessage(
       "به‌اشتراک‌گذاری فایل",
@@ -194,6 +224,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "iconAddExistingRepository": MessageLookupByLibrary.simpleMessage(
       "وارد کردن یک مخزن",
     ),
+    "iconCopy": MessageLookupByLibrary.simpleMessage("کپی"),
     "iconCreateRepository": MessageLookupByLibrary.simpleMessage(
       "ایجاد مخزن جدید",
     ),
@@ -252,7 +283,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "labelSelectRepository": MessageLookupByLibrary.simpleMessage(
       "انتخاب مخزن: ",
     ),
-    "labelSetPermission": MessageLookupByLibrary.simpleMessage("تنظیم مجوز"),
+    "labelSetPermission": MessageLookupByLibrary.simpleMessage("تنظیم دسترسی"),
     "labelShareLink": MessageLookupByLibrary.simpleMessage("اشتراک‌گذاری لینک"),
     "labelSize": MessageLookupByLibrary.simpleMessage("سایز: "),
     "labelSyncStatus": MessageLookupByLibrary.simpleMessage(
@@ -297,7 +328,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "یک مخزن را با استفاده از یک کد QR وارد کنید",
     ),
     "messageAddingFileToLockedRepository": MessageLookupByLibrary.simpleMessage(
-      "این مخزن قفل شده یا دارای مجوز کور است.\n\nاگر رمز عبور را دارید، قفل آن را باز کنید و دوباره امتحان کنید.",
+      "این مخزن قفل شده یا دارای دسترسی کور است.\n\nاگر رمز عبور را دارید، قفل آن را باز کنید و دوباره امتحان کنید.",
     ),
     "messageAddingFileToReadRepository": MessageLookupByLibrary.simpleMessage(
       "این مخزن یک کپی فقط خواندنی است.",
@@ -314,6 +345,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageBackgroundAndroidPermissions": MessageLookupByLibrary.simpleMessage(
       "به‌زودی سیستم‌عامل از شما اجازه می‌خواهد تا این برنامه را در پس‌زمینه اجرا کند.\n\nاین کار برای ادامه همگام‌سازی هنگامی که برنامه در پیش‌زمینه فعال نیست، ضروری است",
     ),
+    "messageBackgroundNotification": MessageLookupByLibrary.simpleMessage(
+      "وی‌سینک در حال اجرا است",
+    ),
     "messageBioAuthFailed": MessageLookupByLibrary.simpleMessage(
       "ناموفق در احراز هویت بیومتریک",
     ),
@@ -325,7 +359,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "همتای شما نمی‌تواند محتواها را بنویسد و بخواند",
     ),
     "messageBlindRepository": MessageLookupByLibrary.simpleMessage(
-      "این مخزن یک کپی با مجوز کور است.",
+      "این مخزن یک کپی با دسترسی کور است.",
     ),
     "messageBlindRepositoryContent": MessageLookupByLibrary.simpleMessage(
       "<bold>رمز عبور</bold> ارائه‌شده امکان مشاهده محتوای این مخزن را به شما نمی‌دهد.",
@@ -334,7 +368,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageBy": MessageLookupByLibrary.simpleMessage("توسط"),
     "messageCamera": MessageLookupByLibrary.simpleMessage("دوربین"),
     "messageCameraPermission": MessageLookupByLibrary.simpleMessage(
-      "برای استفاده از دوربین و خواندن کد QR به این مجوز نیاز داریم",
+      "برای استفاده از دوربین و خواندن کد QR به این دسترسی نیاز داریم",
     ),
     "messageCanadaPrivacyAct": MessageLookupByLibrary.simpleMessage(
       "قانون حفظ حریم خصوصی کانادا",
@@ -375,6 +409,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageCopiedToClipboard": MessageLookupByLibrary.simpleMessage(
       "در کلیپ‌بورد کپی شد.",
     ),
+    "messageCopyEntries": m39,
     "messageCreateAddNewItem": MessageLookupByLibrary.simpleMessage(
       "با استفاده از <icon></icon> یک <bold>پوشه</bold> جدید ایجاد کنید، یا یک <bold>فایل</bold> اضافه کنید",
     ),
@@ -388,7 +423,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "تیم وی‌سینک برای حریم خصوصی کاربر ارزش قائل است و بنابراین هیچ اطلاعات کاربری را جمع آوری نمی‌کند",
     ),
     "messageDataCollectionP2": MessageLookupByLibrary.simpleMessage(
-      "اپلیکیشن وی‌سینک به گونه‌ای طراحی شده که می‌تواند خدمات اشتراک فایل را بدون شناسه کاربر، نام، نام مستعار، حساب کاربری یا هر شکل دیگری از اطلاعات کاربر ارائه دهد. ما نمی‌دانیم چه کسی از برنامه ما استفاده می‌کند و با چه کسی داده‌های خود را همگام‌سازی می‌کند یا به‌اشتراک می‌گذارد",
+      "اپلیکیشن وی‌سینک به گونه‌ای طراحی شده که می‌تواند خدمات اشتراک فایل را بدون شناسه کاربر، نام یا نام مستعار، حساب کاربری یا هر شکل دیگری از اطلاعات کاربر ارائه دهد. ما نمی‌دانیم چه کسی از برنامه ما استفاده می‌کند و با چه کسی داده‌های خود را همگام‌سازی می‌کند یا به‌اشتراک می‌گذارد",
     ),
     "messageDataSharingP1": MessageLookupByLibrary.simpleMessage(
       "وی‌سینک (و eQualit.ie) هیچ اطلاعاتی را با طرف‌های ثالث به‌اشتراک نمی‌گذارد",
@@ -396,11 +431,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageDeclarationDOS": MessageLookupByLibrary.simpleMessage(
       "اعلامیه خدمات آنلاین توزیع‌شده",
     ),
+    "messageDeleteEntries": m40,
     "messageDeletionDataServerNote": MessageLookupByLibrary.simpleMessage(
       "تیم وی‌سینک نمی تواند فایل‌های شخصی را از مخازن حذف کند، زیرا شناسایی آن‌ها به علت رمزنگاری ممکن نیست. اگر لینک مخزنی که باید حذف شود را برای ما ارسال کنید، می توانیم کل مخازن را حذف کنیم",
     ),
     "messageDeletionDataServerP1": MessageLookupByLibrary.simpleMessage(
-      "ساده‌ترین راه برای حذف داده‌های خود، حذف فایل‌ها یا مخازن از دستگاه خودتان است. هرگونه حذف فایل به همه همتایان شما اطلاع‌رسانی خواهد شد(منتشر خواهد شد) - به عنوان مثال، اگر به یک مخزن دسترسی نوشتنی دارید، می توانید فایل‌های موجود در آن را حذف کنید و همان فایل‌ها از مخازن همتایان شما و همچنین از همتای همیشه فعال ما حذف خواهند شد. اگر نیاز دارید که فقط مخازن را از سرور همتای همیشه فعال Always-On-Peer ما حذف کنید (اما همچنان آن‌ها را در مخزن خود در دستگاه خود نگه دارید)، لطفا با آدرس زیر با ما تماس بگیرید",
+      "ساده‌ترین راه برای حذف داده‌های خود، حذف فایل‌ها یا مخازن از دستگاه خودتان است. هر گونه حذف فایل به همه همتاهای شما اطلاع‌رسانی خواهد شد (منتشر خواهد شد) - به عنوان مثال، اگر به یک مخزن دسترسی نوشتنی دارید، می توانید فایل‌های موجود در آن را حذف کنید و همان فایل‌ها از مخازن همتاهای شما و همچنین از همتای همیشه فعال ما حذف خواهند شد. اگر نیاز دارید که فقط مخازن را از سرور همتای همیشه فعال Always-On-Peer ما حذف کنید (اما همچنان آن‌ها را در مخزن خود در دستگاه خود نگه دارید)، لطفا با آدرس زیر با ما تماس بگیرید",
     ),
     "messageDistributedHashTables": MessageLookupByLibrary.simpleMessage(
       "جداول هش توزیع‌شده",
@@ -423,9 +459,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageDownloadFileCanceled": MessageLookupByLibrary.simpleMessage(
       "دانلود فایل لغو شد",
     ),
-    "messageDownloadFileLocation": m3,
-    "messageDownloadingFileCanceled": m4,
-    "messageDownloadingFileError": m5,
+    "messageDownloadFileLocation": m1,
+    "messageDownloadingFileCanceled": m2,
+    "messageDownloadingFileError": m3,
     "messageEmptyFolder": MessageLookupByLibrary.simpleMessage(
       "این <bold>پوشه</bold> خالی است",
     ),
@@ -435,7 +471,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageEnterDifferentName": MessageLookupByLibrary.simpleMessage(
       "لطفا نام دیگری وارد کنید",
     ),
-    "messageEntryAlreadyExist": m6,
+    "messageEntryAlreadyExist": m4,
     "messageEntryTypeDefault": MessageLookupByLibrary.simpleMessage("یک ورودی"),
     "messageEntryTypeFile": MessageLookupByLibrary.simpleMessage("یک فایل"),
     "messageEntryTypeFolder": MessageLookupByLibrary.simpleMessage("یک پوشه"),
@@ -495,19 +531,20 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageErrorCharactersNotAllowed": MessageLookupByLibrary.simpleMessage(
       "استفاده از / یا \\ مجاز نیست",
     ),
+    "messageErrorCreatingFolder": m41,
     "messageErrorCreatingRepository": MessageLookupByLibrary.simpleMessage(
       "خطا در ایجاد مخزن",
     ),
     "messageErrorCreatingToken": MessageLookupByLibrary.simpleMessage(
       "خطا در ایجاد توکن اشتراکی.",
     ),
-    "messageErrorCurrentPathMissing": m8,
+    "messageErrorCurrentPathMissing": m5,
     "messageErrorDefault": MessageLookupByLibrary.simpleMessage(
       "اشکالی پیش آمده. لطفا دوباره تلاش کنید.",
     ),
     "messageErrorDefaultShort": MessageLookupByLibrary.simpleMessage("ناموفق."),
-    "messageErrorDetail": m9,
-    "messageErrorDokanNotInstalled": m10,
+    "messageErrorDetail": m6,
+    "messageErrorDokanNotInstalled": m7,
     "messageErrorEntryNotFound": MessageLookupByLibrary.simpleMessage(
       "ورودی یافت نشد",
     ),
@@ -523,8 +560,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageErrorOpeningRepo": MessageLookupByLibrary.simpleMessage(
       "خطا در باز کردن مخزن",
     ),
-    "messageErrorOpeningRepoDescription": m11,
-    "messageErrorPathNotEmpty": m12,
+    "messageErrorOpeningRepoDescription": m8,
+    "messageErrorPathNotEmpty": m9,
     "messageErrorRepositoryNameExist": MessageLookupByLibrary.simpleMessage(
       "مخزنی با این نام وجود دارد",
     ),
@@ -550,9 +587,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "برای خروج، دوباره دکمه بازگشت را بزنید.",
     ),
     "messageFAQ": MessageLookupByLibrary.simpleMessage("پرسش‌های متداول"),
-    "messageFailedToMount": m15,
+    "messageFailedAddRepository": m10,
+    "messageFailedCreateRepository": m11,
+    "messageFailedToMount": m12,
     "messageFile": MessageLookupByLibrary.simpleMessage("فایل"),
-    "messageFileAlreadyExist": m16,
+    "messageFileAlreadyExist": m13,
+    "messageFileDeleted": m42,
     "messageFileIsDownloading": MessageLookupByLibrary.simpleMessage(
       "فایل از قبل در حال آپلود است",
     ),
@@ -563,9 +603,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageFilePreviewNotAvailable": MessageLookupByLibrary.simpleMessage(
       "پیش‌نمایش فایل هنوز در دسترس نیست",
     ),
+    "messageFileRenamed": m43,
     "messageFiles": MessageLookupByLibrary.simpleMessage("فایل‌ها"),
-    "messageFolderDeleted": m19,
+    "messageFolderDeleted": m14,
     "messageFolderName": MessageLookupByLibrary.simpleMessage("نام پوشه"),
+    "messageFolderRenamed": m44,
     "messageGeneratePassword": MessageLookupByLibrary.simpleMessage(
       "ایجاد رمز عبور",
     ),
@@ -578,7 +620,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageGood": MessageLookupByLibrary.simpleMessage("خوب"),
     "messageGranted": MessageLookupByLibrary.simpleMessage("دسترسی داده شد"),
     "messageGrantingRequiresSettings": MessageLookupByLibrary.simpleMessage(
-      "برای دسترسی این مجوز باید به تنظیمات بروید:\n\nتنظیمات > اپ‌ها و اعلان‌ها",
+      "برای دادن این دسترسی باید به تنظیمات بروید:\n\nتنظیمات > اپ‌ها و اعلان‌ها",
     ),
     "messageIgnoreBatteryOptimizationsPermission":
         MessageLookupByLibrary.simpleMessage(
@@ -588,19 +630,19 @@ class MessageLookup extends MessageLookupByLibrary {
       "ابزاری است که به همتاها اجازه می‌دهد بدون سرور متمرکز، یکدیگر را در شبکه همتابه‌همتا (P2P) پیدا کنند",
     ),
     "messageInfoLocalDiscovery": MessageLookupByLibrary.simpleMessage(
-      "سیستم شناسایی محلی همتا (Local Peer Discovery) به اپلیکیشن‌های وی‌سینک شما اجازه می‌دهد تا فایل‌ها را بدون مراجعه به ارائه‌دهندگان خدمات اینترنتی، جایی که یک وای‌فای محلی یا شبکه دیگری در دسترس است، با همتایان خود به اشتراک بگذارند.\n\nبرای اتصال محلی، این تنظیمات باید روشن باشد",
+      "سیستم شناسایی محلی همتا (Local Peer Discovery) به اپلیکیشن‌های وی‌سینک شما اجازه می‌دهد تا فایل‌ها را بدون مراجعه به ارائه‌دهندگان خدمات اینترنتی، جایی که یک وای‌فای محلی یا شبکه دیگری در دسترس است، با همتاهای خود به اشتراک بگذارند.\n\nبرای اتصال محلی، این تنظیمات باید روشن باشد",
     ),
     "messageInfoNATType": MessageLookupByLibrary.simpleMessage(
-      "این مقدار به روتر شما و/یا ارائه‌دهنده خدمات اینترنتی شما بستگی دارد.\n\nاتصال با همتایان شما به بهترین شکل زمانی حاصل می‌شود که مستقل از نقطه انتهایی باشد",
+      "این مقدار به روتر شما و/یا ارائه‌دهنده خدمات اینترنتی شما بستگی دارد.\n\nاتصال با همتاهای شما به بهترین شکل زمانی حاصل می‌شود که مستقل از نقطه انتهایی باشد",
     ),
     "messageInfoPeerExchange": MessageLookupByLibrary.simpleMessage(
-      "ابزاری است که برای تبادل لیست همتایان با همتاهایی که به آن‌ها متصل هستید، استفاده می‌شود",
+      "ابزاری است که برای تبادل لیست همتاها با همتاهایی که به آن‌ها متصل هستید، استفاده می‌شود",
     ),
     "messageInfoRuntimeID": MessageLookupByLibrary.simpleMessage(
       "یک شناسه منحصر‌به‌فرد است که هربار هنگام شروع توسط وی‌سینک تولید می‌شود.\n\nمی‌توانید از آن برای تایید ارتباط خود با دیگران در بخش مرتبط با همتای (Peer) اپلیکیشن، استفاده کنید",
     ),
     "messageInfoSyncMobileData": MessageLookupByLibrary.simpleMessage(
-      "وقتی این تنظیمات روشن است، ارائه‌دهنده خدمات تلفن همراه شما ممکن است برای انتقال داده‌هایی که هنگام همگام‌سازی مخزن‌هایی که با همتایان خود به اشتراک می‌گذارید، از شما هزینه دریافت کند",
+      "وقتی این تنظیمات روشن است، ارائه‌دهنده خدمات تلفن همراه شما ممکن است برای انتقال داده‌هایی که هنگام همگام‌سازی مخزن‌هایی که با همتاهای خود به اشتراک می‌گذارید، از شما هزینه دریافت کند",
     ),
     "messageInfoUPnP": MessageLookupByLibrary.simpleMessage(
       "مجموعه‌ای از پروتکل‌های شبکه است که به اپلیکیشن‌های وی‌سینک شما اجازه می‌دهد تا یکدیگر را کشف کرده و با یکدیگر ارتباط برقرار کنند.\n\nبرای بهترین اتصال، توصیه می‌کنیم این تنظیمات روشن باشد",
@@ -641,7 +683,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageLocalDiscovery": MessageLookupByLibrary.simpleMessage(
       "شناسایی شبکه محلی",
     ),
-    "messageLockOpenRepos": m21,
+    "messageLockOpenRepos": m15,
     "messageLockedRepository": MessageLookupByLibrary.simpleMessage(
       "این <bold>مخزن</bold> قفل شده است.",
     ),
@@ -658,10 +700,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "آدرس آی‌پی کاربر - به منظور ارائه پشتیبانی فنی",
     ),
     "messageLogDataP1": MessageLookupByLibrary.simpleMessage(
-      "اپلیکیشن وی‌سینک فایل‌های مرتبط با ثبت گزارش (لاگ) را در دستگاه‌های کاربران ایجاد می‌کند. هدف آن‌ها فقط ثبت فعالیت دستگاه برای تسهیل فرآیند رفع اشکال در صورتی است که کاربر در برقراری ارتباط با همتایان خود یا در موارد دیگر در استفاده از وی‌سینک با مشکل مواجه شود. فایل گزارش (لاگ) در دستگاه کاربر باقی می‌ماند، مگر این که کاربر تصمیم بگیرد آن‌را برای اهداف پشتیبانی برای ما ارسال کند",
+      "اپلیکیشن وی‌سینک فایل‌های مرتبط با ثبت گزارش (لاگ) را در دستگاه‌های کاربران ایجاد می‌کند. هدف آن‌ها فقط ثبت فعالیت دستگاه برای تسهیل فرآیند رفع اشکال در صورتی است که کاربر در برقراری ارتباط با همتاهای خود یا در موارد دیگر در استفاده از وی‌سینک با مشکل مواجه شود. فایل گزارش (لاگ) در دستگاه کاربر باقی می‌ماند، مگر این که کاربر تصمیم بگیرد آن‌را برای اهداف پشتیبانی برای ما ارسال کند",
     ),
     "messageLogDataP2": MessageLookupByLibrary.simpleMessage(
-      "اگر کاربر تصمیم بگیرد با ما تماس بگیرد، اطلاعات غیرقابل شناسایی شخصی که ممکن است جمع‌آوری کنیم عبارتند از:",
+      "اگر کاربر تصمیم بگیرد با ما تماس بگیرد، اطلاعات قابل شناسایی شخصی که ممکن است جمع‌آوری کنیم عبارتند از:",
     ),
     "messageLogDataP3": MessageLookupByLibrary.simpleMessage(
       "هیچ‌یک از این اطلاعات با هیچ طرف شخص ثالثی به‌اشتراک گذاشته نمی‌شود",
@@ -672,7 +714,8 @@ class MessageLookup extends MessageLookupByLibrary {
           "اپلیکیشن وی‌سینک مجوز اجرا در پس‌زمینه را ندارد، باز کردن یک اپلیکیشن دیگر ممکن است روند همگام‌سازی را متوقف کند",
         ),
     "messageMobile": MessageLookupByLibrary.simpleMessage("موبایل"),
-    "messageMoveEntryOrigin": m23,
+    "messageMoveEntries": m45,
+    "messageMoveEntryOrigin": m16,
     "messageMovingEntry": MessageLookupByLibrary.simpleMessage(
       "این ویژگی هنگام انتقال «ورودی» در دسترس نیست.",
     ),
@@ -683,7 +726,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageNetworkIsUnavailable": MessageLookupByLibrary.simpleMessage(
       "شبکه در دسترس نیست",
     ),
-    "messageNewFileError": m24,
+    "messageNetworkNoInternet": MessageLookupByLibrary.simpleMessage(
+      "اینترنت در دسترس نیست، اگر وای‌فای روشن باشد همچنان می‌توانید به‌صورت محلی همگام‌سازی کنید",
+    ),
+    "messageNewFileError": m17,
     "messageNewPasswordCopiedClipboard": MessageLookupByLibrary.simpleMessage(
       "رمز عبور جدید در کلیپ‌بورد کپی شد",
     ),
@@ -717,12 +763,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "مخازن می‌توانند به صورت خواندنی-نوشتنی، فقط خواندنی یا کور به اشتراک گذاشته شوند (در این حالت فایل‌ها را برای دیگران ذخیره می‌کنید، اما به آن‌ها دسترسی ندارید)",
     ),
     "messageOnboardingShare": MessageLookupByLibrary.simpleMessage(
-      "همه فایل‌ها و پوشه‌های اضافه‌شده به وی‌سینک به‌طور پیش‌فرض هم در حالت انتقال و هم در حالت استراحت، به‌صورت امن رمزنگاری شده‌اند.",
+      "همه فایل‌ها و پوشه‌های اضافه‌شده به وی‌سینک به‌طور پیش‌فرض هم در حالت انتقال و هم در حالت ذخیره‌سازی، به‌صورت امن رمزنگاری شده‌اند.",
     ),
     "messageOnlyAvailableFiles": MessageLookupByLibrary.simpleMessage(
       "فقط برای فایل‌ها در دسترس است",
     ),
-    "messageOpenFileError": m25,
+    "messageOpenFileError": m18,
     "messageOr": MessageLookupByLibrary.simpleMessage("یا"),
     "messageOuiSyncDesktopTitle": MessageLookupByLibrary.simpleMessage(
       "وی‌سینک",
@@ -750,9 +796,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "یک همتا حذف شد",
     ),
     "messagePermissionRequired": MessageLookupByLibrary.simpleMessage(
-      "این مجوز لازم است",
+      "این دسترسی ضروری است",
     ),
-    "messagePreviewingFileFailed": m26,
+    "messagePleaseAuthenticate": MessageLookupByLibrary.simpleMessage(
+      "لطفا تایید کنید",
+    ),
+    "messagePreviewingFileFailed": m19,
     "messagePrivacyIntro": MessageLookupByLibrary.simpleMessage(
       "این بخش برای اطلاع رسانی به بازدیدکنندگان در مورد سیاست‌های ما در مورد جمع‌آوری، استفاده و افشای اطلاعات شخصی در صورتی که کسی تصمیم به استفاده از سرویس ما داشته باشد، استفاده می شود",
     ),
@@ -798,19 +847,20 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageRepoAuthFailed": MessageLookupByLibrary.simpleMessage(
       "خطا در احراز هویت مخزن",
     ),
-    "messageRepoDeletionErrorDescription": m27,
+    "messageRepoDeletionErrorDescription": m20,
     "messageRepoDeletionFailed": MessageLookupByLibrary.simpleMessage(
       "حذف مخزن ناموفق بود",
     ),
     "messageRepoMissing": MessageLookupByLibrary.simpleMessage(
       "مخزن مورد نظر دیگر آن‌جا نیست",
     ),
-    "messageRepoMissingErrorDescription": m28,
-    "messageRepositoryAccessMode": m29,
-    "messageRepositoryAlreadyExist": m30,
+    "messageRepoMissingErrorDescription": m21,
+    "messageRepositoryAccessMode": m22,
+    "messageRepositoryAlreadyExist": m23,
     "messageRepositoryCurrentPassword": MessageLookupByLibrary.simpleMessage(
       "رمز عبور کنونی",
     ),
+    "messageRepositoryDeleted": m46,
     "messageRepositoryIsNotOpen": MessageLookupByLibrary.simpleMessage(
       "هیچ مخزنی باز نیست",
     ),
@@ -829,7 +879,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageRepositoryPassword": MessageLookupByLibrary.simpleMessage(
       "رمز عبور",
     ),
-    "messageRepositorySuggestedName": m33,
+    "messageRepositoryRenamed": m47,
+    "messageRepositorySuggestedName": m24,
     "messageRepositoryToken": MessageLookupByLibrary.simpleMessage(
       "لینک را این‌جا قرار دهید",
     ),
@@ -837,6 +888,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "بازنشانی رمز محلی",
     ),
     "messageRousseau": MessageLookupByLibrary.simpleMessage("ژان ژاک روسو"),
+    "messageSaveEntriesToDevice": m48,
     "messageSaveToLocation": MessageLookupByLibrary.simpleMessage(
       "فایل مورد نظر را در این پوشه ذخیره کنید",
     ),
@@ -854,19 +906,19 @@ class MessageLookup extends MessageLookupByLibrary {
           "گزینه‌های امنیت برای مخازن کور در دسترس نیستند",
         ),
     "messageSecurityPracticesP1": MessageLookupByLibrary.simpleMessage(
-      "داده‌هایی که کاربر در مخازن وی‌سینک آپلود می‌کند، در حین انتقال و همچنین در حالت استراحت رمزنگاری شده‌اند. این شامل ابرداده‌هایی مانند نام فایل، اندازه، ساختار پوشه و غیره می‌شود. در وی‌سینک، داده‌ها فقط توسط شخصی که داده‌ها را آپلود کرده و افرادی که مخازن خود را با آن‌ها به اشتراک گذاشته‌اند، قابل خواندن است",
+      "داده‌هایی که کاربر در مخازن وی‌سینک آپلود می‌کند، در حین انتقال و همچنین در حالت ذخیره‌سازی رمزنگاری شده‌اند. این شامل ابرداده‌هایی مانند نام فایل، اندازه، ساختار پوشه و غیره می‌شود. در وی‌سینک، داده‌ها فقط توسط شخصی که داده‌ها را آپلود کرده و افرادی که مخازن خود را با آن‌ها به اشتراک گذاشته‌اند، قابل خواندن است",
     ),
     "messageSecurityPracticesP2": MessageLookupByLibrary.simpleMessage(
       "درباره تکنیک‌های رمزنگاری مورد استفاده در اسناد ما می‌توانید اطلاعات بیشتری کسب کنید",
     ),
     "messageSecurityPracticesP3": MessageLookupByLibrary.simpleMessage(
-      "اپلیکیشن وی‌سینک داده‌های کاربران را روی یک همتای همیشه فعال [Always-On Peer] که سروری در کشور کانادا است، ذخیره می‌کند. همه داده‌ها به صورت تکه‌های رمزنگاری‌شده ذخیره می‌شوند و توسط سرور یا اپراتورهای آن قابل خواندن نیستند. هدف این سرور صرفاً پر کردن شکاف بین همتایان خود است که هم‌زمان آنلاین نیستند. تمام داده‌ها به صورت دوره‌ای از این سرور پاک می شوند - هدف آن ارائه ذخیره‌سازی دائمی داده نیست، بلکه همگام‌سازی داده‌ها توسط همتایان را تسهیل می‌کند",
+      "اپلیکیشن وی‌سینک داده‌های کاربران را روی یک همتای همیشه فعال [Always-On Peer] که سروری در کشور کانادا است، ذخیره می‌کند. همه داده‌ها به صورت تکه‌های رمزنگاری‌شده ذخیره می‌شوند و توسط سرور یا اپراتورهای آن قابل خواندن نیستند. هدف این سرور صرفا پر کردن شکاف بین همتاهای خود است که هم‌زمان آنلاین نیستند. تمام داده‌ها به صورت دوره‌ای از این سرور پاک می شوند - هدف آن ارائه ذخیره‌سازی دائمی داده نیست، بلکه همگام‌سازی داده‌ها توسط همتاها را تسهیل می‌کند",
     ),
     "messageSecurityPracticesP4": MessageLookupByLibrary.simpleMessage(
       "اگر دلیلی مبنی بر به‌اشتراک‌گذاری و نشت اطلاعات شخصی خودتان به‌طور غیرقانونی توسط سایر کاربران وی‌سینک دارید، لطفا با آدرس زیر با ما تماس بگیرید",
     ),
     "messageSelectAccessMode": MessageLookupByLibrary.simpleMessage(
-      "یک مجوز برای ایجاد لینک اشتراک‌گذاری انتخاب کنید",
+      "نوع دسترسی برای ایجاد لینک اشتراک‌گذاری را انتخاب کنید",
     ),
     "messageSelectLocation": MessageLookupByLibrary.simpleMessage(
       "مکان را انتخاب کنید",
@@ -878,12 +930,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "تنظیمات موجود در این دستگاه با نسخه جدیدتری از وی‌سینک ایجاد شده‌اند و قابل انتقال نیستند.",
     ),
     "messageShareActionDisabled": MessageLookupByLibrary.simpleMessage(
-      "برای ایجاد لینک مخزن ابتدا باید یک مجوز انتخاب کنید",
+      "برای ایجاد لینک مخزن ابتدا باید نوع دسترسی را انتخاب کنید",
     ),
     "messageShareWithWR": MessageLookupByLibrary.simpleMessage(
       "کد QR را به‌ اشتراک بگذارید",
     ),
-    "messageSortBy": m35,
+    "messageSortBy": m25,
     "messageStorage": MessageLookupByLibrary.simpleMessage("فضای ذخیره‌سازی"),
     "messageStoragePermission": MessageLookupByLibrary.simpleMessage(
       "برای دسترسی به فایل‌ها مورد نیاز است",
@@ -938,8 +990,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageUnlockRepoFailed": MessageLookupByLibrary.simpleMessage(
       "رمز عبور، مخزن را باز نکرد",
     ),
-    "messageUnlockRepoOk": m36,
-    "messageUnlockRepository": m37,
+    "messageUnlockRepoOk": m26,
+    "messageUnlockRepository": m27,
     "messageUnlockUsingBiometrics": MessageLookupByLibrary.simpleMessage(
       "با استفاده از بیومتریک قفل را باز کنید",
     ),
@@ -957,7 +1009,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "شاخص‌های امنیتی مخزن به‌روزرسانی شده است.",
     ),
     "messageUseCacheServers": MessageLookupByLibrary.simpleMessage(
-      "از سرورهای حافظه پنهان (کش) استفاده کنید",
+      "استفاده از سرورهای کش",
     ),
     "messageUseLocalPassword": MessageLookupByLibrary.simpleMessage(
       "استفاده از رمز عبور محلی",
@@ -972,22 +1024,118 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageWriteReplicaExplanation": MessageLookupByLibrary.simpleMessage(
       "دسترسی کامل. همتای شما امکان خواندن و نوشتن دارد",
     ),
-    "messageWritingFileCanceled": m38,
-    "messageWritingFileError": m39,
+    "messageWritingFileCanceled": m28,
+    "messageWritingFileError": m29,
     "popupMenuItemChangePassword": MessageLookupByLibrary.simpleMessage(
       "تغییر رمز عبور",
     ),
     "popupMenuItemCopyPassword": MessageLookupByLibrary.simpleMessage(
       "کپی‌کردن رمز عبور",
     ),
-    "replacementAccess": m40,
-    "replacementChanges": m41,
-    "replacementEntry": m42,
-    "replacementError": m43,
-    "replacementName": m44,
-    "replacementNumber": m45,
-    "replacementPath": m46,
-    "replacementStatus": m47,
+    "replacementAccess": m30,
+    "replacementChanges": m31,
+    "replacementEntry": m32,
+    "replacementError": m33,
+    "replacementName": m34,
+    "replacementNumber": m35,
+    "replacementPath": m36,
+    "replacementStatus": m37,
+    "repoResetAccessTypeInfoBlindOrLocked":
+        MessageLookupByLibrary.simpleMessage("کور یا قفل‌شده"),
+    "repoResetAccessTypeInfoRead": MessageLookupByLibrary.simpleMessage(
+      "خواندنی‌",
+    ),
+    "repoResetAccessTypeInfoWrite": MessageLookupByLibrary.simpleMessage(
+      "نوشتنی‌",
+    ),
+    "repoResetAccessTypeLabel": MessageLookupByLibrary.simpleMessage(
+      "نوع دسترسی مخزن",
+    ),
+    "repoResetActionAnyToWrite": MessageLookupByLibrary.simpleMessage(
+      "این مخزن دسترسی نوشتنی پیدا خواهد کرد.",
+    ),
+    "repoResetActionBlindToBlind": MessageLookupByLibrary.simpleMessage(
+      "این مخزن یک مخزن کور خواهد شد.",
+    ),
+    "repoResetActionBlindToBlindWarn": MessageLookupByLibrary.simpleMessage(
+      "این مخزن ممکن است دسترسی خواندنی یا نوشتنی داشته باشد که با یک رمز محلی قفل شده. در این صورت، پس از اجرای این عملیات باز کردن آن ممکن نخواهد بود.",
+    ),
+    "repoResetActionBlindToRead": MessageLookupByLibrary.simpleMessage(
+      "این مخزن فقط-خواندنی خواهد شد.",
+    ),
+    "repoResetActionBlindToReadWarn": MessageLookupByLibrary.simpleMessage(
+      "این مخزن ممکن است دسترسی نوشتنی داشته باشد که با یک رمز محلی قفل شده. در این صورت، پس از اجرای این عملیات باز کردن برای نوشتن ممکن نخواهد بود.",
+    ),
+    "repoResetActionInfoLabel": MessageLookupByLibrary.simpleMessage(
+      "عملیات در انتظار انجام",
+    ),
+    "repoResetActionReadToBlind": MessageLookupByLibrary.simpleMessage(
+      "این مخزن دسترسی خواندنی خود را از دست خواهد داد.",
+    ),
+    "repoResetActionReadToBlindWarn": MessageLookupByLibrary.simpleMessage(
+      "این عملیات بدون لینک توکن خواندنی یا نوشتنی غیرقابل بازگشت است.",
+    ),
+    "repoResetActionSame": MessageLookupByLibrary.simpleMessage(
+      "هیچ عملیاتی انجام نمی‌شود چون نوع دسترسی توکن و مخزن یکسان است.",
+    ),
+    "repoResetActionWriteToBlind": MessageLookupByLibrary.simpleMessage(
+      "این مخزن دسترسی خواندنی و نوشتنی خود را از دست خواهد داد.",
+    ),
+    "repoResetActionWriteToBlindWarn": MessageLookupByLibrary.simpleMessage(
+      "این عملیات بدون لینک توکن نوشتنی غیرقابل بازگشت است.",
+    ),
+    "repoResetActionWriteToRead": MessageLookupByLibrary.simpleMessage(
+      "این مخزن دسترسی نوشتنی خود را از دست خواهد داد.",
+    ),
+    "repoResetActionWriteToReadWarn": MessageLookupByLibrary.simpleMessage(
+      "این عملیات بدون لینک توکن نوشتنی غیرقابل بازگشت است.",
+    ),
+    "repoResetAuthInfoBlindOrLocked": MessageLookupByLibrary.simpleMessage(
+      "مخزن یا کور است یا با یک رمز محلی قفل شده",
+    ),
+    "repoResetAuthInfoBlindOrLockedWarn": MessageLookupByLibrary.simpleMessage(
+      "برنامه نمی‌تواند تفاوت را تشخیص دهد.",
+    ),
+    "repoResetAuthInfoKeyIsStored": MessageLookupByLibrary.simpleMessage(
+      "کلید روی این دستگاه ذخیره شده.",
+    ),
+    "repoResetAuthInfoKeyIsStoredAndProtected":
+        MessageLookupByLibrary.simpleMessage(
+          "کلید روی این دستگاه ذخیره شده و برای باز کردن مخزن نیاز به تایید اضافی است.",
+        ),
+    "repoResetAuthInfoLabel": MessageLookupByLibrary.simpleMessage("روش تایید"),
+    "repoResetAuthInfoLocked": MessageLookupByLibrary.simpleMessage(
+      "با یک رمز محلی قفل شده.",
+    ),
+    "repoResetAuthInfoPasswordIsStored": MessageLookupByLibrary.simpleMessage(
+      "رمز عبور روی این دستگاه ذخیره شده.",
+    ),
+    "repoResetConfirmUpdateMessage": MessageLookupByLibrary.simpleMessage(
+      "آیا مطمئنید می‌خواهید عملیات به‌روزرسانی را ادامه دهید؟",
+    ),
+    "repoResetConfirmUpdateTitle": MessageLookupByLibrary.simpleMessage(
+      "لطفا تایید کنید‌",
+    ),
+    "repoResetRepoNameLabel": MessageLookupByLibrary.simpleMessage("نام مخزن"),
+    "repoResetTitle": MessageLookupByLibrary.simpleMessage(
+      "بازنشانی دسترسی مخزن",
+    ),
+    "repoResetTokenAlreadySubmitted": MessageLookupByLibrary.simpleMessage(
+      "هیچ عملیاتی انجام نخواهد شد چون این توکن قبلا ارسال شده است.",
+    ),
+    "repoResetTokenEmptyInfo": MessageLookupByLibrary.simpleMessage(
+      "لطفا یک لینک توکن معتبر وارد کنید تا عملیات مشخص شود.",
+    ),
+    "repoResetTokenInvalid": MessageLookupByLibrary.simpleMessage("نامعتبر"),
+    "repoResetTokenInvalidInfo": MessageLookupByLibrary.simpleMessage(
+      "لینک توکن نامعتبر است.",
+    ),
+    "repoResetTokenNonMatching": MessageLookupByLibrary.simpleMessage(
+      "هیچ عملیاتی انجام نمی‌شود چون توکن با این مخزن مطابقت ندارد.",
+    ),
+    "repoResetTokenTypeLabel": MessageLookupByLibrary.simpleMessage(
+      "نوع دسترسی توکن",
+    ),
     "repositoryIsAlreadyImported": MessageLookupByLibrary.simpleMessage(
       "مخزن قبلا وارد شده",
     ),
@@ -1011,7 +1159,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "زبان برنامه",
     ),
     "titleBackgroundAndroidPermissionsTitle":
-        MessageLookupByLibrary.simpleMessage("مجوزهای مورد نیاز"),
+        MessageLookupByLibrary.simpleMessage("دسترسی‌های مورد نیاز"),
     "titleChangePassword": MessageLookupByLibrary.simpleMessage(
       "تغییر رمز عبور",
     ),
@@ -1023,6 +1171,8 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "titleContactUs": MessageLookupByLibrary.simpleMessage("تماس با ما"),
     "titleCookies": MessageLookupByLibrary.simpleMessage("کوکی‌ها"),
+    "titleCopyEntries": MessageLookupByLibrary.simpleMessage("کپی"),
+    "titleCopyingEntry": MessageLookupByLibrary.simpleMessage("کپی کردن ورودی"),
     "titleCreateFolder": MessageLookupByLibrary.simpleMessage("ایجاد پوشه"),
     "titleCreateRepository": MessageLookupByLibrary.simpleMessage(
       "ایجاد مخزن جدید",
@@ -1033,6 +1183,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "titleDataSharing": MessageLookupByLibrary.simpleMessage(
       "۳.۲. به‌اشتراک‌گذاری اطلاعات",
     ),
+    "titleDeleteEntries": MessageLookupByLibrary.simpleMessage("حذف‌"),
     "titleDeleteFile": MessageLookupByLibrary.simpleMessage("حذف فایل"),
     "titleDeleteFolder": MessageLookupByLibrary.simpleMessage("حذف پوشه"),
     "titleDeleteNotEmptyFolder": MessageLookupByLibrary.simpleMessage(
@@ -1087,6 +1238,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "titleLogData": MessageLookupByLibrary.simpleMessage("ثبت اطلاعات"),
     "titleLogs": MessageLookupByLibrary.simpleMessage("گزارش‌ها"),
+    "titleMoveEntries": MessageLookupByLibrary.simpleMessage("انتقال"),
     "titleMovingEntry": MessageLookupByLibrary.simpleMessage(
       "در حال انتقال (مقدار) ورودی",
     ),
@@ -1095,7 +1247,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "دسترسی به فایل‌ها از دستگاه‌های مختلف",
     ),
     "titleOnboardingPermissions": MessageLookupByLibrary.simpleMessage(
-      "تنظیم مجوزها برای همکاری، پخش یا صرفا ذخیره‌سازی",
+      "تنظیم دسترسی‌ها برای همکاری، پخش یا صرفا ذخیره‌سازی",
     ),
     "titleOnboardingShare": MessageLookupByLibrary.simpleMessage(
       "ارسال و دریافت فایل‌ها به‌طور امن",
@@ -1126,9 +1278,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "titleRepository": MessageLookupByLibrary.simpleMessage("مخزن"),
     "titleRepositoryName": MessageLookupByLibrary.simpleMessage("نام مخزن"),
     "titleRequiredPermission": MessageLookupByLibrary.simpleMessage(
-      "مجوز مورد نیاز",
+      "دسترسی مورد نیاز",
     ),
     "titleSaveChanges": MessageLookupByLibrary.simpleMessage("ذخیره تغییرات"),
+    "titleSaveEntriesToDevice": MessageLookupByLibrary.simpleMessage(
+      "ذخیره در دستگاه",
+    ),
     "titleScanRepoQR": MessageLookupByLibrary.simpleMessage("اسکن کد QR مخزن"),
     "titleSecurity": MessageLookupByLibrary.simpleMessage("امنیت"),
     "titleSecurityPractices": MessageLookupByLibrary.simpleMessage(
@@ -1139,7 +1294,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "انتخاب رمز عبور",
     ),
     "titleSettings": MessageLookupByLibrary.simpleMessage("تنظیمات"),
-    "titleShareRepository": m49,
+    "titleShareRepository": m38,
     "titleSortBy": MessageLookupByLibrary.simpleMessage("مرتب‌سازی بر اساس"),
     "titleStateMonitor": MessageLookupByLibrary.simpleMessage("نظارت بر وضعیت"),
     "titleTermsOfUse": MessageLookupByLibrary.simpleMessage("۲. شرایط استفاده"),

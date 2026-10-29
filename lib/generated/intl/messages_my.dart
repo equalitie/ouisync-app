@@ -23,89 +23,89 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m0(access) =>
       "ခွင့်ပြုချက်များသည် repository ၏ လက်ရှိခွင့်ပြုချက်များထက် ကျော်လွန်၍ မရနိုင်ပါ : ${access}";
 
-  static String m3(path) => "ဖိုင်ကို ${path} သို့ ဒေါင်းလုတ်ချပြီးပါပြီ";
+  static String m1(path) => "ဖိုင်ကို ${path} သို့ ဒေါင်းလုတ်ချပြီးပါပြီ";
 
-  static String m4(name) =>
+  static String m2(name) =>
       "${name} - ‌ဒေါင်းလုပ်ဒ်ဆွဲခြင်းကို ပယ်ဖျက်လိုက်ပါသည်";
 
-  static String m5(name) => "${name} - ဒေါင်းလုတ်မအောင်မြင်ပါ";
+  static String m3(name) => "${name} - ဒေါင်းလုတ်မအောင်မြင်ပါ";
 
-  static String m6(entry) => "${entry} သည် ရှိပြီးဖြစ်သည်။";
+  static String m4(entry) => "${entry} သည် ရှိပြီးဖြစ်သည်။";
 
-  static String m8(path) => "";
+  static String m5(path) => "";
 
-  static String m9(error) => "အမှား - ${error}";
+  static String m6(error) => "အမှား - ${error}";
 
-  static String m10(dokanUrl) => "Dokan ကို ရှာမတွေ့ပါ။ ${dokanUrl}";
+  static String m7(dokanUrl) => "Dokan ကို ရှာမတွေ့ပါ။ ${dokanUrl}";
 
-  static String m11(name) => "သိုလှောင်ခန်း ${name} ကို စတင်ခြင်း မအောင်မြင်ပါ";
+  static String m8(name) => "သိုလှောင်ခန်း ${name} ကို စတင်ခြင်း မအောင်မြင်ပါ";
 
-  static String m12(path) => "${path} သည် လစ်လပ်မနေပါ";
+  static String m9(path) => "${path} သည် လစ်လပ်မနေပါ";
 
-  static String m13(name) => "repository ${name} ကို ထည့်သွင်းမှု မအောင်မြင်ပါ";
+  static String m10(name) => "repository ${name} ကို ထည့်သွင်းမှု မအောင်မြင်ပါ";
 
-  static String m14(name) => "repository ${name} ကို တည်ဆောက်မှု မအောင်မြင်ပါ";
+  static String m11(name) => "repository ${name} ကို တည်ဆောက်မှု မအောင်မြင်ပါ";
 
-  static String m15(reason) =>
+  static String m12(reason) =>
       "File Explorer မှတစ်ဆင့် သိုလှောင်ခန်းသို့ မဝင်ရောက်နိုင်ပါ - ${reason}";
 
-  static String m16(name) =>
+  static String m13(name) =>
       "${name} သည် ထိုနေရာတွင် ရှိပြီးဖြစ်သည်။\n\nသင် မည်သို့ပြုလုပ်လိုသနည်း။";
 
-  static String m19(name) => "ဖိုဒါကို အောင်မြင်စွာ ဖျက်လိုက်ပါပြီ - ${name}";
+  static String m14(name) => "ဖိုဒါကို အောင်မြင်စွာ ဖျက်လိုက်ပါပြီ - ${name}";
 
-  static String m21(number) =>
+  static String m15(number) =>
       "ပွင့်လင်း repositories အားလုံးကို လော့ခ်ချလိုပါသလား။\n\n(${number} ခု ဖွင့်မည်)";
 
-  static String m23(path) => "${path} မှ";
+  static String m16(path) => "${path} မှ";
 
-  static String m24(name) => "${name} ဖိုင်ကို တည်ဆောက်မှု မအောင်မြင်ပါ";
+  static String m17(name) => "${name} ဖိုင်ကို တည်ဆောက်မှု မအောင်မြင်ပါ";
 
-  static String m25(name) => "${name} ဖိုင်ကို ဖွင့်လှစ်မှု မအောင်မြင်ပါ";
+  static String m18(name) => "${name} ဖိုင်ကို ဖွင့်လှစ်မှု မအောင်မြင်ပါ";
 
-  static String m26(path) => "${path} ဖိုင်ကို အစမ်းကြည့်ရှုခြင်း မအောင်မြင်ပါ";
+  static String m19(path) => "${path} ဖိုင်ကို အစမ်းကြည့်ရှုခြင်း မအောင်မြင်ပါ";
 
-  static String m27(name) => "repository \"${name}\" ကို ဖျက်၍ မရနိုင်ပါ";
+  static String m20(name) => "repository \"${name}\" ကို ဖျက်၍ မရနိုင်ပါ";
 
-  static String m28(name) =>
+  static String m21(name) =>
       "သိုလှောင်ခန်း \"${name}\" ကို ပုံမှန်နေရာတွင် ရှာမတွေ့ပါ";
 
-  static String m29(access) => "ဝင်ရောက်ခွင့်ပြုပြီးဖြစ်သည် - ${access}";
+  static String m22(access) => "ဝင်ရောက်ခွင့်ပြုပြီးဖြစ်သည် - ${access}";
 
-  static String m30(name) =>
+  static String m23(name) =>
       "ထို repository သည် \"${name}\" ဟူသော အမည်ဖြင့် အက်ပ်တွင် ရှိပြီးဖြစ်သည်။";
 
-  static String m33(name) =>
+  static String m24(name) =>
       "အကြံပြုချက်: ${name}\n(ထိုအမည်ကို အသုံးပြုရန် ဤနေရာကို နှိပ်ပါ)";
 
-  static String m35(name) => "အမျိုးအစား- ${name}";
+  static String m25(name) => "အမျိုးအစား- ${name}";
 
-  static String m36(access) => "${access} ပုံစံတူအဖြစ် လော့ခ်ဖွင့်ပြီးဖြစ်သည်";
+  static String m26(access) => "${access} ပုံစံတူအဖြစ် လော့ခ်ဖွင့်ပြီးဖြစ်သည်";
 
-  static String m37(name) =>
+  static String m27(name) =>
       "\"${name}\" ကို လော့ခ်ဖြည်ရန် စကားဝှက်ထည့်သွင်းပါ";
 
-  static String m38(name) => "${name} ကို ရေးသားခြင်းအား ပယ်ဖျက်လိုက်ပါသည်";
+  static String m28(name) => "${name} ကို ရေးသားခြင်းအား ပယ်ဖျက်လိုက်ပါသည်";
 
-  static String m39(name) => "${name} - ပြင်ဆင်မှု မအောင်မြင်ပါ";
+  static String m29(name) => "${name} - ပြင်ဆင်မှု မအောင်မြင်ပါ";
 
-  static String m40(access) => "";
+  static String m30(access) => "";
 
-  static String m41(changes) => "";
+  static String m31(changes) => "";
 
-  static String m42(entry) => "${entry}";
+  static String m32(entry) => "${entry}";
 
-  static String m43(error) => "${error}";
+  static String m33(error) => "${error}";
 
-  static String m44(name) => "${name}";
+  static String m34(name) => "${name}";
 
-  static String m45(number) => "";
+  static String m35(number) => "";
 
-  static String m46(path) => "${path}";
+  static String m36(path) => "${path}";
 
-  static String m47(status) => "${status}";
+  static String m37(status) => "${status}";
 
-  static String m49(name) => "repository \"${name}\" ကို မျှဝေမည်";
+  static String m38(name) => "repository \"${name}\" ကို မျှဝေမည်";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -450,9 +450,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageDownloadFileCanceled": MessageLookupByLibrary.simpleMessage(
       "ဖိုင်ဒေါင်းလုတ်ချခြင်းကို မလုပ်တော့ပါ",
     ),
-    "messageDownloadFileLocation": m3,
-    "messageDownloadingFileCanceled": m4,
-    "messageDownloadingFileError": m5,
+    "messageDownloadFileLocation": m1,
+    "messageDownloadingFileCanceled": m2,
+    "messageDownloadingFileError": m3,
     "messageEmptyFolder": MessageLookupByLibrary.simpleMessage(
       "ထို <bold>ဖိုဒါ</bold>သည် အလွတ်ဖြစ်ပါသည်",
     ),
@@ -462,7 +462,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageEnterDifferentName": MessageLookupByLibrary.simpleMessage(
       "ကျေးဇူးပြု၍ မတူညီသော နာမည်တစ်ခုကို ထည့်သွင်းပါ",
     ),
-    "messageEntryAlreadyExist": m6,
+    "messageEntryAlreadyExist": m4,
     "messageEntryTypeDefault": MessageLookupByLibrary.simpleMessage(
       "အကြောင်းအရာတစ်ခု",
     ),
@@ -531,15 +531,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageErrorCreatingToken": MessageLookupByLibrary.simpleMessage(
       "မျှဝေ၍ ရသော တိုကင်ကို တည်ဆောက်ခြင်းသည် မှားယွင်းနေသည်။",
     ),
-    "messageErrorCurrentPathMissing": m8,
+    "messageErrorCurrentPathMissing": m5,
     "messageErrorDefault": MessageLookupByLibrary.simpleMessage(
       "တစ်စုံတစ်ခုမှားယွင်းနေသောကြောင့် နောက်တစ်ကြိမ် ထပ်မံကြိုးစားပါ။",
     ),
     "messageErrorDefaultShort": MessageLookupByLibrary.simpleMessage(
       "မအောင်မြင်ပါ။",
     ),
-    "messageErrorDetail": m9,
-    "messageErrorDokanNotInstalled": m10,
+    "messageErrorDetail": m6,
+    "messageErrorDokanNotInstalled": m7,
     "messageErrorEntryNotFound": MessageLookupByLibrary.simpleMessage(
       "အချက်အလက် ရှာမတွေ့ပါ",
     ),
@@ -557,8 +557,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageErrorOpeningRepo": MessageLookupByLibrary.simpleMessage(
       "သိုလှောင်ခန်းကို ဖွင့်လှစ်မှု မှားယွင်းနေပါသည်",
     ),
-    "messageErrorOpeningRepoDescription": m11,
-    "messageErrorPathNotEmpty": m12,
+    "messageErrorOpeningRepoDescription": m8,
+    "messageErrorPathNotEmpty": m9,
     "messageErrorRepositoryNameExist": MessageLookupByLibrary.simpleMessage(
       "ထိုအမည်နှင့် repository တစ်ခု ရှိပြီးဖြစ်ပါသည်",
     ),
@@ -588,11 +588,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageFAQ": MessageLookupByLibrary.simpleMessage(
       "အမေးများသော မေးခွန်းများ",
     ),
-    "messageFailedAddRepository": m13,
-    "messageFailedCreateRepository": m14,
-    "messageFailedToMount": m15,
+    "messageFailedAddRepository": m10,
+    "messageFailedCreateRepository": m11,
+    "messageFailedToMount": m12,
     "messageFile": MessageLookupByLibrary.simpleMessage("ဖိုင်"),
-    "messageFileAlreadyExist": m16,
+    "messageFileAlreadyExist": m13,
     "messageFileIsDownloading": MessageLookupByLibrary.simpleMessage(
       "ဖိုင်ကို တင်ပြီးဖြစ်သည်",
     ),
@@ -604,7 +604,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "ဖိုင်ကို အစမ်းကြည့်ရှုရန် မဖြစ်နိုင်သေးပါ",
     ),
     "messageFiles": MessageLookupByLibrary.simpleMessage("ဖိုင်များ"),
-    "messageFolderDeleted": m19,
+    "messageFolderDeleted": m14,
     "messageFolderName": MessageLookupByLibrary.simpleMessage("ဖိုဒါအမည်"),
     "messageGeneratePassword": MessageLookupByLibrary.simpleMessage(
       "စကားဝှက်ကို ဖန်တီးမည်",
@@ -678,7 +678,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageLocalDiscovery": MessageLookupByLibrary.simpleMessage(
       "စက်တွင်း ရှာဖွေတွေ့ရှိမှု",
     ),
-    "messageLockOpenRepos": m21,
+    "messageLockOpenRepos": m15,
     "messageLockedRepository": MessageLookupByLibrary.simpleMessage(
       "ထို <bold>repository</bold> သည် လော့ကျနေပါသည်။",
     ),
@@ -709,7 +709,7 @@ class MessageLookup extends MessageLookupByLibrary {
           "Ouisync သည် နောက်ကွယ်တွင် အလုပ်လုပ်ရန် ခွင့်ပြုချက် မရရှိသေးသောကြောင့် အခြားအက်ပလီကေးရှင်းကို ဖွင့်လိုက်ပါက လုပ်ဆောင်ဆဲ Ouisync သည် ရပ်တန့်သွားနိုင်ပါသည်",
         ),
     "messageMobile": MessageLookupByLibrary.simpleMessage("မိုဘိုင်း"),
-    "messageMoveEntryOrigin": m23,
+    "messageMoveEntryOrigin": m16,
     "messageMovingEntry": MessageLookupByLibrary.simpleMessage(
       "ထိုနည်းပညာသည် အကြောင်းအရာတစ်ခုကို ရွှေ့ပြောင်းသောအခါ အသုံးပြု၍မရပါ။",
     ),
@@ -720,7 +720,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageNetworkIsUnavailable": MessageLookupByLibrary.simpleMessage(
       "ကွန်ရက်မရရှိနိုင်ပါ",
     ),
-    "messageNewFileError": m24,
+    "messageNewFileError": m17,
     "messageNewPasswordCopiedClipboard": MessageLookupByLibrary.simpleMessage(
       "စကားဝှက်အသစ်ကို ကလစ်ဘုတ်သို့ ကူးယူထားသည်",
     ),
@@ -756,7 +756,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageOnboardingShare": MessageLookupByLibrary.simpleMessage(
       "Ouisync တွင် ထည့်သွင်းထားသော ဖိုင်များနှင့် ဖိုဒါများအားလုံးသည် အကူးအပြောင်းနှင့် အချိန်အများစုတွင် ပုံမှန်အတိုင်း လုံခြုံစွာ ကုဒ်ဝှက်ထားသည်။",
     ),
-    "messageOpenFileError": m25,
+    "messageOpenFileError": m18,
     "messageOr": MessageLookupByLibrary.simpleMessage("သို့မဟုတ်"),
     "messageOuiSyncDesktopTitle": MessageLookupByLibrary.simpleMessage(
       "Ouisync",
@@ -784,7 +784,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "messagePermissionRequired": MessageLookupByLibrary.simpleMessage(
       "ခွင့်ပြုချက်လိုအပ်သည်",
     ),
-    "messagePreviewingFileFailed": m26,
+    "messagePreviewingFileFailed": m19,
     "messagePrivacyIntro": MessageLookupByLibrary.simpleMessage(
       "မည်သူမဆို ကျွန်ုပ်တို့၏ ဝန်ဆောင်မှုအား အသုံးပြုရန် ဆုံးဖြတ်ပါက ကိုယ်ရေးလုံခြုံမှုအချက်အလက်များကို စုဆောင်းခြင်း၊ အသုံးပြုခြင်းနှင့် ထုတ်ဖော်ခြင်းနှင့် သက်ဆိုင်သည့် ကျွန်ုပ်တို့၏ မူဝါဒများကို ဝင်ရောက်အသုံးပြုသူများအား အသိပေးရန်အတွက် ဤကဏ္ဍအား အသုံးပြုသည်",
     ),
@@ -831,16 +831,16 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageRepoAuthFailed": MessageLookupByLibrary.simpleMessage(
       "Repository ကို စစ်ဆေးမှု မအောင်မြင်ပါ",
     ),
-    "messageRepoDeletionErrorDescription": m27,
+    "messageRepoDeletionErrorDescription": m20,
     "messageRepoDeletionFailed": MessageLookupByLibrary.simpleMessage(
       "repository ကို ဖျက်ခြင်း မအောင်မြင်ပါ",
     ),
     "messageRepoMissing": MessageLookupByLibrary.simpleMessage(
       "သိုလှောင်ခန်း မရှိတော့ပါ",
     ),
-    "messageRepoMissingErrorDescription": m28,
-    "messageRepositoryAccessMode": m29,
-    "messageRepositoryAlreadyExist": m30,
+    "messageRepoMissingErrorDescription": m21,
+    "messageRepositoryAccessMode": m22,
+    "messageRepositoryAlreadyExist": m23,
     "messageRepositoryCurrentPassword": MessageLookupByLibrary.simpleMessage(
       "လက်ရှိစကားဝှက်",
     ),
@@ -862,7 +862,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageRepositoryPassword": MessageLookupByLibrary.simpleMessage(
       "စကားဝှက်",
     ),
-    "messageRepositorySuggestedName": m33,
+    "messageRepositorySuggestedName": m24,
     "messageRepositoryToken": MessageLookupByLibrary.simpleMessage(
       "လင့်ခ်ကို ဤနေရာတွင် ကူးယူနေရာချထားပါ",
     ),
@@ -909,7 +909,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageShareWithWR": MessageLookupByLibrary.simpleMessage(
       "QR ကုဒ်နှင့် မျှဝေမည်",
     ),
-    "messageSortBy": m35,
+    "messageSortBy": m25,
     "messageStorage": MessageLookupByLibrary.simpleMessage("သိုလှောင်မှု"),
     "messageStoragePermission": MessageLookupByLibrary.simpleMessage(
       "ဖိုင်များသို့ ဝင်ရောက်ခွင့်ရရှိရန် လိုအပ်ပါသည်",
@@ -966,8 +966,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageUnlockRepoFailed": MessageLookupByLibrary.simpleMessage(
       "စကားဝှက်သည် သိုလှောင်ခန်းကို မဖွင့်ခဲ့ပါ",
     ),
-    "messageUnlockRepoOk": m36,
-    "messageUnlockRepository": m37,
+    "messageUnlockRepoOk": m26,
+    "messageUnlockRepository": m27,
     "messageUnlockUsingBiometrics": MessageLookupByLibrary.simpleMessage(
       "ဇီဝအချက်အလက်များကို သုံး၍ လော့ခ်ဖွင့်မည်",
     ),
@@ -1000,22 +1000,22 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageWriteReplicaExplanation": MessageLookupByLibrary.simpleMessage(
       "အပြည့်အဝ ခွင့်ပြုသည်။ သင်တို့အချင်းချင်း ရေးသားဖတ်ရှုနိုင်ပါသည်",
     ),
-    "messageWritingFileCanceled": m38,
-    "messageWritingFileError": m39,
+    "messageWritingFileCanceled": m28,
+    "messageWritingFileError": m29,
     "popupMenuItemChangePassword": MessageLookupByLibrary.simpleMessage(
       "စကားဝှက်ကို ပြောင်းလဲပါ",
     ),
     "popupMenuItemCopyPassword": MessageLookupByLibrary.simpleMessage(
       "စကားဝှက်ကို ကူးယူပါ",
     ),
-    "replacementAccess": m40,
-    "replacementChanges": m41,
-    "replacementEntry": m42,
-    "replacementError": m43,
-    "replacementName": m44,
-    "replacementNumber": m45,
-    "replacementPath": m46,
-    "replacementStatus": m47,
+    "replacementAccess": m30,
+    "replacementChanges": m31,
+    "replacementEntry": m32,
+    "replacementError": m33,
+    "replacementName": m34,
+    "replacementNumber": m35,
+    "replacementPath": m36,
+    "replacementStatus": m37,
     "repositoryIsAlreadyImported": MessageLookupByLibrary.simpleMessage(
       "Repository ကို ထည့်သွင်းပြီးပါပြီ",
     ),
@@ -1186,7 +1186,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "စကားဝှက်ကို သတ်မှတ်မည်",
     ),
     "titleSettings": MessageLookupByLibrary.simpleMessage("ဆက်တင်များ"),
-    "titleShareRepository": m49,
+    "titleShareRepository": m38,
     "titleSortBy": MessageLookupByLibrary.simpleMessage("အစီအစဥ်"),
     "titleStateMonitor": MessageLookupByLibrary.simpleMessage(""),
     "titleTermsOfUse": MessageLookupByLibrary.simpleMessage(
