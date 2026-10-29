@@ -32,6 +32,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "titleBackgroundAndroidPermissionsTitle":
         MessageLookupByLibrary.simpleMessage("所需权限"),
     "titleChangePassword": MessageLookupByLibrary.simpleMessage("更改密码"),
+    "titleCopyEntries": MessageLookupByLibrary.simpleMessage("复制"),
     "titleCreateFolder": MessageLookupByLibrary.simpleMessage("创建文件夹"),
     "titleCreateRepository": MessageLookupByLibrary.simpleMessage("新建库"),
     "titleDeleteFile": MessageLookupByLibrary.simpleMessage("删除文件"),
@@ -63,6 +64,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "设置协作、广播或简单存储的权限",
     ),
     "titleOnboardingShare": MessageLookupByLibrary.simpleMessage("安全地发送和接收文件"),
+    "titleOurMission": MessageLookupByLibrary.simpleMessage("我们的使命"),
+    "titleOverview": MessageLookupByLibrary.simpleMessage("1.概览"),
+    "titlePrivacyNotice": MessageLookupByLibrary.simpleMessage("3.隐私声明"),
     "titleRemoveBiometrics": MessageLookupByLibrary.simpleMessage("移除生物识别"),
     "titleRepositoriesList": MessageLookupByLibrary.simpleMessage("我的 库"),
     "titleRepository": MessageLookupByLibrary.simpleMessage("存储库"),
@@ -76,6 +80,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "titleSettings": MessageLookupByLibrary.simpleMessage("设置"),
     "titleShareRepository": m38,
     "titleStateMonitor": MessageLookupByLibrary.simpleMessage("状态监视器"),
+    "titleTermsOfUse": MessageLookupByLibrary.simpleMessage("2.使用条款"),
     "titleUnlockRepository": MessageLookupByLibrary.simpleMessage("解锁库"),
     "titleUnsavedChanges": MessageLookupByLibrary.simpleMessage("未保存的更改"),
   };

@@ -98,6 +98,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m48(totals) => "Сохранить выбор:\n\n\t\t${totals}";
 
+  static String m49(path) => "Не удалось поделиться файлом ${path}";
+
   static String m25(name) => "Сортировать по: ${name}";
 
   static String m26(access) => "Открыт в качестве ${access} копии";
@@ -124,6 +126,9 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m37(status) => "${status}";
 
+  static String m50(storage) =>
+      "Вы хотите переместить репозиторий в <bold>${storage}</bold>?";
+
   static String m38(name) => "Поделиться хранилищем \"${name}\"";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -139,6 +144,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "actionAddRepositoryWithToken": MessageLookupByLibrary.simpleMessage(
       "Импортировать хранилище",
     ),
+    "actionAllow": MessageLookupByLibrary.simpleMessage("Разрешить"),
     "actionBack": MessageLookupByLibrary.simpleMessage("Назад"),
     "actionCancel": MessageLookupByLibrary.simpleMessage("Отменить"),
     "actionCancelCapital": MessageLookupByLibrary.simpleMessage("ОТМЕНИТЬ"),
@@ -226,6 +232,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "actionUpdateDokan": MessageLookupByLibrary.simpleMessage("Обновить Dokan"),
     "actionYes": MessageLookupByLibrary.simpleMessage("Да"),
     "buttonLocateRepository": MessageLookupByLibrary.simpleMessage("Найти"),
+    "copyToClipboard": MessageLookupByLibrary.simpleMessage(
+      "Скопировать в буфер обмена",
+    ),
     "iconAccessMode": MessageLookupByLibrary.simpleMessage("Уровень доступа"),
     "iconAddExistingRepository": MessageLookupByLibrary.simpleMessage(
       "Импортировать хранилище",
@@ -687,6 +696,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageKeepBothFolders": MessageLookupByLibrary.simpleMessage(
       "Сохраните обе папки",
     ),
+    "messageLanAccessRequired": MessageLookupByLibrary.simpleMessage(
+      "Для синхронизации с другими устройствами в локальной сети требуется доступ к локальной сети.",
+    ),
     "messageLaunchAtStartup": MessageLookupByLibrary.simpleMessage(
       "Запускать при старте системы",
     ),
@@ -742,6 +754,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageNATType": MessageLookupByLibrary.simpleMessage("Тип NAT"),
     "messageNetworkIsUnavailable": MessageLookupByLibrary.simpleMessage(
       "Сеть недоступна",
+    ),
+    "messageNetworkNoInternet": MessageLookupByLibrary.simpleMessage(
+      "Нет интернета; вы всё ещё можете синхронизироваться локально, если Wi-Fi включён",
     ),
     "messageNewFileError": m17,
     "messageNewPasswordCopiedClipboard": MessageLookupByLibrary.simpleMessage(
@@ -945,6 +960,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageShareWithWR": MessageLookupByLibrary.simpleMessage(
       "Поделиться с помощью QR кода",
     ),
+    "messageSharingFileFailed": m49,
     "messageSortBy": m25,
     "messageStorage": MessageLookupByLibrary.simpleMessage("Память"),
     "messageStoragePermission": MessageLookupByLibrary.simpleMessage(
@@ -1036,6 +1052,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "messageWritingFileCanceled": m28,
     "messageWritingFileError": m29,
+    "openFolder": MessageLookupByLibrary.simpleMessage("Открыть папку"),
     "popupMenuItemChangePassword": MessageLookupByLibrary.simpleMessage(
       "Изменить пароль",
     ),
@@ -1150,6 +1167,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "repoResetTokenTypeLabel": MessageLookupByLibrary.simpleMessage(
       "Тип доступа к токену",
     ),
+    "repoStorageLocation": MessageLookupByLibrary.simpleMessage("Расположение"),
+    "repoStorageMovePrompt": m50,
+    "repoStorageMoveTitle": MessageLookupByLibrary.simpleMessage(
+      "Переместить репозиторий",
+    ),
     "repositoryIsAlreadyImported": MessageLookupByLibrary.simpleMessage(
       "Хранилище уже импортируется",
     ),
@@ -1253,6 +1275,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "titleIssueTracker": MessageLookupByLibrary.simpleMessage("Трекер проблем"),
     "titleJustLegalSociety": MessageLookupByLibrary.simpleMessage(
       "Справедливое и правовое общество",
+    ),
+    "titleLanAccessDenied": MessageLookupByLibrary.simpleMessage(
+      "Доступ к локальной сети запрещён",
     ),
     "titleLinksOtherSites": MessageLookupByLibrary.simpleMessage(
       "Ссылки на Другие сайты",
