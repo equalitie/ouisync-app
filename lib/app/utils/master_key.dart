@@ -1,8 +1,10 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:mutex/mutex.dart';
 import 'package:meta/meta.dart'; // for `@visibleForTesting`
+
 import 'dart:typed_data';
 import 'dart:convert';
+
 import 'cipher.dart' as cipher;
 
 class MasterKey {
@@ -16,7 +18,7 @@ class MasterKey {
   /// Load the master key from the secure storage. Generate a new one if not stored yet.
   static Future<MasterKey> init() async {
     final storage = FlutterSecureStorage(
-      aOptions: _getAndroidOptions(),
+      aOptions: AndroidOptions(),
       mOptions: _getMacOsOptions(),
     );
 
@@ -64,14 +66,5 @@ class MasterKey {
 // On macOS the app is sandboxed with a keychain-access-group entitlement, so use the data
 // protection keychain (entitlement-based, no interactive prompt). `first_unlock` accessibility
 // avoids the "interaction not allowed" (-25308) failure seen when writing during early launch.
-MacOsOptions _getMacOsOptions() => const MacOsOptions(
-  accessibility: KeychainAccessibility.first_unlock,
-);
-
-AndroidOptions _getAndroidOptions() => const AndroidOptions(
-  // TODO: the default value of this if `false` so we can't remove it yet. Ignoring the lint for now
-  // but we should revisit when `flutter_secure_storage` gets bumped.
-  //
-  // ignore: deprecated_member_use
-  encryptedSharedPreferences: true,
-);
+MacOsOptions _getMacOsOptions() =>
+    const MacOsOptions(accessibility: KeychainAccessibility.first_unlock);
