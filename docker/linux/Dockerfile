@@ -4,7 +4,7 @@ FROM ubuntu:22.04
 
 ARG NDK_VERSION
 ARG RUST_VERSION=1.91.0
-ARG FLUTTER_VERSION=3.44.9
+ARG FLUTTER_VERSION=3.47.8
 
 RUN apt-get update && \
     apt-get upgrade -y && \
