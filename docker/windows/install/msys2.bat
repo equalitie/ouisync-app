@@ -13,6 +13,12 @@ if errorlevel 1 exit /b %errorlevel%
 powershell -Command Remove-Item %TEMP_DIR%\msys2.exe
 if errorlevel 1 exit /b %errorlevel%
 
+C:\msys64\usr\bin\bash.exe -lc "pacman-key --init"
+if errorlevel 1 exit /b %errorlevel%
+
+C:\msys64\usr\bin\bash.exe -lc 'pacman-key --populate msys2'
+if errorlevel 1 exit /b %errorlevel%
+
 C:\msys64\usr\bin\bash.exe -lc 'pacman --noconfirm -Syuu'
 if errorlevel 1 exit /b %errorlevel%
 
@@ -21,6 +27,12 @@ if errorlevel 1 exit /b %errorlevel%
 
 C:\msys64\usr\bin\bash.exe -lc 'pacman --noconfirm -S rsync'
 if errorlevel 1 exit /b %errorlevel%
+
+rem The packan-key --init and --populate commands start gpg-agent.exe daemon
+rem which would prevent this bat file from exiting if we didn't kill it.
+C:\msys64\usr\bin\bash.exe -lc "gpgconf --kill all"
+taskkill /F /IM gpg-agent.exe >nul 2>&1
+taskkill /F /IM dirmngr.exe >nul 2>&1
 
 set "PATH=C:\msys64\usr\bin;C:\msys64\mingw64\bin;%PATH%"
 setx PATH "%PATH%" /M

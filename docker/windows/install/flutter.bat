@@ -1,4 +1,4 @@
-set FLUTTER_VERSION=3.44.9
+set FLUTTER_VERSION=3.47.8
 set FLUTTER_INSTALL_DIR=C:\flutter
 
 git clone --filter=tree:0 -b %FLUTTER_VERSION% https://github.com/flutter/flutter.git %FLUTTER_INSTALL_DIR%

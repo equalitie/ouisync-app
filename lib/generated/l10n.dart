@@ -1,6 +1,7 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+
 import 'intl/messages_all.dart';
 
 // **************************************************************************
@@ -2549,6 +2550,16 @@ class S {
     );
   }
 
+  /// `Satellite`
+  String get messageSatellite {
+    return Intl.message(
+      'Satellite',
+      name: 'messageSatellite',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `VPN`
   String get messageVPN {
     return Intl.message('VPN', name: 'messageVPN', desc: '', args: []);
@@ -3839,8 +3850,7 @@ class S {
     return Intl.message(
       'Save selection:\n\n\t\t$totals',
       name: 'messageSaveEntriesToDevice',
-      desc:
-          'Message displayed in a confirmation dialog when saving entries to the device',
+      desc: 'Message displayed in a confirmation dialog when saving entries to the device',
       args: [totals],
     );
   }

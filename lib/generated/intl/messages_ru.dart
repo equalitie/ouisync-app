@@ -425,9 +425,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageConfirmIrreversibleChange": MessageLookupByLibrary.simpleMessage(
       "Это действие необратимо, вы хотите продолжить?",
     ),
-    "messageConfirmNotEmptyFolderDeletion": MessageLookupByLibrary.simpleMessage(
-      "Эта папка не пустая.\n\nВы все еще хотите ее удалить? (Это удалит все ее содержимое)",
-    ),
+    "messageConfirmNotEmptyFolderDeletion":
+        MessageLookupByLibrary.simpleMessage(
+          "Эта папка не пустая.\n\nВы все еще хотите ее удалить? (Это удалит все ее содержимое)",
+        ),
     "messageConfirmRepositoryDeletion": MessageLookupByLibrary.simpleMessage(
       "Вы уверены что хотите удалить это хранилище?",
     ),
@@ -550,9 +551,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "Это приложение разработано в соответствии с нашими ценностями.\n\nИспользуя Ouisync, вы соглашаетесь с этими приницами, и принимаете Условия Использования и Политику Конфиденциальности.",
     ),
     "messageError": MessageLookupByLibrary.simpleMessage("Ошибка !"),
-    "messageErrorAuthenticatingBiometrics": MessageLookupByLibrary.simpleMessage(
-      "Произошла ошибка при авторизации по биометрии. Пожалуйста, попробуйте снова",
-    ),
+    "messageErrorAuthenticatingBiometrics":
+        MessageLookupByLibrary.simpleMessage(
+          "Произошла ошибка при авторизации по биометрии. Пожалуйста, попробуйте снова",
+        ),
     "messageErrorChangingPassword": MessageLookupByLibrary.simpleMessage(
       "Произошла ошибка при изменении пароля. Пожалуйста, попробуйте снова",
     ),
@@ -850,9 +852,10 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage(
           "Это позволит удалить пароль хранилища и использовать биометрическую проверку для разблокировки",
         ),
-    "messageRemoveLocalPasswordConfirmation": MessageLookupByLibrary.simpleMessage(
-      "Удалить локальный пароль этого хранилища?\n\nХранилище разблокируется автоматически, если только локальный пароль не будет добавлен повторно",
-    ),
+    "messageRemoveLocalPasswordConfirmation":
+        MessageLookupByLibrary.simpleMessage(
+          "Удалить локальный пароль этого хранилища?\n\nХранилище разблокируется автоматически, если только локальный пароль не будет добавлен повторно",
+        ),
     "messageRemovedInBrackets": MessageLookupByLibrary.simpleMessage(
       "<удалено>",
     ),
@@ -951,9 +954,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageSettingsRuntimeID": MessageLookupByLibrary.simpleMessage(
       "ID текущей сессии",
     ),
-    "messageSettingsVersionNewerThanCurrent": MessageLookupByLibrary.simpleMessage(
-      "Настройки этого устройства были созданы в более новой версии Ouisync и не могут быть перенесены.",
-    ),
+    "messageSettingsVersionNewerThanCurrent":
+        MessageLookupByLibrary.simpleMessage(
+          "Настройки этого устройства были созданы в более новой версии Ouisync и не могут быть перенесены.",
+        ),
     "messageShareActionDisabled": MessageLookupByLibrary.simpleMessage(
       "Вы должны сначала выбрать уровень доступа перед созданием ссылки для хранилища",
     ),

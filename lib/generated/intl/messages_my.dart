@@ -389,9 +389,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageConfirmIrreversibleChange": MessageLookupByLibrary.simpleMessage(
       "ဤလုပ်ဆောင်ချက်သည် နောက်ပြန်လှည့်၍မရပါ၊ ဆက်လက်လုပ်ဆောင်လိုပါသလား။",
     ),
-    "messageConfirmNotEmptyFolderDeletion": MessageLookupByLibrary.simpleMessage(
-      "ထိုဖိုဒါသည် အလွတ်မဟုတ်ပါ။\n\nဖျက်ရန် လိုလားနေဆဲလား။ (ထိုလုပ်ရပ်သည် အကြောင်းအရာများအားလုံးကို ပျက်စီးစေမည် ဖြစ်သည်)",
-    ),
+    "messageConfirmNotEmptyFolderDeletion":
+        MessageLookupByLibrary.simpleMessage(
+          "ထိုဖိုဒါသည် အလွတ်မဟုတ်ပါ။\n\nဖျက်ရန် လိုလားနေဆဲလား။ (ထိုလုပ်ရပ်သည် အကြောင်းအရာများအားလုံးကို ပျက်စီးစေမည် ဖြစ်သည်)",
+        ),
     "messageConfirmRepositoryDeletion": MessageLookupByLibrary.simpleMessage(
       "ထို repository ကို ဖျက်ရန် သေချာပါသလား။",
     ),
@@ -516,9 +517,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "ကျွန်ုပ်တို့၏ တန်ဖိုးထားမှုများ နှင့်အညီ တည်ဆောက်ထားသည်။\n\n၎င်းကို အသုံးပြုခြင်းဖြင့် သင်သည် ဤမူများကိုလိုက်နာရန် သဘောတူပြီး ကျွန်ုပ်တို့၏အသုံးပြုမှုစည်းမျဉ်းများနှင့် ကိုယ်ရေးလုံခြုံမှုသတိပေးချက်ကို လက်ခံပါသည်။",
     ),
     "messageError": MessageLookupByLibrary.simpleMessage("အမှား!"),
-    "messageErrorAuthenticatingBiometrics": MessageLookupByLibrary.simpleMessage(
-      "ဇီဝအချက်အလက်များကို အသုံးပြု၍ မှန်ကန်ကြောင်း စစ်ဆေးရာတွင် အမှားအယွင်းရှိပါသည်။ ကျေးဇူးပြု၍ ထပ်မံလုပ်ဆောင်ပါ",
-    ),
+    "messageErrorAuthenticatingBiometrics":
+        MessageLookupByLibrary.simpleMessage(
+          "ဇီဝအချက်အလက်များကို အသုံးပြု၍ မှန်ကန်ကြောင်း စစ်ဆေးရာတွင် အမှားအယွင်းရှိပါသည်။ ကျေးဇူးပြု၍ ထပ်မံလုပ်ဆောင်ပါ",
+        ),
     "messageErrorChangingPassword": MessageLookupByLibrary.simpleMessage(
       "စကားဝှက်ကို ပြောင်းလဲရာတွင် ပြဿနာရှိသည်။ ကျေးဇူးပြု၍ ထပ်မံလုပ်ဆောင်ပါ",
     ),
@@ -810,9 +812,10 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage(
           "သိုလှောင်ခန်း၏ စကားဝှက်ကို ဖယ်ရှားပြီး ဇီဝအချက်အလက်ဆိုင်ရာအတည်ပြုချက်ကို ထည့်သွင်းမည်",
         ),
-    "messageRemoveLocalPasswordConfirmation": MessageLookupByLibrary.simpleMessage(
-      "ဤသိုလှောင်ခန်း၏ စက်တွင်းစကားဝှက်ကို ဖယ်ရှားမည်လား။\n\nစက်တွင်းစကားဝှက်ကို ထပ်မံထည့်သွင်းခြင်း မရှိပါက သိုလှောင်ခန်းနေရာကို အလိုအလျောက် လော့ခ်ချပါမည်",
-    ),
+    "messageRemoveLocalPasswordConfirmation":
+        MessageLookupByLibrary.simpleMessage(
+          "ဤသိုလှောင်ခန်း၏ စက်တွင်းစကားဝှက်ကို ဖယ်ရှားမည်လား။\n\nစက်တွင်းစကားဝှက်ကို ထပ်မံထည့်သွင်းခြင်း မရှိပါက သိုလှောင်ခန်းနေရာကို အလိုအလျောက် လော့ခ်ချပါမည်",
+        ),
     "messageRemovedInBrackets": MessageLookupByLibrary.simpleMessage(
       "<ဖယ်ရှားပြီး>",
     ),

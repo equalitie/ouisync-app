@@ -7,7 +7,7 @@ import 'secure_storage.dart';
 class FlutterSecure {
   FlutterSecure._();
 
-  static final _storage = FlutterSecureStorage(aOptions: _getAndroidOptions());
+  static final _storage = FlutterSecureStorage(aOptions: AndroidOptions());
 
   static Future<Result<Void, Error>> writeValue({
     required DatabaseId databaseId,
@@ -52,11 +52,3 @@ class FlutterSecure {
     }
   }
 }
-
-AndroidOptions _getAndroidOptions() => const AndroidOptions(
-  // TODO: the default value of this if `false` so we can't remove it yet. Ignoring the lint for now
-  // but we should revisit when `flutter_secure_storage` gets bumped.
-  //
-  // ignore: deprecated_member_use
-  encryptedSharedPreferences: true,
-);

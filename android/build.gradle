@@ -42,8 +42,15 @@ subprojects {
     }
 }
 
+// Must be set for all subprojects before any of them is evaluated (see `evaluationDependsOn`
+// below). Otherwise ':app' gets evaluated with the default build dir and paths resolved during its
+// evaluation (e.g., `getDefaultProguardFile`) point to a different location than where the files
+// are actually generated.
 subprojects { subproject ->
     subproject.buildDir = "${rootProject.buildDir}/${project.name}"
+}
+
+subprojects { subproject ->
     subproject.evaluationDependsOn(":app")
 
     if (subproject.name != "app") {

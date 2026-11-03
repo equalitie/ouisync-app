@@ -424,9 +424,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageConfirmIrreversibleChange": MessageLookupByLibrary.simpleMessage(
       "Ця дія незворотна, б ви хотіли б продовжити?",
     ),
-    "messageConfirmNotEmptyFolderDeletion": MessageLookupByLibrary.simpleMessage(
-      "Ця папка не порожня.\n\nВи все ще хочете її видалити? (при цьому буде видалено весь її вміст)",
-    ),
+    "messageConfirmNotEmptyFolderDeletion":
+        MessageLookupByLibrary.simpleMessage(
+          "Ця папка не порожня.\n\nВи все ще хочете її видалити? (при цьому буде видалено весь її вміст)",
+        ),
     "messageConfirmRepositoryDeletion": MessageLookupByLibrary.simpleMessage(
       "Ви впевнені, що хочете видалити цей репозиторій?",
     ),
@@ -549,9 +550,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "створений відповідно до наших цінностей.\n\nВикористовуючи його, ви погоджуєтеся дотримуватися цих принципів і приймаєте наші Умови використання та Політику конфіденційності.",
     ),
     "messageError": MessageLookupByLibrary.simpleMessage("Помилка!"),
-    "messageErrorAuthenticatingBiometrics": MessageLookupByLibrary.simpleMessage(
-      "Виникла помилка автентифікації за допомогою біометричних даних. Будь ласка, спробуйте ще раз",
-    ),
+    "messageErrorAuthenticatingBiometrics":
+        MessageLookupByLibrary.simpleMessage(
+          "Виникла помилка автентифікації за допомогою біометричних даних. Будь ласка, спробуйте ще раз",
+        ),
     "messageErrorChangingPassword": MessageLookupByLibrary.simpleMessage(
       "Виникла проблема зі зміною пароля. Будь ласка, спробуйте ще раз",
     ),
@@ -856,9 +858,10 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage(
           "Це видалить пароль сховища і використовуватиме біометричну перевірку для розблокування",
         ),
-    "messageRemoveLocalPasswordConfirmation": MessageLookupByLibrary.simpleMessage(
-      "Видалити локальний пароль цього сховища?\n\nСховище буде розблоковано автоматично, якщо локальний пароль не буде додано знову",
-    ),
+    "messageRemoveLocalPasswordConfirmation":
+        MessageLookupByLibrary.simpleMessage(
+          "Видалити локальний пароль цього сховища?\n\nСховище буде розблоковано автоматично, якщо локальний пароль не буде додано знову",
+        ),
     "messageRemovedInBrackets": MessageLookupByLibrary.simpleMessage(
       "<видалено>",
     ),
@@ -957,9 +960,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageSettingsRuntimeID": MessageLookupByLibrary.simpleMessage(
       "Ідентифікатор виконання",
     ),
-    "messageSettingsVersionNewerThanCurrent": MessageLookupByLibrary.simpleMessage(
-      "У налаштуваннях, знайдені на цьому пристрої були створені з новою версією Ouisync і не можуть бути мігровані.",
-    ),
+    "messageSettingsVersionNewerThanCurrent":
+        MessageLookupByLibrary.simpleMessage(
+          "У налаштуваннях, знайдені на цьому пристрої були створені з новою версією Ouisync і не можуть бути мігровані.",
+        ),
     "messageShareActionDisabled": MessageLookupByLibrary.simpleMessage(
       "Для створення посилання на репозиторій спочатку потрібно вибрати один дозвіл",
     ),

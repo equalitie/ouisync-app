@@ -286,9 +286,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageConfirmFolderDeletion": MessageLookupByLibrary.simpleMessage(
       "Voulez-vous vraiment supprimer ce dossier ?",
     ),
-    "messageConfirmNotEmptyFolderDeletion": MessageLookupByLibrary.simpleMessage(
-      "Ce dossier n\'est pas vide.\n\nVoulez-vous vraiment le supprimer ? (Cela supprimera l\'intégralité de son contenu)",
-    ),
+    "messageConfirmNotEmptyFolderDeletion":
+        MessageLookupByLibrary.simpleMessage(
+          "Ce dossier n\'est pas vide.\n\nVoulez-vous vraiment le supprimer ? (Cela supprimera l\'intégralité de son contenu)",
+        ),
     "messageConfirmRepositoryDeletion": MessageLookupByLibrary.simpleMessage(
       "Voulez-vous vraiment supprimer ce dépôt ?",
     ),
@@ -318,9 +319,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "Un dossier",
     ),
     "messageError": MessageLookupByLibrary.simpleMessage("Erreur !"),
-    "messageErrorAuthenticatingBiometrics": MessageLookupByLibrary.simpleMessage(
-      "Une erreur s\'est produite lors de l\'authentification biométrique. Veuillez réessayer",
-    ),
+    "messageErrorAuthenticatingBiometrics":
+        MessageLookupByLibrary.simpleMessage(
+          "Une erreur s\'est produite lors de l\'authentification biométrique. Veuillez réessayer",
+        ),
     "messageErrorChangingPassword": MessageLookupByLibrary.simpleMessage(
       "Une erreur s\'est produite lors de la modification du mot de passe. Veuillez réessayer",
     ),

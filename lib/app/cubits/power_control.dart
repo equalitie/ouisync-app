@@ -263,6 +263,7 @@ class PowerControl extends Cubit<PowerControlState>
         break;
       case ConnectivityResult.wifi:
       case ConnectivityResult.ethernet:
+      case ConnectivityResult.satellite:
       case ConnectivityResult.vpn:
         newMode = NetworkModeFull();
         break;

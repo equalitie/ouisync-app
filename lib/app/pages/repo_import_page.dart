@@ -249,11 +249,15 @@ class RepoImportPage extends StatelessWidget {
               RepoLocation.legacyExtension,
             ],
           );
-          if (result == null) return;
+          if (result.isEmpty) return;
 
-          final locations = result.paths
-              .whereType<String>()
-              .map((path) => RepoLocation.fromDbPath(path))
+          final locations = result
+              .map((file) {
+                final path = file.path;
+                if (path != null) return RepoLocation.fromDbPath(path);
+                return null;
+              })
+              .nonNulls
               .toList();
 
           await Future.wait(locations.map(reposCubit.importRepoFromLocation));
