@@ -5,6 +5,7 @@ FROM ubuntu:22.04
 ARG NDK_VERSION
 ARG RUST_VERSION=1.91.0
 ARG FLUTTER_VERSION=3.47.8
+ARG JAVA_VERSION=17
 
 RUN apt-get update && \
     apt-get upgrade -y && \
@@ -14,7 +15,7 @@ RUN apt-get update && \
         wget curl rsync \
         libgtk-3-dev libfuse-dev libappindicator3-dev libsecret-1-dev libcurl4-openssl-dev \
         python3-minimal python-is-python3 \
-        openjdk-17-jdk \
+        openjdk-${JAVA_VERSION}-jdk \
         libpulse0 \
         fuse3 \
         socat \
@@ -76,7 +77,7 @@ RUN cargo install --force cargo-sweep cargo-ndk
 # Sentry started to require JDK even for non Android builds. This requirement
 # might be removed in the future.
 # https://github.com/getsentry/sentry-dart/issues/3033#issuecomment-3140320200
-ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+ENV JAVA_HOME=/usr/lib/jvm/java-${JAVA_VERSION}-openjdk-amd64
 
 ENV LANG="C.UTF-8"
 ENV LANGUAGE="C.UTF-8"
