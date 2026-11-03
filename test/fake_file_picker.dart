@@ -1,13 +1,18 @@
 import 'dart:io' as io;
+import 'dart:typed_data';
+import 'package:cross_file/cross_file.dart';
 import 'package:path/path.dart' as p;
 import 'package:file_picker/file_picker.dart'
     show
-        FilePickerResult,
-        FileType,
+        AndroidOptions,
+        DarwinOptions,
+        FilePickerPlatform,
         FilePickerStatus,
+        FileType,
+        LinuxOptions,
         PlatformFile,
-        AndroidSAFOptions,
-        FilePickerPlatform;
+        WebOptions,
+        WindowsOptions;
 
 /// After calling this function the FilePicker will pick the file specified by
 //`filePath` of the disk.
@@ -22,33 +27,46 @@ class _FakeFilePickerPlatform extends FilePickerPlatform {
   final String pickedFile;
 
   @override
-  Future<FilePickerResult?> pickFiles({
+  Future<List<PlatformFile>> pickFiles({
     String? dialogTitle,
     String? initialDirectory,
     FileType type = FileType.any,
     List<String>? allowedExtensions,
-    dynamic Function(FilePickerStatus)? onFileLoading,
+    Function(FilePickerStatus)? onFileLoading,
     int compressionQuality = 0,
-    bool allowMultiple = false,
-    bool withData = false,
-    bool withReadStream = false,
-    bool lockParentWindow = false,
-    bool readSequential = false,
-    bool cancelUploadOnWindowBlur = true,
-    AndroidSAFOptions? androidSafOptions,
-  }) async {
-    final name = p.basename(pickedFile);
-    final file = io.File(pickedFile);
-    final size = await file.length();
-    final readStream = file.openRead();
+    AndroidOptions androidOptions = const AndroidOptions(),
+    DarwinOptions darwinOptions = const DarwinOptions(),
+    WindowsOptions windowsOptions = const WindowsOptions(),
+    LinuxOptions linuxOptions = const LinuxOptions(),
+    WebOptions webOptions = const WebOptions(),
+  }) async => [_FakePlatformFile(pickedFile)];
+}
 
-    return FilePickerResult([
-      PlatformFile(
-        path: pickedFile,
-        name: name,
-        size: size,
-        readStream: readStream,
-      ),
-    ]);
-  }
+/// Picked file backed by a file on the local disk.
+final class _FakePlatformFile extends PlatformFile {
+  _FakePlatformFile(String path) : _file = io.File(path);
+
+  final io.File _file;
+
+  @override
+  String get name => p.basename(_file.path);
+
+  @override
+  Uri get uri => _file.absolute.uri;
+
+  @override
+  XFile get xFile => XFile(_file.path);
+
+  @override
+  int? lengthSync() => _file.lengthSync();
+
+  @override
+  Future<int?> length() => _file.length();
+
+  @override
+  Future<Uint8List> readAsBytes() => _file.readAsBytes();
+
+  @override
+  Stream<Uint8List> readAsByteStream() =>
+      _file.openRead().map(Uint8List.fromList);
 }
