@@ -134,7 +134,7 @@ class _State extends State<GetPasswordAccessDialog> with AppLogger {
     autofocus: true,
   );
 
-  List<Widget> _buildActions(context) => [
+  List<Widget> _buildActions(BuildContext context) => [
     NegativeButton(
       text: S.current.actionCancel,
       onPressed: () => widget.stage.maybePop(null),

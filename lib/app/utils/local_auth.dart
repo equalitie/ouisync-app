@@ -42,7 +42,7 @@ abstract class LocalAuth {
     }
 
     try {
-      return _localAuth.authenticate(localizedReason: reason);
+      return await _localAuth.authenticate(localizedReason: reason);
     } catch (e) {
       return true;
     }

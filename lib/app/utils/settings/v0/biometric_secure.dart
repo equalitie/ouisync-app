@@ -32,7 +32,7 @@ class BiometricSecure {
     return _storage.getStorage(key, options: initOptions);
   }
 
-  static _getKey(DatabaseId databaseId, AuthMode authMode) {
+  static String _getKey(DatabaseId databaseId, AuthMode authMode) {
     if (authMode == AuthMode.version2) {
       return '$databaseId-v2';
     }
@@ -40,7 +40,7 @@ class BiometricSecure {
     return databaseId.toString();
   }
 
-  static _isAuthenticationRequired(AuthMode authMode) {
+  static bool _isAuthenticationRequired(AuthMode authMode) {
     if (authMode == AuthMode.version1) {
       return true;
     }

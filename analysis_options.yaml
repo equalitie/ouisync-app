@@ -6,6 +6,7 @@ analyzer:
     - windows/**
     - macos/**
     - linux/**
+    - lib/generated/**
 include: package:lints/recommended.yaml
 
 linter:
