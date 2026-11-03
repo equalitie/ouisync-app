@@ -351,8 +351,8 @@ class SettingsUserLocale extends Locale implements SettingsLocale {
   Object serialize() {
     return <String, String>{
       "languageCode": languageCode,
-      if (countryCode != null) "countryCode": countryCode!,
-      if (scriptCode != null) "scriptCode": scriptCode!,
+      "countryCode": ?countryCode,
+      "scriptCode": ?scriptCode,
     };
   }
 }

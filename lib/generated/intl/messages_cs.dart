@@ -423,9 +423,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageConfirmIrreversibleChange": MessageLookupByLibrary.simpleMessage(
       "Tato akce je nevratná. Chcete pokračovat?",
     ),
-    "messageConfirmNotEmptyFolderDeletion": MessageLookupByLibrary.simpleMessage(
-      "Tato složka není prázdná.\n\nChcete ji přesto smazat? (Smaže se tím veškerý její obsah.)",
-    ),
+    "messageConfirmNotEmptyFolderDeletion":
+        MessageLookupByLibrary.simpleMessage(
+          "Tato složka není prázdná.\n\nChcete ji přesto smazat? (Smaže se tím veškerý její obsah.)",
+        ),
     "messageConfirmRepositoryDeletion": MessageLookupByLibrary.simpleMessage(
       "Opravdu chcete smazat tento repozitář?",
     ),
@@ -845,9 +846,10 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage(
           "Tím se odstraní heslo repozitáře a k odemykání se použije biometrické ověření.",
         ),
-    "messageRemoveLocalPasswordConfirmation": MessageLookupByLibrary.simpleMessage(
-      "Odstranit místní heslo tohoto repozitáře?\n\nRepozitář se bude odemykat automaticky, dokud znovu nepřidáte místní heslo.",
-    ),
+    "messageRemoveLocalPasswordConfirmation":
+        MessageLookupByLibrary.simpleMessage(
+          "Odstranit místní heslo tohoto repozitáře?\n\nRepozitář se bude odemykat automaticky, dokud znovu nepřidáte místní heslo.",
+        ),
     "messageRemovedInBrackets": MessageLookupByLibrary.simpleMessage(
       "<odstraněno>",
     ),
@@ -923,9 +925,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageSecureUsingBiometrics": MessageLookupByLibrary.simpleMessage(
       "Zabezpečit biometrickým ověřením",
     ),
-    "messageSecurityOptionsNotAvailableBlind": MessageLookupByLibrary.simpleMessage(
-      "Možnosti zabezpečení nejsou dostupné u repozitářů bez přístupu k obsahu.",
-    ),
+    "messageSecurityOptionsNotAvailableBlind":
+        MessageLookupByLibrary.simpleMessage(
+          "Možnosti zabezpečení nejsou dostupné u repozitářů bez přístupu k obsahu.",
+        ),
     "messageSecurityPracticesP1": MessageLookupByLibrary.simpleMessage(
       "Data, která uživatel nahraje do repozitářů Ouisync, jsou koncově šifrována při přenosu i při uložení. To zahrnuje i metadata, například názvy a velikosti souborů, strukturu složek atd. V Ouisync může data číst pouze osoba, která je nahrála, a osoby, s nimiž sdílela své repozitáře",
     ),
@@ -947,9 +950,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageSettingsRuntimeID": MessageLookupByLibrary.simpleMessage(
       "ID spuštění",
     ),
-    "messageSettingsVersionNewerThanCurrent": MessageLookupByLibrary.simpleMessage(
-      "Nastavení nalezená na tomto zařízení byla vytvořena novější verzí Ouisync a nelze je migrovat.",
-    ),
+    "messageSettingsVersionNewerThanCurrent":
+        MessageLookupByLibrary.simpleMessage(
+          "Nastavení nalezená na tomto zařízení byla vytvořena novější verzí Ouisync a nelze je migrovat.",
+        ),
     "messageShareActionDisabled": MessageLookupByLibrary.simpleMessage(
       "Nejprve vyberte oprávnění pro vytvoření odkazu na repozitář.",
     ),

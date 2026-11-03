@@ -163,7 +163,7 @@ class LogsSection extends SettingsSection with AppLogger {
           loggy.warning(
             "Failed to convert picked file's Uri into a file path ($uri)",
           );
-          return null;
+          return;
         }
       } else {
         loggy.error(

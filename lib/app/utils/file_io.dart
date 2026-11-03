@@ -35,7 +35,7 @@ class FileIO with AppLogger {
 
     final result = await FilePicker.pickFiles(type: type);
 
-    if (!result.isEmpty) {
+    if (result.isNotEmpty) {
       loggy.debug(() {
         final fileNames = result.map((file) => file.name).toList();
         return 'Adding files $fileNames';
@@ -51,7 +51,7 @@ class FileIO with AppLogger {
         final fileSize = await srcFile.length();
 
         if (fileSize == null) {
-          loggy.warning('Failed to determine size of file ${fileName}');
+          loggy.warning('Failed to determine size of file $fileName');
           continue;
         }
 

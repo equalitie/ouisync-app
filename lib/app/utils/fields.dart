@@ -90,7 +90,7 @@ class Fields {
     child: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (leadingIcon != null) leadingIcon,
+        ?leadingIcon,
         if (leadingIcon != null) Dimensions.spacingHorizontal,
         Text(text.toUpperCase()),
       ],
@@ -126,7 +126,7 @@ class Fields {
     child: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (leadingIcon != null) leadingIcon,
+        ?leadingIcon,
         if (leadingIcon != null) Dimensions.spacingHorizontal,
         Text(text.toUpperCase()),
       ],
@@ -199,7 +199,7 @@ class Fields {
     style: style,
   );
 
-  static autosizedLabeledText({
+  static Padding autosizedLabeledText({
     required String label,
     required String text,
     Key? textKey,

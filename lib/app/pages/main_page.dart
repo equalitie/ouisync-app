@@ -480,7 +480,7 @@ class _MainPageState extends State<MainPage>
 
     return ValueListenableBuilder(
       valueListenable: _bottomSheetInfo,
-      builder: (_, btInfo, __) => Container(
+      builder: (_, btInfo, _) => Container(
         padding: EdgeInsetsDirectional.only(
           bottom: btInfo.neededPadding <= 0.0
               ? Dimensions.defaultListBottomPadding

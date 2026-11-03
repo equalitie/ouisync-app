@@ -149,7 +149,7 @@ class _InfoBubbleDialogState extends State<_InfoBubbleDialog> {
     // animationTimer = Timer.periodic(animationDuration, (_) => animateBubble());
   }
 
-  initBubblePosition() {
+  void initBubblePosition() {
     widgetConstraints = widget.focusableWidgetKey.globalPaintBounds;
     var bubbleTipHalfWidth = widget.bubbleTipWidth / 2;
     var screenYCenter = screenHeight / 2;
