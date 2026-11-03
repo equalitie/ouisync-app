@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-- Update [Ouisync library](https://github.com/equalitie/ouisync) to [v0.10.1](https://github.com/equalitie/ouisync/blob/master/CHANGELOG.md#v0.10.1)
+- Update [Ouisync library](https://github.com/equalitie/ouisync) to [v0.10.2](https://github.com/equalitie/ouisync/blob/master/CHANGELOG.md#v0.10.2)
 - Fix repository size not decreasing after deleting files in a repository
 - Update if-watch rust dependency caused crash on Windows in local discovery code
 - Update `file_picker` dependency
@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix regression where LAN connectivity was not working
 - Windows: Fix limit to 512MiB repository sizes and O: drive size reporting
 - Fix disappearing repositories when one of the storage paths doesn't exist
+- Add partial czech, russian and chinese (simplified) translations
 
 ## [v0.9.4](https://github.com/equalitie/ouisync-app/compare/v0.9.3...v0.9.4) - 2026-02-09
 
