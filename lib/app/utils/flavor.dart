@@ -35,7 +35,7 @@ enum Flavor {
   static Flavor get current => _current;
 
   @visibleForTesting
-  static set current(value) {
+  static set current(Flavor value) {
     _current = value;
   }
 

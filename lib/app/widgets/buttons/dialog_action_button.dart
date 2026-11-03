@@ -78,7 +78,7 @@ sealed class _ActionButton extends StatelessWidget {
     NegativeButton() => Dimensions.textStyleDialogNegativeButton,
   };
 
-  Color? _fillColor(context) => switch (this) {
+  Color? _fillColor(BuildContext context) => switch (this) {
     PositiveButton(dangerous: final dangerous) =>
       onPressed == null
           ? Colors.grey

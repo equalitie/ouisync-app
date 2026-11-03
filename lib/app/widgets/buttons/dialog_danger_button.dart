@@ -29,7 +29,7 @@ class DangerButton extends StatelessWidget {
     );
   }
 
-  Color _fillColorStatus(context) {
+  Color _fillColorStatus(BuildContext context) {
     return onPressed == null
         ? Colors.grey
         : Theme.of(context).colorScheme.error;

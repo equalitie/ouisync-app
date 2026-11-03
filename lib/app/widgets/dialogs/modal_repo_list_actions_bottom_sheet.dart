@@ -66,7 +66,11 @@ class RepoListActions extends StatelessWidget with AppLogger {
     ),
   );
 
-  Widget _buildAction({name, icon, action}) => Padding(
+  Widget _buildAction({
+    required String name,
+    required IconData icon,
+    required VoidCallback action,
+  }) => Padding(
     padding: Dimensions.paddingBottomSheetActions,
     child: GestureDetector(
       behavior: HitTestBehavior.opaque,

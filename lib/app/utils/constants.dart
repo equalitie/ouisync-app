@@ -79,7 +79,7 @@ class Constants {
   static const natWikipediaUrl =
       'https://en.wikipedia.org/wiki/Network_address_translation';
 
-  static Color primaryColor(context) => Theme.of(context).primaryColorDark;
+  static Color primaryColor(BuildContext context) => Theme.of(context).primaryColorDark;
 
   static const double repositoryBarHeight = 58.0;
 
