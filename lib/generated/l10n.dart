@@ -145,6 +145,26 @@ class S {
     );
   }
 
+  /// `Repository settings`
+  String get titleRepositorySettings {
+    return Intl.message(
+      'Repository settings',
+      name: 'titleRepositorySettings',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add repository`
+  String get labelAddRepository {
+    return Intl.message(
+      'Add repository',
+      name: 'labelAddRepository',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `File details`
   String get titleFileDetails {
     return Intl.message(

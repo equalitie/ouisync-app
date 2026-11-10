@@ -1,0 +1,40 @@
+# Creates a repository named ${NAME} from the repository list and leaves it open.
+# Called from `seed.yaml`, so it targets the UI of the release we upgrade from.
+#
+# Don't use `hideKeyboard` in these flows: on Android it sends Back, which closes the current page
+# in Flutter. The pages move their buttons above the keyboard, so they're tappable without it.
+appId: org.equalitie.ouisync
+---
+# An empty repo list shows a "Create repository" button. Otherwise it's in the menu behind the "+"
+# button.
+- runFlow:
+    when:
+      notVisible: "(?is)create repository(\\n.*)?"
+    commands:
+      # The "+" button got an accessibility label after v0.9.4. Releases without it are tapped by
+      # position. The fallback comes first for the same reason as in `set_password.yaml`.
+      - runFlow:
+          when:
+            notVisible: "Add repository"
+          commands:
+            - tapOn:
+                point: "91%,93%"
+      - runFlow:
+          when:
+            visible: "Add repository"
+          commands:
+            - tapOn: "Add repository"
+- tapOn: "(?is)create repository(\\n.*)?"
+- tapOn: "Name:? ?"
+- inputText: ${NAME}
+- assertVisible: ${NAME}
+# On by default. Turn it off so the test doesn't talk to the real cache servers.
+- tapOn: "(?s)Use cache servers(\\n.*)?"
+- assertVisible:
+    checked: false
+    childOf: "(?s)Use cache servers(\\n.*)?"
+- tapOn: "(?i)create"
+# A new repo opens unlocked and empty.
+- extendedWaitUntil:
+    visible: "(?i)this folder is empty"
+    timeout: 30000

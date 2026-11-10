@@ -1,0 +1,30 @@
+# Runs against the released version: onboards and creates a repository with the default lock.
+appId: org.equalitie.ouisync
+---
+- launchApp:
+    clearState: true
+- runFlow: allow_notifications.yaml
+
+# Onboarding
+- tapOn: "(?s)English(\\n.*)?"
+# The onboarding arrows have no accessibility label in v0.9.4, so tap the button to the right of
+# the page indicator. Swiping doesn't work: it can't leave the last page.
+- repeat:
+    times: 3
+    commands:
+      - tapOn:
+          rightOf: "Page \\d+ of \\d+"
+- tapOn: "(?i)i agree"
+
+# Random secret stored on device (the default). Needs the master key to open.
+- runFlow:
+    file: create_repo.yaml
+    env:
+      NAME: Upgrade default
+- back
+
+- assertVisible: "(?s)Upgrade default(\\n.*)?"
+
+# Give the app a moment to persist settings before it's replaced.
+- waitForAnimationToEnd
+- stopApp

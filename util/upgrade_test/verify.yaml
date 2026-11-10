@@ -1,0 +1,15 @@
+# Runs against the current version after upgrading over `seed.yaml`'s data.
+appId: org.equalitie.ouisync
+---
+- launchApp
+- runFlow: allow_notifications.yaml
+
+- extendedWaitUntil:
+    visible: "(?s)Upgrade default(\\n.*)?"
+    timeout: 30000
+
+# The secret is stored on device, so the repo must open without asking for a password.
+- tapOn: "(?s)Upgrade default(\\n.*)?"
+- extendedWaitUntil:
+    visible: "(?i)this folder is empty"
+    timeout: 30000

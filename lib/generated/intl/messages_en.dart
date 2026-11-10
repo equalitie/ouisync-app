@@ -242,6 +242,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "iconShareTokenWithPeer": MessageLookupByLibrary.simpleMessage(
       "Share this with your peer",
     ),
+    "labelAddRepository": MessageLookupByLibrary.simpleMessage(
+      "Add repository",
+    ),
     "labelAppVersion": MessageLookupByLibrary.simpleMessage("App version"),
     "labelAttachLogs": MessageLookupByLibrary.simpleMessage("Attach logs"),
     "labelBitTorrentDHT": MessageLookupByLibrary.simpleMessage(
@@ -1306,6 +1309,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "titleRepository": MessageLookupByLibrary.simpleMessage("Repository"),
     "titleRepositoryName": MessageLookupByLibrary.simpleMessage(
       "Repository name",
+    ),
+    "titleRepositorySettings": MessageLookupByLibrary.simpleMessage(
+      "Repository settings",
     ),
     "titleRequiredPermission": MessageLookupByLibrary.simpleMessage(
       "Required permission",
