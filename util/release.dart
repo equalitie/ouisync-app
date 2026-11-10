@@ -958,6 +958,15 @@ Future<File> buildDebGUI({
     await createIcon(iconSrc, iconDst, res);
   }
 
+  // Add copyright file
+  await writeDebCopyright(
+    packageDir: packageDir,
+    packageName: '$name-gui',
+    sections: [
+      (files: '*', license: 'GPL-3.0', licenseFile: File('LICENSE')),
+    ],
+  );
+
   // Create debian control file
   final debDir = Directory('${packageDir.path}/DEBIAN');
   await debDir.create();
@@ -1023,6 +1032,15 @@ Future<File> buildDebCLI({
   await binDir.create(recursive: true);
   await File(p.join(targetDir.path, 'ouisync')).copy('${binDir.path}/ouisync');
 
+  // Add copyright file
+  await writeDebCopyright(
+    packageDir: packageDir,
+    packageName: '$name-cli',
+    sections: [
+      (files: '*', license: 'MPL-2.0', licenseFile: File('ouisync/LICENSE')),
+    ],
+  );
+
   // Create debian control file
   final debDir = Directory('${packageDir.path}/DEBIAN');
   await debDir.create();
@@ -1046,6 +1064,51 @@ Future<File> buildDebCLI({
   ]);
 
   return package;
+}
+
+/// Writes a machine-readable debian copyright file
+/// (https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/) into
+/// `usr/share/doc/<packageName>/copyright`, embedding the full license texts.
+Future<void> writeDebCopyright({
+  required Directory packageDir,
+  required String packageName,
+  required List<({String files, String license, File licenseFile})> sections,
+}) async {
+  final docDir = Directory('${packageDir.path}/usr/share/doc/$packageName');
+  await docDir.create(recursive: true);
+
+  final buffer = StringBuffer()
+    ..write(
+      'Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/\n'
+      'Upstream-Name: $packageName\n'
+      'Upstream-Contact: Ouisync developers <support@ouisync.net>\n'
+      'Source: https://github.com/equalitie/ouisync-app\n',
+    );
+
+  for (final section in sections) {
+    buffer.write(
+      '\n'
+      'Files: ${section.files}\n'
+      'Copyright: eQualitie Inc.\n'
+      'License: ${section.license}\n',
+    );
+  }
+
+  // Each distinct license text is included once, in a standalone paragraph.
+  final licenses = {
+    for (final section in sections) section.license: section.licenseFile,
+  };
+
+  for (final MapEntry(key: license, value: file) in licenses.entries) {
+    buffer.write('\nLicense: $license\n');
+
+    for (final line in await file.readAsLines()) {
+      // Continuation lines must be indented and empty lines replaced with ".".
+      buffer.write(line.trim().isEmpty ? ' .\n' : ' $line\n');
+    }
+  }
+
+  await File('${docDir.path}/copyright').writeAsString(buffer.toString());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
