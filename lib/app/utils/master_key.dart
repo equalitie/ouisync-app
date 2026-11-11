@@ -20,26 +20,37 @@ class MasterKey {
   MasterKey._(this.secretKey);
 
   /// Load the master key from the secure storage. Generate a new one if not stored yet.
-  static Future<MasterKey> init() async {
-    final storage = FlutterSecureStorage(
-      aOptions: _getAndroidOptions(),
-      mOptions: _getMacOsOptions(),
-    );
+  static Future<MasterKey> init() => initWith(
+    storage: _SecureMasterKeyStorage(
+      FlutterSecureStorage(
+        aOptions: _getAndroidOptions(),
+        mOptions: _getMacOsOptions(),
+      ),
+    ),
+    legacyStorage: Platform.isAndroid ? _NativeLegacyMasterKeyStorage() : null,
+  );
 
+  /// Like `init` but with the storages passed in. `legacyStorage` is the storage used by Ouisync
+  /// 0.9.4 and older on Android, `null` on other platforms.
+  @visibleForTesting
+  static Future<MasterKey> initWith({
+    required MasterKeyStorage storage,
+    required LegacyMasterKeyStorage? legacyStorage,
+  }) async {
     // Ensure nothing else tries to initialize the MasterKey concurrently or data
     // loss could happen.
     await _mutex.acquire();
 
     try {
       var masterKeyBase64 =
-          await _migrateLegacyKey(storage) ??
-          await storage.read(key: _masterKey);
+          await _migrateLegacyKey(storage, legacyStorage) ??
+          await storage.read();
 
       if (masterKeyBase64 == null) {
         // No master password was generated yet, generate one now.
         final masterKey = cipher.randomSecretKey();
         masterKeyBase64 = base64.encode(masterKey.bytes);
-        await storage.write(key: _masterKey, value: masterKeyBase64);
+        await storage.write(masterKeyBase64);
       }
 
       return MasterKey._(cipher.SecretKey(base64.decode(masterKeyBase64)));
@@ -73,15 +84,18 @@ class MasterKey {
   /// The legacy key takes precedence over a key already in the current storage. Such key can only
   /// come from a pre-release build which generated a new key because it couldn't read the legacy
   /// one, and the repositories created before it need the legacy key.
-  static Future<String?> _migrateLegacyKey(FlutterSecureStorage storage) async {
-    if (!Platform.isAndroid) {
+  static Future<String?> _migrateLegacyKey(
+    MasterKeyStorage storage,
+    LegacyMasterKeyStorage? legacyStorage,
+  ) async {
+    if (legacyStorage == null) {
       return null;
     }
 
     final String? legacyKey;
 
     try {
-      legacyKey = await Native.instance.readLegacySecureStorage(_masterKey);
+      legacyKey = await legacyStorage.read();
     } catch (e, st) {
       // Don't generate a new key, the repositories would become inaccessible. The legacy key is
       // still stored and can possibly be recovered by a future version.
@@ -95,16 +109,16 @@ class MasterKey {
 
     _logger.info('migrating the legacy master key');
 
-    await storage.write(key: _masterKey, value: legacyKey);
+    await storage.write(legacyKey);
 
     // Delete the legacy key only once the new storage is known to hold it.
-    if (await storage.read(key: _masterKey) != legacyKey) {
+    if (await storage.read() != legacyKey) {
       _logger.error('failed to migrate the legacy master key: read back mismatch');
       throw MasterKeyUnreadable('legacy master key migration failed');
     }
 
     try {
-      await Native.instance.deleteLegacySecureStorage(_masterKey);
+      await legacyStorage.delete();
     } catch (e, st) {
       // Not fatal: the next start migrates the same key again.
       _logger.error('failed to delete the legacy master key:', e, st);
@@ -112,6 +126,43 @@ class MasterKey {
 
     return legacyKey;
   }
+}
+
+/// Where the master key is stored.
+@visibleForTesting
+abstract interface class MasterKeyStorage {
+  Future<String?> read();
+  Future<void> write(String value);
+}
+
+/// Where Ouisync 0.9.4 and older stored the master key on Android.
+@visibleForTesting
+abstract interface class LegacyMasterKeyStorage {
+  Future<String?> read();
+  Future<void> delete();
+}
+
+class _SecureMasterKeyStorage implements MasterKeyStorage {
+  _SecureMasterKeyStorage(this._storage);
+
+  final FlutterSecureStorage _storage;
+
+  @override
+  Future<String?> read() => _storage.read(key: MasterKey._masterKey);
+
+  @override
+  Future<void> write(String value) =>
+      _storage.write(key: MasterKey._masterKey, value: value);
+}
+
+class _NativeLegacyMasterKeyStorage implements LegacyMasterKeyStorage {
+  @override
+  Future<String?> read() =>
+      Native.instance.readLegacySecureStorage(MasterKey._masterKey);
+
+  @override
+  Future<void> delete() =>
+      Native.instance.deleteLegacySecureStorage(MasterKey._masterKey);
 }
 
 /// Thrown when the master key exists but can't be read. Generating a new key instead would make
