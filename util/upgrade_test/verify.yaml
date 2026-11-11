@@ -13,3 +13,14 @@ appId: org.equalitie.ouisync
 - extendedWaitUntil:
     visible: "(?i)this folder is empty"
     timeout: 30000
+
+# Start again: the first start migrated the master key, this one must work from the migrated key.
+- stopApp
+- launchApp
+- extendedWaitUntil:
+    visible: "(?s)Upgrade default(\\n.*)?"
+    timeout: 30000
+- tapOn: "(?s)Upgrade default(\\n.*)?"
+- extendedWaitUntil:
+    visible: "(?i)this folder is empty"
+    timeout: 30000

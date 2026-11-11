@@ -165,6 +165,36 @@ class S {
     );
   }
 
+  /// `Ouisync failed to start`
+  String get titleStartupFailed {
+    return Intl.message(
+      'Ouisync failed to start',
+      name: 'titleStartupFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Something went wrong while starting Ouisync.`
+  String get messageStartupFailed {
+    return Intl.message(
+      'Something went wrong while starting Ouisync.',
+      name: 'messageStartupFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Ouisync couldn’t read the key that protects your repositories. Please don’t clear the app’s data or reinstall the app, as that would make your repositories permanently inaccessible, and report this problem to us.`
+  String get messageMasterKeyUnreadable {
+    return Intl.message(
+      'Ouisync couldn’t read the key that protects your repositories. Please don’t clear the app’s data or reinstall the app, as that would make your repositories permanently inaccessible, and report this problem to us.',
+      name: 'messageMasterKeyUnreadable',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `File details`
   String get titleFileDetails {
     return Intl.message(

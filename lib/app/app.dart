@@ -17,6 +17,7 @@ import 'pages/pages.dart';
 import 'utils/constants.dart' show Constants;
 import 'utils/dirs.dart';
 import 'utils/log.dart' as log;
+import 'utils/master_key.dart' show MasterKeyUnreadable;
 import 'utils/stage.dart';
 import 'utils/platform/platform.dart' show PlatformWindowManager;
 import 'utils/utils.dart'
@@ -54,10 +55,16 @@ class App extends StatefulWidget {
 }
 
 class _AppState extends State<App> {
-  late final components = _AppComponents.create(widget.args).then((components) {
-    widget.controller?._stopListener = () => components.destroy();
-    return components;
-  });
+  late final components = _AppComponents.create(widget.args).then(
+    (components) {
+      widget.controller?._stopListener = () => components.destroy();
+      return components;
+    },
+    onError: (Object e, StackTrace st) {
+      log.named('').error('failed to start:', e, st);
+      Error.throwWithStackTrace(e, st);
+    },
+  );
 
   @override
   Widget build(BuildContext context) => FutureBuilder<_AppComponents>(
@@ -72,6 +79,10 @@ class _AppState extends State<App> {
             locale: localeState.currentLocale,
             home: _buildHomeWidget(components),
           ),
+        );
+      } else if (snapshot.hasError) {
+        return _buildMaterialApp(
+          home: StartupErrorScreen(error: snapshot.error!),
         );
       } else {
         return _buildMaterialApp(home: LoadingScreen());
@@ -365,6 +376,44 @@ class LoadingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) =>
       Scaffold(body: Center(child: CircularProgressIndicator()));
+}
+
+/// Shown instead of the app when it fails to start.
+class StartupErrorScreen extends StatelessWidget {
+  const StartupErrorScreen({required this.error, super.key});
+
+  final Object error;
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    body: SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              S.current.titleStartupFailed,
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 16.0),
+            Text(
+              error is MasterKeyUnreadable
+                  ? S.current.messageMasterKeyUnreadable
+                  : S.current.messageStartupFailed,
+            ),
+            const SizedBox(height: 16.0),
+            // Details for reporting the problem.
+            SelectableText(
+              error.toString(),
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
 }
 
 // Due to race conditions the app sometimes `pop`s more from the stack than have been pushed

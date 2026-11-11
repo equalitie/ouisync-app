@@ -32,6 +32,15 @@ class Native {
   Future<void> log(LogLevel level, String message) =>
       _channel.invokeMethod('log', [level.toInt(), message]);
 
+  /// Android only. Reads a value stored by `flutter_secure_storage` 10.0.0-beta.4 (Ouisync 0.9.4
+  /// and older), which newer versions of the plugin can't read. Returns `null` if there is none.
+  Future<String?> readLegacySecureStorage(String key) =>
+      _channel.invokeMethod<String>('readLegacySecureStorage', [key]);
+
+  /// Android only. Deletes a value stored by `flutter_secure_storage` 10.0.0-beta.4.
+  Future<void> deleteLegacySecureStorage(String key) =>
+      _channel.invokeMethod('deleteLegacySecureStorage', [key]);
+
   /// In Android, it retrieves the legacy path to the Download directory
   Future<String?> getDownloadPathForAndroid() =>
       _channel.invokeMethod<String>('getDownloadPath');

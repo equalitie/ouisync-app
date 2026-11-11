@@ -718,6 +718,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "messageLogDataP3": MessageLookupByLibrary.simpleMessage(
       "None of this data is shared with any third parties",
     ),
+    "messageMasterKeyUnreadable": MessageLookupByLibrary.simpleMessage(
+      "Ouisync couldn’t read the key that protects your repositories. Please don’t clear the app’s data or reinstall the app, as that would make your repositories permanently inaccessible, and report this problem to us.",
+    ),
     "messageMedium": MessageLookupByLibrary.simpleMessage("Medium"),
     "messageMissingBackgroundServicePermission":
         MessageLookupByLibrary.simpleMessage(
@@ -948,6 +951,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "messageSharingFileFailed": m49,
     "messageSortBy": m25,
+    "messageStartupFailed": MessageLookupByLibrary.simpleMessage(
+      "Something went wrong while starting Ouisync.",
+    ),
     "messageStorage": MessageLookupByLibrary.simpleMessage("Storage"),
     "messageStoragePermission": MessageLookupByLibrary.simpleMessage(
       "Needed for getting access to the files",
@@ -1334,6 +1340,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "titleSettings": MessageLookupByLibrary.simpleMessage("Settings"),
     "titleShareRepository": m38,
     "titleSortBy": MessageLookupByLibrary.simpleMessage("Sort by"),
+    "titleStartupFailed": MessageLookupByLibrary.simpleMessage(
+      "Ouisync failed to start",
+    ),
     "titleStateMonitor": MessageLookupByLibrary.simpleMessage("State Monitor"),
     "titleTermsOfUse": MessageLookupByLibrary.simpleMessage("2. Terms of Use"),
     "titleTermsPrivacy": MessageLookupByLibrary.simpleMessage(

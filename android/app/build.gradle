@@ -144,6 +144,12 @@ flutter {
    source = "../.."
 }
 
+dependencies {
+    // Reading values stored by `flutter_secure_storage` 10.0.0-beta.4 (Ouisync <= 0.9.4), see
+    // `LegacySecureStorage.kt`. Deprecated, but still the only way to read that format.
+    implementation "androidx.security:security-crypto:1.1.0"
+}
+
 easylauncher {
     defaultFlavorNaming true
 
