@@ -54,6 +54,25 @@ class MainActivity : FlutterFragmentActivity() {
                     log(args[0] as Int, args[1] as String)
                     result.success(null)
                 }
+                "readLegacySecureStorage" -> {
+                    val args = call.arguments as List<Any>
+                    val key = args[0] as String
+                    try {
+                        result.success(LegacySecureStorage(this).read(key))
+                    } catch (e: Exception) {
+                        result.error("legacySecureStorage", e.toString(), null)
+                    }
+                }
+                "deleteLegacySecureStorage" -> {
+                    val args = call.arguments as List<Any>
+                    val key = args[0] as String
+                    try {
+                        LegacySecureStorage(this).delete(key)
+                        result.success(null)
+                    } catch (e: Exception) {
+                        result.error("legacySecureStorage", e.toString(), null)
+                    }
+                }
                 else -> {
                     result.notImplemented()
                 }

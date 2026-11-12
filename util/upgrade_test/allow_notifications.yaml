@@ -1,0 +1,14 @@
+# Android asks for the notification permission shortly after the first launch, over the app's own
+# UI. Allow it if it shows up. Matching the dialog's own text means this can't tap a button in the
+# app.
+appId: org.equalitie.ouisync
+---
+- extendedWaitUntil:
+    visible: "Allow Ouisync to send you notifications\\?"
+    timeout: 5000
+    optional: true
+- runFlow:
+    when:
+      visible: "Allow Ouisync to send you notifications\\?"
+    commands:
+      - tapOn: "Allow"

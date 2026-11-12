@@ -155,6 +155,11 @@ class _OnboardingPageState extends State<OnboardingPage> {
               Icons.arrow_forward,
               textDirection: TextDirection.ltr,
             ),
+            // Accessibility labels, also used by the upgrade test (`util/upgrade_test`). The done
+            // button looks the same as next, so it's labeled the same.
+            backSemantic: S.current.actionBack,
+            nextSemantic: S.current.actionNext,
+            doneSemantic: S.current.actionNext,
             curve: Curves.fastLinearToSlowEaseIn,
             dotsDecorator: DotsDecorator(
               size: Size(10.0, 10.0),

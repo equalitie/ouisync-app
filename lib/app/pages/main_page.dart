@@ -360,6 +360,8 @@ class _MainPageState extends State<MainPage>
       await _showRepoSettings(context, repoCubit: repoCubit);
     },
     size: Dimensions.sizeIconSmall,
+    // Also serves as the accessibility label, used by the upgrade test (`util/upgrade_test`).
+    tooltip: S.current.titleRepositorySettings,
     key: ValueKey('settings'),
   );
 
@@ -381,6 +383,8 @@ class _MainPageState extends State<MainPage>
           mini: true,
           focusNode: _fabFocus,
           heroTag: Constants.heroTagRepoListActions,
+          // Also serves as the accessibility label, used by the upgrade test (`util/upgrade_test`).
+          tooltip: S.current.labelAddRepository,
           child: icon,
           onPressed: _showRepoListActions,
         );

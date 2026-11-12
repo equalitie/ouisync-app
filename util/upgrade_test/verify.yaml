@@ -1,0 +1,33 @@
+# Runs against the current version after upgrading over `seed.yaml`'s data. The secrets of all the
+# repositories depend on the master key, so they must open without asking for a password.
+appId: org.equalitie.ouisync
+---
+- launchApp
+- runFlow: allow_notifications.yaml
+
+- extendedWaitUntil:
+    visible: "(?s)Upgrade default(\\n.*)?"
+    timeout: 30000
+- runFlow:
+    file: check_repo_opens.yaml
+    env:
+      NAME: Upgrade default
+- runFlow:
+    file: check_repo_opens.yaml
+    env:
+      NAME: Upgrade remembered
+
+# Start again: the first start migrated the master key, this one must work from the migrated key.
+- stopApp
+- launchApp
+- extendedWaitUntil:
+    visible: "(?s)Upgrade default(\\n.*)?"
+    timeout: 30000
+- runFlow:
+    file: check_repo_opens.yaml
+    env:
+      NAME: Upgrade default
+- runFlow:
+    file: check_repo_opens.yaml
+    env:
+      NAME: Upgrade remembered
