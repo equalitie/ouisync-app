@@ -1,0 +1,9 @@
+# Opens the repository ${NAME} from the repository list, checks it's unlocked without asking for a
+# password and returns to the list. Called from `verify.yaml`.
+appId: org.equalitie.ouisync
+---
+- tapOn: "(?s)${NAME}(\\n.*)?"
+- extendedWaitUntil:
+    visible: "(?i)this folder is empty"
+    timeout: 30000
+- back

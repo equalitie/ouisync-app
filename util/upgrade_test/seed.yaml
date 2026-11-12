@@ -1,5 +1,8 @@
-# Runs against the released version: onboards and creates a repository with the default lock.
+# Runs against the released version: onboards and creates repositories whose secret depends on the
+# master key.
 appId: org.equalitie.ouisync
+env:
+  PASSWORD: upgrade-test-password
 ---
 - launchApp:
     clearState: true
@@ -23,7 +26,19 @@ appId: org.equalitie.ouisync
       NAME: Upgrade default
 - back
 
+# Local password, remembered. Also needs the master key to open.
+- runFlow:
+    file: create_repo.yaml
+    env:
+      NAME: Upgrade remembered
+- runFlow:
+    file: set_password.yaml
+    env:
+      FORGET: "false"
+- back
+
 - assertVisible: "(?s)Upgrade default(\\n.*)?"
+- assertVisible: "(?s)Upgrade remembered(\\n.*)?"
 
 # Give the app a moment to persist settings before it's replaced.
 - waitForAnimationToEnd
