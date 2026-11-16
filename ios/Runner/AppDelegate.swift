@@ -4,17 +4,17 @@ import OuisyncCommon
 import UIKit
 
 
-@main @objc class AppDelegate: FlutterAppDelegate {
+@main @objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
     typealias LaunchOptions = [UIApplication.LaunchOptionsKey: Any]?
-    override func application(_ application: UIApplication,
-                              didFinishLaunchingWithOptions launchOptions: LaunchOptions) -> Bool {
-        guard let flutter = window?.rootViewController as? FlutterViewController else {
-            print("App root view controller is not flutter")
-            return false
-        }
+
+    // With the UIScene lifecycle the window belongs to SceneDelegate, so the app's window and
+    // root view controller are not available in application(_:didFinishLaunchingWithOptions:).
+    // The engine is set up here instead, once Flutter has created it.
+    func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
+        let messenger = engineBridge.applicationRegistrar.messenger()
 
         FlutterMethodChannel(name: Constants.flutterConfigChannel,
-                             binaryMessenger: flutter.binaryMessenger)
+                             binaryMessenger: messenger)
         .setMethodCallHandler { call, result in
             switch call.method {
             case "getSharedDir": result(Directories.rootPath)
@@ -25,7 +25,7 @@ import UIKit
             }
         }
 
-        bag.append(FileProviderProxy(flutter.binaryMessenger))
+        bag.append(FileProviderProxy(messenger))
 
         // Register the File Provider domain so the extension is available in the Files app. This
         // used to happen lazily via the app<->extension XPC "initialize" call, but that tunnel is
@@ -40,8 +40,11 @@ import UIKit
             }
         }
 
-        GeneratedPluginRegistrant.register(with: self)
+        GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
+    }
 
+    override func application(_ application: UIApplication,
+                              didFinishLaunchingWithOptions launchOptions: LaunchOptions) -> Bool {
         return super.application(application, didFinishLaunchingWithOptions: launchOptions)
     }
 
