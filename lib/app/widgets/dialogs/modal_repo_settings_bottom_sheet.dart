@@ -1,3 +1,4 @@
+import 'package:ouisync_app/app/utils/session_handle.dart' show SessionProxy;
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -33,7 +34,7 @@ class RepositorySettings extends StatelessWidget
   });
 
   final Settings settings;
-  final Session session;
+  final SessionProxy session;
   final RepoCubit repoCubit;
   final ReposCubit reposCubit;
   final StoreDirsCubit storeDirsCubit;

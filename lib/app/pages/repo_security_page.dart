@@ -1,8 +1,8 @@
+import 'package:ouisync_app/app/utils/session_handle.dart' show SessionProxy;
 import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync/ouisync.dart' show Session;
 
 import '../../generated/l10n.dart';
 import '../pages/repo_reset_access.dart';
@@ -37,7 +37,7 @@ class RepoSecurityPage extends StatefulWidget {
 
   final Stage stage;
   final Settings settings;
-  final Session session;
+  final SessionProxy session;
   final RepoCubit repo;
   final UnlockedAccess originalAccess;
   final PasswordHasher passwordHasher;

@@ -4,7 +4,7 @@ import 'dart:io' as io;
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync/ouisync.dart' show EntryType, Session;
+import 'package:ouisync/ouisync.dart' show EntryType;
 import 'package:ouisync_app/app/cubits/lan_access.dart' show LanAccessCubit;
 import 'package:path/path.dart' as system_path;
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
@@ -47,7 +47,7 @@ class MainPage extends StatefulWidget {
 
   final Stage stage;
   final PlatformWindowManager windowManager;
-  final Session session;
+  final SessionProxy session;
   final Settings settings;
   final Stream<List<SharedMediaFile>> receivedMedia;
   final ReposCubit reposCubit;

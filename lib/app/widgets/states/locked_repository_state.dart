@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:ouisync/ouisync.dart' show Session;
 
 import '../../../generated/l10n.dart';
 import '../../cubits/cubits.dart';
@@ -23,7 +22,7 @@ class LockedRepositoryState extends StatefulWidget {
   final MasterKey masterKey;
   final PasswordHasher passwordHasher;
   final Settings settings;
-  final Session session;
+  final SessionProxy session;
   final Stage stage;
 
   @override

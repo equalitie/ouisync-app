@@ -1,3 +1,4 @@
+import 'package:ouisync_app/app/utils/session_handle.dart' show SessionProxy;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ouisync/ouisync.dart';
@@ -14,7 +15,7 @@ import 'pages.dart' show UserProvidedPeersPage;
 const double _contentSize = 12.0;
 
 class PeersPage extends StatefulWidget {
-  final Session session;
+  final SessionProxy session;
   final PeerSetCubit cubit;
   final Stage stage;
 

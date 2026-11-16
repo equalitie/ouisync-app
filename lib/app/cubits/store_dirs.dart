@@ -3,12 +3,12 @@ import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart' show Cubit;
-import 'package:ouisync/ouisync.dart' show Session;
 import 'package:path/path.dart' show join;
 import 'package:path_provider/path_provider.dart'
     show getExternalStorageDirectories;
 
 import '../utils/dirs.dart';
+import '../utils/session_handle.dart' show SessionProxy;
 import '../utils/native.dart';
 import '../utils/storage_volume.dart';
 
@@ -54,7 +54,7 @@ class StoreDir {
 }
 
 class StoreDirsCubit extends Cubit<StoreDirs> {
-  final Session _session;
+  final SessionProxy _session;
   final Dirs _dirs;
 
   StoreDirsCubit(this._session, this._dirs) : super(StoreDirs()) {
@@ -70,7 +70,6 @@ class StoreDirsCubit extends Cubit<StoreDirs> {
 
   Future<void> _update() async {
     List<StoreDir> dirs;
-
     if (Platform.isAndroid) {
       dirs = await getExternalStorageDirectories()
           .then((dirs) => (dirs ?? []).map((dir) => join(dir.path, _name)))

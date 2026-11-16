@@ -8,6 +8,7 @@ import 'package:ouisync_app/app/cubits/mount.dart';
 import 'package:ouisync_app/app/cubits/store_dirs.dart';
 import 'package:ouisync_app/app/models/auth_mode.dart';
 import 'package:ouisync_app/app/models/repo_location.dart';
+import 'package:ouisync_app/app/utils/session_handle.dart';
 import 'package:ouisync_app/app/utils/cache_servers.dart';
 import 'package:ouisync_app/app/utils/master_key.dart';
 import 'package:ouisync_app/app/utils/random.dart';
@@ -21,7 +22,7 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
   late Server server;
-  late Session session;
+  late SessionHandle session;
   late MountCubit mountCubit;
   late StoreDirsCubit storeDirsCubit;
   late ReposCubit reposCubit;
@@ -35,7 +36,8 @@ void main() {
     server = Server.create(configPath: configPath);
     await server.start();
 
-    session = await Session.create(configPath: configPath);
+    final ouisyncSession = await Session.create(configPath: configPath);
+    session = SessionHandle.wrap(ouisyncSession, server: server);
     await session.setStoreDirs([join(appDir.path, 'store')]);
 
     final settings = await Settings.init(MasterKey.random());

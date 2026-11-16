@@ -1,6 +1,6 @@
+import 'package:ouisync_app/app/utils/session_handle.dart' show SessionProxy;
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import 'package:ouisync/ouisync.dart' show Session;
 
 import '../../generated/l10n.dart';
 import '../utils/stage.dart';
@@ -9,7 +9,7 @@ import '../widgets/widgets.dart' show DirectionalAppBar;
 
 class QRScanner extends StatefulWidget {
   final Stage stage;
-  final Session session;
+  final SessionProxy session;
 
   const QRScanner({required this.stage, required this.session, super.key});
 

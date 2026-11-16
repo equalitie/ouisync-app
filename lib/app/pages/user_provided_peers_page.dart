@@ -1,6 +1,6 @@
+import 'package:ouisync_app/app/utils/session_handle.dart' show SessionProxy;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync/ouisync.dart';
 
 import '../../generated/l10n.dart';
 import '../cubits/user_provided_peers.dart';
@@ -13,7 +13,7 @@ import '../widgets/widgets.dart' show DirectionalAppBar;
 class UserProvidedPeersPage extends StatefulWidget {
   UserProvidedPeersPage({required this.session, required this.stage});
 
-  final Session session;
+  final SessionProxy session;
   final Stage stage;
 
   @override
@@ -22,7 +22,7 @@ class UserProvidedPeersPage extends StatefulWidget {
 }
 
 class _UserProvidedPeersState extends State<UserProvidedPeersPage> {
-  _UserProvidedPeersState(Session session)
+  _UserProvidedPeersState(SessionProxy session)
     : _cubit = UserProvidedPeersCubit(session);
 
   final UserProvidedPeersCubit _cubit;

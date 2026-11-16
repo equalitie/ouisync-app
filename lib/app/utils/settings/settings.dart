@@ -1,6 +1,6 @@
 import 'dart:io' as io;
 
-import 'package:ouisync/ouisync.dart';
+import 'package:ouisync_app/app/utils/utils.dart';
 import 'package:path/path.dart';
 
 import 'v1.dart' as v1;
@@ -17,7 +17,7 @@ typedef SettingsUserLocale = v2.SettingsUserLocale;
 typedef SettingsDefaultLocale = v2.SettingsDefaultLocale;
 typedef InvalidSettingsVersion = v2.InvalidSettingsVersion;
 
-Future<Settings> loadAndMigrateSettings(Session session) async {
+Future<Settings> loadAndMigrateSettings(SessionHandle session) async {
   await _migratePaths();
 
   final masterKey = await MasterKey.init();

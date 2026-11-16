@@ -1,7 +1,7 @@
+import 'package:ouisync_app/app/utils/session_handle.dart' show SessionProxy;
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:ouisync/ouisync.dart';
 import 'package:ouisync_app/app/cubits/lan_access.dart' show LanAccessCubit;
 import 'package:stream_transform/stream_transform.dart';
 
@@ -26,7 +26,7 @@ class SettingsPage extends StatefulWidget {
     required this.stage,
   });
 
-  final Session session;
+  final SessionProxy session;
   final LocaleCubit localeCubit;
   final MountCubit mount;
   final ErrorCubit errorCubit;
