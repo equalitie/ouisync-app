@@ -166,37 +166,37 @@ class RepoCreationCubit extends Cubit<RepoCreationState>
     with CubitActions, AppLogger {
   RepoCreationCubit({required this.reposCubit}) : super(RepoCreationState()) {
     nameController.addListener(_onLocationChangedUnawaited);
-
     setLocalSecret(LocalSecretRandom());
-
-    // Set initial dir to the first store dir
-    unawaited(
-      reposCubit.session
-          .getStoreDirs()
-          .then((dirs) {
-            final substate = state.substate;
-            final dir = dirs.firstOrNull;
-
-            if (dir == null) {
-              return;
-            }
-
-            if (substate is! RepoCreationPending || substate.dir != null) {
-              return;
-            }
-
-            emitUnlessClosed(
-              state.copyWith(substate: substate.copyWith(dir: dir)),
-            );
-          })
-          .then((_) => _onLocationChanged()),
-    );
+    unawaited(_setInitialDir());
   }
 
   final ReposCubit reposCubit;
 
   final nameController = TextEditingController();
   final positiveButtonFocusNode = FocusNode();
+
+  Future<void> _setInitialDir() async {
+    // Set initial dir to the first store dir
+    await reposCubit.session
+        .getStoreDirs()
+        .then((dirs) {
+          final substate = state.substate;
+          final dir = dirs.firstOrNull;
+
+          if (dir == null) {
+            return;
+          }
+
+          if (substate is! RepoCreationPending || substate.dir != null) {
+            return;
+          }
+
+          emitUnlessClosed(
+            state.copyWith(substate: substate.copyWith(dir: dir)),
+          );
+        })
+        .then((_) => _onLocationChanged());
+  }
 
   @override
   Future<void> close() async {
@@ -210,11 +210,9 @@ class RepoCreationCubit extends Cubit<RepoCreationState>
     if (token == null) {
       return;
     }
-
-    final accessMode = await reposCubit.session.getShareTokenAccessMode(token);
-    final suggestedName = await reposCubit.session.getShareTokenSuggestedName(
-      token,
-    );
+    final session = reposCubit.session;
+    final accessMode = await session.getShareTokenAccessMode(token);
+    final suggestedName = await session.getShareTokenSuggestedName(token);
     final useCacheServers = await reposCubit.cacheServers
         .isEnabledForShareToken(token);
 

@@ -1,3 +1,4 @@
+import 'package:ouisync_app/app/utils/session_handle.dart' show SessionProxy;
 import 'dart:async';
 import 'dart:io' as io;
 
@@ -57,7 +58,7 @@ class AboutSection extends SettingsSection with AppLogger {
          title: S.current.titleAbout,
        );
 
-  final Session session;
+  final SessionProxy session;
   final LocaleCubit localeCubit;
   final PowerControl powerControl;
   final ReposCubit reposCubit;
@@ -231,9 +232,10 @@ class AboutSection extends SettingsSection with AppLogger {
     }
 
     if (attachments.logs) {
+      final rootMonitor = await reposCubit.session.getRootStateMonitor();
       final logs = await stage.loading(
         dumpAll(
-          rootMonitor: reposCubit.rootStateMonitor,
+          rootMonitor: rootMonitor,
           powerControl: powerControl,
           connectivityInfo: connectivityInfo,
           natDetection: natDetection,

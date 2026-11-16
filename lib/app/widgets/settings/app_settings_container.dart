@@ -1,6 +1,5 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:ouisync/ouisync.dart';
 import 'package:ouisync_app/app/cubits/lan_access.dart' show LanAccessCubit;
 import 'package:settings_ui/settings_ui.dart' as s;
 
@@ -16,7 +15,7 @@ import 'settings_section.dart';
 
 class AppSettingsContainer extends StatefulWidget {
   AppSettingsContainer(
-    Session session, {
+    SessionProxy session, {
     required void Function() checkForDokan,
     required ConnectivityInfo connectivityInfo,
     required Dirs dirs,
@@ -45,7 +44,7 @@ class AppSettingsContainer extends StatefulWidget {
            mount: mount,
            errorCubit: errorCubit,
            powerControl: powerControl,
-           reposCubit: reposCubit,
+           session: session,
            connectivityInfo: connectivityInfo,
            natDetection: natDetection,
            checkForDokan: checkForDokan,
