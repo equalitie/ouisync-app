@@ -3,6 +3,7 @@ import 'dart:io' as io;
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:ouisync_app/app/models/repo_location.dart';
 import 'package:ouisync_app/app/cubits/cubits.dart';
 import 'package:ouisync_app/app/utils/cache_servers.dart';
 import 'package:ouisync/ouisync.dart';
@@ -53,7 +54,8 @@ void main() {
     mountCubit = MountCubit(deps.session, deps.dirs)..init();
 
     originRepoCubit = await RepoCubit.create(
-      repo: originRepo,
+      location: RepoLocation.fromDbPath(await originRepo.getPath()),
+      session: deps.session,
       navigation: navigationCubit,
       entrySelection: entrySelectionCubit,
       bottomSheet: bottomSheetCubit,
@@ -62,7 +64,8 @@ void main() {
     );
 
     otherRepoCubit = await RepoCubit.create(
-      repo: otherRepo,
+      location: RepoLocation.fromDbPath(await otherRepo.getPath()),
+      session: deps.session,
       navigation: navigationCubit,
       entrySelection: entrySelectionCubit,
       bottomSheet: bottomSheetCubit,

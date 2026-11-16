@@ -1,9 +1,11 @@
+import 'dart:async';
+
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:network_info_plus/network_info_plus.dart';
-import 'package:ouisync/ouisync.dart';
 
 import '../utils/peer_addr.dart';
+import '../utils/session_handle.dart' show SessionProxy;
 import '../utils/utils.dart' show AppLogger;
 import 'cubits.dart' show CubitActions;
 
@@ -58,12 +60,27 @@ class ConnectivityInfoState extends Equatable {
 
 class ConnectivityInfo extends Cubit<ConnectivityInfoState>
     with AppLogger, CubitActions {
-  final Session _session;
+  final SessionProxy _session;
   final _networkInfo = NetworkInfo();
 
-  ConnectivityInfo(Session session)
+  ConnectivityInfo(SessionProxy session)
     : _session = session,
-      super(ConnectivityInfoState());
+      super(ConnectivityInfoState()) {
+    _session.started.addListener(_onSessionStarted);
+  }
+
+  @override
+  Future<void> close() async {
+    _session.started.removeListener(_onSessionStarted);
+    await super.close();
+  }
+
+  void _onSessionStarted() {
+    if (_session.started.value == 0) {
+      return;
+    }
+    unawaited(update());
+  }
 
   // refresh network settings
   Future<void> update() async {

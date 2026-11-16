@@ -100,10 +100,10 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   final NavigationCubit _navigation;
   final EntrySelectionCubit _entrySelection;
   final EntryBottomSheetCubit _bottomSheet;
-  final Repository _repo;
   final CacheServers _cacheServers;
   final MountCubit _mountCubit;
   final void Function(String)? _onNotify;
+  final SessionProxy _session;
 
   // We don't expose `_repo.events` directly, instead we pipe it though this controller and expose
   // only its stream. This allows us to resubscribe to `_repo.events` when the repo gets closed and
@@ -111,35 +111,65 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   final _eventController = StreamController<void>.broadcast();
   StreamSubscription<void>? _eventSubscription;
 
+  Future<Repository> get _repo async =>
+      await _session.getRepository(path: state.location.path);
+
   RepoCubit._(
     this._navigation,
     this._entrySelection,
     this._bottomSheet,
-    this._repo,
     this._cacheServers,
     this._mountCubit,
     this._onNotify,
+    this._session,
     super.state,
   ) {
     _currentFolder.repo = this;
-
-    _eventController.onListen = () {
-      _eventSubscription = _repo.events.listen(_eventController.add);
+    _eventController.onListen = () async {
+      final repo = await _repo;
+      _eventSubscription = repo.events.listen(_eventController.add);
     };
     _eventController.onCancel = () => _eventSubscription?.cancel();
   }
 
   static Future<RepoCubit> create({
-    required Repository repo,
+    required RepoLocation location,
     required MountCubit mountCubit,
     required NavigationCubit navigation,
     required EntrySelectionCubit entrySelection,
     required EntryBottomSheetCubit bottomSheet,
     required CacheServers cacheServers,
     void Function(String)? onNotify,
+    required SessionProxy session,
   }) async {
-    final path = await repo.getPath();
-    final location = RepoLocation.fromDbPath(path);
+    final state = await _loadState(session, location);
+
+    final cubit = RepoCubit._(
+      navigation,
+      entrySelection,
+      bottomSheet,
+      cacheServers,
+      mountCubit,
+      onNotify,
+      session,
+      state,
+    );
+
+    unawaited(cubit._mount());
+
+    // Fetching the cache server state involves network request which might take a long time. Using
+    // `unawaited` to avoid blocking this function on it.
+    unawaited(cubit._updateCacheServersState());
+
+    return cubit;
+  }
+
+  // Reads the repository's own state from its handle.
+  static Future<RepoState> _loadState(
+    SessionProxy session,
+    RepoLocation location,
+  ) async {
+    final repo = await session.getRepository(path: location.path);
     final authMode = await repo.getAuthMode();
 
     var state = RepoState(location: location, authMode: authMode);
@@ -158,27 +188,10 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
       );
     }
 
-    final cubit = RepoCubit._(
-      navigation,
-      entrySelection,
-      bottomSheet,
-      repo,
-      cacheServers,
-      mountCubit,
-      onNotify,
-      state,
-    );
-
-    unawaited(cubit._mount());
-
-    // Fetching the cache server state involves network request which might take a long time. Using
-    // `unawaited` to avoid blocking this function on it.
-    unawaited(cubit._updateCacheServersState());
-
-    return cubit;
+    return state;
   }
 
-  Future<String> get infoHash async => await _repo.getInfoHash();
+  Future<String> get infoHash async => await (await _repo).getInfoHash();
   RepoLocation get location => state.location;
   String get name => state.location.name;
   AccessMode get accessMode => state.accessMode;
@@ -187,7 +200,12 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
 
   Stream<void> get events => _eventController.stream;
 
-  Future<void> delete() => _repo.delete();
+  Future<void> delete() async {
+    final location = state.location;
+    final repo = await _repo;
+    await repo.delete();
+    _session.repositoryMoved(location.path, null);
+  }
 
   void updateNavigation() {
     _navigation.current(location, currentFolder);
@@ -234,11 +252,12 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   }
 
   Future<void> enableSync() async {
-    await _repo.setSyncEnabled(true);
+    final repo = await _repo;
+    await repo.setSyncEnabled(true);
 
     // DHT and PEX states can only be queried when sync is enabled, so let's do it here.
-    final isDhtEnabled = await _repo.isDhtEnabled();
-    final isPexEnabled = await _repo.isPexEnabled();
+    final isDhtEnabled = await repo.isDhtEnabled();
+    final isPexEnabled = await repo.isPexEnabled();
 
     emitUnlessClosed(
       state.copyWith(isDhtEnabled: isDhtEnabled, isPexEnabled: isPexEnabled),
@@ -250,7 +269,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
       return;
     }
 
-    await _repo.setDhtEnabled(value);
+    await (await _repo).setDhtEnabled(value);
 
     emitUnlessClosed(state.copyWith(isDhtEnabled: value));
   }
@@ -260,7 +279,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
       return;
     }
 
-    await _repo.setPexEnabled(value);
+    await (await _repo).setPexEnabled(value);
 
     emitUnlessClosed(state.copyWith(isPexEnabled: value));
   }
@@ -268,14 +287,16 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   Future<void> setCacheServersEnabled(bool value) async {
     // Update the state to the desired value for immediate feedback...
     emitUnlessClosed(state.copyWith(isCacheServersEnabled: value));
-    await _cacheServers.setEnabled(_repo, value);
+    final repo = await _repo;
+    await _cacheServers.setEnabled(repo, value);
     // ...then fetch the actual value and update the state again. This is needed because some of
     // the cache server requests might fail.
     await _updateCacheServersState();
   }
 
   Future<void> _updateCacheServersState() async {
-    final value = await _cacheServers.isEnabledForRepo(_repo);
+    final repo = await _repo;
+    final value = await _cacheServers.isEnabledForRepo(repo);
     emitUnlessClosed(state.copyWith(isCacheServersEnabled: value));
   }
 
@@ -293,7 +314,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     AccessMode accessMode, {
     String? password,
   }) async {
-    return await _repo.share(
+    return await (await _repo).share(
       accessMode: accessMode,
       localSecret: password != null
           ? LocalSecretPassword(Password(password))
@@ -310,7 +331,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     }
 
     try {
-      await _repo.mount();
+      await (await _repo).mount();
       emitUnlessClosed(state.copyWith(mountState: const MountStateSuccess()));
     } on Unsupported {
       emitUnlessClosed(state.copyWith(mountState: const MountStateDisabled()));
@@ -323,25 +344,26 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
 
   Future<void> unmount() async {
     try {
-      await _repo.unmount();
+      await (await _repo).unmount();
       emitUnlessClosed(state.copyWith(mountState: const MountStateDisabled()));
     } catch (_) {}
   }
 
-  Future<String?> get mountPoint => _repo.getMountPoint();
+  Future<String?> get mountPoint async => (await _repo).getMountPoint();
 
-  Future<bool> entryExists(String path) =>
-      _repo.getEntryType(path).then((t) => t != null);
+  Future<bool> entryExists(String path) async =>
+      (await _repo).getEntryType(path).then((t) => t != null);
 
-  Future<EntryType?> entryType(String path) => _repo.getEntryType(path);
+  Future<EntryType?> entryType(String path) async =>
+      (await _repo).getEntryType(path);
 
-  Future<Progress> get syncProgress => _repo.getSyncProgress();
+  Future<Progress> get syncProgress async => (await _repo).getSyncProgress();
 
-  Future<Stats> get networkStats => _repo.getStats();
+  Future<Stats> get networkStats async => (await _repo).getStats();
 
   // Get the state monitor of this particular repository. That is 'root >
   // Repositories > this repository ID'.
-  Future<StateMonitor> get stateMonitor => _repo.stateMonitor;
+  Future<StateMonitor> get stateMonitor async => (await _repo).stateMonitor;
 
   Future<void> navigateTo(String destination) async {
     emitUnlessClosed(state.copyWith(isLoading: true));
@@ -357,8 +379,9 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
 
     final content = <FileSystemEntry>[];
 
+    final repo = await _repo;
     // If the directory does not exist, the following command will throw.
-    final directory = await _repo.readDirectory(path);
+    final directory = await repo.readDirectory(path);
 
     try {
       for (final dirEntry in directory) {
@@ -387,7 +410,8 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   }
 
   Future<bool> isFolderEmpty(String path) async {
-    final directory = await _repo.readDirectory(path);
+    final repo = await _repo;
+    final directory = await repo.readDirectory(path);
     return directory.isEmpty;
   }
 
@@ -395,7 +419,8 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     emitUnlessClosed(state.copyWith(isLoading: true));
 
     try {
-      await _repo.createDirectory(folderPath);
+      final repo = await _repo;
+      await repo.createDirectory(folderPath);
       _currentFolder.goTo(folderPath);
       return true;
     } catch (e, st) {
@@ -410,7 +435,8 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     emitUnlessClosed(state.copyWith(isLoading: true));
 
     try {
-      await _repo.removeDirectory(path, recursive);
+      final repo = await _repo;
+      await repo.removeDirectory(path, recursive);
       return true;
     } catch (e, st) {
       loggy.debug('Directory $path deletion failed', e, st);
@@ -499,14 +525,15 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   /// TODO: It should be possible to add API which does not temporarily unlock
   /// the repository.
   Future<AccessMode> getSecretAccessMode(LocalSecret secret) async {
-    final credentials = await _repo.getCredentials();
+    final repo = await _repo;
+    final credentials = await repo.getCredentials();
 
     try {
-      await _repo.setAccessMode(AccessMode.blind, null);
-      await _repo.setAccessMode(AccessMode.write, secret);
-      return await _repo.getAccessMode();
+      await repo.setAccessMode(AccessMode.blind, null);
+      await repo.setAccessMode(AccessMode.write, secret);
+      return await repo.getAccessMode();
     } finally {
-      await _repo.setCredentials(credentials);
+      await repo.setCredentials(credentials);
     }
   }
 
@@ -522,7 +549,8 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
 
   Future<void> setAuthMode(AuthMode authMode) async {
     emitUnlessClosed(state.copyWith(isLoading: true));
-    await _repo.setAuthMode(authMode);
+    final repo = await _repo;
+    await repo.setAuthMode(authMode);
     emitUnlessClosed(state.copyWith(authMode: authMode, isLoading: false));
   }
 
@@ -532,25 +560,26 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   }) async {
     emitUnlessClosed(state.copyWith(isLoading: true));
 
+    final repo = await _repo;
     // Grab the current credentials so we can restore the access mode when we are done.
-    final credentials = await _repo.getCredentials();
+    final credentials = await repo.getCredentials();
 
     try {
       // First try to switch the repo to the write mode using `oldSecret`. If the secret is
       // the correct write secret we end up in write mode. If it's the correct read secret we
       // end up in read mode. Otherwise we end up in blind mode. Depending on the mode we end up
       // in, we change the corresponding secret to `newSecret`.
-      await _repo.setAccessMode(AccessMode.write, oldSecret);
+      await repo.setAccessMode(AccessMode.write, oldSecret);
 
-      switch (await _repo.getAccessMode()) {
+      switch (await repo.getAccessMode()) {
         case AccessMode.write:
-          await _repo.setAccess(
+          await repo.setAccess(
             read: AccessChangeEnable(newSecret),
             write: AccessChangeEnable(newSecret),
           );
           break;
         case AccessMode.read:
-          await _repo.setAccess(read: AccessChangeEnable(newSecret));
+          await repo.setAccess(read: AccessChangeEnable(newSecret));
           break;
         case AccessMode.blind:
           loggy.warning('Incorrect local secret');
@@ -567,13 +596,14 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
       );
       return false;
     } finally {
-      await _repo.setCredentials(credentials);
+      await repo.setCredentials(credentials);
       emitUnlessClosed(state.copyWith(isLoading: false));
     }
   }
 
   Future<void> setAccess({AccessChange? read, AccessChange? write}) async {
-    await _repo.setAccess(read: read, write: write);
+    final repo = await _repo;
+    await repo.setAccess(read: read, write: write);
 
     // Operation succeeded (did not throw), so we can set `state.accessMode`
     // based on `read` and `write`.
@@ -591,16 +621,18 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   }
 
   Future<void> resetAccess(ShareToken token) async {
-    await _repo.resetAccess(token);
-    final accessMode = await _repo.getAccessMode();
+    final repo = await _repo;
+    await repo.resetAccess(token);
+    final accessMode = await repo.getAccessMode();
     emitUnlessClosed(state.copyWith(accessMode: accessMode));
   }
 
   /// Unlocks the repository using the secret. The access mode the repository ends up in depends on
   /// what access mode the secret unlock (read or write).
   Future<void> unlock(LocalSecret? secret) async {
-    await _repo.setAccessMode(AccessMode.write, secret);
-    final accessMode = await _repo.getAccessMode();
+    final repo = await _repo;
+    await repo.setAccessMode(AccessMode.write, secret);
+    final accessMode = await repo.getAccessMode();
     emitUnlessClosed(state.copyWith(accessMode: accessMode));
 
     if (state.accessMode != AccessMode.blind) {
@@ -610,25 +642,31 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
 
   /// Locks the repository (switches it to blind mode)
   Future<void> lock() async {
-    await _repo.setAccessMode(AccessMode.blind, null);
-    final accessMode = await _repo.getAccessMode();
+    final repo = await _repo;
+    await repo.setAccessMode(AccessMode.blind, null);
+    final accessMode = await repo.getAccessMode();
     emitUnlessClosed(state.copyWith(accessMode: accessMode));
   }
 
   /// Move this repo to another location on the filesystem.
   Future<void> move(String dstPath) async {
-    await _repo.move(dstPath);
+    final oldPath = state.location.path;
+    final repo = await _repo;
+    await repo.move(dstPath);
 
-    final path = await _repo.getPath();
+    final path = await repo.getPath();
     final location = RepoLocation.fromDbPath(path);
 
     // Resubscribe to the event stream
     await _eventSubscription?.cancel();
 
     if (_eventController.hasListener) {
-      _eventSubscription = _repo.events.listen(_eventController.add);
+      _eventSubscription = repo.events.listen(_eventController.add);
     }
 
+    // Re-key the cache and update the state back to back (no await in between), so `_repo` never
+    // resolves a path the cache doesn't know.
+    _session.repositoryMoved(oldPath, location.path);
     emitUnlessClosed(state.copyWith(location: location));
   }
 
@@ -700,7 +738,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     }
 
     try {
-      final src = await _repo.openFile(sourcePath);
+      final src = await (await _repo).openFile(sourcePath);
 
       try {
         final length = await src.getLength();
@@ -813,7 +851,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     );
 
     if (createFolderOk && recursive) {
-      final contents = await _repo.readDirectory(source);
+      final contents = await (await _repo).readDirectory(source);
 
       for (var entry in contents) {
         final from = repo_path.join(source, entry.name);
@@ -836,7 +874,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     emitUnlessClosed(state.copyWith(isLoading: true));
 
     try {
-      await _repo.moveEntry(source, destination);
+      await (await _repo).moveEntry(source, destination);
       return true;
     } catch (e, st) {
       loggy.debug('Move entry from $source to $destination failed', e, st);
@@ -889,7 +927,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
   ) async {
     final copied = await _copyFile(source, destination, destinationRepoCubit);
     if (copied) {
-      await _repo.removeFile(source);
+      await (await _repo).removeFile(source);
       return true;
     }
     return false;
@@ -909,7 +947,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     );
     if (copied) {
       if (recursive) {
-        await _repo.removeDirectory(source, true);
+        await (await _repo).removeDirectory(source, true);
       }
       return true;
     }
@@ -920,7 +958,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     emitUnlessClosed(state.copyWith(isLoading: true));
 
     try {
-      await _repo.removeFile(filePath);
+      await (await _repo).removeFile(filePath);
       return true;
     } catch (e, st) {
       loggy.debug('Delete file $filePath failed', e, st);
@@ -966,14 +1004,16 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     }
   }
 
-  StreamSubscription<void> autoRefresh() =>
-      _repo.events.asyncMapSample((_) => refresh()).listen(null);
+  Future<StreamSubscription<void>> autoRefresh() async {
+    final repo = await _repo;
+    return repo.events.asyncMapSample((_) => refresh()).listen(null);
+  }
 
   Future<File?> _createFile(String newFilePath) async {
     File? newFile;
 
     try {
-      newFile = await _repo.createFile(newFilePath);
+      newFile = await (await _repo).createFile(newFilePath);
     } catch (e, st) {
       loggy.debug('File creation $newFilePath failed', e, st);
     }
@@ -981,5 +1021,5 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     return newFile;
   }
 
-  Future<File> openFile(String path) => _repo.openFile(path);
+  Future<File> openFile(String path) async => (await _repo).openFile(path);
 }

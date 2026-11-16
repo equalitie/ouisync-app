@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_file_dialog/flutter_file_dialog.dart';
-import 'package:ouisync/ouisync.dart' show StateMonitor, VfsDriverInstallError;
+import 'package:ouisync/ouisync.dart' show VfsDriverInstallError;
 import 'package:path/path.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -20,11 +20,11 @@ import 'settings_section.dart';
 import 'settings_tile.dart';
 
 class LogsSection extends SettingsSection with AppLogger {
-  final StateMonitor stateMonitor;
+  // final StateMonitor stateMonitor;
+  final SessionProxy session;
   final MountCubit mount;
   final ErrorCubit errorCubit;
   final PowerControl powerControl;
-  final ReposCubit reposCubit;
   final ConnectivityInfo connectivityInfo;
   final NatDetection natDetection;
   final void Function() checkForDokan;
@@ -34,13 +34,12 @@ class LogsSection extends SettingsSection with AppLogger {
     required this.mount,
     required this.errorCubit,
     required this.powerControl,
-    required this.reposCubit,
+    required this.session,
     required this.connectivityInfo,
     required this.natDetection,
     required this.checkForDokan,
     required this.dirs,
-  }) : stateMonitor = reposCubit.rootStateMonitor,
-       super(
+  }) : super(
          key: GlobalKey(debugLabel: 'key_logs_section'),
          title: S.current.titleLogs,
        );
@@ -227,11 +226,14 @@ class LogsSection extends SettingsSection with AppLogger {
     }
   }
 
-  Future<File> _dumpInfo(NatDetection natDetection) => dumpAll(
-    connectivityInfo: connectivityInfo,
-    natDetection: natDetection,
-    powerControl: powerControl,
-    rootMonitor: stateMonitor,
-    compress: true,
-  );
+  Future<File> _dumpInfo(NatDetection natDetection) async {
+    final rootMonitor = await session.getRootStateMonitor();
+    return dumpAll(
+      connectivityInfo: connectivityInfo,
+      natDetection: natDetection,
+      powerControl: powerControl,
+      rootMonitor: rootMonitor,
+      compress: true,
+    );
+  }
 }

@@ -1,3 +1,4 @@
+import 'package:ouisync_app/app/utils/session_handle.dart' show SessionProxy;
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -17,7 +18,7 @@ import '../widgets/widgets.dart'
 
 class RepoResetAccessPage extends StatefulWidget {
   final Stage stage;
-  final Session session;
+  final SessionProxy session;
   final RepoCubit repo;
   final Access startAccess;
   final Settings settings;
@@ -27,7 +28,7 @@ class RepoResetAccessPage extends StatefulWidget {
   // before submitting any changes).
   static Future<Access> show({
     required Stage stage,
-    required Session session,
+    required SessionProxy session,
     required Settings settings,
     required RepoCubit repo,
     required Access startAccess,

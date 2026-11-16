@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:ouisync/ouisync.dart' show NetworkDefaults, Server, Session;
 import 'package:ouisync_app/app/cubits/store_dirs.dart';
+import 'package:ouisync_app/app/utils/session_handle_observer.dart';
 import 'package:package_info_plus/package_info_plus.dart' show PackageInfo;
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
@@ -14,7 +14,6 @@ import '../generated/l10n.dart';
 import 'cubits/cubits.dart'
     show LocaleCubit, LocaleState, MountCubit, ReposCubit, ErrorCubit;
 import 'pages/pages.dart';
-import 'utils/constants.dart' show Constants;
 import 'utils/dirs.dart';
 import 'utils/log.dart' as log;
 import 'utils/master_key.dart' show MasterKeyUnreadable;
@@ -28,6 +27,8 @@ import 'utils/utils.dart'
         CacheServers,
         clearPreviewCache,
         loadAndMigrateSettings,
+        SessionProxy,
+        SessionHandle,
         Settings;
 import 'widgets/flavor_banner.dart';
 import 'widgets/media_receiver.dart';
@@ -113,7 +114,6 @@ class _AppState extends State<App> {
 
   Widget _buildHomeWidget(_AppComponents components) => HomeWidget(
     dirs: components.dirs,
-    server: components.server,
     session: components.session,
     windowManager: components.windowManager,
     settings: components.settings,
@@ -137,8 +137,7 @@ class AppController {
 class _AppComponents {
   final PlatformWindowManager windowManager;
   final Dirs dirs;
-  final Server server;
-  final Session session;
+  final SessionHandle session;
   final Settings settings;
   final ErrorCubit errorCubit;
   final LocaleCubit localeCubit;
@@ -147,7 +146,6 @@ class _AppComponents {
   _AppComponents._(
     this.windowManager,
     this.dirs,
-    this.server,
     this.session,
     this.settings,
     this.errorCubit,
@@ -167,7 +165,18 @@ class _AppComponents {
 
     unawaited(clearPreviewCache());
 
-    final (server, session) = await _initServerAndSession(dirs, windowManager);
+    final session = await SessionHandle.create(dirs);
+    final sessionObserver = SessionHandleObserver(session);
+
+    sessionObserver.attach();
+
+    windowManager.onClose(() async {
+      sessionObserver.detach();
+      // Await the close: the window manager closes/destroys the window as soon as this handler
+      // completes, so without the await the server/session teardown would race the shutdown.
+      await session.close();
+    });
+
     final errorCubit = ErrorCubit(session);
     final settings = await loadAndMigrateSettings(session);
     final localeCubit = LocaleCubit(settings);
@@ -176,7 +185,6 @@ class _AppComponents {
     return _AppComponents._(
       windowManager,
       dirs,
-      server,
       session,
       settings,
       errorCubit,
@@ -190,47 +198,6 @@ class _AppComponents {
     await errorCubit.close();
 
     await session.close();
-    await server.stop();
-  }
-}
-
-Future<(Server, Session)> _initServerAndSession(
-  Dirs dirs,
-  PlatformWindowManager windowManager,
-) async {
-  final logger = log.named('');
-
-  final server = Server.create(configPath: dirs.config);
-  await server.initLog();
-
-  try {
-    await server.start();
-  } catch (e, st) {
-    logger.error('failed to start server:', e, st);
-    rethrow;
-  }
-
-  try {
-    final session = await Session.create(configPath: dirs.config);
-
-    windowManager.onClose(() async {
-      await session.close();
-      await server.stop();
-    });
-
-    await session.initNetwork(
-      NetworkDefaults(
-        bind: Constants.defaultBindAddrs,
-        portForwardingEnabled: true,
-        localDiscoveryEnabled: true,
-      ),
-    );
-
-    return (server, session);
-  } catch (e, st) {
-    logger.error('failed to initialize session:', e, st);
-    await server.stop();
-    rethrow;
   }
 }
 
@@ -238,7 +205,6 @@ class HomeWidget extends StatefulWidget {
   HomeWidget({
     required this.windowManager,
     required this.dirs,
-    required this.server,
     required this.session,
     required this.settings,
     required this.localeCubit,
@@ -249,8 +215,7 @@ class HomeWidget extends StatefulWidget {
 
   final PlatformWindowManager windowManager;
   final Dirs dirs;
-  final Server server;
-  final Session session;
+  final SessionProxy session;
   final Settings settings;
   final LocaleCubit localeCubit;
   final ErrorCubit errorCubit;
@@ -268,6 +233,13 @@ class _HomeWidgetState extends State<HomeWidget>
   late final StreamSubscription updateServerNotificationSubscription;
   final stage = Stage();
 
+  void _onSessionStarted() {
+    if (reposCubit.session.started.value == 0) {
+      return;
+    }
+    _updateServerNotification();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -276,11 +248,7 @@ class _HomeWidgetState extends State<HomeWidget>
     // changes. This is so it always shows correctly localized messages.
     updateServerNotificationSubscription = widget.localeCubit.stream
         .startWith(widget.localeCubit.state)
-        .listen(
-          (_) => widget.server.notify(
-            contentTitle: S.current.messageBackgroundNotification,
-          ),
-        );
+        .listen((_) => _updateServerNotification());
 
     final cacheServers = CacheServers(widget.session);
     cacheServers.addAll(widget.settings.cacheServers);
@@ -296,6 +264,10 @@ class _HomeWidgetState extends State<HomeWidget>
     );
 
     unawaited(_init());
+
+    // The server is recreated on restart, and the new one needs its notification again.
+    widget.session.started.addListener(_onSessionStarted);
+    _onSessionStarted();
   }
 
   @override
@@ -315,6 +287,7 @@ class _HomeWidgetState extends State<HomeWidget>
     //widget.appRouteObserver.unsubscribe(this);
 
     unawaited(updateServerNotificationSubscription.cancel());
+    widget.session.started.removeListener(_onSessionStarted);
 
     super.dispose();
   }
@@ -340,6 +313,10 @@ class _HomeWidgetState extends State<HomeWidget>
         storeDirsCubit: widget.storeDirsCubit,
       ),
     ),
+  );
+
+  void _updateServerNotification() => widget.session.notify(
+    contentTitle: S.current.messageBackgroundNotification,
   );
 
   Future<void> _init() async {

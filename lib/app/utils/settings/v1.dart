@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io' as io;
 
 import 'package:equatable/equatable.dart';
-import 'package:ouisync/ouisync.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
@@ -141,12 +140,12 @@ class Settings with AppLogger {
     return Settings._(root, prefs, masterKey);
   }
 
-  Future<void> migrate(Session session) async {
+  Future<void> migrate(SessionHandle session) async {
     await _migrateValues(session);
     await _migrateRepositoryPaths();
   }
 
-  Future<void> _migrateValues(Session session) async {
+  Future<void> _migrateValues(SessionHandle session) async {
     // Check if already fully migrated. The `atomicSharedPrefsSettingsKey` was introduced in V1
     // where it's the only key.
     if (_prefs.containsKey(atomicSharedPrefsSettingsKey) &&
@@ -203,6 +202,8 @@ class Settings with AppLogger {
         final repo = await session.openRepository(path: location.path);
         await repo.setAuthMode(authMode);
         await repo.close();
+        // The handle caches opened repositories; don't leave the closed one there.
+        session.repositoryMoved(location.path, null);
       } catch (e, st) {
         loggy.error(
           'failed to migrate auth mode for repository ${location.path}:',

@@ -1,3 +1,4 @@
+import 'package:ouisync_app/app/utils/session_handle.dart' show SessionProxy;
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -9,7 +10,7 @@ import '../cubits/cubits.dart' show StateMonitorCubit;
 import '../widgets/widgets.dart' show DirectionalAppBar;
 
 class StateMonitorPage extends StatefulWidget {
-  final Session session;
+  final SessionProxy session;
 
   StateMonitorPage(this.session);
 
@@ -18,19 +19,36 @@ class StateMonitorPage extends StatefulWidget {
 }
 
 class _StateMonitorState extends State<StateMonitorPage> {
-  late final StateMonitorCubit root;
-
-  _StateMonitorState();
+  StateMonitorCubit? root;
 
   @override
   void initState() {
     super.initState();
-    root = StateMonitorCubit(widget.session.rootStateMonitor);
+    widget.session.started.addListener(_onSessionStarted);
+    _onSessionStarted();
+  }
+
+  // The session is replaced after a reset (e.g. on resume), which silently kills the monitor's
+  // `changes` stream, so rebuild the root against the new session.
+  void _onSessionStarted() {
+    if (widget.session.started.value == 0) {
+      return;
+    }
+    unawaited(_init());
+  }
+
+  Future<void> _init() async {
+    if (!mounted) return;
+    final old = root;
+    unawaited(old?.close());
+    final monitor = await widget.session.getRootStateMonitor();
+    setState(() => root = StateMonitorCubit(monitor));
   }
 
   @override
   void dispose() {
-    unawaited(root.close());
+    widget.session.started.removeListener(_onSessionStarted);
+    unawaited(root?.close());
     super.dispose();
   }
 
@@ -42,7 +60,11 @@ class _StateMonitorState extends State<StateMonitorPage> {
         cardTheme: CardThemeData(margin: EdgeInsetsDirectional.all(1.0)),
         listTileTheme: ListTileThemeData(dense: true),
       ),
-      child: _NodeWidget(root),
+      child: switch (root) {
+        // Keyed by cubit so expanded children are discarded along with the old root.
+        final root? => _NodeWidget(root, key: ValueKey(root)),
+        null => const Center(child: CircularProgressIndicator()),
+      },
     ),
   );
 }
@@ -50,7 +72,7 @@ class _StateMonitorState extends State<StateMonitorPage> {
 class _NodeWidget extends StatelessWidget {
   final StateMonitorCubit cubit;
 
-  _NodeWidget(this.cubit);
+  _NodeWidget(this.cubit, {super.key});
 
   @override
   Widget build(
@@ -147,11 +169,9 @@ class _ChildWidgetState extends State<_ChildWidget> {
     });
   }
 
-  Future<void> collapse() async {
-    await cubit?.close();
-
-    setState(() {
-      cubit = null;
-    });
+  void collapse() {
+    final old = cubit;
+    setState(() => cubit = null);
+    unawaited(old?.close());
   }
 }

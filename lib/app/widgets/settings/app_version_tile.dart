@@ -1,6 +1,6 @@
+import 'package:ouisync_app/app/utils/session_handle.dart' show SessionProxy;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync/ouisync.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../utils/flavor.dart';
@@ -13,7 +13,7 @@ import '../../utils/click_counter.dart';
 
 class AppVersionTile extends StatefulWidget {
   final Stage stage;
-  final Session session;
+  final SessionProxy session;
   final UpgradeExistsCubit upgradeExists;
   final Widget title;
   final Widget leading;

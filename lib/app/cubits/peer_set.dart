@@ -8,22 +8,28 @@ import 'package:ouisync/ouisync.dart';
 import 'package:stream_transform/stream_transform.dart';
 
 import '../utils/log.dart';
+import '../utils/session_handle.dart' show SessionProxy;
 import 'utils.dart';
 
 class PeerSetCubit extends Cubit<PeerSet> with CubitActions, AppLogger {
-  final Session _session;
+  final SessionProxy _session;
   StreamSubscription<void>? _subscription;
+  Duration? _autoRefreshPeriod;
 
-  PeerSetCubit(Session session) : _session = session, super(const PeerSet([])) {
-    unawaited(_init());
+  PeerSetCubit(SessionProxy session)
+    : _session = session,
+      super(const PeerSet([])) {
+    _session.started.addListener(_onSessionRestarted);
+    unawaited(_onSessionRestarted());
   }
 
-  Future<void> _init() async {
-    await setAutoRefresh(null);
+  Future<void> _onSessionRestarted() async {
+    await setAutoRefresh(_autoRefreshPeriod);
     await refresh();
   }
 
   Future<void> setAutoRefresh(Duration? period) async {
+    _autoRefreshPeriod = period;
     await _subscription?.cancel();
 
     if (period != null) {
@@ -32,9 +38,8 @@ class PeerSetCubit extends Cubit<PeerSet> with CubitActions, AppLogger {
       ).asyncMapSample((_) => refresh()).listen(null);
       loggy.debug('peer set auto refresh enabled (period: $period)');
     } else {
-      _subscription = _session.networkEvents
-          .asyncMapSample((_) => refresh())
-          .listen(null);
+      final events = await _session.networkEvents();
+      _subscription = events.asyncMapSample((_) => refresh()).listen(null);
       loggy.debug('peer set auto refresh disabled');
     }
   }
@@ -49,6 +54,7 @@ class PeerSetCubit extends Cubit<PeerSet> with CubitActions, AppLogger {
 
   @override
   Future<void> close() async {
+    _session.started.removeListener(_onSessionRestarted);
     await _subscription?.cancel();
     await super.close();
   }

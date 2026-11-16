@@ -21,6 +21,7 @@ import 'package:ouisync_app/app/utils/log.dart' as log;
 import 'package:ouisync_app/app/utils/stage.dart';
 import 'package:ouisync_app/app/utils/platform/platform.dart';
 import 'package:ouisync_app/app/utils/random.dart';
+import 'package:ouisync_app/app/utils/session_handle.dart';
 import 'package:ouisync_app/app/utils/utils.dart'
     show CacheServers, MasterKey, Settings;
 import 'package:ouisync_app/generated/l10n.dart';
@@ -60,10 +61,28 @@ Future<void> testEnv(FutureOr<void> Function() callback) async {
 
   late Sandbox sandbox;
   late BlocObserver origBlocObserver;
+  late Directory sharedDir;
 
   setUp(() async {
+    TestWidgetsFlutterBinding.ensureInitialized();
+
     origBlocObserver = Bloc.observer;
     sandbox = await Sandbox.setUp();
+
+    // Dirs.init() asks the native side for the shared directory (see lib/app/utils/native.dart).
+    // The app's native channel doesn't exist under flutter test, so answer that call here.
+    sharedDir = await Directory.systemTemp.createTemp('ouisync-test-shared');
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+          const MethodChannel('org.equalitie.ouisync/native'),
+          (call) async => call.method == 'getSharedDir' ? sharedDir.path : null,
+        );
+    // Media receiver asks for an initial universal link on startup; there is none under test.
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+          const MethodChannel('org.equalitie.ouisync/universal_links'),
+          (call) async => null,
+        );
 
     ConnectivityPlatform.instance = _FakeConnectivityPlatform();
 
@@ -71,6 +90,17 @@ Future<void> testEnv(FutureOr<void> Function() callback) async {
   });
 
   tearDown(() async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+          const MethodChannel('org.equalitie.ouisync/native'),
+          null,
+        );
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+          const MethodChannel('org.equalitie.ouisync/universal_links'),
+          null,
+        );
+    await deleteTempDir(sharedDir);
     await sandbox.tearDown();
     Bloc.observer = origBlocObserver;
   });
@@ -82,6 +112,7 @@ Future<void> testEnv(FutureOr<void> Function() callback) async {
 class TestDependencies {
   TestDependencies._(
     this.server,
+    this.ouisyncSession,
     this.session,
     this.settings,
     this.reposCubit,
@@ -103,7 +134,8 @@ class TestDependencies {
     await server.initLog();
     await server.start();
 
-    final session = await Session.create(configPath: dirs.config);
+    final ouisyncSession = await Session.create(configPath: dirs.config);
+    final session = SessionHandle.wrap(ouisyncSession, server: server);
 
     final storeDirsCubit = StoreDirsCubit(session, dirs);
     await storeDirsCubit.stream.firstWhere((state) => state.isNotEmpty);
@@ -123,6 +155,7 @@ class TestDependencies {
 
     return TestDependencies._(
       server,
+      ouisyncSession,
       session,
       settings,
       reposCubit,
@@ -139,7 +172,7 @@ class TestDependencies {
     await mountCubit.close();
     await reposCubit.close();
     await errorCubit.close();
-    await session.close();
+    await ouisyncSession.close();
     await server.stop();
   }
 
@@ -163,7 +196,8 @@ class TestDependencies {
       );
 
   final Server server;
-  final Session session;
+  final Session ouisyncSession;
+  final SessionProxy session;
   final Settings settings;
   final ReposCubit reposCubit;
   final MountCubit mountCubit;

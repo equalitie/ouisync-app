@@ -1,3 +1,4 @@
+import 'package:ouisync_app/app/utils/session_handle.dart' show SessionProxy;
 import 'package:flutter/material.dart';
 import 'package:loggy/loggy.dart';
 import 'package:ouisync/ouisync.dart';
@@ -101,7 +102,7 @@ mixin RepositoryActionsMixin on LoggyType {
   Future<void> navigateToRepositorySecurity({
     required Stage stage,
     required Settings settings,
-    required Session session,
+    required SessionProxy session,
     required RepoCubit repoCubit,
     required PasswordHasher passwordHasher,
   }) async {
@@ -222,7 +223,7 @@ mixin RepositoryActionsMixin on LoggyType {
   Future<void> unlockRepository({
     required BuildContext context,
     required Settings settings,
-    required Session session,
+    required SessionProxy session,
     required RepoCubit repoCubit,
     required PasswordHasher passwordHasher,
     required Stage stage,

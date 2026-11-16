@@ -1,11 +1,12 @@
 import 'package:ouisync/ouisync.dart';
 
 import 'random.dart';
+import 'session_handle.dart' show SessionProxy;
 
 // This class exists mainly to avoid passing the ouisync Session throughout the
 // code where only it's password hashing functionality is needed.
 class PasswordHasher {
-  final Session _ouisyncSession;
+  final SessionProxy _ouisyncSession;
 
   PasswordHasher(this._ouisyncSession);
 

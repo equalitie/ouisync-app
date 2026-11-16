@@ -1,3 +1,4 @@
+import 'package:ouisync_app/app/utils/session_handle.dart' show SessionProxy;
 import 'package:flutter/material.dart';
 import 'package:ouisync/ouisync.dart';
 
@@ -28,14 +29,14 @@ class GetPasswordAccessDialog extends StatefulWidget {
   });
 
   final Stage stage;
-  final Session session;
+  final SessionProxy session;
   final Settings settings;
   final RepoCubit repoCubit;
 
   static Future<Access?> show(
     Stage stage,
     Settings settings,
-    Session session,
+    SessionProxy session,
     RepoCubit repoCubit,
   ) => stage.showDialog<Access>(
     builder: (BuildContext context) => ScaffoldMessenger(

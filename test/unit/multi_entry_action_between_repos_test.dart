@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:ouisync_app/app/models/repo_location.dart';
 import 'package:ouisync_app/app/models/folder.dart'
     show DirectoryEntry, FileEntry, FileSystemEntry;
 import 'package:ouisync_app/app/pages/main_page.dart';
@@ -72,7 +73,8 @@ void main() {
     final mountCubit = MountCubit(deps.session, deps.dirs)..init();
 
     originRepoCubit = await RepoCubit.create(
-      repo: originRepo,
+      location: RepoLocation.fromDbPath(await originRepo.getPath()),
+      session: deps.session,
       navigation: NavigationCubit(),
       entrySelection: EntrySelectionCubit(),
       bottomSheet: EntryBottomSheetCubit(),
@@ -81,7 +83,8 @@ void main() {
     );
 
     destinationRepoCubit = await RepoCubit.create(
-      repo: destinationRepo,
+      location: RepoLocation.fromDbPath(await destinationRepo.getPath()),
+      session: deps.session,
       navigation: NavigationCubit(),
       entrySelection: EntrySelectionCubit(),
       bottomSheet: EntryBottomSheetCubit(),

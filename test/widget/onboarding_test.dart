@@ -6,6 +6,7 @@ import 'package:ouisync_app/app/cubits/repos.dart';
 import 'package:ouisync_app/app/cubits/error.dart';
 import 'package:ouisync_app/app/cubits/store_dirs.dart';
 import 'package:ouisync_app/app/pages/main_page.dart';
+import 'package:ouisync_app/app/utils/session_handle.dart';
 import 'package:ouisync_app/app/utils/dirs.dart';
 import 'package:ouisync_app/app/utils/master_key.dart';
 import 'package:ouisync_app/app/utils/settings/settings.dart';
@@ -16,7 +17,7 @@ import '../utils.dart';
 void main() {
   late Dirs dirs;
   late Server server;
-  late Session session;
+  late SessionHandle session;
   late Settings settings;
   late LocaleCubit localeCubit;
   late ErrorCubit errorCubit;
@@ -28,7 +29,8 @@ void main() {
     server = Server.create(configPath: dirs.config);
     await server.start();
 
-    session = await Session.create(configPath: dirs.config);
+    final ouisyncSession = await Session.create(configPath: dirs.config);
+    session = SessionHandle.wrap(ouisyncSession, server: server);
 
     errorCubit = ErrorCubit(session);
 
@@ -58,7 +60,6 @@ void main() {
           HomeWidget(
             localeCubit: localeCubit,
             errorCubit: errorCubit,
-            server: server,
             session: session,
             settings: settings,
             windowManager: FakeWindowManager(),
@@ -74,8 +75,7 @@ void main() {
 
       // Go to the second onboarding page
       await tester.anxiousTap(find.byIcon(Icons.arrow_forward));
-      await tester
-          .pumpAndSettle(); // TODO: Do we need to call this after every interaction?
+      await tester.pumpAndSettle(); // TODO: Do we need to call this after every interaction?
 
       // Go to the third onboarding page
       await tester.anxiousTap(find.byIcon(Icons.arrow_forward));

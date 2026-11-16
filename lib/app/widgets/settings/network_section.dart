@@ -5,7 +5,6 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync/ouisync.dart' show Session;
 import 'package:ouisync_app/app/cubits/lan_access.dart'
     show LanAccessState, LanAccessCubit;
 
@@ -34,7 +33,7 @@ class NetworkSection extends SettingsSection {
        );
 
   final Stage stage;
-  final Session session;
+  final SessionProxy session;
   final ConnectivityInfo connectivityInfo;
   final NatDetection natDetection;
   final PeerSetCubit peerSet;

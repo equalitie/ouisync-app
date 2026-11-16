@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:ouisync_app/app/models/repo_location.dart';
 import 'package:ouisync_app/app/cubits/cubits.dart';
 import 'package:ouisync_app/app/models/models.dart';
 import 'package:ouisync_app/app/pages/main_page.dart';
@@ -55,7 +56,8 @@ void main() {
     final mountCubit = MountCubit(deps.session, deps.dirs)..init();
 
     originRepoCubit = await RepoCubit.create(
-      repo: originRepo,
+      location: RepoLocation.fromDbPath(await originRepo.getPath()),
+      session: deps.session,
       navigation: navigationCubit,
       entrySelection: entrySelectionCubit,
       bottomSheet: bottomSheetCubit,

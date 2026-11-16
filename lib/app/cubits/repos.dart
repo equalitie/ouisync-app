@@ -10,6 +10,7 @@ import 'package:stream_transform/stream_transform.dart';
 import '../../generated/l10n.dart';
 import '../models/models.dart';
 import '../utils/option.dart';
+import '../utils/session_handle.dart' show SessionProxy;
 import '../utils/random.dart' show randomSalt, randomSecretKey;
 import '../utils/utils.dart'
     show
@@ -52,7 +53,7 @@ class ReposState {
 }
 
 class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
-  final Session _session;
+  final SessionProxy _session;
   final Settings _settings;
   final MountCubit _mountCubit;
   final void Function(String)? _onNotify;
@@ -100,43 +101,71 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
     _storeDirsSubscription = storeDirsCubit.stream
         .asyncMapSample((_) => _reload())
         .listen(null);
+
+    _session.started.addListener(_reload);
   }
 
-  Future<void> _load() async {
-    final repos = await _session.listRepositories();
-
-    for (final repo in repos.values) {
-      await _addRepo(repo);
+  Future<Set<RepoLocation>> _load() async {
+    final listed = <RepoLocation>{};
+    for (final repo in (await _session.listRepositories()).values) {
+      try {
+        final location = RepoLocation.fromDbPath(await repo.getPath());
+        await _addRepo(location);
+        listed.add(location);
+      } catch (e, st) {
+        loggy.error(
+          'Failed to load repository',
+          e,
+          st,
+        ); // one bad repo doesn't block the rest
+      }
     }
+    return listed;
   }
 
-  Future<void> _reload() async {
+  Future<void>? _reloading;
+  Future<void> _reload() {
+    return _reloading ??= _reloadOnce().whenComplete(() => _reloading = null);
+  }
+
+  Future<void> _reloadOnce() async {
+    if (_session.started.value == 0) return;
     loggy.debug('Reloading repositories');
 
     final currentLocation = state.current?.location;
-    final currentSubscription = _currentSubscription;
-    _currentSubscription = null;
+    emitUnlessClosed(state.copyWith(isLoading: true));
 
-    emit(
-      state.copyWith(repos: SplayTreeMap(), current: None(), isLoading: true),
-    );
+    try {
+      await _currentSubscription?.cancel();
+      _currentSubscription = null;
 
-    await currentSubscription?.cancel();
-    await _load();
+      final listed = await _load(); // returns the locations it loaded
 
-    if (currentLocation != null) {
-      await setCurrent(state.repos[currentLocation]);
+      // Drop entries for repos that no longer exist.
+      for (final entry in state.repos.values.toList()) {
+        if (!listed.contains(entry.location)) {
+          await entry.close();
+          emitUnlessClosed(
+            state.copyWith(repos: state.repos.withRemoved(entry.location)),
+          );
+        }
+      }
+
+      await setCurrent(
+        currentLocation == null ? null : state.repos[currentLocation],
+      );
+    } catch (e, st) {
+      loggy.error('Reload failed', e, st);
+    } finally {
+      emitUnlessClosed(state.copyWith(isLoading: false)); // spinner can't stick
     }
-
-    emit(state.copyWith(isLoading: false));
   }
 
-  Session get session => _session;
+  SessionProxy get session => _session;
 
-  StateMonitor get rootStateMonitor => _session.rootStateMonitor;
-
-  Future<ShareToken> createToken(String tokenString) =>
-      session.validateShareToken(tokenString);
+  Future<ShareToken> createToken(String tokenString) async {
+    return await _session.validateShareToken(tokenString);
+  }
 
   Future<void> moveRepository(
     RepoLocation oldLocation,
@@ -215,12 +244,14 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
       return;
     }
 
-    await _currentSubscription?.cancel();
-    _currentSubscription = null;
-
-    if (entry is OpenRepoEntry) {
-      _currentSubscription = entry.cubit.autoRefresh();
-    }
+    // Subscribe first, then swap the stored subscription synchronously, so overlapping calls can't
+    // overwrite each other's subscription without cancelling it.
+    final subscription = entry is OpenRepoEntry
+        ? await entry.cubit.autoRefresh()
+        : null;
+    final previous = _currentSubscription;
+    _currentSubscription = subscription;
+    await previous?.cancel();
 
     // We must not set repositories for which the user provides the password
     // as "default" because they must be indistinguishable from blind
@@ -242,12 +273,12 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
     setCurrent(null);
   }
 
-  Future<void> _addRepo(Repository repo) async {
+  Future<void> _addRepo(RepoLocation location) async {
     // First open the repo in blind mode and with sync disabled, then try to unlock it with the
     // stored secret (if any) and only then enable sync. This is to avoid downloading unwanted
     // blocks.
 
-    final cubit = await _createRepoCubit(repo);
+    final cubit = await _createRepoCubit(location);
     final authMode = cubit.state.authMode;
 
     final unlock = switch (authMode) {
@@ -272,7 +303,6 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
     }
 
     await cubit.enableSync();
-
     await _addRepoEntry(OpenRepoEntry(cubit));
   }
 
@@ -290,14 +320,15 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
     );
   }
 
-  Future<RepoCubit> _createRepoCubit(Repository repo) => RepoCubit.create(
-    repo: repo,
+  Future<RepoCubit> _createRepoCubit(RepoLocation location) => RepoCubit.create(
+    location: location,
     mountCubit: _mountCubit,
     navigation: navigation,
     entrySelection: entriesSelection,
     bottomSheet: bottomSheet,
     cacheServers: cacheServers,
     onNotify: _onNotify,
+    session: _session,
   );
 
   @override
@@ -315,6 +346,8 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
     await _storeDirsSubscription?.cancel();
     _storeDirsSubscription = null;
 
+    _session.started.removeListener(_reload);
+
     for (final repo in repos.values) {
       await repo.close();
     }
@@ -328,10 +361,8 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
       return;
     }
 
-    final Repository repo;
-
     try {
-      repo = await _session.openRepository(path: location.path);
+      await _session.openRepository(path: location.path);
     } on AlreadyExists {
       loggy.warning(
         'Same repository but from different location is already loaded',
@@ -348,7 +379,7 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
       return;
     }
 
-    await _addRepo(repo);
+    await _addRepo(location);
   }
 
   Future<RepoEntry> createRepository({
@@ -378,7 +409,7 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
     SetLocalSecretKeyAndSalt randomLocalSecret() =>
         SetLocalSecretKeyAndSalt(key: randomSecretKey(), salt: randomSalt());
 
-    switch (await token?.let(session.getShareTokenAccessMode)) {
+    switch (await token?.let(_session.getShareTokenAccessMode)) {
       case AccessMode.blind:
         readSecret = randomLocalSecret();
         writeSecret = randomLocalSecret();
@@ -409,7 +440,7 @@ class ReposCubit extends Cubit<ReposState> with CubitActions, AppLogger {
       await cacheServers.setEnabled(repo, true);
     }
 
-    final cubit = await _createRepoCubit(repo);
+    final cubit = await _createRepoCubit(location);
 
     final authMode = switch (localSecretMode) {
       LocalSecretMode.manual => AuthModeBlindOrManual(),
