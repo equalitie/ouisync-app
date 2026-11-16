@@ -40,6 +40,17 @@ import UIKit
             }
         }
 
+        universalLinkChannel = FlutterMethodChannel(name: universalLinkChannelName,
+                                                    binaryMessenger: messenger)
+        universalLinkChannel?.setMethodCallHandler { [weak self] call, result in
+            switch call.method {
+            case "getInitialLink":
+                result(self?.pendingUniversalLink)
+                self?.pendingUniversalLink = nil
+            default: result(FlutterMethodNotImplemented)
+            }
+        }
+
         GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
     }
 
@@ -47,6 +58,40 @@ import UIKit
                               didFinishLaunchingWithOptions launchOptions: LaunchOptions) -> Bool {
         return super.application(application, didFinishLaunchingWithOptions: launchOptions)
     }
+
+    // With scenes, iOS delivers universal links to SceneDelegate instead of this method. This is
+    // kept for the case where it is called anyway.
+    override func application(_ application: UIApplication,
+                              continue userActivity: NSUserActivity,
+                              restorationHandler: @escaping ([any UIUserActivityRestoring]?) -> Void) -> Bool {
+        if let url = userActivity.webpageURL, handleUniversalLink(url) {
+            return true
+        }
+
+        return super.application(application, continue: userActivity, restorationHandler: restorationHandler)
+    }
+
+    // The receive_sharing_intent plugin only forwards ShareMedia-prefixed URLs, so universal links
+    // to https://ouisync.net/r#... are relayed to Dart here. Returns false for any other URL.
+    // Called by SceneDelegate as well, for links that arrive through the UIScene lifecycle.
+    @discardableResult
+    func handleUniversalLink(_ url: URL) -> Bool {
+        guard isOuiSyncShareLink(url) else {
+            return false
+        }
+
+        pendingUniversalLink = url.absoluteString
+        universalLinkChannel?.invokeMethod("onLink", arguments: nil)
+        return true
+    }
+
+    private func isOuiSyncShareLink(_ url: URL) -> Bool {
+        url.scheme == "https" && url.host == "ouisync.net" && url.path == "/r" && url.fragment != nil
+    }
+
+    private let universalLinkChannelName = "org.equalitie.ouisync/universal_links"
+    private var universalLinkChannel: FlutterMethodChannel?
+    private var pendingUniversalLink: String?
 
     private var bag = [AnyObject]() // things that we don't need but should nonetheless be retained
 }
