@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 /// Widget for receiving media files via drag-and-drop (on desktop) or share intents (on mobile).
@@ -17,6 +18,11 @@ class MediaReceiver extends StatefulWidget {
 }
 
 class _MediaReceiverState extends State<MediaReceiver> {
+  // Must match the channel name in ios/Runner/AppDelegate.swift and macos/Runner/AppDelegate.swift.
+  static const _universalLinkChannel = MethodChannel(
+    'org.equalitie.ouisync/universal_links',
+  );
+
   StreamSubscription? subscription;
 
   @override
@@ -33,12 +39,40 @@ class _MediaReceiverState extends State<MediaReceiver> {
         ReceiveSharingIntent.instance.getInitialMedia().then(onMediaReceived),
       );
     }
+
+    if (Platform.isIOS || Platform.isMacOS) {
+      _universalLinkChannel.setMethodCallHandler(onUniversalLinkCall);
+      unawaited(getInitialUniversalLink());
+    }
   }
 
   @override
   void dispose() {
     subscription?.cancel();
+
+    if (Platform.isIOS || Platform.isMacOS) {
+      _universalLinkChannel.setMethodCallHandler(null);
+    }
+
     super.dispose();
+  }
+
+  // Called by the native side when a https://ouisync.net/r# link is opened while the app is running.
+  Future<void> onUniversalLinkCall(MethodCall call) async {
+    if (call.method == 'onLink') {
+      await getInitialUniversalLink();
+    }
+  }
+
+  // Fetches (and clears) a pending link. Used both at startup and when a link arrives at runtime.
+  Future<void> getInitialUniversalLink() async {
+    final link = await _universalLinkChannel.invokeMethod<String>(
+      'getInitialLink',
+    );
+
+    if (link != null) {
+      onMediaReceived([SharedMediaFile(path: link, type: SharedMediaType.url)]);
+    }
   }
 
   @override
