@@ -18,6 +18,7 @@ class MainFlutterWindow: NSWindow {
         setupFlutterToExtensionProxy(flutterBinaryMessenger)
         setupFlutterMethodChannel(flutterBinaryMessenger)
         setupFlutterAutostartChannel(flutterBinaryMessenger)
+        setupFlutterUniversalLinkChannel(flutterBinaryMessenger)
 
         RegisterGeneratedPlugins(registry: flutterViewController)
 
