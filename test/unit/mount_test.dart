@@ -8,6 +8,7 @@ import 'package:ouisync_app/app/cubits/entry_selection.dart';
 import 'package:ouisync_app/app/cubits/mount.dart';
 import 'package:ouisync_app/app/cubits/navigation.dart';
 import 'package:ouisync_app/app/cubits/repo.dart';
+import 'package:ouisync_app/app/models/repo_location.dart';
 import 'package:ouisync_app/app/utils/cache_servers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -35,7 +36,8 @@ void main() {
     mountCubit = MountCubit(deps.session, deps.dirs)..init();
 
     repoCubit = await RepoCubit.create(
-      repo: repo,
+      location: RepoLocation.fromDbPath(await repo.getPath()),
+      session: deps.session,
       navigation: NavigationCubit(),
       entrySelection: EntrySelectionCubit(),
       bottomSheet: EntryBottomSheetCubit(),
