@@ -34,5 +34,7 @@
 	<string>NSApplication</string>
 	<key>FlutterDeepLinkingEnabled</key>
 	<false/>
+	<key>LSMultipleInstancesProhibited</key>
+	<true/>
 </dict>
 </plist>
