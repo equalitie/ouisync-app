@@ -23,7 +23,7 @@ mixin SessionProxy {
     String? contentTitle,
     String? contentText,
   }) async {
-    (await _server)?.notify(
+    await (await _server)?.notify(
       channelName: channelName,
       contentTitle: contentTitle,
       contentText: contentText,
