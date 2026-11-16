@@ -3,14 +3,17 @@ import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync/ouisync.dart' as oui;
 import 'package:ouisync_app/app/utils/constants.dart';
 
 import '../../generated/l10n.dart';
+import '../utils/session_handle.dart' show SessionProxy;
 import '../utils/utils.dart'
     show AppLogger, LocalInterfaceAddr, LocalInterfaceWatch, Settings;
 import '../utils/watch.dart' as watch;
 import 'cubits.dart' show CubitActions;
+
+// How long a network bind may take before we give up on it.
+const _bindTimeout = Duration(seconds: 5);
 
 class PowerControlState {
   final ConnectivityResult connectivityType;
@@ -105,7 +108,7 @@ class PowerControlState {
 
 class PowerControl extends Cubit<PowerControlState>
     with AppLogger, CubitActions {
-  final oui.Session _session;
+  final SessionProxy _session;
   final Settings _settings;
   final Connectivity _connectivity;
   _Transition _networkModeTransition = _Transition.none;
@@ -119,11 +122,15 @@ class PowerControl extends Cubit<PowerControlState>
 
   @override
   Future<void> close() {
+    _session.started.removeListener(_onSessionStarted);
     _localInterfaceWatch.close();
     return super.close();
   }
 
-  Future<void> _init() async {
+  Future<void> _onSessionStarted() async {
+    if (_session.started.value == 0) {
+      return;
+    }
     final userWantsSyncOnMobileEnabled = _settings.getSyncOnMobileEnabled();
     final userWantsLocalDiscoveryEnabled = _settings.getLocalDiscoveryEnabled();
 
@@ -146,7 +153,11 @@ class PowerControl extends Cubit<PowerControlState>
         );
 
     await _updateNetworkMode(newState);
+  }
 
+  Future<void> _init() async {
+    _session.started.addListener(_onSessionStarted);
+    unawaited(_onSessionStarted());
     unawaited(_listenToConnectivityChanges());
     unawaited(_listenToLocalNetworkInterfaceChanges());
   }
@@ -169,7 +180,6 @@ class PowerControl extends Cubit<PowerControlState>
     }
 
     emitUnlessClosed(state.copyWith(userWantsPortForwardingEnabled: value));
-
     await _session.setPortForwardingEnabled(value);
   }
 
@@ -329,7 +339,9 @@ class PowerControl extends Cubit<PowerControlState>
     }
 
     try {
-      await _session.bindNetwork(addrs);
+      // A bind on a dead session may never return. Without the timeout, the transition would
+      // stay ongoing and every later network mode change would be queued forever.
+      await _session.bindNetwork(addrs).timeout(_bindTimeout);
     } catch (e) {
       if (!emitUnlessClosed(
         state.copyWith(networkMode: NetworkModeDisabled()),

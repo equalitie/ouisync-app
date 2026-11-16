@@ -6,23 +6,44 @@ import 'package:ouisync/ouisync.dart';
 
 import 'log.dart';
 import 'peer_addr.dart';
+import 'session_handle.dart' show SessionProxy;
 
 final _defaultListeners = {(PeerProto.quic, 20209), (PeerProto.tcp, 20209)};
 
 /// Utility to set and query the cache servers state.
 class CacheServers with AppLogger {
   /// Use the given cache server hosts.
-  CacheServers(this._session);
+  CacheServers(this._session) {
+    // The peers live in the session, so after a restart they have to be added again.
+    _session.started.addListener(_onSessionStarted);
+    _onSessionStarted();
+  }
 
-  final Session _session;
+  final SessionProxy _session;
+  final Set<String> _configuredHosts = {};
   final Set<String> _hosts = {};
   final _mutex = Mutex();
+
+  // Incremented on every restart, so that an `_add` started before the restart does not record
+  // its host as added to the new session.
+  int _generation = 0;
+
+  void _onSessionStarted() {
+    if (_session.started.value == 0) {
+      return;
+    }
+    _generation = _session.started.value;
+    _hosts.clear();
+    _addHosts(_configuredHosts);
+  }
 
   /// Add the specified host as cache server.
   Future<void> _add(String host) async {
     if (_hosts.contains(host)) {
       return;
     }
+
+    final generation = _generation;
 
     Set<(PeerProto, int)> listeners;
 
@@ -48,6 +69,11 @@ class CacheServers with AppLogger {
     final addrs = await _dnsLookupWithRetry(host);
     loggy.debug('resolved $host: $addrs');
 
+    // The session was replaced while we were resolving, the restart re-adds the host.
+    if (generation != _generation) {
+      return;
+    }
+
     final peers = addrs
         .expand(
           (addr) => listeners.map(
@@ -61,6 +87,10 @@ class CacheServers with AppLogger {
     // listener protocols, ports and the resolved ip addresses.
     await _session.addUserProvidedPeers(peers);
     loggy.debug('added $host as peer: $peers');
+
+    if (generation != _generation) {
+      return;
+    }
 
     _hosts.add(host);
   }
@@ -96,8 +126,15 @@ class CacheServers with AppLogger {
   }
 
   /// Add all the specified hosts as cache servers.
-  void addAll(Iterable<String> hosts) =>
+  void addAll(Iterable<String> hosts) {
+    _configuredHosts.addAll(hosts);
+    _addHosts(hosts);
+  }
+
+  void _addHosts(Iterable<String> hosts) =>
       unawaited(Future.wait(hosts.map((host) => _add(host))));
+
+  void close() => _session.started.removeListener(_onSessionStarted);
 
   /// Enable or disable cache servers for the specified repo. Note that currently this
   /// enables/disables all defined cache servers together.

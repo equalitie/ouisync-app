@@ -1,14 +1,22 @@
 import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ouisync/ouisync.dart';
+
+import '../utils/session_handle.dart' show SessionProxy;
 import 'utils.dart';
 
 class UserProvidedPeersCubit extends Cubit<List<String>> with CubitActions {
-  final Session _session;
+  final SessionProxy _session;
 
-  UserProvidedPeersCubit(Session session) : _session = session, super([]) {
+  UserProvidedPeersCubit(SessionProxy session) : _session = session, super([]) {
+    _session.started.addListener(_refresh);
     unawaited(_refresh());
+  }
+
+  @override
+  Future<void> close() async {
+    _session.started.removeListener(_refresh);
+    await super.close();
   }
 
   Future<void> addPeer(String addr) async {
@@ -21,6 +29,10 @@ class UserProvidedPeersCubit extends Cubit<List<String>> with CubitActions {
     await _refresh();
   }
 
-  Future<void> _refresh() =>
-      _session.getUserProvidedPeers().then(emitUnlessClosed);
+  Future<void> _refresh() async {
+    if (_session.started.value == 0) {
+      return;
+    }
+    await _session.getUserProvidedPeers().then(emitUnlessClosed);
+  }
 }

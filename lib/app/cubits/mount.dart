@@ -4,6 +4,7 @@ import 'package:ouisync/ouisync.dart';
 
 import '../utils/dirs.dart';
 import '../utils/log.dart';
+import '../utils/session_handle.dart';
 import 'utils.dart';
 
 sealed class MountState {
@@ -30,22 +31,24 @@ class MountStateFailure extends MountState {
 }
 
 class MountCubit extends Cubit<MountState> with CubitActions, AppLogger {
-  final Session session;
+  final SessionProxy _session;
   final Dirs dirs;
 
-  MountCubit(this.session, this.dirs) : super(MountStateDisabled());
+  MountCubit(this._session, this.dirs) : super(MountStateDisabled());
 
-  void init() => unawaited(_init());
+  void init() {
+    _session.started.addListener(_onSessionStarted);
+    _onSessionStarted();
+  }
 
   Future<void> _init() async {
     emitUnlessClosed(MountStateMounting());
-
     try {
-      if (await session.getMountRoot() == null) {
-        await session.setMountRoot(dirs.defaultMount);
+      if (await _session.getMountRoot() == null) {
+        await _session.setMountRoot(dirs.defaultMount);
       }
 
-      final mountRoot = await session.getMountRoot();
+      final mountRoot = await _session.getMountRoot();
 
       emitUnlessClosed(
         mountRoot != null ? MountStateSuccess() : MountStateDisabled(),
@@ -63,6 +66,13 @@ class MountCubit extends Cubit<MountState> with CubitActions, AppLogger {
     }
   }
 
+  void _onSessionStarted() {
+    if (_session.started.value == 0) {
+      return;
+    }
+    unawaited(_init());
+  }
+
   Future<void> initialized() async {
     if (state is MountStateMounting) {
       await stream.where((state) => state is! MountStateMounting).first;
@@ -71,6 +81,7 @@ class MountCubit extends Cubit<MountState> with CubitActions, AppLogger {
 
   @override
   Future<void> close() async {
+    _session.started.removeListener(_onSessionStarted);
     await initialized();
     await super.close();
   }
