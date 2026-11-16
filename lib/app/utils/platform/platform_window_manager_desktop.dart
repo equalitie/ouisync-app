@@ -203,7 +203,24 @@ class PlatformWindowManagerDesktop
     }
 
     _state = _State.closing;
-    await windowManager.close();
+
+    // `windowManager.close()` simulates a click on the native close button
+    // (`performClose`), which is a no-op when the window is hidden (e.g.
+    // after using "Hide" from the tray menu), silently preventing the app
+    // from exiting. Running the shutdown directly avoids depending on the
+    // window's visibility.
+    // The window is torn down even if the close handler throws, so the app
+    // can't get stuck in the `closing` state. The error still propagates.
+    try {
+      final onClose = _onClose;
+      if (onClose != null) {
+        await onClose();
+      }
+    } finally {
+      _state = _State.closed;
+      await windowManager.setPreventClose(false);
+      await windowManager.destroy();
+    }
   }
 }
 

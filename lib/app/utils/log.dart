@@ -162,7 +162,11 @@ class _ConsolePrinter extends LoggyPrinter {
   @override
   void onLog(LogRecord record) {
     // ignore: avoid_print
-    print(_formatRecord(record));
+    final line = _formatRecord(record);
+    // ignore: avoid_print
+    print(line);
+    // iOS routes print() to os_log, which Logtee doesn't capture. Write to fd 1 as well.
+    if (Platform.isIOS) stdout.writeln(line);
   }
 }
 
@@ -173,7 +177,7 @@ final _levelPad = ouisync.LogLevel.values
 String _formatRecord(LogRecord record) {
   final level = record.level.toOuisync();
   final message = _formatMessage(record);
-  return '${_formatTimestamp(DateTime.now())} ${level.name.toUpperCase().padRight(_levelPad)} $message';
+  return '${_formatTimestamp(DateTime.now())} FLUTTER ${level.name.toUpperCase().padRight(_levelPad)} $message';
 }
 
 String _formatMessage(LogRecord record) {

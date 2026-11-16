@@ -4,6 +4,7 @@ import 'dart:typed_data' show Uint8List;
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_file_dialog/flutter_file_dialog.dart';
 import 'package:ouisync/ouisync.dart' show StateMonitor, VfsDriverInstallError;
@@ -66,8 +67,18 @@ class LogsSection extends SettingsSection with AppLogger {
       BlocBuilder<ErrorCubit, ErrorCubitState>(
         bloc: errorCubit,
         builder: (context, state) {
-          if (state.errorHappened) {
-            return _errorTile(context, S.current.messageLibraryPanic);
+          // Keep the tile while there are recorded errors, even after they were marked seen.
+          if (errorCubit.errors.isNotEmpty) {
+            return _errorTile(
+              context,
+              S.current.messageLibraryPanic,
+              onTap: () {
+                // Opening the list counts as having seen the errors. This is the trigger on
+                // mobile, where the Logs section is never selected in the sidebar.
+                errorCubit.markSeen();
+                _showErrors(context, errorCubit.errors);
+              },
+            );
           } else {
             return SizedBox.shrink();
           }
@@ -118,6 +129,35 @@ class LogsSection extends SettingsSection with AppLogger {
       leading: Icon(Icons.error, color: color),
       trailing: trailing,
       onTap: onTap,
+    );
+  }
+
+  void _showErrors(BuildContext context, List<ErrorRecord> errors) {
+    final text = errors.reversed.join('\n');
+
+    unawaited(
+      showDialog<void>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(S.current.messageLibraryPanic),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: SingleChildScrollView(child: SelectableText(text)),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                unawaited(Clipboard.setData(ClipboardData(text: text)));
+              },
+              child: Text(S.current.titleCopyEntries),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(S.current.actionCloseCapital),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
