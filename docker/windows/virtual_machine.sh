@@ -127,6 +127,11 @@ vm_ssh_options=(
     -o "UserKnownHostsFile=/dev/null"
 )
 
+# `ssh_key` is the public key installed in the VM (set by the calling script).
+if [ -f "${ssh_key%.pub}" ]; then
+    vm_ssh_options+=(-i "${ssh_key%.pub}")
+fi
+
 function vm_ssh() (
     args=(
         -p $host_ssh_port
@@ -219,7 +224,7 @@ function vm_ensure_os_and_ssh_installed() (
     echo "👉 Installing Windows OS and OpenSSH"
 
     (
-        cp ~/.ssh/id_ed25519.pub "$host_root/oem/"
+        cp "$ssh_key" "$host_root/oem/ssh_key.pub"
         start_vm "$ctx"
         trap 'stop_vm "$ctx"' RETURN EXIT
         await_ssh_connectible

@@ -6,7 +6,7 @@ source "$(dirname "$0")/windows/utils.sh"
 
 function print_help() {
     echo "Script for building Ouisync App in a Docker container"
-    echo "Usage: $0 (--commit <COMMIT> | --srcdir <SRCDIR>) [--out <OUTPUT_DIRECTORY>] [--flavor <FLAVOR>] [--no-exe] [--no-msix] [--no-build] [--sharedir <SHAREDIR>]"
+    echo "Usage: $0 (--commit <COMMIT> | --srcdir <SRCDIR>) [--out <OUTPUT_DIRECTORY>] [--flavor <FLAVOR>] [--no-exe] [--no-msix] [--no-build] [--sharedir <SHAREDIR>] [--ssh-key <SSH_KEY>]"
     echo "  COMMIT:           Commit from which to build"
     echo "  SRCDIR:           Source dir from which to build"
     echo "  OUTPUT_DIRECTORY: Directory where artifacts will be stored"
@@ -16,12 +16,16 @@ function print_help() {
     echo "  --no-exe:         Don't build the exe installer"
     echo "  --no-msix:        Don't build the msix package"
     echo "  --no-build:       Use if you just want to access the Windows VM without any building taking place"
+    echo "  SSH_KEY:          Public SSH key used to access the VM, the private key is expected next to it"
+    echo "                    without the '.pub' extension. Default: ~/.ssh/id_ed25519.pub. It's only"
+    echo "                    installed in the VM when Windows is installed (the first run)"
 }
 
 build_exe="--exe"
 build_msix="--msix"
 sharedir=
 do_build=y
+ssh_key=~/.ssh/id_ed25519.pub
 
 while [[ "$#" -gt 0 ]]; do
     case $1 in
@@ -34,6 +38,7 @@ while [[ "$#" -gt 0 ]]; do
         --flavor) flavor="$2"; shift ;;
         --sharedir) sharedir="$2"; shift ;;
         --no-build) do_build=n ;;
+        --ssh-key) ssh_key="$2"; shift ;;
         *) error "Unknown argument: $1" ;;
     esac
     shift
@@ -46,6 +51,10 @@ if [ -n "$sharedir" ]; then
     if [ ! -d "$sharedir" ]; then
         error "The path '$sharedir' passed as --sharedir argument is not a directory"
     fi
+fi
+
+if [ ! -f "$ssh_key" ]; then
+    error "The SSH key '$ssh_key' doesn't exist"
 fi
 
 source "$(dirname "$0")/windows/virtual_machine.sh"

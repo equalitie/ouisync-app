@@ -18,7 +18,7 @@ rem which we'll need for the next step
 powershell -Command Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0
 if errorlevel 1 exit /b %errorlevel%
 
-type %~dp0\id_ed25519.pub >> "C:\ProgramData\ssh\administrators_authorized_keys"
+type %~dp0\ssh_key.pub >> "C:\ProgramData\ssh\administrators_authorized_keys"
 if errorlevel 1 exit /b %errorlevel%
 
 powershell -Command Start-Service sshd
