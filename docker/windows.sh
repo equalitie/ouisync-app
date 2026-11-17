@@ -2,17 +2,19 @@
 
 set -e
 
-source $(dirname $0)/windows/utils.sh
+source "$(dirname "$0")/windows/utils.sh"
 
 function print_help() {
     echo "Script for building Ouisync App in a Docker container"
-    echo "Usage: $0 (--commit <COMMIT> | --srcdir <SRCDIR>) [--out <OUTPUT_DIRECTORY>] [--flavor <FLAVOR>] [--no-build] [--sharedir <SHAREDIR>]"
+    echo "Usage: $0 (--commit <COMMIT> | --srcdir <SRCDIR>) [--out <OUTPUT_DIRECTORY>] [--flavor <FLAVOR>] [--no-exe] [--no-msix] [--no-build] [--sharedir <SHAREDIR>]"
     echo "  COMMIT:           Commit from which to build"
     echo "  SRCDIR:           Source dir from which to build"
     echo "  OUTPUT_DIRECTORY: Directory where artifacts will be stored"
     echo "  FLAVOR:           One of {production,nightly,unofficial}. The default is 'production' when '--commit'"
     echo "                    is used and 'unofficial' when '--srcdir' is used"
-    echo "  SHAREDIR:         Share the giveven directory with the Windows virtual machine"
+    echo "  SHAREDIR:         Share the given directory with the Windows virtual machine"
+    echo "  --no-exe:         Don't build the exe installer"
+    echo "  --no-msix:        Don't build the msix package"
     echo "  --no-build:       Use if you just want to access the Windows VM without any building taking place"
 }
 
@@ -46,7 +48,7 @@ if [ -n "$sharedir" ]; then
     fi
 fi
 
-source $(dirname $0)/windows/virtual_machine.sh
+source "$(dirname "$0")/windows/virtual_machine.sh"
 
 image_name=ouisync-runner-windows.$USER
 container_name="ouisync.windows-builder.$(date +'%Y-%m-%dT%H-%M-%S')"
@@ -93,13 +95,13 @@ fi
 # Setup the VM
 vm_ensure_os_and_ssh_installed "$ctx_vm"
 
-vm_install "$ctx_vm" $host_root/install/visual_studio.bat
-vm_install "$ctx_vm" $host_root/install/rust.bat
-vm_install "$ctx_vm" $host_root/install/git.bat
-vm_install "$ctx_vm" $host_root/install/msys2.bat
-vm_install "$ctx_vm" $host_root/install/inno_setup.bat
-vm_install "$ctx_vm" $host_root/install/java.bat
-vm_install "$ctx_vm" $host_root/install/flutter.bat
+vm_install "$ctx_vm" "$host_root/install/visual_studio.bat"
+vm_install "$ctx_vm" "$host_root/install/rust.bat"
+vm_install "$ctx_vm" "$host_root/install/git.bat"
+vm_install "$ctx_vm" "$host_root/install/msys2.bat"
+vm_install "$ctx_vm" "$host_root/install/inno_setup.bat"
+vm_install "$ctx_vm" "$host_root/install/java.bat"
+vm_install "$ctx_vm" "$host_root/install/flutter.bat"
 
 # Utils
 function cat_vm() (
@@ -138,7 +140,7 @@ if [ -n "$commit" ]; then
     vm_ssh "cd c:/src; git reset --hard $commit"
     vm_ssh "cd c:/src; git submodule update --init --recursive"
 else
-    vm_rsync_into $srcdir "/c/src"
+    vm_rsync_into "$srcdir" "/c/src"
 fi
 
 # Prepare secrets
@@ -172,8 +174,10 @@ if [ -n "$build_msix" -a "$flavor" != "unofficial" ]; then
 fi
 
 # Collect artifacts
-mkdir -p $out_dir
-for asset in $(vm_ssh "c:/msys64/usr/bin/ls.exe $vm_out_dir"); do
+mkdir -p "$out_dir"
+mapfile -t assets < <(vm_ssh "c:/msys64/usr/bin/ls.exe -1 $vm_out_dir")
+for asset in "${assets[@]}"; do
+    asset=${asset%$'\r'}
     echo "Collecting artifact: $asset"
-    scp "${vm_ssh_options[@]}" -P $host_ssh_port ssh@localhost:"$vm_out_dir/$asset" $out_dir
+    scp "${vm_ssh_options[@]}" -P "$host_ssh_port" "ssh@localhost:$vm_out_dir/$asset" "$out_dir"
 done

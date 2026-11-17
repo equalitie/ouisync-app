@@ -2,12 +2,13 @@
 
 set -e
 
-function error() {
+# Named differently from `error` in `utils.sh`, which also prints the usage of the calling script.
+function fail() {
     echo "❌ Error: $@"
     exit 1
 }
 
-host_root=$(dirname $0)/windows
+host_root="$(dirname "$0")/windows"
 host_ssh_port=2222
 
 ### Utils
@@ -54,14 +55,14 @@ function start_vm() (
     ctx=$1
 
     if [ -n "$(container_id "$ctx")" ]; then
-        error "The container is already running"
+        fail "The container is already running"
     fi
 
     image_name=$(vm_ctx_image_name "$ctx")
     container_name=$(vm_ctx_container_name "$ctx")
     volume_name=$(vm_ctx_volume_name "$ctx")
 
-    docker build --progress plain -t $image_name - < $host_root/Dockerfile
+    docker build --progress plain -t $image_name - < "$host_root/Dockerfile"
 
     docker volume create $volume_name || true
 
@@ -100,7 +101,7 @@ function start_vm() (
         docker_run_args+=(-v "$sharedir:/shared")
     fi
 
-    docker run ${docker_run_args[@]} $image_name 2>&1 | prefix "🪟 " &
+    docker run "${docker_run_args[@]}" $image_name 2>&1 | prefix "🪟 " &
 )
 
 function stop_vm() (
@@ -137,7 +138,7 @@ function vm_scp() (
     dst=$2
     args=(
         -P $host_ssh_port
-        $src ssh@localhost:$dst
+        "$src" "ssh@localhost:$dst"
     )
     scp "${vm_ssh_options[@]}" "${args[@]}"
 )
@@ -171,7 +172,7 @@ function vm_rsync_into () (
         --compress \
         --rsync-path='C:\msys64\usr\bin\rsync.exe' \
         "${exclude_dirs[@]/#/--exclude=}" \
-        ${srcdir%/}/ ssh@localhost:$dstdir
+        "${srcdir%/}/" "ssh@localhost:$dstdir"
 )
 
 ### Snapshots
@@ -216,7 +217,7 @@ function vm_ensure_os_and_ssh_installed() (
     echo "👉 Installing Windows OS and OpenSSH"
 
     (
-        cp ~/.ssh/id_ed25519.pub $host_root/oem/
+        cp ~/.ssh/id_ed25519.pub "$host_root/oem/"
         start_vm "$ctx"
         trap 'stop_vm "$ctx"' RETURN EXIT
         await_ssh_connectible
@@ -228,7 +229,7 @@ function vm_ensure_os_and_ssh_installed() (
 function vm_install() (
     ctx="$1"
     bat_path=$2
-    bat_file=$(basename $bat_path)
+    bat_file=$(basename "$bat_path")
     snapshot_tag="installed_${bat_file%.*}"
 
     if is_in $snapshot_tag $(snapshot_tags "$ctx"); then
@@ -247,7 +248,7 @@ function vm_install() (
         vm_scripts_path="C:\\Users\\Docker\\InstallScripts"
 
         vm_ssh "New-Item -ItemType Directory -Force -Path $vm_scripts_path | Out-Null"
-        vm_scp $bat_path "$vm_scripts_path"
+        vm_scp "$bat_path" "$vm_scripts_path"
         vm_ssh "$vm_scripts_path\\$bat_file"
     )
 
