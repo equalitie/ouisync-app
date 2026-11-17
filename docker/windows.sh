@@ -6,7 +6,7 @@ source "$(dirname "$0")/windows/utils.sh"
 
 function print_help() {
     echo "Script for building Ouisync App in a Docker container"
-    echo "Usage: $0 (--commit <COMMIT> | --srcdir <SRCDIR>) [--out <OUTPUT_DIRECTORY>] [--flavor <FLAVOR>] [--no-exe] [--no-msix] [--no-build] [--sharedir <SHAREDIR>] [--ssh-key <SSH_KEY>]"
+    echo "Usage: $0 (--commit <COMMIT> | --srcdir <SRCDIR>) [--out <OUTPUT_DIRECTORY>] [--flavor <FLAVOR>] [--no-exe] [--no-msix] [--no-build] [--sharedir <SHAREDIR>] [--ssh-key <SSH_KEY>] [--keep-vm-state]"
     echo "  COMMIT:           Commit from which to build"
     echo "  SRCDIR:           Source dir from which to build"
     echo "  OUTPUT_DIRECTORY: Directory where artifacts will be stored"
@@ -19,6 +19,8 @@ function print_help() {
     echo "  SSH_KEY:          Public SSH key used to access the VM, the private key is expected next to it"
     echo "                    without the '.pub' extension. Default: ~/.ssh/id_ed25519.pub. It's only"
     echo "                    installed in the VM when Windows is installed (the first run)"
+    echo "  --keep-vm-state:  Continue from the VM disk state left by the previous run. By default the"
+    echo "                    disk is restored to the state right after installing the dependencies"
 }
 
 build_exe="--exe"
@@ -26,6 +28,7 @@ build_msix="--msix"
 sharedir=
 do_build=y
 ssh_key=~/.ssh/id_ed25519.pub
+keep_vm_state=n
 
 while [[ "$#" -gt 0 ]]; do
     case $1 in
@@ -39,6 +42,7 @@ while [[ "$#" -gt 0 ]]; do
         --sharedir) sharedir="$2"; shift ;;
         --no-build) do_build=n ;;
         --ssh-key) ssh_key="$2"; shift ;;
+        --keep-vm-state) keep_vm_state=y ;;
         *) error "Unknown argument: $1" ;;
     esac
     shift
@@ -104,13 +108,25 @@ fi
 # Setup the VM
 vm_ensure_os_and_ssh_installed "$ctx_vm"
 
-vm_install "$ctx_vm" "$host_root/install/visual_studio.bat"
-vm_install "$ctx_vm" "$host_root/install/rust.bat"
-vm_install "$ctx_vm" "$host_root/install/git.bat"
-vm_install "$ctx_vm" "$host_root/install/msys2.bat"
-vm_install "$ctx_vm" "$host_root/install/inno_setup.bat"
-vm_install "$ctx_vm" "$host_root/install/java.bat"
-vm_install "$ctx_vm" "$host_root/install/flutter.bat"
+install_scripts=(
+    visual_studio.bat
+    rust.bat
+    git.bat
+    msys2.bat
+    inno_setup.bat
+    java.bat
+    flutter.bat
+)
+
+for script in "${install_scripts[@]}"; do
+    vm_install "$ctx_vm" "$host_root/install/$script"
+done
+
+# Start from the state right after the last installation, discarding whatever previous runs left
+# on the disk (sources, build outputs, secrets, ...).
+if [ "$keep_vm_state" != y ]; then
+    vm_restore_snapshot "$ctx_vm" "$(vm_install_snapshot_tag "${install_scripts[-1]}")"
+fi
 
 # Utils
 function cat_vm() (

@@ -200,6 +200,14 @@ function vm_snapshot() (
         2>/dev/null
 )
 
+function vm_restore_snapshot() (
+    ctx=$1
+    tag=$2
+
+    echo "👉 Restoring the VM disk to snapshot $tag"
+    vm_snapshot "$ctx" -a "$tag"
+)
+
 function snapshot_tags() (
     # `snapshot -l` prints a table like this, we're only interested in the "tags"
     #
@@ -233,11 +241,17 @@ function vm_ensure_os_and_ssh_installed() (
     vm_snapshot "$ctx" -c $snapshot_tag
 )
 
+# Name of the snapshot taken after running the given install script.
+function vm_install_snapshot_tag() (
+    bat_file=$(basename "$1")
+    echo "installed_${bat_file%.*}"
+)
+
 function vm_install() (
     ctx="$1"
     bat_path=$2
     bat_file=$(basename "$bat_path")
-    snapshot_tag="installed_${bat_file%.*}"
+    snapshot_tag=$(vm_install_snapshot_tag "$bat_file")
 
     if is_in $snapshot_tag $(snapshot_tags "$ctx"); then
         echo "👍 Already installed $bat_file"
