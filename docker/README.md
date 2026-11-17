@@ -14,3 +14,6 @@ Run `./docker/linux.sh --help` and `./docker/windows.sh --help` for usage instru
 
 To build the release packages, have [pass](https://www.passwordstore.org/) installed with
 eQualitie's password repository.
+
+The `windows.sh` script needs Docker Engine 26.0 or newer and KVM on the machine running the
+Windows VM (this machine, or the one passed with `--host`).

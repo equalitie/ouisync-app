@@ -6,7 +6,7 @@ source "$(dirname "$0")/windows/utils.sh"
 
 function print_help() {
     echo "Script for building Ouisync App in a Docker container"
-    echo "Usage: $0 (--commit <COMMIT> | --srcdir <SRCDIR>) [--out <OUTPUT_DIRECTORY>] [--flavor <FLAVOR>] [--no-exe] [--no-msix] [--no-build] [--sharedir <SHAREDIR>] [--ssh-key <SSH_KEY>] [--keep-vm-state]"
+    echo "Usage: $0 (--commit <COMMIT> | --srcdir <SRCDIR>) [--out <OUTPUT_DIRECTORY>] [--flavor <FLAVOR>] [--no-exe] [--no-msix] [--no-build] [--sharedir <SHAREDIR>] [--ssh-key <SSH_KEY>] [--keep-vm-state] [--host <HOST>]"
     echo "  COMMIT:           Commit from which to build"
     echo "  SRCDIR:           Source dir from which to build"
     echo "  OUTPUT_DIRECTORY: Directory where artifacts will be stored"
@@ -21,6 +21,9 @@ function print_help() {
     echo "                    installed in the VM when Windows is installed (the first run)"
     echo "  --keep-vm-state:  Continue from the VM disk state left by the previous run. By default the"
     echo "                    disk is restored to the state right after installing the dependencies"
+    echo "  HOST:             Run the VM on another Linux machine, accessed over SSH (anything 'ssh <HOST>'"
+    echo "                    accepts). It needs Docker and KVM. Secrets and artifacts stay on this machine."
+    echo "                    Not supported together with --sharedir"
 }
 
 build_exe="--exe"
@@ -29,6 +32,7 @@ sharedir=
 do_build=y
 ssh_key=~/.ssh/id_ed25519.pub
 keep_vm_state=n
+remote_host=
 
 while [[ "$#" -gt 0 ]]; do
     case $1 in
@@ -43,6 +47,7 @@ while [[ "$#" -gt 0 ]]; do
         --no-build) do_build=n ;;
         --ssh-key) ssh_key="$2"; shift ;;
         --keep-vm-state) keep_vm_state=y ;;
+        --host) remote_host="$2"; shift ;;
         *) error "Unknown argument: $1" ;;
     esac
     shift
@@ -50,6 +55,10 @@ done
 
 if [ -z "$commit" -a -z "$srcdir" ]; then error "Missing one of --commit or --srcdir"; fi
 if [ -n "$commit" -a -n "$srcdir" ]; then error "--commit and --srcdir are mutually exclusive"; fi
+
+if [ -n "$sharedir" ] && [ -n "$remote_host" ]; then
+    error "--sharedir is not supported together with --host"
+fi
 
 if [ -n "$sharedir" ]; then
     if [ ! -d "$sharedir" ]; then
@@ -59,6 +68,11 @@ fi
 
 if [ ! -f "$ssh_key" ]; then
     error "The SSH key '$ssh_key' doesn't exist"
+fi
+
+# All `docker` commands then run on the remote host.
+if [ -n "$remote_host" ]; then
+    export DOCKER_HOST="ssh://$remote_host"
 fi
 
 source "$(dirname "$0")/windows/virtual_machine.sh"
@@ -144,6 +158,7 @@ start_vm "$ctx_vm"
 # Enter the container on exit
 trap on_exit EXIT
 function on_exit() {
+    print_vm_access_hint
     echo "Entering VM"
     vm_ssh
     stop_vm "$ctx_vm"
@@ -204,5 +219,5 @@ mapfile -t assets < <(vm_ssh "c:/msys64/usr/bin/ls.exe -1 $vm_out_dir")
 for asset in "${assets[@]}"; do
     asset=${asset%$'\r'}
     echo "Collecting artifact: $asset"
-    scp "${vm_ssh_options[@]}" -P "$host_ssh_port" "ssh@localhost:$vm_out_dir/$asset" "$out_dir"
+    vm_scp_from "$vm_out_dir/$asset" "$out_dir"
 done

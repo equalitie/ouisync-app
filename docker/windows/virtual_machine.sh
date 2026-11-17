@@ -66,6 +66,16 @@ function start_vm() (
 
     docker volume create $volume_name || true
 
+    # Copy the `oem` directory into the `oem` subdirectory of the volume instead of bind-mounting
+    # it, so it works the same when docker runs on a remote host (`--host`). The SSH key (`ssh_key`,
+    # set by the calling script) is added next to the scripts, `sshd.bat` installs it in the VM.
+    tar -C "$host_root/oem" -c . | docker run -i --rm \
+        -v "$volume_name:/storage" \
+        -e SSH_KEY="$(cat "$ssh_key")" \
+        --entrypoint /bin/bash \
+        $image_name \
+        -c 'rm -rf /storage/oem && mkdir /storage/oem && tar -x -C /storage/oem && printf "%s\n" "$SSH_KEY" > /storage/oem/ssh_key.pub'
+
     # The ports are only published on localhost: the web viewer and RDP have a default password.
     docker_run_args=(
         --rm 
@@ -85,7 +95,8 @@ function start_vm() (
         --device=/dev/net/tun 
         --cap-add NET_ADMIN 
         -v "$volume_name:/storage" 
-        -v "$host_root/oem:/oem"
+        # Requires Docker Engine >= 26.0 (`volume-subpath`)
+        --mount "type=volume,src=$volume_name,dst=/oem,volume-subpath=oem"
         --stop-timeout 120 
         # "Windows 11 LTSC
         -e VERSION=11l
@@ -132,6 +143,12 @@ if [ -f "${ssh_key%.pub}" ]; then
     vm_ssh_options+=(-i "${ssh_key%.pub}")
 fi
 
+# `remote_host` is set by the calling script when the VM runs on another machine (`--host`). Its
+# ports are only published on that machine's localhost, so connect through it.
+if [ -n "$remote_host" ]; then
+    vm_ssh_options+=(-o "ProxyJump=$remote_host")
+fi
+
 function vm_ssh() (
     args=(
         -p $host_ssh_port
@@ -148,6 +165,20 @@ function vm_scp() (
         "$src" "ssh@localhost:$dst"
     )
     scp "${vm_ssh_options[@]}" "${args[@]}"
+)
+
+function vm_scp_from() (
+    src=$1
+    dst=$2
+    scp "${vm_ssh_options[@]}" -P $host_ssh_port "ssh@localhost:$src" "$dst"
+)
+
+function print_vm_access_hint() (
+    if [ -n "$remote_host" ]; then
+        echo "To access the VM's web viewer and RDP, forward the ports first:"
+        echo "  ssh -L 8006:localhost:8006 -L 3389:localhost:3389 $remote_host"
+    fi
+    echo "Web viewer: http://localhost:8006, RDP: localhost:3389 (user: Docker, password: admin)"
 )
 
 function await_ssh_connectible() (
@@ -232,7 +263,6 @@ function vm_ensure_os_and_ssh_installed() (
     echo "👉 Installing Windows OS and OpenSSH"
 
     (
-        cp "$ssh_key" "$host_root/oem/ssh_key.pub"
         start_vm "$ctx"
         trap 'stop_vm "$ctx"' RETURN EXIT
         await_ssh_connectible
