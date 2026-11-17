@@ -2,12 +2,13 @@
 
 set -e
 
-function error() {
+# Named differently from `error` in `utils.sh`, which also prints the usage of the calling script.
+function fail() {
     echo "❌ Error: $@"
     exit 1
 }
 
-host_root=$(dirname $0)/windows
+host_root="$(dirname "$0")/windows"
 host_ssh_port=2222
 
 ### Utils
@@ -54,35 +55,48 @@ function start_vm() (
     ctx=$1
 
     if [ -n "$(container_id "$ctx")" ]; then
-        error "The container is already running"
+        fail "The container is already running"
     fi
 
     image_name=$(vm_ctx_image_name "$ctx")
     container_name=$(vm_ctx_container_name "$ctx")
     volume_name=$(vm_ctx_volume_name "$ctx")
 
-    docker build --progress plain -t $image_name - < $host_root/Dockerfile
+    docker build --progress plain -t $image_name - < "$host_root/Dockerfile"
 
     docker volume create $volume_name || true
 
+    # Copy the `oem` directory into the `oem` subdirectory of the volume instead of bind-mounting
+    # it, so it works the same when docker runs on a remote host (`--host`). The SSH key (`ssh_key`,
+    # set by the calling script) is added next to the scripts, `sshd.bat` installs it in the VM.
+    tar -C "$host_root/oem" -c . | docker run -i --rm \
+        -v "$volume_name:/storage" \
+        -e SSH_KEY="$(cat "$ssh_key")" \
+        --entrypoint /bin/bash \
+        $image_name \
+        -c 'rm -rf /storage/oem && mkdir /storage/oem && tar -x -C /storage/oem && printf "%s\n" "$SSH_KEY" > /storage/oem/ssh_key.pub'
+
+    # The ports are only published on localhost: the web viewer and RDP have a default password.
     docker_run_args=(
         --rm 
         --name $container_name 
-        -p 8006:8006 
+        # Web viewer (noVNC)
+        -p 127.0.0.1:8006:8006 
         # RDP (e.g. Remmina)
         # Username: Docker
         # Password: admin
-        -p 3389:3389/tcp
-        -p 3389:3389/udp
+        -p 127.0.0.1:3389:3389/tcp
+        -p 127.0.0.1:3389:3389/udp
         # SSH, after it is installed, add you'r public key to
         # C:/ProgramData/ssh/administrators_authorized_keys
         # and connect using `ssh ssh@localhost -p $host_ssh_port`
-        -p $host_ssh_port:22/tcp
+        -p 127.0.0.1:$host_ssh_port:22/tcp
         --device=/dev/kvm 
         --device=/dev/net/tun 
         --cap-add NET_ADMIN 
         -v "$volume_name:/storage" 
-        -v "$host_root/oem:/oem"
+        # Requires Docker Engine >= 26.0 (`volume-subpath`)
+        --mount "type=volume,src=$volume_name,dst=/oem,volume-subpath=oem"
         --stop-timeout 120 
         # "Windows 11 LTSC
         -e VERSION=11l
@@ -100,7 +114,7 @@ function start_vm() (
         docker_run_args+=(-v "$sharedir:/shared")
     fi
 
-    docker run ${docker_run_args[@]} $image_name 2>&1 | prefix "🪟 " &
+    docker run "${docker_run_args[@]}" $image_name 2>&1 | prefix "🪟 " &
 )
 
 function stop_vm() (
@@ -124,6 +138,17 @@ vm_ssh_options=(
     -o "UserKnownHostsFile=/dev/null"
 )
 
+# `ssh_key` is the public key installed in the VM (set by the calling script).
+if [ -f "${ssh_key%.pub}" ]; then
+    vm_ssh_options+=(-i "${ssh_key%.pub}")
+fi
+
+# `remote_host` is set by the calling script when the VM runs on another machine (`--host`). Its
+# ports are only published on that machine's localhost, so connect through it.
+if [ -n "$remote_host" ]; then
+    vm_ssh_options+=(-o "ProxyJump=$remote_host")
+fi
+
 function vm_ssh() (
     args=(
         -p $host_ssh_port
@@ -137,9 +162,23 @@ function vm_scp() (
     dst=$2
     args=(
         -P $host_ssh_port
-        $src ssh@localhost:$dst
+        "$src" "ssh@localhost:$dst"
     )
     scp "${vm_ssh_options[@]}" "${args[@]}"
+)
+
+function vm_scp_from() (
+    src=$1
+    dst=$2
+    scp "${vm_ssh_options[@]}" -P $host_ssh_port "ssh@localhost:$src" "$dst"
+)
+
+function print_vm_access_hint() (
+    if [ -n "$remote_host" ]; then
+        echo "To access the VM's web viewer and RDP, forward the ports first:"
+        echo "  ssh -L 8006:localhost:8006 -L 3389:localhost:3389 $remote_host"
+    fi
+    echo "Web viewer: http://localhost:8006, RDP: localhost:3389 (user: Docker, password: admin)"
 )
 
 function await_ssh_connectible() (
@@ -171,7 +210,7 @@ function vm_rsync_into () (
         --compress \
         --rsync-path='C:\msys64\usr\bin\rsync.exe' \
         "${exclude_dirs[@]/#/--exclude=}" \
-        ${srcdir%/}/ ssh@localhost:$dstdir
+        "${srcdir%/}/" "ssh@localhost:$dstdir"
 )
 
 ### Snapshots
@@ -190,6 +229,14 @@ function vm_snapshot() (
         $image_name \
         -c "qemu-img snapshot $action $arg /storage/data.qcow2" \
         2>/dev/null
+)
+
+function vm_restore_snapshot() (
+    ctx=$1
+    tag=$2
+
+    echo "👉 Restoring the VM disk to snapshot $tag"
+    vm_snapshot "$ctx" -a "$tag"
 )
 
 function snapshot_tags() (
@@ -216,7 +263,6 @@ function vm_ensure_os_and_ssh_installed() (
     echo "👉 Installing Windows OS and OpenSSH"
 
     (
-        cp ~/.ssh/id_ed25519.pub $host_root/oem/
         start_vm "$ctx"
         trap 'stop_vm "$ctx"' RETURN EXIT
         await_ssh_connectible
@@ -225,11 +271,17 @@ function vm_ensure_os_and_ssh_installed() (
     vm_snapshot "$ctx" -c $snapshot_tag
 )
 
+# Name of the snapshot taken after running the given install script.
+function vm_install_snapshot_tag() (
+    bat_file=$(basename "$1")
+    echo "installed_${bat_file%.*}"
+)
+
 function vm_install() (
     ctx="$1"
     bat_path=$2
-    bat_file=$(basename $bat_path)
-    snapshot_tag="installed_${bat_file%.*}"
+    bat_file=$(basename "$bat_path")
+    snapshot_tag=$(vm_install_snapshot_tag "$bat_file")
 
     if is_in $snapshot_tag $(snapshot_tags "$ctx"); then
         echo "👍 Already installed $bat_file"
@@ -247,7 +299,7 @@ function vm_install() (
         vm_scripts_path="C:\\Users\\Docker\\InstallScripts"
 
         vm_ssh "New-Item -ItemType Directory -Force -Path $vm_scripts_path | Out-Null"
-        vm_scp $bat_path "$vm_scripts_path"
+        vm_scp "$bat_path" "$vm_scripts_path"
         vm_ssh "$vm_scripts_path\\$bat_file"
     )
 

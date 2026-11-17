@@ -1,1 +1,3 @@
+# Written here by older versions of windows.sh, the key now goes directly to the Docker volume
+ssh_key.pub
 id_ed25519.pub

@@ -2,24 +2,37 @@
 
 set -e
 
-source $(dirname $0)/windows/utils.sh
+source "$(dirname "$0")/windows/utils.sh"
 
 function print_help() {
     echo "Script for building Ouisync App in a Docker container"
-    echo "Usage: $0 (--commit <COMMIT> | --srcdir <SRCDIR>) [--out <OUTPUT_DIRECTORY>] [--flavor <FLAVOR>] [--no-build] [--sharedir <SHAREDIR>]"
+    echo "Usage: $0 (--commit <COMMIT> | --srcdir <SRCDIR>) [--out <OUTPUT_DIRECTORY>] [--flavor <FLAVOR>] [--no-exe] [--no-msix] [--no-build] [--sharedir <SHAREDIR>] [--ssh-key <SSH_KEY>] [--keep-vm-state] [--host <HOST>]"
     echo "  COMMIT:           Commit from which to build"
     echo "  SRCDIR:           Source dir from which to build"
     echo "  OUTPUT_DIRECTORY: Directory where artifacts will be stored"
     echo "  FLAVOR:           One of {production,nightly,unofficial}. The default is 'production' when '--commit'"
     echo "                    is used and 'unofficial' when '--srcdir' is used"
-    echo "  SHAREDIR:         Share the giveven directory with the Windows virtual machine"
+    echo "  SHAREDIR:         Share the given directory with the Windows virtual machine"
+    echo "  --no-exe:         Don't build the exe installer"
+    echo "  --no-msix:        Don't build the msix package"
     echo "  --no-build:       Use if you just want to access the Windows VM without any building taking place"
+    echo "  SSH_KEY:          Public SSH key used to access the VM, the private key is expected next to it"
+    echo "                    without the '.pub' extension. Default: ~/.ssh/id_ed25519.pub. It's only"
+    echo "                    installed in the VM when Windows is installed (the first run)"
+    echo "  --keep-vm-state:  Continue from the VM disk state left by the previous run. By default the"
+    echo "                    disk is restored to the state right after installing the dependencies"
+    echo "  HOST:             Run the VM on another Linux machine, accessed over SSH (anything 'ssh <HOST>'"
+    echo "                    accepts). It needs Docker and KVM. Secrets and artifacts stay on this machine."
+    echo "                    Not supported together with --sharedir"
 }
 
 build_exe="--exe"
 build_msix="--msix"
 sharedir=
 do_build=y
+ssh_key=~/.ssh/id_ed25519.pub
+keep_vm_state=n
+remote_host=
 
 while [[ "$#" -gt 0 ]]; do
     case $1 in
@@ -32,6 +45,9 @@ while [[ "$#" -gt 0 ]]; do
         --flavor) flavor="$2"; shift ;;
         --sharedir) sharedir="$2"; shift ;;
         --no-build) do_build=n ;;
+        --ssh-key) ssh_key="$2"; shift ;;
+        --keep-vm-state) keep_vm_state=y ;;
+        --host) remote_host="$2"; shift ;;
         *) error "Unknown argument: $1" ;;
     esac
     shift
@@ -40,13 +56,26 @@ done
 if [ -z "$commit" -a -z "$srcdir" ]; then error "Missing one of --commit or --srcdir"; fi
 if [ -n "$commit" -a -n "$srcdir" ]; then error "--commit and --srcdir are mutually exclusive"; fi
 
+if [ -n "$sharedir" ] && [ -n "$remote_host" ]; then
+    error "--sharedir is not supported together with --host"
+fi
+
 if [ -n "$sharedir" ]; then
     if [ ! -d "$sharedir" ]; then
         error "The path '$sharedir' passed as --sharedir argument is not a directory"
     fi
 fi
 
-source $(dirname $0)/windows/virtual_machine.sh
+if [ ! -f "$ssh_key" ]; then
+    error "The SSH key '$ssh_key' doesn't exist"
+fi
+
+# All `docker` commands then run on the remote host.
+if [ -n "$remote_host" ]; then
+    export DOCKER_HOST="ssh://$remote_host"
+fi
+
+source "$(dirname "$0")/windows/virtual_machine.sh"
 
 image_name=ouisync-runner-windows.$USER
 container_name="ouisync.windows-builder.$(date +'%Y-%m-%dT%H-%M-%S')"
@@ -93,13 +122,25 @@ fi
 # Setup the VM
 vm_ensure_os_and_ssh_installed "$ctx_vm"
 
-vm_install "$ctx_vm" $host_root/install/visual_studio.bat
-vm_install "$ctx_vm" $host_root/install/rust.bat
-vm_install "$ctx_vm" $host_root/install/git.bat
-vm_install "$ctx_vm" $host_root/install/msys2.bat
-vm_install "$ctx_vm" $host_root/install/inno_setup.bat
-vm_install "$ctx_vm" $host_root/install/java.bat
-vm_install "$ctx_vm" $host_root/install/flutter.bat
+install_scripts=(
+    visual_studio.bat
+    rust.bat
+    git.bat
+    msys2.bat
+    inno_setup.bat
+    java.bat
+    flutter.bat
+)
+
+for script in "${install_scripts[@]}"; do
+    vm_install "$ctx_vm" "$host_root/install/$script"
+done
+
+# Start from the state right after the last installation, discarding whatever previous runs left
+# on the disk (sources, build outputs, secrets, ...).
+if [ "$keep_vm_state" != y ]; then
+    vm_restore_snapshot "$ctx_vm" "$(vm_install_snapshot_tag "${install_scripts[-1]}")"
+fi
 
 # Utils
 function cat_vm() (
@@ -117,6 +158,7 @@ start_vm "$ctx_vm"
 # Enter the container on exit
 trap on_exit EXIT
 function on_exit() {
+    print_vm_access_hint
     echo "Entering VM"
     vm_ssh
     stop_vm "$ctx_vm"
@@ -138,7 +180,7 @@ if [ -n "$commit" ]; then
     vm_ssh "cd c:/src; git reset --hard $commit"
     vm_ssh "cd c:/src; git submodule update --init --recursive"
 else
-    vm_rsync_into $srcdir "/c/src"
+    vm_rsync_into "$srcdir" "/c/src"
 fi
 
 # Prepare secrets
@@ -172,8 +214,10 @@ if [ -n "$build_msix" -a "$flavor" != "unofficial" ]; then
 fi
 
 # Collect artifacts
-mkdir -p $out_dir
-for asset in $(vm_ssh "c:/msys64/usr/bin/ls.exe $vm_out_dir"); do
+mkdir -p "$out_dir"
+mapfile -t assets < <(vm_ssh "c:/msys64/usr/bin/ls.exe -1 $vm_out_dir")
+for asset in "${assets[@]}"; do
+    asset=${asset%$'\r'}
     echo "Collecting artifact: $asset"
-    scp "${vm_ssh_options[@]}" -P $host_ssh_port ssh@localhost:"$vm_out_dir/$asset" $out_dir
+    vm_scp_from "$vm_out_dir/$asset" "$out_dir"
 done
