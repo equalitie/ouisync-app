@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ouisync_app/app/models/auth_mode.dart';
-import 'package:ouisync_app/app/utils/session_handle.dart' show SessionProxy;
 import 'package:ouisync_app/app/utils/utils.dart';
 import 'package:ouisync_app/app/utils/settings/v0/v0.dart' as v0;
 import 'package:ouisync_app/app/utils/settings/v1.dart' as v1;
