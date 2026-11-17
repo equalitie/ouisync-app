@@ -6,6 +6,10 @@
 	<array>
 		<string>group.org.equalitie</string>
 	</array>
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>applinks:ouisync.net</string>
+	</array>
 	<key>com.apple.security.network.client</key>
 	<true/>
 </dict>

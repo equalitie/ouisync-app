@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:ouisync/ouisync.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -249,8 +250,31 @@ class _ShareRepositoryState extends State<ShareRepository> with AppLogger {
                       (renderBox?.size ?? Size.zero);
                 }
 
+                // Apple share targets (AirDrop, Messages, ...) only offer link-aware
+                // items for a URI, not for plain text.
+                final isApple = Platform.isIOS || Platform.isMacOS;
+
+                // share_plus on macOS shares the uri as a String, which hides AirDrop,
+                // so use our own native NSURL share there.
+                if (Platform.isMacOS) {
+                  await const MethodChannel(
+                    'org.equalitie.ouisync/share_url',
+                  ).invokeMethod<void>('share', {
+                    'url': _shareToken!,
+                    'x': origin?.left,
+                    'y': origin?.top,
+                    'width': origin?.width,
+                    'height': origin?.height,
+                  });
+                  return;
+                }
+
                 await SharePlus.instance.share(
-                  ShareParams(text: _shareToken!, sharePositionOrigin: origin),
+                  ShareParams(
+                    uri: isApple ? Uri.parse(_shareToken!) : null,
+                    text: isApple ? null : _shareToken!,
+                    sharePositionOrigin: origin,
+                  ),
                 );
               },
             ),

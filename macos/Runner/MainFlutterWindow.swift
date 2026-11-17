@@ -18,6 +18,8 @@ class MainFlutterWindow: NSWindow {
         setupFlutterToExtensionProxy(flutterBinaryMessenger)
         setupFlutterMethodChannel(flutterBinaryMessenger)
         setupFlutterAutostartChannel(flutterBinaryMessenger)
+        setupFlutterUniversalLinkChannel(flutterBinaryMessenger)
+        setupFlutterShareUrlChannel(flutterBinaryMessenger, view: flutterViewController.view)
 
         RegisterGeneratedPlugins(registry: flutterViewController)
 
@@ -27,6 +29,53 @@ class MainFlutterWindow: NSWindow {
     override public func order(_ place: NSWindow.OrderingMode, relativeTo otherWin: Int) {
         super.order(place, relativeTo: otherWin)
         hiddenWindowAtLaunch()
+    }
+
+    // ------------------------------------------------------------------
+    // share_plus on macOS hands `uri` to the share picker as a String, so AirDrop (which needs a
+    // real NSURL) is not offered. Share links as NSURL here instead.
+    // ------------------------------------------------------------------
+    fileprivate func setupFlutterShareUrlChannel(_ binaryMessenger: FlutterBinaryMessenger, view: NSView) {
+        FlutterMethodChannel(name: "org.equalitie.ouisync/share_url", binaryMessenger: binaryMessenger)
+            .setMethodCallHandler { [weak view] call, result in
+                guard call.method == "share",
+                      let args = call.arguments as? [String: Any],
+                      let string = args["url"] as? String,
+                      let url = URL(string: string),
+                      let view = view else {
+                    result(FlutterMethodNotImplemented)
+                    return
+                }
+
+                let rect = NSMakeRect(CGFloat(args["x"] as? Double ?? 0),
+                                      CGFloat(args["y"] as? Double ?? 0),
+                                      CGFloat(args["width"] as? Double ?? 0),
+                                      CGFloat(args["height"] as? Double ?? 0))
+
+                DispatchQueue.main.async {
+                    NSSharingServicePicker(items: [url]).show(relativeTo: rect, of: view, preferredEdge: .maxY)
+                    result(nil)
+                }
+            }
+    }
+
+
+    // Called from MainFlutterWindow once the Flutter engine exists, so the channel is registered
+    // before Dart starts. Looking the view controller up in applicationDidFinishLaunching was
+    // unreliable: the guard failed silently and the channel was never created.
+    fileprivate func setupFlutterUniversalLinkChannel(_ binaryMessenger: FlutterBinaryMessenger) {
+        guard let appDelegate = NSApp.delegate as? AppDelegate else { return }
+        let channel = FlutterMethodChannel(name: appDelegate.universalLinkChannelName,
+                                           binaryMessenger: binaryMessenger)
+        channel.setMethodCallHandler { call, result in
+            switch call.method {
+            case "getInitialLink":
+                result(appDelegate.pendingUniversalLink)
+                appDelegate.pendingUniversalLink = nil
+            default: result(FlutterMethodNotImplemented)
+            }
+        }
+        appDelegate.universalLinkChannel = channel
     }
 
     // ------------------------------------------------------------------
