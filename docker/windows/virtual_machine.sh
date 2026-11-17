@@ -66,19 +66,21 @@ function start_vm() (
 
     docker volume create $volume_name || true
 
+    # The ports are only published on localhost: the web viewer and RDP have a default password.
     docker_run_args=(
         --rm 
         --name $container_name 
-        -p 8006:8006 
+        # Web viewer (noVNC)
+        -p 127.0.0.1:8006:8006 
         # RDP (e.g. Remmina)
         # Username: Docker
         # Password: admin
-        -p 3389:3389/tcp
-        -p 3389:3389/udp
+        -p 127.0.0.1:3389:3389/tcp
+        -p 127.0.0.1:3389:3389/udp
         # SSH, after it is installed, add you'r public key to
         # C:/ProgramData/ssh/administrators_authorized_keys
         # and connect using `ssh ssh@localhost -p $host_ssh_port`
-        -p $host_ssh_port:22/tcp
+        -p 127.0.0.1:$host_ssh_port:22/tcp
         --device=/dev/kvm 
         --device=/dev/net/tun 
         --cap-add NET_ADMIN 
