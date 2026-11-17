@@ -7,6 +7,14 @@ xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.CAMERA"/>
 
+    <!-- Added by the `open_filex` plugin, which we only use on iOS and macOS (Android opens files
+         through our own DocumentsProvider). The app doesn't need them, and Google Play requires a
+         justification for READ_MEDIA_IMAGES and READ_MEDIA_VIDEO. If `open_filex` is ever used on
+         Android, these need to be restored. -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" tools:node="remove"/>
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" tools:node="remove"/>
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" tools:node="remove"/>
+
     <!-- needed by flutter_email_sender -->
     <queries>
         <intent>
