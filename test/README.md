@@ -63,3 +63,30 @@ extension is useful for this.
 [override-custom-fonts]: https://api.flutter.dev/flutter/flutter_test/matchesGoldenFile.html
 [tester-runasync-link]: https://api.flutter.dev/flutter/flutter_test/WidgetTester/runAsync.html
 [tester-link]: https://api.flutter.dev/flutter/flutter_test/WidgetTester-class.html
+
+## Android upgrade test
+
+`upgrade/run.dart` checks that data created in the latest published release survives upgrading to
+the current code. It downloads the release APK from GitHub, re-signs it with a throwaway test key,
+installs it on an emulator, creates repositories in it using [Maestro](https://maestro.dev), then
+installs a build of the current code (signed with the same test key) over it and checks that the
+repositories still open.
+
+Requirements: a running Android emulator, `ANDROID_HOME` pointing to the Android SDK (with
+build-tools), `keytool` and `maestro` on `PATH`.
+
+```bash
+dart run test/upgrade/run.dart                 # upgrade from the latest release
+dart run test/upgrade/run.dart --from v0.9.4   # upgrade from a specific release
+```
+
+The test uninstalls Ouisync from the device first, so it refuses to run on a real device unless
+`--allow-real-device` is passed. Downloads, the test key and logs (logcat and Maestro screenshots)
+go to `build/upgrade_test/`.
+
+It's a standalone script rather than a `flutter test` test, as it needs an emulator and external
+tools. Its name doesn't end in `_test.dart` so `flutter test` doesn't pick it up.
+
+The Maestro flows are in `upgrade/flows/`. `seed.yaml` drives the old release and `verify.yaml`
+the new build, so the selectors in `seed.yaml` must match the UI of the release being upgraded
+from.

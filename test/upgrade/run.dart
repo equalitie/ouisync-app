@@ -11,7 +11,7 @@
 // Requirements: flutter, adb, a running Android emulator, Android SDK build-tools (for
 // `apksigner` and `aapt2`), `keytool` and `maestro` (https://maestro.dev).
 //
-// Usage: dart run util/upgrade_test.dart [--from v0.9.4] [--device emulator-5554]
+// Usage: dart run test/upgrade/run.dart [--from v0.9.4] [--device emulator-5554]
 
 import 'dart:convert';
 import 'dart:io';
@@ -22,11 +22,11 @@ import 'package:cryptography_plus/cryptography_plus.dart';
 import 'package:hex/hex.dart';
 import 'package:path/path.dart' as p;
 
-import 'release.dart' show run, runCapture;
+import '../../util/release.dart' show run, runCapture;
 
 const appId = 'org.equalitie.ouisync';
 const gitHubRepo = 'equalitie/ouisync-app';
-const flowsDir = 'util/upgrade_test';
+const flowsDir = 'test/upgrade/flows';
 const keyAlias = 'upgrade-test';
 const keyPassword = 'upgrade-test';
 
