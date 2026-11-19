@@ -833,9 +833,15 @@ function upgrade_test() {
     # don't get in the way of the test.
     emulator_start --api $api --target default
 
+    # Pass the GitHub token (if any) to raise the GitHub API rate limit, see test/upgrade/run.dart.
+    local env_opts=()
+    if [ -n "${GITHUB_TOKEN-}" ]; then
+        env_opts=(-e GITHUB_TOKEN)
+    fi
+
     log_group_begin "Run upgrade test"
     local result=0
-    exe -w /opt/ouisync-app -t \
+    exe -w /opt/ouisync-app -t "${env_opts[@]}" \
         dart run test/upgrade/run.dart --target-platform android-x64 "${args[@]}" \
         || result=$?
     log_group_end

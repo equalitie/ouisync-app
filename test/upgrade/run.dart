@@ -242,9 +242,18 @@ class Release {
 
 Future<Release> fetchRelease(String? tag) async {
   final path = tag != null ? 'tags/$tag' : 'latest';
+
+  // Unauthenticated GitHub API requests are rate limited per IP address, which may be shared with
+  // other jobs (e.g. on CI). A token, if available, raises the limit.
+  final token = Platform.environment['GITHUB_TOKEN'];
+
   final json = jsonDecode(
     await httpGetString(
       Uri.parse('https://api.github.com/repos/$gitHubRepo/releases/$path'),
+      headers: {
+        if (token != null && token.isNotEmpty)
+          HttpHeaders.authorizationHeader: 'Bearer $token',
+      },
     ),
   ) as Map<String, dynamic>;
 
@@ -292,15 +301,21 @@ Future<File> downloadApk(Release release, Directory workDir) async {
   return file;
 }
 
-Future<String> httpGetString(Uri url) async =>
-    utf8.decode(await httpGetBytes(url));
+Future<String> httpGetString(
+  Uri url, {
+  Map<String, String> headers = const {},
+}) async => utf8.decode(await httpGetBytes(url, headers: headers));
 
-Future<List<int>> httpGetBytes(Uri url) async {
+Future<List<int>> httpGetBytes(
+  Uri url, {
+  Map<String, String> headers = const {},
+}) async {
   final client = HttpClient();
 
   try {
     final request = await client.getUrl(url);
     request.headers.set(HttpHeaders.userAgentHeader, 'ouisync-upgrade-test');
+    headers.forEach(request.headers.set);
     final response = await request.close();
 
     if (response.statusCode != HttpStatus.ok) {
