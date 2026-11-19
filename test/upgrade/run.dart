@@ -45,6 +45,13 @@ Future<void> main(List<String> args) async {
       help: 'Directory for downloads, keys and logs',
       defaultsTo: 'build/upgrade_test',
     )
+    ..addOption(
+      'target-platform',
+      help:
+          'Comma separated list of target platforms to build the current version for, '
+          'passed to `flutter build apk` (default: all). Building only for the device '
+          '(e.g. android-x64 for an emulator) is much faster.',
+    )
     ..addFlag(
       'skip-build',
       help: 'Reuse the previously built APK of the current code',
@@ -89,7 +96,11 @@ Future<void> main(List<String> args) async {
   // New version
   final newApk = (options['skip-build'] as bool)
       ? File(builtApkPath)
-      : await buildCurrentApk(keystore, oldVersionCode + 1);
+      : await buildCurrentApk(
+          keystore,
+          oldVersionCode + 1,
+          targetPlatform: options['target-platform'] as String?,
+        );
 
   final logDir = Directory(p.join(workDir.path, 'logs'));
   if (await logDir.exists()) {
@@ -445,7 +456,11 @@ Future<int> getVersionCode(File apk, Directory buildTools) async {
 }
 
 // `adb install -r` refuses to downgrade, so the build number must be higher than the release's.
-Future<File> buildCurrentApk(TestKeystore keystore, int minBuildNumber) async {
+Future<File> buildCurrentApk(
+  TestKeystore keystore,
+  int minBuildNumber, {
+  String? targetPlatform,
+}) async {
   final pubspecBuildNumber = await _pubspecBuildNumber();
   final buildNumber = pubspecBuildNumber > minBuildNumber
       ? pubspecBuildNumber
@@ -462,6 +477,7 @@ Future<File> buildCurrentApk(TestKeystore keystore, int minBuildNumber) async {
       '--flavor=production',
       '--build-number',
       '$buildNumber',
+      if (targetPlatform != null) '--target-platform=$targetPlatform',
     ],
     environment: {'STORE_FILE': keystore.propertiesFile.path},
   );
