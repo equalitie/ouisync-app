@@ -117,6 +117,18 @@ function print_help() {
             echo "    --platform <linux|android>    Platform for which to run the tests"
             echo "    --api <API>                   Android API level to run in"
             ;;
+        "upgrade-test")
+            echo "Run the Android upgrade test (see test/README.md)"
+            echo
+            echo "Usage: $0 upgrade-test --api <API> [--logs <PATH>] [ARGS...]"
+            echo
+            echo "Options:"
+            echo "    --api <API>                   Android API level to run in"
+            echo "    --logs <PATH>                 Directory to copy the test logs and screenshots to"
+            echo
+            echo "Arguments:"
+            echo "    ARGS                          Additional arguments for test/upgrade/run.dart (e.g. --from <TAG>)"
+            ;;
         "analyze")
             echo "Analyze the dart source code"
             echo
@@ -160,6 +172,7 @@ function print_help() {
             echo "    build                      Build release"
             echo "    unit-test                  Run unit tests"
             echo "    integration-test           Run integration tests"
+            echo "    upgrade-test               Run the Android upgrade test"
             echo "    analyze                    Analyze the dart source code"
             echo "    container                  Explicitly manage the container"
             echo "    warmup                     Warmup cache for android tests and builds"
@@ -595,11 +608,18 @@ function emulator_wait_boot() {
 
 function emulator_start() {
     local api=
+    # System image target (e.g. 'default', 'google_apis'). If omitted, picked based on the API level.
+    local target=
 
     while true; do
         case ${1-} in
             --api)
                 api=${2-}
+                shift
+                shift
+                ;;
+            --target)
+                target=${2-}
                 shift
                 shift
                 ;;
@@ -613,15 +633,17 @@ function emulator_start() {
         error "Missing --api"
     fi
 
-    local target=default
-    case $api in
-        "37.0")
-            target=google_apis
-            ;;
-        "37.1")
-            target=google_apis_ps16k
-            ;;
-    esac
+    if [ -z "$target" ]; then
+        target=default
+        case $api in
+            "37.0")
+                target=google_apis
+                ;;
+            "37.1")
+                target=google_apis_ps16k
+                ;;
+        esac
+    fi
 
     local avd=android-$api
     local system_image="system-images;android-$api;$target;x86_64"
@@ -777,6 +799,59 @@ function integration_test_android() {
     fi
 }
 
+####################################################################################################
+# Run the Android upgrade test (see test/upgrade)
+function upgrade_test() {
+    local api=
+    local logs_dir=
+    local args=()
+
+    while [ $# -gt 0 ]; do
+        case $1 in
+            --api)
+                api="$2"
+                shift
+                ;;
+            --logs)
+                logs_dir="$2"
+                shift
+                ;;
+            *)
+                args+=("$1")
+                ;;
+        esac
+        shift
+    done
+
+    if [ -z "$api" ]; then
+        error "Missing --api"
+    fi
+
+    init
+
+    # Use the plain image (without Google apps), so that things like the keyboard's stylus prompt
+    # don't get in the way of the test.
+    emulator_start --api $api --target default
+
+    log_group_begin "Run upgrade test"
+    local result=0
+    exe -w /opt/ouisync-app -t \
+        dart run test/upgrade/run.dart --target-platform android-x64 "${args[@]}" \
+        || result=$?
+    log_group_end
+
+    if [ -n "$logs_dir" ]; then
+        log_group_begin "Collect logs"
+        mkdir -p "$logs_dir"
+        dock cp $container_name:/opt/ouisync-app/build/upgrade_test/logs/. "$logs_dir" || true
+        log_group_end
+    fi
+
+    emulator_stop
+
+    return $result
+}
+
 function integration_test_linux() {
     init
     exe -w /opt/ouisync-app -t flutter test -d linux integration_test $@
@@ -912,6 +987,9 @@ case "${1-}" in
         ;;
     integration-test|integration-tests|it)
         integration_test ${@:2}
+        ;;
+    upgrade-test)
+        upgrade_test ${@:2}
         ;;
     analyze)
         analyze ${@:2}
