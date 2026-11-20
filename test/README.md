@@ -89,4 +89,5 @@ tools. Its name doesn't end in `_test.dart` so `flutter test` doesn't pick it up
 
 The Maestro flows are in `upgrade/flows/`. `seed.yaml` drives the old release and `verify.yaml`
 the new build, so the selectors in `seed.yaml` must match the UI of the release being upgraded
-from.
+from. They tap buttons by their accessibility labels ("Next" in the onboarding, "Add repository",
+"Repository settings"), which were added in v0.9.5, so `--from` older releases doesn't work.
