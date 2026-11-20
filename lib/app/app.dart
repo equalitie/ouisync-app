@@ -82,7 +82,10 @@ class _AppState extends State<App> {
         );
       } else if (snapshot.hasError) {
         return _buildMaterialApp(
-          home: StartupErrorScreen(error: snapshot.error!),
+          home: StartupErrorScreen(
+            error: snapshot.error!,
+            stackTrace: snapshot.stackTrace,
+          ),
         );
       } else {
         return _buildMaterialApp(home: LoadingScreen());
@@ -380,9 +383,10 @@ class LoadingScreen extends StatelessWidget {
 
 /// Shown instead of the app when it fails to start.
 class StartupErrorScreen extends StatelessWidget {
-  const StartupErrorScreen({required this.error, super.key});
+  const StartupErrorScreen({required this.error, this.stackTrace, super.key});
 
   final Object error;
+  final StackTrace? stackTrace;
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -409,6 +413,13 @@ class StartupErrorScreen extends StatelessWidget {
               error.toString(),
               style: Theme.of(context).textTheme.bodySmall,
             ),
+            if (stackTrace != null) ...[
+              const SizedBox(height: 16.0),
+              SelectableText(
+                stackTrace.toString(),
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
           ],
         ),
       ),
