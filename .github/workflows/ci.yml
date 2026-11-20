@@ -293,13 +293,15 @@ jobs:
         with:
           submodules: recursive
 
+      # API 36, not 37.0: on 37.0 the emulator's software renderers crash on this runner as soon as
+      # the test sends the app to the background (see `upgrade_test` in docker/linux.sh).
       - name: Run upgrade test
         run: |
           ./docker/linux.sh \
             --container ouisync-upgrade-test-android-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT \
             --srcdir . \
             --cache shared \
-            upgrade-test --api 37.0 --logs upgrade-test-logs
+            upgrade-test --api 36 --logs upgrade-test-logs
         env:
           # Raises the GitHub API rate limit when looking up the latest release
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
