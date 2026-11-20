@@ -872,12 +872,18 @@ function upgrade_test() {
     if [ -n "$logs_dir" ]; then
         log_group_begin "Collect logs"
 
-        # Emulator crash reports, if any
+        # Emulator crash reports and the adb server log (it records server restarts and dropped
+        # devices), if any
         dock exec $container_name sh -c '
-            dst=/opt/ouisync-app/build/upgrade_test/logs/emulator-crash
+            logs=/opt/ouisync-app/build/upgrade_test/logs
             for src in /tmp/android-*/emu-crash-*.db /root/.android/breakpad; do
                 if [ -e "$src" ]; then
-                    mkdir -p "$dst" && cp -r "$src" "$dst/"
+                    mkdir -p "$logs/emulator-crash" && cp -r "$src" "$logs/emulator-crash/"
+                fi
+            done
+            for src in /tmp/adb.*.log; do
+                if [ -e "$src" ]; then
+                    mkdir -p "$logs" && cp "$src" "$logs/"
                 fi
             done
         ' || true
