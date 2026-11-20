@@ -861,7 +861,10 @@ function upgrade_test() {
 
     log_group_begin "Run upgrade test"
     local result=0
-    exe -w /opt/ouisync-app -t "${env_opts[@]}" \
+    # Don't give the test a terminal (no `-t`). On a terminal, Maestro shows an interactive progress
+    # view, which most likely kept the test's own timeout from working, see `runMaestro` in
+    # test/upgrade/run.dart.
+    exe -w /opt/ouisync-app "${env_opts[@]}" \
         dart run test/upgrade/run.dart --target-platform android-x64 "${args[@]}" \
         || result=$?
     log_group_end

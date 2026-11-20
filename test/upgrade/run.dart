@@ -237,11 +237,15 @@ Future<void> runMaestro(Adb adb, String flow, Directory logDir) async {
 
   print('\$ maestro ${args.join(' ')}');
 
-  final process = await Process.start(
-    'maestro',
-    args,
-    mode: ProcessStartMode.inheritStdio,
-  );
+  // Run Maestro with its output going through pipes to this script, which prints it, instead of
+  // letting it write to our terminal directly. On a terminal, Maestro shows an interactive
+  // progress view that it keeps redrawing, and for that it changes the terminal's settings. On
+  // CI, when the emulator disappeared, the timeout below never fired and this script printed
+  // nothing more, most likely because of that. Without a terminal, Maestro prints plain lines and
+  // can't affect this script.
+  final process = await Process.start('maestro', args);
+  final stdoutDone = process.stdout.forEach(stdout.add);
+  final stderrDone = process.stderr.forEach(stderr.add);
 
   final status = await process.exitCode.timeout(
     maestroTimeout,
@@ -250,6 +254,10 @@ Future<void> runMaestro(Adb adb, String flow, Directory logDir) async {
       throw 'Maestro flow $flow timed out after ${maestroTimeout.inMinutes} minutes';
     },
   );
+
+  // Not awaited on timeout: a leftover child process could keep the pipes open.
+  await stdoutDone;
+  await stderrDone;
 
   if (status != 0) {
     throw 'Maestro flow $flow failed with exit code $status';
