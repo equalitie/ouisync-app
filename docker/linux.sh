@@ -672,16 +672,21 @@ function emulator_start() {
     log_group_begin "Launch emulator"
 
     # Launch the emulator in separate process. Prefix its output with '🤖' to distinguish it from
-    # other output.
-    exe emulator                    \
-        -avd $avd                   \
-        -no-metrics                 \
-        -no-snapshot                \
-        -gpu $gpu                   \
-        -no-window                  \
-        -no-audio                   \
-        -no-boot-anim               \
-        | sed 's/^/🤖 /' &
+    # other output. Print its exit status when it ends (e.g. 134 = aborted, 137 = killed, 139 =
+    # segfault) and don't buffer the output, so it shows up at the time the emulator printed it.
+    (
+        status=0
+        exe emulator                    \
+            -avd $avd                   \
+            -no-metrics                 \
+            -no-snapshot                \
+            -gpu $gpu                   \
+            -no-window                  \
+            -no-audio                   \
+            -no-boot-anim               \
+            || status=$?
+        echo "Emulator exited with status $status"
+    ) | sed -u 's/^/🤖 /' &
 
     emulator_wait_boot
 
@@ -860,12 +865,24 @@ function upgrade_test() {
 
     if [ -n "$logs_dir" ]; then
         log_group_begin "Collect logs"
+
+        # Emulator crash reports, if any
+        dock exec $container_name sh -c '
+            dst=/opt/ouisync-app/build/upgrade_test/logs/emulator-crash
+            for src in /tmp/android-*/emu-crash-*.db /root/.android/breakpad; do
+                if [ -e "$src" ]; then
+                    mkdir -p "$dst" && cp -r "$src" "$dst/"
+                fi
+            done
+        ' || true
+
         mkdir -p "$logs_dir"
         dock cp $container_name:/opt/ouisync-app/build/upgrade_test/logs/. "$logs_dir" || true
         log_group_end
     fi
 
-    emulator_stop
+    # The emulator may have already ended (e.g. crashed), which would make this fail.
+    emulator_stop || true
 
     return $result
 }
