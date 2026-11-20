@@ -610,8 +610,6 @@ function emulator_start() {
     local api=
     # System image target (e.g. 'default', 'google_apis'). If omitted, picked based on the API level.
     local target=
-    # Emulator rendering mode (the `-gpu` option)
-    local gpu=swiftshader_indirect
 
     while true; do
         case ${1-} in
@@ -622,11 +620,6 @@ function emulator_start() {
                 ;;
             --target)
                 target=${2-}
-                shift
-                shift
-                ;;
-            --gpu)
-                gpu=${2-}
                 shift
                 shift
                 ;;
@@ -680,7 +673,7 @@ function emulator_start() {
             -avd $avd                   \
             -no-metrics                 \
             -no-snapshot                \
-            -gpu $gpu                   \
+            -gpu swiftshader_indirect   \
             -no-window                  \
             -no-audio                   \
             -no-boot-anim               \
