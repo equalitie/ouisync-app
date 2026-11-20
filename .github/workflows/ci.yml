@@ -285,6 +285,8 @@ jobs:
     name: "run upgrade test on android"
     runs-on: self-hosted
     needs: [build_integration_test_android] # to seed gradle cache
+    # A successful run takes about 20 minutes. Fail hung runs instead of blocking a runner for hours.
+    timeout-minutes: 45
 
     steps:
       - uses: actions/checkout@v7

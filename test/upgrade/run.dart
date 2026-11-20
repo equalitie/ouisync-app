@@ -123,8 +123,14 @@ Future<void> main(List<String> args) async {
 
     print('Upgrade test passed');
   } catch (e) {
-    final logcat = File(p.join(logDir.path, 'logcat.txt'));
-    await logcat.writeAsString(await adb.capture(['logcat', '-d']));
+    // The device may be gone (e.g. the emulator crashed), don't let that hide the original error.
+    try {
+      final logcat = File(p.join(logDir.path, 'logcat.txt'));
+      await logcat.writeAsString(await adb.capture(['logcat', '-d']));
+    } catch (e) {
+      print('Failed to collect logcat: $e');
+    }
+
     print('Upgrade test failed: $e');
     print('Logs and screenshots are in ${logDir.path}');
     exitCode = 1;
@@ -216,15 +222,39 @@ Future<void> prepareDevice(Adb adb) async {
   ]);
 }
 
-Future<void> runMaestro(Adb adb, String flow, Directory logDir) =>
-    _run('maestro', [
-      '--device',
-      adb.serial,
-      'test',
-      '--debug-output',
-      p.join(logDir.path, p.basenameWithoutExtension(flow)),
-      p.join(flowsDir, flow),
-    ]);
+// Maestro can hang instead of exiting, e.g. when the device disappears during a flow.
+const maestroTimeout = Duration(minutes: 10);
+
+Future<void> runMaestro(Adb adb, String flow, Directory logDir) async {
+  final args = [
+    '--device',
+    adb.serial,
+    'test',
+    '--debug-output',
+    p.join(logDir.path, p.basenameWithoutExtension(flow)),
+    p.join(flowsDir, flow),
+  ];
+
+  print('\$ maestro ${args.join(' ')}');
+
+  final process = await Process.start(
+    'maestro',
+    args,
+    mode: ProcessStartMode.inheritStdio,
+  );
+
+  final status = await process.exitCode.timeout(
+    maestroTimeout,
+    onTimeout: () {
+      process.kill(ProcessSignal.sigkill);
+      throw 'Maestro flow $flow timed out after ${maestroTimeout.inMinutes} minutes';
+    },
+  );
+
+  if (status != 0) {
+    throw 'Maestro flow $flow failed with exit code $status';
+  }
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 //
