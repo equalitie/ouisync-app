@@ -377,6 +377,10 @@ function auto_start_container() {
     local socket_dir=/tmp/ouisync
     local socket="$socket_dir/$container_name.keep-alive.sock"
 
+    if ! host_exe command -v socat > /dev/null; then
+        error "'socat' is not installed${host:+ on $host}, it's needed to keep the container running"
+    fi
+
     host_exe mkdir -p "$socket_dir"
     host_exe rm -f $socket
     host_exe socat PIPE UNIX-LISTEN:$socket &
