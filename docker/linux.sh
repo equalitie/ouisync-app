@@ -844,11 +844,14 @@ function upgrade_test() {
     # Use the plain image (without Google apps), so that things like the keyboard's stylus prompt
     # don't get in the way of the test.
     #
-    # With the default `swiftshader_indirect` rendering, `system_server` on API 37.0 aborts on an
-    # assertion in the emulator's graphics buffer mapper (`mapper.ranchu: Assertion failed:
-    # !rcEnc->featureInfo()->hasReadColorBufferDma`) whenever an app goes to the background, which
-    # the test does. Use the ANGLE based software renderer instead.
-    emulator_start --api $api --target default --gpu swangle_indirect
+    # Render in software inside the guest. The host side renderers failed as soon as the app drew
+    # something:
+    # - With `swiftshader_indirect`, `system_server` on API 37.0 aborts on an assertion in the
+    #   emulator's graphics buffer mapper (`mapper.ranchu: Assertion failed:
+    #   !rcEnc->featureInfo()->hasReadColorBufferDma`) whenever an app goes to the background.
+    # - With `swangle_indirect`, the emulator process itself ended silently right after the app
+    #   started.
+    emulator_start --api $api --target default --gpu guest
 
     # Pass the GitHub token (if any) to raise the GitHub API rate limit, see test/upgrade/run.dart.
     local env_opts=()
