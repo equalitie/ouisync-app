@@ -52,28 +52,3 @@ Click on your profile icon > `Settings` > `Developer settings` > `Personal acces
 tokens` > `Tokens` and check the `write:packages` scope.
 
 Write it to a file and pass it to `release.dart` as the `--token-file` argument.
-
-
-# Android upgrade test
-
-`upgrade_test.dart` checks that data created in the latest published release survives upgrading to
-the current code. It downloads the release APK from GitHub, re-signs it with a throwaway test key,
-installs it on an emulator, creates repositories in it using [Maestro](https://maestro.dev), then
-installs a build of the current code (signed with the same test key) over it and checks that the
-repositories still open.
-
-Requirements: a running Android emulator, `ANDROID_HOME` pointing to the Android SDK (with
-build-tools), `keytool` and `maestro` on `PATH`.
-
-```bash
-dart run util/upgrade_test.dart                 # upgrade from the latest release
-dart run util/upgrade_test.dart --from v0.9.4   # upgrade from a specific release
-```
-
-The test uninstalls Ouisync from the device first, so it refuses to run on a real device unless
-`--allow-real-device` is passed. Downloads, the test key and logs (logcat and Maestro screenshots)
-go to `build/upgrade_test/`.
-
-The Maestro flows are in `upgrade_test/`. `seed.yaml` drives the old release and `verify.yaml`
-the new build, so the selectors in `seed.yaml` must match the UI of the release being upgraded
-from.

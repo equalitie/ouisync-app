@@ -281,6 +281,42 @@ jobs:
       #   # Upload only when the tests fail
       #   if: failure() || cancelled()
 
+  upgrade_test_android:
+    name: "run upgrade test on android"
+    runs-on: self-hosted
+    needs: [build_integration_test_android] # to seed gradle cache
+    # A successful run takes about 20 minutes. Fail hung runs instead of blocking a runner for hours.
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          submodules: recursive
+
+      # API 36, not 37.0: on 37.0 the emulator's software renderers crash on this runner as soon as
+      # the test sends the app to the background (see `upgrade_test` in docker/linux.sh).
+      - name: Run upgrade test
+        run: |
+          ./docker/linux.sh \
+            --container ouisync-upgrade-test-android-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT \
+            --srcdir . \
+            --cache shared \
+            upgrade-test --api 36 --logs upgrade-test-logs
+        env:
+          # Raises the GitHub API rate limit when looking up the latest release
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload logs
+        uses: actions/upload-artifact@v7
+        with:
+          name: upgrade-test-logs
+          path: upgrade-test-logs
+          # Maestro puts its screenshots and hierarchies in `.maestro` directories
+          include-hidden-files: true
+          if-no-files-found: ignore
+        # Upload only when the test fails
+        if: failure()
+
   build_integration_test_android:
     name: "build integration tests for android"
     runs-on: self-hosted

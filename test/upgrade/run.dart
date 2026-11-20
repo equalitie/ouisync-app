@@ -11,7 +11,7 @@
 // Requirements: flutter, adb, a running Android emulator, Android SDK build-tools (for
 // `apksigner` and `aapt2`), `keytool` and `maestro` (https://maestro.dev).
 //
-// Usage: dart run util/upgrade_test.dart [--from v0.9.4] [--device emulator-5554]
+// Usage: dart run test/upgrade/run.dart [--from v0.9.4] [--device emulator-5554]
 
 import 'dart:convert';
 import 'dart:io';
@@ -22,11 +22,11 @@ import 'package:cryptography_plus/cryptography_plus.dart';
 import 'package:hex/hex.dart';
 import 'package:path/path.dart' as p;
 
-import 'release.dart' show run, runCapture;
+import '../../util/release.dart' show run, runCapture;
 
 const appId = 'org.equalitie.ouisync';
 const gitHubRepo = 'equalitie/ouisync-app';
-const flowsDir = 'util/upgrade_test';
+const flowsDir = 'test/upgrade/flows';
 const keyAlias = 'upgrade-test';
 const keyPassword = 'upgrade-test';
 
@@ -44,6 +44,13 @@ Future<void> main(List<String> args) async {
       'work-dir',
       help: 'Directory for downloads, keys and logs',
       defaultsTo: 'build/upgrade_test',
+    )
+    ..addOption(
+      'target-platform',
+      help:
+          'Comma separated list of target platforms to build the current version for, '
+          'passed to `flutter build apk` (default: all). Building only for the device '
+          '(e.g. android-x64 for an emulator) is much faster.',
     )
     ..addFlag(
       'skip-build',
@@ -89,7 +96,11 @@ Future<void> main(List<String> args) async {
   // New version
   final newApk = (options['skip-build'] as bool)
       ? File(builtApkPath)
-      : await buildCurrentApk(keystore, oldVersionCode + 1);
+      : await buildCurrentApk(
+          keystore,
+          oldVersionCode + 1,
+          targetPlatform: options['target-platform'] as String?,
+        );
 
   final logDir = Directory(p.join(workDir.path, 'logs'));
   if (await logDir.exists()) {
@@ -112,8 +123,14 @@ Future<void> main(List<String> args) async {
 
     print('Upgrade test passed');
   } catch (e) {
-    final logcat = File(p.join(logDir.path, 'logcat.txt'));
-    await logcat.writeAsString(await adb.capture(['logcat', '-d']));
+    // The device may be gone (e.g. the emulator crashed), don't let that hide the original error.
+    try {
+      final logcat = File(p.join(logDir.path, 'logcat.txt'));
+      await logcat.writeAsString(await adb.capture(['logcat', '-d']));
+    } catch (e) {
+      print('Failed to collect logcat: $e');
+    }
+
     print('Upgrade test failed: $e');
     print('Logs and screenshots are in ${logDir.path}');
     exitCode = 1;
@@ -205,15 +222,47 @@ Future<void> prepareDevice(Adb adb) async {
   ]);
 }
 
-Future<void> runMaestro(Adb adb, String flow, Directory logDir) =>
-    _run('maestro', [
-      '--device',
-      adb.serial,
-      'test',
-      '--debug-output',
-      p.join(logDir.path, p.basenameWithoutExtension(flow)),
-      p.join(flowsDir, flow),
-    ]);
+// Maestro can hang instead of exiting, e.g. when the device disappears during a flow.
+const maestroTimeout = Duration(minutes: 10);
+
+Future<void> runMaestro(Adb adb, String flow, Directory logDir) async {
+  final args = [
+    '--device',
+    adb.serial,
+    'test',
+    '--debug-output',
+    p.join(logDir.path, p.basenameWithoutExtension(flow)),
+    p.join(flowsDir, flow),
+  ];
+
+  print('\$ maestro ${args.join(' ')}');
+
+  // Run Maestro with its output going through pipes to this script, which prints it, instead of
+  // letting it write to our terminal directly. On a terminal, Maestro shows an interactive
+  // progress view that it keeps redrawing, and for that it changes the terminal's settings. On
+  // CI, when the emulator disappeared, the timeout below never fired and this script printed
+  // nothing more, most likely because of that. Without a terminal, Maestro prints plain lines and
+  // can't affect this script.
+  final process = await Process.start('maestro', args);
+  final stdoutDone = process.stdout.forEach(stdout.add);
+  final stderrDone = process.stderr.forEach(stderr.add);
+
+  final status = await process.exitCode.timeout(
+    maestroTimeout,
+    onTimeout: () {
+      process.kill(ProcessSignal.sigkill);
+      throw 'Maestro flow $flow timed out after ${maestroTimeout.inMinutes} minutes';
+    },
+  );
+
+  // Not awaited on timeout: a leftover child process could keep the pipes open.
+  await stdoutDone;
+  await stderrDone;
+
+  if (status != 0) {
+    throw 'Maestro flow $flow failed with exit code $status';
+  }
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -231,9 +280,18 @@ class Release {
 
 Future<Release> fetchRelease(String? tag) async {
   final path = tag != null ? 'tags/$tag' : 'latest';
+
+  // Unauthenticated GitHub API requests are rate limited per IP address, which may be shared with
+  // other jobs (e.g. on CI). A token, if available, raises the limit.
+  final token = Platform.environment['GITHUB_TOKEN'];
+
   final json = jsonDecode(
     await httpGetString(
       Uri.parse('https://api.github.com/repos/$gitHubRepo/releases/$path'),
+      headers: {
+        if (token != null && token.isNotEmpty)
+          HttpHeaders.authorizationHeader: 'Bearer $token',
+      },
     ),
   ) as Map<String, dynamic>;
 
@@ -281,15 +339,21 @@ Future<File> downloadApk(Release release, Directory workDir) async {
   return file;
 }
 
-Future<String> httpGetString(Uri url) async =>
-    utf8.decode(await httpGetBytes(url));
+Future<String> httpGetString(
+  Uri url, {
+  Map<String, String> headers = const {},
+}) async => utf8.decode(await httpGetBytes(url, headers: headers));
 
-Future<List<int>> httpGetBytes(Uri url) async {
+Future<List<int>> httpGetBytes(
+  Uri url, {
+  Map<String, String> headers = const {},
+}) async {
   final client = HttpClient();
 
   try {
     final request = await client.getUrl(url);
     request.headers.set(HttpHeaders.userAgentHeader, 'ouisync-upgrade-test');
+    headers.forEach(request.headers.set);
     final response = await request.close();
 
     if (response.statusCode != HttpStatus.ok) {
@@ -445,7 +509,11 @@ Future<int> getVersionCode(File apk, Directory buildTools) async {
 }
 
 // `adb install -r` refuses to downgrade, so the build number must be higher than the release's.
-Future<File> buildCurrentApk(TestKeystore keystore, int minBuildNumber) async {
+Future<File> buildCurrentApk(
+  TestKeystore keystore,
+  int minBuildNumber, {
+  String? targetPlatform,
+}) async {
   final pubspecBuildNumber = await _pubspecBuildNumber();
   final buildNumber = pubspecBuildNumber > minBuildNumber
       ? pubspecBuildNumber
@@ -462,6 +530,7 @@ Future<File> buildCurrentApk(TestKeystore keystore, int minBuildNumber) async {
       '--flavor=production',
       '--build-number',
       '$buildNumber',
+      if (targetPlatform != null) '--target-platform=$targetPlatform',
     ],
     environment: {'STORE_FILE': keystore.propertiesFile.path},
   );

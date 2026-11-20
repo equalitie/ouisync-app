@@ -73,6 +73,18 @@ RUN rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux
 # Install some rust utilities
 RUN cargo install --force cargo-sweep cargo-ndk
 
+# Install Maestro (UI test automation, used by the Android upgrade test in `test/upgrade`)
+# https://github.com/mobile-dev-inc/maestro/releases
+ARG MAESTRO_VERSION=2.12.1
+ARG MAESTRO_SHA256=54dbb0716425626604973cbb374c585ca30272375d9ce15177a1152765ddd9d7
+RUN wget -q https://github.com/mobile-dev-inc/maestro/releases/download/cli-${MAESTRO_VERSION}/maestro.zip -P /tmp && \
+    echo "${MAESTRO_SHA256}  /tmp/maestro.zip" | sha256sum -c - && \
+    unzip -q /tmp/maestro.zip -d /opt && \
+    rm /tmp/maestro.zip
+ENV PATH="/opt/maestro/bin:$PATH"
+ENV MAESTRO_CLI_NO_ANALYTICS=1
+ENV MAESTRO_CLI_ANALYSIS_NOTIFICATION_DISABLED=true
+
 # Expose Java
 # Sentry started to require JDK even for non Android builds. This requirement
 # might be removed in the future.

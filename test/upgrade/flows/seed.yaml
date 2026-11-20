@@ -10,13 +10,11 @@ env:
 
 # Onboarding
 - tapOn: "(?s)English(\\n.*)?"
-# The onboarding arrows have no accessibility label in v0.9.4, so tap the button to the right of
-# the page indicator. Swiping doesn't work: it can't leave the last page.
+# Swiping doesn't work: it can't leave the last page.
 - repeat:
     times: 3
     commands:
-      - tapOn:
-          rightOf: "Page \\d+ of \\d+"
+      - tapOn: "Next"
 - tapOn: "(?i)i agree"
 
 # Random secret stored on device (the default). Needs the master key to open.

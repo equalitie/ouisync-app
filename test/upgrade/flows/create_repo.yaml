@@ -11,19 +11,7 @@ appId: org.equalitie.ouisync
     when:
       notVisible: "(?is)create repository(\\n.*)?"
     commands:
-      # The "+" button got an accessibility label after v0.9.4. Releases without it are tapped by
-      # position. The fallback comes first for the same reason as in `set_password.yaml`.
-      - runFlow:
-          when:
-            notVisible: "Add repository"
-          commands:
-            - tapOn:
-                point: "91%,93%"
-      - runFlow:
-          when:
-            visible: "Add repository"
-          commands:
-            - tapOn: "Add repository"
+      - tapOn: "Add repository"
 - tapOn: "(?is)create repository(\\n.*)?"
 - tapOn: "Name:? ?"
 - inputText: ${NAME}
