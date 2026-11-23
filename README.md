@@ -30,7 +30,7 @@ You'll need [Flutter](https://docs.flutter.dev/get-started/install), [Rust](http
 
 * Windows: [Dokan](https://github.com/dokan-dev/dokany/releases) (User mode file system)
 * Android: [SDK](https://developer.android.com/) and [NDK](https://developer.android.com/studio/projects/install-ndk)
-* Linux: `sudo apt-get install pkg-config libfuse-dev appindicator3-0.1 libsecret-1-dev`
+* Linux: `sudo apt-get install pkg-config libfuse-dev libayatana-appindicator3-dev libsecret-1-dev`
 * macOS/iOS: See [darwin/README.md](darwin/README.md) for setup and build instructions
 
 ### Linux, Windows, Android

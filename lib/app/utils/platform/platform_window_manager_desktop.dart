@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:dbus/dbus.dart';
 import 'package:flutter/material.dart';
 import 'package:system_tray/system_tray.dart' as stray;
 import 'package:window_manager/window_manager.dart';
@@ -120,6 +121,11 @@ class PlatformWindowManagerDesktop
       _showWindow = args[0] == Constants.launchAtStartupArg ? false : true;
     }
 
+    // Without a tray there would be no way to show the window.
+    if (!_showWindow && !await _isTrayAvailable()) {
+      _showWindow = true;
+    }
+
     /// For some reason, if we use a constant value for the title in the
     /// WindowsOptions, the app hangs. This is true for the localized strings,
     /// or a regular constant value in Constants.
@@ -158,9 +164,16 @@ class PlatformWindowManagerDesktop
     // handler is called. Window close prevention is still enabled so the close handler can
     // complete. Afterwards the close prevention is disabled and the window is closed again, which
     // then actually closes the window and exits the app.
+    //
+    // If there is no tray, closing the window exits the app, as there would be no way to show the
+    // window again.
     switch (_state) {
       case _State.open:
-        await _toggleVisible(false);
+        if (await _isTrayAvailable()) {
+          await _toggleVisible(false);
+        } else {
+          await _close();
+        }
       case _State.closing:
         final onClose = _onClose;
         if (onClose != null) {
@@ -172,6 +185,33 @@ class PlatformWindowManagerDesktop
         await windowManager.close();
       case _State.closed:
       // let the window manager destroy the window
+    }
+  }
+
+  /// Whether the tray icon can be shown, so the window can be hidden to it.
+  ///
+  /// On Linux the tray icon is an AppIndicator, which is shown only when a tray host is registered
+  /// on the session bus. Some desktops don't have one by default, e.g. GNOME on Debian, where it
+  /// requires the AppIndicator extension. Checked every time as the host can come and go while
+  /// the app is running.
+  ///
+  /// Not detected: desktops providing only the legacy XEmbed tray, which AppIndicator falls back
+  /// to when there is no tray host. There the icon is shown but this returns `false`.
+  Future<bool> _isTrayAvailable() async {
+    if (!Platform.isLinux) {
+      return true;
+    }
+
+    final client = DBusClient.session();
+
+    try {
+      return await client.nameHasOwner('org.kde.StatusNotifierWatcher');
+    } catch (e) {
+      // Without the session bus there is no tray host either.
+      loggy.warning('Failed to check whether the system tray is available: $e');
+      return false;
+    } finally {
+      await client.close();
     }
   }
 

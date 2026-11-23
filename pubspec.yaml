@@ -39,6 +39,7 @@ dependencies:
   cross_file: ^0.3.3
   cryptography_plus: ^3.0.0
   cupertino_icons: ^2.0.0
+  dbus: ^0.8.0
   desktop_drop: ^0.8.0
   device_info_plus: ^13.2.0
   dns_client: ^1.3.1
