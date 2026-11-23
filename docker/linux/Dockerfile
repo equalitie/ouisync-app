@@ -13,7 +13,7 @@ RUN apt-get update && \
         build-essential cmake ninja-build clang pkg-config \
         git xxd unzip \
         wget curl rsync \
-        libgtk-3-dev libfuse-dev libappindicator3-dev libsecret-1-dev libcurl4-openssl-dev \
+        libgtk-3-dev libfuse-dev libayatana-appindicator3-dev libsecret-1-dev libcurl4-openssl-dev \
         python3-minimal python-is-python3 \
         openjdk-${JAVA_VERSION}-jdk \
         libpulse0 \
