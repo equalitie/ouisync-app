@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Linux: When no system tray is available (e.g. GNOME without the AppIndicator
+  extension), closing the window now quits the app instead of leaving it
+  running in the background with no way to open the window again
+
 ## [v0.9.5](https://github.com/equalitie/ouisync-app/compare/v0.9.4...v0.9.5) - 2026-11-18
 
 - Update [Ouisync library](https://github.com/equalitie/ouisync) to [v0.10.2](https://github.com/equalitie/ouisync/blob/master/CHANGELOG.md#v0.10.2)
