@@ -420,21 +420,23 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     }
   }
 
-  Future<void> saveFile({
+  /// Returns `true` if the whole file was written, `false` if it failed or
+  /// was canceled.
+  Future<bool> saveFile({
     required String filePath,
     required int length,
     required Stream<List<int>> fileByteStream,
   }) async {
     if (state.uploads.containsKey(filePath)) {
       _onNotify?.call(S.current.messageFileIsDownloading);
-      return;
+      return false;
     }
 
     final file = await _createFile(filePath);
 
     if (file == null) {
       _onNotify?.call(S.current.messageNewFileError(filePath));
-      return;
+      return false;
     }
 
     loggy.debug('Saving file $filePath');
@@ -462,7 +464,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     } catch (e, st) {
       loggy.debug('Save file to $filePath failed: ${e.toString()}', e, st);
       _onNotify?.call(S.current.messageWritingFileError(filePath));
-      return;
+      return false;
     } finally {
       await file.close();
       await refresh();
@@ -474,10 +476,13 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
 
     if (job.state.cancel) {
       _onNotify?.call(S.current.messageWritingFileCanceled(filePath));
+      return false;
     }
+
+    return true;
   }
 
-  Future<void> replaceFile({
+  Future<bool> replaceFile({
     required String filePath,
     required int length,
     required Stream<List<int>> fileByteStream,
@@ -488,7 +493,7 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
       loggy.error('Failed deleting file $filePath:', e, st);
     }
 
-    await saveFile(
+    return await saveFile(
       filePath: filePath,
       length: length,
       fileByteStream: fileByteStream,
@@ -793,13 +798,15 @@ class RepoCubit extends Cubit<RepoState> with CubitActions, AppLogger {
     final originFile = await openFile(source);
     final originFileLength = await originFile.getLength();
 
-    await (destinationRepoCubit ?? this).saveFile(
-      filePath: destination,
-      length: originFileLength,
-      fileByteStream: originFile.readStream(),
-    );
-
-    return true;
+    try {
+      return await (destinationRepoCubit ?? this).saveFile(
+        filePath: destination,
+        length: originFileLength,
+        fileByteStream: originFile.readStream(),
+      );
+    } finally {
+      await originFile.close();
+    }
   }
 
   Future<bool> _copyFolder(

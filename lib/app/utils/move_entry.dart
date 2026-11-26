@@ -75,13 +75,18 @@ class MoveEntry with AppLogger {
       final file = await _originRepoCubit.openFile(sourcePath);
       final fileLength = await file.getLength();
 
-      await (destinationRepoCubit ?? _originRepoCubit).replaceFile(
-        filePath: destinationPath,
-        length: fileLength,
-        fileByteStream: file.readStream(),
-      );
+      final replaced = await (destinationRepoCubit ?? _originRepoCubit)
+          .replaceFile(
+            filePath: destinationPath,
+            length: fileLength,
+            fileByteStream: file.readStream(),
+          );
+      await file.close();
 
-      await _originRepoCubit.deleteFile(sourcePath);
+      // Keep the source if the write failed or was canceled.
+      if (replaced) {
+        await _originRepoCubit.deleteFile(sourcePath);
+      }
     } catch (e, st) {
       loggy.debug(e, st);
     }
