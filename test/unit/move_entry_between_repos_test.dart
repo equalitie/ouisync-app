@@ -112,6 +112,47 @@ void main() {
     }
   });
 
+  test('Cancel moving file to other repo preserves the source', () async {
+    // Large enough to be read in many chunks, so the move doesn't complete
+    // before the cancel takes effect.
+    final content = List.generate(64 * 1024, (i) => i % 256);
+
+    {
+      final file = await originRepo.createFile('file1.txt');
+      await file.write(0, content);
+      await file.close();
+    }
+
+    // Cancel the upload as soon as it starts.
+    final subscription = otherRepoCubit.stream
+        .where((state) => state.uploads.isNotEmpty)
+        .listen((state) => state.uploads.values.first.cancel());
+
+    final result = await originRepoCubit.moveEntryToRepo(
+      destinationRepoCubit: otherRepoCubit,
+      type: EntryType.file,
+      source: '/file1.txt',
+      destination: 'file1.txt',
+      recursive: true,
+    );
+
+    await subscription.cancel();
+
+    expect(result, equals(false));
+
+    final originContentsPost = await originRepo.readDirectory('/');
+    expect(
+      originContentsPost,
+      dirEntryComparator([
+        DirectoryEntry(name: 'file1.txt', entryType: EntryType.file),
+      ]),
+    );
+
+    final file = await originRepo.openFile('/file1.txt');
+    expect(await file.read(0, content.length), equals(content));
+    await file.close();
+  });
+
   test('Move empty folder to other repo', () async {
     final expectedFolder1 = <DirectoryEntry>[
       DirectoryEntry(name: 'folder1', entryType: EntryType.directory),
