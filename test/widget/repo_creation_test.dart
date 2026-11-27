@@ -61,11 +61,10 @@ void main() {
       await tester.enterText(nameFinder, 'foo');
       await tester.pumpUntilFound(errorFinder);
 
-      // The error should disappear after the name is fixed.
+      // The error should disappear after the name is fixed. The name is
+      // validated asynchronously, so wait for it.
       await tester.enterText(nameFinder, 'bar');
-      await tester.pumpAndSettle();
-
-      expect(errorFinder, findsNothing);
+      await tester.pumpUntilNotFound(errorFinder);
     }),
   );
 
