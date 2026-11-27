@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io' show Platform, SocketException;
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
@@ -10,29 +11,55 @@ import 'utils.dart' show CubitActions;
 import '../utils/log.dart' show AppLogger;
 
 // Keep only the most recent errors so a chatty stretch (e.g. several subscriptions erroring
-// around the same reconnect) can't make this grow without bound.
+// around the same restart) can't make this grow without bound.
 const _maxRecordedErrors = 20;
 
-// Watch if an error happened in different parts of the app and the ouisync library.
-// Only captures errors that can't be gracefuly handled, the cubit indicates to
-// the user that the log should be captured.
-class ErrorCubit extends Cubit<ErrorCubitState> with CubitActions, AppLogger {
+/// Records errors from the app and the ouisync library. Lives for the whole process rather than
+/// for a single session, so the history survives reconnects. Create one at startup and call
+/// [installGlobalHandlers] once.
+class ErrorLog with AppLogger {
   final List<ErrorRecord> _errors = [];
+  final _controller = StreamController<ErrorRecord>.broadcast();
+  bool _handlersInstalled = false;
 
-  ErrorCubit(native.Session session) : super(ErrorCubitState(false)) {
-    // NOTE: Depending on where a panic happens inside the Rust code, we either
-    // can detect it through the state monitor, or the server/service closes
-    // the connection and we disconnect. The latter is caught through the
-    // `onError` handlers set up below.
-    unawaited(
-      _RustPanicDetectionRunner(this, loggy, session.rootStateMonitor).init(),
+  // Recorded errors, oldest first.
+  List<ErrorRecord> get errors => List.unmodifiable(_errors);
+
+  // Emits each error as it is recorded.
+  Stream<ErrorRecord> get stream => _controller.stream;
+
+  void record(String message, [StackTrace? stack]) {
+    // Errors can still arrive after the log is closed (during shutdown). Drop them.
+    if (_controller.isClosed) {
+      return;
+    }
+
+    final record = ErrorRecord(
+      timestamp: DateTime.now(),
+      message: message,
+      stack: stack,
     );
+
+    _errors.add(record);
+
+    if (_errors.length > _maxRecordedErrors) {
+      _errors.removeRange(0, _errors.length - _maxRecordedErrors);
+    }
+
+    _controller.add(record);
+  }
+
+  /// Hooks the Flutter and platform error handlers so uncaught errors get recorded. The previous
+  /// handlers are chained, so the default logging still happens. Call once per process.
+  void installGlobalHandlers() {
+    assert(!_handlersInstalled, 'global error handlers are already installed');
+    _handlersInstalled = true;
 
     // These are printed in utils/log.dart. Here we just record the message for the error badge
     // indicator (and whoever wants to read it) and let the default handler also log it.
     final defaultFlutterOnError = FlutterError.onError;
     FlutterError.onError = (details) {
-      _emitError(
+      record(
         'Unhandled Flutter exception: ${details.exceptionAsString()}',
         details.stack,
       );
@@ -44,7 +71,15 @@ class ErrorCubit extends Cubit<ErrorCubitState> with CubitActions, AppLogger {
 
     final defaultPlatformOnError = PlatformDispatcher.instance.onError;
     PlatformDispatcher.instance.onError = (exception, stack) {
-      _emitError('Unhandled platform exception: $exception', stack);
+      if (_isSuspendedSocketError(exception)) {
+        // Same non-error as in the panic watcher: the client's pending futures fail when iOS
+        // invalidates the socket. Several can fail at once, so log each at WARN and mark the
+        // exception handled so it isn't also logged as an unhandled error.
+        loggy.warning('Connection lost: $exception');
+        return true;
+      }
+
+      record('Unhandled platform exception: $exception', stack);
 
       if (defaultPlatformOnError != null) {
         return defaultPlatformOnError(exception, stack);
@@ -55,19 +90,77 @@ class ErrorCubit extends Cubit<ErrorCubitState> with CubitActions, AppLogger {
     };
   }
 
-  // Recorded errors, oldest first. Read when the user opens the error list in Settings.
-  List<ErrorRecord> get errors => List.unmodifiable(_errors);
+  Future<void> close() async {
+    await _controller.close();
+  }
+}
 
-  void _emitError(String message, [StackTrace? stack]) {
-    _errors.add(
-      ErrorRecord(timestamp: DateTime.now(), message: message, stack: stack),
+// Watch if an error happened in different parts of the app and the ouisync library.
+// Only captures errors that can't be gracefully handled, the cubit indicates to
+// the user that the log should be captured.
+//
+// The cubit is created per session (see `HomeWidget`) and only reflects errors recorded while it
+// exists. The errors themselves are kept in the `ErrorLog`, which outlives the cubit.
+class ErrorCubit extends Cubit<ErrorCubitState> with CubitActions, AppLogger {
+  final ErrorLog _log;
+  final native.Session _session;
+
+  StreamSubscription<ErrorRecord>? _logSubscription;
+
+  // The runner currently watching the session's state monitor, if any. At most one is alive: a
+  // restart (or close) stops it before another one is created.
+  _RustPanicDetectionRunner? _panicRunner;
+
+  ErrorCubit(this._log, native.Session session)
+    : _session = session,
+      super(ErrorCubitState(false)) {
+    // NOTE: Depending on where a panic happens inside the Rust code, we either
+    // can detect it through the state monitor, or the server/service closes
+    // the connection and we disconnect. The latter is caught by the
+    // `onError` handlers installed in `ErrorLog`.
+    _logSubscription = _log.stream.listen(
+      (_) => emitUnlessClosed(ErrorCubitState(true)),
     );
 
-    if (_errors.length > _maxRecordedErrors) {
-      _errors.removeRange(0, _errors.length - _maxRecordedErrors);
-    }
+    _startWatchForPanics();
+  }
 
-    emitUnlessClosed(ErrorCubitState(true));
+  @override
+  Future<void> close() async {
+    await _logSubscription?.cancel();
+    _logSubscription = null;
+
+    await _stopWatchForPanics();
+    await super.close();
+  }
+
+  // Recorded errors, oldest first. Read when the user opens the error list in Settings.
+  List<ErrorRecord> get errors => _log.errors;
+
+  Future<void> _stopWatchForPanics() async {
+    final runner = _panicRunner;
+    _panicRunner = null;
+    await runner?.stop();
+  }
+
+  // Arms the panic watch on the session, stopping any previous watch first so runners don't pile
+  // up.
+  Future<void> _startWatchForPanics() async {
+    await _stopWatchForPanics();
+    try {
+      final runner = _RustPanicDetectionRunner(
+        _log,
+        loggy,
+        _session.rootStateMonitor,
+      );
+      if (isClosed) {
+        return;
+      }
+      _panicRunner = runner;
+      await runner.start();
+    } catch (e) {
+      _reportPanicDetectionFailure(_log, loggy, e);
+    }
   }
 
   // Called once the user has seen the errors. Clears the "error happened" flag but keeps the
@@ -77,6 +170,22 @@ class ErrorCubit extends Cubit<ErrorCubitState> with CubitActions, AppLogger {
       emitUnlessClosed(ErrorCubitState(false));
     }
   }
+}
+
+// iOS invalidates the loopback socket to the embedded server when the app is suspended, so the
+// watcher fails with a `SocketException` (e.g. EBADF) that is not a panic. Don't surface it as an
+// error, just let the probe restart the session if it really is dead.
+bool _isSuspendedSocketError(Object e) =>
+    Platform.isIOS && e is SocketException;
+
+void _reportPanicDetectionFailure(ErrorLog log, Loggy loggy, Object e) {
+  if (_isSuspendedSocketError(e)) {
+    loggy.warning("Rust panic detection: connection lost: $e");
+    return;
+  }
+
+  loggy.error("Rust panic detection: $e");
+  log.record("Rust panic detection: $e");
 }
 
 class ErrorRecord extends Equatable {
@@ -116,29 +225,86 @@ class ErrorCubitState extends Equatable {
 }
 
 class _RustPanicDetectionRunner {
-  final ErrorCubit _errorCubit;
+  final ErrorLog _log;
   final Loggy _loggy;
   final native.StateMonitor _serviceStateMonitor;
 
   _RustPanicDetectionRunner(
-    this._errorCubit,
+    this._log,
     this._loggy,
     native.StateMonitor rootStateMonitor,
   ) : _serviceStateMonitor = rootStateMonitor.child(
         native.MonitorId.expectUnique("Service"),
       );
 
-  Future<void> init() async {
+  StreamSubscription<void>? _subscription;
+  bool _stopped = false;
+
+  // Starts watching. Reports at most one failure (a detected panic, or being unable to read the
+  // counter) and stops watching after it: the counter is cumulative, so every later change would
+  // report the same panic again.
+  Future<void> start() async {
+    if (_stopped) {
+      return;
+    }
+
+    try {
+      // Subscribe before the first load so a change landing in between isn't missed. An extra
+      // load on an early event is harmless.
+      //
+      // TODO: The ouisync Dart bindings never complete this stream when the session closes:
+      // `Client.close()` cancels its socket listener before closing the socket, so `_receiveDone`
+      // (the only place that closes the pending `subscribe()` sinks) never runs. That is why this
+      // runner must be stopped explicitly (see `stop`) and why `onDone` below isn't reached on
+      // session close. Fix in the bindings (Layer 2): have `Client.close()` (and probably
+      // `_disconnect()`) close the notification sinks and fail the pending responses, sharing the
+      // cleanup with `_receiveDone`. Afterwards decide what an unexpected `onDone` (connection lost
+      // while the service survives, e.g. after a listener rebind) should do here: probably
+      // re-subscribe with a delay, giving up on `StateError('client closed')`.
+      _subscription = _serviceStateMonitor.changes.listen(
+        (_) => unawaited(_check()),
+        onError: (Object e) => _fail(e),
+        onDone: () =>
+            _loggy.debug("Rust panic detection: state monitor stream ended"),
+      );
+
+      await _check();
+    } catch (e) {
+      _fail(e);
+    }
+  }
+
+  // Stops watching. Safe to call more than once. Nothing is reported after this returns.
+  Future<void> stop() async {
+    _stopped = true;
+
+    final subscription = _subscription;
+    _subscription = null;
+
+    await subscription?.cancel();
+  }
+
+  Future<void> _check() async {
+    if (_stopped) {
+      return;
+    }
+
     try {
       await _load();
-
-      await for (final _ in _serviceStateMonitor.changes) {
-        await _load();
-      }
     } catch (e) {
-      _loggy.error("Rust panic detection: $e");
-      _errorCubit._emitError("Rust panic detection: $e");
+      _fail(e);
     }
+  }
+
+  void _fail(Object e) {
+    if (_stopped) {
+      return;
+    }
+
+    // Stop first so concurrent in-flight checks can't report the same failure again.
+    unawaited(stop());
+
+    _reportPanicDetectionFailure(_log, _loggy, e);
   }
 
   Future<void> _load() async {

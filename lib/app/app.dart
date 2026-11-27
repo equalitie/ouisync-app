@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:ouisync/ouisync.dart' show NetworkDefaults, Server, Session;
 import 'package:ouisync_app/app/cubits/store_dirs.dart';
 import 'package:package_info_plus/package_info_plus.dart' show PackageInfo;
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
@@ -12,11 +11,18 @@ import 'package:stream_transform/stream_transform.dart';
 
 import '../generated/l10n.dart';
 import 'cubits/cubits.dart'
-    show LocaleCubit, LocaleState, MountCubit, ReposCubit, ErrorCubit;
+    show
+        ErrorCubit,
+        ErrorLog,
+        LocaleCubit,
+        LocaleState,
+        MountCubit,
+        ReposCubit,
+        SessionCubit,
+        SessionState;
 import 'pages/pages.dart';
-import 'utils/constants.dart' show Constants;
-import 'utils/dirs.dart';
 import 'utils/log.dart' as log;
+import 'utils/dirs.dart';
 import 'utils/master_key.dart' show MasterKeyUnreadable;
 import 'utils/stage.dart';
 import 'utils/platform/platform.dart' show PlatformWindowManager;
@@ -26,9 +32,9 @@ import 'utils/utils.dart'
         AppTextThemeExtension,
         AppTypography,
         CacheServers,
+        Settings,
         clearPreviewCache,
-        loadAndMigrateSettings,
-        Settings;
+        loadAndMigrateSettings;
 import 'widgets/flavor_banner.dart';
 import 'widgets/media_receiver.dart';
 
@@ -54,49 +60,78 @@ class App extends StatefulWidget {
   State<App> createState() => _AppState();
 }
 
-class _AppState extends State<App> {
-  late final components = _AppComponents.create(widget.args).then(
+class _AppState extends State<App> with AppLogger {
+  late final components = AppComponents.create(widget.args).then(
     (components) {
       widget.controller?._stopListener = () => components.destroy();
       return components;
     },
     onError: (Object e, StackTrace st) {
-      log.named('').error('failed to start:', e, st);
+      loggy.error('failed to start:', e, st);
       Error.throwWithStackTrace(e, st);
     },
   );
 
+  // Created once per state, not per build: MaterialApp is rebuilt on locale changes and the
+  // observer keeps the route history, which would otherwise be lost on every rebuild.
+  final _navigatorObserver = _AppNavigatorObserver();
+
+  // Created once, not per build, so the theme object stays the same across rebuilds.
+  final _theme = _setupAppThemeData();
+
   @override
-  Widget build(BuildContext context) => FutureBuilder<_AppComponents>(
+  Widget build(BuildContext context) => FutureBuilder<AppComponents>(
     future: components,
     builder: (context, snapshot) {
       final components = snapshot.data;
 
-      if (components != null) {
-        return BlocBuilder<LocaleCubit, LocaleState>(
-          bloc: components.localeCubit,
-          builder: (context, localeState) => _buildMaterialApp(
-            locale: localeState.currentLocale,
-            home: _buildHomeWidget(components),
-          ),
-        );
-      } else if (snapshot.hasError) {
-        return _buildMaterialApp(
-          home: StartupErrorScreen(
-            error: snapshot.error!,
-            stackTrace: snapshot.stackTrace,
-          ),
-        );
-      } else {
-        return _buildMaterialApp(home: LoadingScreen());
+      if (components == null) {
+        if (snapshot.hasError) {
+          return _buildMaterialApp(
+            home: StartupErrorScreen(
+              error: snapshot.error!,
+              stackTrace: snapshot.stackTrace,
+            ),
+          );
+        }
+
+        return _buildMaterialApp(home: const LoadingScreen());
       }
+
+      // Rebuilds on every session change, so a disconnect or a failed reconnect shows up right away.
+      return BlocBuilder<SessionCubit, SessionState>(
+        bloc: components.sessionCubit,
+        builder: (context, sessionState) {
+          if (sessionState.connecting) {
+            return _buildMaterialApp(home: const LoadingScreen());
+          }
+
+          final sessionError = sessionState.error;
+          if (sessionError != null) {
+            return _buildMaterialApp(
+              home: StartupErrorScreen(
+                error: sessionError,
+                sessionCubit: components.sessionCubit,
+              ),
+            );
+          }
+
+          return BlocBuilder<LocaleCubit, LocaleState>(
+            bloc: components.localeCubit,
+            builder: (context, localeState) => _buildMaterialApp(
+              locale: localeState.currentLocale,
+              home: _buildHomeWidget(components),
+            ),
+          );
+        },
+      );
     },
   );
 
   Widget _buildMaterialApp({required Widget home, Locale? locale}) =>
       MaterialApp(
         debugShowCheckedModeBanner: false,
-        theme: _setupAppThemeData(),
+        theme: _theme,
         locale: locale,
         localizationsDelegates: const [
           S.delegate,
@@ -108,19 +143,19 @@ class _AppState extends State<App> {
         home: home,
         builder: (context, child) =>
             FlavorBanner(child: child ?? SizedBox.shrink()),
-        navigatorObservers: [_AppNavigatorObserver()],
+        navigatorObservers: [_navigatorObserver],
       );
 
-  Widget _buildHomeWidget(_AppComponents components) => HomeWidget(
-    dirs: components.dirs,
-    server: components.server,
-    session: components.session,
-    windowManager: components.windowManager,
-    settings: components.settings,
-    localeCubit: components.localeCubit,
-    errorCubit: components.errorCubit,
-    storeDirsCubit: components.storeDirsCubit,
-  );
+  Widget _buildHomeWidget(AppComponents components) =>
+      BlocBuilder<SessionCubit, SessionState>(
+        bloc: components.sessionCubit,
+        builder: (context, sessionState) => HomeWidget(
+          // Keyed by generation: after a reconnect, everything that depends on the session has to
+          // be recreated with the new one.
+          key: ValueKey(sessionState.generation),
+          components: components,
+        ),
+      );
 }
 
 @visibleForTesting
@@ -134,28 +169,30 @@ class AppController {
   }
 }
 
-class _AppComponents {
+/// The long-lived objects the app is built from. Created once at startup and passed down to the
+/// widgets that need them.
+class AppComponents {
   final PlatformWindowManager windowManager;
   final Dirs dirs;
-  final Server server;
-  final Session session;
+  final ErrorLog errorLog;
+  final SessionCubit sessionCubit;
   final Settings settings;
-  final ErrorCubit errorCubit;
   final LocaleCubit localeCubit;
-  final StoreDirsCubit storeDirsCubit;
 
-  _AppComponents._(
-    this.windowManager,
-    this.dirs,
-    this.server,
-    this.session,
-    this.settings,
-    this.errorCubit,
-    this.localeCubit,
-    this.storeDirsCubit,
-  );
+  AppComponents({
+    required this.windowManager,
+    required this.dirs,
+    required this.errorLog,
+    required this.sessionCubit,
+    required this.settings,
+    required this.localeCubit,
+  });
 
-  static Future<_AppComponents> create(List<String> args) async {
+  static Future<AppComponents> create(List<String> args) async {
+    // Installed first, once per process, so errors from any later startup step are recorded. The
+    // error log outlives session reconnects.
+    final errorLog = ErrorLog()..installGlobalHandlers();
+
     final packageInfo = await PackageInfo.fromPlatform();
     final windowManager = await PlatformWindowManager.create(
       args,
@@ -167,94 +204,58 @@ class _AppComponents {
 
     unawaited(clearPreviewCache());
 
-    final (server, session) = await _initServerAndSession(dirs, windowManager);
-    final errorCubit = ErrorCubit(session);
-    final settings = await loadAndMigrateSettings(session);
-    final localeCubit = LocaleCubit(settings);
-    final storeDirsCubit = StoreDirsCubit(session, dirs);
+    final sessionCubit = await SessionCubit.create(dirs);
 
-    return _AppComponents._(
-      windowManager,
-      dirs,
-      server,
-      session,
-      settings,
-      errorCubit,
-      localeCubit,
-      storeDirsCubit,
+    final Settings settings;
+    final LocaleCubit localeCubit;
+
+    try {
+      settings = await loadAndMigrateSettings(sessionCubit.session);
+      localeCubit = LocaleCubit(settings);
+    } catch (e, st) {
+      await sessionCubit.close();
+      Error.throwWithStackTrace(e, st);
+    }
+
+    final components = AppComponents(
+      windowManager: windowManager,
+      dirs: dirs,
+      errorLog: errorLog,
+      sessionCubit: sessionCubit,
+      settings: settings,
+      localeCubit: localeCubit,
     );
+
+    // `destroy` is the only shutdown path. Closing the window calls it too, so the session is
+    // closed gracefully before the process exits.
+    windowManager.onClose(components.destroy);
+
+    return components;
+  }
+
+  Future<void>? _windowInit;
+
+  // Sets the window title and system tray. Runs once per process, on first use, rather than once
+  // per `HomeWidget`, since a reconnect recreates the `HomeWidget`. It runs from the widget tree
+  // because it needs localization, which is only available under `MaterialApp`.
+  Future<void> initWindow() => _windowInit ??= _initWindow();
+
+  Future<void> _initWindow() async {
+    await windowManager.setTitle(S.current.messageOuiSyncDesktopTitle);
+    await windowManager.initSystemTray();
   }
 
   Future<void> destroy() async {
     await localeCubit.close();
-    await errorCubit.close();
-
-    await session.close();
-    await server.stop();
-  }
-}
-
-Future<(Server, Session)> _initServerAndSession(
-  Dirs dirs,
-  PlatformWindowManager windowManager,
-) async {
-  final logger = log.named('');
-
-  final server = Server.create(configPath: dirs.config);
-  await server.initLog();
-
-  try {
-    await server.start();
-  } catch (e, st) {
-    logger.error('failed to start server:', e, st);
-    rethrow;
-  }
-
-  try {
-    final session = await Session.create(configPath: dirs.config);
-
-    windowManager.onClose(() async {
-      await session.close();
-      await server.stop();
-    });
-
-    await session.initNetwork(
-      NetworkDefaults(
-        bind: Constants.defaultBindAddrs,
-        portForwardingEnabled: true,
-        localDiscoveryEnabled: true,
-      ),
-    );
-
-    return (server, session);
-  } catch (e, st) {
-    logger.error('failed to initialize session:', e, st);
-    await server.stop();
-    rethrow;
+    await sessionCubit.close();
+    await errorLog.close();
   }
 }
 
 class HomeWidget extends StatefulWidget {
-  HomeWidget({
-    required this.windowManager,
-    required this.dirs,
-    required this.server,
-    required this.session,
-    required this.settings,
-    required this.localeCubit,
-    required this.errorCubit,
-    required this.storeDirsCubit,
-    super.key,
-  });
+  const HomeWidget({required this.components, super.key});
 
-  final PlatformWindowManager windowManager;
-  final Dirs dirs;
-  final Server server;
-  final Session session;
-  final Settings settings;
-  final LocaleCubit localeCubit;
-  final ErrorCubit errorCubit;
-  final StoreDirsCubit storeDirsCubit;
+  final AppComponents components;
 
   @override
   State<HomeWidget> createState() => _HomeWidgetState();
@@ -264,7 +265,9 @@ class _HomeWidgetState extends State<HomeWidget>
     with AppLogger /*, RouteAware*/ {
   final receivedMediaController = StreamController<List<SharedMediaFile>>();
   late final MountCubit mountCubit;
+  late final StoreDirsCubit storeDirsCubit;
   late final ReposCubit reposCubit;
+  late final ErrorCubit errorCubit;
   late final StreamSubscription updateServerNotificationSubscription;
   final stage = Stage();
 
@@ -272,30 +275,36 @@ class _HomeWidgetState extends State<HomeWidget>
   void initState() {
     super.initState();
 
+    final components = widget.components;
+    final session = components.sessionCubit.session;
+
     // Update the server notification for the current locale and also every time the current locale
     // changes. This is so it always shows correctly localized messages.
-    updateServerNotificationSubscription = widget.localeCubit.stream
-        .startWith(widget.localeCubit.state)
+    updateServerNotificationSubscription = components.localeCubit.stream
+        .startWith(components.localeCubit.state)
         .listen(
-          (_) => widget.server.notify(
+          (_) => components.sessionCubit.server.notify(
             contentTitle: S.current.messageBackgroundNotification,
           ),
         );
 
-    final cacheServers = CacheServers(widget.session);
-    cacheServers.addAll(widget.settings.cacheServers);
+    errorCubit = ErrorCubit(components.errorLog, session);
 
-    mountCubit = MountCubit(widget.session, widget.dirs)..init();
+    final cacheServers = CacheServers(session);
+    cacheServers.addAll(components.settings.cacheServers);
+
+    mountCubit = MountCubit(session, components.dirs)..init();
+    storeDirsCubit = StoreDirsCubit(session, components.dirs);
     reposCubit = ReposCubit(
-      session: widget.session,
-      settings: widget.settings,
+      session: session,
+      settings: components.settings,
       cacheServers: cacheServers,
       mountCubit: mountCubit,
-      storeDirsCubit: widget.storeDirsCubit,
+      storeDirsCubit: storeDirsCubit,
       onNotify: (message) => stage.showSnackBar(message),
     );
 
-    unawaited(_init());
+    unawaited(components.initWindow());
   }
 
   @override
@@ -310,7 +319,9 @@ class _HomeWidgetState extends State<HomeWidget>
   @override
   void dispose() {
     unawaited(reposCubit.close());
+    unawaited(storeDirsCubit.close());
     unawaited(mountCubit.close());
+    unawaited(errorCubit.close());
     unawaited(receivedMediaController.close());
     //widget.appRouteObserver.unsubscribe(this);
 
@@ -320,31 +331,30 @@ class _HomeWidgetState extends State<HomeWidget>
   }
 
   @override
-  Widget build(BuildContext context) => MediaReceiver(
-    controller: receivedMediaController,
-    child: OnboardingPage(
-      stage: stage,
-      localeCubit: widget.localeCubit,
-      settings: widget.settings,
-      mainPage: MainPage(
-        stage: stage,
-        localeCubit: widget.localeCubit,
-        mountCubit: mountCubit,
-        errorCubit: widget.errorCubit,
-        receivedMedia: receivedMediaController.stream,
-        reposCubit: reposCubit,
-        session: widget.session,
-        settings: widget.settings,
-        windowManager: widget.windowManager,
-        dirs: widget.dirs,
-        storeDirsCubit: widget.storeDirsCubit,
-      ),
-    ),
-  );
+  Widget build(BuildContext context) {
+    final components = widget.components;
 
-  Future<void> _init() async {
-    await widget.windowManager.setTitle(S.current.messageOuiSyncDesktopTitle);
-    await widget.windowManager.initSystemTray();
+    return MediaReceiver(
+      controller: receivedMediaController,
+      child: OnboardingPage(
+        stage: stage,
+        localeCubit: components.localeCubit,
+        settings: components.settings,
+        mainPage: MainPage(
+          stage: stage,
+          localeCubit: components.localeCubit,
+          mountCubit: mountCubit,
+          errorCubit: errorCubit,
+          receivedMedia: receivedMediaController.stream,
+          reposCubit: reposCubit,
+          session: components.sessionCubit.session,
+          settings: components.settings,
+          windowManager: components.windowManager,
+          dirs: components.dirs,
+          storeDirsCubit: storeDirsCubit,
+        ),
+      ),
+    );
   }
 }
 
@@ -383,10 +393,16 @@ class LoadingScreen extends StatelessWidget {
 
 /// Shown instead of the app when it fails to start.
 class StartupErrorScreen extends StatelessWidget {
-  const StartupErrorScreen({required this.error, this.stackTrace, super.key});
+  const StartupErrorScreen({
+    required this.error,
+    this.stackTrace,
+    this.sessionCubit,
+    super.key,
+  });
 
   final Object error;
   final StackTrace? stackTrace;
+  final SessionCubit? sessionCubit;
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -407,6 +423,13 @@ class StartupErrorScreen extends StatelessWidget {
                   ? S.current.messageMasterKeyUnreadable
                   : S.current.messageStartupFailed,
             ),
+            if (sessionCubit != null) ...[
+              const SizedBox(height: 16.0),
+              ElevatedButton(
+                onPressed: () => sessionCubit?.reconnect(),
+                child: Text(S.current.actionRetry),
+              ),
+            ],
             const SizedBox(height: 16.0),
             // Details for reporting the problem.
             SelectableText(

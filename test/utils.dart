@@ -135,7 +135,7 @@ class TestDependencies {
     final storeDirsCubit = StoreDirsCubit(session, dirs);
     await storeDirsCubit.stream.firstWhere((state) => state.isNotEmpty);
 
-    final errorCubit = ErrorCubit(session);
+    final errorCubit = ErrorCubit(ErrorLog(), session);
     final settings = await Settings.init(MasterKey.random());
     final mountCubit = MountCubit(session, dirs)..init();
     final reposCubit = ReposCubit(
