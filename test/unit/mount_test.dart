@@ -50,28 +50,37 @@ void main() {
     await deps.dispose();
   });
 
-  test('read mounted file', () async {
-    final path = '/hello.txt';
-    final content = 'hello world';
-    final contentBytes = utf8.encode(content);
+  test(
+    'read mounted file',
+    () async {
+      final path = '/hello.txt';
+      final content = 'hello world';
+      final contentBytes = utf8.encode(content);
 
-    // Upload the file to the repo
-    await repoCubit.saveFile(
-      filePath: path,
-      length: contentBytes.length,
-      fileByteStream: Stream.value(contentBytes),
-    );
+      // Upload the file to the repo
+      await repoCubit.saveFile(
+        filePath: path,
+        length: contentBytes.length,
+        fileByteStream: Stream.value(contentBytes),
+      );
 
-    // Mount it and try to read the mounted file
-    deps.mountCubit.init();
-    await deps.mountCubit.waitUntil((state) => state is MountStateSuccess);
+      // Mount it and try to read the mounted file
+      deps.mountCubit.init();
+      await deps.mountCubit.waitUntil((state) => state is MountStateSuccess);
 
-    final mountRoot = await repoCubit.mountPoint;
-    expect(mountRoot, isNotEmpty);
+      final mountRoot = await repoCubit.mountPoint;
+      expect(mountRoot, isNotEmpty);
 
-    final mountPath = '$mountRoot$path';
-    final mountContent = await io.File(mountPath).readAsString();
+      final mountPath = '$mountRoot$path';
+      final mountContent = await io.File(mountPath).readAsString();
 
-    expect(mountContent, equals(content));
-  }, tags: ['mount']);
+      expect(mountContent, equals(content));
+    },
+    tags: ['mount'],
+    // macOS exposes files via the File Provider extension, not a filesystem mount, so the mount
+    // cubit ends up in `MountStateDisabled` there.
+    skip: io.Platform.isMacOS
+        ? 'filesystem mount is not supported on macOS'
+        : null,
+  );
 }

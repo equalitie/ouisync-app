@@ -4,7 +4,7 @@ import 'package:ouisync_app/app/app.dart';
 import 'package:ouisync_app/app/cubits/locale.dart';
 import 'package:ouisync_app/app/cubits/repos.dart';
 import 'package:ouisync_app/app/cubits/error.dart';
-import 'package:ouisync_app/app/cubits/store_dirs.dart';
+import 'package:ouisync_app/app/cubits/session.dart';
 import 'package:ouisync_app/app/pages/main_page.dart';
 import 'package:ouisync_app/app/utils/dirs.dart';
 import 'package:ouisync_app/app/utils/master_key.dart';
@@ -19,8 +19,8 @@ void main() {
   late Session session;
   late Settings settings;
   late LocaleCubit localeCubit;
-  late ErrorCubit errorCubit;
-  late StoreDirsCubit storeDirsCubit;
+  late ErrorLog errorLog;
+  late SessionCubit sessionCubit;
 
   setUp(() async {
     dirs = await Dirs.init();
@@ -30,20 +30,18 @@ void main() {
 
     session = await Session.create(configPath: dirs.config);
 
-    errorCubit = ErrorCubit(session);
+    errorLog = ErrorLog();
+    sessionCubit = SessionCubit(server, session, SessionConnector(dirs));
 
     settings = await Settings.init(MasterKey.random());
     settings.cacheServers = [];
 
     localeCubit = LocaleCubit(settings);
-
-    storeDirsCubit = StoreDirsCubit(session, dirs);
-    await storeDirsCubit.stream.firstWhere((state) => state.isNotEmpty);
   });
 
   tearDown(() async {
     await localeCubit.close();
-    await errorCubit.close();
+    await sessionCubit.close();
     await session.close();
     await server.stop();
   });
@@ -56,14 +54,14 @@ void main() {
       await tester.pumpWidget(
         testApp(
           HomeWidget(
-            localeCubit: localeCubit,
-            errorCubit: errorCubit,
-            server: server,
-            session: session,
-            settings: settings,
-            windowManager: FakeWindowManager(),
-            dirs: dirs,
-            storeDirsCubit: storeDirsCubit,
+            components: AppComponents(
+              windowManager: FakeWindowManager(),
+              dirs: dirs,
+              errorLog: errorLog,
+              sessionCubit: sessionCubit,
+              settings: settings,
+              localeCubit: localeCubit,
+            ),
           ),
         ),
       );
@@ -74,8 +72,7 @@ void main() {
 
       // Go to the second onboarding page
       await tester.anxiousTap(find.byIcon(Icons.arrow_forward));
-      await tester
-          .pumpAndSettle(); // TODO: Do we need to call this after every interaction?
+      await tester.pumpAndSettle(); // TODO: Do we need to call this after every interaction?
 
       // Go to the third onboarding page
       await tester.anxiousTap(find.byIcon(Icons.arrow_forward));
