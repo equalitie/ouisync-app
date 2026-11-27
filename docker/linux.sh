@@ -231,8 +231,9 @@ function create_artifact_volume() {
 
     dock volume create $artifact_volume > /dev/null
 
-    # Prune old artifact directories
-    dock run $common_opts find . -type d -ctime +$artifact_retention_days -exec rm -rf {} \;
+    # Prune old artifact directories. Limit the depth so `find` doesn't try to descend into the
+    # directories it has just removed (which makes it fail).
+    dock run $common_opts find . -mindepth 1 -maxdepth 1 -type d -ctime +$artifact_retention_days -exec rm -rf {} +
 
     # Create new artifacts directory
     dock run $common_opts mkdir -p "$artifact_id"
