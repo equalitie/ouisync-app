@@ -116,6 +116,7 @@ function print_help() {
             echo "Options:"
             echo "    --platform <linux|android>    Platform for which to run the tests"
             echo "    --api <API>                   Android API level to run in"
+            echo "    --logcat <PATH>               File to save the emulator's logcat to if the tests fail (android only)"
             ;;
         "upgrade-test")
             echo "Run the Android upgrade test (see test/README.md)"
@@ -714,11 +715,16 @@ function integration_test_android() {
     local api=
     local build=
     local run=
+    local logcat=
 
     while true; do
         case ${1-} in
             --api)
                 api="${2-}"
+                shift 2
+                ;;
+            --logcat)
+                logcat="${2-}"
                 shift 2
                 ;;
             --build)
@@ -781,27 +787,39 @@ function integration_test_android() {
 
         emulator_start --api $api
 
+        # Failures from here on are recorded in `result` instead of exiting right away, so that
+        # the logcat can still be collected.
+        local result=0
+
         log_group_begin "Install"
-        exe adb install -r $app_path
-        exe adb install -r $test_path
+        { exe adb install -r $app_path && exe adb install -r $test_path; } || result=$?
         log_group_end
 
-        log_group_begin "Run tests"
+        if [ "$result" = 0 ]; then
+            log_group_begin "Run tests"
 
-        # HACK: `adb shell am instrument` returns success error code even on test failure. Need to
-        # parse the output to find out the test result.
-        output=$(mktemp)
-        exe -t adb shell am instrument -w \
-            org.equalitie.ouisync.itest.test/androidx.test.runner.AndroidJUnitRunner \
-            2>&1 \
-            | tee $output
+            # HACK: `adb shell am instrument` returns success error code even on test failure.
+            # Need to parse the output to find out the test result.
+            output=$(mktemp)
+            exe -t adb shell am instrument -w \
+                org.equalitie.ouisync.itest.test/androidx.test.runner.AndroidJUnitRunner \
+                2>&1 \
+                | tee $output
 
-        result=0
-        grep -qE "^OK \(" $output || result=$?
+            grep -qE "^OK \(" $output || result=$?
 
-        log_group_end
+            log_group_end
+        fi
 
-        emulator_stop
+        if [ "$result" != 0 -a -n "$logcat" ]; then
+            log_group_begin "Collect logcat"
+            # The emulator may be gone (e.g. crashed), which would make this fail.
+            exe adb logcat -d > "$logcat" || true
+            log_group_end
+        fi
+
+        # The emulator may have already ended (e.g. crashed), which would make this fail.
+        emulator_stop || true
 
         if [ "$result" != 0 ]; then
             exit "$result"

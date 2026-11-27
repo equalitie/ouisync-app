@@ -269,17 +269,18 @@ jobs:
             --srcdir . \
             --cache shared \
             --artifact-id $GITHUB_RUN_ID \
-            integration-test --platform android --run --api ${{ matrix.api-level }}
+            integration-test --platform android --run --api ${{ matrix.api-level }} \
+            --logcat logcat.txt
 
-      # - name: Upload logcat
-      #   uses: actions/upload-artifact@v7
-      #   with:
-      #     # Name of the produced zip file
-      #     name: logcat-${{ matrix.api-level }}
-      #     path: logcat.txt
-      #     if-no-files-found: ignore
-      #   # Upload only when the tests fail
-      #   if: failure() || cancelled()
+      - name: Upload logcat
+        uses: actions/upload-artifact@v7
+        with:
+          # Name of the produced zip file
+          name: logcat-${{ matrix.api-level }}
+          path: logcat.txt
+          if-no-files-found: ignore
+        # Upload only when the tests fail
+        if: failure() || cancelled()
 
   upgrade_test_android:
     name: "run upgrade test on android"
