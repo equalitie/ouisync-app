@@ -60,10 +60,26 @@ Future<void> testEnv(FutureOr<void> Function() callback) async {
 
   late Sandbox sandbox;
   late BlocObserver origBlocObserver;
+  late Directory sharedDir;
 
   setUp(() async {
     origBlocObserver = Bloc.observer;
     sandbox = await Sandbox.setUp();
+
+    // Dirs.init() asks the native side for the shared directory (see lib/app/utils/native.dart).
+    // The app's native channel doesn't exist under flutter test, so answer that call here.
+    sharedDir = await Directory.systemTemp.createTemp('ouisync-test-shared');
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+          const MethodChannel('org.equalitie.ouisync/native'),
+          (call) async => call.method == 'getSharedDir' ? sharedDir.path : null,
+        );
+    // Media receiver asks for an initial universal link on startup; there is none under test.
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+          const MethodChannel('org.equalitie.ouisync/universal_links'),
+          (call) async => null,
+        );
 
     ConnectivityPlatform.instance = _FakeConnectivityPlatform();
 
@@ -71,6 +87,17 @@ Future<void> testEnv(FutureOr<void> Function() callback) async {
   });
 
   tearDown(() async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+          const MethodChannel('org.equalitie.ouisync/native'),
+          null,
+        );
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+          const MethodChannel('org.equalitie.ouisync/universal_links'),
+          null,
+        );
+    await sharedDir.delete(recursive: true);
     await sandbox.tearDown();
     Bloc.observer = origBlocObserver;
   });
