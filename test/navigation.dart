@@ -36,7 +36,8 @@ class MainPage {
     // Filling in the repo name triggers an async operation and so we must explicitly wait until
     // it completes.
     await tester.enterText(find.byKey(ValueKey('name')), 'my repo');
-    await repoCreationObserver.waitUntil(
+    await tester.pumpUntilState(
+      repoCreationObserver,
       (state) => state.substate is RepoCreationValid,
     );
     await tester.pump();
@@ -51,12 +52,18 @@ class MainPage {
     await tester.pump();
 
     // Verify that use cache servers is off:
-    await repoCreationObserver.waitUntil((state) => !state.useCacheServers);
+    await tester.pumpUntilState(
+      repoCreationObserver,
+      (state) => !state.useCacheServers,
+    );
 
     await tester.anxiousTap(find.byKey(Key('create-repository')));
 
-    await repoCreationObserver.waitUntil(
+    await tester.pumpUntilState(
+      repoCreationObserver,
       (state) => state.substate is RepoCreationSuccess,
+      // Creating a repository can take a few seconds on a busy CI machine.
+      timeout: Duration(seconds: 20),
     );
 
     final repoCubit = deps.reposCubit.state.repos.values

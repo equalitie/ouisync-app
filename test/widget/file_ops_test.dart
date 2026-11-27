@@ -137,6 +137,8 @@ void main() {
 
       await repoPage.addFile(srcFile.path);
 
+      // The file shows up only after it's been uploaded and the folder refreshed.
+      await tester.pumpUntilFound(find.text(srcFileName));
       expect(find.text(srcFileName), findsOne);
     }),
   );

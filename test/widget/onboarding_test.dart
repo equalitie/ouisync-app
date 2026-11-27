@@ -95,7 +95,7 @@ void main() {
 
       // Agree with the T&C and go to the main page
       await tester.anxiousTap(find.text('I AGREE'));
-      await reposObserver.waitUntil((state) => !state.isLoading);
+      await tester.pumpUntilState(reposObserver, (state) => !state.isLoading);
       await tester.pumpAndSettle();
 
       // Assert we are on the main page

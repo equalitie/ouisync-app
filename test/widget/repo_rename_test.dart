@@ -49,7 +49,10 @@ void main() {
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('RENAME'));
-      await tester.pumpUntilFound(find.text('Repository renamed as Bar'));
+      await tester.pumpUntilFound(
+        find.text('Repository renamed as Bar'),
+        timeout: Duration(seconds: 20),
+      );
 
       expect(repoCubit.location.name, equals('Bar'));
     }),

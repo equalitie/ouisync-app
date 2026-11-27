@@ -153,8 +153,11 @@ class Adb {
   Future<String> capture(List<String> args) =>
       runCapture('adb', ['-s', serial, ...args]);
 
+  // Not an incremental install (the default on newer devices): with it, `adb install` returns
+  // before the whole APK is on the device and the device fetches the rest from adb on demand. On
+  // CI, adb lost its connection to the emulator every time the app was then cleared and launched.
   Future<void> install(File apk, {bool replace = false}) =>
-      run(['install', if (replace) '-r', apk.path]);
+      run(['install', '--no-incremental', if (replace) '-r', apk.path]);
 
   Future<void> uninstall(String packageName) async {
     final installed = await capture(['shell', 'pm', 'list', 'packages']);
