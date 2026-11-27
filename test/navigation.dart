@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ouisync_app/app/cubits/repo.dart';
 import 'package:ouisync_app/app/cubits/repo_creation.dart';
+import 'package:ouisync_app/app/models/repo_entry.dart' show OpenRepoEntry;
 import 'package:ouisync_app/app/pages/repo_security_page.dart';
 import 'package:ouisync_app/app/pages/repo_reset_access.dart';
 import 'package:ouisync_app/app/utils/utils.dart';
@@ -54,6 +55,15 @@ class MainPage {
     await repoCreationObserver.waitUntil((state) => !state.useCacheServers);
 
     await tester.anxiousTap(find.byKey(Key('create-repository')));
+
+    // Keep pumping while the repository is being created, otherwise the
+    // creation may not progress before the timeout on slower machines (CI).
+    await tester.pumpUntil(
+      () => deps.reposCubit.state.repos.values.any(
+        (entry) => entry is OpenRepoEntry && entry.name == 'my repo',
+      ),
+      timeout: Duration(seconds: 20),
+    );
 
     await repoCreationObserver.waitUntil(
       (state) => state.substate is RepoCreationSuccess,
