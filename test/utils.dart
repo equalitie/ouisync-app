@@ -210,21 +210,21 @@ class StateObserver<T> extends BlocObserver {
   StateObserver._(this._prev);
 
   final BlocObserver? _prev;
-  final _completer = Completer<BlocBase<T>>();
+  BlocBase<T>? _bloc;
 
-  /// Waits until the observed bloc transitions to a state for which the given predicate returns
-  /// true. If it's already in such state, returns immediately.
-  Future<void> waitUntil(bool Function(T) f, {Duration timeout = _timeout}) =>
-      _completer.future
-          .timeout(timeout)
-          .then((bloc) => bloc.waitUntil(f, timeout: timeout));
+  /// Returns true if the observed bloc has been created and is in a state for which the given
+  /// predicate returns true. Use `WidgetTesterExtension.pumpUntilState` to wait for such state.
+  bool check(bool Function(T) f) {
+    final bloc = _bloc;
+    return bloc != null && f(bloc.state);
+  }
 
   @override
   void onCreate(BlocBase bloc) {
     super.onCreate(bloc);
 
     if (bloc is BlocBase<T>) {
-      _completer.complete(bloc);
+      _bloc = bloc;
     }
 
     _prev?.onCreate(bloc);
@@ -394,6 +394,15 @@ extension WidgetTesterExtension on WidgetTester {
     );
     return;
   }
+
+  /// Pumps until the bloc observed by `observer` transitions to a state for which the given
+  /// predicate returns true. Unlike waiting on the bloc directly, this keeps pumping while waiting,
+  /// which some async operations triggered from the UI need in order to complete.
+  Future<void> pumpUntilState<T>(
+    StateObserver<T> observer,
+    bool Function(T) f, {
+    Duration timeout = _timeout,
+  }) => pumpUntil(() => observer.check(f), timeout: timeout);
 
   Future<T> pumpUntilNonNull<T>(
     T? Function() f, {

@@ -234,20 +234,27 @@ void main() {
         await tester.pump();
 
         // We should now be on the repo creation page. Wait until it loads.
-        await stateObserver.waitUntil((state) => state.token != null);
+        await tester.pumpUntilState(
+          stateObserver,
+          (state) => state.token != null,
+        );
         await tester.pumpAndSettle();
 
         // Apply the suggested name.
         await tester.anxiousTap(find.textContaining('Suggested: $repoName'));
-        await stateObserver.waitUntil(
+        await tester.pumpUntilState(
+          stateObserver,
           (state) => state.substate is RepoCreationValid,
         );
         await tester.pumpAndSettle();
 
         // Create the repo
         await tester.anxiousTap(find.text('IMPORT'));
-        await stateObserver.waitUntil(
+        await tester.pumpUntilState(
+          stateObserver,
           (state) => state.substate is RepoCreationSuccess,
+          // Creating a repository can take a few seconds on a busy CI machine.
+          timeout: Duration(seconds: 20),
         );
 
         expect(

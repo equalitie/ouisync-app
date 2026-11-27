@@ -90,7 +90,10 @@ void main() {
       await tester.pumpAndSettle();
 
       await tester.enterText(find.byKey(ValueKey('token')), token);
-      await repoImportObserver.waitUntil((state) => state is ShareTokenValid);
+      await tester.pumpUntilState(
+        repoImportObserver,
+        (state) => state is ShareTokenValid,
+      );
       await tester.pumpAndSettle();
 
       // The repo token is shown.
@@ -107,7 +110,10 @@ void main() {
       );
       await tester.pump();
 
-      await repoCreationObserver.waitUntil((state) => state.token != null);
+      await tester.pumpUntilState(
+        repoCreationObserver,
+        (state) => state.token != null,
+      );
       await tester.pump();
 
       expect(find.widgetWithText(TextFormField, token), findsOne);
@@ -143,7 +149,10 @@ void main() {
 
       // Tap on the suggested name and wait until it gets applied.
       await tester.anxiousTap(suggestedName);
-      await repoCreationObserver.waitUntil((state) => state.name == name);
+      await tester.pumpUntilState(
+        repoCreationObserver,
+        (state) => state.name == name,
+      );
 
       await tester.pumpAndSettle();
 
@@ -158,8 +167,11 @@ void main() {
 
       // Tap the "IMPORT" button and wait until the repo gets created.
       await tester.anxiousTap(find.text('IMPORT'));
-      await repoCreationObserver.waitUntil(
+      await tester.pumpUntilState(
+        repoCreationObserver,
         (state) => state.substate is RepoCreationSuccess,
+        // Creating a repository can take a few seconds on a busy CI machine.
+        timeout: Duration(seconds: 20),
       );
 
       // The repo got created correctly.
